@@ -271,6 +271,19 @@ export class ModelScene extends Scene {
   }
 
   /**
+   * Call if the object has been changed in such a way that the shadow's shape
+   * has changed (not a rotation about the Y axis).
+   */
+  updateShadow() {
+    const shadow = this.model.shadow;
+    if (shadow != null) {
+      const side =
+          (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
+      shadow.setModel(this.model, this.shadowSoftness, side);
+    }
+  }
+
+  /**
    * This method returns the world position and model-space normal of the point
    * on the mesh corresponding to the input pixel coordinates given relative to
    * the model-viewer element. If the mesh is not hit, the result is null.

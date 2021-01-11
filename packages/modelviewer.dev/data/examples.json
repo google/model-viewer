@@ -208,6 +208,10 @@
         "name": "Variants"
       },
       {
+        "htmlId": "transforms",
+        "name": "Transforms"
+      },
+      {
         "htmlId": "changeColor",
         "name": "Change Color"
       },

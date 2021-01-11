@@ -93,16 +93,16 @@ suite('ModelScene', () => {
       expect(scene.height).to.be.equal(200);
     });
 
-    test('model is not scaled', () => {
+    test('model is not scaled', async () => {
       dummyMesh.geometry.applyMatrix4(new Matrix4().makeScale(1, 3, 10));
-      scene.model.setObject(dummyMesh);
+      await scene.model.setObject(dummyMesh);
 
       scene.setSize(1000, 500);
       expect(scene.model.scale).to.be.eql(new Vector3(1, 1, 1));
     });
 
-    test('idealCameraDistance is set correctly', () => {
-      scene.model.setObject(dummyMesh);
+    test('idealCameraDistance is set correctly', async () => {
+      await scene.model.setObject(dummyMesh);
 
       const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
       const expectedDistance = dummyRadius / Math.sin(halfFov);
@@ -110,8 +110,8 @@ suite('ModelScene', () => {
           .to.be.closeTo(expectedDistance, 0.0001);
     });
 
-    test('fieldOfViewAspect is set correctly', () => {
-      scene.model.setObject(dummyMesh);
+    test('fieldOfViewAspect is set correctly', async () => {
+      await scene.model.setObject(dummyMesh);
 
       expect(scene.model.fieldOfViewAspect).to.be.closeTo(1, 0.0001);
     });

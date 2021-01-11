@@ -19,6 +19,7 @@ import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
+import {ModelScene} from './ModelScene.js';
 import {reduceVertices} from './ModelUtils.js';
 import {Shadow, Side} from './Shadow.js';
 
@@ -52,6 +53,7 @@ export default class Model extends Object3D {
   public fieldOfViewAspect = 0;
   public userData: {url: string|null} = {url: null};
   public url: string|null = null;
+  public tightBounds = false;
 
   get currentGLTF() {
     return this._currentGLTF;
@@ -82,10 +84,19 @@ export default class Model extends Object3D {
    * Pass in a THREE.Object3D to be controlled
    * by this model.
    */
-  setObject(model: Object3D) {
+  async setObject(model: Object3D) {
     this.reset();
     this.modelContainer.add(model);
-    this.updateFraming();
+    this.updateBoundingBox();
+
+    const scene = this.parent as ModelScene;
+    let target = null;
+    if (this.tightBounds === true) {
+      await scene.element.requestUpdate('cameraTarget');
+      target = scene.getTarget();
+    }
+    this.updateFraming(target);
+
     this.dispatchEvent({type: 'model-load'});
   }
 
@@ -153,7 +164,15 @@ export default class Model extends Object3D {
 
     this.userData.url = url;
 
-    this.updateFraming();
+    this.updateBoundingBox();
+
+    const scene = this.parent as ModelScene;
+    let target = null;
+    if (this.tightBounds === true) {
+      await scene.element.requestUpdate('cameraTarget');
+      target = scene.getTarget();
+    }
+    this.updateFraming(target);
 
     this.dispatchEvent({type: 'model-load', url});
   }
@@ -263,6 +282,22 @@ export default class Model extends Object3D {
     this.mixer.uncacheRoot(this);
   }
 
+  updateBoundingBox() {
+    this.remove(this.modelContainer);
+
+    if (this.tightBounds === true) {
+      const bound = (box: Box3, vertex: Vector3): Box3 => {
+        return box.expandByPoint(vertex);
+      };
+      this.boundingBox = reduceVertices(this.modelContainer, bound, new Box3());
+    } else {
+      this.boundingBox.setFromObject(this.modelContainer);
+    }
+    this.boundingBox.getSize(this.size);
+
+    this.add(this.modelContainer);
+  }
+
   /**
    * Calculates the idealCameraDistance and fieldOfViewAspect that allows the 3D
    * object to be framed tightly in a 2D window of any aspect ratio without
@@ -275,8 +310,6 @@ export default class Model extends Object3D {
     this.remove(this.modelContainer);
 
     if (center == null) {
-      this.boundingBox.setFromObject(this.modelContainer);
-      this.boundingBox.getSize(this.size);
       center = this.boundingBox.getCenter(new Vector3);
     }
 
@@ -284,7 +317,7 @@ export default class Model extends Object3D {
       return Math.max(value, center!.distanceToSquared(vertex));
     };
     const framedRadius =
-        Math.sqrt(reduceVertices(this.modelContainer, radiusSquared));
+        Math.sqrt(reduceVertices(this.modelContainer, radiusSquared, 0));
 
     this.idealCameraDistance = framedRadius / SAFE_RADIUS_RATIO;
 
@@ -295,7 +328,7 @@ export default class Model extends Object3D {
           value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
     };
     this.fieldOfViewAspect =
-        reduceVertices(this.modelContainer, horizontalFov) / DEFAULT_TAN_FOV;
+        reduceVertices(this.modelContainer, horizontalFov, 0) / DEFAULT_TAN_FOV;
 
     this.add(this.modelContainer);
   }
@@ -340,10 +373,10 @@ export default class Model extends Object3D {
   }
 
   /**
-   * Call when updating the shadow; returns true if an update is needed and
-   * resets the state.
+   * Call to check if the shadow needs an updated render; returns true if an
+   * update is needed and resets the state.
    */
-  updateShadow(): boolean {
+  isShadowDirty(): boolean {
     const shadow = this.shadow;
     if (shadow == null) {
       return false;

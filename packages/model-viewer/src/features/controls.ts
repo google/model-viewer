@@ -80,6 +80,7 @@ export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
 export type InteractionPromptStyle = 'basic'|'wiggle';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
+export type Bounds = 'tight'|'legacy';
 
 export const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
@@ -240,12 +241,16 @@ export declare interface ControlsInterface {
   interactionPromptStyle: InteractionPromptStyle;
   interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
+  orbitSensitivity: number;
+  touchAction: TouchAction;
+  bounds: Bounds;
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
   getMinimumFieldOfView(): number;
   getMaximumFieldOfView(): number;
   jumpCameraToGoal(): void;
+  updateFraming(): Promise<void>;
   resetInteractionPrompt(): void;
 }
 
@@ -335,6 +340,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: Boolean, attribute: 'disable-zoom'})
     disableZoom: boolean = false;
+
+    @property({type: String, attribute: 'bounds'}) bounds: Bounds = 'legacy';
 
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
@@ -456,6 +463,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         controls.disableZoom = this.disableZoom;
       }
 
+      if (changedProperties.has('bounds')) {
+        this[$scene].model.tightBounds = this.bounds === 'tight';
+      }
+
       if (changedProperties.has('interactionPrompt') ||
           changedProperties.has('cameraControls') ||
           changedProperties.has('src')) {
@@ -484,16 +495,38 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('orbitSensitivity')) {
-        this[$controls].sensitivity = this.orbitSensitivity;
+        controls.sensitivity = this.orbitSensitivity;
       }
 
       if (this[$jumpCamera] === true) {
         Promise.resolve().then(() => {
-          this[$controls].jumpToGoal();
+          controls.jumpToGoal();
           this[$scene].jumpToGoal();
           this[$jumpCamera] = false;
         });
       }
+    }
+
+    async updateFraming() {
+      const scene = this[$scene];
+      const oldFramedFieldOfView = scene.framedFieldOfView;
+
+      await this.requestUpdate('cameraTarget');
+
+      scene.model.updateFraming(
+          this.bounds === 'tight' ? scene.getTarget() : undefined);
+      scene.frameModel();
+
+      const newFramedFieldOfView = scene.framedFieldOfView;
+      const zoom = this[$controls].getFieldOfView() / oldFramedFieldOfView;
+      this[$zoomAdjustedFieldOfView] = newFramedFieldOfView * zoom;
+      this[$maintainThetaPhi] = true;
+
+      this.requestUpdate('maxFieldOfView');
+      this.requestUpdate('fieldOfView');
+      this.requestUpdate('minCameraOrbit');
+      this.requestUpdate('maxCameraOrbit');
+      await this.requestUpdate('cameraOrbit');
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {

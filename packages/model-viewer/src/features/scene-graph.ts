@@ -14,10 +14,12 @@
  */
 
 import {property} from 'lit-element';
-import {MeshStandardMaterial} from 'three';
+import {Euler, MeshStandardMaterial} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
+import {normalizeUnit} from '../styles/conversions.js';
+import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {Variants} from '../three-components/gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
@@ -40,6 +42,8 @@ export interface SceneGraphInterface {
   readonly model?: Model;
   variantName: string|undefined;
   readonly availableVariants: Array<string>;
+  orientation: string;
+  scale: string;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
 }
 
@@ -56,6 +60,11 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'variant-name'})
     variantName: string|undefined = undefined;
+
+    @property({type: String, attribute: 'orientation'})
+    orientation: string = '0 0 0';
+
+    @property({type: String, attribute: 'scale'}) scale: string = '1 1 1';
 
     // Scene-graph API:
     /** @export */
@@ -108,6 +117,33 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
               material,
               gltfElementMap.get(material) as Set<MeshStandardMaterial>);
         }
+      }
+
+      if (changedProperties.has('orientation') ||
+          changedProperties.has('scale')) {
+        const model = this[$scene].model;
+        const {modelContainer} = model;
+
+        const orientation = parseExpressions(this.orientation)[0]
+                                .terms as [NumberNode, NumberNode, NumberNode];
+
+        const roll = normalizeUnit(orientation[0]).number;
+        const pitch = normalizeUnit(orientation[1]).number;
+        const yaw = normalizeUnit(orientation[2]).number;
+
+        modelContainer.quaternion.setFromEuler(
+            new Euler(pitch, yaw, roll, 'YXZ'));
+
+        const scale = parseExpressions(this.scale)[0]
+                          .terms as [NumberNode, NumberNode, NumberNode];
+
+        modelContainer.scale.set(
+            scale[0].number, scale[1].number, scale[2].number);
+
+        model.updateBoundingBox();
+        this[$scene].updateShadow();
+        this[$renderer].arRenderer.onUpdateScene();
+        this[$needsRender]();
       }
     }
 
