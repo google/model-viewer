@@ -93,7 +93,7 @@ export class MobileView extends LitElement {
     }
   }
 
-  // Need to fetch the USDZ first, such that we can POST the USDZ again if
+  // Need to fetch the USDZ first so we can POST the USDZ again if
   // someone closes quick-look and then chooses to reopen it.
   async waitForUSDZ(usdzId: number) {
     const usdzUrl = usdzToSession(this.pipeId, this.sessionId, usdzId);
@@ -149,7 +149,7 @@ export class MobileView extends LitElement {
       this.initializeToast(json.updatedContent);
       setTimeout(() => {
         this.toastClassName = '';
-      }, 5000);
+      }, 7000);
       await this.waitForData(json);
     } else {
       console.error('Error:', response);

@@ -38,9 +38,6 @@ import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reduce
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getPingUrl, getRandomInt, getSessionUrl, gltfToSession, post, postWithTimeout, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
-// TODO: When there is a massive failure, i.e. no response, the whole system
-// seems to be shutting down.
-
 /**
  * Section for displaying QR Code and other info related for mobile devices.
  * This is the section on the editor under the File Manager.
@@ -54,7 +51,6 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() isDeployed = false;
   @internalProperty() isDeployable = false;
   @internalProperty() isSendingData = false;
-  @internalProperty() numberOfCompleted = 0;
   @internalProperty() contentHasChanged = false;
 
   @internalProperty() openedIOS: boolean = false;
@@ -223,10 +219,6 @@ export class OpenMobileView extends ConnectedLitElement {
     } catch (e) {
       console.log('error posting...');
     }
-    this.numberOfCompleted += 1
-    console.log('done, session: ', session.id);
-    console.log(
-        'session: ', this.numberOfCompleted, '/', this.sessionList.length);
   }
 
   // Send any state, model, or environment iamge that has been updated since the
