@@ -89,10 +89,14 @@ export default class Model extends Object3D {
     this.modelContainer.add(model);
     this.updateBoundingBox();
     const scene = this.parent as ModelScene;
-    await scene.element.requestUpdate('cameraTarget');
-    this.updateFraming(
-        this.tightBounds === true ? (this.parent as ModelScene).getTarget() :
-                                    undefined);
+
+    let target = null;
+    if (this.tightBounds === true) {
+      await scene.element.requestUpdate('cameraTarget');
+      target = scene.getTarget();
+    }
+    this.updateFraming(target);
+
     this.dispatchEvent({type: 'model-load'});
   }
 
@@ -162,9 +166,13 @@ export default class Model extends Object3D {
 
     this.updateBoundingBox();
     const scene = this.parent as ModelScene;
-    await scene.element.requestUpdate('cameraTarget');
-    this.updateFraming(
-        this.tightBounds === true ? scene.getTarget() : undefined);
+
+    let target = null;
+    if (this.tightBounds === true) {
+      await scene.element.requestUpdate('cameraTarget');
+      target = scene.getTarget();
+    }
+    this.updateFraming(target);
 
     this.dispatchEvent({type: 'model-load', url});
   }
