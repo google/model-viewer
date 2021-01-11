@@ -217,15 +217,28 @@ export class OpenMobileView extends ConnectedLitElement {
       session: MobileSession, updatedContent: EditorUpdates,
       usdzBlob: Blob|undefined, gltfBlob: Blob|undefined,
       envBlob: Blob|undefined) {
-    await this.sendSessionContent(
-        session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
+    try {
+      await this.sendSessionContent(
+          session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
+    } catch (e) {
+      console.log('error posting...');
+    }
+    this.numberOfCompleted += 1
+    console.log('done, session: ', session.id);
+    console.log(
+        'session: ', this.numberOfCompleted, '/', this.sessionList.length);
   }
 
   // Send any state, model, or environment iamge that has been updated since the
   // last refresh.
-  // TODO: Now that the posts are asynchronous, need to find a new way to deal
-  // with knowing when isSendingData should be set to false.
   async postInfo() {
+    if (this.isSendingData) {
+      return;
+    }
+    this.isSendingData = true;
+    setTimeout(() => {
+      this.isSendingData = false;
+    }, 20000);
     const updatedContent = this.getUpdatedContent();
     const staleContent = this.getStaleContent();
 
@@ -278,15 +291,15 @@ export class OpenMobileView extends ConnectedLitElement {
     const response = await fetch(this.mobilePingUrl);
     if (response.ok) {
       const json: MobileSession = await response.json();
+      this.sessionList.push(json);
+      if (json.os === 'iOS') {
+        this.openedIOS = true;
+      }
       // Only update if not currently updating...
       if (!this.isSendingData) {
         this.postInfo();
       }
       this.haveReceivedResponse = true;
-      this.sessionList.push(json);
-      if (json.os === 'iOS') {
-        this.openedIOS = true;
-      }
       return true;
     }
     return false;

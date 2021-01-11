@@ -105,8 +105,10 @@ export class MobileExpanadableSection extends LitElement {
       </mwc-button>
       ${this.optionalMessage}
     </div>
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px
-    0px;">AR Settings:</div> <me-checkbox
+    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
+      AR Settings:
+    </div> 
+    <me-checkbox
       id="ar-modes"
       label="Default AR Modes to Scene Viewer"
       ?checked="${this.defaultToSceneViewer}"
