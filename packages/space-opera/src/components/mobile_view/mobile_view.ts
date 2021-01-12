@@ -31,6 +31,8 @@ import {styles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession} from './types.js';
 import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
+// TODO: Fix, out of sync on multi failure gets.
+
 const TOAST_TIME = 7000;  // 7s
 
 /**
@@ -64,13 +66,12 @@ export class MobileView extends LitElement {
   @internalProperty() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
   @internalProperty() sessionOs = getMobileOperatingSystem();
 
-  updateState(snippet: any, envChanged: boolean) {
-    // The partialState env link correspondes to the editor's link.
-    if (envChanged) {
-      snippet.config.environmentImage = undefined;
-    } else if (this.config.environmentImage) {
-      snippet.config.environmentImage = this.config.environmentImage;
-    }
+  get needIosSrc(): boolean {
+    return this.sessionOs === 'iOS' && this.iosUrl.length <= 1;
+  }
+
+  updateState(snippet: any) {
+    // TODO: Handle env image is undefined.
 
     this.hotspots = snippet.hotspots;
     this.arConfig = snippet.arConfig;
@@ -84,7 +85,7 @@ export class MobileView extends LitElement {
       arButton.addEventListener('click', () => {
         try {
           if (this.sessionOs === 'iOS') {
-            post(this.usdzBlob!, this.arConfig.iosSrc!);
+            post(this.usdzBlob!, this.iosUrl);
           } else {
             post(this.currentBlob!, this.modelViewerUrl);
           }
@@ -97,12 +98,13 @@ export class MobileView extends LitElement {
 
   // Need to fetch the USDZ first so we can POST the USDZ again if
   // someone closes quick-look and then chooses to reopen it.
-  async waitForUSDZ(usdzId: number) {
-    const usdzUrl = usdzToSession(this.pipeId, this.sessionId, usdzId);
+  async waitForUSDZ(usdzId: number, iosSrcIsReality: boolean) {
+    const usdzUrl =
+        usdzToSession(this.pipeId, this.sessionId, usdzId, iosSrcIsReality);
     const response = await fetch(usdzUrl);
     if (response.ok) {
       this.usdzBlob = await response.blob();
-      this.arConfig.iosSrc = usdzUrl;
+      this.iosUrl = usdzUrl;
     } else {
       console.error('Error:', response);
     }
@@ -120,14 +122,17 @@ export class MobileView extends LitElement {
           gltfToSession(this.pipeId, this.sessionId, updatedContent.gltfId);
     }
     if (updatedContent.stateChanged) {
-      this.updateState(json.snippet, updatedContent.envChanged);
+      this.updateState(json.snippet);
     }
+
+    // TODO: Handle env image is undefined
     if (updatedContent.envChanged) {
       this.envImageUrl =
           envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
     }
     if (updatedContent.iosChanged) {
-      await this.waitForUSDZ(updatedContent.usdzId);
+      await this.waitForUSDZ(
+          updatedContent.usdzId, updatedContent.iosSrcIsReality);
     }
 
     this.overlay!.style.display = 'none';
@@ -187,6 +192,14 @@ export class MobileView extends LitElement {
     }
   }
 
+  renderIosMessage() {
+    return html`
+    <div class="ios-message">
+      Upload a .usdz or .reality file to view your model in AR.
+    </div>
+    `
+  }
+
   render() {
     const config = {...this.config};
     applyCameraEdits(config, this.camera);
@@ -200,7 +213,7 @@ export class MobileView extends LitElement {
           src=${this.modelViewerUrl}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}
-          ios-src=${ifDefined(this.arConfig!.iosSrc)}
+          ios-src=${ifDefined(this.iosUrl)}
           ?autoplay=${!!config.autoplay}
           ?auto-rotate=${!!config.autoRotate}
           ?camera-controls=${!!config.cameraControls}
@@ -225,7 +238,9 @@ export class MobileView extends LitElement {
     </div>
     <div class="${this.toastClassName}" id="snackbar-mobile">
       ${this.toastBody}
-    </div>`;
+    </div>
+    ${this.needIosSrc ? this.renderIosMessage() : html``}
+    `;
   }
 
   // Ping the editor
