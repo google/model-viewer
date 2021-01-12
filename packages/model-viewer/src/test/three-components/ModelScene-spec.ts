@@ -16,7 +16,7 @@
 import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import {DEFAULT_FOV_DEG} from '../../three-components/Model.js';
+import {DEFAULT_FOV_DEG} from '../../three-components/ModelScene.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
 
@@ -58,20 +58,20 @@ suite('ModelScene', () => {
     test('fires a model-load event when loaded', async function() {
       let fired = false;
       scene.addEventListener('model-load', () => fired = true);
-      await scene.setModelSource(assetPath('models/Astronaut.glb'));
+      await scene.setSource(assetPath('models/Astronaut.glb'));
       expect(fired).to.be.ok;
     });
   });
 
   suite('with a model', () => {
     setup(async () => {
-      await scene.setModelSource(assetPath('models/Astronaut.glb'));
+      await scene.setSource(assetPath('models/Astronaut.glb'));
     });
 
     suite('setShadowIntensity', () => {
       test('can increase intensity and reset it to zero', () => {
         scene.setShadowIntensity(1);
-        const shadow = scene.model.shadow!;
+        const shadow = scene.shadow!;
         expect(shadow).to.be.ok;
         expect(shadow.getIntensity()).to.be.equal(1);
         scene.setShadowIntensity(0);
@@ -79,9 +79,9 @@ suite('ModelScene', () => {
       });
 
       test('shadow is only created when intensity is greater than zero', () => {
-        expect(scene.model.shadow).to.be.not.ok;
+        expect(scene.shadow).to.be.not.ok;
         scene.setShadowIntensity(1);
-        expect(scene.model.shadow).to.be.ok;
+        expect(scene.shadow).to.be.ok;
       });
     });
   });
@@ -95,25 +95,24 @@ suite('ModelScene', () => {
 
     test('model is not scaled', async () => {
       dummyMesh.geometry.applyMatrix4(new Matrix4().makeScale(1, 3, 10));
-      await scene.model.setObject(dummyMesh);
+      await scene.setObject(dummyMesh);
 
       scene.setSize(1000, 500);
-      expect(scene.model.scale).to.be.eql(new Vector3(1, 1, 1));
+      expect(scene.scale).to.be.eql(new Vector3(1, 1, 1));
     });
 
     test('idealCameraDistance is set correctly', async () => {
-      await scene.model.setObject(dummyMesh);
+      await scene.setObject(dummyMesh);
 
       const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
       const expectedDistance = dummyRadius / Math.sin(halfFov);
-      expect(scene.model.idealCameraDistance)
-          .to.be.closeTo(expectedDistance, 0.0001);
+      expect(scene.idealCameraDistance).to.be.closeTo(expectedDistance, 0.0001);
     });
 
     test('fieldOfViewAspect is set correctly', async () => {
-      await scene.model.setObject(dummyMesh);
+      await scene.setObject(dummyMesh);
 
-      expect(scene.model.fieldOfViewAspect).to.be.closeTo(1, 0.0001);
+      expect(scene.fieldOfViewAspect).to.be.closeTo(1, 0.0001);
     });
 
     test('cannot set the canvas smaller than 1x1', () => {

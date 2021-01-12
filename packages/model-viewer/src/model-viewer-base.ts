@@ -340,7 +340,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     renderer.unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
-      this[$scene].model.reset();
+      this[$scene].reset();
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
@@ -352,7 +352,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // though the value has effectively not changed, so we need to check to make
     // sure that the value has actually changed before changing the loaded flag.
     if (changedProperties.has('src') &&
-        (this.src == null || this.src !== this[$scene].model.url)) {
+        (this.src == null || this.src !== this[$scene].url)) {
       this[$loaded] = false;
       this[$loadedTime] = 0;
       this[$updateSource]();
@@ -377,20 +377,20 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const qualityArgument = options ? options.qualityArgument : undefined;
     const idealAspect = options ? options.idealAspect : undefined;
 
-    const {width, height, model, aspect} = this[$scene];
+    const {width, height, fieldOfViewAspect, aspect} = this[$scene];
     const {dpr, scaleFactor} = this[$renderer];
     let outputWidth = width * scaleFactor * dpr;
     let outputHeight = height * scaleFactor * dpr;
     let offsetX = 0;
     let offsetY = 0;
     if (idealAspect === true) {
-      if (model.fieldOfViewAspect > aspect) {
+      if (fieldOfViewAspect > aspect) {
         const oldHeight = outputHeight;
-        outputHeight = Math.round(outputWidth / model.fieldOfViewAspect);
+        outputHeight = Math.round(outputWidth / fieldOfViewAspect);
         offsetY = (oldHeight - outputHeight) / 2;
       } else {
         const oldWidth = outputWidth;
-        outputWidth = Math.round(outputHeight * model.fieldOfViewAspect);
+        outputWidth = Math.round(outputHeight * fieldOfViewAspect);
         offsetX = (oldWidth - outputWidth) / 2;
       }
     }
@@ -519,7 +519,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
     try {
-      await this[$scene].setModelSource(
+      await this[$scene].setSource(
           source, (progress: number) => updateSourceProgress(progress * 0.8));
 
       const detail = {url: source};

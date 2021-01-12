@@ -121,8 +121,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('orientation') ||
           changedProperties.has('scale')) {
-        const model = this[$scene].model;
-        const {modelContainer} = model;
+        const {modelContainer} = this[$scene];
 
         const orientation = parseExpressions(this.orientation)[0]
                                 .terms as [NumberNode, NumberNode, NumberNode];
@@ -140,7 +139,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         modelContainer.scale.set(
             scale[0].number, scale[1].number, scale[2].number);
 
-        model.updateBoundingBox();
+        this[$scene].updateBoundingBox();
         this[$scene].updateShadow();
         this[$renderer].arRenderer.onUpdateScene();
         this[$needsRender]();
@@ -152,7 +151,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$variants] = [];
 
-      const {currentGLTF} = this[$scene].model;
+      const {currentGLTF} = this[$scene];
 
       if (currentGLTF != null) {
         const {correlatedSceneGraph} = currentGLTF;
@@ -185,12 +184,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     /** @export */
     async exportScene(options?: SceneExportOptions): Promise<Blob> {
-      const {model} = this[$scene];
-      return new Promise<Blob>(async (resolve, reject) => {
-        if (model == null) {
-          return reject('Model missing or not yet loaded');
-        }
-
+      const scene = this[$scene];
+      return new Promise<Blob>(async (resolve) => {
         // Defaults
         const opts = {
           binary: true,
@@ -203,10 +198,10 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         Object.assign(opts, options);
         // Not configurable
-        opts.animations = model.animations;
+        opts.animations = scene.animations;
         opts.truncateDrawRange = true;
 
-        const shadow = model.shadow;
+        const shadow = scene.shadow;
         let visible = false;
         // Remove shadow from export
         if (shadow != null) {
@@ -215,7 +210,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
 
         const exporter = new GLTFExporter();
-        exporter.parse(model.modelContainer, (gltf) => {
+        exporter.parse(scene.modelContainer, (gltf) => {
           return resolve(
               new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
                 type: opts.binary ? 'application/octet-stream' :

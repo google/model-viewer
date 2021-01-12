@@ -452,7 +452,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       test('sets max radius to at least the camera framed distance', () => {
         const cameraDistance = element[$scene].camera.position.distanceTo(
-            element[$scene].model.position);
+            element[$scene].target.position);
         expect(controls.options.maximumRadius).to.be.at.least(cameraDistance);
       });
 
@@ -464,7 +464,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             await timePasses();
 
             const cameraDistance = element[$scene].camera.position.distanceTo(
-                element[$scene].model.position);
+                element[$scene].target.position);
             expect(controls.camera.far)
                 .to.be.at.least(cameraDistance + maxRadius);
           });
@@ -476,7 +476,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             await timePasses();
 
             const cameraDistance = element[$scene].camera.position.distanceTo(
-                element[$scene].model.position);
+                element[$scene].target.position);
             expect(controls.camera.far)
                 .to.be.at.least(cameraDistance + maxRadius);
           });
