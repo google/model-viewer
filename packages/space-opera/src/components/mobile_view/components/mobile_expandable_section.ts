@@ -143,7 +143,7 @@ export class MobileExpanadableSection extends LitElement {
     </div> 
     <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ} 
       style="--mdc-theme-primary: ${needUsdzButton}">
-      USDZ
+      USDZ / REALITY
     </mwc-button>
     ${uploadUsdzText}
     `;

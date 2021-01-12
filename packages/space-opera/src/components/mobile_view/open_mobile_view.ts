@@ -55,6 +55,7 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() isSendingData = false;
   @internalProperty() contentHasChanged = false;
 
+  @internalProperty() iosSrcIsReality: boolean = false;
   @internalProperty() openedIOS: boolean = false;
   @internalProperty() iosAndNoUsdz = false;
   @query('me-file-modal') fileModal!: FileModalElement;
@@ -149,7 +150,8 @@ export class OpenMobileView extends ConnectedLitElement {
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
           envIsHdr: this.envIsHdr(), gltfId: getRandomInt(1e+20),
           usdzId: getRandomInt(1e+20),
-          iosChanged: this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz)
+          iosChanged: this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz),
+          iosSrcIsReality: this.iosSrcIsReality,
     }
   }
 
@@ -160,7 +162,8 @@ export class OpenMobileView extends ConnectedLitElement {
       gltfChanged: true, stateChanged: true,
           envChanged: this.urls.env !== undefined, envIsHdr: this.envIsHdr(),
           gltfId: getRandomInt(1e+20), usdzId: getRandomInt(1e+20),
-          iosChanged: this.urls.usdz !== undefined
+          iosChanged: this.urls.usdz !== undefined,
+          iosSrcIsReality: this.iosSrcIsReality,
     }
   }
 
@@ -188,7 +191,11 @@ export class OpenMobileView extends ConnectedLitElement {
     if (updatedContent.iosChanged && usdzBlob) {
       await post(
           usdzBlob,
-          usdzToSession(this.pipeId, session.id, updatedContent.usdzId));
+          usdzToSession(
+              this.pipeId,
+              session.id,
+              updatedContent.usdzId,
+              this.iosSrcIsReality));
     }
 
     if (updatedContent.gltfChanged && gltfBlob) {
@@ -354,10 +361,14 @@ export class OpenMobileView extends ConnectedLitElement {
       /// The user canceled the previous upload
       return;
     }
+    const fileName = files[0].name;
     const arrayBuffer = await files[0].arrayBuffer();
-    reduxStore.dispatch(dispatchSetIosName(files[0].name));
+    reduxStore.dispatch(dispatchSetIosName(fileName));
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     reduxStore.dispatch(dispatchIosSrc(url));
+
+    const fileType = fileName.split('.')[fileName.split('.').length - 1];
+    this.iosSrcIsReality = fileType === 'reality';
   }
 
   render() {
@@ -379,7 +390,7 @@ export class OpenMobileView extends ConnectedLitElement {
       .onUploadUSDZ=${this.onUploadUSDZ.bind(this)}
     >
     </mobile-expandable-section>
-    <me-file-modal accept=".usdz"></me-file-modal>
+    <me-file-modal accept=".usdz,.reality"></me-file-modal>
     <mobile-modal .pipeId=${this.pipeId}></mobile-modal>
     <div style="margin-bottom: 40px;"></div>
   `;

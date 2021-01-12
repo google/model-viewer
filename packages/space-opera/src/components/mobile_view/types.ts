@@ -31,6 +31,7 @@ export interface EditorUpdates {
   gltfChanged: boolean;
   gltfId: number;
   iosChanged: boolean;
+  iosSrcIsReality: boolean;
   usdzId: number;
   stateChanged: boolean;
   envChanged: boolean;
