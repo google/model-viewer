@@ -139,7 +139,7 @@ export class MobileExpanadableSection extends LitElement {
                                                html``
     return html`
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
-      iOS Settings:
+      To enable AR on iOS, upload:
     </div> 
     <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ} 
       style="--mdc-theme-primary: ${needUsdzButton}">
