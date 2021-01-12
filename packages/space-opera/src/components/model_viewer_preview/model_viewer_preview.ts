@@ -33,7 +33,7 @@ import {modelViewerPreviewStyles} from '../../styles.css.js';
 import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
-import {dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
+import {dispatchCameraControlsEnabled, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
@@ -305,6 +305,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
         const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
         reduxStore.dispatch(dispatchGltfUrl(url));
         dispatchConfig(extractStagingConfig(this.config));
+        reduxStore.dispatch(dispatchCameraControlsEnabled(true));
         reduxStore.dispatch(dispatchSetHotspots([]));
       }
       if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {

@@ -31,8 +31,6 @@ import {styles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession} from './types.js';
 import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
-// On drag, default camera controls on.
-
 const TOAST_TIME = 7000;  // 7s
 
 /**
