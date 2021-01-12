@@ -60,48 +60,49 @@ const vector3 = new Vector3();
  * Provides lights and cameras to be used in a renderer.
  */
 export class ModelScene extends Scene {
-  public aspect = 1;
-  public canvas: HTMLCanvasElement;
-  public shadowIntensity = 0;
-  public shadowSoftness = 1;
-  public width = 1;
-  public height = 1;
-  public isDirty = false;
-  public renderCount = 0;
   public element: ModelViewerElementBase;
+  public canvas: HTMLCanvasElement;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
-  public exposure = 1;
-  public target: Object3D;
-  public canScale = true;
-  public framedFieldOfView = DEFAULT_FOV_DEG;
+  public width = 1;
+  public height = 1;
+  public aspect = 1;
+  public isDirty = false;
+  public renderCount = 0;
+
   public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
 
-  private goalTarget = new Vector3();
-  private targetDamperX = new Damper();
-  private targetDamperY = new Damper();
-  private targetDamperZ = new Damper();
-
-  public shadow: Shadow|null = null;
-
-  private _currentGLTF: ModelViewerGLTFInstance|null = null;
-  private mixer: AnimationMixer;
-  private cancelPendingSourceChange: (() => void)|null = null;
-  private animationsByName: Map<string, AnimationClip> = new Map();
-  private currentAnimationAction: AnimationAction|null = null;
-
-  public animations: Array<AnimationClip> = [];
+  public url: string|null = null;
+  public target = new Object3D();
   public modelContainer = new Object3D();
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();
   public size = new Vector3();
   public idealCameraDistance = 0;
   public fieldOfViewAspect = 0;
-  public url: string|null = null;
+  public framedFieldOfView = DEFAULT_FOV_DEG;
+
+  public shadow: Shadow|null = null;
+  public shadowIntensity = 0;
+  public shadowSoftness = 1;
+
+  public exposure = 1;
+  public canScale = true;
   public tightBounds = false;
+
+  private goalTarget = new Vector3();
+  private targetDamperX = new Damper();
+  private targetDamperY = new Damper();
+  private targetDamperZ = new Damper();
+
+  private _currentGLTF: ModelViewerGLTFInstance|null = null;
+  private mixer: AnimationMixer;
+  private cancelPendingSourceChange: (() => void)|null = null;
+  private animationsByName: Map<string, AnimationClip> = new Map();
+  private currentAnimationAction: AnimationAction|null = null;
 
   constructor({canvas, element, width, height}: ModelSceneConfig) {
     super();
@@ -110,7 +111,6 @@ export class ModelScene extends Scene {
 
     this.element = element;
     this.canvas = canvas;
-    this.target = new Object3D();
 
     // These default camera values are never used, as they are reset once the
     // model is loaded and framing is computed.
@@ -237,109 +237,6 @@ export class ModelScene extends Scene {
     this.dispatchEvent({type: 'model-load', url: this.url});
   }
 
-  /**
-   * Updates the ModelScene for a new container size in CSS pixels.
-   */
-  setSize(width: number, height: number) {
-    if (this.width === width && this.height === height) {
-      return;
-    }
-    this.width = Math.max(width, 1);
-    this.height = Math.max(height, 1);
-
-    this.aspect = this.width / this.height;
-    this.frameModel();
-
-    this.isDirty = true;
-  }
-
-  get currentGLTF() {
-    return this._currentGLTF;
-  }
-
-  set animationTime(value: number) {
-    this.mixer.setTime(value);
-  }
-
-  get animationTime(): number {
-    if (this.currentAnimationAction != null) {
-      return this.currentAnimationAction.time;
-    }
-
-    return 0;
-  }
-
-  get duration(): number {
-    if (this.currentAnimationAction != null &&
-        this.currentAnimationAction.getClip()) {
-      return this.currentAnimationAction.getClip().duration;
-    }
-
-    return 0;
-  }
-
-  get hasActiveAnimation(): boolean {
-    return this.currentAnimationAction != null;
-  }
-
-  /**
-   * Plays an animation if there are any associated with the current model.
-   * Accepts an optional string name of an animation to play. If no name is
-   * provided, or if no animation is found by the given name, always falls back
-   * to playing the first animation.
-   */
-  playAnimation(name: string|null = null, crossfadeTime: number = 0) {
-    if (this._currentGLTF == null) {
-      return;
-    }
-    const {animations} = this;
-    if (animations == null || animations.length === 0) {
-      console.warn(
-          `Cannot play animation (model does not have any animations)`);
-      return;
-    }
-
-    let animationClip = null;
-
-    if (name != null) {
-      animationClip = this.animationsByName.get(name);
-    }
-
-    if (animationClip == null) {
-      animationClip = animations[0];
-    }
-
-    try {
-      const {currentAnimationAction: lastAnimationAction} = this;
-
-      this.currentAnimationAction =
-          this.mixer.clipAction(animationClip, this).play();
-      this.currentAnimationAction.enabled = true;
-
-      if (lastAnimationAction != null &&
-          this.currentAnimationAction !== lastAnimationAction) {
-        this.currentAnimationAction.crossFadeFrom(
-            lastAnimationAction, crossfadeTime, false);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  stopAnimation() {
-    if (this.currentAnimationAction != null) {
-      this.currentAnimationAction.stop();
-      this.currentAnimationAction.reset();
-      this.currentAnimationAction = null;
-    }
-
-    this.mixer.stopAllAction();
-  }
-
-  updateAnimation(step: number) {
-    this.mixer.update(step);
-  }
-
   reset() {
     this.url = null;
     const gltf = this._currentGLTF;
@@ -359,6 +256,26 @@ export class ModelScene extends Scene {
 
     this.mixer.stopAllAction();
     this.mixer.uncacheRoot(this);
+  }
+
+  get currentGLTF() {
+    return this._currentGLTF;
+  }
+
+  /**
+   * Updates the ModelScene for a new container size in CSS pixels.
+   */
+  setSize(width: number, height: number) {
+    if (this.width === width && this.height === height) {
+      return;
+    }
+    this.width = Math.max(width, 1);
+    this.height = Math.max(height, 1);
+
+    this.aspect = this.width / this.height;
+    this.frameModel();
+
+    this.isDirty = true;
   }
 
   updateBoundingBox() {
@@ -505,6 +422,89 @@ export class ModelScene extends Scene {
 
   get yaw(): number {
     return this.rotation.y;
+  }
+
+  set animationTime(value: number) {
+    this.mixer.setTime(value);
+  }
+
+  get animationTime(): number {
+    if (this.currentAnimationAction != null) {
+      return this.currentAnimationAction.time;
+    }
+
+    return 0;
+  }
+
+  get duration(): number {
+    if (this.currentAnimationAction != null &&
+        this.currentAnimationAction.getClip()) {
+      return this.currentAnimationAction.getClip().duration;
+    }
+
+    return 0;
+  }
+
+  get hasActiveAnimation(): boolean {
+    return this.currentAnimationAction != null;
+  }
+
+  /**
+   * Plays an animation if there are any associated with the current model.
+   * Accepts an optional string name of an animation to play. If no name is
+   * provided, or if no animation is found by the given name, always falls back
+   * to playing the first animation.
+   */
+  playAnimation(name: string|null = null, crossfadeTime: number = 0) {
+    if (this._currentGLTF == null) {
+      return;
+    }
+    const {animations} = this;
+    if (animations == null || animations.length === 0) {
+      console.warn(
+          `Cannot play animation (model does not have any animations)`);
+      return;
+    }
+
+    let animationClip = null;
+
+    if (name != null) {
+      animationClip = this.animationsByName.get(name);
+    }
+
+    if (animationClip == null) {
+      animationClip = animations[0];
+    }
+
+    try {
+      const {currentAnimationAction: lastAnimationAction} = this;
+
+      this.currentAnimationAction =
+          this.mixer.clipAction(animationClip, this).play();
+      this.currentAnimationAction.enabled = true;
+
+      if (lastAnimationAction != null &&
+          this.currentAnimationAction !== lastAnimationAction) {
+        this.currentAnimationAction.crossFadeFrom(
+            lastAnimationAction, crossfadeTime, false);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  stopAnimation() {
+    if (this.currentAnimationAction != null) {
+      this.currentAnimationAction.stop();
+      this.currentAnimationAction.reset();
+      this.currentAnimationAction = null;
+    }
+
+    this.mixer.stopAllAction();
+  }
+
+  updateAnimation(step: number) {
+    this.mixer.update(step);
   }
 
   /**
