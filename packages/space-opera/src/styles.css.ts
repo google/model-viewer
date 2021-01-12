@@ -218,6 +218,19 @@ input[type="file"] {
   padding-top: 10px;
   width: 100%;
 }
+
+.modal-text {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 10px 0px;
+  color: white;
+  word-wrap: break-word;
+  width: 100%;
+}
+
+.piping-link {
+  color: #6495ED;
+}
 `;
 
 // https://www.w3schools.com/howto/howto_js_snackbar.asp
