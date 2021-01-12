@@ -174,8 +174,6 @@ export class ModelScene extends Scene {
       this.cancelPendingSourceChange = null;
     }
 
-    this.url = url;
-
     let gltf: ModelViewerGLTFInstance;
 
     try {
@@ -200,6 +198,7 @@ export class ModelScene extends Scene {
     }
 
     this.reset();
+    this.url = url;
     this._currentGLTF = gltf;
 
     if (gltf != null) {
