@@ -105,6 +105,11 @@ export class MobileExpanadableSection extends LitElement {
       </mwc-button>
       ${this.optionalMessage}
     </div>
+    `;
+  }
+
+  renderAR() {
+    return html`
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
       AR Settings:
     </div> 
@@ -122,7 +127,7 @@ export class MobileExpanadableSection extends LitElement {
       @change=${this.enableARChange}
       >
     </me-checkbox>
-    `;
+    `
   }
 
   renderIos() {
@@ -148,6 +153,7 @@ export class MobileExpanadableSection extends LitElement {
     return html`
       ${!this.isDeployed ? this.renderDeployButton() : html``}
       ${this.isDeployed ? this.renderMobileInfo() : html``}
+      ${this.renderAR()}
       ${this.renderIos()}
     `
   }
