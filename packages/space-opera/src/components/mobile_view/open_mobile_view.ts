@@ -34,7 +34,7 @@ import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {MobileModal} from './components/mobile_modal.js';
 
-import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetRefreshable, getArConfig, getRefreshable} from './reducer.js';
+import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetForcePost, dispatchSetRefreshable, getArConfig, getForcePost, getRefreshable} from './reducer.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
@@ -117,6 +117,11 @@ export class OpenMobileView extends ConnectedLitElement {
     this.defaultToSceneViewer =
         this.arConfig.arModes === 'scene-viewer webxr quick-look';
     this.iosAndNoUsdz = this.openedIOS && this.arConfig.iosSrc === undefined;
+
+    if (getForcePost(state) === true) {
+      this.postInfo();
+      reduxStore.dispatch(dispatchSetForcePost(false));
+    }
   }
 
   // True if any content we'd send to the mobile view has changed.

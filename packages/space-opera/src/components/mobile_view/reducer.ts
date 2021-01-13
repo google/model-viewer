@@ -16,6 +16,7 @@
  */
 
 import {Action, ArConfigState, State} from '../../types.js';
+import {MobileState} from './types.js';
 
 const SET_IOS_SRC = 'SET_IOS_SRC';
 export function dispatchIosSrc(iosSrc: string) {
@@ -61,13 +62,26 @@ export function dispatchSetRefreshable(canRefresh: boolean) {
   return {type: SET_REFRESHABLE, payload: canRefresh};
 }
 
-export const getRefreshable = (state: State) => state.entities.isRefreshable;
+const SET_FORCE_POST = 'SET_FORCE_POST';
+export function dispatchSetForcePost(forcePost: boolean) {
+  return {type: SET_FORCE_POST, payload: forcePost};
+}
 
-export function isRefreshableReducer(
-    state: boolean = false, action: Action): boolean {
+export const getRefreshable = (state: State) =>
+    state.entities.mobile.isRefreshable;
+export const getForcePost = (state: State) => state.entities.mobile.forcePost;
+
+export function mobileReducer(
+    state: MobileState = {
+      isRefreshable: false,
+      forcePost: false
+    },
+    action: Action): MobileState {
   switch (action.type) {
     case SET_REFRESHABLE:
-      return action.payload;
+      return {...state, isRefreshable: action.payload};
+    case SET_FORCE_POST:
+      return {...state, forcePost: action.payload};
     default:
       return state;
   }

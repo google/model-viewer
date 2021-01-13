@@ -39,8 +39,7 @@ import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, gene
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
 import {getEdits, getOrigEdits} from '../materials_panel/reducer.js';
-import {getRefreshable} from '../mobile_view/reducer.js';
-import {outsidePostInfo} from '../mobile_view/utils.js';
+import {dispatchSetForcePost, getRefreshable} from '../mobile_view/reducer.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
@@ -168,6 +167,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
     }
   }
 
+  forcePost() {
+    reduxStore.dispatch(dispatchSetForcePost(true));
+  }
+
   protected render() {
     // If the gltf model has a URL, it must be more recent
     const currentSrc = this[$gltf]?.getModelViewerSource() ?? this[$gltfUrl];
@@ -187,7 +190,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     </mwc-icon-button>`;
     const refreshMobileButton = this.refreshButtonIsReady === true ? html
     `<mwc-icon-button icon="cached" class="RefreshMobileButton"
-      title="Refresh Mobile" @click=${outsidePostInfo}>
+      title="Refresh Mobile" @click=${this.forcePost}>
     </mwc-icon-button>`: html``;
     const childElements = [
       ...renderHotspots(this.hotspots),

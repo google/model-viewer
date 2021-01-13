@@ -19,15 +19,6 @@ import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
 
 export const DOMAIN = 'https://piping.glitch.me/';
 
-export function outsidePostInfo() {
-  document.querySelector('open-mobile-view')?.postInfo();
-}
-
-export function outsideCanRefresh(): boolean|undefined {
-  console.log('open exsts', document.querySelector('open-mobile-view'));
-  return document.querySelector('open-mobile-view')?.canRefresh;
-}
-
 export function getRandomInt(max: number): number {
   return Math.floor(Math.random() * Math.floor(max));
 }

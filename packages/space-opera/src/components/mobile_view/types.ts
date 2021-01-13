@@ -42,3 +42,8 @@ export interface MobilePacket {
   updatedContent: EditorUpdates;
   snippet?: any;
 }
+
+export interface MobileState {
+  isRefreshable: boolean;
+  forcePost: boolean;
+}
