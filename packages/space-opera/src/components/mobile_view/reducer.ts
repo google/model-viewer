@@ -55,3 +55,20 @@ export function arReducer(
       return state;
   }
 }
+
+const SET_REFRESHABLE = 'SET_REFRESHABLE';
+export function dispatchSetRefreshable(canRefresh: boolean) {
+  return {type: SET_REFRESHABLE, payload: canRefresh};
+}
+
+export const getRefreshable = (state: State) => state.entities.isRefreshable;
+
+export function isRefreshableReducer(
+    state: boolean = false, action: Action): boolean {
+  switch (action.type) {
+    case SET_REFRESHABLE:
+      return action.payload;
+    default:
+      return state;
+  }
+}

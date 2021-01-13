@@ -131,6 +131,15 @@ model-viewer {
   width: 100%;
 }
 
+.RefreshMobileButton {
+  border-radius: 50%;
+  border: 1px #DC143C solid;
+  bottom: 100px;
+  color: #DC143C;
+  position: absolute;
+  right: 25px;
+}
+
 .ScreenShotButton {
   border-radius: 50%;
   border: 1px #4285f4 solid;

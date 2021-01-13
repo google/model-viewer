@@ -64,6 +64,7 @@ export interface ModelViewerSnippetState {
 
 export interface EntitiesState {
   isDirtyCamera: boolean;
+  isRefreshable: boolean;
   environment: EnvironmentState;
   gltf: GltfState;
   gltfEdits: GltfEditsState;
@@ -82,6 +83,7 @@ export const INITIAL_STATE: State = {
   ui: {hotspots: {addHotspot: false}},
   entities: {
     isDirtyCamera: false,
+    isRefreshable: false,
     environment: {environmentImages: INITIAL_ENVIRONMENT_IMAGES},
     gltf: {gltfJsonString: ''},
     gltfEdits: {

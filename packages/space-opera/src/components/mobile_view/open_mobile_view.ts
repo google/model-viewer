@@ -34,7 +34,7 @@ import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {MobileModal} from './components/mobile_modal.js';
 
-import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
+import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetRefreshable, getArConfig, getRefreshable} from './reducer.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
@@ -77,6 +77,12 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() sessionList: MobileSession[] = [];
   @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
 
+  get canRefresh(): boolean {
+    return this.isDeployed &&
+        (this.haveReceivedResponse &&
+         (!this.isSendingData && this.contentHasChanged));
+  }
+
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
     this.gltfModel = getGltfModel(state);
@@ -103,6 +109,11 @@ export class OpenMobileView extends ConnectedLitElement {
     };
 
     this.contentHasChanged = this.getContentHasChanged();
+    // only update if different, need conditional because it would infinitely
+    // loop otherwise
+    if (getRefreshable(state) !== this.canRefresh) {
+      reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
+    }
     this.defaultToSceneViewer =
         this.arConfig.arModes === 'scene-viewer webxr quick-look';
     this.iosAndNoUsdz = this.openedIOS && this.arConfig.iosSrc === undefined;
@@ -231,13 +242,16 @@ export class OpenMobileView extends ConnectedLitElement {
   // Send any state, model, or environment iamge that has been updated since the
   // last refresh.
   async postInfo() {
+    console.log('posting info...');
     if (this.isSendingData) {
       return;
     }
     this.isSendingData = true;
+    reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
     const sessionList = [...this.sessionList];
     setTimeout(() => {
       this.isSendingData = false;
+      reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
     }, REFRESH_DELAY);
     const updatedContent = this.getUpdatedContent();
     const staleContent = this.getStaleContent();
@@ -284,6 +298,7 @@ export class OpenMobileView extends ConnectedLitElement {
     this.lastUrlsSent['gltf'] = this.urls['gltf'];
 
     this.contentHasChanged = this.getContentHasChanged();
+    reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view

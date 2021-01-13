@@ -39,6 +39,8 @@ import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, gene
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
 import {getEdits, getOrigEdits} from '../materials_panel/reducer.js';
+import {getRefreshable} from '../mobile_view/reducer.js';
+import {outsidePostInfo} from '../mobile_view/utils.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
@@ -74,6 +76,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty()[$gltfUrl]?: string;
   @internalProperty() gltfError: string = '';
 
+  @internalProperty() refreshButtonIsReady: boolean = false;
+
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;
     this.camera = getCamera(state);
@@ -84,6 +88,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this[$gltf] = getGltfModel(state);
     this[$gltfUrl] = getGltfUrl(state);
     this[$autoplay] = getConfig(state).autoplay;
+    this.refreshButtonIsReady = getRefreshable(state);
   }
 
   firstUpdated() {
@@ -178,10 +183,17 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
     const screenshotButton = !hasModel ? html`` : html
     `<mwc-icon-button icon="photo_camera" class="ScreenShotButton"
-      title="Take screenshot"
-      @click=${this.downloadScreenshot}>
+      title="Take screenshot" @click=${this.downloadScreenshot}>
     </mwc-icon-button>`;
-    const childElements = [...renderHotspots(this.hotspots), screenshotButton];
+    const refreshMobileButton = this.refreshButtonIsReady === true ? html
+    `<mwc-icon-button icon="cached" class="RefreshMobileButton"
+      title="Refresh Mobile" @click=${outsidePostInfo}>
+    </mwc-icon-button>`: html``;
+    const childElements = [
+      ...renderHotspots(this.hotspots),
+      screenshotButton,
+      refreshMobileButton
+    ];
 
     if (this.gltfError) {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
