@@ -16,7 +16,6 @@
 import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Vector2, Vector3} from 'three';
 
 import {Damper} from './Damper.js';
-import Model from './Model.js';
 import {ModelScene} from './ModelScene.js';
 import {Side} from './Shadow.js';
 
@@ -51,8 +50,8 @@ const addCorner =
 /**
  * This class is a set of two coincident planes. The first is just a cute box
  * outline with rounded corners and damped opacity to indicate the floor extents
- * of a model. It is purposely larger than the model's bounding box by RADIUS on
- * all sides so that small models are still visible / selectable. Its center is
+ * of a scene. It is purposely larger than the scene's bounding box by RADIUS on
+ * all sides so that small scenes are still visible / selectable. Its center is
  * actually carved out by vertices to ensure its fragment shader doesn't add
  * much time.
  *
@@ -67,11 +66,11 @@ export class PlacementBox extends Mesh {
   private goalOpacity: number;
   private opacityDamper: Damper;
 
-  constructor(model: Model, side: Side) {
+  constructor(scene: ModelScene, side: Side) {
     const geometry = new BufferGeometry();
     const triangles: Array<number> = [];
     const vertices: Array<number> = [];
-    const {size, boundingBox} = model;
+    const {size, boundingBox} = scene;
 
     const x = size.x / 2;
     const y = (side === 'back' ? size.y : size.z) / 2;
@@ -118,7 +117,7 @@ export class PlacementBox extends Mesh {
         this.position.z = this.shadowHeight;
     }
 
-    model.add(this);
+    scene.target.add(this);
   }
 
   /**
@@ -134,7 +133,7 @@ export class PlacementBox extends Mesh {
   }
 
   /**
-   * Offset the height of the box relative to the bottom of the model. Positive
+   * Offset the height of the box relative to the bottom of the scene. Positive
    * is up, so generally only negative values are used.
    */
   set offsetHeight(offset: number) {

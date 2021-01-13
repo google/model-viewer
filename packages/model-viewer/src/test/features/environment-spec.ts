@@ -42,7 +42,7 @@ const modelUsingEnvMap =
  */
 const waitForLoadAndEnvMap = (element: ModelViewerElementBase) => {
   const load = waitForEvent(element, 'load');
-  const envMap = waitForEvent(element[$scene].model, 'envmap-update');
+  const envMap = waitForEvent(element[$scene], 'envmap-update');
   return Promise.all([load, envMap]);
 };
 
@@ -99,7 +99,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         document.body.insertBefore(element, document.body.firstChild);
 
         environmentChanges = 0;
-        scene.model.addEventListener('envmap-update', () => {
+        scene.addEventListener('envmap-update', () => {
           environmentChanges++;
         });
         await onLoad;
@@ -160,7 +160,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     test('changes the opacity of the static shadow', async () => {
       element.shadowIntensity = 1.0;
       await timePasses();
-      const newIntensity = scene.model.shadow!.getIntensity();
+      const newIntensity = scene.shadow!.getIntensity();
       expect(newIntensity).to.be.eq(BASE_OPACITY);
     });
   });
@@ -184,7 +184,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     suite('and environment-image subsequently removed', () => {
       setup(async () => {
-        let envMapChanged = waitForEvent(scene.model, 'envmap-update');
+        let envMapChanged = waitForEvent(scene, 'envmap-update');
         element.removeAttribute('environment-image');
         await envMapChanged;
       });
@@ -260,7 +260,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     suite('and skybox-image subsequently removed', () => {
       setup(async () => {
-        let envMapChanged = waitForEvent(scene.model, 'envmap-update');
+        let envMapChanged = waitForEvent(scene, 'envmap-update');
         element.removeAttribute('skybox-image');
         await envMapChanged;
       });

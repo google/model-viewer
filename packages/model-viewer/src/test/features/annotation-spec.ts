@@ -27,7 +27,7 @@ const expect = chai.expect;
 
 const sceneContainsHotspot =
     (scene: ModelScene, element: HTMLElement): boolean => {
-      const {children} = scene.model;
+      const {children} = scene.target;
       for (let i = 0, l = children.length; i < l; i++) {
         const hotspot = children[i];
         if (hotspot instanceof Hotspot &&
@@ -90,7 +90,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       hotspot.setAttribute('data-normal', '0m 0m -1m');
       element.appendChild(hotspot);
       await timePasses();
-      numSlots = scene.model.children.length;
+      numSlots = scene.target.children.length;
     });
 
     test('creates a corresponding slot', () => {
@@ -110,12 +110,12 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       });
 
       test('does not change the slot', () => {
-        expect(scene.model.children.length).to.be.equal(numSlots);
+        expect(scene.target.children.length).to.be.equal(numSlots);
       });
 
       test('does not change the data', () => {
         const {position, normal} =
-            (scene.model.children[numSlots - 1] as Hotspot);
+            (scene.target.children[numSlots - 1] as Hotspot);
         expect(position).to.be.deep.equal(new Vector3(1, 1, 1));
         expect(normal).to.be.deep.equal(new Vector3(0, 0, -1));
       });
@@ -124,7 +124,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         element.updateHotspot(
             {name: 'hotspot-1', position: '0m 1m 2m', normal: '1m 0m 0m'});
         const {position, normal} =
-            (scene.model.children[numSlots - 1] as Hotspot);
+            (scene.target.children[numSlots - 1] as Hotspot);
         expect(position).to.be.deep.equal(new Vector3(0, 1, 2));
         expect(normal).to.be.deep.equal(new Vector3(1, 0, 0));
       });
@@ -140,7 +140,8 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           // already visible.
           await rafPasses();
 
-          const hotspotObject2D = scene.model.children[numSlots - 1] as Hotspot;
+          const hotspotObject2D =
+              scene.target.children[numSlots - 1] as Hotspot;
 
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
@@ -172,7 +173,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         element.removeChild(hotspot);
         await timePasses();
 
-        expect(scene.model.children.length).to.be.equal(numSlots);
+        expect(scene.target.children.length).to.be.equal(numSlots);
       });
 
       test('but removing both does remove the slot', async () => {
@@ -180,7 +181,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         element.removeChild(hotspot2);
         await timePasses();
 
-        expect(scene.model.children.length).to.be.equal(numSlots - 1);
+        expect(scene.target.children.length).to.be.equal(numSlots - 1);
       });
     });
   });

@@ -231,7 +231,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * turntable rotation.
      */
     getDimensions(): Vector3D {
-      return toVector3D(this[$scene].model.size);
+      return toVector3D(this[$scene].size);
     }
 
     protected[$modelIsRevealed] = false;
@@ -451,7 +451,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     async[$updateSource]() {
       this[$lastReportedProgress] = 0;
-      if (this[$scene].model.currentGLTF == null || this.src == null ||
+      if (this[$scene].currentGLTF == null || this.src == null ||
           !this[$shouldAttemptPreload]()) {
         // Don't show the poster when switching models.
         this.showPoster();
