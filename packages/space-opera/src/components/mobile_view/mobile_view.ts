@@ -31,8 +31,6 @@ import {styles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
-// TODO: Fix, out of sync on multi failure gets.
-
 const TOAST_TIME = 7000;  // 7s
 
 /**
@@ -126,7 +124,6 @@ export class MobileView extends LitElement {
       this.updateState(json.snippet, json.urls);
     }
 
-    // TODO: Handle env image is undefined
     if (updatedContent.envChanged) {
       this.envImageUrl =
           envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);

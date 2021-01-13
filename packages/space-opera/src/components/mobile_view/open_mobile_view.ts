@@ -38,8 +38,6 @@ import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetForcePost, dispa
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
-// TODO: Handle excessive timeout issues, check if they only occur locally...
-
 const REFRESH_DELAY = 20000;  // 20s
 
 /**
