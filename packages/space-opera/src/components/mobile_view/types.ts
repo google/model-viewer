@@ -40,6 +40,7 @@ export interface EditorUpdates {
 
 export interface MobilePacket {
   updatedContent: EditorUpdates;
+  urls: URLs;
   snippet?: any;
 }
 

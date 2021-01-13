@@ -199,7 +199,8 @@ export class OpenMobileView extends ConnectedLitElement {
     }
     session.isStale = true;
 
-    const packet: MobilePacket = {updatedContent: updatedContent};
+    const packet:
+        MobilePacket = {updatedContent: updatedContent, urls: this.urls};
     if (updatedContent.stateChanged) {
       packet.snippet = this.snippet;
     }

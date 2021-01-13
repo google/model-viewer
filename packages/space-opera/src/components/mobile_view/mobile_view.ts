@@ -28,7 +28,7 @@ import {downloadContents} from '../model_viewer_preview/reducer.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 import {styles} from './styles.css.js';
-import {EditorUpdates, MobilePacket, MobileSession} from './types.js';
+import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
 // TODO: Fix, out of sync on multi failure gets.
@@ -48,6 +48,8 @@ export class MobileView extends LitElement {
   @internalProperty() iosUrl: string = '';
   @internalProperty() currentBlob?: Blob;
   @internalProperty() usdzBlob?: Blob;
+
+  @internalProperty() editorUrls?: URLs;
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
@@ -70,9 +72,8 @@ export class MobileView extends LitElement {
     return this.sessionOs === 'iOS' && this.iosUrl.length <= 1;
   }
 
-  updateState(snippet: any) {
-    // TODO: Handle env image is undefined.
-
+  updateState(snippet: any, urls: URLs) {
+    this.editorUrls = urls;
     this.hotspots = snippet.hotspots;
     this.arConfig = snippet.arConfig;
     this.config = snippet.config;
@@ -122,7 +123,7 @@ export class MobileView extends LitElement {
           gltfToSession(this.pipeId, this.sessionId, updatedContent.gltfId);
     }
     if (updatedContent.stateChanged) {
-      this.updateState(json.snippet);
+      this.updateState(json.snippet, json.urls);
     }
 
     // TODO: Handle env image is undefined
@@ -203,7 +204,9 @@ export class MobileView extends LitElement {
   render() {
     const config = {...this.config};
     applyCameraEdits(config, this.camera);
-    const skyboxImage = config.useEnvAsSkybox ? this.envImageUrl : undefined;
+    const skyboxImage = (config.useEnvAsSkybox && this.editorUrls?.env) ?
+        this.envImageUrl :
+        undefined;
     const childElements = [...renderHotspots(this.hotspots)];
     return html`
     <div id="overlay"></div>
@@ -231,7 +234,6 @@ export class MobileView extends LitElement {
           max-camera-orbit=${ifDefined(config.maxCameraOrbit)}
           min-field-of-view=${ifDefined(config.minFov)}
           max-field-of-view=${ifDefined(config.maxFov)}
-          animation-name=${ifDefined(config.animationName)}
           @load=${this.modelIsLoaded}
         >${childElements}</model-viewer>
       </div>
