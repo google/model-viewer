@@ -74,6 +74,23 @@ export class OpenModal extends ConnectedLitElement {
     return arConfig
   }
 
+  // Convert html "camera-controls" to "cameraControls"
+  makeObjectName(name: string): string {
+    const listOfParts = name.split('-');
+    let newName = '';
+    let isFirst = true;
+    for (let part of listOfParts) {
+      if (isFirst) {
+        newName = part;
+        isFirst = false;
+      } else {
+        const newPart = part.charAt(0).toUpperCase() + part.slice(1);
+        newName = newName + newPart;
+      }
+    }
+    return newName
+  }
+
   parseExtraAttributes(
       snippet: string, config: ModelViewerConfig,
       arConfig: ArConfigState): string {
@@ -82,11 +99,20 @@ export class OpenModal extends ConnectedLitElement {
     const modelViewer =
         parsedInput.body.getElementsByTagName('model-viewer')[0];
     let extraAttributes = '';
-
-    // Loop through all of the attributes in "modelViewer"
-    // If the attributes are in the config, ignore them
-    // Otherwise, add them to the string we'll put into snippet and state
-
+    const attributes = modelViewer.attributes;
+    for (let i = 0; i < attributes.length; i++) {
+      const name = attributes[i].name;
+      const value = attributes[i].value;
+      const objectName = this.makeObjectName(name);
+      // if neither config has the key, add it to extra attribute string
+      if (!(objectName in config || objectName in arConfig)) {
+        if (value.length === 0) {
+          extraAttributes = extraAttributes + ` ${name}`
+        } else {
+          extraAttributes = extraAttributes + ` ${name}="${value}"`
+        }
+      }
+    }
     return extraAttributes;
   }
 
