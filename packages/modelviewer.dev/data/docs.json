@@ -697,10 +697,14 @@
       {
         "name": "environment-image",
         "htmlName": "environmentImage",
-        "description": "Controls the environmental reflection of the model. Normally if <span class='attribute'>skybox-image</span> is set, that image will also be used for the <span class='attribute'>environment-image</span>. Use <span class='attribute'>environment-image</span> to only set the reflection without affecting the background.",
+        "description": "Controls the environmental reflection of the model. Normally if <span class='attribute'>skybox-image</span> is set, that image will also be used for the <span class='attribute'>environment-image</span>. Use <span class='attribute'>environment-image</span> to only set the reflection without affecting the background. If neither is specified, default lighting will be applied. If 'neutral' is specified without a skybox, then a more evenly-lit environment is applied instead.",
         "links": [
           "<a href=\"../examples/lightingandenv/#environmentLighting\">Related examples</a>"
-        ]
+        ],
+        "default": {
+          "default": "empty string",
+          "options": "'neutral' or a URL to a .hdr or .jpg file"
+        }
       },
       {
         "name": "exposure",
