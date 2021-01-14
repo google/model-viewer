@@ -38,7 +38,7 @@ import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
-import {applyRelativeFilePaths, dispatchConfig} from '../reducer.js';
+import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes} from '../reducer.js';
 
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
@@ -112,7 +112,7 @@ export class OpenModal extends ConnectedLitElement {
 
       const extraAttributes =
           this.parseExtraAttributes(inputText, config, arConfig);
-      // TODO: dispatch extra snippet into modelviewersnippet state
+      reduxStore.dispatch(dispatchExtraAttributes(extraAttributes));
 
       const hotspotErrors: Error[] = [];
       const hotspotConfigs = parseHotspotsFromSnippet(inputText, hotspotErrors);
