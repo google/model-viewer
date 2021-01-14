@@ -139,9 +139,8 @@ export function createMaterials(
     model: GltfModel,
     texturesByHandle: Map<TextureHandle, Texture>): Material[] {
   const modelMaterials = model.materials;
-  const editMaterials = [];
+  const editMaterials: Material[] = [];
   for (const m of modelMaterials) {
-    // @ts-ignore
     editMaterials.push(createMaterial(m, texturesByHandle));
   }
   return editMaterials;
