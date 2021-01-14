@@ -86,9 +86,6 @@ export class OpenModal extends ConnectedLitElement {
     // Loop through all of the attributes in "modelViewer"
     // If the attributes are in the config, ignore them
     // Otherwise, add them to the string we'll put into snippet and state
-    // (TODO: Add state for this arbitrary snippet inside of the model viewer
-    // snippet such that it will automatically be sent over to mobile.)
-    // return complete string
 
     return extraAttributes;
   }

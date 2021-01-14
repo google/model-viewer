@@ -32,6 +32,8 @@ export interface ModelViewerEventHandlers {
   readonly click?: (event: MouseEvent) => void;
 }
 
+// TODO: Add extraAttributes to renderer.
+
 /**
  * Renders a model-viewer tag given the config.
  */

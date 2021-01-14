@@ -187,6 +187,7 @@ export class MobileView extends LitElement {
     }
   }
 
+  // TODO: Add extraAttributes to renderer.
   render() {
     const config = {...this.config};
     applyCameraEdits(config, this.camera);
