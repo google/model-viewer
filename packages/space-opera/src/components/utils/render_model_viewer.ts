@@ -18,8 +18,10 @@
 import '@google/model-viewer/lib/model-viewer';
 
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {spread} from '@open-wc/lit-helpers';
 import {html, TemplateResult} from 'lit-html';
 import {ifDefined} from 'lit-html/directives/if-defined';
+
 import {ArConfigState} from '../../types';
 
 /** Optional handlers for model-viewer events */
@@ -46,12 +48,12 @@ export function renderModelViewer(
     eventHandlers?: ModelViewerEventHandlers,
     childElements?: Array<TemplateResult|HTMLElement>) {
   console.log(extraAttributes, extraAttributes.length);
-  const extraA =
-      extraAttributes.length > 0 ? extraAttributes : `\nar-placement=floor\n`;
-  console.log(extraA);
   const skyboxImage =
       config.useEnvAsSkybox ? config.environmentImage : undefined;
-  const mv = html`<model-viewer
+  const mv = html`<model-viewer ...=${spread({
+    'ar-placement': 'floor',
+    'orientation': '20deg 0 0'
+  })}
         src=${config.src || ''}
         ?ar=${!!arConfig.ar}
         ar-modes=${ifDefined(arConfig.arModes)}

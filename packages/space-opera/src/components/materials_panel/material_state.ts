@@ -141,6 +141,7 @@ export function createMaterials(
   const modelMaterials = model.materials;
   const editMaterials = [];
   for (const m of modelMaterials) {
+    // @ts-ignore
     editMaterials.push(createMaterial(m, texturesByHandle));
   }
   return editMaterials;

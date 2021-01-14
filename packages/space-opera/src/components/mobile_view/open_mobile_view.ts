@@ -253,7 +253,7 @@ export class OpenMobileView extends ConnectedLitElement {
         await prepareGlbBlob(this.gltfModel!) :
         undefined;
 
-    let envBlob = undefined;
+    let envBlob;
     if (updatedContent.envChanged || (haveStale && staleContent.envChanged)) {
       const response = await fetch(this.urls.env!);
       if (!response.ok) {
