@@ -74,6 +74,25 @@ export class OpenModal extends ConnectedLitElement {
     return arConfig
   }
 
+  parseExtraAttributes(
+      snippet: string, config: ModelViewerConfig,
+      arConfig: ArConfigState): string {
+    // Parse snippet like we parse it in the other sections
+    const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
+    const modelViewer =
+        parsedInput.body.getElementsByTagName('model-viewer')[0];
+    let extraAttributes = '';
+
+    // Loop through all of the attributes in "modelViewer"
+    // If the attributes are in the config, ignore them
+    // Otherwise, add them to the string we'll put into snippet and state
+    // (TODO: Add state for this arbitrary snippet inside of the model viewer
+    // snippet such that it will automatically be sent over to mobile.)
+    // return complete string
+
+    return extraAttributes;
+  }
+
   async handleSubmitSnippet(value?: string) {
     const textArea = this.snippetViewer.snippet;
     if (!textArea)
@@ -90,6 +109,10 @@ export class OpenModal extends ConnectedLitElement {
             /<\s*model-viewer[^>]*\s*>(\n|.)*<\s*\/\s*model-viewer>/)) {
       const config = parseSnippet(inputText);
       const arConfig = this.parseSnippetAr(inputText);
+
+      const extraAttributes =
+          this.parseExtraAttributes(inputText, config, arConfig);
+      // TODO: dispatch extra snippet into modelviewersnippet state
 
       const hotspotErrors: Error[] = [];
       const hotspotConfigs = parseHotspotsFromSnippet(inputText, hotspotErrors);
