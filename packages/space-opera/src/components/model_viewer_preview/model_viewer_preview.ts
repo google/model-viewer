@@ -24,7 +24,6 @@ import '@material/mwc-icon-button';
 
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
-import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
@@ -184,19 +183,13 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
     const hasModel = !!editedConfig.src;
 
-    const screenshotButton = !hasModel ? html`` : html
-    `<mwc-icon-button icon="photo_camera" class="ScreenShotButton"
-      title="Take screenshot" @click=${this.downloadScreenshot}>
-    </mwc-icon-button>`;
     const refreshMobileButton = this.refreshButtonIsReady === true ? html
-    `<mwc-icon-button icon="cached" class="RefreshMobileButton"
-      title="Refresh Mobile" @click=${this.forcePost}>
-    </mwc-icon-button>`: html``;
-    const childElements = [
-      ...renderHotspots(this.hotspots),
-      screenshotButton,
-      refreshMobileButton
-    ];
+    `<mwc-button icon="cached" @click=${this.forcePost}
+      style="--mdc-theme-primary: #DC143C; border: #DC143C" class="RefreshMobileButton">
+      Refresh Mobile
+    </mwc-button>`: html``;
+    const childElements =
+        [...renderHotspots(this.hotspots), refreshMobileButton];
 
     if (this.gltfError) {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
@@ -289,13 +282,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
       normal: positionAndNormal.normal,
     }));
     reduxStore.dispatch(dispatchUpdateHotspotMode(false));
-  }
-
-  private async downloadScreenshot() {
-    if (!this.modelViewer)
-      return;
-    safeDownloadCallback(
-        await this.modelViewer.toBlob(), 'Space Opera Screenshot.png', '')();
   }
 
   private onDragover(event: DragEvent) {

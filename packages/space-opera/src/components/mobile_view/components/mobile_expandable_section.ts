@@ -122,7 +122,7 @@ export class MobileExpanadableSection extends LitElement {
     </me-checkbox>
     <me-checkbox
       id="ar-modes"
-      label="Default AR Modes to Scene Viewer"
+      label="Default AR Mode to Scene Viewer"
       ?checked="${this.defaultToSceneViewer}"
       @change=${this.selectArMode}
       >
