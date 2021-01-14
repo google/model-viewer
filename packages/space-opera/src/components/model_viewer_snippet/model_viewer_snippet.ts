@@ -42,7 +42,7 @@ import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {ExportZipButton} from './components/download_button.js';
 import {ImportCard} from './components/open_button.js';
-import {applyRelativeFilePaths} from './reducer.js';
+import {applyRelativeFilePaths, getExtraAttributes} from './reducer.js';
 
 /**
  *
@@ -58,6 +58,7 @@ export class ExportPanel extends ConnectedLitElement {
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @internalProperty() gltfUrl?: string;
+  @internalProperty() extraAttributes: string = '';
 
   @query('snippet-viewer') snippetViewer!: SnippetViewer;
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
@@ -74,6 +75,7 @@ export class ExportPanel extends ConnectedLitElement {
     this.hotspots = getHotspots(state);
     this.gltfUrl = getGltfUrl(state);
     this.relativeFilePaths = getRelativeFilePaths(state);
+    this.extraAttributes = getExtraAttributes(state);
   }
 
   snippetCopyToClipboard() {
@@ -95,7 +97,11 @@ export class ExportPanel extends ConnectedLitElement {
     }
 
     const snippet = renderModelViewer(
-        editedConfig, editedArConfig, {}, renderHotspots(this.hotspots));
+        editedConfig,
+        editedArConfig,
+        this.extraAttributes,
+        {},
+        renderHotspots(this.hotspots));
 
     if (this.isJustOutput) {
       return html`

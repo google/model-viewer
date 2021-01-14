@@ -38,7 +38,7 @@ import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
-import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes} from '../reducer.js';
+import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
 
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
@@ -53,6 +53,7 @@ export class OpenModal extends ConnectedLitElement {
   @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @query('snippet-viewer#snippet-input')
   private readonly snippetViewer!: SnippetViewer;
+  @internalProperty() extraAttributes: string = '';
 
   stateChanged(state: State) {
     this.config = getConfig(state);
@@ -60,6 +61,7 @@ export class OpenModal extends ConnectedLitElement {
     this.camera = getCamera(state);
     this.gltfUrl = getGltfUrl(state);
     this.relativeFilePaths = getRelativeFilePaths(state);
+    this.extraAttributes = getExtraAttributes(state);
   }
 
   // logic similar to parseSnippet inside of editing adapter.
@@ -91,6 +93,7 @@ export class OpenModal extends ConnectedLitElement {
     return newName
   }
 
+  // TODO: Switch to storing this as an object
   parseExtraAttributes(
       snippet: string, config: ModelViewerConfig,
       arConfig: ArConfigState): string {
@@ -107,9 +110,9 @@ export class OpenModal extends ConnectedLitElement {
       // if neither config has the key, add it to extra attribute string
       if (!(objectName in config || objectName in arConfig)) {
         if (value.length === 0) {
-          extraAttributes = extraAttributes + ` ${name}`
+          extraAttributes = extraAttributes + `\n${name}`
         } else {
-          extraAttributes = extraAttributes + ` ${name}="${value}"`
+          extraAttributes = extraAttributes + `\n${name}="${value}"`
         }
       }
     }
@@ -232,8 +235,8 @@ export class OpenModal extends ConnectedLitElement {
       editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
     }
 
-    const exampleLoadableSnippet =
-        renderModelViewer(editedConfig, editedArConfig, {}, undefined);
+    const exampleLoadableSnippet = renderModelViewer(
+        editedConfig, editedArConfig, this.extraAttributes, {}, undefined);
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>

@@ -39,7 +39,7 @@ import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, gene
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
 import {getEdits, getOrigEdits} from '../materials_panel/reducer.js';
-import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
+import {dispatchConfig, getExtraAttributes} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -73,6 +73,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty()[$gltf]?: GltfModel;
   @internalProperty()[$gltfUrl]?: string;
   @internalProperty() gltfError: string = '';
+  @internalProperty() extraAttributes: string = '';
 
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;
@@ -84,6 +85,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this[$gltf] = getGltfModel(state);
     this[$gltfUrl] = getGltfUrl(state);
     this[$autoplay] = getConfig(state).autoplay;
+    this.extraAttributes = getExtraAttributes(state);
   }
 
   firstUpdated() {
@@ -198,6 +200,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
         renderModelViewer(
             editedConfig,
             emptyARConfig,
+            this.extraAttributes,
             {
               load: () => {
                 this.onModelLoaded();

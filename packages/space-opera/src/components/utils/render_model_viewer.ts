@@ -32,7 +32,9 @@ export interface ModelViewerEventHandlers {
   readonly click?: (event: MouseEvent) => void;
 }
 
-// TODO: Add extraAttributes to renderer.
+// implement:
+// https://github.com/Polymer/lit-html/issues/923#issuecomment-548547460
+// https://open-wc.org/docs/development/lit-helpers/#spread-directives
 
 /**
  * Renders a model-viewer tag given the config.
@@ -40,11 +42,16 @@ export interface ModelViewerEventHandlers {
 export function renderModelViewer(
     config: ModelViewerConfig,
     arConfig: ArConfigState,
+    extraAttributes: string,
     eventHandlers?: ModelViewerEventHandlers,
     childElements?: Array<TemplateResult|HTMLElement>) {
+  console.log(extraAttributes, extraAttributes.length);
+  const extraA =
+      extraAttributes.length > 0 ? extraAttributes : `\nar-placement=floor\n`;
+  console.log(extraA);
   const skyboxImage =
       config.useEnvAsSkybox ? config.environmentImage : undefined;
-  return html`<model-viewer
+  const mv = html`<model-viewer
         src=${config.src || ''}
         ?ar=${!!arConfig.ar}
         ar-modes=${ifDefined(arConfig.arModes)}
@@ -77,4 +84,7 @@ export function renderModelViewer(
       ${childElements}
     </model-viewer>
         `;
+  console.log('mv', mv);
+  // TODO: Force the extra attributes into the model viewer lists..
+  return mv;
 }

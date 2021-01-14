@@ -49,6 +49,7 @@ export class MobileView extends LitElement {
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
+  @internalProperty() extraAttributes: string = '';
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() envImageUrl: string = '';
@@ -76,6 +77,7 @@ export class MobileView extends LitElement {
     this.arConfig = snippet.arConfig;
     this.config = snippet.config;
     this.camera = snippet.camera;
+    this.extraAttributes = snippet.extraAttributes;
 
     // Send a new POST out for each scene-viewer button press
     if (snippet.arConfig.ar) {
@@ -187,7 +189,6 @@ export class MobileView extends LitElement {
     }
   }
 
-  // TODO: Add extraAttributes to renderer.
   render() {
     const config = {...this.config};
     applyCameraEdits(config, this.camera);
@@ -221,6 +222,7 @@ export class MobileView extends LitElement {
           max-field-of-view=${ifDefined(config.maxFov)}
           animation-name=${ifDefined(config.animationName)}
           @load=${this.modelIsLoaded}
+          ${this.extraAttributes}
         >${childElements}</model-viewer>
       </div>
     </div>
