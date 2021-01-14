@@ -127,7 +127,7 @@ suite('ModelViewerElementBase', () => {
           element.src = assetPath('models/Horse.glb');
           await waitForEvent(element, 'load');
 
-          expect(element[$scene].model.userData.url)
+          expect(element[$scene].url)
               .to.be.equal(assetPath('models/Horse.glb'));
         });
 
@@ -137,7 +137,7 @@ suite('ModelViewerElementBase', () => {
           element.src = assetPath('models/Horse.glb');
           await waitForEvent(element, 'load');
 
-          expect(element[$scene].model.userData.url)
+          expect(element[$scene].url)
               .to.be.equal(assetPath('models/Horse.glb'));
         });
       });
@@ -164,9 +164,6 @@ suite('ModelViewerElementBase', () => {
     });
 
     suite('when losing the GL context', () => {
-      // We're skipping this test for now, as losing the context that was
-      // created with transferControlToOffscreen() causes the Chrome tab to
-      // crash.
       let element: ModelViewerElementBase;
       setup(() => {
         element = new ModelViewerElement();
@@ -313,7 +310,7 @@ suite('ModelViewerElementBase', () => {
         test.skip('idealAspect gives the proper blob dimensions', async () => {
           const basicBlob = await element.toBlob();
           const idealBlob = await element.toBlob({idealAspect: true});
-          const idealHeight = 32 / element[$scene].model.fieldOfViewAspect;
+          const idealHeight = 32 / element[$scene].fieldOfViewAspect;
 
           const {dpr, scaleFactor} = element[$renderer];
           const f = dpr * scaleFactor;

@@ -1,7 +1,7 @@
 import {Group, Material, Mesh, Object3D, Texture} from 'three';
 import {GLTF as ThreeGLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, GLTFElement, VariantMappings} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 export type ThreeSceneObject = Object3D|Material|Texture;
 type ThreeSceneObjectCallback = (a: ThreeSceneObject, b: ThreeSceneObject) =>
@@ -226,5 +226,51 @@ export class CorrelatedSceneGraph {
     this[$gltf] = gltf;
     this[$gltfElementMap] = gltfElementMap;
     this[$threeObjectMap] = threeObjectMap;
+  }
+
+  loadVariant(variantIndex: number, onUpdate: () => void = () => {}):
+      Set<number> {
+    const updatedMaterials = new Set<number>();
+
+    this.threeGLTF.scene.traverse(async (object) => {
+      const {gltfExtensions} = object.userData;
+      if (!(object as Mesh).isMesh || gltfExtensions == null) {
+        return;
+      }
+
+      const meshVariantData = gltfExtensions['KHR_materials_variants'];
+      if (meshVariantData == null) {
+        return;
+      }
+
+      let materialIndex = -1;
+      for (const mapping of (meshVariantData.mappings as VariantMappings)) {
+        if (mapping.variants.indexOf(variantIndex) >= 0) {
+          materialIndex = mapping.material;
+          break;
+        }
+      }
+      if (materialIndex < 0) {
+        return;
+      }
+
+      const material =
+          await this.threeGLTF.parser.getDependency('material', materialIndex);
+      updatedMaterials.add(materialIndex);
+      (object as Mesh).material = material;
+      onUpdate();
+
+      const gltfElement = this.gltf.materials![materialIndex];
+      let threeObjects = this.gltfElementMap.get(gltfElement);
+
+      if (threeObjects == null) {
+        threeObjects = new Set();
+        this.gltfElementMap.set(gltfElement, threeObjects);
+      }
+
+      threeObjects.add(material);
+    });
+
+    return updatedMaterials;
   }
 }

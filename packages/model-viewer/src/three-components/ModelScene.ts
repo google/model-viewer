@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-import {Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import ModelViewerElementBase from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 
 import {Damper, SETTLING_TIME} from './Damper.js';
-import Model, {DEFAULT_FOV_DEG} from './Model.js';
+import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
+import {Hotspot} from './Hotspot.js';
+import {reduceVertices} from './ModelUtils.js';
+import {Shadow} from './Shadow.js';
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string
@@ -39,7 +42,14 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Secondary: 'secondary'
 };
 
-const DEFAULT_TAN_FOV = Math.tan((DEFAULT_FOV_DEG / 2) * Math.PI / 180);
+export const DEFAULT_FOV_DEG = 45;
+const DEFAULT_HALF_FOV = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
+export const SAFE_RADIUS_RATIO = Math.sin(DEFAULT_HALF_FOV);
+export const DEFAULT_TAN_FOV = Math.tan(DEFAULT_HALF_FOV);
+
+const view = new Vector3();
+const target = new Vector3();
+const normalWorld = new Vector3();
 
 const raycaster = new Raycaster();
 const vector3 = new Vector3();
@@ -50,30 +60,49 @@ const vector3 = new Vector3();
  * Provides lights and cameras to be used in a renderer.
  */
 export class ModelScene extends Scene {
-  public aspect = 1;
-  public canvas: HTMLCanvasElement;
-  public shadowIntensity = 0;
-  public shadowSoftness = 1;
-  public width = 1;
-  public height = 1;
-  public isDirty = false;
-  public renderCount = 0;
   public element: ModelViewerElementBase;
+  public canvas: HTMLCanvasElement;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
-  public exposure = 1;
-  public model: Model;
-  public canScale = true;
-  public framedFieldOfView = DEFAULT_FOV_DEG;
+  public width = 1;
+  public height = 1;
+  public aspect = 1;
+  public isDirty = false;
+  public renderCount = 0;
+
   public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
 
+  public url: string|null = null;
+  public target = new Object3D();
+  public modelContainer = new Object3D();
+  public animationNames: Array<string> = [];
+  public boundingBox = new Box3();
+  public size = new Vector3();
+  public idealCameraDistance = 0;
+  public fieldOfViewAspect = 0;
+  public framedFieldOfView = DEFAULT_FOV_DEG;
+
+  public shadow: Shadow|null = null;
+  public shadowIntensity = 0;
+  public shadowSoftness = 1;
+
+  public exposure = 1;
+  public canScale = true;
+  public tightBounds = false;
+
   private goalTarget = new Vector3();
   private targetDamperX = new Damper();
   private targetDamperY = new Damper();
   private targetDamperZ = new Damper();
+
+  private _currentGLTF: ModelViewerGLTFInstance|null = null;
+  private mixer: AnimationMixer;
+  private cancelPendingSourceChange: (() => void)|null = null;
+  private animationsByName: Map<string, AnimationClip> = new Map();
+  private currentAnimationAction: AnimationAction|null = null;
 
   constructor({canvas, element, width, height}: ModelSceneConfig) {
     super();
@@ -82,7 +111,6 @@ export class ModelScene extends Scene {
 
     this.element = element;
     this.canvas = canvas;
-    this.model = new Model();
 
     // These default camera values are never used, as they are reset once the
     // model is loaded and framing is computed.
@@ -91,12 +119,15 @@ export class ModelScene extends Scene {
 
     this.activeCamera = this.camera;
 
-    this.add(this.model);
+    this.add(this.target);
 
     this.setSize(width, height);
 
-    this.model.addEventListener(
-        'model-load', (event: any) => this.onModelLoad(event));
+    this.target.name = 'Target';
+    this.modelContainer.name = 'ModelContainer';
+
+    this.target.add(this.modelContainer);
+    this.mixer = new AnimationMixer(this.modelContainer);
   }
 
   /**
@@ -114,16 +145,121 @@ export class ModelScene extends Scene {
   }
 
   /**
+   * Pass in a THREE.Object3D to be controlled
+   * by this model.
+   */
+  async setObject(model: Object3D) {
+    this.reset();
+    this.modelContainer.add(model);
+    await this.setupScene();
+  }
+
+  /**
    * Sets the model via URL.
    */
-  async setModelSource(
-      source: string|null, progressCallback?: (progress: number) => void) {
-    try {
-      await this.model.setSource(this.element, source, progressCallback);
-    } catch (e) {
-      throw new Error(
-          `Could not set model source to '${source}': ${e.message}`);
+
+  async setSource(
+      url: string|null, progressCallback?: (progress: number) => void) {
+    if (!url || url === this.url) {
+      if (progressCallback) {
+        progressCallback(1);
+      }
+      return;
     }
+
+    // If we have pending work due to a previous source change in progress,
+    // cancel it so that we do not incur a race condition:
+    if (this.cancelPendingSourceChange != null) {
+      this.cancelPendingSourceChange!();
+      this.cancelPendingSourceChange = null;
+    }
+
+    let gltf: ModelViewerGLTFInstance;
+
+    try {
+      gltf = await new Promise<ModelViewerGLTFInstance>(
+          async (resolve, reject) => {
+            this.cancelPendingSourceChange = () => reject();
+            try {
+              const result = await this.element[$renderer].loader.load(
+                  url, this.element, progressCallback);
+              resolve(result);
+            } catch (error) {
+              reject(error);
+            }
+          });
+    } catch (error) {
+      if (error == null) {
+        // Loading was cancelled, so silently return
+        return;
+      }
+
+      throw error;
+    }
+
+    this.reset();
+    this.url = url;
+    this._currentGLTF = gltf;
+
+    if (gltf != null) {
+      this.modelContainer.add(gltf.scene);
+    }
+
+    const {animations} = gltf!;
+    const animationsByName = new Map();
+    const animationNames = [];
+
+    for (const animation of animations) {
+      animationsByName.set(animation.name, animation);
+      animationNames.push(animation.name);
+    }
+
+    this.animations = animations;
+    this.animationsByName = animationsByName;
+    this.animationNames = animationNames;
+
+    await this.setupScene();
+  }
+
+  private async setupScene() {
+    this.updateBoundingBox();
+
+    let target = null;
+    if (this.tightBounds === true) {
+      await this.element.requestUpdate('cameraTarget');
+      target = this.getTarget();
+    }
+    this.updateFraming(target);
+
+    this.frameModel();
+    this.setShadowIntensity(this.shadowIntensity);
+    this.isDirty = true;
+    this.dispatchEvent({type: 'model-load', url: this.url});
+  }
+
+  reset() {
+    this.url = null;
+    const gltf = this._currentGLTF;
+    // Remove all current children
+    if (gltf != null) {
+      for (const child of this.modelContainer.children) {
+        this.modelContainer.remove(child);
+      }
+      gltf.dispose();
+      this._currentGLTF = null;
+    }
+
+    if (this.currentAnimationAction != null) {
+      this.currentAnimationAction.stop();
+      this.currentAnimationAction = null;
+    }
+
+    this.mixer.stopAllAction();
+    this.mixer.uncacheRoot(this);
+  }
+
+  get currentGLTF() {
+    return this._currentGLTF;
   }
 
   /**
@@ -142,13 +278,64 @@ export class ModelScene extends Scene {
     this.isDirty = true;
   }
 
+  updateBoundingBox() {
+    this.target.remove(this.modelContainer);
+
+    if (this.tightBounds === true) {
+      const bound = (box: Box3, vertex: Vector3): Box3 => {
+        return box.expandByPoint(vertex);
+      };
+      this.boundingBox = reduceVertices(this.modelContainer, bound, new Box3());
+    } else {
+      this.boundingBox.setFromObject(this.modelContainer);
+    }
+    this.boundingBox.getSize(this.size);
+
+    this.target.add(this.modelContainer);
+  }
+
+  /**
+   * Calculates the idealCameraDistance and fieldOfViewAspect that allows the 3D
+   * object to be framed tightly in a 2D window of any aspect ratio without
+   * clipping at any camera orbit. The camera's center target point can be
+   * optionally specified. If no center is specified, it defaults to the center
+   * of the bounding box, which means asymmetric models will tend to be tight on
+   * one side instead of both. Proper choice of center can correct this.
+   */
+  updateFraming(center: Vector3|null = null) {
+    this.target.remove(this.modelContainer);
+
+    if (center == null) {
+      center = this.boundingBox.getCenter(new Vector3);
+    }
+
+    const radiusSquared = (value: number, vertex: Vector3): number => {
+      return Math.max(value, center!.distanceToSquared(vertex));
+    };
+    const framedRadius =
+        Math.sqrt(reduceVertices(this.modelContainer, radiusSquared, 0));
+
+    this.idealCameraDistance = framedRadius / SAFE_RADIUS_RATIO;
+
+    const horizontalFov = (value: number, vertex: Vector3): number => {
+      vertex.sub(center!);
+      const radiusXZ = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z);
+      return Math.max(
+          value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
+    };
+    this.fieldOfViewAspect =
+        reduceVertices(this.modelContainer, horizontalFov, 0) / DEFAULT_TAN_FOV;
+
+    this.target.add(this.modelContainer);
+  }
+
   /**
    * Set's the framedFieldOfView based on the aspect ratio of the window in
    * order to keep the model fully visible at any camera orientation.
    */
   frameModel() {
-    const vertical = DEFAULT_TAN_FOV *
-        Math.max(1, this.model.fieldOfViewAspect / this.aspect);
+    const vertical =
+        DEFAULT_TAN_FOV * Math.max(1, this.fieldOfViewAspect / this.aspect);
     this.framedFieldOfView = 2 * Math.atan(vertical) * 180 / Math.PI;
   }
 
@@ -171,16 +358,6 @@ export class ModelScene extends Scene {
    */
   setCamera(camera: Camera) {
     this.activeCamera = camera;
-  }
-
-  /**
-   * Called when the model's contents have loaded, or changed.
-   */
-  onModelLoad(event: {url: string}) {
-    this.frameModel();
-    this.setShadowIntensity(this.shadowIntensity);
-    this.isDirty = true;
-    this.dispatchEvent({type: 'model-load', url: event.url});
   }
 
   /**
@@ -210,16 +387,16 @@ export class ModelScene extends Scene {
    */
   updateTarget(delta: number) {
     const goal = this.goalTarget;
-    const target = this.model.position;
+    const target = this.target.position;
     if (!goal.equals(target)) {
-      const radius = this.model.idealCameraDistance;
+      const radius = this.idealCameraDistance;
       let {x, y, z} = target;
       x = this.targetDamperX.update(x, goal.x, delta, radius);
       y = this.targetDamperY.update(y, goal.y, delta, radius);
       z = this.targetDamperZ.update(z, goal.z, delta, radius);
-      this.model.position.set(x, y, z);
-      this.model.updateMatrixWorld();
-      this.model.setShadowRotation(this.yaw);
+      this.target.position.set(x, y, z);
+      this.target.updateMatrixWorld();
+      this.setShadowRotation(this.yaw);
       this.isDirty = true;
     }
   }
@@ -239,7 +416,7 @@ export class ModelScene extends Scene {
   set yaw(radiansY: number) {
     this.rotation.y = radiansY;
     this.updateMatrixWorld(true);
-    this.model.setShadowRotation(radiansY);
+    this.setShadowRotation(radiansY);
     this.isDirty = true;
   }
 
@@ -247,16 +424,117 @@ export class ModelScene extends Scene {
     return this.rotation.y;
   }
 
+  set animationTime(value: number) {
+    this.mixer.setTime(value);
+  }
+
+  get animationTime(): number {
+    if (this.currentAnimationAction != null) {
+      return this.currentAnimationAction.time;
+    }
+
+    return 0;
+  }
+
+  get duration(): number {
+    if (this.currentAnimationAction != null &&
+        this.currentAnimationAction.getClip()) {
+      return this.currentAnimationAction.getClip().duration;
+    }
+
+    return 0;
+  }
+
+  get hasActiveAnimation(): boolean {
+    return this.currentAnimationAction != null;
+  }
+
+  /**
+   * Plays an animation if there are any associated with the current model.
+   * Accepts an optional string name of an animation to play. If no name is
+   * provided, or if no animation is found by the given name, always falls back
+   * to playing the first animation.
+   */
+  playAnimation(name: string|null = null, crossfadeTime: number = 0) {
+    if (this._currentGLTF == null) {
+      return;
+    }
+    const {animations} = this;
+    if (animations == null || animations.length === 0) {
+      console.warn(
+          `Cannot play animation (model does not have any animations)`);
+      return;
+    }
+
+    let animationClip = null;
+
+    if (name != null) {
+      animationClip = this.animationsByName.get(name);
+    }
+
+    if (animationClip == null) {
+      animationClip = animations[0];
+    }
+
+    try {
+      const {currentAnimationAction: lastAnimationAction} = this;
+
+      this.currentAnimationAction =
+          this.mixer.clipAction(animationClip, this).play();
+      this.currentAnimationAction.enabled = true;
+
+      if (lastAnimationAction != null &&
+          this.currentAnimationAction !== lastAnimationAction) {
+        this.currentAnimationAction.crossFadeFrom(
+            lastAnimationAction, crossfadeTime, false);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  stopAnimation() {
+    if (this.currentAnimationAction != null) {
+      this.currentAnimationAction.stop();
+      this.currentAnimationAction.reset();
+      this.currentAnimationAction = null;
+    }
+
+    this.mixer.stopAllAction();
+  }
+
+  updateAnimation(step: number) {
+    this.mixer.update(step);
+  }
+
+  /**
+   * Call if the object has been changed in such a way that the shadow's shape
+   * has changed (not a rotation about the Y axis).
+   */
+  updateShadow() {
+    const shadow = this.shadow;
+    if (shadow != null) {
+      const side =
+          (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
+      shadow.setScene(this, this.shadowSoftness, side);
+    }
+  }
+
+
   /**
    * Sets the shadow's intensity, lazily creating the shadow as necessary.
    */
   setShadowIntensity(shadowIntensity: number) {
-    shadowIntensity = Math.max(shadowIntensity, 0);
-    this.shadowIntensity = shadowIntensity;
-    if (this.model.hasModel()) {
-      const side =
-          (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
-      this.model.setShadowIntensity(shadowIntensity, this.shadowSoftness, side);
+    let shadow = this.shadow;
+    const side =
+        (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
+    if (shadow != null) {
+      shadow.setIntensity(shadowIntensity);
+      shadow.setScene(this, this.shadowSoftness, side);
+    } else if (shadowIntensity > 0) {
+      shadow = new Shadow(this, this.shadowSoftness, side);
+      shadow.setIntensity(shadowIntensity);
+      this.shadow = shadow;
     }
   }
 
@@ -267,7 +545,47 @@ export class ModelScene extends Scene {
    */
   setShadowSoftness(softness: number) {
     this.shadowSoftness = softness;
-    this.model.setShadowSoftness(softness);
+    const shadow = this.shadow;
+    if (shadow != null) {
+      shadow.setSoftness(softness);
+    }
+  }
+
+  /**
+   * The shadow must be rotated manually to match any global rotation applied to
+   * this model. The input is the global orientation about the Y axis.
+   */
+  setShadowRotation(radiansY: number) {
+    const shadow = this.shadow;
+    if (shadow != null) {
+      shadow.setRotation(radiansY);
+    }
+  }
+
+  /**
+   * Call to check if the shadow needs an updated render; returns true if an
+   * update is needed and resets the state.
+   */
+  isShadowDirty(): boolean {
+    const shadow = this.shadow;
+    if (shadow == null) {
+      return false;
+    } else {
+      const {needsUpdate} = shadow;
+      shadow.needsUpdate = false;
+      return needsUpdate;
+    }
+  }
+
+  /**
+   * Shift the floor vertically from the bottom of the model's bounding box by
+   * offset (should generally be negative).
+   */
+  setShadowScaleAndOffset(scale: number, offset: number) {
+    const shadow = this.shadow;
+    if (shadow != null) {
+      shadow.setScaleAndOffset(scale, offset);
+    }
   }
 
   /**
@@ -293,5 +611,70 @@ export class ModelScene extends Scene {
         new Matrix3().getNormalMatrix(hit.object.matrixWorld));
 
     return {position: hit.point, normal: hit.face.normal};
+  }
+
+  /**
+   * The following methods are for operating on the set of Hotspot objects
+   * attached to the scene. These come from DOM elements, provided to slots by
+   * the Annotation Mixin.
+   */
+  addHotspot(hotspot: Hotspot) {
+    this.target.add(hotspot);
+  }
+
+  removeHotspot(hotspot: Hotspot) {
+    this.target.remove(hotspot);
+  }
+
+  /**
+   * Helper method to apply a function to all hotspots.
+   */
+  forHotspots(func: (hotspot: Hotspot) => void) {
+    const {children} = this.target;
+    for (let i = 0, l = children.length; i < l; i++) {
+      const hotspot = children[i];
+      if (hotspot instanceof Hotspot) {
+        func(hotspot);
+      }
+    }
+  }
+
+  /**
+   * Update the CSS visibility of the hotspots based on whether their normals
+   * point toward the camera.
+   */
+  updateHotspots(viewerPosition: Vector3) {
+    this.forHotspots((hotspot) => {
+      view.copy(viewerPosition);
+      target.setFromMatrixPosition(hotspot.matrixWorld);
+      view.sub(target);
+      normalWorld.copy(hotspot.normal)
+          .transformDirection(this.target.matrixWorld);
+      if (view.dot(normalWorld) < 0) {
+        hotspot.hide();
+      } else {
+        hotspot.show();
+      }
+    });
+  }
+
+  /**
+   * Rotate all hotspots to an absolute orientation given by the input number of
+   * radians. Zero returns them to upright.
+   */
+  orientHotspots(radians: number) {
+    this.forHotspots((hotspot) => {
+      hotspot.orient(radians);
+    });
+  }
+
+  /**
+   * Set the rendering visibility of all hotspots. This is used to hide them
+   * during transitions and such.
+   */
+  setHotspotsVisibility(visible: boolean) {
+    this.forHotspots((hotspot) => {
+      hotspot.visible = visible;
+    });
   }
 }

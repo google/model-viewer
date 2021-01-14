@@ -192,9 +192,12 @@ export class ModelViewerPreview extends ConnectedLitElement {
           `<div class="HelpText">Drag a GLB here!<br/><small>And HDRs for lighting</small></div>`);
     }
 
+    const emptyARConfig = {};
+
     return html`${
         renderModelViewer(
             editedConfig,
+            emptyARConfig,
             {
               load: () => {
                 this.onModelLoaded();

@@ -80,23 +80,6 @@ suite('ModelViewerElementBase with ARMixin', () => {
           expect(url.search).to.match(/(%3F|%26|&)token=foo(%26|&|$)/);
         });
 
-        test('defaults title and link', () => {
-          element.src = 'https://example.com/model.gltf';
-          element.alt = 'alt';
-          (element as any)[$openSceneViewer]();
-
-          expect(intentUrls.length).to.be.equal(1);
-
-          const url = new URL(intentUrls[0]);
-
-          expect(url.search).to.match(/(%3F|%26|&)title=alt(%26|&|$)/);
-
-          const linkRegex =
-              `(%3F|%26|&)link=${self.location.toString()}(%26|&|$)`;
-          linkRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-          expect(url.search).to.match(new RegExp(linkRegex));
-        });
-
         test('keeps title and link when supplied', () => {
           element.src = 'https://example.com/model.gltf?link=foo&title=bar';
           element.alt = 'alt';
@@ -131,14 +114,23 @@ suite('ModelViewerElementBase with ARMixin', () => {
           expect(url.pathname).equal('/model.usdz');
           expect(url.hash).to.equal('#allowsContentScaling=0');
         });
-      });
-    });
 
-    suite('quick-look-browsers', () => {
-      // TODO(#624,#625): We cannot implement these tests without the ability
-      // to mock our constants
-      test('shows the AR button for allowed browsers');
-      test('hides the AR button for non-allowed browsers');
+        test('keeps original hash too', () => {
+          element.src = 'https://example.com/model.gltf';
+          element.iosSrc =
+              'https://example.com/model.usdz#custom=path-to-banner.html';
+          element.arScale = 'fixed';
+          (element as any)[$openIOSARQuickLook]();
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.pathname).equal('/model.usdz');
+          expect(url.hash).to.equal(
+              '#custom=path-to-banner.html&allowsContentScaling=0');
+        });
+      });
     });
 
     suite('with webxr', () => {

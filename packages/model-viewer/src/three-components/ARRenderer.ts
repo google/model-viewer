@@ -191,7 +191,7 @@ export class ARRenderer extends EventDispatcher {
       requestAnimationFrame(() => resolve());
     });
 
-    scene.model.setHotspotsVisibility(false);
+    scene.setHotspotsVisibility(false);
     scene.isDirty = true;
     // Render a frame to turn off the hotspots
     await waitForAnimationFrame;
@@ -240,7 +240,7 @@ export class ARRenderer extends EventDispatcher {
 
     this.currentSession = currentSession;
     this.placementBox =
-        new PlacementBox(scene.model, this.placeOnWall ? 'back' : 'bottom');
+        new PlacementBox(scene, this.placeOnWall ? 'back' : 'bottom');
     this.placementComplete = false;
     this.lastTick = performance.now();
 
@@ -290,13 +290,21 @@ export class ARRenderer extends EventDispatcher {
       if (this.placeOnWall) {
         // Move the scene's target to the center of the back of the model's
         // bounding box.
-        scene.setTarget(target.x, target.y, scene.model.boundingBox.min.z);
+        scene.setTarget(target.x, target.y, scene.boundingBox.min.z);
       } else {
         // Move the scene's target to the model's floor height.
-        scene.setTarget(target.x, scene.model.boundingBox.min.y, target.z);
+        scene.setTarget(target.x, scene.boundingBox.min.y, target.z);
       }
     }
   }
+
+  onUpdateScene = () => {
+    if (this.placementBox != null && this.isPresenting) {
+      this.placementBox!.dispose();
+      this.placementBox = new PlacementBox(
+          this.presentedScene!, this.placeOnWall ? 'back' : 'bottom');
+    }
+  };
 
   private postSessionCleanup() {
     // The offscreen WebXR framebuffer is now invalid, switch
@@ -314,13 +322,13 @@ export class ARRenderer extends EventDispatcher {
 
     const scene = this.presentedScene;
     if (scene != null) {
-      const {model, element} = scene;
+      const {target, element} = scene;
       scene.setCamera(scene.camera);
-      model.remove(this.placementBox!);
+      target.remove(this.placementBox!);
 
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
-      model.setShadowScaleAndOffset(1, 0);
+      scene.setShadowScaleAndOffset(1, 0);
       const yaw = this.turntableRotation;
       if (yaw != null) {
         scene.yaw = yaw;
@@ -333,11 +341,11 @@ export class ARRenderer extends EventDispatcher {
       if (background != null) {
         scene.background = background;
       }
-      const target = this.oldTarget;
-      scene.setTarget(target.x, target.y, target.z);
+      const point = this.oldTarget;
+      scene.setTarget(point.x, point.y, point.z);
 
       scene.removeEventListener('model-load', this.onUpdateScene);
-      model.orientHotspots(0);
+      scene.orientHotspots(0);
       element.requestUpdate('cameraTarget');
       element[$onResize](element.getBoundingClientRect());
     }
@@ -388,14 +396,6 @@ export class ARRenderer extends EventDispatcher {
     this.dispatchEvent({type: 'status', status: ARStatus.NOT_PRESENTING});
   }
 
-  private onUpdateScene = () => {
-    if (this.placementBox != null && this.isPresenting) {
-      this.placementBox!.dispose();
-      this.placementBox = new PlacementBox(
-          this.presentedScene!.model, this.placeOnWall ? 'back' : 'bottom');
-    }
-  };
-
   private updateCamera(view: XRView) {
     const {camera} = this;
     const {matrix: cameraMatrix} = camera;
@@ -415,16 +415,15 @@ export class ARRenderer extends EventDispatcher {
       camera.getWorldDirection(vector3);
       scene.yaw = Math.atan2(-vector3.x, -vector3.z);
       this.goalYaw = scene.yaw;
-      this.initialModelToWorld = new Matrix4().copy(scene.model.matrixWorld);
-      scene.model.setHotspotsVisibility(true);
+      this.initialModelToWorld = new Matrix4().copy(scene.matrixWorld);
+      scene.setHotspotsVisibility(true);
       this.initialized = true;
       this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
 
     if (this.initialHitSource != null) {
       // Target locked to screen center
-      const {position, model} = this.presentedScene!;
-      const radius = model.idealCameraDistance;
+      const {position, idealCameraDistance: radius} = this.presentedScene!;
       camera.getWorldDirection(position);
       position.multiplyScalar(radius);
       position.add(camera.position);
@@ -440,7 +439,7 @@ export class ARRenderer extends EventDispatcher {
     this.threeRenderer.setViewport(
         viewport.x, viewport.y, viewport.width, viewport.height);
 
-    this.presentedScene!.model.orientHotspots(
+    this.presentedScene!.orientHotspots(
         Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
   }
 
@@ -513,7 +512,6 @@ export class ARRenderer extends EventDispatcher {
    */
   public placeModel(hit: Vector3) {
     const scene = this.presentedScene!;
-    const {model} = scene;
 
     this.placementBox!.show = true;
 
@@ -526,7 +524,7 @@ export class ARRenderer extends EventDispatcher {
       const origin = this.camera.position.clone();
       const direction = hit.clone().sub(origin).normalize();
       // Pull camera back enough to be outside of large models.
-      origin.sub(direction.multiplyScalar(model.idealCameraDistance));
+      origin.sub(direction.multiplyScalar(scene.idealCameraDistance));
       const ray = new Ray(origin, direction.normalize());
 
       const modelToWorld = this.initialModelToWorld!;
@@ -536,9 +534,9 @@ export class ARRenderer extends EventDispatcher {
       ray.applyMatrix4(modelToWorld.invert());
 
       // Make the box tall so that we don't intersect the top face.
-      const {max} = model.boundingBox;
+      const {max} = scene.boundingBox;
       max.y += 10;
-      ray.intersectBox(model.boundingBox, modelPosition);
+      ray.intersectBox(scene.boundingBox, modelPosition);
       max.y -= 10;
 
       if (modelPosition != null) {
@@ -662,7 +660,7 @@ export class ARRenderer extends EventDispatcher {
           // drop the placement box to the floor. The model falls on select end.
           if (offset < 0) {
             this.placementBox!.offsetHeight = offset / scale;
-            this.presentedScene!.model.setShadowScaleAndOffset(scale, offset);
+            this.presentedScene!.setShadowScaleAndOffset(scale, offset);
             // Interpolate hit ray up to drag plane
             const cameraPosition = vector3.copy(this.camera.position);
             const alpha = -offset / (cameraPosition.y - hit.y);
@@ -679,8 +677,7 @@ export class ARRenderer extends EventDispatcher {
 
   private moveScene(delta: number) {
     const scene = this.presentedScene!;
-    const {model, position, yaw} = scene;
-    const radius = model.idealCameraDistance;
+    const {position, yaw, idealCameraDistance: radius} = scene;
     const goal = this.goalPosition;
     const oldScale = scene.scale.x;
     const box = this.placementBox!;
@@ -702,7 +699,7 @@ export class ARRenderer extends EventDispatcher {
         const offset = goal.y - y;
         if (this.placementComplete && this.placeOnWall === false) {
           box.offsetHeight = offset / newScale;
-          model.setShadowScaleAndOffset(newScale, offset);
+          scene.setShadowScaleAndOffset(newScale, offset);
         } else if (offset === 0) {
           this.placementComplete = true;
           box.show = false;

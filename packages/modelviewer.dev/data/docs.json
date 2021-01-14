@@ -5,7 +5,7 @@
       {
         "name": "src",
         "htmlName": "src",
-        "description": "The URL to the 3D model. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.",
+        "description": "The URL to the 3D model. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported.",
         "links": [
           "<a href=\"../examples/loading\">Related examples</a>"
         ],
@@ -299,15 +299,6 @@
         "links": [
           "<a href=\"../examples/augmentedreality/#ar\"><span class='attribute'>ios-src</span> example</a>"
         ]
-      },
-      {
-        "name": "quick-look-browsers",
-        "htmlName": "quickLookBrowsers",
-        "description": "Set this attribute to control which iOS browsers will be allowed to launch AR Quick Look on iOS. Allowed values are \"safari\" and \"chrome\". You can specify any number of browsers separated by whitespace, for example: \"safari chrome\".",
-        "default": {
-          "default": "safari",
-          "options": "safari chrome"
-        }
       }
     ],
     "CSS": [
@@ -541,6 +532,18 @@
           "default": "25deg",
           "options": "angle between 0 and 180 degrees"
         }
+      },
+      {
+        "name": "bounds",
+        "htmlName": "bounds",
+        "description": "Sets the method of calculating the model's bounding box, which affects its shadow's position and default camera framing. Legacy mode is conservative and occasionally results in a bounding box that is too large, especially when used with the orientation attribute. Tight will give precise results and will also account for a custom camera-target, keeping the model always in frame by default. Tight will become the default value in a future release, so check if your seamless poster images need updating.",
+        "default": {
+          "default": "legacy",
+          "options": "tight, legacy"
+        },
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
+        ]
       }
     ],
     "CSS": [
@@ -597,6 +600,14 @@
         "name": "jumpCameraToGoal()",
         "htmlName": "jumpCameraToGoal",
         "description": "Changes the camera to its last configured goal state immediately on the next update instead of interpolating the motion over time."
+      },
+      {
+        "name": "updateFraming()",
+        "htmlName": "updateFraming",
+        "description": "Recalculates the camera defaults in case the model has been changed, for instance by the orientation or scale attributes.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#tranforms\"><span class='attribute'>updateFraming</span> example</a>"
+        ]
       },
       {
         "name": "getMinimumFieldOfView()",
@@ -824,7 +835,49 @@
   },
   {
     "Title": "Scene Graph",
+    "Attributes": [
+      {
+        "name": "variant-name",
+        "htmlName": "variantName",
+        "description": "Selects a model variant by name.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "orientation",
+        "htmlName": "orientation",
+        "description": "Rotates the model to the orientation specified by roll, pitch, yaw Euler angles, where yaw is first applied about the Y-axis, then pitch about the new local X-axis (positive is front-down), then roll about the new local Z-axis. If specified before the model loads, automatic camera framing will take this change into account; otherwise the updateFraming() method must be called manually.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
+        ],
+        "default": {
+          "default": "0deg 0deg 0deg",
+          "options": "$roll $pitch $yaw"
+        }
+      },
+      {
+        "name": "scale",
+        "htmlName": "scale",
+        "description": "Scales the model as specified in the X, Y, and Z directions. Scale is applied before orientation. If specified before the model loads, automatic camera framing will take this change into account; otherwise the updateFraming() method must be called manually.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
+        ],
+        "default": {
+          "default": "1 1 1",
+          "options": "$x $y $z"
+        }
+      }
+    ],
     "Properties": [
+      {
+        "name": "availableVariants",
+        "htmlName": "availableVariants",
+        "description": "This property reports an array of strings, corresponding to variants in the loaded model that can be selected with <span class='attribute'>variant-name</span>.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
+        ]
+      },
       {
         "name": "model",
         "htmlName": "model",
@@ -848,7 +901,7 @@
       {
         "name": "scene-graph-ready",
         "htmlName": "sceneGraphReady",
-        "description": "Dispatched when scene-graph access is available and after the model has been loaded. See the <a href='examples/scene-graph.html'>Scene Graph</a> documentation for more details.",
+        "description": "THIS EVENT IS DEPRECATED, as it now fires at the same time as 'load', so please use that event instead.",
         "links": [
           "<a href=\"../examples/scenegraph/#changeMaterial\">Related examples</a>"
         ]

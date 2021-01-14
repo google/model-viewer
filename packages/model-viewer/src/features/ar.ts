@@ -16,7 +16,7 @@
 import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
 
-import {IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_CHROME, IS_IOS_SAFARI, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
+import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$loaded, $needsRender, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
@@ -25,11 +25,6 @@ import {Constructor, waitForEvent} from '../utilities.js';
 let isWebXRBlocked = false;
 let isSceneViewerBlocked = false;
 const noArViewerSigil = '#model-viewer-no-ar-fallback';
-
-export type QuickLookBrowser = 'safari'|'chrome';
-
-const deserializeQuickLookBrowsers =
-    enumerationDeserializer<QuickLookBrowser>(['safari', 'chrome']);
 
 export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'none';
 
@@ -56,8 +51,6 @@ export const $openIOSARQuickLook = Symbol('openIOSARQuickLook');
 const $canActivateAR = Symbol('canActivateAR');
 const $arMode = Symbol('arMode');
 const $arModes = Symbol('arModes');
-const $canLaunchQuickLook = Symbol('canLaunchQuickLook');
-const $quickLookBrowsers = Symbol('quickLookBrowsers');
 const $arAnchor = Symbol('arAnchor');
 const $preload = Symbol('preload');
 
@@ -71,7 +64,6 @@ export declare interface ARInterface {
   arModes: string;
   arScale: string;
   iosSrc: string|null;
-  quickLookBrowsers: string;
   readonly canActivateAR: boolean;
   activateAR(): Promise<void>;
 }
@@ -91,9 +83,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'ios-src'}) iosSrc: string|null = null;
 
-    @property({type: String, attribute: 'quick-look-browsers'})
-    quickLookBrowsers: string = 'safari';
-
     get canActivateAR(): boolean {
       return this[$arMode] !== ARMode.NONE;
     }
@@ -110,8 +99,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
     protected[$preload] = false;
-
-    protected[$quickLookBrowsers]: Set<QuickLookBrowser> = new Set();
 
     private[$onARButtonContainerClick] = (event: Event) => {
       event.preventDefault();
@@ -153,11 +140,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     async update(changedProperties: Map<string, any>) {
       super.update(changedProperties);
-
-      if (changedProperties.has('quickLookBrowsers')) {
-        this[$quickLookBrowsers] =
-            deserializeQuickLookBrowsers(this.quickLookBrowsers);
-      }
 
       if (changedProperties.has('arScale')) {
         this[$scene].canScale = this.arScale !== 'fixed';
@@ -225,7 +207,7 @@ configuration or device capabilities');
             break;
           } else if (
               value === 'quick-look' && !!this.iosSrc &&
-              this[$canLaunchQuickLook] && IS_AR_QUICKLOOK_CANDIDATE) {
+              IS_AR_QUICKLOOK_CANDIDATE) {
             this[$arMode] = ARMode.QUICK_LOOK;
             break;
           }
@@ -247,16 +229,6 @@ configuration or device capabilities');
         this.dispatchEvent(
             new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
       }
-    }
-
-    get[$canLaunchQuickLook](): boolean {
-      if (IS_IOS_CHROME) {
-        return this[$quickLookBrowsers].has('chrome');
-      } else if (IS_IOS_SAFARI) {
-        return this[$quickLookBrowsers].has('safari');
-      }
-
-      return false;
     }
 
     protected async[$enterARWithWebXR]() {
@@ -309,11 +281,8 @@ configuration or device capabilities');
       // modelUrl can contain title/link/sound etc.
       // These are already URL-encoded, so we shouldn't do that again here.
       let intentParams = `?file=${modelUrl.toString()}&mode=ar_only`;
-      if (!gltfSrc.includes('&link=')) {
-        intentParams += `&link=${location}`;
-      }
-      if (!gltfSrc.includes('&title=')) {
-        intentParams += `&title=${encodeURIComponent(this.alt || '')}`;
+      if (!gltfSrc.includes('&disable_occlusion=')) {
+        intentParams += `&disable_occlusion=true`;
       }
       if (this.arScale === 'fixed') {
         intentParams += `&resizable=false`;
@@ -354,7 +323,10 @@ configuration or device capabilities');
     [$openIOSARQuickLook]() {
       const modelUrl = new URL(this.iosSrc!, self.location.toString());
       if (this.arScale === 'fixed') {
-        modelUrl.hash = 'allowsContentScaling=0';
+        if (modelUrl.hash) {
+          modelUrl.hash += '&';
+        }
+        modelUrl.hash += 'allowsContentScaling=0';
       }
       const anchor = this[$arAnchor];
       anchor.setAttribute('rel', 'ar');

@@ -42,7 +42,6 @@ const $resizeObserver = Symbol('resizeObserver');
 const $intersectionObserver = Symbol('intersectionObserver');
 const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
-const $contextLostHandler = Symbol('contextLostHandler');
 
 export const $loaded = Symbol('loaded');
 export const $updateSize = Symbol('updateSize');
@@ -168,9 +167,6 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$intersectionObserver]: IntersectionObserver|null = null;
 
   protected[$progressTracker]: ProgressTracker = new ProgressTracker();
-
-  protected[$contextLostHandler] = (event: ContextLostEvent) =>
-      this[$onContextLost](event);
 
   /** @export */
   get loaded() {
@@ -312,8 +308,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     const renderer = this[$renderer];
     renderer.addEventListener(
-        'contextlost',
-        this[$contextLostHandler] as (event: ThreeEvent) => void);
+        'contextlost', this[$onContextLost] as (event: ThreeEvent) => void);
 
     renderer.registerScene(this[$scene]);
 
@@ -340,13 +335,12 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
     const renderer = this[$renderer];
     renderer.removeEventListener(
-        'contextlost',
-        this[$contextLostHandler] as (event: ThreeEvent) => void);
+        'contextlost', this[$onContextLost] as (event: ThreeEvent) => void);
 
     renderer.unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
-      this[$scene].model.reset();
+      this[$scene].reset();
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
@@ -357,11 +351,16 @@ export default class ModelViewerElementBase extends UpdatingElement {
     // of a microtask, LitElement/UpdatingElement will notify of a change even
     // though the value has effectively not changed, so we need to check to make
     // sure that the value has actually changed before changing the loaded flag.
-    if (changedProperties.has('src') &&
-        (this.src == null || this.src !== this[$scene].model.url)) {
-      this[$loaded] = false;
-      this[$loadedTime] = 0;
-      this[$updateSource]();
+    if (changedProperties.has('src')) {
+      if (this.src == null) {
+        this[$loaded] = false;
+        this[$loadedTime] = 0;
+        this[$scene].reset();
+      } else if (this.src !== this[$scene].url) {
+        this[$loaded] = false;
+        this[$loadedTime] = 0;
+        this[$updateSource]();
+      }
     }
 
     if (changedProperties.has('alt')) {
@@ -383,20 +382,20 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const qualityArgument = options ? options.qualityArgument : undefined;
     const idealAspect = options ? options.idealAspect : undefined;
 
-    const {width, height, model, aspect} = this[$scene];
+    const {width, height, fieldOfViewAspect, aspect} = this[$scene];
     const {dpr, scaleFactor} = this[$renderer];
     let outputWidth = width * scaleFactor * dpr;
     let outputHeight = height * scaleFactor * dpr;
     let offsetX = 0;
     let offsetY = 0;
     if (idealAspect === true) {
-      if (model.fieldOfViewAspect > aspect) {
+      if (fieldOfViewAspect > aspect) {
         const oldHeight = outputHeight;
-        outputHeight = Math.round(outputWidth / model.fieldOfViewAspect);
+        outputHeight = Math.round(outputWidth / fieldOfViewAspect);
         offsetY = (oldHeight - outputHeight) / 2;
       } else {
         const oldWidth = outputWidth;
-        outputWidth = Math.round(outputHeight * model.fieldOfViewAspect);
+        outputWidth = Math.round(outputHeight * fieldOfViewAspect);
         offsetX = (oldWidth - outputWidth) / 2;
       }
     }
@@ -507,11 +506,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$scene].setSize(e.width, e.height);
   }
 
-  [$onContextLost](event: ContextLostEvent) {
+  [$onContextLost] = (event: ContextLostEvent) => {
     this.dispatchEvent(new CustomEvent(
         'error',
         {detail: {type: 'webglcontextlost', sourceError: event.sourceEvent}}));
-  }
+  };
 
   /**
    * Parses the element for an appropriate source URL and
@@ -525,7 +524,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
     try {
-      await this[$scene].setModelSource(
+      await this[$scene].setSource(
           source, (progress: number) => updateSourceProgress(progress * 0.8));
 
       const detail = {url: source};

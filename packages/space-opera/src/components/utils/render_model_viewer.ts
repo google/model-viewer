@@ -20,6 +20,7 @@ import '@google/model-viewer/lib/model-viewer';
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {html, TemplateResult} from 'lit-html';
 import {ifDefined} from 'lit-html/directives/if-defined';
+import {ArConfigState} from '../../types';
 
 /** Optional handlers for model-viewer events */
 export interface ModelViewerEventHandlers {
@@ -36,12 +37,16 @@ export interface ModelViewerEventHandlers {
  */
 export function renderModelViewer(
     config: ModelViewerConfig,
+    arConfig: ArConfigState,
     eventHandlers?: ModelViewerEventHandlers,
     childElements?: Array<TemplateResult|HTMLElement>) {
   const skyboxImage =
       config.useEnvAsSkybox ? config.environmentImage : undefined;
   return html`<model-viewer
         src=${config.src || ''}
+        ?ar=${!!arConfig.ar}
+        ar-modes=${ifDefined(arConfig.arModes)}
+        ios-src=${ifDefined(arConfig.iosSrc)}
         ?autoplay=${!!config.autoplay}
         ?auto-rotate=${!!config.autoRotate}
         ?camera-controls=${!!config.cameraControls}
