@@ -140,12 +140,15 @@ window.oscillate = function(min, max, period, time) {
           <div class="heading">
             <h2 class="demo-title">Showing the difference between our two baked-in lighting environments</h2>
             <h4>If no environment or skybox is specified, we have a baked-in
-            default scene that is faster. It is designed primarily for frontward
-            viewing, but there is also a baked-in neutral lighting environment
-            that is evenly lit on all sides, and can be activated by setting 
+            default scene that is faster to load. It is designed primarily for
+            frontward viewing, but there is also a baked-in neutral lighting
+            environment that is evenly lit on all sides, and can be activated by
+            setting 
             <span class="attribute">environment-image="neutral"</span>. This
             lighting has also been roughly calibrated to render colors at nearly
-            their baseColorMap RGB values. </h4>
+            their baseColorMap RGB values. You may find the neutral lighting to
+            be more pleasing than the default when using auto-rotate, as shown
+            here, or when object does not have a clear front side.</h4>
           </div>
           <example-snippet stamp-to="neutralLighting" highlight-as="html">
             <template>

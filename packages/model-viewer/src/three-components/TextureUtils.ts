@@ -57,7 +57,7 @@ export default class TextureUtils extends EventDispatcher {
   private skyboxCache = new Map<string, Promise<Texture>>();
   private environmentMapCache = new Map<string, Promise<WebGLRenderTarget>>();
 
-  constructor(private threeRenderer: WebGLRenderer) {
+  constructor(threeRenderer: WebGLRenderer) {
     super();
     this.PMREMGenerator = new PMREMGenerator(threeRenderer);
   }
@@ -225,10 +225,8 @@ export default class TextureUtils extends EventDispatcher {
   private loadGeneratedEnvironmentMapAlt(): Promise<WebGLRenderTarget> {
     if (this.generatedEnvironmentMapAlt == null) {
       const defaultScene = new EnvironmentSceneAlt;
-      this.threeRenderer.toneMappingExposure = 0.46;
       this.generatedEnvironmentMapAlt =
           this.PMREMGenerator.fromScene(defaultScene, GENERATED_SIGMA);
-      this.threeRenderer.toneMappingExposure = 1;
       this.addMetadata(this.generatedEnvironmentMapAlt.texture, null);
     }
 
