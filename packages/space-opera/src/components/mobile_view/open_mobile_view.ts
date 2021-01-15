@@ -31,6 +31,7 @@ import {FileModalElement} from '../file_modal/file_modal.js';
 import {getHotspots} from '../hotspot_panel/reducer.js';
 import {getEdits} from '../materials_panel/reducer.js';
 import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
+import {getExtraAttributes} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {MobileModal} from './components/mobile_modal.js';
 
@@ -104,6 +105,7 @@ export class OpenMobileView extends ConnectedLitElement {
       camera: getCamera(state),
       hotspots: getHotspots(state),
       edits: getEdits(state),
+      extraAttributes: getExtraAttributes(state)
     };
 
     this.contentHasChanged = this.getContentHasChanged();
