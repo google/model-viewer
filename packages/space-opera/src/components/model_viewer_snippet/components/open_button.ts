@@ -18,7 +18,7 @@
 import '@material/mwc-button';
 import '../../file_modal/file_modal.js';
 
-import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main';
+import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
 import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
@@ -38,7 +38,8 @@ import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
-import {applyRelativeFilePaths, dispatchConfig} from '../reducer.js';
+import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
+import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
@@ -53,6 +54,7 @@ export class OpenModal extends ConnectedLitElement {
   @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @query('snippet-viewer#snippet-input')
   private readonly snippetViewer!: SnippetViewer;
+  @internalProperty() extraAttributes: any = {};
 
   stateChanged(state: State) {
     this.config = getConfig(state);
@@ -60,18 +62,7 @@ export class OpenModal extends ConnectedLitElement {
     this.camera = getCamera(state);
     this.gltfUrl = getGltfUrl(state);
     this.relativeFilePaths = getRelativeFilePaths(state);
-  }
-
-  // logic similar to parseSnippet inside of editing adapter.
-  parseSnippetAr(snippet: string): ArConfigState {
-    const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
-    const modelViewer =
-        parsedInput.body.getElementsByTagName('model-viewer')[0];
-    const arConfig: ArConfigState = {};
-    arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
-    arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
-    arConfig.iosSrc = modelViewer.getAttribute('ios-src') || undefined;
-    return arConfig
+    this.extraAttributes = getExtraAttributes(state);
   }
 
   async handleSubmitSnippet(value?: string) {
@@ -89,7 +80,10 @@ export class OpenModal extends ConnectedLitElement {
     if (inputText.match(
             /<\s*model-viewer[^>]*\s*>(\n|.)*<\s*\/\s*model-viewer>/)) {
       const config = parseSnippet(inputText);
-      const arConfig = this.parseSnippetAr(inputText);
+      const arConfig = parseSnippetAr(inputText);
+
+      const extraAttributes = parseExtraAttributes(inputText);
+      reduxStore.dispatch(dispatchExtraAttributes(extraAttributes));
 
       const hotspotErrors: Error[] = [];
       const hotspotConfigs = parseHotspotsFromSnippet(inputText, hotspotErrors);
@@ -186,8 +180,8 @@ export class OpenModal extends ConnectedLitElement {
       editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
     }
 
-    const exampleLoadableSnippet =
-        renderModelViewer(editedConfig, editedArConfig, {}, undefined);
+    const exampleLoadableSnippet = renderModelViewer(
+        editedConfig, editedArConfig, this.extraAttributes, {}, undefined);
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>

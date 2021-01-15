@@ -61,6 +61,7 @@ export interface ModelViewerSnippetState {
   config: ModelViewerConfig;
   hotspots: HotspotConfig[];
   relativeFilePaths: RelativeFilePathsState;
+  extraAttributes: any;
 }
 
 export interface EntitiesState {
@@ -101,6 +102,7 @@ export const INITIAL_STATE: State = {
       hotspots: [],
       camera: INITIAL_CAMERA,
       relativeFilePaths: {},
+      extraAttributes: {},
     },
   },
 };

@@ -15,6 +15,8 @@
  *
  */
 
+import {ModelViewerSnippetState} from '../../types';
+
 export interface URLs {
   gltf: string|undefined;
   usdz: string|undefined;
@@ -40,8 +42,8 @@ export interface EditorUpdates {
 
 export interface MobilePacket {
   updatedContent: EditorUpdates;
+  snippet: ModelViewerSnippetState;
   urls: URLs;
-  snippet?: any;
 }
 
 export interface MobileState {

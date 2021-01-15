@@ -17,18 +17,21 @@
 
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
+import {spread} from '@open-wc/lit-helpers';
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {toastStyles} from '../../styles.css.js';
-import {ArConfigState} from '../../types.js';
+import {ArConfigState, ModelViewerSnippetState} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {HotspotConfig} from '../hotspot_panel/types.js';
+import {HotspotConfig, toVector3D} from '../hotspot_panel/types.js';
 import {downloadContents} from '../model_viewer_preview/reducer.js';
+import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
-import {styles} from './styles.css.js';
+import {styles as mobileStyles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
+
 import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
 const TOAST_TIME = 7000;  // 7s
@@ -39,7 +42,7 @@ const TOAST_TIME = 7000;  // 7s
  */
 @customElement('mobile-view')
 export class MobileView extends LitElement {
-  static styles = [styles, toastStyles];
+  static styles = [mobileStyles, toastStyles, hotspotStyles];
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
@@ -51,6 +54,7 @@ export class MobileView extends LitElement {
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
+  @internalProperty() extraAttributes: any = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() envImageUrl: string = '';
@@ -70,12 +74,23 @@ export class MobileView extends LitElement {
     return this.sessionOs === 'iOS' && this.iosUrl.length <= 1;
   }
 
-  updateState(snippet: any, urls: URLs) {
+  updateState(snippet: ModelViewerSnippetState, urls: URLs) {
     this.editorUrls = urls;
     this.hotspots = snippet.hotspots;
+    for (let hotspot of this.hotspots) {
+      hotspot.position = toVector3D(
+          [hotspot.position.x, hotspot.position.y, hotspot.position.z]);
+      if (hotspot.normal) {
+        hotspot.normal =
+            toVector3D([hotspot.normal.x, hotspot.normal.y, hotspot.normal.z])
+      }
+    }
+
+    // Set all of the other relevant snippet information
     this.arConfig = snippet.arConfig;
     this.config = snippet.config;
     this.camera = snippet.camera;
+    this.extraAttributes = snippet.extraAttributes;
 
     // Send a new POST out for each scene-viewer button press
     if (snippet.arConfig.ar) {
@@ -109,9 +124,10 @@ export class MobileView extends LitElement {
     }
   }
 
-  // We set modelViewerUrl instead of directly fetching it because scene-viewer
-  // requires the same url from the current model-viewer state, and we need to
-  // make a POST request to that URL when scene-viewer is triggered.
+  // We set modelViewerUrl instead of directly fetching it because
+  // scene-viewer requires the same url from the current model-viewer state,
+  // and we need to make a POST request to that URL when scene-viewer is
+  // triggered.
   async waitForData(json: MobilePacket) {
     const updatedContent: EditorUpdates = json.updatedContent;
     this.overlay!.style.display = 'block';
@@ -209,7 +225,7 @@ export class MobileView extends LitElement {
     <div id="overlay"></div>
     <div class="app">
       <div class="mvContainer">
-        <model-viewer
+        <model-viewer ...=${spread(this.extraAttributes)}
           src=${this.modelViewerUrl}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}
@@ -232,7 +248,9 @@ export class MobileView extends LitElement {
           min-field-of-view=${ifDefined(config.minFov)}
           max-field-of-view=${ifDefined(config.maxFov)}
           @load=${this.modelIsLoaded}
-        >${childElements}</model-viewer>
+        >
+          ${childElements}
+        </model-viewer>
       </div>
     </div>
     <div class="${this.toastClassName}" id="snackbar-mobile">
