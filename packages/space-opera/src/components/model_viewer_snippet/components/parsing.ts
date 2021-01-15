@@ -15,41 +15,36 @@
  *
  */
 
+const ATTRIBUTE_LIST: string[] = [
+  'src',
+  'auto-rotate',
+  'camera-controls',
+  'environment-image',
+  'skybox-image',
+  'exposure',
+  'poster',
+  'reveal',
+  'shadow-intensity',
+  'shadow-softness',
+  'max-camera-orbit',
+  'min-camera-orbit',
+  'max-field-of-view',
+  'min-field-of-view',
+  'autoplay',
+  'animation-name',
+  'camera-orbit',
+  'camera-target',
+  'field-of-view',
+  'ar',
+  'ar-modes',
+  'ios-src'
+];
+
 import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
 import {ArConfigState} from '../../../types';
 
-// logic similar to parseSnippet inside of editing adapter.
-export function parseSnippetAr(snippet: string): ArConfigState {
-  const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
-  const modelViewer = parsedInput.body.getElementsByTagName('model-viewer')[0];
-  const arConfig: ArConfigState = {};
-  arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
-  arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
-  arConfig.iosSrc = modelViewer.getAttribute('ios-src') || undefined;
-  return arConfig
-}
-
-// Convert html "camera-controls" to "cameraControls"
-function makeObjectName(name: string): string {
-  const listOfParts = name.split('-');
-  let newName = '';
-  let isFirst = true;
-  for (let part of listOfParts) {
-    if (isFirst) {
-      newName = part;
-      isFirst = false;
-    } else {
-      const newPart = part.charAt(0).toUpperCase() + part.slice(1);
-      newName = newName + newPart;
-    }
-  }
-  return newName
-}
-
 // https://open-wc.org/docs/development/lit-helpers/#regular-spread
-export function parseExtraAttributes(
-    snippet: string, config: ModelViewerConfig, arConfig: ArConfigState):
-    string {
+export function parseExtraAttributes(snippet: string): string {
   // Parse snippet and extract attributes from model-viewer
   const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
   const modelViewer = parsedInput.body.getElementsByTagName('model-viewer')[0];
@@ -59,11 +54,10 @@ export function parseExtraAttributes(
   // Loop through every attribute, only add the attributes to extraAttributes
   // if they are not a part of config or arConfig
   for (let i = 0; i < attributes.length; i++) {
-    const name = attributes[i].name;
+    const name: string = attributes[i].name;
     const value = attributes[i].value;
-    const objectName = makeObjectName(name);
     // if neither config has the key, add it to extra attribute string
-    if (!(objectName in config || objectName in arConfig)) {
+    if (!(ATTRIBUTE_LIST.includes(name))) {
       if (value.length === 0) {
         // Boolean attribute is true
         extraAttributes[`?${name}`] = true;
@@ -74,6 +68,17 @@ export function parseExtraAttributes(
     }
   }
   return extraAttributes;
+}
+
+// logic similar to parseSnippet inside of editing adapter.
+export function parseSnippetAr(snippet: string): ArConfigState {
+  const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
+  const modelViewer = parsedInput.body.getElementsByTagName('model-viewer')[0];
+  const arConfig: ArConfigState = {};
+  arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
+  arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
+  arConfig.iosSrc = modelViewer.getAttribute('ios-src') || undefined;
+  return arConfig
 }
 
 function tryParseNumberAttribute(element: Element, attribute: string): number|

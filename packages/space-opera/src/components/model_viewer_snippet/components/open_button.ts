@@ -82,7 +82,7 @@ export class OpenModal extends ConnectedLitElement {
       const config = parseSnippet(inputText);
       const arConfig = parseSnippetAr(inputText);
 
-      const extraAttributes = parseExtraAttributes(inputText, config, arConfig);
+      const extraAttributes = parseExtraAttributes(inputText);
       reduxStore.dispatch(dispatchExtraAttributes(extraAttributes));
 
       const hotspotErrors: Error[] = [];
