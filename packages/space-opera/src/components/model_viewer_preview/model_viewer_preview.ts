@@ -73,7 +73,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty()[$gltf]?: GltfModel;
   @internalProperty()[$gltfUrl]?: string;
   @internalProperty() gltfError: string = '';
-  @internalProperty() extraAttributes: string = '';
+  @internalProperty() extraAttributes: any = {};
 
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;

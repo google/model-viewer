@@ -53,7 +53,7 @@ export class OpenModal extends ConnectedLitElement {
   @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @query('snippet-viewer#snippet-input')
   private readonly snippetViewer!: SnippetViewer;
-  @internalProperty() extraAttributes: string = '';
+  @internalProperty() extraAttributes: any = {};
 
   stateChanged(state: State) {
     this.config = getConfig(state);
@@ -93,16 +93,19 @@ export class OpenModal extends ConnectedLitElement {
     return newName
   }
 
-  // TODO: Switch to storing this as an object
+  // https://open-wc.org/docs/development/lit-helpers/#regular-spread
   parseExtraAttributes(
       snippet: string, config: ModelViewerConfig,
       arConfig: ArConfigState): string {
-    // Parse snippet like we parse it in the other sections
+    // Parse snippet and extract attributes from model-viewer
     const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
     const modelViewer =
         parsedInput.body.getElementsByTagName('model-viewer')[0];
-    let extraAttributes = '';
+    let extraAttributes: any = {};
     const attributes = modelViewer.attributes;
+
+    // Loop through every attribute, only add the attributes to extraAttributes
+    // if they are not a part of config or arConfig
     for (let i = 0; i < attributes.length; i++) {
       const name = attributes[i].name;
       const value = attributes[i].value;
@@ -110,12 +113,15 @@ export class OpenModal extends ConnectedLitElement {
       // if neither config has the key, add it to extra attribute string
       if (!(objectName in config || objectName in arConfig)) {
         if (value.length === 0) {
-          extraAttributes = extraAttributes + `\n${name}`
+          // Boolean attribute is true
+          extraAttributes[`?${name}`] = true;
         } else {
-          extraAttributes = extraAttributes + `\n${name}="${value}"`
+          // Normal attribute is set to it's snippet's value
+          extraAttributes[`${name}`] = value;
         }
       }
     }
+    console.log(extraAttributes);
     return extraAttributes;
   }
 

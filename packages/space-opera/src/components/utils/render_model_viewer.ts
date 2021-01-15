@@ -44,16 +44,12 @@ export interface ModelViewerEventHandlers {
 export function renderModelViewer(
     config: ModelViewerConfig,
     arConfig: ArConfigState,
-    extraAttributes: string,
+    extraAttributes: any,
     eventHandlers?: ModelViewerEventHandlers,
     childElements?: Array<TemplateResult|HTMLElement>) {
-  console.log(extraAttributes, extraAttributes.length);
   const skyboxImage =
       config.useEnvAsSkybox ? config.environmentImage : undefined;
-  const mv = html`<model-viewer ...=${spread({
-    'ar-placement': 'floor',
-    'orientation': '20deg 0 0'
-  })}
+  return html`<model-viewer ...=${spread(extraAttributes)}
         src=${config.src || ''}
         ?ar=${!!arConfig.ar}
         ar-modes=${ifDefined(arConfig.arModes)}
@@ -86,7 +82,4 @@ export function renderModelViewer(
       ${childElements}
     </model-viewer>
         `;
-  console.log('mv', mv);
-  // TODO: Force the extra attributes into the model viewer lists..
-  return mv;
 }

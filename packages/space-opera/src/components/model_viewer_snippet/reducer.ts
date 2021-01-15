@@ -64,15 +64,14 @@ export function dispatchConfig(config?: ModelViewerConfig) {
 }
 
 const SET_EXTRA_ATTRIBUTES = 'SET_EXTRA_ATTRIBUTES'
-export function dispatchExtraAttributes(attributes: string) {
+export function dispatchExtraAttributes(attributes: any) {
   return {type: SET_EXTRA_ATTRIBUTES, payload: attributes};
 }
 
-export const getExtraAttributes = (state: State) =>
+export const getExtraAttributes = (state: State): any =>
     state.entities.modelViewerSnippet.extraAttributes;
 
-export function extraAttributesReducer(
-    state: string = '', action: Action): string {
+export function extraAttributesReducer(state: any = {}, action: Action): any {
   switch (action.type) {
     case SET_EXTRA_ATTRIBUTES:
       return action.payload;

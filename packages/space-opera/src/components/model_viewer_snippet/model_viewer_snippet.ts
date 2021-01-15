@@ -58,7 +58,7 @@ export class ExportPanel extends ConnectedLitElement {
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @internalProperty() gltfUrl?: string;
-  @internalProperty() extraAttributes: string = '';
+  @internalProperty() extraAttributes: any = {};
 
   @query('snippet-viewer') snippetViewer!: SnippetViewer;
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
