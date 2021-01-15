@@ -135,7 +135,7 @@ export class ARRenderer extends EventDispatcher {
 
     // The render state update takes effect on the next animation frame. Wait
     // for it so that we get a framebuffer.
-    let waitForXRAnimationFrame = new Promise((resolve, _reject) => {
+    let waitForXRAnimationFrame = new Promise<void>((resolve, _reject) => {
       session.requestAnimationFrame(() => resolve());
     });
     await waitForXRAnimationFrame;
@@ -187,7 +187,7 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
-    let waitForAnimationFrame = new Promise((resolve, _reject) => {
+    let waitForAnimationFrame = new Promise<void>((resolve, _reject) => {
       requestAnimationFrame(() => resolve());
     });
 

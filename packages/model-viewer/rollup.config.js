@@ -19,6 +19,7 @@ const cleanup = require('rollup-plugin-cleanup');
 const {terser} = require('rollup-plugin-terser');
 const commonjs = require('@rollup/plugin-commonjs');
 const polyfill = require('rollup-plugin-polyfill');
+import dts from "rollup-plugin-dts";
 
 const {NODE_ENV} = process.env;
 
@@ -115,6 +116,18 @@ if (NODE_ENV !== 'development') {
         onwarn,
       },
   );
+
+  outputOptions.push(
+    {
+      input: './lib/model-viewer.d.ts',
+      output: {
+        file: './dist/model-viewer.d.ts',
+        format: 'esm',
+        name: 'ModelViewerElement'
+      },
+      plugins: [dts()]
+    },
+);
 }
 
 export default outputOptions;

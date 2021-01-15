@@ -243,7 +243,7 @@ export class FilamentViewer extends LitElement {
 
     const asset = this[$currentAsset]!;
 
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       console.log('Loading resources for', modelUrl);
       asset.loadResources(resolve, () => {}, basepath(modelUrl), 1);
     });

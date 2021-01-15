@@ -300,7 +300,7 @@ export class ArtifactCreator {
     // currently has no mechanism to detect this and will happily tell you
     // your code is correct when it isn't.
     const evaluateError = await page.evaluate(async (maxTimeInSec) => {
-      const modelBecomesReady = new Promise((resolve, reject) => {
+      const modelBecomesReady = new Promise<void>((resolve, reject) => {
         let timeout: NodeJS.Timeout;
         if (maxTimeInSec > 0) {
           timeout = setTimeout(() => {
