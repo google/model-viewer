@@ -34,10 +34,6 @@ export interface ModelViewerEventHandlers {
   readonly click?: (event: MouseEvent) => void;
 }
 
-// implement:
-// https://github.com/Polymer/lit-html/issues/923#issuecomment-548547460
-// https://open-wc.org/docs/development/lit-helpers/#spread-directives
-
 /**
  * Renders a model-viewer tag given the config.
  */

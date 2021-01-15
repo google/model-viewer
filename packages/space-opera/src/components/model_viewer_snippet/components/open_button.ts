@@ -18,7 +18,7 @@
 import '@material/mwc-button';
 import '../../file_modal/file_modal.js';
 
-import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main';
+import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
 import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
@@ -39,6 +39,7 @@ import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
 import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
+import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
@@ -64,67 +65,6 @@ export class OpenModal extends ConnectedLitElement {
     this.extraAttributes = getExtraAttributes(state);
   }
 
-  // logic similar to parseSnippet inside of editing adapter.
-  parseSnippetAr(snippet: string): ArConfigState {
-    const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
-    const modelViewer =
-        parsedInput.body.getElementsByTagName('model-viewer')[0];
-    const arConfig: ArConfigState = {};
-    arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
-    arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
-    arConfig.iosSrc = modelViewer.getAttribute('ios-src') || undefined;
-    return arConfig
-  }
-
-  // Convert html "camera-controls" to "cameraControls"
-  makeObjectName(name: string): string {
-    const listOfParts = name.split('-');
-    let newName = '';
-    let isFirst = true;
-    for (let part of listOfParts) {
-      if (isFirst) {
-        newName = part;
-        isFirst = false;
-      } else {
-        const newPart = part.charAt(0).toUpperCase() + part.slice(1);
-        newName = newName + newPart;
-      }
-    }
-    return newName
-  }
-
-  // https://open-wc.org/docs/development/lit-helpers/#regular-spread
-  parseExtraAttributes(
-      snippet: string, config: ModelViewerConfig,
-      arConfig: ArConfigState): string {
-    // Parse snippet and extract attributes from model-viewer
-    const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
-    const modelViewer =
-        parsedInput.body.getElementsByTagName('model-viewer')[0];
-    let extraAttributes: any = {};
-    const attributes = modelViewer.attributes;
-
-    // Loop through every attribute, only add the attributes to extraAttributes
-    // if they are not a part of config or arConfig
-    for (let i = 0; i < attributes.length; i++) {
-      const name = attributes[i].name;
-      const value = attributes[i].value;
-      const objectName = this.makeObjectName(name);
-      // if neither config has the key, add it to extra attribute string
-      if (!(objectName in config || objectName in arConfig)) {
-        if (value.length === 0) {
-          // Boolean attribute is true
-          extraAttributes[`?${name}`] = true;
-        } else {
-          // Normal attribute is set to it's snippet's value
-          extraAttributes[`${name}`] = value;
-        }
-      }
-    }
-    console.log(extraAttributes);
-    return extraAttributes;
-  }
-
   async handleSubmitSnippet(value?: string) {
     const textArea = this.snippetViewer.snippet;
     if (!textArea)
@@ -140,10 +80,9 @@ export class OpenModal extends ConnectedLitElement {
     if (inputText.match(
             /<\s*model-viewer[^>]*\s*>(\n|.)*<\s*\/\s*model-viewer>/)) {
       const config = parseSnippet(inputText);
-      const arConfig = this.parseSnippetAr(inputText);
+      const arConfig = parseSnippetAr(inputText);
 
-      const extraAttributes =
-          this.parseExtraAttributes(inputText, config, arConfig);
+      const extraAttributes = parseExtraAttributes(inputText, config, arConfig);
       reduxStore.dispatch(dispatchExtraAttributes(extraAttributes));
 
       const hotspotErrors: Error[] = [];
