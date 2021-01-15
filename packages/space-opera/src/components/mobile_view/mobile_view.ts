@@ -17,6 +17,7 @@
 
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
+import {spread} from '@open-wc/lit-helpers';
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
@@ -49,7 +50,7 @@ export class MobileView extends LitElement {
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
-  @internalProperty() extraAttributes: string = '';
+  @internalProperty() extraAttributes: any = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() envImageUrl: string = '';
@@ -198,7 +199,7 @@ export class MobileView extends LitElement {
     <div id="overlay"></div>
     <div class="app">
       <div class="mvContainer">
-        <model-viewer
+        <model-viewer ...=${spread(this.extraAttributes)}
           src=${this.modelViewerUrl}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}
@@ -222,7 +223,6 @@ export class MobileView extends LitElement {
           max-field-of-view=${ifDefined(config.maxFov)}
           animation-name=${ifDefined(config.animationName)}
           @load=${this.modelIsLoaded}
-          ${this.extraAttributes}
         >${childElements}</model-viewer>
       </div>
     </div>
