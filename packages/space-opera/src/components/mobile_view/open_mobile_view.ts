@@ -34,7 +34,7 @@ import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {MobileModal} from './components/mobile_modal.js';
 
-import {dispatchAr, dispatchArModes, dispatchIosSrc, getArConfig} from './reducer.js';
+import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetForcePost, dispatchSetRefreshable, getArConfig, getForcePost, getRefreshable} from './reducer.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
@@ -55,6 +55,7 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() isSendingData = false;
   @internalProperty() contentHasChanged = false;
 
+  @internalProperty() iosSrcIsReality: boolean = false;
   @internalProperty() openedIOS: boolean = false;
   @internalProperty() iosAndNoUsdz = false;
   @query('me-file-modal') fileModal!: FileModalElement;
@@ -73,6 +74,12 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() sessionList: MobileSession[] = [];
   @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
+
+  get canRefresh(): boolean {
+    return this.isDeployed &&
+        (this.haveReceivedResponse &&
+         (!this.isSendingData && this.contentHasChanged));
+  }
 
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
@@ -100,9 +107,19 @@ export class OpenMobileView extends ConnectedLitElement {
     };
 
     this.contentHasChanged = this.getContentHasChanged();
+    // only update if different, need conditional because it would infinitely
+    // loop otherwise
+    if (getRefreshable(state) !== this.canRefresh) {
+      reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
+    }
     this.defaultToSceneViewer =
         this.arConfig.arModes === 'scene-viewer webxr quick-look';
     this.iosAndNoUsdz = this.openedIOS && this.arConfig.iosSrc === undefined;
+
+    if (getForcePost(state) === true) {
+      this.postInfo();
+      reduxStore.dispatch(dispatchSetForcePost(false));
+    }
   }
 
   // True if any content we'd send to the mobile view has changed.
@@ -149,7 +166,8 @@ export class OpenMobileView extends ConnectedLitElement {
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
           envIsHdr: this.envIsHdr(), gltfId: getRandomInt(1e+20),
           usdzId: getRandomInt(1e+20),
-          iosChanged: this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz)
+          iosChanged: this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz),
+          iosSrcIsReality: this.iosSrcIsReality,
     }
   }
 
@@ -160,7 +178,8 @@ export class OpenMobileView extends ConnectedLitElement {
       gltfChanged: true, stateChanged: true,
           envChanged: this.urls.env !== undefined, envIsHdr: this.envIsHdr(),
           gltfId: getRandomInt(1e+20), usdzId: getRandomInt(1e+20),
-          iosChanged: this.urls.usdz !== undefined
+          iosChanged: this.urls.usdz !== undefined,
+          iosSrcIsReality: this.iosSrcIsReality,
     }
   }
 
@@ -178,7 +197,8 @@ export class OpenMobileView extends ConnectedLitElement {
     }
     session.isStale = true;
 
-    const packet: MobilePacket = {updatedContent: updatedContent};
+    const packet:
+        MobilePacket = {updatedContent: updatedContent, urls: this.urls};
     if (updatedContent.stateChanged) {
       packet.snippet = this.snippet;
     }
@@ -188,7 +208,11 @@ export class OpenMobileView extends ConnectedLitElement {
     if (updatedContent.iosChanged && usdzBlob) {
       await post(
           usdzBlob,
-          usdzToSession(this.pipeId, session.id, updatedContent.usdzId));
+          usdzToSession(
+              this.pipeId,
+              session.id,
+              updatedContent.usdzId,
+              this.iosSrcIsReality));
     }
 
     if (updatedContent.gltfChanged && gltfBlob) {
@@ -222,13 +246,16 @@ export class OpenMobileView extends ConnectedLitElement {
   // Send any state, model, or environment iamge that has been updated since the
   // last refresh.
   async postInfo() {
+    console.log('posting info...');
     if (this.isSendingData) {
       return;
     }
     this.isSendingData = true;
+    reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
     const sessionList = [...this.sessionList];
     setTimeout(() => {
       this.isSendingData = false;
+      reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
     }, REFRESH_DELAY);
     const updatedContent = this.getUpdatedContent();
     const staleContent = this.getStaleContent();
@@ -275,6 +302,7 @@ export class OpenMobileView extends ConnectedLitElement {
     this.lastUrlsSent['gltf'] = this.urls['gltf'];
 
     this.contentHasChanged = this.getContentHasChanged();
+    reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
   }
 
   // update haveReceivedResponse when a ping was received from the mobile view
@@ -354,10 +382,14 @@ export class OpenMobileView extends ConnectedLitElement {
       /// The user canceled the previous upload
       return;
     }
+    const fileName = files[0].name;
     const arrayBuffer = await files[0].arrayBuffer();
-    reduxStore.dispatch(dispatchSetIosName(files[0].name));
+    reduxStore.dispatch(dispatchSetIosName(fileName));
     const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
     reduxStore.dispatch(dispatchIosSrc(url));
+
+    const fileType = fileName.split('.')[fileName.split('.').length - 1];
+    this.iosSrcIsReality = fileType === 'reality';
   }
 
   render() {
@@ -379,7 +411,7 @@ export class OpenMobileView extends ConnectedLitElement {
       .onUploadUSDZ=${this.onUploadUSDZ.bind(this)}
     >
     </mobile-expandable-section>
-    <me-file-modal accept=".usdz"></me-file-modal>
+    <me-file-modal accept=".usdz,.reality"></me-file-modal>
     <mobile-modal .pipeId=${this.pipeId}></mobile-modal>
     <div style="margin-bottom: 40px;"></div>
   `;

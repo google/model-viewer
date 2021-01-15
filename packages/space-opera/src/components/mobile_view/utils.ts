@@ -49,8 +49,12 @@ export function envToSession(
 
 // ex: 'https://piping.nwtgck.repl.co/123-456-789'
 export function usdzToSession(
-    pipeId: number|string, sessionID: number, modelId: number): string {
-  return `${DOMAIN}${pipeId}-${sessionID}-${modelId}.usdz`;
+    pipeId: number|string,
+    sessionID: number,
+    modelId: number,
+    iosSrcIsReality: boolean): string {
+  const fileType = iosSrcIsReality ? 'reality' : 'usdz';
+  return `${DOMAIN}${pipeId}-${sessionID}-${modelId}.${fileType}`;
 }
 
 export async function prepareGlbBlob(gltf: GltfModel) {

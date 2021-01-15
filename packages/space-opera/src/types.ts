@@ -21,6 +21,7 @@ import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_cl
 import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
 import {HotspotConfig} from './components/hotspot_panel/types.js';
 import {EnvironmentImage, INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/types.js';
+import {MobileState} from './components/mobile_view/types.js';
 import {GltfEdits, GltfState, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/types.js';
 
 interface HotspotsUIState {
@@ -64,6 +65,7 @@ export interface ModelViewerSnippetState {
 
 export interface EntitiesState {
   isDirtyCamera: boolean;
+  mobile: MobileState;
   environment: EnvironmentState;
   gltf: GltfState;
   gltfEdits: GltfEditsState;
@@ -82,6 +84,10 @@ export const INITIAL_STATE: State = {
   ui: {hotspots: {addHotspot: false}},
   entities: {
     isDirtyCamera: false,
+    mobile: {
+      isRefreshable: false,
+      forcePost: false,
+    },
     environment: {environmentImages: INITIAL_ENVIRONMENT_IMAGES},
     gltf: {gltfJsonString: ''},
     gltfEdits: {

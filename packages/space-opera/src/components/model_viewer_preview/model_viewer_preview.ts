@@ -24,7 +24,6 @@ import '@material/mwc-icon-button';
 
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
-import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
@@ -33,12 +32,13 @@ import {modelViewerPreviewStyles} from '../../styles.css.js';
 import {extractStagingConfig, State} from '../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
-import {dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
+import {dispatchCameraControlsEnabled, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
 import {getEdits, getOrigEdits} from '../materials_panel/reducer.js';
+import {dispatchSetForcePost, getRefreshable} from '../mobile_view/reducer.js';
 import {dispatchConfig} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
@@ -74,6 +74,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty()[$gltfUrl]?: string;
   @internalProperty() gltfError: string = '';
 
+  @internalProperty() refreshButtonIsReady: boolean = false;
+
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;
     this.camera = getCamera(state);
@@ -84,6 +86,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this[$gltf] = getGltfModel(state);
     this[$gltfUrl] = getGltfUrl(state);
     this[$autoplay] = getConfig(state).autoplay;
+    this.refreshButtonIsReady = getRefreshable(state);
   }
 
   firstUpdated() {
@@ -163,6 +166,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
     }
   }
 
+  forcePost() {
+    reduxStore.dispatch(dispatchSetForcePost(true));
+  }
+
   protected render() {
     // If the gltf model has a URL, it must be more recent
     const currentSrc = this[$gltf]?.getModelViewerSource() ?? this[$gltfUrl];
@@ -176,12 +183,13 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
     const hasModel = !!editedConfig.src;
 
-    const screenshotButton = !hasModel ? html`` : html
-    `<mwc-icon-button icon="photo_camera" class="ScreenShotButton"
-      title="Take screenshot"
-      @click=${this.downloadScreenshot}>
-    </mwc-icon-button>`;
-    const childElements = [...renderHotspots(this.hotspots), screenshotButton];
+    const refreshMobileButton = this.refreshButtonIsReady === true ? html
+    `<mwc-button icon="cached" @click=${this.forcePost}
+      style="--mdc-theme-primary: #DC143C; border: #DC143C" class="RefreshMobileButton">
+      Refresh Mobile
+    </mwc-button>`: html``;
+    const childElements =
+        [...renderHotspots(this.hotspots), refreshMobileButton];
 
     if (this.gltfError) {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
@@ -276,13 +284,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
     reduxStore.dispatch(dispatchUpdateHotspotMode(false));
   }
 
-  private async downloadScreenshot() {
-    if (!this.modelViewer)
-      return;
-    safeDownloadCallback(
-        await this.modelViewer.toBlob(), 'Space Opera Screenshot.png', '')();
-  }
-
   private onDragover(event: DragEvent) {
     if (!event.dataTransfer)
       return;
@@ -305,6 +306,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
         const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
         reduxStore.dispatch(dispatchGltfUrl(url));
         dispatchConfig(extractStagingConfig(this.config));
+        reduxStore.dispatch(dispatchCameraControlsEnabled(true));
         reduxStore.dispatch(dispatchSetHotspots([]));
       }
       if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
