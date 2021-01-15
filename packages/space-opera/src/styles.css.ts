@@ -131,11 +131,8 @@ model-viewer {
   width: 100%;
 }
 
-.ScreenShotButton {
-  border-radius: 50%;
-  border: 1px #4285f4 solid;
+.RefreshMobileButton {
   bottom: 25px;
-  color: #4285f4; /* MATERIAL_COLOR_GOOGLE_BLUE_500 */;
   position: absolute;
   right: 25px;
 }
@@ -218,6 +215,19 @@ input[type="file"] {
   padding-top: 10px;
   width: 100%;
 }
+
+.modal-text {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 10px 0px;
+  color: white;
+  word-wrap: break-word;
+  width: 100%;
+}
+
+.piping-link {
+  color: #6495ED;
+}
 `;
 
 // https://www.w3schools.com/howto/howto_js_snackbar.asp
@@ -264,8 +274,8 @@ export const toastStyles: CSSResult = css`
 
 #snackbar-mobile.show {
   visibility: visible;
-  -webkit-animation: fadein 0.5s, fadeout 0.5s 4.5s;
-  animation: fadein 0.5s, fadeout 0.5s 4.5s;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 6.5s;
+  animation: fadein 0.5s, fadeout 0.5s 6.5s;
 }
 
 @-webkit-keyframes fadein {

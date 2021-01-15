@@ -24,7 +24,7 @@ const NON_ANIMATED_GLB_PATH = assetPath('models/Astronaut.glb');
 const ANIMATED_GLB_PATH = assetPath('models/RobotExpressive.glb');
 
 const animationIsPlaying = (element: any, animationName = null): boolean => {
-  const {currentAnimationAction} = element[$scene].model;
+  const {currentAnimationAction} = element[$scene];
 
   if (currentAnimationAction != null &&
       (animationName == null ||

@@ -105,21 +105,26 @@ export class MobileExpanadableSection extends LitElement {
       </mwc-button>
       ${this.optionalMessage}
     </div>
+    `;
+  }
+
+  renderAR() {
+    return html`
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
       AR Settings:
     </div> 
-    <me-checkbox
-      id="ar-modes"
-      label="Default AR Modes to Scene Viewer"
-      ?checked="${this.defaultToSceneViewer}"
-      @change=${this.selectArMode}
-      >
-    </me-checkbox>
     <me-checkbox
       id="ar"
       label="Enable AR"
       ?checked="${!!this.arConfig!.ar}"
       @change=${this.enableARChange}
+      >
+    </me-checkbox>
+    <me-checkbox
+      id="ar-modes"
+      label="Default AR Mode to Scene Viewer"
+      ?checked="${this.defaultToSceneViewer}"
+      @change=${this.selectArMode}
       >
     </me-checkbox>
     `;
@@ -134,11 +139,11 @@ export class MobileExpanadableSection extends LitElement {
                                                html``
     return html`
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
-      iOS Settings:
+      To enable AR on iOS, upload:
     </div> 
     <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ} 
       style="--mdc-theme-primary: ${needUsdzButton}">
-      USDZ
+      USDZ / REALITY
     </mwc-button>
     ${uploadUsdzText}
     `;
@@ -148,6 +153,7 @@ export class MobileExpanadableSection extends LitElement {
     return html`
       ${!this.isDeployed ? this.renderDeployButton() : html``}
       ${this.isDeployed ? this.renderMobileInfo() : html``}
+      ${this.renderAR()}
       ${this.renderIos()}
     `
   }

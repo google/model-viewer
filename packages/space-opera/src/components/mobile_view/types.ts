@@ -33,6 +33,7 @@ export interface EditorUpdates {
   gltfChanged: boolean;
   gltfId: number;
   iosChanged: boolean;
+  iosSrcIsReality: boolean;
   usdzId: number;
   stateChanged: boolean;
   envChanged: boolean;
@@ -42,4 +43,10 @@ export interface EditorUpdates {
 export interface MobilePacket {
   updatedContent: EditorUpdates;
   snippet: ModelViewerSnippetState;
+  urls: URLs;
+}
+
+export interface MobileState {
+  isRefreshable: boolean;
+  forcePost: boolean;
 }

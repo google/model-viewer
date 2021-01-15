@@ -21,7 +21,7 @@ import ModelViewerElementBase, {$ariaLabel, $container, $hasTransitioned, $loade
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
-import {SAFE_RADIUS_RATIO} from '../three-components/Model.js';
+import {SAFE_RADIUS_RATIO} from '../three-components/ModelScene.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
@@ -137,7 +137,7 @@ export const cameraOrbitIntrinsics = (() => {
   const phi = normalizeUnit(defaultTerms[1]) as NumberNode<'rad'>;
 
   return (element: ModelViewerElementBase) => {
-    const radius = element[$scene].model.idealCameraDistance;
+    const radius = element[$scene].idealCameraDistance;
 
     return {
       basis: [theta, phi, numberNode(radius, 'm')],
@@ -147,8 +147,7 @@ export const cameraOrbitIntrinsics = (() => {
 })();
 
 const minCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
-  const radius =
-      MINIMUM_RADIUS_RATIO * element[$scene].model.idealCameraDistance;
+  const radius = MINIMUM_RADIUS_RATIO * element[$scene].idealCameraDistance;
 
   return {
     basis: [
@@ -176,7 +175,7 @@ const maxCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
 };
 
 export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
-  const center = element[$scene].model.boundingBox.getCenter(new Vector3);
+  const center = element[$scene].boundingBox.getCenter(new Vector3);
 
   return {
     basis: [
@@ -464,7 +463,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('bounds')) {
-        this[$scene].model.tightBounds = this.bounds === 'tight';
+        this[$scene].tightBounds = this.bounds === 'tight';
       }
 
       if (changedProperties.has('interactionPrompt') ||
@@ -513,7 +512,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       await this.requestUpdate('cameraTarget');
 
-      scene.model.updateFraming(
+      scene.updateFraming(
           this.bounds === 'tight' ? scene.getTarget() : undefined);
       scene.frameModel();
 
@@ -646,7 +645,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
      * orbiting at the supplied radius.
      */
     [$updateCameraForRadius](radius: number) {
-      const {idealCameraDistance} = this[$scene].model;
+      const {idealCameraDistance} = this[$scene];
       const maximumRadius = Math.max(idealCameraDistance, radius);
 
       const near = 0;
