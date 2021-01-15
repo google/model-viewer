@@ -15,6 +15,11 @@
  *
  */
 
+import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
+import {ArConfigState} from '../../../types';
+
+// A list of accepted attributes in render_model_viewer. Used when parsing for
+// extra attributes.
 const ATTRIBUTE_LIST: string[] = [
   'src',
   'auto-rotate',
@@ -40,9 +45,7 @@ const ATTRIBUTE_LIST: string[] = [
   'ios-src'
 ];
 
-import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
-import {ArConfigState} from '../../../types';
-
+// Creating object in this way such that "spread" works.
 // https://open-wc.org/docs/development/lit-helpers/#regular-spread
 export function parseExtraAttributes(snippet: string): string {
   // Parse snippet and extract attributes from model-viewer

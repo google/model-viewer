@@ -178,10 +178,8 @@ export class OpenMobileView extends ConnectedLitElement {
     }
     session.isStale = true;
 
-    const packet: MobilePacket = {updatedContent: updatedContent};
-    if (updatedContent.stateChanged) {
-      packet.snippet = this.snippet;
-    }
+    const packet:
+        MobilePacket = {updatedContent: updatedContent, snippet: this.snippet};
 
     await post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
 

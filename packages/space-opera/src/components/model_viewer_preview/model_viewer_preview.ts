@@ -183,8 +183,9 @@ export class ModelViewerPreview extends ConnectedLitElement {
       title="Take screenshot"
       @click=${this.downloadScreenshot}>
     </mwc-icon-button>`;
+    console.log(this.hotspots);
     const childElements = [...renderHotspots(this.hotspots), screenshotButton];
-
+    console.log(childElements);
     if (this.gltfError) {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
           this.gltfError}</div>`);
