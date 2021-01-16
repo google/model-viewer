@@ -156,6 +156,10 @@
         "name": "Environment Lighting"
       },
       {
+        "htmlId": "neutralLighting",
+        "name": "Neutral Lighting"
+      },
+      {
         "htmlId": "renderExposure",
         "name": "Render Exposure"
       },

@@ -134,7 +134,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
                   const texturesLoad =
                       textureUtils.generateEnvironmentMapAndSkybox(
                           deserializeUrl(skyboxImage),
-                          deserializeUrl(environmentImage),
+                          environmentImage,
                           {progressTracker: this[$progressTracker]});
                   this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
                   resolve(await texturesLoad);

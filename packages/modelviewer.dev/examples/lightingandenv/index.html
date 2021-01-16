@@ -81,6 +81,7 @@ window.oscillate = function(min, max, period, time) {
         </div>
       </div>
     </div>
+
     <div class="sample">
       <div id="litModel" class="demo"></div>
       <div class="content">
@@ -126,6 +127,45 @@ window.oscillate = function(min, max, period, time) {
           <example-snippet stamp-to="environmentLighting" highlight-as="html">
             <template>
 <model-viewer camera-controls environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest, on a pink background" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="neutralLighting" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Showing the difference between our two baked-in lighting environments</h2>
+            <h4>If no environment or skybox is specified, we have a baked-in
+            default scene that is faster to load. It is designed primarily for
+            frontward viewing, but there is also a baked-in neutral lighting
+            environment that is evenly lit on all sides, and can be activated by
+            setting 
+            <span class="attribute">environment-image="neutral"</span>. This
+            lighting has also been roughly calibrated to render colors at nearly
+            their baseColorMap RGB values. You may find the neutral lighting to
+            be more pleasing than the default when using auto-rotate, as shown
+            here, or when object does not have a clear front side.</h4>
+          </div>
+          <example-snippet stamp-to="neutralLighting" highlight-as="html">
+            <template>
+<model-viewer id="neutral-demo" camera-controls auto-rotate environment-image="neutral" alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
+  <label for="neutral">Neutral Lighting: </label>
+  <input id="neutral" type="checkbox" checked="true">
+</model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#neutral-demo');
+  const checkbox = document.querySelector('#neutral');
+  
+  checkbox.addEventListener('change',() => {
+    modelViewer.environmentImage = checkbox.checked ? 'neutral' : '';
+  });
+})();
+</script>
             </template>
           </example-snippet>
         </div>
