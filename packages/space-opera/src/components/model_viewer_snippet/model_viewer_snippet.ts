@@ -154,6 +154,11 @@ ${
   </div>
 </me-expandable-tab>` :
                                  html``}
+<me-expandable-tab tabName="Best Practices" .open=${true}>
+  <div slot="content">
+    <best-practices></best-practices>
+  </div>
+</me-expandable-tab>
 `;
   }
 

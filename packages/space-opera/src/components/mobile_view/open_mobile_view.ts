@@ -415,7 +415,6 @@ export class OpenMobileView extends ConnectedLitElement {
     </mobile-expandable-section>
     <me-file-modal accept=".usdz,.reality"></me-file-modal>
     <mobile-modal .pipeId=${this.pipeId}></mobile-modal>
-    <div style="margin-bottom: 40px;"></div>
   `;
   }
 }
