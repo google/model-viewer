@@ -34,7 +34,7 @@
     "Emmett Lalish <elalish@google.com>"
   ],
   "devDependencies": {
-    "@google/model-viewer": "^1.3.0",
+    "@google/model-viewer": "^1.4.0",
     "@google/model-viewer-editing-adapter": "^0.0.1",
     "@google/model-viewer-shared-assets": "^0.0.1",
     "@material/mwc-button": "^0.18.0",
