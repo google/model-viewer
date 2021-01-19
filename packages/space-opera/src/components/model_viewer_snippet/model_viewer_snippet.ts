@@ -64,10 +64,6 @@ export class ExportPanel extends ConnectedLitElement {
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
   @query('me-import-card') importCard!: ImportCard;
 
-  isTestingMobile(): boolean {
-    return window.location.search === '?id=testingMobile';
-  }
-
   stateChanged(state: State) {
     this.config = getConfig(state);
     this.arConfig = getArConfig(state);
@@ -146,14 +142,11 @@ export class ExportPanel extends ConnectedLitElement {
     <me-export-zip-button id="export-zip"></me-export-zip-button>
   </div>
 </me-expandable-tab>
-${
-        this.isTestingMobile() ? html`
 <me-expandable-tab tabName="Mobile View" .open=${true}>
   <div slot="content">
     <open-mobile-view></open-mobile-view>
   </div>
-</me-expandable-tab>` :
-                                 html``}
+</me-expandable-tab>
 `;
   }
 
