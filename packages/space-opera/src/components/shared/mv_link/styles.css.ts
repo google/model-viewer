@@ -40,7 +40,7 @@ export const styles: CSSResult = css`
 }
 
 .icon-button {
-  background-image: url(./assets/ic_modelviewer.svg);
+  background-image: url(https://modelviewer.dev/shared-assets/icons/ic_modelviewer.svg);
   background-position: 50% 50%;
   background-repeat: no-repeat;
   background-size: 34px;
