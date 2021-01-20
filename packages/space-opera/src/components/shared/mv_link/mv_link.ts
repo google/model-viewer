@@ -19,8 +19,7 @@ import {customElement, html, LitElement} from 'lit-element';
 import {styles} from './styles.css.js';
 
 /**
- * An expandable tab with a label and an arrow icon indicating its expanded
- * state.
+ * Link to modelviewer.dev site.
  */
 @customElement('mv-link')
 export class MVLink extends LitElement {

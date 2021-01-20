@@ -18,17 +18,17 @@
 import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 .outer-container {
-  background-color: black;
-  padding: 10px;
-  overflow: auto;
-  white-space: nowrap;
-  display: flex;
   align-items: center;
+  background-color: black;
+  display: flex;
+  overflow: auto;
+  padding: 10px;
+  white-space: nowrap;
 }
 
 .inner-container {
-  display: flex;
   align-items: center;
+  display: flex;
   margin-left: auto;
   margin-right: auto;
   opacity: 1;
@@ -40,26 +40,24 @@ export const styles: CSSResult = css`
 }
 
 .icon-button {
+  background-image: url(./assets/ic_modelviewer.svg);
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-size: 34px;
+  cursor: pointer;
+  display: inline-block;
+  height: 34px;
   margin-left: -4px;
   margin-right: 8px;
   width: 34px;
-  height: 34px;
-  background-size: 34px;
-  background-repeat: no-repeat;
-  display: inline-block;
-  cursor: pointer;
-  background-position: 50% 50%;
-  opacity: 1;
-  background-image: url(./assets/ic_modelviewer.svg);
 }
 
 .attribute {
-  display: flex;
   align-items: center;
-  font-size: 1.1em;
   color: #FFFFFF;
-  white-space: pre-wrap !important;
+  display: flex;
   font-family: 'Roboto Mono', monospace;
-  opacity: 1;
+  font-size: 1.1em;
+  white-space: pre-wrap !important;
 }
 `;
