@@ -48,7 +48,6 @@ export class ExpandableTab extends LitElement {
     if (this.sticky) {
       return html`
     <div class="expandableTab ${stickyClass}">
-      <mv-link></mv-link>
       <div data-element-type="expandableTab">
         <div class="sticky-container ${StickyWithLineHeightClass}">
           <div class="sticky-label">

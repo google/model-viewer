@@ -62,6 +62,7 @@ export class Tabs extends LitElement {
   render() {
     return html`
       <div class="TabHeader">
+        <mv-link></mv-link>
         <mwc-tab-bar
                @MDCTabBar:activated=${this.tabActivated}>
           ${this.panels.map(this.renderPanelIcon)}

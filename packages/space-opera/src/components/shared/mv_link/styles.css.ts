@@ -19,7 +19,7 @@ import {css, CSSResult} from 'lit-element';
 export const styles: CSSResult = css`
 .outer-container {
   align-items: center;
-  background-color: black;
+  background-color: #efefef;
   display: flex;
   overflow: auto;
   padding: 10px;
@@ -54,10 +54,10 @@ export const styles: CSSResult = css`
 
 .attribute {
   align-items: center;
-  color: #FFFFFF;
+  color: black;
   display: flex;
   font-family: 'Roboto Mono', monospace;
-  font-size: 1.1em;
+  font-size: 1.4em;
   white-space: pre-wrap !important;
 }
 `;
