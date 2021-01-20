@@ -105,6 +105,7 @@ set -x
 # Copy the latest fidelity testing results:
 mkdir -p $DEPLOY_ROOT/fidelity
 mkdir -p $DEPLOY_ROOT/editor
+mkdir -p $DEPLOY_ROOT/editor/assets
 mkdir -p $DEPLOY_ROOT/editor/view
 mkdir -p $DEPLOY_ROOT/dist
 
@@ -112,6 +113,7 @@ mv ../render-fidelity-tools/test/results $DEPLOY_ROOT/fidelity/results
 cp ../render-fidelity-tools/test/results-viewer.html $DEPLOY_ROOT/fidelity/index.html
 cp ../render-fidelity-tools/dist/* $DEPLOY_ROOT/dist/
 cp ../space-opera/editor/index.html $DEPLOY_ROOT/editor/
+cp ../space-opera/editor/assets/ic_modelviewer.svg $DEPLOY_ROOT/editor/assets/
 cp ../space-opera/editor/view/index.html $DEPLOY_ROOT/editor/view/
 cp ../space-opera/dist/space-opera.js $DEPLOY_ROOT/dist/
 
