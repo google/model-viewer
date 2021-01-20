@@ -520,11 +520,11 @@ export class ModelScene extends Scene {
     }
   }
 
-
   /**
    * Sets the shadow's intensity, lazily creating the shadow as necessary.
    */
   setShadowIntensity(shadowIntensity: number) {
+    this.shadowIntensity = shadowIntensity;
     let shadow = this.shadow;
     const side =
         (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
