@@ -148,9 +148,7 @@ export class ExportPanel extends ConnectedLitElement {
   </div>
 </me-expandable-tab>
 <me-expandable-tab tabName="Best Practices" .open=${true}>
-  <div slot="content">
-    <best-practices></best-practices>
-  </div>
+  <best-practices slot="content"></best-practices>
 </me-expandable-tab>
 `;
   }
