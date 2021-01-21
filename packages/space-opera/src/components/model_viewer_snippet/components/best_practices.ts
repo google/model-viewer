@@ -22,21 +22,36 @@ import {customElement, html, internalProperty, LitElement} from 'lit-element';
  */
 @customElement('best-practices')
 export class BestPractices extends LitElement {
-  @internalProperty() isUsingDefaultProgressBar = true;
+  @internalProperty() progressBar: boolean = false;
+  @internalProperty() arButton: boolean = false;
 
   onProgressBarChange() {
+    this.progressBar = !this.progressBar;
+  }
+
+  onARButtonChange() {
+    this.arButton = !this.arButton;
   }
 
   render() {
     return html`
-    <div>Todo</div>
+    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
+      Override Default Slots:
+    </div> 
     <me-checkbox 
-            id="progress-bar" 
-            label="Use Recommended Progress Bar"
-            ?checked="${this.isUsingDefaultProgressBar}"
-            @change=${this.onProgressBarChange}
-            >
-          </me-checkbox>
+      id="progress-bar" 
+      label="Progress Bar"
+      ?checked="${this.progressBar}"
+      @change=${this.onProgressBarChange}
+      >
+    </me-checkbox>
+    <me-checkbox 
+      id="ar-button" 
+      label="AR Button"
+      ?checked="${this.arButton}"
+      @change=${this.onARButtonChange}
+      >
+    </me-checkbox>
     <div style="margin-bottom: 50px;"></div>
     `;
   }
