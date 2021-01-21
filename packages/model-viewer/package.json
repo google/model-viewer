@@ -1,6 +1,6 @@
 {
   "name": "@google/model-viewer",
-  "version": "1.3.0",
+  "version": "1.4.1",
   "description": "Easily display interactive 3D models on the web and in AR!",
   "repository": "https://github.com/google/model-viewer",
   "bugs": {

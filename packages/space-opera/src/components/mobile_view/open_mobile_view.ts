@@ -360,8 +360,9 @@ export class OpenMobileView extends ConnectedLitElement {
   // Initialize AR values and start deploy loop
   async onInitialDeploy() {
     this.isDeployed = true;
-    reduxStore.dispatch(dispatchAr(true));
-    reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
+    if (this.arConfig?.arModes === undefined) {
+      reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
+    }
     await this.onDeploy();
   }
 
