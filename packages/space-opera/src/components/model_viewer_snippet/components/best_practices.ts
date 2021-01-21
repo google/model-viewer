@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2020 Google LLC. All Rights Reserved.
+ * Copyright 2021 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,28 @@
  *
  */
 
-import {customElement, html, LitElement} from 'lit-element';
+import {customElement, html, internalProperty, LitElement} from 'lit-element';
 
 /**
  * A section of best practices to enable or disable.
  */
 @customElement('best-practices')
 export class BestPractices extends LitElement {
+  @internalProperty() isUsingDefaultProgressBar = true;
+
+  onProgressBarChange() {
+  }
+
   render() {
     return html`
     <div>Todo</div>
+    <me-checkbox 
+            id="progress-bar" 
+            label="Use Recommended Progress Bar"
+            ?checked="${this.isUsingDefaultProgressBar}"
+            @change=${this.onProgressBarChange}
+            >
+          </me-checkbox>
     <div style="margin-bottom: 50px;"></div>
     `;
   }
