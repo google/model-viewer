@@ -96,7 +96,6 @@ export class MaterialPanel extends ConnectedLitElement {
 
     if (this.selectedMaterialId !== undefined) {
       const id = this.selectedMaterialId;
-      console.log('state id and mat length: ', id, this.materials.length);
       if (id < 0 || id >= this.materials.length) {
         this.selectedMaterialId = 0;
       }
@@ -228,10 +227,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
-  // TODO: Materials with undefined material.name will constantly re-render and
-  // trigger the looping animation for selecting a material, sometimes.
   renderSelectMaterialTab() {
-    console.log('materials', this.materials);
     return html`
     <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
         true}>
