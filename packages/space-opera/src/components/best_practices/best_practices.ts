@@ -29,12 +29,11 @@ import {dispatchSetARButton, dispatchSetProgressBar, getBestPractices} from './r
 export class BestPractices extends ConnectedLitElement {
   @internalProperty() bestPractices?: BestPracticesState;
 
-  @query('me-checkbox#ar-button') progressBarCheckbox!: CheckboxElement;
+  @query('me-checkbox#progress-bar') progressBarCheckbox!: CheckboxElement;
   @query('me-checkbox#ar-button') arButtonCheckbox!: CheckboxElement;
 
   stateChanged(state: State) {
     this.bestPractices = getBestPractices(state);
-    console.log(this.bestPractices);
   }
 
   onProgressBarChange() {
@@ -48,7 +47,7 @@ export class BestPractices extends ConnectedLitElement {
 
   render() {
     return html`
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
+    <div style="font-size: 14px; font-weight: 500; margin: 0px 0px 10px 0px;">
       Override Default Slots:
     </div> 
     <me-checkbox 
