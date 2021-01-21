@@ -62,6 +62,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() isNewModel: boolean = true;
   @internalProperty() currentGltfUrl: string = '';
   @internalProperty() isTesting: boolean = false;
+  @internalProperty() isInterpolating: boolean = false;
 
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
   @query('me-slider-with-input#roughness-factor')
@@ -95,6 +96,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
     if (this.selectedMaterialId !== undefined) {
       const id = this.selectedMaterialId;
+      console.log('state id and mat length: ', id, this.materials.length);
       if (id < 0 || id >= this.materials.length) {
         this.selectedMaterialId = 0;
       }
@@ -170,6 +172,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   // Logic for interpolating from red emissive factor to the original.
   interpolateMaterial() {
+    this.isInterpolating = true;
     const index = this.selectedMaterialId!;
     const id = this.selectedMaterialId!;
     const originalBaseColor = this.materials[index].baseColorFactor;
@@ -205,6 +208,7 @@ export class MaterialPanel extends ConnectedLitElement {
         const emissiveFactor = originalEmissiveFactor;
         reduxStore.dispatch(dispatchSetEmissiveFactor(
             getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
+        this.isInterpolating = false;
       }
     };
     requestAnimationFrame(interpolateStep);
@@ -216,14 +220,18 @@ export class MaterialPanel extends ConnectedLitElement {
       this.selectedMaterialId = Number(value);
       checkFinite(this.selectedMaterialId);
       // Don't interpolate on the initial model load.
-      if (!this.isNewModel && this.isLegalIndex() && !this.isTesting) {
+      if (!this.isNewModel && this.isLegalIndex() && !this.isTesting &&
+          !this.isInterpolating) {
         this.interpolateMaterial();
       }
       this.isNewModel = false;
     }
   }
 
+  // TODO: Materials with undefined material.name will constantly re-render and
+  // trigger the looping animation for selecting a material, sometimes.
   renderSelectMaterialTab() {
+    console.log('materials', this.materials);
     return html`
     <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
         true}>
