@@ -239,7 +239,8 @@ export class MaterialPanel extends ConnectedLitElement {
         >${
         this.materials.map(
             (material, id) => html`<paper-item value="${id}">(${id}) ${
-                material.name}</paper-item>`)}
+                material.name ? material.name :
+                                'Unnamed Material'}</paper-item>`)}
       </me-dropdown>
     </me-expandable-tab>
     `;

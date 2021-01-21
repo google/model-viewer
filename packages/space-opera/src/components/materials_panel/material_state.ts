@@ -72,7 +72,7 @@ export interface Material {
 function createMaterial(
     domMaterial: GltfMaterial,
     texturesByHandle: Map<TextureHandle, Texture>): Material {
-  const name = domMaterial.name ? domMaterial.name : 'Unnamed Material';
+  const name = domMaterial.name;
   const pbr = domMaterial.pbrMetallicRoughness;
   const baseColorTexture = pbr.baseColorTexture;
   const baseColorTextureId =
