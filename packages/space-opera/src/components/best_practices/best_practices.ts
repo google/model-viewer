@@ -64,7 +64,6 @@ export class BestPractices extends ConnectedLitElement {
       @change=${this.onARButtonChange}
       >
     </me-checkbox>
-    <div style="margin-bottom: 50px;"></div>
     `;
   }
 }
