@@ -41,4 +41,4 @@ import './components/mobile_view/mobile_view.js';
 import './components/mobile_view/open_mobile_view.js';
 import './components/mobile_view/components/mobile_modal.js';
 import './components/mobile_view/components/mobile_expandable_section.js';
-import './components/model_viewer_snippet/components/best_practices.js';
+import './components/best_practices/best_practices.js';

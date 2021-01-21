@@ -15,22 +15,35 @@
  *
  */
 
-import {customElement, html, internalProperty, LitElement} from 'lit-element';
+import {customElement, html, internalProperty, query} from 'lit-element';
+import {reduxStore} from '../../space_opera_base';
+import {BestPracticesState, State} from '../../types';
+import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element';
+import {CheckboxElement} from '../shared/checkbox/checkbox';
+import {dispatchSetARButton, dispatchSetProgressBar, getBestPractices} from './reducer';
 
 /**
  * A section of best practices to enable or disable.
  */
 @customElement('best-practices')
-export class BestPractices extends LitElement {
-  @internalProperty() progressBar: boolean = false;
-  @internalProperty() arButton: boolean = false;
+export class BestPractices extends ConnectedLitElement {
+  @internalProperty() bestPractices?: BestPracticesState;
+
+  @query('me-checkbox#ar-button') progressBarCheckbox!: CheckboxElement;
+  @query('me-checkbox#ar-button') arButtonCheckbox!: CheckboxElement;
+
+  stateChanged(state: State) {
+    this.bestPractices = getBestPractices(state);
+    console.log(this.bestPractices);
+  }
 
   onProgressBarChange() {
-    this.progressBar = !this.progressBar;
+    reduxStore.dispatch(
+        dispatchSetProgressBar(this.progressBarCheckbox.checked));
   }
 
   onARButtonChange() {
-    this.arButton = !this.arButton;
+    reduxStore.dispatch(dispatchSetARButton(this.arButtonCheckbox.checked));
   }
 
   render() {
@@ -41,14 +54,14 @@ export class BestPractices extends LitElement {
     <me-checkbox 
       id="progress-bar" 
       label="Progress Bar"
-      ?checked="${this.progressBar}"
+      ?checked="${this.bestPractices?.progressBar}"
       @change=${this.onProgressBarChange}
       >
     </me-checkbox>
     <me-checkbox 
       id="ar-button" 
       label="AR Button"
-      ?checked="${this.arButton}"
+      ?checked="${this.bestPractices?.arButton}"
       @change=${this.onARButtonChange}
       >
     </me-checkbox>
