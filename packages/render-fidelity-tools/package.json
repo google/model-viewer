@@ -47,7 +47,8 @@
     "pngjs": "^5.0.0",
     "puppeteer": "^5.2.1",
     "resize-observer-polyfill": "^1.5.0",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "gltf-sample-viewer": "./npm_package"
   },
   "devDependencies": {
     "@google/model-viewer-shared-assets": "^0.0.1",

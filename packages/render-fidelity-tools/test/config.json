@@ -18,6 +18,10 @@
     {
       "name": "dspbr-pt",
       "description": "dspbr-pt"
+    },
+    {
+      "name": "gltf-sample-viewer",
+      "description": "gltf-sample-viewer"
     }
   ],
   "scenarios": [
