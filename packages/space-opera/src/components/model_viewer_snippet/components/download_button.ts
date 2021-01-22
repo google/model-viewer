@@ -23,7 +23,8 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
-import {ArConfigState, RelativeFilePathsState, State} from '../../../types.js';
+import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '../../../types.js';
+import {getBestPractices} from '../../best_practices/reducer.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getArConfig} from '../../mobile_view/reducer.js';
@@ -87,7 +88,8 @@ async function prepareZipArchive(
     config: ModelViewerConfig,
     arConfig: ArConfigState,
     data: {snippetText: string},
-    relativeFilePaths: RelativeFilePathsState): Promise<Payload> {
+    relativeFilePaths: RelativeFilePathsState,
+    bestPractices: BestPracticesState): Promise<Payload> {
   const zip = new JSZip();
 
   const glb = await prepareGlbPayload(gltf, relativeFilePaths.modelName!);
@@ -120,7 +122,10 @@ async function prepareZipArchive(
     zip.file(relativeFilePaths.iosName!, response.blob());
   }
 
+  // TODO: Modify into runnable html file.
   zip.file('snippet.txt', data.snippetText);
+
+  // TODO: Add CSS file with relevant CSS as necessary.
 
   return {
     blob: await zip.generateAsync({type: 'blob', compression: 'DEFLATE'}),
@@ -163,21 +168,18 @@ export class ExportZipButton extends GenericDownloadButton {
     const gltf = getGltfModel(state);
     const relativeFilePaths = getRelativeFilePaths(state);
     const arConfig = getArConfig(state);
+    const bestPractices = getBestPractices(state);
+
     if (!gltf) {
       this.preparePayload = undefined;
       return;
     }
 
-    const urls = new Array<string>();
-    if (config.environmentImage) {
-      urls.push(config.environmentImage);
-    }
-
     // Note that snippet text will necessarily be set manually post-update,
     // and therefore we must pass a containing object (in our case, this) by
     // reference.
-    this.preparePayload = () =>
-        prepareZipArchive(gltf, config, arConfig, this, relativeFilePaths);
+    this.preparePayload = () => prepareZipArchive(
+        gltf, config, arConfig, this, relativeFilePaths, bestPractices);
   }
 }
 

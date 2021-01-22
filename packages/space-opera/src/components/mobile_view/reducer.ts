@@ -69,6 +69,9 @@ export function dispatchSetForcePost(forcePost: boolean) {
 
 export const getRefreshable = (state: State) =>
     state.entities.mobile.isRefreshable;
+
+// Allow the ability to trigger a postInfo (for a mobile device) from anywhere
+// in the code.
 export const getForcePost = (state: State) => state.entities.mobile.forcePost;
 
 export function mobileReducer(
