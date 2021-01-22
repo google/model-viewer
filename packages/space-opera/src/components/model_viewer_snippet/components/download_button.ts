@@ -25,6 +25,7 @@ import {css, customElement, html, internalProperty} from 'lit-element';
 
 import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '../../../types.js';
 import {getBestPractices} from '../../best_practices/reducer.js';
+import {arButtonCSS, progressBarCSS} from '../../best_practices/styles.css.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getArConfig} from '../../mobile_view/reducer.js';
@@ -123,9 +124,19 @@ async function prepareZipArchive(
   }
 
   // TODO: Modify into runnable html file.
+  // with CSS, etc.
   zip.file('snippet.txt', data.snippetText);
 
-  // TODO: Add CSS file with relevant CSS as necessary.
+  if (bestPractices.arButton || bestPractices.progressBar) {
+    let cssText = '';
+    if (bestPractices.arButton) {
+      cssText = arButtonCSS.cssText;
+    }
+    if (bestPractices.progressBar) {
+      cssText = `${cssText}\n${progressBarCSS.cssText}`;
+    }
+    zip.file('styles.css', cssText);
+  }
 
   return {
     blob: await zip.generateAsync({type: 'blob', compression: 'DEFLATE'}),
