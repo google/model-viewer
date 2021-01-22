@@ -1,9 +1,10 @@
 {
-  "name": "gltf-sample-viewer",
+  "name": "gltf-viewer",
   "version": "1.0.0",
   "description": "The official glTF sample viewer.",
-  "main": "gltf-sample-viewer.js",
-  "module": "gltf-sample-viewer.module.js",
+  "main": "gltf-viewer",
+  "module": "gltf-viewer.module.js",
+  "typings": "gltf-viewer",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KhronosGroup/glTF-Sample-Viewer.git"
