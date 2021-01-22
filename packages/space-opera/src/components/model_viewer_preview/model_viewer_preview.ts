@@ -29,7 +29,10 @@ import {customElement, html, internalProperty, PropertyValues, query} from 'lit-
 
 import {reduxStore} from '../../space_opera_base.js';
 import {modelViewerPreviewStyles} from '../../styles.css.js';
-import {extractStagingConfig, State} from '../../types.js';
+import {BestPracticesState, extractStagingConfig, State} from '../../types.js';
+import {getBestPractices} from '../best_practices/reducer.js';
+import {renderARButton, renderProgressBar} from '../best_practices/render_best_practices.js';
+import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
 import {dispatchCameraControlsEnabled, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
@@ -61,7 +64,8 @@ const $autoplay = Symbol('autoplay');
  */
 @customElement('model-viewer-preview')
 export class ModelViewerPreview extends ConnectedLitElement {
-  static styles = [modelViewerPreviewStyles, hotspotStyles];
+  static styles =
+      [modelViewerPreviewStyles, hotspotStyles, arButtonCSS, progressBarCSS];
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
@@ -74,8 +78,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty()[$gltfUrl]?: string;
   @internalProperty() gltfError: string = '';
   @internalProperty() extraAttributes: any = {};
-
   @internalProperty() refreshButtonIsReady: boolean = false;
+  @internalProperty() bestPractices?: BestPracticesState;
 
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;
@@ -89,6 +93,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this[$autoplay] = getConfig(state).autoplay;
     this.extraAttributes = getExtraAttributes(state);
     this.refreshButtonIsReady = getRefreshable(state);
+    this.bestPractices = getBestPractices(state);
   }
 
   firstUpdated() {
@@ -190,8 +195,15 @@ export class ModelViewerPreview extends ConnectedLitElement {
       style="--mdc-theme-primary: #DC143C; border: #DC143C" class="RefreshMobileButton">
       Refresh Mobile
     </mwc-button>`: html``;
+
     const childElements =
         [...renderHotspots(this.hotspots), refreshMobileButton];
+    if (this.bestPractices?.progressBar) {
+      childElements.push(renderProgressBar());
+    }
+    if (this.bestPractices?.arButton) {
+      childElements.push(renderARButton());
+    }
 
     if (this.gltfError) {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
