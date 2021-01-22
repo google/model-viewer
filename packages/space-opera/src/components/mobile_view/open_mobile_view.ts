@@ -24,14 +24,12 @@ import QRious from 'qrious';
 import {reduxStore} from '../../space_opera_base.js';
 import {openMobileViewStyles} from '../../styles.css.js';
 import {ArConfigState, State} from '../../types.js';
-import {getCamera} from '../camera_settings/reducer.js';
 import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
-import {getHotspots} from '../hotspot_panel/reducer.js';
 import {getEdits} from '../materials_panel/reducer.js';
 import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
-import {getExtraAttributes} from '../model_viewer_snippet/reducer.js';
+import {getModelViewerSnippet} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {MobileModal} from './components/mobile_modal.js';
 
@@ -100,12 +98,8 @@ export class OpenMobileView extends ConnectedLitElement {
     };
 
     this.snippet = {
-      config: getConfig(state),
-      arConfig: this.arConfig,
-      camera: getCamera(state),
-      hotspots: getHotspots(state),
+      ...getModelViewerSnippet(state),
       edits: getEdits(state),
-      extraAttributes: getExtraAttributes(state)
     };
 
     this.contentHasChanged = this.getContentHasChanged();

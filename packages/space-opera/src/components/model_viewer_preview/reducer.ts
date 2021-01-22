@@ -19,12 +19,29 @@ import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
-import {Action, State} from '../../types.js';
+import {Action, BestPracticesState, State} from '../../types.js';
+import {renderARButton, renderProgressBar} from '../best_practices/render_best_practices.js';
 import {Camera} from '../camera_settings/camera_state.js';
+import {HotspotConfig} from '../hotspot_panel/types.js';
 import {GltfState} from '../model_viewer_preview/types.js';
+import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 export function getModelViewer() {
   return document.querySelector('model-viewer-preview')?.modelViewer;
+}
+
+export function renderCommonChildElements(
+    hotspots: HotspotConfig[], bestPractices: BestPracticesState) {
+  const childElements: any[] = [
+    ...renderHotspots(hotspots),
+  ];
+  if (bestPractices?.progressBar) {
+    childElements.push(renderProgressBar());
+  }
+  if (bestPractices?.arButton) {
+    childElements.push(renderARButton());
+  }
+  return childElements;
 }
 
 export function getCameraState(viewer: ModelViewerElement) {

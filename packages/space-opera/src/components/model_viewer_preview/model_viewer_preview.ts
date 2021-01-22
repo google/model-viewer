@@ -31,7 +31,6 @@ import {reduxStore} from '../../space_opera_base.js';
 import {modelViewerPreviewStyles} from '../../styles.css.js';
 import {BestPracticesState, extractStagingConfig, State} from '../../types.js';
 import {getBestPractices} from '../best_practices/reducer.js';
-import {renderARButton, renderProgressBar} from '../best_practices/render_best_practices.js';
 import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
@@ -45,12 +44,11 @@ import {dispatchSetForcePost, getRefreshable} from '../mobile_view/reducer.js';
 import {dispatchConfig, getExtraAttributes} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
-import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {applyEdits} from './gltf_edits.js';
 import {dispatchGltfAndEdits} from './gltf_edits.js';
-import {dispatchGltfUrl, downloadContents, getGltfModel, getGltfUrl} from './reducer.js';
+import {dispatchGltfUrl, downloadContents, getGltfModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
@@ -196,15 +194,12 @@ export class ModelViewerPreview extends ConnectedLitElement {
       Refresh Mobile
     </mwc-button>`: html``;
 
+    // Renders elements common between mobile and editor.
     const childElements =
-        [...renderHotspots(this.hotspots), refreshMobileButton];
-    if (this.bestPractices?.progressBar) {
-      childElements.push(renderProgressBar());
-    }
-    if (this.bestPractices?.arButton) {
-      childElements.push(renderARButton());
-    }
+        renderCommonChildElements(this.hotspots, this.bestPractices!);
 
+    // Add additional elements, editor specific.
+    childElements.push(refreshMobileButton);
     if (this.gltfError) {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
           this.gltfError}</div>`);
