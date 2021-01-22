@@ -28,9 +28,11 @@ import {getBestPractices} from '../../best_practices/reducer.js';
 import {arButtonCSS, progressBarCSS} from '../../best_practices/styles.css.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
+import {getHotspots} from '../../hotspot_panel/reducer.js';
 import {getArConfig} from '../../mobile_view/reducer.js';
 import {getGltfModel} from '../../model_viewer_preview/reducer.js';
 import {getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
+import {styles as hotspotStyles} from '../../utils/hotspot/hotspot.css.js';
 
 interface Payload {
   blob: Blob;
@@ -90,7 +92,8 @@ async function prepareZipArchive(
     arConfig: ArConfigState,
     data: {snippetText: string},
     relativeFilePaths: RelativeFilePathsState,
-    bestPractices: BestPracticesState): Promise<Payload> {
+    bestPractices: BestPracticesState,
+    hasHotspots: boolean): Promise<Payload> {
   const zip = new JSZip();
 
   const glb = await prepareGlbPayload(gltf, relativeFilePaths.modelName!);
@@ -123,14 +126,18 @@ async function prepareZipArchive(
     zip.file(relativeFilePaths.iosName!, response.blob());
   }
 
-  // TODO: Modify into runnable html file.
-  // with CSS, etc.
+  // TODO: Modify into runnable html file with the best practices slots
+  // filled as necessary.
+  // Add scripts into HTML file.
   zip.file('snippet.txt', data.snippetText);
 
-  if (bestPractices.arButton || bestPractices.progressBar) {
+  if (bestPractices.arButton || bestPractices.progressBar || hasHotspots) {
     let cssText = '';
+    if (hasHotspots) {
+      cssText = hotspotStyles.cssText;
+    }
     if (bestPractices.arButton) {
-      cssText = arButtonCSS.cssText;
+      cssText = `${cssText}\n${arButtonCSS.cssText}`;
     }
     if (bestPractices.progressBar) {
       cssText = `${cssText}\n${progressBarCSS.cssText}`;
@@ -180,6 +187,7 @@ export class ExportZipButton extends GenericDownloadButton {
     const relativeFilePaths = getRelativeFilePaths(state);
     const arConfig = getArConfig(state);
     const bestPractices = getBestPractices(state);
+    const hasHotspots = getHotspots(state).length > 0;
 
     if (!gltf) {
       this.preparePayload = undefined;
@@ -190,7 +198,13 @@ export class ExportZipButton extends GenericDownloadButton {
     // and therefore we must pass a containing object (in our case, this) by
     // reference.
     this.preparePayload = () => prepareZipArchive(
-        gltf, config, arConfig, this, relativeFilePaths, bestPractices);
+        gltf,
+        config,
+        arConfig,
+        this,
+        relativeFilePaths,
+        bestPractices,
+        hasHotspots);
   }
 }
 
