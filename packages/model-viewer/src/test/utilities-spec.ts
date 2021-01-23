@@ -54,7 +54,7 @@ suite('utils', () => {
               // There is not a good way to test this given the current
               // factoring and bundling constraints
               // TODO:
-              // https://github.com/GoogleWebComponents/model-viewer/issues/262
+              // https://github.com/google/model-viewer/issues/262
           });
     });
   });

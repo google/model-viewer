@@ -13,41 +13,36 @@
  * limitations under the License.
  */
 
-import {Texture} from 'three';
-
 import {BASE_OPACITY, EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
-import {$shadow} from '../../three-components/Model.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
-import {assetPath, rafPasses, textureMatchesMeta, timePasses, waitForEvent} from '../helpers.js';
+import {timePasses, waitForEvent} from '../../utilities.js';
+import {assetPath, rafPasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
-const ALT_BG_IMAGE_URL = assetPath('environments/grey.png');
-const BG_IMAGE_URL = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
+const ALT_BG_IMAGE_URL = assetPath('environments/white_furnace.hdr');
 const HDR_BG_IMAGE_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
 const MODEL_URL = assetPath('models/reflective-sphere.gltf');
-const MULTI_MATERIAL_MODEL_URL = assetPath('models/Triangle.gltf');
 
 const backgroundHasMap =
     (scene: ModelScene, url: string|null) => {
-      return textureMatchesMeta((scene.background as Texture), {url: url});
+      return (scene.background as any).userData.url === url;
     }
 
 const modelUsingEnvMap =
     (scene: ModelScene, url: string|null) => {
-      return textureMatchesMeta((scene.environment as Texture), {url: url});
+      return (scene.environment as any).userData.url === url;
     }
 
 /**
  * Returns a promise that resolves when a given element is loaded
  * and has an environment map set that matches the passed in meta.
- * @see textureMatchesMeta
  */
 const waitForLoadAndEnvMap = (element: ModelViewerElementBase) => {
   const load = waitForEvent(element, 'load');
-  const envMap = waitForEvent(element[$scene].model, 'envmap-update');
+  const envMap = waitForEvent(element[$scene], 'envmap-update');
   return Promise.all([load, envMap]);
 };
 
@@ -85,6 +80,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     const environmentChangeHandler = () => environmentChangeCount++;
     element.addEventListener('environment-change', environmentChangeHandler);
     element.style.display = 'none';
+    element.src = MODEL_URL;
     document.body.insertBefore(element, document.body.firstChild);
     await rafPasses();
     expect(environmentChangeCount).to.be.equal(0);
@@ -103,7 +99,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
         document.body.insertBefore(element, document.body.firstChild);
 
         environmentChanges = 0;
-        scene.model.addEventListener('envmap-update', () => {
+        scene.addEventListener('envmap-update', () => {
           environmentChanges++;
         });
         await onLoad;
@@ -119,43 +115,6 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
       test('changes the environment exactly once', async function() {
         expect(environmentChanges).to.be.eq(1);
-      });
-    });
-  });
-
-  suite('with a skybox-image property', () => {
-    suite('and a src property', () => {
-      setup(async () => {
-        let onLoad = waitForLoadAndEnvMap(element);
-        element.src = MODEL_URL;
-        element.skyboxImage = BG_IMAGE_URL;
-        document.body.insertBefore(element, document.body.firstChild);
-        await onLoad;
-      });
-
-      teardown(() => {
-        document.body.removeChild(element);
-      });
-
-      test('displays background with the correct map', async function() {
-        expect(backgroundHasMap(scene, element.skyboxImage!)).to.be.ok;
-      });
-
-      test('applies the image as an environment map', async function() {
-        expect(modelUsingEnvMap(scene, element.skyboxImage)).to.be.ok;
-      });
-
-      suite('on a model with multi-material meshes', () => {
-        setup(async () => {
-          let onLoad = waitForEvent(element, 'load');
-          element.src = MULTI_MATERIAL_MODEL_URL;
-          await onLoad;
-        });
-        test(
-            'applies environment map on model with multi-material meshes',
-            async function() {
-              expect(modelUsingEnvMap(scene, element.skyboxImage)).to.be.ok;
-            });
       });
     });
   });
@@ -201,7 +160,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     test('changes the opacity of the static shadow', async () => {
       element.shadowIntensity = 1.0;
       await timePasses();
-      const newIntensity = scene.model[$shadow]!.getIntensity();
+      const newIntensity = scene.shadow!.getIntensity();
       expect(newIntensity).to.be.eq(BASE_OPACITY);
     });
   });
@@ -225,7 +184,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     suite('and environment-image subsequently removed', () => {
       setup(async () => {
-        let envMapChanged = waitForEvent(scene.model, 'envmap-update');
+        let envMapChanged = waitForEvent(scene, 'envmap-update');
         element.removeAttribute('environment-image');
         await envMapChanged;
       });
@@ -301,7 +260,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     suite('and skybox-image subsequently removed', () => {
       setup(async () => {
-        let envMapChanged = waitForEvent(scene.model, 'envmap-update');
+        let envMapChanged = waitForEvent(scene, 'envmap-update');
         element.removeAttribute('skybox-image');
         await envMapChanged;
       });

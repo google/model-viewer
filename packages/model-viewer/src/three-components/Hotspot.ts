@@ -34,44 +34,41 @@ export interface HotspotConfiguration {
   normal?: string;
 }
 
-const $slot = Symbol('slot');
-const $pivot = Symbol('pivot');
-const $referenceCount = Symbol('referenceCount');
-const $updateVisibility = Symbol('updateVisibility');
-const $visible = Symbol('visible');
-
 /**
  * The Hotspot object is a reference-counted slot. If decrement() returns true,
  * it should be removed from the tree so it can be garbage-collected.
  */
 export class Hotspot extends CSS2DObject {
   public normal: Vector3 = new Vector3(0, 1, 0);
-  private[$visible] = false;
-  private[$referenceCount] = 1;
-  private[$pivot] = document.createElement('div');
-  private[$slot]: HTMLSlotElement = document.createElement('slot');
+  private initialized = false;
+  private referenceCount = 1;
+  private pivot = document.createElement('div');
+  private slot: HTMLSlotElement = document.createElement('slot');
 
   constructor(config: HotspotConfiguration) {
     super(document.createElement('div'));
 
     this.element.classList.add('annotation-wrapper');
 
-    this[$slot].name = config.name;
+    this.slot.name = config.name;
 
-    this.element.appendChild(this[$pivot]);
-    this[$pivot].appendChild(this[$slot]);
+    this.element.appendChild(this.pivot);
+    this.pivot.appendChild(this.slot);
 
     this.updatePosition(config.position);
     this.updateNormal(config.normal);
+  }
+
+  get facingCamera(): boolean {
+    return !this.element.classList.contains('hide');
   }
 
   /**
    * Sets the hotspot to be in the highly visible foreground state.
    */
   show() {
-    if (!this[$visible]) {
-      this[$visible] = true;
-      this[$updateVisibility]();
+    if (!this.facingCamera || !this.initialized) {
+      this.updateVisibility(true);
     }
   }
 
@@ -79,9 +76,8 @@ export class Hotspot extends CSS2DObject {
    * Sets the hotspot to be in the diminished background state.
    */
   hide() {
-    if (this[$visible]) {
-      this[$visible] = false;
-      this[$updateVisibility]();
+    if (this.facingCamera || !this.initialized) {
+      this.updateVisibility(false);
     }
   }
 
@@ -89,7 +85,7 @@ export class Hotspot extends CSS2DObject {
    * Call this when adding elements to the same slot to keep track.
    */
   increment() {
-    this[$referenceCount]++;
+    this.referenceCount++;
   }
 
   /**
@@ -97,10 +93,10 @@ export class Hotspot extends CSS2DObject {
    * is unused.
    */
   decrement(): boolean {
-    if (this[$referenceCount] > 0) {
-      --this[$referenceCount];
+    if (this.referenceCount > 0) {
+      --this.referenceCount;
     }
-    return this[$referenceCount] === 0;
+    return this.referenceCount === 0;
   }
 
   /**
@@ -115,6 +111,7 @@ export class Hotspot extends CSS2DObject {
       this.position.setComponent(
           i, normalizeUnit(positionNodes[i] as NumberNode<'m'>).number);
     }
+    this.updateMatrixWorld();
   }
 
   /**
@@ -132,12 +129,12 @@ export class Hotspot extends CSS2DObject {
   }
 
   orient(radians: number) {
-    this[$pivot].style.transform = `rotate(${radians}rad)`;
+    this.pivot.style.transform = `rotate(${radians}rad)`;
   }
 
-  protected[$updateVisibility]() {
+  updateVisibility(show: boolean) {
     // NOTE: IE11 doesn't support a second arg for classList.toggle
-    if (this[$visible]) {
+    if (show) {
       this.element.classList.remove('hide');
     } else {
       this.element.classList.add('hide');
@@ -145,7 +142,7 @@ export class Hotspot extends CSS2DObject {
 
     // NOTE: ShadyDOM doesn't support slot.assignedElements, otherwise we could
     // use that here.
-    this[$slot].assignedNodes().forEach((node) => {
+    this.slot.assignedNodes().forEach((node) => {
       if (node.nodeType !== Node.ELEMENT_NODE) {
         return;
       }
@@ -158,7 +155,7 @@ export class Hotspot extends CSS2DObject {
         const attributeName = `data-${visibilityAttribute}`;
 
         // NOTE: IE11 doesn't support toggleAttribute
-        if (this[$visible]) {
+        if (show) {
           element.setAttribute(attributeName, '');
         } else {
           element.removeAttribute(attributeName);
@@ -167,9 +164,11 @@ export class Hotspot extends CSS2DObject {
 
       element.dispatchEvent(new CustomEvent('hotspot-visibility', {
         detail: {
-          visible: this[$visible],
+          visible: show,
         },
       }));
     });
+
+    this.initialized = true;
   }
 }

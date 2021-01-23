@@ -1,6 +1,6 @@
 <!--
 /* @license
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2020 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,7 @@
   <title>&lt;model-viewer&gt;</title>
   <meta charset="utf-8">
   <meta name="description" content="Easily display interactive 3D models on the web and in AR">
-  <meta name="viewport" content="width=device-width, user-scalable=no,
-  minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
 
@@ -36,671 +35,110 @@
   <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
-  <!-- 💁 OPTIONAL: Fullscreen polyfill is needed to fully support AR features -->
-  <script src="node_modules/fullscreen-polyfill/dist/fullscreen.polyfill.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
-  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
-  <!--<script src="node_modules/@magicleap/prismatic/prismatic.min.js"></script>-->
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
 </head>
 <body>
 
-  <a id="button-github" class="icon-github icon-button" href="https://github.com/GoogleWebComponents/model-viewer"></a>
-
   <div class="sample">
-
     <div id="demo-container" class="demo"></div>
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <div class="lockup zero-interaction"><div class="icon-button icon-modelviewer-black"></div><h1>model-viewer</h1></div>
-          <h3 style="font-weight:400;">Easily display interactive 3D models on the web & in AR</h3>
+          <div class="lockup zero-interaction"><div class="icon-button icon-modelviewer-black"></div><h1><span class="attribute">&lt;model-viewer&gt;</span></h1></div>
+          <h3 class="slogan" style="font-weight:400;">Easily display interactive 3D models on the web & in AR</h3>
         </div>
-        <example-snippet inert-script stamp-to="demo-container" highlight-as="html">
-          <template>
+
+          <div id="section-quick-start">
+            <h3 class="grouping-title grouping-title-new quick-start">Quick Start</h3>
+            <div class="quick-start-example">
+              <example-snippet inert-script stamp-to="demo-container" highlight-as="html">
+                <template>
 <!-- Import the component -->
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
 <script type="noexecute" nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+
 <!-- Use it like any other HTML element -->
 <model-viewer src="shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls></model-viewer>
-          </template>
-        </example-snippet>
+                </template>
+              </example-snippet>
+            </div>
+          </div>
 
-        <div id="section-examples">
-          <h3 class="grouping-title border-bottom">Examples</h3>
-          <ul id="list-example">
+          <a href="https://bundlephobia.com/result?p=@google/model-viewer">
+            <img src="https://badgen.net/bundlephobia/minzip/@google/model-viewer" alt="Min Zip" />
+          </a>
+          <a href="https://github.com/google/model-viewer/releases">
+            <img src="https://img.shields.io/github/v/release/google/model-viewer" alt="Latest Release" />
+          </a>
+          <br />
+          <a href="https://twitter.com/intent/follow?screen_name=modelviewer">
+            <img src="https://img.shields.io/twitter/follow/modelviewer?style=social&logo=twitter" alt="follow on Twitter" />
+          </a>
+          <a href="https://github.com/google/model-viewer/discussions">
+            <img src="https://img.shields.io/github/stars/google/model-viewer.svg?style=social&label=Star&maxAge=2592000" alt="Github Discussions" />
+          </a>
 
-            <li><a href="examples/animation.html"><h4>Animation</h4></a></li>
-
-            <li><a href="examples/lazy-loading.html"><h4>Lazy Loading</h4></a></li>
-
-            <li><a href="examples/model-formats.html"><h4>Model Formats</h4></a></li>
-
-            <li><a href="examples/staging-and-camera-control.html"><h4>Staging &amp; Camera Control</h4></a></li>
-
-            <li><a href="examples/lighting-and-environment.html"><h4>Lighting &amp; Environment</h4></a></li>
-
-            <li><a href="examples/augmented-reality.html"><h4>Augmented Reality</h4></a></li>
-
-            <li><a href="examples/customizing-ui.html"><h4>Customizing UI</h4></a></li>
-
-            <li><a href="examples/annotations.html"><h4>Annotations</h4></a></li>
-			
-			      <li><a href="examples/tester.html"><h4>Interactive Example</h4></a></li>
-          </ul>
+        <div id="section-documentation">
+          <h3 class="grouping-title grouping-title-new border-bottom">Documentation</h3>
+          <ol class="new-list-example">
+            <li>
+              <h4>
+                API <a href="docs/index.html">documentation</a> &amp; <a href="examples/loading/index.html">examples</a>
+              </h4>
+            </li>
+          </ol>
         </div>
 
-        <div id="section-attributes">
-          <h3 class="grouping-title">Attributes</h3>
-
-          <ul class="list-attribute">
+        <div id="section-editor">
+          <h3 class="grouping-title grouping-title-new border-bottom">Model Editor</h3>
+          <ol class="new-list-example">
             <li>
-              <div>src<a href="#required-for-display">*</a></div>
-              <p>The URL to the 3D model. This parameter is required for <span
-              class="attribute">&lt;model-viewer&gt;</span> to display. Only <a
-              href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0">glTF</a>/<a
-              href="https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification">GLB</a>
-              models are supported, see <a
-              href="https://github.com/GoogleWebComponents/model-viewer#supported-formats">Supported
-              Formats</a>.</p>
+              <h4>
+                Use the <a href="editor">Model Editor</a> to prepare your GLB models for the web
+              </h4>
             </li>
             <li>
-              <div>alt</div>
-              <p>Configures the model with custom text that will be used to
-              describe the model to viewers who use a screen reader or otherwise
-              depend on additional semantic context to understand what they are
-              viewing.</p>
+              <h4>
+                <a href="examples/tester.html">Interactive Viewer</a> (Legacy)
+              </h4>
             </li>
-            <li>
-              <div>animation-name</div>
-              <p>Selects an animation to play by name. This animation will play
-              when the .play() method is invoked, or when the &lt;model-viewer&gt;
-              is configured to autoplay. If no animation-name is specified,
-              &lt;model-viewer&gt; always picks the first animation it finds in
-              the model.</p>
-            </li>
-            <li>
-              <div>animation-crossfade-duration</div>
-              <p>When the current animation is changed, &lt;model-viewer&gt;
-              automatically crossfades between the previous and next animations.
-              This attribute controls how long the crossfade is in milliseconds.
-              Defaults to 300.</p>
-            </li>
-            <li>
-              <div>ar</div>
-              <p>Enable the ability to launch AR experiences on supported devices.</p>
-            </li>
-            <li>
-              <div>ar-modes</div>
-              <p>A prioritized list of the types of AR experiences to enable, if available; see 
-              <a href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">
-              Augmented Reality</a>.
-              Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer",
-              to launch the <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a> 
-              app, "quick-look", to launch the iOS Quick Look app, and "fallback", to launch a fullscreen non-AR
-              experience in the event Scene Viewer fails to launch. You can specify any number of modes separated by
-              whitespace. Defaults to "webxr scene-viewer quick-look fallback".
-            </li>
-            <li>
-              <div>ar-scale</div>
-              <p>Controls the scaling behavior in AR mode in
-              <a href="https://developers.google.com/ar/develop/java/scene-viewer">Scene Viewer</a>.
-              Set to "fixed" to disable scaling of the model, which sets it to
-              always be at 100% scale. Defaults to "auto" which allows the model to
-              be resized.</p>
-            </li>
-            <li>
-              <div>auto-rotate</div>
-              <p>Enables the auto-rotation of the model.</p>
-            </li>
-            <li>
-              <div>auto-rotate-delay</div>
-              <p>Sets the delay before auto-rotation begins. The format of the value
-              is a number in milliseconds. The default is 3000.</p>
-            </li>
-            <li>
-              <div>autoplay</div>
-              <p>If this is true and a model has animations, an animation will
-              automatically begin to play when this attribute is set (or when the
-              property is set to true). If no animation-name is specified, plays
-              the first animation. Defaults to false.</p>
-            </li>
-            <li>
-              <div>skybox-image</div>
-              <p>Sets the background image of the scene when viewed inline.
-              Takes a URL to an <a
-              href="https://en.wikipedia.org/wiki/Equirectangular_projection">equirectangular
-              projection image</a> that's used for the skybox, as well as
-              applied as an environment map on the model. Supports png, jpg and
-              hdr (recommended) images.</p>
-            </li>
-            <li>
-              <div>camera-controls</div>
-              <p>Enables controls via mouse/touch when in flat view.</p>
-            </li>
-            <li>
-              <div>camera-orbit</div>
-              <span>
-                <p>Set the starting and/or subsequent orbital position of the
-                camera. You can control the azimuthal and polar angles, and the
-                distance from the model. Accepts values of the form "$angle $angle
-                $distance", like "10deg 75deg 1.5m". Also supports units in
-                radians ("rad") for angles and centimeters ("cm") or millimeters
-                ("mm") for camera distance. Camera distance can also be set as a
-                percentage ('%'), where 100% gives the model tight framing within
-                any window based on all possible theta and phi values. Any time
-                this value changes from its initially configured value, the camera
-                will interpolate from its current position to the new value.
-                Any value set to 'auto' will revert to the default.</p>
-                <p>For camera-orbit, camera-target and field-of-view, parts of the
-                property value can be configured with CSS-like functions. The CSS
-                calc() function is supported for these values, as well as a specialized
-                form of the env() function. You can use env(window-scroll-y) anywhere
-                in the expression to get a number from 0-1 that corresponds to the
-                current top-level scroll position of the current frame. For example,
-                a value like "calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m"
-                cause the camera to orbit horizontally around the model as the user
-                scrolls down the page.</p>
-                <p>Defaults to "0deg 75deg 105%"</p>
-              </span>
-            </li>
-            <li>
-              <div>camera-target</div>
-              <p>Set the starting and/or subsequent point the camera orbits
-              around. Accepts values of the form "$X $Y $Z", like "0m 1.5m
-              -0.5m". Also supports units in centimeters ("cm") or millimeters
-              ("mm"). A special value "auto" can be used, which sets the target
-              to the center of the model's bounding box in that dimension. Any
-              time this value changes from its initially configured value, the
-              camera will interpolate from its current position to the new
-              value. Defaults to "auto auto auto".</p>
-            </li>
-            <li>
-              <div>environment-image</div>
-              <p>Controls the environmental reflection of the model. Normally if
-              skybox-image is set, that image will also be used for the
-              environment-image. Use environment-image to only set the reflection
-              without affecting the background.</p>
-            </li>
-            <li>
-              <div>exposure</div>
-              <p>Controls the exposure of both the model and skybox, for use
-              primarily with HDR environments. Defaults to 1.</p>
-            </li>
-            <li>
-              <div>field-of-view</div>
-              <p>Used to configure the vertical field of view of the camera.
-              Accepts values units in both degrees and radians (e.g., "30deg" or
-              "0.5rad"). Accepts any value between 10 and 45 degrees. Any time
-              this value changes from its initially configured value, the camera
-              will interpolate from its current value to the new value. Defaults
-              to "auto", which sets either the vertical or horizontal field of
-              view to 45 degrees depending on the dimensions of the model and the
-              aspect ratio of the canvas.</p>
-            </li>
-            <li>
-              <div>interaction-policy</div>
-              <p>Allows you to change whether the viewer requires focus before
-              interacting with it. If set to "allow-when-focused", the user must
-              focus on the viewer (click / tap) before being able to control it.
-              If set to "always-allow", the user can control it even if the
-              viewer is not the focused element on the page. Defaults to
-              "always-allow".</p>
-            </li>
-            <li>
-              <div>interaction-prompt</div>
-              <p>Allows you to change the conditions under which the visual and
-              audible interaction prompt will display. Allowed values are
-              "auto", "when-focused" and "none". If set to "auto", the
-              interaction prompt will be displayed as soon as the
-              interaction-prompt-threshold (see below) time has elapsed (after
-              the model is revealed). If set to "when-focused", the interaction
-              prompt will only be activated if the element has first received
-              focus. The interaction prompt will only display if camera-controls
-              are enabled. Defaults to "auto".</p>
-            </li>
-            <li>
-              <div>interaction-prompt-style</div>
-              <p>Configures the presentation style of the interaction-prompt when
-              it is raised. The two allowed values are "wiggle" and "basic". When
-              set to "wiggle", the prompt will animate from horizontally and the
-              model will appear to be rotated as though the prompt is interacting
-              with it. When set to "basic", the prompt is not animated, and instead
-              simply appears until it is dismissed by user interaction.
-              Defaults to "wiggle".</p>
-            </li>
-            <li>
-              <div>interaction-prompt-threshold</div>
-              <p>When camera-controls are enabled, &lt;model-viewer&gt; will
-              prompt the user visually (and audibly, for screen readers) to
-              interact if they focus it but don't interact with it for some time.
-              This attribute allows you to set how long &lt;model-viewer&gt;
-              should wait (in milliseconds) before prompting to interact. Defaults
-              to 3000.</p>
-            </li>
-            <li>
-              <div>ios-src</div>
-              <p>The url to a <a
-              href="https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html">USDZ</a>
-              model which will be used on <a
-              href="https://www.apple.com/ios/augmented-reality/">supported iOS
-              12+ devices</a> via <a
-              href="https://developer.apple.com/videos/play/wwdc2018/603/">AR
-              Quick Look</a> on Safari. See <a
-              href="https://github.com/GoogleWebComponents/model-viewer#augmented-reality">Augmented
-              Reality</a>.</p>
-            </li>
-            <li>
-              <div>magic-leap</div>
-              <p>Enables the ability to view models in AR when viewing content
-              on <a href="https://magicleaphelio.com/">Magic Leap's Helio</a>
-              browser, requires that src is a GLB model, and requires the
-              inclusion of the <a
-              href="https://www.npmjs.com/package/@magicleap/prismatic">@magicleap/prismatic</a>
-              library.</p>
-            </li>
-            <li>
-              <div>max-camera-orbit</div>
-              <p>Set the maximum orbital values of the camera. Takes values in
-                the same form as camera-orbit, but does not support env().
-                Defaults to "Infinity 157.5deg Infinity". Note "Infinity" is not an
-                accepted keyword, but the default can still be obtained by passing
-                "auto".</p>
-            </li>
-            <li>
-              <div>max-field-of-view</div>
-              <p>Set the maximum field of view of the camera, corresponding to
-                maximum zoom-out. Takes values in the same form as field-of-view,
-                but does not support env(). Defaults to "45deg". </p>
-            </li>
-            <li>
-              <div>min-camera-orbit</div>
-              <p>Set the minimum orbital values of the camera, just like
-                max-camera-orbit above. Defaults to "-Infinity 22.5deg 0".</p>
-            </li>
-            <li>
-              <div>min-field-of-view</div>
-              <p>Set the minimum field of view of the camera, corresponding to
-                maximum zoom-in, just like max-field-of-view above. Defaults to
-                "10deg". </p>
-            </li>
-            <li>
-              <div>poster</div>
-              <p>Displays an image instead of the model, useful for showing the
-                user something before a model is loaded and ready to render. If
-                you use a poster with transparency, you may also want to set
-                --poster-color to transparent so that the background shows
-                through. See <a href="./examples/lazy-loading.html">our section
-                on lazy loading</a> for examples.</p>
-            </li>
-            <li>
-              <div>loading</div>
-              <p>An enumerable attribute describing under what conditions the
-              model should be preloaded. The supported values are "auto", "lazy" 
-              and "eager". Auto is equivalent to lazy, which loads the model
-              when it is near the viewport for reveal = "auto", and when interacted
-              with for reveal = "interaction". Eager loads the model immediately. 
-              See <a href="./examples/lazy-loading.html">our section on lazy loading</a> 
-              for examples. Defaults to "auto".</p>
-            </li>
-            <li>
-              <div>quick-look-browsers</div>
-              <p>Set this attribute to control which iOS browsers will be allowed
-              to launch AR Quick Look on iOS. Allowed values are "safari" and
-              "chrome". You can specify any number of browsers separated by
-              whitespace, for example: "safari chrome". Defaults to "safari".</p>
-            </li>
-            <li>
-              <div>reveal</div>
-              <p>This attribute controls when the model should be revealed. It currently supports three
-              values: "auto", "interaction", and "manual". If reveal is set to
-              "interaction", &lt;model-viewer&gt; will wait until the user
-              interacts with the poster before loading and revealing the model.
-              If set to "auto", the model will be revealed as soon as it is done
-              loading and rendering. If set to "manual", the model will remain hidden 
-              until dismissPoster() is called. Defaults to "auto".</p>
-            </li>
-            <li>
-              <div>shadow-intensity</div>
-              <p>Controls the opacity of the shadow. Set to 0 to turn off the
-              shadow entirely. Defaults to 0.</p>
-            </li>
-            <li>
-              <div>shadow-softness</div>
-              <p>Controls the blurriness of the shadow. Set to 0 for hard shadows. 
-              Softness should not be changed every frame as it incurs a 
-              performance cost. Softer shadows render faster. Defaults to 1.</p>
-            </li>
-          </ul>
-
-          <p style="color:rgba(0,0,0,.54);" id="required-for-display">*
-          Parameters that are required for display.</p>
-          <p style="color:rgba(0,0,0,.54);">Note: All attributes have a
-          corresponding property in camel-case format. For example, the
-          skybox-image attribute can also be configured using the
-          skyboxImage property.</p>
-
+          </ol>
         </div>
 
-        <div id="section-custom-css">
-          <h3 class="grouping-title">CSS Custom Properties</h3>
-
-          <ul class="list-attribute">
+        <div id="section-metrics">
+          <h3 class="grouping-title grouping-title-new border-bottom">Metrics</h3>
+          <ol class="new-list-example">
             <li>
-              <div>--ar-button-display</div>
-              <p>Sets the display property of the AR button. Intended to be used
-              to force the button to be hidden. Defaults to block.</p>
+              <h4>
+                <a href="examples/lighthouse.html">Performance</a>
+              </h4>
             </li>
             <li>
-              <div>--interaction-prompt-display</div>
-              <p>Sets the display property of the interaction prompt. Intended
-              to be used to force the prompt to be hidden. Defaults to flex.</p>
+              <h4>
+                <a href="fidelity">glTF Fidelity Comparison</a>
+              </h4>
             </li>
-            <li>
-              <div>--min-hotspot-opacity</div>
-              <p>Sets the opacity of hidden hotspots. Defaults to 0.25.</p>
-            </li>
-            <li>
-              <div>--max-hotspot-opacity</div>
-              <p>Sets the opacity of visible hotspots. Defaults to 1.</p>
-            </li>
-            <li>
-              <div>--poster-color</div>
-              <p>Sets the background-color of the poster. You may wish to set
-                this to transparent if you are using a seamless poster with
-                transparency (so that the background color of
-                &lt;model-viewer&gt; shows through). Defaults to #fff.</p>
-            </li>
-            <li>
-              <div>--poster-image</div>
-              <p>Sets the background-image of the poster. This is currently
-              overridden by the poster attribute if it is set. Defaults to
-              none.</p>
-            </li>
-            <li>
-              <div>--progress-bar-color</div>
-              <p>Sets the background-color of the progress bar. Defaults to
-              rgba(0, 0, 0, 0.4).</p>
-            </li>
-            <li>
-              <div>--progress-bar-height</div>
-              <p>Sets the height of the progress bar. Defaults to 5px.</p>
-            </li>
-            <li>
-              <div>--progress-mask</div>
-              <p>Sets the background of the progress mask. Defaults to #fff.</p>
-            </li>
-          </ul>
-
-        </div>
-
-        <div id="section-properties">
-          <h3 class="grouping-title">Properties</h3>
-
-          <ul class="list-attribute">
-            <li>
-              <div>currentTime</div>
-              <p>This property reports the current track time of the currently
-              selected animation. If no animations are available, the value is
-              always 0. This property can be set in order to seek along the
-              timeline of the currently playing animation. For example, if you
-              set it to 0, it will reset an animation to the beginning.</p>
-            </li>
-            <li>
-              <div>loaded</div>
-              <p>This property is read-only. It returns true if the load event
-              below has fired since the last src change.</p>
-            </li>
-            <li>
-              <div>modelIsVisible</div>
-              <p>This property is read-only. It returns true if the element is 
-              visible on the page (assuming there is an IntersectionObserver) and the
-              poster has been dismissed.</p>
-            </li>
-            <li>
-              <div>paused</div>
-              <p>This property is read-only. It returns true if animations are
-              paused. It returns false if animations are playing. Animations
-              always start paused, and remain so unless the autoplay attribute
-              is set or the .play() method is invoked.</p>
-            </li>
-            <li>
-              <div>ModelViewer.dracoDecoderLocation</div>
-              <p>This static, writable property sets &lt;model-viewer&gt;'s
-              DRACO decoder location URL. By default, the DRACO decoder will be
-              loaded from a Google CDN.</p>
-            </li>
-            <li>
-              <div>ModelViewer.minimumRenderScale</div>
-              <p>This static, writable property sets &lt;model-viewer&gt;'s minimum rendering 
-              scale factor as it dynamically changes resolution to maintain framerate. Turn 
-              off this effect by setting to 1. Defaults to 0.5.</p>
-            </li>
-            <li>
-              <div>ModelViewer.modelCacheSize</div>
-              <p>This static, writable property sets &lt;model-viewer&gt;'s internal
-              glTF model cache size, controlling number of individual models that should
-              be cached. Note that any number of models may be cached at a given time.
-              This number just sets the maximum number of models that can be cached even
-              if they are not being used by a &lt;model-viewer&gt; element in the document.
-              Note also that the cache size is measured in number of glTF models, not bytes!
-              This is important to keep in mind, since any two models may have wildly
-              different byte sizes. Default is 5.</p>
-            </li>
-          </ul>
-
-        </div>
-
-        <div id="section-methods">
-          <h3 class="grouping-title">Methods</h3>
-
-          <ul class="list-attribute">
-            <li>
-              <div>activateAR()</div>
-              <p>Activates AR. Note that for any mode that is not WebXR-based,
-              this method most likely has to be called synchronous from a user
-              interaction handler. Otherwise, attempts to activate modes that
-              require user interaction will most likely be ignored.</p>
-            </li>
-            <li>
-              <div>dismissPoster()</div>
-              <p>Dismisses the poster, causing the model to load and render if
-              necessary. This is currently effectively the same as interacting
-              with the poster via user input.</p>
-            </li>
-            <li>
-              <div>getCameraOrbit()</div>
-              <p>Returns the realtime orbital position of the camera. Azimuthal
-              (theta) and polar (phi) angles are representred as radians, and the
-              distance (radius) is represented in meters. This value may differ
-              from the value configured with the camera-orbit attribute on account
-              of user interaction or camera interpolation.</p>
-            </li>
-            <li>
-              <div>getCameraOrbit()</div>
-              <p>Returns the realtime orbital position of the camera. Azimuthal
-              (theta) and polar (phi) angles are representred as radians, and the
-              distance (radius) is represented in meters. This value may differ
-              from the value configured with the camera-orbit attribute on account
-              of user interaction or camera interpolation.</p>
-            </li>
-            <li>
-              <div>getCameraTarget()</div>
-              <p>Returns the realtime target position of the camera in meters.
-              This value may differ from the value configured with the
-              camera-target attribute on account of user interaction or camera
-              interpolation.</p>
-            </li>
-            <li>
-              <div>getFieldOfView()</div>
-              <p>Returns the realtime camera vertical field of view in degrees. 
-              This value may differ from the value configured with the field-of-view 
-              attribute on account of user interaction or camera interpolation.</p>
-            </li>
-            <li>
-              <div>positionAndNormalFromPoint(pixelX, pixelY)</div>
-              <p>Returns the world position and normal of the point on the mesh
-              corresponding to the input pixel coordinates given relative to the
-              model-viewer element. The position and normal are returned as
-              Vector3D, which has a method toString() that outputs a format
-              suitable for putting in a hotspot's data-position and data-normal
-              attributes. The function returns null if no object is hit.</p>
-            </li>
-            <li>
-              <div>jumpCameraToGoal()</div>
-              <p>Changes the camera to its last configured goal state immediately on 
-              the next update instead of interpolating the motion over time.</p>
-            </li>
-            <li>
-              <div>ModelViewer.mapURLs(callback)</div>
-              <p>If provided, the callback will be passed each resource URL
-              before a request is sent. The callback may return the original
-              URL, or a new URL to override loading behavior. This behavior can
-              be used to load assets from .ZIP files, drag-and-drop APIs, and
-              Data URIs. This is a static method.</p>
-            </li>
-            <li>
-              <div>play()</div>
-              <p>Causes animations to be played. Use the autoplay attribute if
-              you want animations to be played automatically. If there are no
-              animations, nothing will happen, so make sure that the model is
-              loaded before invoking this method.</p>
-            </li>
-            <li>
-              <div>pause()</div>
-              <p>Causes animations to be paused. If you want to reset the
-              current animation to the beginning, you should also set the
-              currentTime property to 0.</p>
-            </li>
-            <li>
-              <div>resetTurntableRotation()</div>
-              <p>Resets the turntable that rotates the model when auto-rotate
-              is enabled. The new value of the turntable rotation will be 0 after
-              this method is invoked, but the model may not update until the next
-              render frame.</p>
-            </li>
-            <li>
-              <div>resetInteractionPrompt()</div>
-              <p>Typically, the interaction prompt will only display once and then
-              stops displaying after the user interacts with the 3D model for the
-              first time. You can invoke this method in order to reset the interaction
-              prompt after it has already been displayed. Doing so will cause it to
-              display once again when the interaction-prompt display conditions have
-              been met.
-              </p>
-            </li>
-            <li>
-              <div>toDataURL(type, encoderOptions)</div>
-              <p>Returns a screenshot of the current model render in the format
-              specified by <i>type</i> (defaults to image/png). The screenshot is
-              encoded as a data URL string. In formats that support a sliding scale
-              of quality (such as image/jpeg and image/webp) you can also specify a
-              value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i>
-              defaults to 0.92 otherwise).</p>
-            </li>
-            <li>
-              <div>toBlob(options: {mimeType, qualityArgument, idealAspect})</div>
-              <p>Returns a promise that resolves into a Blob object in the
-              format specified by the <i>mimeType</i> (defaults to image/png). A
-              Blob object represents a file-like object of immutable, raw data.
-              You can also specify a value between 0 and 1 for
-              <i>qualityArgument</i> (Currently only available on Chrome desktop
-              and Firefox) which defaults to 0.92 and 0.8 for image/png and
-              image/webp respectively. By setting idealAspect to true, the blob
-              will be captured at the ideal poster aspect ratio instead of the
-              canvas aspect ratio. This allows for easy poster creation, where a
-              single poster will match the render seamlessly at any canvas
-              aspect ratio.</p>
-            </li>
-            <li>
-              <div>updateHotspot({name, position, normal})</div>
-              <p>Updates the position and/or normal of the hotspot associated
-              with slot = name. The position and normal are given in the same
-              string format as the hotspot attributes data-position and
-              data-normal, which are also in the same format as the
-              camera-target attribute.</p>
-            </li>
-          </ul>
-
-        </div>
-
-        <div id="section-events">
-          <h3 class="grouping-title">Events</h3>
-
-          <ul class="list-attribute">
-            <li>
-              <div>camera-change</div>
-              <p>Fired when the camera position and/or field of view have
-              changed. If the change occurred due to user interaction, the
-              "event.detail.source" property will be set to
-              "user-interaction".</p>
-            </li>
-            <li>
-              <div>environment-change</div>
-              <p>Fired when the environment has changed. If the environment is
-              derived from skybox-image or environment-image, the image will
-              have loaded by the time this event fires.</p>
-            </li>
-            <li>
-              <div>error</div>
-              <p>This event can be triggered for two reasons: a model has failed
-              to load or parse, or the WebGL context was lost. If the model failed
-              to load, event.detail.type will be 'loadfailure'. If the WebGL context
-              was lost, event.detail.type will be 'webglcontextlost'. In both cases,
-              recovery countermeasures are left as an exercise for the user. The
-              element will not make automatic attempts to re-load a model that has failed
-              to load. Nor will the element attempt to restore the GL context after
-              it has been lost. Error events also hold a reference to the originating
-              error event (when there is one) as event.detail.sourceEvent.</p>
-            </li>
-            <li>
-              <div>load</div>
-              <p>Fired when a model is loaded. Can fire multiple times per <span
-              class="attribute">&lt;model-viewer&gt;</span> if the src attribute
-              is changed.</p>
-            </li>
-            <li>
-              <div>model-visibility</div>
-              <p>This event is fired when the visibility of the model changes. When the
-              model is loaded, the element is in the viewport (assuming there is an 
-              IntersectionObserver), and the poster has been dismissed, this event will fire 
-              and <span class="attribute">event.detail.visible</span> will be "true".</p>
-            </li>
-            <li>
-              <div>poster-visibility</div>
-              <p>This event is fired when the visiblity of the poster image
-              changes. The current visibility state can be read from the
-              <span class="attribute">event.detail.visible</span> property</p>
-            </li>
-            <li>
-              <div>play</div>
-              <p>Dispatched when animations begin to play.</p>
-            </li>
-            <li>
-              <div>pause</div>
-              <p>Dispatched when animations are paused. A model always begins in
-              the paused state, so it is worth mentioning that this event will not
-              be dispatched until the the pause() method is invoked after
-              animations have begun playing.</p>
-            </li>
-            <li>
-              <div>preload</div>
-              <p>When loading = "eager" this event is fired when preloading is done.</p>
-            </li>
-          </ul>
-
+          </ol>
         </div>
 
         <div id="section-browser-support">
-          <h3 class="grouping-title border-bottom">Browser Support</h3>
+          <h3 class="grouping-title grouping-title-new border-bottom">Browser Support</h3>
 
           <div id="browser-support-icon-group">
-            <div class="icon-desc"><img class="size-24 icon-check"><div>Natively supported</div></div>
-            <div class="icon-desc"><img class="size-24 icon-warning"><div>Available with polyfill</div></div>
-            <div class="icon-desc"><img class="size-24 icon-flag"><div>Behind a flag, unstable</div></div>
-            <div class="icon-desc"><img class="size-24 icon-na"><div>Not available</div></div>
+            <div class="icon-desc"><img class="size-24 icon-check" alt="icon-check"><div>Natively supported</div></div>
+            <div class="icon-desc"><img class="size-24 icon-warning" alt="icon-warning"><div>Available with polyfill</div></div>
+            <div class="icon-desc"><img class="size-24 icon-flag" alt="icon-flag"><div>Behind a flag, unstable</div></div>
+            <div class="icon-desc"><img class="size-24 icon-na" alt="icon-na"><div>Not available</div></div>
           </div>
 
           <div style="clear:both"></div>
@@ -713,31 +151,31 @@
               <th>Feature</th>
               <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
               <th><img class="logo-canary" title="Canary" alt="Canary"></th>
-              <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
-              <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
-              <th><img class="logo-samsung" title="Samsung Internet"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
             </tr>
             <tr>
               <td>Custom Elements</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
               <td>Shadow DOM</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
           </table>
 
@@ -749,51 +187,41 @@
               <th>Feature</th>
               <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
               <th><img class="logo-canary" title="Canary" alt="Canary"></th>
-              <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
-              <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
-              <th><img class="logo-samsung" title="Samsung Internet"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
             </tr>
             <tr>
               <td>Resize Observer</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
               <td>Intersection Observer</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-            </tr>
-            <tr>
-              <td>Fullscreen API</td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
               <td>:focus-visible</td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
-              <td><img class="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
+              <td><img class="icon-warning" alt="icon-warning"></td>
             </tr>
           </table>
 
@@ -805,32 +233,42 @@
               <th>Feature</th>
               <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
               <th><img class="logo-canary" title="Canary" alt="Canary"></th>
-              <th><img class="logo-safari" title="Safari 12" alt="Safari 12"></th>
-              <th><img class="logo-firefox" title="Firefox 65" alt="Firefox 65"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
               <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
-              <th><img class="logo-samsung" title="Samsung Internet"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
             </tr>
-            
+
             <tr>
               <td>WebXR Device API</td>
-              <td><img class="icon-flag"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
               <td>WebXR HitTest API</td>
-              <td><img class="icon-flag"></td>
-              <td><img class="icon-check"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
-              <td><img class="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+            <tr>
+              <td>WebXR DOM Overlay API</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
             </tr>
           </table>
 
@@ -847,9 +285,15 @@
         licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
       </li>
     </ul>
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018 Google Inc. Licensed under the Apache License 2.0.</div>
-    <div><a href="https://github.com/GoogleWebComponents/model-viewer">Github</a> ∙ <a href="https://model-viewer.glitch.me/">Glitch</a> ∙ <a href="https://github.com/GoogleWebComponents/model-viewer/issues">Bug report</a></div>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div id='footer-links'></div>
   </div>
+
+  <script type="module" src="./examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { initFooterLinks();})();
+  </script>
 
 
   <!-- Documentation-specific dependencies: -->

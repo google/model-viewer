@@ -15,7 +15,7 @@
 
 const {applyKarmaHacks} = require('./shared-assets/scripts/karma-hacks.js');
 
-const browserStackTunnelID = applyKarmaHacks();
+applyKarmaHacks();
 
 module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
@@ -78,7 +78,7 @@ module.exports = function(config) {
       mocha: {
         reporter: 'html',
         ui: 'tdd',
-        timeout: 30000,
+        timeout: 60000,
       },
     },
 
@@ -88,8 +88,7 @@ module.exports = function(config) {
 
     // Note setting --browsers on the command-line always overrides this list.
     browsers: [
-      // TODO(#1207)
-      // 'ChromeHeadless',
+      'ChromeHeadless',
     ],
   });
 
@@ -102,27 +101,33 @@ module.exports = function(config) {
     }
 
     const browserStackLaunchers = {
-      // TODO(#1207)
-      // 'Edge (latest)': {
-      //   base: 'BrowserStack',
-      //   os: 'Windows',
-      //   os_version: '10',
-      //   browser: 'Edge',
-      //   browser_version: 'latest',
-      // },
-      'Chrome 83.0 (Beta)': {
+      'Chrome (latest)': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
         browser: 'Chrome',
-        browser_version: '83.0 beta',
+        browser_version: 'latest',
       },
-      'Edge 83.0 (Beta)': {
+      'Chrome (latest-1)': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Chrome',
+        browser_version: 'latest-1',
+      },
+      'Edge (latest)': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
         browser: 'Edge',
-        browser_version: '83.0 beta',
+        browser_version: 'latest',
+      },
+      'Edge (latest-1)': {
+        base: 'BrowserStack',
+        os: 'Windows',
+        os_version: '10',
+        browser: 'Edge',
+        browser_version: 'latest-1',
       },
       'Firefox (latest)': {
         base: 'BrowserStack',
@@ -131,12 +136,12 @@ module.exports = function(config) {
         browser: 'Firefox',
         browser_version: 'latest',
       },
-      'Firefox 72.0': {
+      'Firefox (latest-1)': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
         browser: 'Firefox',
-        browser_version: '72.0',
+        browser_version: 'latest-1',
       },
       'Safari (latest)': {
         base: 'BrowserStack',
@@ -144,16 +149,6 @@ module.exports = function(config) {
         os_version: 'Catalina',
         browser: 'safari',
         browser_version: 'latest',
-        // BrowserStack occassionally fails to tunnel localhost for Safari
-        // instances, causing them to time out:
-        url: 'http://127.0.0.1:9876'
-      },
-      'Safari 12.1': {
-        base: 'BrowserStack',
-        os: 'OS X',
-        os_version: 'Mojave',
-        browser: 'safari',
-        browser_version: '12.1',
         // BrowserStack occassionally fails to tunnel localhost for Safari
         // instances, causing them to time out:
         url: 'http://127.0.0.1:9876'
@@ -169,18 +164,17 @@ module.exports = function(config) {
         // domain so we go there directly instead:
         url: 'http://bs-local.com:9876'
       },
-      'iOS Safari (iOS 12)': {
+      'iOS Safari (iOS 14)': {
         base: 'BrowserStack',
         os: 'iOS',
-        os_version: '12',
-        device: 'iPhone 7',
+        os_version: '14',
+        device: 'iPhone 11',
         browser: 'iPhone',
         real_mobile: 'true',
         // BrowserStack seems to drop the port when redirecting to this special
         // domain so we go there directly instead:
         url: 'http://bs-local.com:9876'
       },
-
     };
 
     config.set({
@@ -188,8 +182,7 @@ module.exports = function(config) {
         idleTimeout: 600,
         name: '<model-viewer> Unit Tests',
         project: '<model-viewer>',
-        build: process.env.BROWSER_STACK_BUILD_NAME || browserStackTunnelID,
-        tunnelIdentifier: browserStackTunnelID
+        build: process.env.BROWSER_STACK_BUILD_NAME
       },
 
       reporters: ['BrowserStack', 'mocha'],

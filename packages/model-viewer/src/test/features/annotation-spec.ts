@@ -16,17 +16,18 @@
 import {Vector3} from 'three';
 
 import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
-import ModelViewerElementBase, {$needsRender, $scene, Vector3D} from '../../model-viewer-base';
+import ModelViewerElementBase, {$loaded, $needsRender, $scene, Vector3D} from '../../model-viewer-base';
 import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
-import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers';
+import {timePasses, waitForEvent} from '../../utilities';
+import {assetPath, rafPasses} from '../helpers';
 import {BasicSpecTemplate} from '../templates';
 
 const expect = chai.expect;
 
 const sceneContainsHotspot =
     (scene: ModelScene, element: HTMLElement): boolean => {
-      const {children} = scene.model;
+      const {children} = scene.target;
       for (let i = 0, l = children.length; i < l; i++) {
         const hotspot = children[i];
         if (hotspot instanceof Hotspot &&
@@ -86,10 +87,10 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       hotspot = document.createElement('div');
       hotspot.setAttribute('slot', 'hotspot-1');
       hotspot.setAttribute('data-position', '1m 1m 1m');
-      hotspot.setAttribute('data-normal', '0m 0m 1m');
+      hotspot.setAttribute('data-normal', '0m 0m -1m');
       element.appendChild(hotspot);
       await timePasses();
-      numSlots = scene.model.children.length;
+      numSlots = scene.target.children.length;
     });
 
     test('creates a corresponding slot', () => {
@@ -109,21 +110,21 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       });
 
       test('does not change the slot', () => {
-        expect(scene.model.children.length).to.be.equal(numSlots);
+        expect(scene.target.children.length).to.be.equal(numSlots);
       });
 
       test('does not change the data', () => {
         const {position, normal} =
-            (scene.model.children[numSlots - 1] as Hotspot);
+            (scene.target.children[numSlots - 1] as Hotspot);
         expect(position).to.be.deep.equal(new Vector3(1, 1, 1));
-        expect(normal).to.be.deep.equal(new Vector3(0, 0, 1));
+        expect(normal).to.be.deep.equal(new Vector3(0, 0, -1));
       });
 
       test('updateHotspot does change the data', () => {
         element.updateHotspot(
             {name: 'hotspot-1', position: '0m 1m 2m', normal: '1m 0m 0m'});
         const {position, normal} =
-            (scene.model.children[numSlots - 1] as Hotspot);
+            (scene.target.children[numSlots - 1] as Hotspot);
         expect(position).to.be.deep.equal(new Vector3(0, 1, 2));
         expect(normal).to.be.deep.equal(new Vector3(1, 0, 0));
       });
@@ -139,12 +140,13 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           // already visible.
           await rafPasses();
 
-          const hotspotObject2D = scene.model.children[numSlots - 1] as Hotspot;
-          hotspotObject2D.hide();
+          const hotspotObject2D =
+              scene.target.children[numSlots - 1] as Hotspot;
 
           const camera = element[$scene].getCamera();
           camera.position.z = 2;
           camera.updateMatrixWorld();
+          element[$loaded] = true;
           element[$needsRender]();
 
           await waitForEvent(hotspot2, 'hotspot-visibility');
@@ -152,18 +154,18 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           wrapper = hotspotObject2D.element;
         });
 
-        test('the hotspot is visible', async () => {
-          expect(wrapper.classList.contains('hide')).to.be.false;
+        test('the hotspot is hidden', async () => {
+          expect(wrapper.classList.contains('hide')).to.be.true;
         });
 
-        test('the hotspot is hidden after turning', async () => {
+        test('the hotspot is visible after turning', async () => {
           element[$scene].yaw = Math.PI;
           element[$scene].updateMatrixWorld();
           element[$needsRender]();
 
           await waitForEvent(hotspot2, 'hotspot-visibility');
 
-          expect(!!wrapper.classList.contains('hide')).to.be.true;
+          expect(!!wrapper.classList.contains('hide')).to.be.false;
         });
       });
 
@@ -171,7 +173,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         element.removeChild(hotspot);
         await timePasses();
 
-        expect(scene.model.children.length).to.be.equal(numSlots);
+        expect(scene.target.children.length).to.be.equal(numSlots);
       });
 
       test('but removing both does remove the slot', async () => {
@@ -179,7 +181,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         element.removeChild(hotspot2);
         await timePasses();
 
-        expect(scene.model.children.length).to.be.equal(numSlots - 1);
+        expect(scene.target.children.length).to.be.equal(numSlots - 1);
       });
     });
   });

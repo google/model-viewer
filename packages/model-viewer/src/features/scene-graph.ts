@@ -13,275 +13,215 @@
  * limitations under the License.
  */
 
-import {ThreeDOMCapability} from '@google/3dom/lib/api.js';
-import {ThreeDOMExecutionContext} from '@google/3dom/lib/context.js';
-import {ModelGraft} from '@google/3dom/lib/facade/three-js/model-graft.js';
 import {property} from 'lit-element';
+import {Euler, MeshStandardMaterial} from 'three';
+import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
+import {normalizeUnit} from '../styles/conversions.js';
+import {NumberNode, parseExpressions} from '../styles/parsers.js';
+import {Variants} from '../three-components/gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
 
-const SCENE_GRAPH_SCRIPT_TYPE = 'experimental-scene-graph-worklet';
-const VALID_CAPABILITIES: Set<ThreeDOMCapability> =
-    new Set(['messaging', 'fetch', 'material-properties']);
+import {Image, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
+import {Material} from './scene-graph/material.js';
+import {Model} from './scene-graph/model.js';
 
-const $onChildListMutation = Symbol('onChildListMutation');
-const $childListMutationHandler = Symbol('childListMutationHandler');
-const $mutationObserver = Symbol('mutationObserver');
-const $createExecutionContext = Symbol('createExecutionContext');
-const $onScriptElementAdded = Symbol('onScriptElementAdded');
-const $executionContext = Symbol('executionContext');
-const $updateExecutionContextModel = Symbol('updateExecutionContextModel');
 const $currentGLTF = Symbol('currentGLTF');
-const $modelGraft = Symbol('modelGraft');
-const $onModelGraftMutation = Symbol('onModelGraftMutation');
-const $modelGraftMutationHandler = Symbol('modelGraftMutationHandler');
-const $isValid3DOMScript = Symbol('isValid3DOMScript');
+const $model = Symbol('model');
+const $variants = Symbol('variants');
+
+interface SceneExportOptions {
+  binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
+      maxTextureSize?: number, forcePowerOfTwoTextures?: boolean,
+      includeCustomExtensions?: boolean,
+}
 
 export interface SceneGraphInterface {
-  worklet: Worker|null;
+  readonly model?: Model;
+  variantName: string|undefined;
+  readonly availableVariants: Array<string>;
+  orientation: string;
+  scale: string;
+  exportScene(options?: SceneExportOptions): Promise<Blob>;
 }
 
 /**
- * SceneGraphMixin manages a `<model-viewer>` integration with the 3DOM library
- * in order to support custom scripts that operate on the <model-viewer> scene
- * graph.
- *
- * When applied, users can specify a special `<script>` type that can be added
- * as a child of `<model-viewer>`. The script will be invoked in a special
- * Web Worker, conventionally referred to as a "scene graph worklet."
- *
- * Script on the browser main thread can communicate with the scene graph
- * worklet via `modelViewer.worklet` using `postMessage`, much like they would
- * with any other Web Worker.
- *
- * Scene graph worklet scripts must be bestowed capabilities by the author of
- * the `<model-viewer>` markup. The three capabilities currently available
- * include:
- *
- *  - `messaging`: The ability to communicate with other contexts via
- *    `postMessage` and `MessageChannel`
- *  - `fetch`: Access to the global `fetch` method for network operations
- *  - `material-properties`: The ability to manipulate the basic properties of
- *    a Material and its associated constructs in the scene graph
- *
- * A trivial example of creating a scene graph worklet that can manipulate
- * material properties looks like this:
- *
- * ```html
- * <model-viewer>
- *   <script type="experimental-scene-graph-worklet"
- *       allow="material-properties">
- *
- *     console.log('Hello from the scene graph worklet!');
- *
- *     self.addEventListener('model-change', () => {
- *       model.materials[0].pbrMetallicRoughness
- *         .setBaseColorFactor([1, 0, 0, 1]);
- *     });
- *
- *   </script>
- * </model-viewer>
- * ```
- *
- * Only one worklet is allowed per `<model-viewer>` at a time. If a new worklet
- * script is appended to a `<model-viewer>` with a running worklet, a new
- * worklet will be created and the previous one will be terminated. If there
- * is more than one worklet script at HTML parse time, the last one in tree
- * order will be used.
- *
- * When a worklet is created, `<model-viewer>` will dispatch a 'worklet-created'
- * event. At the time that this event is dispatched, the worklet will be created
- * but the model is not guaranteed to have been made available to the worklet.
+ * SceneGraphMixin manages exposes a model API in order to support operations on
+ * the <model-viewer> scene graph.
  */
 export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<SceneGraphInterface>&T => {
   class SceneGraphModelViewerElement extends ModelViewerElement {
-    @property({type: Object}) protected[$modelGraft]: ModelGraft|null = null;
-
-    protected[$childListMutationHandler] = (records: Array<MutationRecord>) =>
-        this[$onChildListMutation](records);
-
-    protected[$modelGraftMutationHandler] = (event: Event) =>
-        this[$onModelGraftMutation](event);
-
-    protected[$mutationObserver] =
-        new MutationObserver(this[$childListMutationHandler]);
-
-    protected[$executionContext]: ThreeDOMExecutionContext|null = null;
-
+    protected[$model]: Model|undefined = undefined;
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
+    protected[$variants]: Array<string> = [];
+
+    @property({type: String, attribute: 'variant-name'})
+    variantName: string|undefined = undefined;
+
+    @property({type: String, attribute: 'orientation'})
+    orientation: string = '0 0 0';
+
+    @property({type: String, attribute: 'scale'}) scale: string = '1 1 1';
+
+    // Scene-graph API:
+    /** @export */
+    get model() {
+      return this[$model];
+    }
+
+    get availableVariants() {
+      return this[$variants];
+    }
 
     /**
-     * A reference to the active worklet if one exists, or else `null`. A
-     * worklet is not created until a scene graph worklet script has been
-     * detected as a child of this `<model-viewer>`.
+     * References to each element constructor. Supports instanceof checks; these
+     * classes are not directly constructable.
      */
-    get worklet() {
-      const executionContext = this[$executionContext];
-      return executionContext != null ? executionContext.worker : null;
-    }
+    static Model: Constructor<Model>;
+    static Material: Constructor<Material>;
+    static PBRMetallicRoughness: Constructor<PBRMetallicRoughness>;
+    static Sampler: Constructor<Sampler>;
+    static TextureInfo: Constructor<TextureInfo>;
+    static Texture: Constructor<Texture>;
+    static Image: Constructor<Image>;
 
-    connectedCallback() {
-      super.connectedCallback();
-
-      this[$mutationObserver].observe(this, {childList: true});
-
-      const script = this.querySelector<HTMLScriptElement>(
-          `script[type="${SCENE_GRAPH_SCRIPT_TYPE}"]:last-of-type`);
-
-      if (script != null && this[$isValid3DOMScript](script)) {
-        this[$onScriptElementAdded](script);
-      }
-    }
-
-    async disconnectedCallback() {
-      super.disconnectedCallback();
-
-      this[$mutationObserver].disconnect();
-
-      const executionContext = this[$executionContext];
-
-      if (executionContext != null) {
-        await executionContext.terminate();
-        this[$executionContext] = null;
-      }
-    }
-
-    updated(changedProperties: Map<string|symbol, unknown>): void {
+    updated(changedProperties: Map<string, any>) {
       super.updated(changedProperties);
-      if (changedProperties.has($modelGraft)) {
-        const oldModelGraft =
-            changedProperties.get($modelGraft) as ModelGraft | null;
-        if (oldModelGraft != null) {
-          oldModelGraft.removeEventListener(
-              'mutation', this[$modelGraftMutationHandler]);
+
+      if (changedProperties.has('variantName')) {
+        const variants = this[$variants];
+        const threeGLTF = this[$currentGLTF];
+        const {variantName} = this;
+
+        const variantIndex = variants.findIndex((v) => v === variantName);
+        if (threeGLTF == null || variantIndex < 0) {
+          return;
         }
 
-        const modelGraft = this[$modelGraft];
+        const onUpdate = () => {
+          this[$needsRender]();
+        };
 
-        if (modelGraft != null) {
-          modelGraft.addEventListener(
-              'mutation', this[$modelGraftMutationHandler]);
-        }
-      }
-    }
+        const updatedMaterials =
+            threeGLTF.correlatedSceneGraph.loadVariant(variantIndex, onUpdate);
+        const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
-    [$onModelLoad](event: any) {
-      super[$onModelLoad](event);
-
-      this[$updateExecutionContextModel]();
-    }
-
-    [$isValid3DOMScript](node: Node) {
-      return node instanceof HTMLScriptElement &&
-          (node.textContent || node.src) &&
-          node.getAttribute('type') === SCENE_GRAPH_SCRIPT_TYPE
-    }
-
-    [$onChildListMutation](records: Array<MutationRecord>) {
-      if (this.parentNode == null) {
-        // Ignore a lazily reported list of mutations if we are detached
-        // from the document...
-        return;
-      }
-
-      let lastScriptElement: HTMLScriptElement|null = null;
-
-      for (const record of records) {
-        for (const node of Array.from(record.addedNodes)) {
-          if (this[$isValid3DOMScript](node)) {
-            lastScriptElement = node as HTMLScriptElement;
-          }
+        for (const index of updatedMaterials) {
+          const material = gltf.materials![index];
+          this[$model]!.materials[index] = new Material(
+              onUpdate,
+              gltf,
+              material,
+              gltfElementMap.get(material) as Set<MeshStandardMaterial>);
         }
       }
 
-      if (lastScriptElement != null) {
-        this[$onScriptElementAdded](lastScriptElement);
+      if (changedProperties.has('orientation') ||
+          changedProperties.has('scale')) {
+        const {modelContainer} = this[$scene];
+
+        const orientation = parseExpressions(this.orientation)[0]
+                                .terms as [NumberNode, NumberNode, NumberNode];
+
+        const roll = normalizeUnit(orientation[0]).number;
+        const pitch = normalizeUnit(orientation[1]).number;
+        const yaw = normalizeUnit(orientation[2]).number;
+
+        modelContainer.quaternion.setFromEuler(
+            new Euler(pitch, yaw, roll, 'YXZ'));
+
+        const scale = parseExpressions(this.scale)[0]
+                          .terms as [NumberNode, NumberNode, NumberNode];
+
+        modelContainer.scale.set(
+            scale[0].number, scale[1].number, scale[2].number);
+
+        this[$scene].updateBoundingBox();
+        this[$scene].updateShadow();
+        this[$renderer].arRenderer.onUpdateScene();
+        this[$needsRender]();
       }
     }
 
-    [$onScriptElementAdded](script: HTMLScriptElement) {
-      if (!this[$isValid3DOMScript](script)) {
-        return;
-      }
+    [$onModelLoad]() {
+      super[$onModelLoad]();
 
-      const allowString = script.getAttribute('allow') || '';
-      const allowList =
-          allowString.split(';')
-              .map((fragment) => fragment.trim())
-              .filter<ThreeDOMCapability>(
-                  (capability): capability is ThreeDOMCapability =>
-                      VALID_CAPABILITIES.has(capability as ThreeDOMCapability));
+      this[$variants] = [];
 
-      if (script.src) {
-        this[$createExecutionContext](script.src, allowList);
-      } else {
-        this[$createExecutionContext](
-            script.textContent!, allowList, {eval: true});
-      }
-    }
-
-    async[$createExecutionContext](
-        scriptSource: string, capabilities: Array<ThreeDOMCapability>,
-        options = {eval: false}) {
-      let executionContext = this[$executionContext];
-
-      if (executionContext != null) {
-        await executionContext.terminate();
-      }
-
-      this[$executionContext] = executionContext =
-          new ThreeDOMExecutionContext(capabilities);
-
-      this.dispatchEvent(new CustomEvent(
-          'worklet-created', {detail: {worklet: this.worklet}}));
-
-      if (options.eval) {
-        await executionContext.eval(scriptSource);
-      } else {
-        await executionContext.import(scriptSource);
-      }
-
-      this[$updateExecutionContextModel]();
-    }
-
-    [$updateExecutionContextModel]() {
-      const executionContext = this[$executionContext];
-
-      if (executionContext == null || this.parentNode == null) {
-        // Ignore if we don't have a 3DOM script to run, or if we are
-        // currently detached from the document
-        return;
-      }
-
-      const scene = this[$scene];
-      const {model} = scene;
-      const {currentGLTF} = model;
-      let modelGraft: ModelGraft|null = null;
+      const {currentGLTF} = this[$scene];
 
       if (currentGLTF != null) {
         const {correlatedSceneGraph} = currentGLTF;
-        const currentModelGraft = this[$modelGraft];
 
-        if (correlatedSceneGraph != null) {
-          if (currentModelGraft != null && currentGLTF === this[$currentGLTF]) {
-            return;
+        if (correlatedSceneGraph != null &&
+            currentGLTF !== this[$currentGLTF]) {
+          this[$model] = new Model(correlatedSceneGraph, () => {
+            this[$needsRender]();
+          });
+        }
+
+        // KHR_materials_variants extension spec:
+        // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
+
+        const {gltfExtensions} = currentGLTF.userData;
+        if (gltfExtensions != null) {
+          const extension = gltfExtensions['KHR_materials_variants'];
+
+          if (extension != null) {
+            this[$variants] =
+                (extension.variants as Variants).map(variant => variant.name);
           }
-
-          modelGraft = new ModelGraft(model.url || '', correlatedSceneGraph);
         }
       }
 
-      executionContext.changeModel(modelGraft);
-
-      this[$modelGraft] = modelGraft;
       this[$currentGLTF] = currentGLTF;
+      // TODO: remove this event, as it is synonymous with the load event.
+      this.dispatchEvent(new CustomEvent('scene-graph-ready'));
     }
 
-    [$onModelGraftMutation](_event: Event) {
-      this[$needsRender]();
+    /** @export */
+    async exportScene(options?: SceneExportOptions): Promise<Blob> {
+      const scene = this[$scene];
+      return new Promise<Blob>(async (resolve) => {
+        // Defaults
+        const opts = {
+          binary: true,
+          onlyVisible: true,
+          maxTextureSize: Infinity,
+          forcePowerOfTwoTextures: false,
+          includeCustomExtensions: false,
+          embedImages: true
+        } as GLTFExporterOptions;
+
+        Object.assign(opts, options);
+        // Not configurable
+        opts.animations = scene.animations;
+        opts.truncateDrawRange = true;
+
+        const shadow = scene.shadow;
+        let visible = false;
+        // Remove shadow from export
+        if (shadow != null) {
+          visible = shadow.visible;
+          shadow.visible = false;
+        }
+
+        const exporter = new GLTFExporter();
+        exporter.parse(scene.modelContainer, (gltf) => {
+          return resolve(
+              new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
+                type: opts.binary ? 'application/octet-stream' :
+                                    'application/json'
+              }));
+        }, opts);
+
+        if (shadow != null) {
+          shadow.visible = visible;
+        }
+      });
     }
   }
 

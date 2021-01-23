@@ -3,3 +3,4 @@ node_modules
 test/renderers/filament/ktx
 test/renderers/filament/cmgen
 test/results
+test/renderers/dspbr-pt/shader

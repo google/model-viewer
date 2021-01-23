@@ -16,25 +16,37 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$renderer, $scene, $tick} from '../model-viewer-base.js';
+import {style} from '../decorators.js';
+import ModelViewerElementBase, {$hasTransitioned, $renderer, $scene, $tick} from '../model-viewer-base.js';
+import {degreesToRadians} from '../styles/conversions.js';
+import {EvaluatedStyle, Intrinsics} from '../styles/evaluators.js';
+import {numberNode, NumberNode} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
 
 import {CameraChangeDetails} from './controls.js';
 
 // How much the model will rotate per
 // second in radians:
-const ROTATION_SPEED = Math.PI / 32;
+const DEFAULT_ROTATION_SPEED = Math.PI / 32;
 export const AUTO_ROTATE_DELAY_DEFAULT = 3000;
 
+const rotationRateIntrinsics = {
+  basis:
+      [degreesToRadians(numberNode(DEFAULT_ROTATION_SPEED, 'rad')) as
+       NumberNode<'rad'>],
+  keywords: {auto: [null]}
+};
+
 const $autoRotateStartTime = Symbol('autoRotateStartTime');
-const $cameraChangeHandler = Symbol('cameraChangeHandler');
+const $radiansPerSecond = Symbol('radiansPerSecond');
+const $syncRotationRate = Symbol('syncRotationRate');
 const $onCameraChange = Symbol('onCameraChange');
 
 export declare interface StagingInterface {
   autoRotate: boolean;
   autoRotateDelay: number;
   readonly turntableRotation: number;
-  resetTurntableRotation(): void;
+  resetTurntableRotation(theta?: number): void;
 }
 
 export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -46,21 +58,25 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'auto-rotate-delay'})
     autoRotateDelay: number = AUTO_ROTATE_DELAY_DEFAULT;
 
+    @style(
+        {intrinsics: rotationRateIntrinsics, updateHandler: $syncRotationRate})
+    @property({type: String, attribute: 'rotation-per-second'})
+    rotationPerSecond: string = 'auto';
+
     private[$autoRotateStartTime] = performance.now();
-    private[$cameraChangeHandler] = (event: CustomEvent<CameraChangeDetails>) =>
-        this[$onCameraChange](event);
+    private[$radiansPerSecond] = 0;
 
     connectedCallback() {
       super.connectedCallback();
       this.addEventListener(
-          'camera-change', this[$cameraChangeHandler] as EventListener);
+          'camera-change', this[$onCameraChange] as EventListener);
       this[$autoRotateStartTime] = performance.now();
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
       this.removeEventListener(
-          'camera-change', this[$cameraChangeHandler] as EventListener);
+          'camera-change', this[$onCameraChange] as EventListener);
       this[$autoRotateStartTime] = performance.now();
     }
 
@@ -72,10 +88,14 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
+    [$syncRotationRate](style: EvaluatedStyle<Intrinsics<['rad']>>) {
+      this[$radiansPerSecond] = style[0];
+    }
+
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (!this.autoRotate || !this.modelIsVisible ||
+      if (!this.autoRotate || !this[$hasTransitioned]() ||
           this[$renderer].isPresenting) {
         return;
       }
@@ -84,12 +104,12 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
           delta, time - this[$autoRotateStartTime] - this.autoRotateDelay);
 
       if (rotationDelta > 0) {
-        this[$scene].yaw =
-            this.turntableRotation + ROTATION_SPEED * rotationDelta * 0.001;
+        this[$scene].yaw = this.turntableRotation +
+            this[$radiansPerSecond] * rotationDelta * 0.001;
       }
     }
 
-    [$onCameraChange](event: CustomEvent<CameraChangeDetails>) {
+    [$onCameraChange] = (event: CustomEvent<CameraChangeDetails>) => {
       if (!this.autoRotate) {
         return;
       }
@@ -97,14 +117,14 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (event.detail.source === 'user-interaction') {
         this[$autoRotateStartTime] = performance.now();
       }
-    }
+    };
 
     get turntableRotation(): number {
       return this[$scene].yaw;
     }
 
-    resetTurntableRotation() {
-      this[$scene].yaw = 0;
+    resetTurntableRotation(theta = 0) {
+      this[$scene].yaw = theta;
     }
   }
 

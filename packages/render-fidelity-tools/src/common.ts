@@ -24,15 +24,36 @@ export const COMPONENTS_PER_PIXEL: number = 4;
 // @see http://www.progmat.uaem.mx:8080/artVol2Num2/Articulo3Vol2Num2.pdf
 export const MAX_COLOR_DISTANCE: number = 35215;
 
+export const DEVICE_PIXEL_RATIO: number = 2;
+
+// use this threshold to do automatic fidelity test for model-viewer. any
+// scenario whose rms value (in dB) is bigger than the threshold will fail.
+export const FIDELITY_TEST_THRESHOLD: number = -19;
+
+export const WARNING_MESSAGE: string =
+    'Candidate image is semi-transparent, probably the screenshot was taken before the poster faded away!';
+
+export interface FidelityRegressionResults {
+  results: Array<ImageComparisonAnalysis>;
+  warnings: Array<string>;
+  errors: Array<string>;
+}
+
 export interface ImageComparisonAnalysis {
-  matchingRatio: number;
-  averageDistanceRatio: number;
-  mismatchingAverageDistanceRatio: number;
+  rmsDistanceRatio: number;
 }
 
 export interface ImageComparisonResults {
-  analysis: ImageComparisonAnalysis;
+  analysis: ImageComparisonAnalysis
+}
+
+export interface Visuals {
   imageBuffers: {delta: ArrayBuffer|null; blackWhite: ArrayBuffer | null;};
+}
+
+export interface ScenarioRecord {
+  analysisResults: Array<ImageComparisonAnalysis>;
+  scenarioConfig: ScenarioConfig;
 }
 
 export interface ImageComparisonMessage {
@@ -58,7 +79,7 @@ export interface ThresholdChangedMessage extends ImageComparisonMessage {
 }
 
 export interface AnalysisCompletedMessage extends ImageComparisonMessage {
-  result: ImageComparisonResults
+  result: Visuals
 }
 
 export interface Dimensions {
@@ -86,6 +107,8 @@ export interface ScenarioConfig {
   orbit: {theta: number, phi: number, radius: number};
   verticalFoV: number;
   exclude?: Array<string>;
+  renderSkybox: boolean;
+  pt?: {numSamples?: number};
 }
 
 export interface RendererConfig {
@@ -132,25 +155,17 @@ export class ImageComparator {
     image[position + 3] = a;
   }
 
-  analyze(threshold: number, options: AnalysisOptions = {
-    generateVisuals: true
-  }): ImageComparisonResults {
+  generateVisuals(threshold: number): Visuals {
     const {candidateImage, goldenImage} = this;
     const {width, height} = this.dimensions;
-    const {generateVisuals} = options;
 
-    const blackWhiteImage = generateVisuals ?
-        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL) :
-        null;
-    const deltaImage = generateVisuals ?
-        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL) :
-        null;
+    const blackWhiteImage =
+        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL);
+    const deltaImage =
+        new Uint8ClampedArray(this.imagePixels * COMPONENTS_PER_PIXEL);
 
     const thresholdSquared = threshold * threshold;
 
-    let matched = 0;
-    let sum = 0;
-    let mismatchingSum = 0;
     let maximumDeltaIntensity = 0;
 
     if (candidateImage.length != goldenImage.length) {
@@ -166,76 +181,130 @@ export class ImageComparator {
             colorDelta(candidateImage, goldenImage, position, position);
         const exactlyMatched = (delta <= thresholdSquared ? 1 : 0) * 255;
 
-        if (exactlyMatched) {
-          matched++;
-        } else {
-          mismatchingSum += delta;
-        }
-
         const thresholdDelta = Math.max(0, delta - thresholdSquared);
 
-        sum += thresholdDelta;
+        const deltaIntensity =
+            Math.round(255 * thresholdDelta / MAX_COLOR_DISTANCE);
 
-        if (generateVisuals) {
-          const deltaIntensity =
-              Math.round(255 * thresholdDelta / MAX_COLOR_DISTANCE);
+        maximumDeltaIntensity = Math.max(deltaIntensity, maximumDeltaIntensity);
 
-          maximumDeltaIntensity =
-              Math.max(deltaIntensity, maximumDeltaIntensity);
-
-          this.drawPixel(
-              blackWhiteImage!,
-              position,
-              exactlyMatched,
-              exactlyMatched,
-              exactlyMatched);
-          this.drawPixel(
-              deltaImage!,
-              position,
-              255,
-              255 - deltaIntensity,
-              255 - deltaIntensity);
-        }
+        this.drawPixel(
+            blackWhiteImage,
+            position,
+            exactlyMatched,
+            exactlyMatched,
+            exactlyMatched);
+        this.drawPixel(
+            deltaImage,
+            position,
+            255,
+            255 - deltaIntensity,
+            255 - deltaIntensity);
       }
     }
 
-    if (generateVisuals) {
-      for (let y = 0; y < height; ++y) {
-        for (let x = 0; x < width; ++x) {
-          const index = y * width + x;
-          const position = index * COMPONENTS_PER_PIXEL;
-          const absoluteDeltaIntensity = 255 - deltaImage![position + 1];
-          const relativeDeltaIntensity = Math.round(
-              255 - 255 * (absoluteDeltaIntensity / maximumDeltaIntensity));
+    for (let y = 0; y < height; ++y) {
+      for (let x = 0; x < width; ++x) {
+        const index = y * width + x;
+        const position = index * COMPONENTS_PER_PIXEL;
+        const absoluteDeltaIntensity = 255 - deltaImage![position + 1];
+        const relativeDeltaIntensity = Math.round(
+            255 - 255 * (absoluteDeltaIntensity / maximumDeltaIntensity));
 
-          this.drawPixel(
-              deltaImage!,
-              position,
-              255,
-              relativeDeltaIntensity,
-              relativeDeltaIntensity);
-        }
+        this.drawPixel(
+            deltaImage,
+            position,
+            255,
+            relativeDeltaIntensity,
+            relativeDeltaIntensity);
       }
     }
-
-    const mismatchingPixels = this.imagePixels - matched;
-
-    const mismatchingAverageDistanceRatio = mismatchingPixels > 0 ?
-        mismatchingSum / (this.imagePixels - matched) / MAX_COLOR_DISTANCE :
-        0;
-    const averageDistanceRatio = sum / this.imagePixels / MAX_COLOR_DISTANCE;
 
     return {
-      analysis: {
-        matchingRatio: matched / this.imagePixels,
-        averageDistanceRatio,
-        mismatchingAverageDistanceRatio,
-      },
       imageBuffers: {
-        delta: deltaImage ? deltaImage.buffer as ArrayBuffer : null,
-        blackWhite: blackWhiteImage ? blackWhiteImage.buffer as ArrayBuffer :
-                                      null
+        delta: deltaImage ? deltaImage.buffer : null,
+        blackWhite: blackWhiteImage ? blackWhiteImage.buffer : null
       }
     };
   }
+
+  analyze(checkSemiTransparent: boolean = true): ImageComparisonResults {
+    const {candidateImage, goldenImage} = this;
+    const {width, height} = this.dimensions;
+
+    let squareSum = 0;
+
+    if (candidateImage.length != goldenImage.length) {
+      throw new Error(`Image sizes do not match (candidate: ${
+          candidateImage.length}, golden: ${goldenImage.length})`);
+    }
+
+    // Sometimes the screenshot is taken when poster has not faded away, and
+    // when the golden image's background (use top left pixel to represent) is
+    // transparent while the candidate(mode-viewer) image is not, it's
+    // definitely that case
+    if (checkSemiTransparent) {
+      const candidateTopLeftAlpha = candidateImage[3];
+      const goldenTopLeftAlpha = goldenImage[3];
+      if (goldenTopLeftAlpha != candidateTopLeftAlpha) {
+        throw new Error(WARNING_MESSAGE);
+      }
+    }
+
+    let modelPixelCount = 0;
+    let colorlessPixelCount = 0;
+
+    for (let y = 0; y < height; ++y) {
+      for (let x = 0; x < width; ++x) {
+        const index = y * width + x;
+        // image's pixel data is stored in an 1-D array, 1st row sequentialy,
+        // then 2nd row, .. for each pixel, its data is stored by order of r, g,
+        // b, a.  here position is the index for current pixel's r , position+3
+        // is index for its alpha
+        const position = index * COMPONENTS_PER_PIXEL;
+        // alpha is in range 0~255 here, map it to 0~1
+        const alpha = candidateImage[position + 3] / 255;
+
+        let isWhitePixel = true;
+        let isBlackPixel = true;
+        for (let i = 0; i < 3; i++) {
+          const colorComponent = candidateImage[position + i] * alpha;
+          if (colorComponent != 255) {
+            isWhitePixel = false;
+          }
+          if (colorComponent != 0) {
+            isBlackPixel = false;
+          }
+        }
+
+        if (isBlackPixel || isWhitePixel) {
+          colorlessPixelCount++;
+        }
+
+        if (alpha === 0) {
+          continue;
+        }
+
+        const delta =
+            colorDelta(candidateImage, goldenImage, position, position);
+
+        squareSum += delta * delta;
+        modelPixelCount++;
+      }
+    }
+
+    const imagePixelCount = width * height;
+
+    if (colorlessPixelCount === imagePixelCount) {
+      throw new Error('Candidate image is colorless!');
+    }
+
+    const rmsDistanceRatio =
+        Math.sqrt(squareSum / modelPixelCount) / MAX_COLOR_DISTANCE;
+    return {analysis: {rmsDistanceRatio}};
+  }
+}
+
+export function toDecibel(value: number): number {
+  return 10 * Math.log10(value);
 }

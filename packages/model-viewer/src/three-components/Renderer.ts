@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGL1Renderer} from 'three';
+import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$canvas, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
+import {$canvas, $sceneIsReady, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
+import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {Debugger} from './Debugger.js';
+import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
-import * as WebGLUtils from './WebGLUtils.js';
 
 export interface RendererOptions {
   debug?: boolean;
@@ -39,14 +41,8 @@ const DURATION_DECAY = 0.2;
 const LOW_FRAME_DURATION_MS = 18;
 const HIGH_FRAME_DURATION_MS = 26;
 const MAX_AVG_CHANGE_MS = 2;
-const SCALE_STEP = 0.79;
-const DEFAULT_MIN_SCALE = 0.5;
-
-export const $arRenderer = Symbol('arRenderer');
-
-const $onWebGLContextLost = Symbol('onWebGLContextLost');
-const $webGLContextLostHandler = Symbol('webGLContextLostHandler');
-const $singleton = Symbol('singleton');
+const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
+const DEFAULT_LAST_STEP = 3;
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -60,51 +56,58 @@ const $singleton = Symbol('singleton');
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  static[$singleton] = new Renderer({debug: isDebugMode()});
+  static _singleton = new Renderer({debug: isDebugMode()});
 
   static get singleton() {
-    return this[$singleton];
+    return this._singleton;
   }
 
   static resetSingleton() {
-    this[$singleton].dispose();
-    this[$singleton] = new Renderer({debug: isDebugMode()});
+    this._singleton.dispose();
+    this._singleton = new Renderer({debug: isDebugMode()});
   }
 
-  public threeRenderer!: WebGLRenderer;
-  public context3D!: WebGLRenderingContext|null;
+  public threeRenderer!: WebGL1Renderer;
   public canvasElement: HTMLCanvasElement;
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
+  public roughnessMipmapper: RoughnessMipmapper;
+  public loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
+  public width = 0;
+  public height = 0;
   public dpr = 1;
-  public minScale = DEFAULT_MIN_SCALE;
 
   protected debugger: Debugger|null = null;
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
   private lastTick: number;
-  private width = 0;
-  private height = 0;
-  private scale = 1;
+  private scaleStep = 0;
+  private lastStep = DEFAULT_LAST_STEP;
   private avgFrameDuration =
       (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
-  private[$webGLContextLostHandler] = (event: WebGLContextEvent) =>
-      this[$onWebGLContextLost](event);
-
   get canRender() {
-    return this.threeRenderer != null && this.context3D != null;
+    return this.threeRenderer != null;
+  }
+
+  get scaleFactor() {
+    return SCALE_STEPS[this.scaleStep];
+  }
+
+  set minScale(scale: number) {
+    let i = 1;
+    while (i < SCALE_STEPS.length) {
+      if (SCALE_STEPS[i] < scale) {
+        break;
+      }
+      ++i;
+    }
+    this.lastStep = i - 1;
   }
 
   constructor(options?: RendererOptions) {
     super();
-
-    const webGlOptions = {
-      alpha: true,
-      antialias: true,
-      powerPreference: 'high-performance' as WebGLPowerPreference
-    };
 
     this.dpr = resolveDpr();
 
@@ -115,24 +118,18 @@ export class Renderer extends EventDispatcher {
         this.canvasElement.transferControlToOffscreen() :
         this.canvasElement;
 
-    this.canvas3D.addEventListener(
-        'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
+    this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
 
     try {
-      // Need to support both 'webgl' and 'experimental-webgl' (IE11).
-      this.context3D = WebGLUtils.getContext(this.canvas3D, webGlOptions);
-
-      // Patch the gl context's extension functions before passing
-      // it to three.
-      WebGLUtils.applyExtensionCompatibility(this.context3D);
-
-      this.threeRenderer = new WebGLRenderer({
+      this.threeRenderer = new WebGL1Renderer({
         canvas: this.canvas3D,
-        context: this.context3D,
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance' as WebGLPowerPreference,
+        preserveDrawingBuffer: true
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = GammaEncoding;
-      this.threeRenderer.gammaFactor = 2.2;
       this.threeRenderer.physicallyCorrectLights = true;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
       this.threeRenderer.shadowMap.enabled = true;
@@ -147,13 +144,13 @@ export class Renderer extends EventDispatcher {
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
     } catch (error) {
-      this.context3D = null;
       console.warn(error);
     }
 
     this.arRenderer = new ARRenderer(this);
     this.textureUtils =
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
+    this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
 
     this.updateRendererSize();
     this.lastTick = performance.now();
@@ -196,8 +193,9 @@ export class Renderer extends EventDispatcher {
     }
 
     // Expand the canvas size to make up for shrinking the viewport.
-    const widthCSS = width / this.scale;
-    const heightCSS = height / this.scale;
+    const scale = this.scaleFactor;
+    const widthCSS = width / scale;
+    const heightCSS = height / scale;
     // The canvas element must by styled outside of three due to the offscreen
     // canvas not being directly stylable.
     this.canvasElement.style.width = `${widthCSS}px`;
@@ -208,8 +206,8 @@ export class Renderer extends EventDispatcher {
     // and only the portion that is shown is copied over.
     for (const scene of this.scenes) {
       const {canvas} = scene;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
       canvas.style.width = `${widthCSS}px`;
       canvas.style.height = `${heightCSS}px`;
       scene.isDirty = true;
@@ -217,20 +215,19 @@ export class Renderer extends EventDispatcher {
   }
 
   private updateRendererScale() {
-    let {scale} = this;
+    const scaleStep = this.scaleStep;
     if (this.avgFrameDuration > HIGH_FRAME_DURATION_MS &&
-        scale > this.minScale) {
-      scale *= SCALE_STEP;
-    } else if (this.avgFrameDuration < LOW_FRAME_DURATION_MS && scale < 1) {
-      scale /= SCALE_STEP;
-      scale = Math.min(scale, 1);
+        this.scaleStep < this.lastStep) {
+      ++this.scaleStep;
+    } else if (
+        this.avgFrameDuration < LOW_FRAME_DURATION_MS && this.scaleStep > 0) {
+      --this.scaleStep;
     }
-    scale = Math.max(scale, this.minScale);
 
-    if (scale == this.scale) {
+    if (scaleStep == this.scaleStep) {
       return;
     }
-    this.scale = scale;
+    const scale = this.scaleFactor;
     this.avgFrameDuration =
         (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
@@ -250,12 +247,13 @@ export class Renderer extends EventDispatcher {
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
     const {canvas} = scene;
+    const scale = this.scaleFactor;
 
-    canvas.width = this.width * this.dpr;
-    canvas.height = this.height * this.dpr;
+    canvas.width = Math.round(this.width * this.dpr);
+    canvas.height = Math.round(this.height * this.dpr);
 
-    canvas.style.width = `${this.width / this.scale}px`;
-    canvas.style.height = `${this.height / this.scale}px`;
+    canvas.style.width = `${this.width / scale}px`;
+    canvas.style.height = `${this.height / scale}px`;
 
     if (this.multipleScenesVisible) {
       canvas.classList.add('show');
@@ -298,12 +296,13 @@ export class Renderer extends EventDispatcher {
     let visibleScenes = 0;
     let visibleInput = null;
     for (const scene of this.scenes) {
-      if (scene.visible) {
+      const {element} = scene;
+      if (element.modelIsVisible) {
         ++visibleScenes;
-        visibleInput = scene.element[$userInputElement];
+        visibleInput = element[$userInputElement];
       }
     }
-    const multipleScenesVisible = visibleScenes > 1;
+    const multipleScenesVisible = visibleScenes > 1 || USE_OFFSCREEN_CANVAS;
     const {canvasElement} = this;
 
     if (multipleScenesVisible === this.multipleScenesVisible &&
@@ -331,6 +330,23 @@ export class Renderer extends EventDispatcher {
     }
   }
 
+  /**
+   * Returns an array version of this.scenes where the non-visible ones are
+   * first. This allows eager scenes to be rendered before they are visible,
+   * without needing the multi-canvas render path.
+   */
+  private orderedScenes(): Array<ModelScene> {
+    const scenes = [];
+    for (const visible of [false, true]) {
+      for (const scene of this.scenes) {
+        if (scene.element.modelIsVisible === visible) {
+          scenes.push(scene);
+        }
+      }
+    }
+    return scenes;
+  }
+
   get isPresenting(): boolean {
     return this.arRenderer.isPresenting;
   }
@@ -340,7 +356,7 @@ export class Renderer extends EventDispatcher {
    * the time that has passed since the last rendered frame.
    */
   preRender(scene: ModelScene, t: number, delta: number) {
-    const {element, exposure, model} = scene;
+    const {element, exposure} = scene;
 
     element[$tick](t, delta);
 
@@ -348,7 +364,7 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !(self as any).isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
-    if (model.updateShadow()) {
+    if (scene.isShadowDirty()) {
       this.threeRenderer.shadowMap.needsUpdate = true;
     }
   }
@@ -370,10 +386,10 @@ export class Renderer extends EventDispatcher {
     this.updateRendererSize();
     this.updateRendererScale();
 
-    const {dpr, scale} = this;
+    const {dpr, scaleFactor} = this;
 
-    for (const scene of this.scenes) {
-      if (scene.hasRendered && (!scene.visible || scene.paused)) {
+    for (const scene of this.orderedScenes()) {
+      if (!scene.element[$sceneIsReady]()) {
         continue;
       }
 
@@ -383,12 +399,24 @@ export class Renderer extends EventDispatcher {
         continue;
       }
       scene.isDirty = false;
-      scene.hasRendered = true;
+      ++scene.renderCount;
+
+      if (!scene.element.modelIsVisible && !this.multipleScenesVisible) {
+        // Here we are pre-rendering on the visible canvas, so we must mark the
+        // visible scene dirty to ensure it overwrites us.
+        for (const scene of this.scenes) {
+          if (scene.element.modelIsVisible) {
+            scene.isDirty = true;
+          }
+        }
+      }
 
       // We avoid using the Three.js PixelRatio and handle it ourselves here so
       // that we can do proper rounding and avoid white boundary pixels.
-      const width = Math.ceil(scene.width * scale * dpr);
-      const height = Math.ceil(scene.height * scale * dpr);
+      const width = Math.min(
+          Math.ceil(scene.width * scaleFactor * dpr), this.canvas3D.width);
+      const height = Math.min(
+          Math.ceil(scene.height * scaleFactor * dpr), this.canvas3D.height);
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer
@@ -431,11 +459,11 @@ export class Renderer extends EventDispatcher {
     this.scenes.clear();
 
     this.canvas3D.removeEventListener(
-        'webglcontextlost', this[$webGLContextLostHandler] as EventListener);
+        'webglcontextlost', this.onWebGLContextLost);
   }
 
-  [$onWebGLContextLost](event: WebGLContextEvent) {
+  onWebGLContextLost = (event: Event) => {
     this.dispatchEvent(
         {type: 'contextlost', sourceEvent: event} as ContextLostEvent);
-  }
+  };
 }

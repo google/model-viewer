@@ -17,7 +17,7 @@ import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
 import {IS_IE11} from '../../constants.js';
 import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
-import {$currentSession, $onWebXRFrame, ARRenderer} from '../../three-components/ARRenderer.js';
+import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {SETTLING_TIME} from '../../three-components/Damper.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
@@ -55,7 +55,9 @@ class MockXRFrame implements XRFrame {
       projectionMatrix: camera.projectionMatrix.elements as unknown as
           Float32Array,
       viewMatrix: {} as Float32Array,
-      transform: transform
+      transform: transform,
+      recommendedViewportScale: null,
+      requestViewportScale: (_scale: number|null) => {}
     };
     const viewerPos: XRViewerPose = {transform: transform, views: [view]};
 
@@ -95,8 +97,13 @@ suite('ARRenderer', () => {
   const stubWebXrInterface = (arRenderer: ARRenderer) => {
     arRenderer.resolveARSession = async () => {
       class FakeSession extends EventTarget implements XRSession {
-        public renderState: XRRenderState = {baseLayer: {} as XRLayer} as
-            XRRenderState;
+        public renderState: XRRenderState = {
+          baseLayer: {
+            getViewport: () => {
+              return {x: 0, y: 0, width: 320, height: 240} as XRViewport
+            }
+          } as XRLayer
+        } as XRRenderState;
 
         public hitTestSources: Set<XRHitTestSource> =
             new Set<XRHitTestSource>();
@@ -189,7 +196,7 @@ suite('ARRenderer', () => {
         width: 200,
         height: 100,
       });
-      await modelScene.setModelSource(assetPath('models/Astronaut.glb'));
+      await modelScene.setSource(assetPath('models/Astronaut.glb'));
       stubWebXrInterface(arRenderer);
       setInputSources([]);
 
@@ -211,7 +218,7 @@ suite('ARRenderer', () => {
     });
 
     test('presents the model at its natural scale', () => {
-      const scale = modelScene.model.getWorldScale(new Vector3());
+      const scale = modelScene.target.getWorldScale(new Vector3());
 
       expect(scale.x).to.be.equal(1);
       expect(scale.y).to.be.equal(1);
@@ -224,7 +231,7 @@ suite('ARRenderer', () => {
       });
 
       test('restores the model to its natural scale', () => {
-        const scale = modelScene.model.getWorldScale(new Vector3());
+        const scale = modelScene.target.getWorldScale(new Vector3());
 
         expect(scale.x).to.be.equal(1);
         expect(scale.y).to.be.equal(1);
@@ -249,19 +256,18 @@ suite('ARRenderer', () => {
 
       setup(async () => {
         await arRenderer.present(modelScene);
-        arRenderer[$onWebXRFrame](
-            0, new MockXRFrame(arRenderer[$currentSession]!));
+        arRenderer.onWebXRFrame(0, new MockXRFrame(arRenderer.currentSession!));
         yaw = modelScene.yaw;
       });
 
       test('places the model oriented to the camera', () => {
         const epsilon = 0.0001;
-        const {model, position} = modelScene;
+        const {target, position} = modelScene;
 
         const cameraPosition = arRenderer.camera.position;
         const cameraToHit = new Vector2(
             position.x - cameraPosition.x, position.z - cameraPosition.z);
-        const forward = model.getWorldDirection(new Vector3());
+        const forward = target.getWorldDirection(new Vector3());
         const forwardProjection = new Vector2(forward.x, forward.z);
 
         expect(forward.y).to.be.equal(0);
@@ -276,8 +282,8 @@ suite('ARRenderer', () => {
           hitPosition = new Vector3(5, -1, 1);
           await arRenderer.placeModel(hitPosition);
           // Long enough time to settle at new position.
-          arRenderer[$onWebXRFrame](
-              SETTLING_TIME, new MockXRFrame(arRenderer[$currentSession]!));
+          arRenderer.onWebXRFrame(
+              SETTLING_TIME, new MockXRFrame(arRenderer.currentSession!));
         });
 
         test('scene has the same orientation', () => {

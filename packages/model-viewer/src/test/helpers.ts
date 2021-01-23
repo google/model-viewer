@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {EventDispatcher, Group, Texture} from 'three';
-import {GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {Group} from 'three';
+import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
-import {deserializeUrl} from '../utilities.js';
+import {deserializeUrl, PredicateFunction, timePasses} from '../utilities.js';
 
 export const elementFromLocalPoint =
     (document: Document|ShadowRoot, x: number, y: number): Element|null => {
@@ -38,17 +38,6 @@ export const pickShadowDescendant =
           null;
     };
 
-export const timePasses = (ms: number = 0): Promise<void> =>
-    new Promise(resolve => setTimeout(resolve, ms));
-
-export type PredicateFunction<T = void> = (value: T) => boolean;
-
-/**
- * Three.js EventDispatcher and DOM EventTarget use different event patterns,
- * so AnyEvent covers the shape of both event types.
- */
-export type AnyEvent = Event|CustomEvent<any>|{[index: string]: string};
-
 export const until =
     async (predicate: PredicateFunction) => {
   while (!predicate()) {
@@ -58,41 +47,6 @@ export const until =
 
 export const rafPasses = (): Promise<void> =>
     new Promise(resolve => requestAnimationFrame(() => resolve()));
-
-/**
- * Takes a texture and an object and returns a boolean indicating
- * if whether or not the texture's userData matches the fields
- * defined on the `meta` object.
- *
- * @param {THREE.Texture}
- * @param {Object}
- * @return {boolean}
- */
-export const textureMatchesMeta =
-    (texture: Texture, meta: {[index: string]: any}): boolean =>
-        !!(texture && (texture as any).userData &&
-           Object.keys(meta).reduce((matches, key) => {
-             return matches && meta[key] === (texture as any).userData[key];
-           }, true));
-
-/**
- * @param {EventTarget|EventDispatcher} target
- * @param {string} eventName
- * @param {?Function} predicate
- */
-export const waitForEvent = <T extends AnyEvent = Event>(
-    target: EventTarget|EventDispatcher,
-    eventName: string,
-    predicate: PredicateFunction<T>|null = null): Promise<T> =>
-    new Promise(resolve => {
-      function handler(event: AnyEvent) {
-        if (!predicate || predicate(event as T)) {
-          resolve(event as T);
-          target.removeEventListener(eventName, handler);
-        }
-      }
-      target.addEventListener(eventName, handler);
-    });
 
 export interface SyntheticEventProperties {
   clientX?: number;
@@ -208,6 +162,13 @@ export const operatorNode = (value: Operator): OperatorNode =>
 export const functionNode =
     (name: string, args: Array<ExpressionNode>): FunctionNode =>
         ({type: 'function', name: identNode(name), arguments: args});
+
+export const loadThreeGLTF = (url: string): Promise<ThreeGLTF> => {
+  const loader = new GLTFLoader();
+  return new Promise<ThreeGLTF>((resolve, reject) => {
+    loader.load(url, resolve, undefined, reject);
+  });
+};
 
 export const createFakeThreeGLTF = () => {
   const scene = new Group();

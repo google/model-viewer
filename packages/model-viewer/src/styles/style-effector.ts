@@ -99,7 +99,6 @@ const $computeStyleCallback = Symbol('computeStyleCallback');
 const $astWalker = Symbol('astWalker');
 const $dependencies = Symbol('dependencies');
 
-const $scrollHandler = Symbol('scrollHandler');
 const $onScroll = Symbol('onScroll');
 
 /**
@@ -126,8 +125,6 @@ export class StyleEffector {
 
   protected[$computeStyleCallback]: StyleEffectorCallback;
   protected[$astWalker] = new ASTWalker<FunctionNode>(['function']);
-
-  protected[$scrollHandler] = () => this[$onScroll]();
 
   constructor(callback: StyleEffectorCallback) {
     this[$computeStyleCallback] = callback;
@@ -156,7 +153,7 @@ export class StyleEffector {
           if (newDependencies['window-scroll'] == null) {
             const observer = 'window-scroll' in oldDependencies ?
                 oldDependencies['window-scroll'] :
-                new ScrollObserver(this[$scrollHandler]);
+                new ScrollObserver(this[$onScroll]);
             observer!.observe();
             delete oldDependencies['window-scroll'];
             newDependencies['window-scroll'] = observer;
@@ -185,7 +182,7 @@ export class StyleEffector {
     }
   }
 
-  protected[$onScroll]() {
+  protected[$onScroll] = () => {
     this[$computeStyleCallback]({relatedState: 'window-scroll'});
-  }
+  };
 }

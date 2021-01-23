@@ -13,20 +13,31 @@
  * limitations under the License.
  */
 
+import ModelViewerElementBase from '../../model-viewer-base.js';
 import {$evictionPolicy, CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
 
+const ModelViewerElement = class extends ModelViewerElementBase {
+  static get is() {
+    return 'model-viewer-loader';
+  }
+};
+
+customElements.define('model-viewer-loader', ModelViewerElement);
+
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 suite('CachingGLTFLoader', () => {
   suite('when loading a glTF', () => {
     let loader: CachingGLTFLoader;
+    let element: ModelViewerElementBase;
 
     setup(() => {
       loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
+      element = new ModelViewerElement();
     });
 
     teardown(() => {
@@ -35,7 +46,7 @@ suite('CachingGLTFLoader', () => {
 
     suite('before glTF is loaded', () => {
       test('reports that it has not finished loading', async () => {
-        const fileLoads = loader.load(ASTRONAUT_GLB_PATH);
+        const fileLoads = loader.load(ASTRONAUT_GLB_PATH, element);
         try {
           expect(CachingGLTFLoader.hasFinishedLoading(ASTRONAUT_GLB_PATH))
               .to.be.false;
@@ -47,14 +58,14 @@ suite('CachingGLTFLoader', () => {
 
     suite('after glTF is loaded', () => {
       test('reports that it has finished loading', async () => {
-        await loader.load(ASTRONAUT_GLB_PATH);
+        await loader.load(ASTRONAUT_GLB_PATH, element);
         expect(CachingGLTFLoader.hasFinishedLoading(ASTRONAUT_GLB_PATH))
             .to.be.true;
       });
     });
 
     test('synchronously populates the cache', async () => {
-      const fileLoads = loader.load(ASTRONAUT_GLB_PATH);
+      const fileLoads = loader.load(ASTRONAUT_GLB_PATH, element);
       try {
         expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.true;
       } finally {
@@ -63,7 +74,7 @@ suite('CachingGLTFLoader', () => {
     });
 
     test('yields a promise that resolves a group', async () => {
-      const {scene} = await loader.load(ASTRONAUT_GLB_PATH);
+      const {scene} = await loader.load(ASTRONAUT_GLB_PATH, element);
       expect(scene).to.be.ok;
       expect(scene!.type).to.be.equal('Group');
     });
@@ -81,7 +92,7 @@ suite('CachingGLTFLoader', () => {
       });
 
       test('deletinates them when they are fully released', async () => {
-        const gltf = await loader.load(ASTRONAUT_GLB_PATH);
+        const gltf = await loader.load(ASTRONAUT_GLB_PATH, element);
 
         expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.true;
         gltf.dispose();

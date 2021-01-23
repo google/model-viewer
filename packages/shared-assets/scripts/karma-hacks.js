@@ -1,48 +1,4 @@
 module.exports.applyKarmaHacks = () => {
-  const uniqueTunnelID = `${Date.now()}-${Math.random().toString().slice(2)}`;
-
-  // This terrible hack needed in order to specify a custom BrowserStack
-  // tunnel identifier. Failures to do so results in overlapping tunnels when
-  // builds run in parallel.
-  // @see https://github.com/karma-runner/karma-browserstack-launcher/issues/155
-
-  // Patch global require so that we can intercept a resolved module by name. It
-  // isn't sufficient to require the module ourselves because it is a transitive
-  // dependency and we might not resolve the correct version:
-  const Module = module.constructor;
-  const require = Module.prototype.require;
-  Module.prototype.require = function(...args) {
-    const resolvedModule = require.apply(this, args);
-    if (args[0] === 'browserstack-local') {
-      const {Local} = resolvedModule;
-      // Annoyingly, browserstack-local populates methods using assignment on
-      // the instance rather than decorating the prototype, so we have to wrap
-      // the constructor in order to patch anything:
-      // @see https://github.com/browserstack/browserstack-local-nodejs/blob/d238484416e7ea6dfb51aede7d84d09339a8032a/lib/Local.js#L28
-      const WrappedLocal = function(...args) {
-        // Create an instance of the canonical class and patch its method post
-        // hoc before it is handed off to the invoking user:
-        const local = new Local(...args);
-        const start = local.start;
-        local.start = function(...args) {
-          const config = args[0];
-          // If the config is lacking a specified identifier for the tunnel,
-          // make sure to populate it with the one we want:
-          if (config && config.localIdentifier == null) {
-            console.warn(
-                'Patching BrowserStack tunnel configuration to specify unique ID:',
-                uniqueTunnelID);
-            config.localIdentifier = uniqueTunnelID;
-          }
-          return start.apply(this, args);
-        };
-        return local;
-      };
-      resolvedModule.Local = WrappedLocal;
-    }
-    return resolvedModule;
-  };
-
   // This terrible hack brought to you by a combination of two things:
   //  1. BrowserStack drops the server port when redirecting from localhost
   //     to bs-local.com on iOS
@@ -74,6 +30,4 @@ module.exports.applyKarmaHacks = () => {
   // so make sure to copy those over too:
   assign.call(Object, newAssign, assign);
   Object.assign = newAssign;
-
-  return uniqueTunnelID;
 };

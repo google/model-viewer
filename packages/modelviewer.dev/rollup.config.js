@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-const resolve = require('rollup-plugin-node-resolve');
-const replace = require('rollup-plugin-replace');
+const {nodeResolve: resolve} = require('@rollup/plugin-node-resolve');
+const replace = require('@rollup/plugin-replace');
 
 const onwarn = (warning, warn) => {
   // Suppress non-actionable warning caused by TypeScript boilerplate:
@@ -25,7 +25,7 @@ const onwarn = (warning, warn) => {
 
 const plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
 
-const watchFiles = ['lib/**', '../3dom/lib/**', '../model-viewer/lib/**'];
+const watchFiles = ['lib/**', '../model-viewer/lib/**'];
 
 const outputOptions = [
   {
@@ -66,6 +66,30 @@ const outputOptions = [
     input: './lib/tester.js',
     output:
         {file: './examples/built/tester-umd.js', format: 'umd', name: 'Tester'},
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
+  },
+  {
+    input: './lib/docs-and-examples/docs-and-examples.js',
+    output: {
+      file: './examples/built/docs-and-examples.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'docs-and-examples'
+    },
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn
+  },
+  {
+    input: './lib/docs-and-examples/docs-and-examples.js',
+    output:
+        {file: './examples/built/docs-and-examples-umd.js', format: 'umd', name: 'docs-and-examples'},
     watch: {
       include: watchFiles,
     },

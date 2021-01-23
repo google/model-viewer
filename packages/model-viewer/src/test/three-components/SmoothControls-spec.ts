@@ -16,7 +16,8 @@
 import {PerspectiveCamera, Vector3} from 'three';
 
 import {ChangeSource, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
-import {dispatchSyntheticEvent, waitForEvent} from '../helpers.js';
+import {waitForEvent} from '../../utilities.js';
+import {dispatchSyntheticEvent} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -244,39 +245,6 @@ suite('SmoothControls', () => {
           settleControls(controls);
 
           expect(controls.getFieldOfView()).to.be.closeTo(20, 0.00001);
-        });
-      });
-
-      suite('event handling', () => {
-        suite('prevent-all', () => {
-          setup(() => {
-            controls.applyOptions({
-              eventHandlingBehavior: 'prevent-all',
-              interactionPolicy: 'always-allow'
-            });
-          });
-
-          test('always preventDefaults handled, cancellable UI events', () => {
-            dispatchSyntheticEvent(element, 'mousedown');
-
-            const mousemove = dispatchSyntheticEvent(element, 'mousemove');
-
-            expect(mousemove.defaultPrevented).to.be.equal(true);
-          });
-        });
-
-        suite('prevent-handled', () => {
-          setup(() => {
-            controls.applyOptions({eventHandlingBehavior: 'prevent-handled'});
-          });
-
-          test('does not cancel unhandled UI events', () => {
-            dispatchSyntheticEvent(element, 'mousedown');
-
-            const mousemove = dispatchSyntheticEvent(element, 'mousemove');
-
-            expect(mousemove.defaultPrevented).to.be.equal(false);
-          });
         });
       });
 

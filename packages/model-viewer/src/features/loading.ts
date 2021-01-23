@@ -15,10 +15,10 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getLoaded, $getModelIsVisible, $isElementInViewport, $progressTracker, $updateSource, $userInputElement} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
-import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
-import {Constructor, deserializeUrl, throttle} from '../utilities.js';
+import {Renderer} from '../three-components/Renderer.js';
+import {Constructor, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 
@@ -31,7 +31,7 @@ export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 const PROGRESS_MASK_BASE_OPACITY = 0.2;
 
 const DEFAULT_DRACO_DECODER_LOCATION =
-    'https://www.gstatic.com/draco/versioned/decoders/1.3.5/';
+    'https://www.gstatic.com/draco/versioned/decoders/1.3.6/';
 
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
@@ -52,7 +52,6 @@ const PosterDismissalSource: {[index: string]: DismissalSource} = {
   INTERACTION: 'interaction'
 };
 
-const loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
 const loadingStatusAnnouncer = new LoadingStatusAnnouncer();
 
 export const $defaultProgressBarElement = Symbol('defaultProgressBarElement');
@@ -62,26 +61,14 @@ export const $posterContainerElement = Symbol('posterContainerElement');
 export const $defaultPosterElement = Symbol('defaultPosterElement');
 
 const $posterDismissalSource = Symbol('posterDismissalSource');
-
-const $modelIsReadyForReveal = Symbol('modelIsReadyForReveal');
-const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
-const $shouldRevealModel = Symbol('shouldRevealModel');
-const $showPoster = Symbol('showPoster');
 const $hidePoster = Symbol('hidePoster');
 const $modelIsRevealed = Symbol('modelIsRevealed');
-const $preloadAttempted = Symbol('preloadAttempted');
-const $sourceUpdated = Symbol('sourceUpdated');
-
-const $updateLoadingAndVisibility = Symbol('updateLoadingAndVisibility');
-
 const $updateProgressBar = Symbol('updateProgressBar');
 const $lastReportedProgress = Symbol('lastReportedProgress');
+const $transitioned = Symbol('transitioned');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
-const $clickHandler = Symbol('clickHandler');
-const $keydownHandler = Symbol('keydownHandler');
-const $progressHandler = Symbol('processHandler');
 const $onClick = Symbol('onClick');
 const $onKeydown = Symbol('onKeydown');
 const $onProgress = Symbol('onProgress');
@@ -93,6 +80,8 @@ export declare interface LoadingInterface {
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
+  showPoster(): void;
+  getDimensions(): Vector3D;
 }
 
 export declare interface LoadingStaticInterface {
@@ -172,15 +161,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * from .ZIP files, drag-and-drop APIs, and Data URIs.
      */
     static mapURLs(callback: (url: string) => string) {
-      loader[$loader].manager.setURLModifier(callback);
+      Renderer.singleton.loader[$loader].manager.setURLModifier(callback);
     }
 
     /**
      * A URL pointing to the image to use as a poster in scenarios where the
      * <model-viewer> is not ready to reveal a rendered model to the viewer.
      */
-    @property({converter: {fromAttribute: deserializeUrl}})
-    poster: string|null = null;
+    @property({type: String}) poster: string|null = null;
 
     /**
      * An enumerable attribute describing under what conditions the
@@ -210,13 +198,44 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * the poster via user input.
      */
     dismissPoster() {
-      this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
-      this.requestUpdate();
+      if (this[$sceneIsReady]()) {
+        this[$hidePoster]();
+      } else {
+        this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
+        this[$updateSource]();
+      }
+    }
+
+    /**
+     * Displays the poster, hiding the 3D model. If this is called after the 3D
+     * model has been revealed, then it will behave as though
+     * reveal='interaction', being dismissed either by a user click or a call to
+     * dismissPoster().
+     */
+    showPoster() {
+      const posterContainerElement = this[$posterContainerElement];
+      const defaultPosterElement = this[$defaultPosterElement];
+
+      defaultPosterElement.removeAttribute('tabindex');
+      defaultPosterElement.removeAttribute('aria-hidden');
+      posterContainerElement.classList.add('show');
+
+      const oldVisibility = this.modelIsVisible;
+      this[$modelIsRevealed] = false;
+      this[$announceModelVisibility](oldVisibility);
+      this[$transitioned] = false;
+    }
+
+    /**
+     * Returns the model's bounding box dimensions in meters, independent of
+     * turntable rotation.
+     */
+    getDimensions(): Vector3D {
+      return toVector3D(this[$scene].size);
     }
 
     protected[$modelIsRevealed] = false;
-    protected[$preloadAttempted] = false;
-    protected[$sourceUpdated] = false;
+    protected[$transitioned] = false;
 
     protected[$lastReportedProgress]: number = 0;
 
@@ -240,12 +259,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     protected[$ariaLabelCallToAction] =
         this[$defaultPosterElement].getAttribute('aria-label');
-
-    protected[$clickHandler]: () => void = () => this[$onClick]();
-    protected[$keydownHandler]:
-        (event: KeyboardEvent) => void = (event) => this[$onKeydown](event);
-    protected[$progressHandler]:
-        (event: Event) => void = (event) => this[$onProgress](event);
 
     protected[$updateProgressBar] = throttle((progress: number) => {
       const parentNode = this[$defaultProgressBarElement].parentNode as Element;
@@ -295,12 +308,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       // Fired when a user first clicks the model element. Used to
       // change the visibility of a poster image, or start loading
       // a model.
+      this[$posterContainerElement].addEventListener('click', this[$onClick]);
       this[$posterContainerElement].addEventListener(
-          'click', this[$clickHandler]);
-      this[$posterContainerElement].addEventListener(
-          'keydown', this[$keydownHandler]);
-      this[$progressTracker].addEventListener(
-          'progress', this[$progressHandler]);
+          'keydown', this[$onKeydown]);
+      this[$progressTracker].addEventListener('progress', this[$onProgress]);
 
       loadingStatusAnnouncer.registerInstance(this);
     }
@@ -309,11 +320,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.disconnectedCallback();
 
       this[$posterContainerElement].removeEventListener(
-          'click', this[$clickHandler]);
+          'click', this[$onClick]);
       this[$posterContainerElement].removeEventListener(
-          'keydown', this[$keydownHandler]);
-      this[$progressTracker].removeEventListener(
-          'progress', this[$progressHandler]);
+          'keydown', this[$onKeydown]);
+      this[$progressTracker].removeEventListener('progress', this[$onProgress]);
 
       loadingStatusAnnouncer.unregisterInstance(this)
     }
@@ -326,37 +336,28 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             `url(${this.poster})`;
       }
 
-      if (changedProperties.has('src')) {
-        if (!this[$modelIsReadyForReveal]) {
-          this[$lastReportedProgress] = 0;
-        }
-
-        this[$posterDismissalSource] = null;
-        this[$preloadAttempted] = false;
-        this[$sourceUpdated] = false;
-      }
-
       if (changedProperties.has('alt')) {
         this[$defaultPosterElement].setAttribute(
             'aria-label',
             `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
       }
 
-      this[$updateLoadingAndVisibility]()
+      if (changedProperties.has('reveal') || changedProperties.has('loaded')) {
+        if (!this[$sceneIsReady]()) {
+          this[$updateSource]();
+        }
+      }
     }
 
-    [$onClick]() {
-      if (this[$posterDismissalSource] != null ||
-          this.reveal === RevealStrategy.MANUAL) {
+    [$onClick] = () => {
+      if (this.reveal === RevealStrategy.MANUAL) {
         return;
       }
-      this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
-      this.requestUpdate();
-    }
+      this.dismissPoster();
+    };
 
-    [$onKeydown](event: KeyboardEvent) {
-      if (this[$posterDismissalSource] != null ||
-          this.reveal === RevealStrategy.MANUAL) {
+    [$onKeydown] = (event: KeyboardEvent) => {
+      if (this.reveal === RevealStrategy.MANUAL) {
         return;
       }
       switch (event.keyCode) {
@@ -364,116 +365,63 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         // both spacebar and enter to produce a synthetic click action
         case SPACE_KEY:
         case ENTER_KEY:
-          this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
+          this.dismissPoster();
           break;
         default:
           break;
       }
+    };
 
-      this.requestUpdate();
-    }
-
-    [$onProgress](event: Event) {
+    [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
-
-      this.requestUpdate();
+      this[$lastReportedProgress] =
+          Math.max(progress, this[$lastReportedProgress]);
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
+        if (this[$sceneIsReady]() &&
+            (this[$posterDismissalSource] != null ||
+             this.reveal === RevealStrategy.AUTO)) {
+          this[$hidePoster]();
+        }
       }
 
       this[$updateProgressBar](progress);
 
       this.dispatchEvent(
           new CustomEvent('progress', {detail: {totalProgress: progress}}));
+    };
 
-      this[$lastReportedProgress] =
-          Math.max(progress, this[$lastReportedProgress]);
+    [$shouldAttemptPreload](): boolean {
+      return !!this.src &&
+          (this[$posterDismissalSource] != null ||
+           this.loading === LoadingStrategy.EAGER ||
+           (this.reveal === RevealStrategy.AUTO && this[$isElementInViewport]));
     }
 
-    get[$modelIsReadyForReveal](): boolean {
+    [$sceneIsReady](): boolean {
       const {src} = this;
-
-      return !!src && CachingGLTFLoader.hasFinishedLoading(src) &&
-          this[$lastReportedProgress] === 1.0 && this[$shouldRevealModel]
-    }
-
-    get[$shouldRevealModel](): boolean {
-      return this.reveal === RevealStrategy.AUTO ||
-          !!this[$posterDismissalSource];
-    }
-
-    get[$shouldAttemptPreload](): boolean {
-      const {src} = this;
-
-      return !!src &&
-          (this.loading === LoadingStrategy.EAGER ||
-           this[$shouldRevealModel]) &&
-          this[$isElementInViewport];
-    }
-
-    async[$updateLoadingAndVisibility]() {
-      if (this[$shouldAttemptPreload] && !this[$preloadAttempted]) {
-        this[$preloadAttempted] = true;
-
-        const updatePreloadProgress = this[$progressTracker].beginActivity();
-
-        try {
-          const src = this.src!;
-          const detail = {url: src};
-
-          await loader.preload(src, updatePreloadProgress);
-          this.dispatchEvent(new CustomEvent('preload', {detail}));
-        } catch (error) {
-          this.dispatchEvent(new CustomEvent(
-              'error', {detail: {type: 'loadfailure', sourceError: error}}));
-        } finally {
-          updatePreloadProgress(1.0);
-          this.requestUpdate();
-        }
-      }
-
-      if (this[$modelIsReadyForReveal]) {
-        await this[$updateSource]();
-      } else {
-        this[$showPoster]();
-      }
-    }
-
-    [$showPoster]() {
-      const posterContainerElement = this[$posterContainerElement];
-      const defaultPosterElement = this[$defaultPosterElement];
-      const posterContainerOpacity =
-          parseFloat(self.getComputedStyle(posterContainerElement).opacity!);
-
-      defaultPosterElement.removeAttribute('tabindex');
-      defaultPosterElement.removeAttribute('aria-hidden');
-      posterContainerElement.classList.add('show');
-
-      if (posterContainerOpacity < 1.0) {
-        posterContainerElement.addEventListener('transitionend', () => {
-          const oldVisibility = this.modelIsVisible;
-          this[$modelIsRevealed] = false;
-          this[$announceModelVisibility](oldVisibility);
-        }, {once: true});
-      }
+      return !!src && super[$sceneIsReady]() &&
+          this[$lastReportedProgress] === 1.0;
     }
 
     [$hidePoster]() {
+      this[$posterDismissalSource] = null;
       const posterContainerElement = this[$posterContainerElement];
       const defaultPosterElement = this[$defaultPosterElement];
 
       if (posterContainerElement.classList.contains('show')) {
         posterContainerElement.classList.remove('show');
 
+        const oldVisibility = this.modelIsVisible;
+        this[$modelIsRevealed] = true;
+        this[$announceModelVisibility](oldVisibility);
+
         // We might need to forward focus to our internal canvas, but that
         // cannot happen until the poster has completely transitioned away
         posterContainerElement.addEventListener('transitionend', () => {
-          const oldVisibility = this.modelIsVisible;
           requestAnimationFrame(() => {
-            this[$modelIsRevealed] = true;
-            this[$announceModelVisibility](oldVisibility);
-
+            this[$transitioned] = true;
             const root = this.getRootNode();
 
             // If the <model-viewer> is still focused, forward the focus to
@@ -487,6 +435,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             // screen readers
             defaultPosterElement.setAttribute('aria-hidden', 'true');
             defaultPosterElement.tabIndex = -1;
+            this.dispatchEvent(new CustomEvent('poster-dismissed'));
           });
         }, {once: true});
       }
@@ -496,18 +445,18 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       return super[$getModelIsVisible]() && this[$modelIsRevealed];
     }
 
-    [$getLoaded]() {
-      const src = this.src;
-      return super[$getLoaded]() ||
-          !!(src && CachingGLTFLoader.hasFinishedLoading(src));
+    [$hasTransitioned](): boolean {
+      return super[$hasTransitioned]() && this[$transitioned];
     }
 
     async[$updateSource]() {
-      if (this[$modelIsReadyForReveal] && !this[$sourceUpdated]) {
-        this[$sourceUpdated] = true;
-        await super[$updateSource]();
-        this[$hidePoster]();
+      this[$lastReportedProgress] = 0;
+      if (this[$scene].currentGLTF == null || this.src == null ||
+          !this[$shouldAttemptPreload]()) {
+        // Don't show the poster when switching models.
+        this.showPoster();
       }
+      await super[$updateSource]();
     }
   }
 

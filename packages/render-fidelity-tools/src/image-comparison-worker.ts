@@ -95,7 +95,7 @@ class ImageComparisonWorker {
         }
 
         const {width, height} = this.analyzer!.dimensions;
-        const result = analyzer.analyze(threshold, {generateVisuals: true});
+        const result = analyzer.generateVisuals(threshold);
 
         this.blackWhiteContext!.putImageData(
             new ImageData(

@@ -17,7 +17,8 @@ import {CameraChangeDetails} from '../../features/controls.js';
 import {StagingMixin} from '../../features/staging.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {ChangeSource} from '../../three-components/SmoothControls.js';
-import {assetPath, rafPasses, timePasses, waitForEvent} from '../helpers.js';
+import {timePasses, waitForEvent} from '../../utilities.js';
+import {assetPath, rafPasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -58,6 +59,14 @@ suite('ModelViewerElementBase with StagingMixin', () => {
 
     teardown(() => {
       document.body.removeChild(element);
+    });
+
+    test('can manually rotate turntable', () => {
+      element.resetTurntableRotation(3);
+      expect(element.turntableRotation).to.be.equal(3);
+
+      element.resetTurntableRotation();
+      expect(element.turntableRotation).to.be.equal(0);
     });
 
     suite('auto-rotate', () => {

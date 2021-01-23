@@ -15,7 +15,7 @@
 
 const {applyKarmaHacks} = require('./shared-assets/scripts/karma-hacks.js');
 
-const browserStackTunnelID = applyKarmaHacks();
+applyKarmaHacks();
 
 module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
@@ -64,7 +64,7 @@ module.exports = function(config) {
       mocha: {
         reporter: 'html',
         ui: 'tdd',
-        timeout: 30000,
+        timeout: 180000,
       },
     },
 
@@ -73,7 +73,9 @@ module.exports = function(config) {
     mochaReporter: {output: 'autowatch'},
 
     // Note setting --browsers on the command-line always overrides this list.
-    browsers: [],
+    browsers: [
+      'ChromeHeadless',
+    ],
   });
 
   if (process.env.USE_BROWSER_STACK) {
@@ -98,8 +100,7 @@ module.exports = function(config) {
         idleTimeout: 600,
         name: '<model-viewer> Unit Tests',
         project: '<model-viewer>',
-        build: process.env.BROWSER_STACK_BUILD_NAME || browserStackTunnelID,
-        tunnelIdentifier: browserStackTunnelID
+        build: process.env.BROWSER_STACK_BUILD_NAME
       },
 
       reporters: ['BrowserStack', 'mocha'],

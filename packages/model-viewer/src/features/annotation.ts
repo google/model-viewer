@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Matrix4, Vector2} from 'three';
+import {Matrix3, Matrix4, Vector2} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$needsRender, $onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
@@ -31,6 +31,7 @@ const $removeHotspot = Symbol('removeHotspot');
 // Used internally by positionAndNormalFromPoint()
 const pixelPosition = new Vector2();
 const worldToModel = new Matrix4();
+const worldToModelNormal = new Matrix3();
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
@@ -71,11 +72,13 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     constructor(...args: Array<any>) {
       super(...args);
 
-      const shadowRoot = this.shadowRoot!;
       const {domElement} = this[$annotationRenderer];
-      domElement.classList.add('annotation-container');
-      shadowRoot.querySelector('.container')!.appendChild(domElement);
-      domElement.appendChild(shadowRoot.querySelector('.default')!);
+      const {style} = domElement;
+      style.display = 'none';
+      style.pointerEvents = 'none';
+      style.position = 'absolute';
+      style.top = '0';
+      this.shadowRoot!.querySelector('.default')!.appendChild(domElement);
     }
 
     connectedCallback() {
@@ -122,6 +125,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
+      this[$needsRender]();
     }
 
     /**
@@ -134,7 +138,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
         {position: Vector3D, normal: Vector3D}|null {
       const scene = this[$scene];
-      const {width, height, model} = scene;
+      const {width, height, target} = scene;
       pixelPosition.set(pixelX / width, pixelY / height)
           .multiplyScalar(2)
           .subScalar(1);
@@ -145,9 +149,13 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         return null;
       }
 
-      worldToModel.getInverse(model.matrixWorld);
+      worldToModel.copy(target.matrixWorld).invert();
       const position = toVector3D(hit.position.applyMatrix4(worldToModel));
-      const normal = toVector3D(hit.normal);
+
+      worldToModelNormal.getNormalMatrix(worldToModel);
+      const normal =
+          toVector3D(hit.normal.applyNormalMatrix(worldToModelNormal));
+
       return {position: position, normal: normal};
     }
 
@@ -157,7 +165,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const camera = scene.getCamera();
 
       if (scene.isDirty) {
-        scene.model.updateHotspots(camera.position);
+        scene.updateHotspots(camera.position);
+        this[$annotationRenderer].domElement.style.display = '';
         this[$annotationRenderer].render(scene, camera);
       }
     }
@@ -184,7 +193,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           normal: node.dataset.normal,
         });
         this[$hotspotMap].set(node.slot, hotspot);
-        this[$scene].model.addHotspot(hotspot);
+        this[$scene].addHotspot(hotspot);
         // This happens automatically in render(), but we do it early so that
         // the slots appear in the shadow DOM and the elements get attached,
         // allowing us to dispatch events on them.
@@ -205,7 +214,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (hotspot.decrement()) {
-        this[$scene].model.removeHotspot(hotspot);
+        this[$scene].removeHotspot(hotspot);
         this[$hotspotMap].delete(node.slot);
       }
       this[$scene].isDirty = true;

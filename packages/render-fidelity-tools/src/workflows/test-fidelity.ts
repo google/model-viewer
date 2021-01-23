@@ -19,20 +19,24 @@ import {dirname, join, resolve} from 'path';
 import rimraf from 'rimraf';
 
 const require = module.createRequire(import.meta.url);
+// actions/core can only be imported using commonJS's require here
+const core = require('@actions/core');
 
 import {ArtifactCreator} from '../artifact-creator.js';
+import {FIDELITY_TEST_THRESHOLD} from '../common.js';
 
 const configPath = resolve(process.argv[2]);
 const rootDirectory = resolve(dirname(configPath));
 const config = require(configPath);
 
 const outputDirectory = join(rootDirectory, 'results');
+const port = 9030;
 const screenshotCreator = new ArtifactCreator(
     config,
     rootDirectory,
-    `http://localhost:9030/test/renderers/model-viewer/`);
+    `http://localhost:${port}/test/renderers/model-viewer/`);
 const server = HTTPServer.createServer({root: './', cache: -1});
-server.listen(9030);
+server.listen(port);
 
 
 try {
@@ -43,6 +47,8 @@ try {
 
 let scenarioWhitelist: Set<string>|null = null;
 
+// default update screenshots command takes 3 arguments. If there's more than 3,
+// user has specified scenarios to test
 if (process.argv.length > 3) {
   scenarioWhitelist = new Set();
 
@@ -51,9 +57,69 @@ if (process.argv.length > 3) {
   }
 }
 
-screenshotCreator.captureAndAnalyzeScreenshots(scenarioWhitelist)
+screenshotCreator.fidelityTest(scenarioWhitelist)
     .then(() => {
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();
+
+      const fidelityRegressionPath =
+          join(outputDirectory, 'fidelityRegressionResults.json');
+      const {
+        results: fidelityRegressionResults,
+        errors: fidelityRegressionErrors,
+        warnings: fidelityRegressionWarnings
+      } = require(fidelityRegressionPath);
+
+      const fidelityRegressionPassedCount = fidelityRegressionResults.length;
+      const fidelityRegressionErrorCount = fidelityRegressionErrors.length;
+      const fidelityRegressionWarningCount = fidelityRegressionWarnings.length;
+      const scenarioCount = fidelityRegressionPassedCount +
+          fidelityRegressionErrorCount + fidelityRegressionWarningCount
+
+      console.log(`Fidelity regression test on ${
+          scenarioCount} scenarios finished. Model-Viewer passed ${
+          fidelityRegressionPassedCount} scenarios ✅, failed ${
+          fidelityRegressionErrorCount} scenarios ❌, ${
+          fidelityRegressionWarningCount} senarios passed with warings❗️. (Uses ${
+          FIDELITY_TEST_THRESHOLD} dB as threshold)`);
+
+      if (fidelityRegressionWarningCount > 0) {
+        console.log('🔍 Logging warning scenarios: ');
+        for (const warning of fidelityRegressionWarnings) {
+          console.log(warning);
+        }
+
+        core.warning(
+            '❗️Fidelity test detected some warnings! Please try to fix them');
+      }
+
+      if (fidelityRegressionErrorCount > 0) {
+        console.log('🔍 Logging failed scenarios: ');
+        for (const error of fidelityRegressionErrors) {
+          console.log(error);
+        }
+      }
+
+      const compareRendererResultPath = join(outputDirectory, 'config.json');
+      const {scenarios: comparedRenderResult, errors: compareRendererErrors} =
+          require(compareRendererResultPath);
+      const compareRendererPassCount = comparedRenderResult.length;
+      const compareRendererErrorCount = compareRendererErrors.length;
+
+      console.log(`Compare Renderers on ${scenarioCount} scenarios finished. ${
+          compareRendererPassCount} scenarios passed ✅, ${
+          compareRendererErrorCount} scenarios failed ❌`);
+
+      if (compareRendererErrorCount > 0) {
+        console.log('🔍 Logging failed scenarios: ');
+        for (const error of compareRendererErrors) {
+          console.log(error);
+        }
+      }
+
+      if (fidelityRegressionErrorCount > 0 || compareRendererErrorCount > 0) {
+        throw new Error(
+            ' ❌ Fidelity test failed! Please fix the errors listed above before mering this pr!');
+      }
     })
-    .catch((error: any) => console.error(error));
+    .catch((error: any) => core.setFailed(error.message));

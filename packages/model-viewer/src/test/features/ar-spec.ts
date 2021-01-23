@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import {IS_IOS} from '../../constants.js';
-import {ARInterface, ARMixin, openIOSARQuickLook, openSceneViewer} from '../../features/ar.js';
+import {IS_IE11, IS_IOS} from '../../constants.js';
+import {$openIOSARQuickLook, $openSceneViewer, ARInterface, ARMixin} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
-import {Constructor} from '../../utilities.js';
-import {assetPath, spy, timePasses, waitForEvent} from '../helpers.js';
+import {Constructor, timePasses, waitForEvent} from '../../utilities.js';
+import {assetPath, spy} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -41,56 +41,96 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
-    suite('openSceneViewer', () => {
-      test('preserves query parameters in model URLs', () => {
-        const intentUrls: Array<string> = [];
-        const restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
+    suite('AR intents', () => {
+      if (IS_IE11) {
+        return;
+      }
+      let element: ModelViewerElementBase&ARInterface;
+      let intentUrls: Array<string>;
+      let restoreAnchorClick: () => void;
+
+      setup(() => {
+        element = new ModelViewerElement();
+        document.body.insertBefore(element, document.body.firstChild);
+        intentUrls = [];
+        restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
           value: function() {
             intentUrls.push((this as HTMLAnchorElement).href);
           }
         });
+      });
 
-        openSceneViewer(
-            'https://example.com/model.gltf?token=foo',
-            'Example model',
-            'auto');
-
-        expect(intentUrls.length).to.be.equal(1);
-
-        const url = new URL(intentUrls[0]);
-
-        expect(url.search).to.match(/(%3F|%26)token%3Dfoo(%26|&|$)/);
-
+      teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
         restoreAnchorClick();
       });
-    });
 
-    suite('openQuickLook', () => {
-      test('sets hash for fixed scale', () => {
-        const intentUrls: Array<string> = [];
-        const restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
-          value: function() {
-            intentUrls.push((this as HTMLAnchorElement).href);
-          }
+      suite('openSceneViewer', () => {
+        test('preserves query parameters in model URLs', () => {
+          element.src = 'https://example.com/model.gltf?token=foo';
+          element.alt = 'Example model';
+          (element as any)[$openSceneViewer]();
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.search).to.match(/(%3F|%26|&)token=foo(%26|&|$)/);
         });
 
-        openIOSARQuickLook('https://example.com/model.gltf', 'fixed');
+        test('keeps title and link when supplied', () => {
+          element.src = 'https://example.com/model.gltf?link=foo&title=bar';
+          element.alt = 'alt';
+          (element as any)[$openSceneViewer]();
 
-        expect(intentUrls.length).to.be.equal(1);
+          expect(intentUrls.length).to.be.equal(1);
 
-        const url = new URL(intentUrls[0]);
+          const url = new URL(intentUrls[0]);
 
-        expect(url.hash).to.equal('#allowsContentScaling=0');
+          expect(url.search).to.match(/(%3F|%26|&)title=bar(%26|&|$)/);
+          expect(url.search).to.not.match(/(%3F|%26|&)title=alt(%26|&|$)/);
 
-        restoreAnchorClick();
+          expect(url.search).to.match(/(%3F|%26|&)link=foo(%26|&|$)/);
+          const linkRegex =
+              `(%3F|%26|&)link=${self.location.toString()}(%26|&|$)`;
+          linkRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          expect(url.search).to.not.match(new RegExp(linkRegex));
+        });
       });
-    });
 
-    suite('quick-look-browsers', () => {
-      // TODO(#624,#625): We cannot implement these tests without the ability
-      // to mock our constants
-      test('shows the AR button for allowed browsers');
-      test('hides the AR button for non-allowed browsers');
+      suite('openQuickLook', () => {
+        test('sets hash for fixed scale', () => {
+          element.src = 'https://example.com/model.gltf';
+          element.iosSrc = 'https://example.com/model.usdz';
+          element.arScale = 'fixed';
+          (element as any)[$openIOSARQuickLook]();
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.pathname).equal('/model.usdz');
+          expect(url.hash).to.equal('#allowsContentScaling=0');
+        });
+
+        test('keeps original hash too', () => {
+          element.src = 'https://example.com/model.gltf';
+          element.iosSrc =
+              'https://example.com/model.usdz#custom=path-to-banner.html';
+          element.arScale = 'fixed';
+          (element as any)[$openIOSARQuickLook]();
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.pathname).equal('/model.usdz');
+          expect(url.hash).to.equal(
+              '#custom=path-to-banner.html&allowsContentScaling=0');
+        });
+      });
     });
 
     suite('with webxr', () => {

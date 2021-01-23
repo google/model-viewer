@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
@@ -22,7 +22,7 @@ jobs:
         echo "::set-output name=dir::$(npm config get cache)"
 
     - name: Cache npm packages
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ${{ steps.npm-cache.outputs.dir }}
         key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
@@ -32,14 +32,17 @@ jobs:
     - name: NPM install
       run: npm ci
 
-    - name: Lint TypeScript sources
-      run: npm run lint
+    # - name: Lint TypeScript sources
+    #   run: npm run lint
 
     - name: Bootstrap packages
       run: npm run bootstrap
 
     - name: Build packages
       run: npm run build
+
+    - name: Generate legacy bundles
+      run: npm run build:legacy-support
 
     - name: Generate fidelity artifacts 
       uses: GabrielBB/xvfb-action@v1.0
