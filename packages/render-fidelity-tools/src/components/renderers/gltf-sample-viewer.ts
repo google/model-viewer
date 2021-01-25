@@ -1,5 +1,5 @@
 // @ts-ignore
-import {computePrimitiveCentroids, GltfState, GltfView, initDracoLib, initKtxLib, loadEnvironment, loadGltf, ToneMaps} from 'gltf-viewer';
+import {computePrimitiveCentroids, GltfState, GltfView, initDracoLib, initKtxLib, loadEnvironment, loadGltf, ToneMaps} from '@khronosgroup/gltf-viewer';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -75,11 +75,12 @@ export class GltfSampleViewer extends LitElement {
     this[$state].renderingParameters.clearColor = [0, 0, 0, 0];
 
     const luts = {
-      lut_ggx_file: '../../../node_modules/gltf-viewer/assets/lut_ggx.png',
+      lut_ggx_file:
+          '../../../node_modules/@khronosgroup/gltf-viewer/dist/assets/lut_ggx.png',
       lut_charlie_file:
-          '../../../node_modules/gltf-viewer/assets/lut_charlie.png',
+          '../../../node_modules/@khronosgroup/gltf-viewer/dist/assets/lut_charlie.png',
       lut_sheen_E_file:
-          '../../../node_modules/gltf-viewer/assets/lut_sheen_E.png'
+          '../../../node_modules/@khronosgroup/gltf-viewer/dist/assets/lut_sheen_E.png'
     };
 
     this[$state].renderingParameters.environmentRotation = 0;
