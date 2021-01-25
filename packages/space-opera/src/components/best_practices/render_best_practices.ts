@@ -18,12 +18,10 @@
 import {html} from 'lit-element';
 import {getModelViewer} from '../model_viewer_preview/reducer';
 
-// TODO: Add <scripts> to be added into the HTML file.
-
 export function renderProgressBar() {
   getModelViewer()?.addEventListener('progress', onProgress);
   return html`
-  <div class="progress-bar" slot="progress-bar">
+  <div class="progress-bar hide" slot="progress-bar">
     <div class="update-bar"></div>
   </div>
   `
