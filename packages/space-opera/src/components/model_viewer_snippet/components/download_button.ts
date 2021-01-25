@@ -127,19 +127,21 @@ async function prepareZipArchive(
     zip.file(relativeFilePaths.iosName!, response.blob());
   }
 
-  const temp = modelViewerTemplate;
-  const modelViewerTemplateString =
-      temp.replace('<div>modelviewer</div>', data.snippetText);
+  let template = modelViewerTemplate;
+  // Conditionally set script if anything requires javascript. Currently, this
+  // is only the progressbar.
+  const script =
+      bestPractices.progressBar ? '<script src="script.js"></script>' : '';
 
-  const progressBarReplacement = bestPractices.progressBar ?
-      '<script src="src/progressbar.js"></script>' :
-      ''
-  const mvString = modelViewerTemplateString.replace(
-      '<script>progressbar</script>', progressBarReplacement);
+  // Replace placeholders in html string from constants
+  template = template.replace('<div>modelviewer</div>', data.snippetText);
+  template = template.replace('<script>progressbar</script>', script);
+  zip.file('index.html', template);
 
-  zip.file('index.html', mvString);
+  // Keep model-viewer snippet
   zip.file('snippet.txt', data.snippetText);
 
+  // Add css file for the model-viewer and other related add ons
   let cssText = modelViewerStyles.cssText;
   if (hasHotspots) {
     cssText = `${cssText}\n${hotspotStyles.cssText}`;
@@ -148,12 +150,14 @@ async function prepareZipArchive(
     cssText = `${cssText}\n${arButtonCSS.cssText}`;
   }
   if (bestPractices.progressBar) {
-    const fileText = progressBar;
-    console.log(fileText);
-    zip.file('script.js', fileText);
     cssText = `${cssText}\n${progressBarCSS.cssText}`;
   }
   zip.file('styles.css', cssText);
+
+  // Add a script file if any javascript is needed
+  if (bestPractices.progressBar) {
+    zip.file('script.js', progressBar);
+  }
 
   return {
     blob: await zip.generateAsync({type: 'blob', compression: 'DEFLATE'}),
