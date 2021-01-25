@@ -24,7 +24,7 @@ import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
 import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '../../../types.js';
-import {modelViewerTemplate} from '../../best_practices/constants.js';
+import {modelViewerTemplate, progressBar} from '../../best_practices/constants.js';
 import {getBestPractices} from '../../best_practices/reducer.js';
 import {arButtonCSS, modelViewerStyles, progressBarCSS} from '../../best_practices/styles.css.js';
 import {getConfig} from '../../config/reducer.js';
@@ -136,7 +136,6 @@ async function prepareZipArchive(
       ''
   const mvString = modelViewerTemplateString.replace(
       '<script>progressbar</script>', progressBarReplacement);
-  console.log(progressBarReplacement);
 
   zip.file('index.html', mvString);
   zip.file('snippet.txt', data.snippetText);
@@ -148,14 +147,10 @@ async function prepareZipArchive(
   if (bestPractices.arButton) {
     cssText = `${cssText}\n${arButtonCSS.cssText}`;
   }
-  const isTesting = true;
   if (bestPractices.progressBar) {
-    const fileName = isTesting ?
-        './progressbar.js' :
-        'https://modelviewer.dev/shared-assets/best_practices_scripts/progressbar.js';
-    const file = await fetch(fileName);
-    const fileText = await file.text();
-    zip.file('./src/progressbar.js', fileText);
+    const fileText = progressBar;
+    console.log(fileText);
+    zip.file('script.js', fileText);
     cssText = `${cssText}\n${progressBarCSS.cssText}`;
   }
   zip.file('styles.css', cssText);
