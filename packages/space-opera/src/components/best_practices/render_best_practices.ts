@@ -29,14 +29,6 @@ export function renderProgressBar() {
   `
 }
 
-export function renderARButton() {
-  return html`
-  <button slot="ar-button" id="ar-button">
-    View in your space
-  </button>
-  `
-}
-
 export const onProgress = (event) => {
   const progressBar = event.target.querySelector('.progress-bar');
   const updatingBar = event.target.querySelector('.update-bar');
@@ -50,3 +42,11 @@ export const onProgress = (event) => {
     }
   }
 };
+
+export function renderARButton() {
+  return html`
+  <button slot="ar-button" id="ar-button">
+    View in your space
+  </button>
+  `
+}

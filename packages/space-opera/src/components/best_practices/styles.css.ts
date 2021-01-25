@@ -17,6 +17,20 @@
 
 import {css, CSSResult} from 'lit-element';
 
+export const modelViewerStyles: CSSResult = css`
+model-viewer {
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  width: 100%;
+}
+`
+
 export const progressBarCSS: CSSResult = css`
 .progress-bar {
   display: block;

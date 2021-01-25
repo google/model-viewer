@@ -24,8 +24,9 @@ import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
 import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '../../../types.js';
+import {modelViewerTemplate} from '../../best_practices/constants.js';
 import {getBestPractices} from '../../best_practices/reducer.js';
-import {arButtonCSS, progressBarCSS} from '../../best_practices/styles.css.js';
+import {arButtonCSS, modelViewerStyles, progressBarCSS} from '../../best_practices/styles.css.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getHotspots} from '../../hotspot_panel/reducer.js';
@@ -126,24 +127,24 @@ async function prepareZipArchive(
     zip.file(relativeFilePaths.iosName!, response.blob());
   }
 
-  // TODO: Modify into runnable html file with the best practices slots
-  // filled as necessary.
-  // Add scripts into HTML file.
-  zip.file('snippet.txt', data.snippetText);
+  const temp = modelViewerTemplate;
+  const modelViewerTemplateString =
+      temp.replace('<div>modelviewer</div>', data.snippetText);
 
-  if (bestPractices.arButton || bestPractices.progressBar || hasHotspots) {
-    let cssText = '';
-    if (hasHotspots) {
-      cssText = hotspotStyles.cssText;
-    }
-    if (bestPractices.arButton) {
-      cssText = `${cssText}\n${arButtonCSS.cssText}`;
-    }
-    if (bestPractices.progressBar) {
-      cssText = `${cssText}\n${progressBarCSS.cssText}`;
-    }
-    zip.file('styles.css', cssText);
+  // TODO: Add scripts into HTML file.
+  zip.file('snippet.html', modelViewerTemplateString);
+
+  let cssText = modelViewerStyles.cssText;
+  if (hasHotspots) {
+    cssText = `${cssText}\n${hotspotStyles.cssText}`;
   }
+  if (bestPractices.arButton) {
+    cssText = `${cssText}\n${arButtonCSS.cssText}`;
+  }
+  if (bestPractices.progressBar) {
+    cssText = `${cssText}\n${progressBarCSS.cssText}`;
+  }
+  zip.file('styles.css', cssText);
 
   return {
     blob: await zip.generateAsync({type: 'blob', compression: 'DEFLATE'}),
