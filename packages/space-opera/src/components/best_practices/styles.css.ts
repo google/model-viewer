@@ -18,18 +18,20 @@
 import {css, CSSResult} from 'lit-element';
 
 export const modelViewerStyles: CSSResult = css`
-model-viewer {
-  cursor: -webkit-grab;
-  cursor: -moz-grab;
-  display: flex;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-  user-select: none;
-  width: 100%;
+body {
+  margin: 1em;
+  padding: 0;
+  font-family: Google Sans, Noto, Roboto, Helvetica Neue, sans-serif;
+  color: #244376;
 }
-`
+
+model-viewer {
+  width: 100%;
+  height: 400px;
+  background-color: #70BCD1;
+  --poster-color: #ffffff00;
+}
+`;
 
 export const progressBarCSS: CSSResult = css`
 .progress-bar {

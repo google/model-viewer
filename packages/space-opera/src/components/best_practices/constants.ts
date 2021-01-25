@@ -26,6 +26,8 @@ export const modelViewerTemplate = `
   <body>
     <div>modelviewer</div>
 
+    <script>progressbar</script>
+
     <!-- 💁 Include both scripts below to support all browsers! -->
 
     <!-- Loads <model-viewer> for modern browsers: -->

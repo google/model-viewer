@@ -131,8 +131,15 @@ async function prepareZipArchive(
   const modelViewerTemplateString =
       temp.replace('<div>modelviewer</div>', data.snippetText);
 
-  // TODO: Add scripts into HTML file.
-  zip.file('snippet.html', modelViewerTemplateString);
+  const progressBarReplacement = bestPractices.progressBar ?
+      '<script src="src/progressbar.js"></script>' :
+      ''
+  const mvString = modelViewerTemplateString.replace(
+      '<script>progressbar</script>', progressBarReplacement);
+  console.log(progressBarReplacement);
+
+  zip.file('index.html', mvString);
+  zip.file('snippet.txt', data.snippetText);
 
   let cssText = modelViewerStyles.cssText;
   if (hasHotspots) {
@@ -141,7 +148,14 @@ async function prepareZipArchive(
   if (bestPractices.arButton) {
     cssText = `${cssText}\n${arButtonCSS.cssText}`;
   }
+  const isTesting = true;
   if (bestPractices.progressBar) {
+    const fileName = isTesting ?
+        './progressbar.js' :
+        'https://modelviewer.dev/shared-assets/best_practices_scripts/progressbar.js';
+    const file = await fetch(fileName);
+    const fileText = await file.text();
+    zip.file('./src/progressbar.js', fileText);
     cssText = `${cssText}\n${progressBarCSS.cssText}`;
   }
   zip.file('styles.css', cssText);
