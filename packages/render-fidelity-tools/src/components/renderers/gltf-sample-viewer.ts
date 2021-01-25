@@ -64,13 +64,13 @@ export class GltfSampleViewer extends LitElement {
 
     const {target, orbit, verticalFoV} = scenario;
     const camera = this[$state].userCamera;
+    camera.setVerticalFoV(verticalFoV);
     camera.fitViewToScene(this[$state].gltf, this[$state].sceneIndex);
     camera.setTarget([target.x, target.y, target.z]);
-    const pitch = this[$degToRadians](orbit.theta);
-    const yaw = this[$degToRadians](orbit.phi - 90);
+    const pitch = this[$degToRadians](orbit.phi - 90);
+    const yaw = this[$degToRadians](orbit.theta);
     camera.setRotation(yaw, pitch);
     camera.setZoom(orbit.radius);
-    camera.setVerticalFoV(verticalFoV);
 
     this[$state].renderingParameters.clearColor = [0, 0, 0];
 
@@ -82,6 +82,8 @@ export class GltfSampleViewer extends LitElement {
           '../../../node_modules/gltf-viewer/assets/lut_sheen_E.png'
     };
 
+    this[$state].renderingParameters.environmentRotation = 0;
+
     this[$state].environment =
         await loadEnvironment(scenario.lighting, this[$view], luts);
 
@@ -89,13 +91,12 @@ export class GltfSampleViewer extends LitElement {
 
     this[$state].renderingParameters.toneMap = ToneMaps.ACES;
 
-    this[$view].renderFrame(this[$state]).then(() => {
-      requestAnimationFrame(() => {
-        this.dispatchEvent(
-            // This notifies the framework that the model is visible and the
-            // screenshot can be taken
-            new CustomEvent('model-visibility', {detail: {visible: true}}));
-      });
+    this[$view].renderFrame(this[$state]);
+    requestAnimationFrame(() => {
+      this.dispatchEvent(
+          // This notifies the framework that the model is visible and the
+          // screenshot can be taken
+          new CustomEvent('model-visibility', {detail: {visible: true}}));
     });
   }
 
