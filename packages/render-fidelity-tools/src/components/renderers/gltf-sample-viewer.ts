@@ -47,7 +47,7 @@ export class GltfSampleViewer extends LitElement {
       console.log('test');
       this[$canvas] = this.shadowRoot!.querySelector('canvas');
       this[$view] = new GltfView(
-          this[$canvas]!.getContext('webgl2', {alpha: false, antialias: true}));
+          this[$canvas]!.getContext('webgl2', {alpha: true, antialias: true}));
       this[$state] = this[$view].createState();
       initDracoLib();
       initKtxLib(this[$view]);
@@ -64,7 +64,7 @@ export class GltfSampleViewer extends LitElement {
 
     const {target, orbit, verticalFoV} = scenario;
     const camera = this[$state].userCamera;
-    camera.setVerticalFoV(verticalFoV);
+    camera.setVerticalFoV(this[$degToRadians](verticalFoV));
     camera.fitViewToScene(this[$state].gltf, this[$state].sceneIndex);
     camera.setTarget([target.x, target.y, target.z]);
     const pitch = this[$degToRadians](orbit.phi - 90);
@@ -72,7 +72,7 @@ export class GltfSampleViewer extends LitElement {
     camera.setRotation(yaw, pitch);
     camera.setZoom(orbit.radius);
 
-    this[$state].renderingParameters.clearColor = [0, 0, 0];
+    this[$state].renderingParameters.clearColor = [0, 0, 0, 0];
 
     const luts = {
       lut_ggx_file: '../../../node_modules/gltf-viewer/assets/lut_ggx.png',
