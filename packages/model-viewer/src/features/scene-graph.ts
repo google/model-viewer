@@ -173,6 +173,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           if (extension != null) {
             this[$variants] =
                 (extension.variants as Variants).map(variant => variant.name);
+            this.requestUpdate('variantName');
           }
         }
       }
