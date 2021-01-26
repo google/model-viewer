@@ -65,6 +65,8 @@ export class OpenModal extends ConnectedLitElement {
     this.extraAttributes = getExtraAttributes(state);
   }
 
+  // TODO: When we're saving the snippet either after adding extra attributes or
+  // modifying an existing attribute, we are creating a new independent element.
   async handleSubmitSnippet(value?: string) {
     const textArea = this.snippetViewer.snippet;
     if (!textArea)
