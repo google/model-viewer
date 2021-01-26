@@ -38,7 +38,6 @@ Command                        | Description
 ------------------------------ | -----------
 `npm run bootstrap`            | Bootstraps the project for development and cross-links sub-projects
 `npm run build`                | Runs the build step for all sub-projects
-`npm run build:legacy-support` | Builds JS bundles that have IE11 support
 `npm run serve`                | Runs a web server and opens a new browser tab pointed to the local copy of modelviewer.dev (don't forget to build!)
 `npm run test`                 | Runs tests in all sub-projects that have them
 `npm run clean`                | Removes built artifacts from all sub-projects

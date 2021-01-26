@@ -23,18 +23,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../shared-assets/models/favicon.png"/>
-  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
-  <!-- The following libraries and polyfills are recommended to maximize browser support -->
-
-  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
-  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
-  <script src="../node_modules/intersection-observer/intersection-observer.js"></script>
-
-  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
-  <script src="../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../node_modules/focus-visible/dist/focus-visible.js" defer></script>
@@ -225,14 +213,10 @@
   </div>
 
   <script type="module" src="./built/tester.js"></script>
-  <script nomodule src="./built/tester-umd.js"></script>
 
   <!-- Documentation-specific dependencies: -->
   <script type="module"
       src="./built/dependencies.js">
-  </script>
-  <script nomodule
-      src="./built/dependencies-legacy.js">
   </script>
 </body>
 </html>

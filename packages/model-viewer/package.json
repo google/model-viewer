@@ -30,7 +30,6 @@
     "dist/model-viewer.min.js.map",
     "dist/model-viewer-umd.js",
     "dist/model-viewer-umd.js.map",
-    "dist/model-viewer-legacy.js",
     "POLYFILLS.md"
   ],
   "scripts": {
@@ -41,21 +40,18 @@
     "build:tsc": "tsc --incremental",
     "build:rollup": "rollup -c --environment NODE_ENV:production",
     "build:rollup:dev": "rollup -c --environment NODE_ENV:development",
-    "create-legacy-bundles": "node ./scripts/create-legacy-bundles.js",
-    "prepublishOnly": "npm run build && npm run create-legacy-bundles",
+    "prepublishOnly": "npm run build",
     "test": "karma start --single-run",
     "test:ci": "npm run test",
-    "test:ci:legacy": "karma start ./karma-legacy.conf.js --single-run",
     "check-fidelity": "node ./test/fidelity/index.js ./test/fidelity/config.json",
     "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
     "update:package-lock": "rm ./package-lock.json && npm i --only=production",
-    "serve": "node_modules/.bin/http-server -a 127.0.0.1 -c-1",
+    "serve": "node_modules/.bin/http-server -c-1",
     "dev": "npm run build:dev && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:test' 'serve -- -s'",
     "watch:tsc": "tsc -w --incremental",
     "watch:rollup": "rollup -c -w --environment NODE_ENV:production",
     "watch:rollup:dev": "rollup -c -w --environment NODE_ENV:development",
-    "watch:test": "karma start",
-    "watch:test:legacy": "karma start ./karma-legacy.conf.js"
+    "watch:test": "karma start"
   },
   "keywords": [
     "ar",
@@ -99,7 +95,6 @@
     "mocha": "^8.1.2",
     "npm-run-all": "^4.1.5",
     "object.values": "^1.1.1",
-    "polymer-build": "^3.1.1",
     "resize-observer-polyfill": "^1.5.0",
     "rollup": "^2.26.6",
     "rollup-plugin-cleanup": "^3.1.1",
