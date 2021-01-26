@@ -29,8 +29,7 @@
     "dist/model-viewer.min.js",
     "dist/model-viewer.min.js.map",
     "dist/model-viewer-umd.js",
-    "dist/model-viewer-umd.js.map",
-    "POLYFILLS.md"
+    "dist/model-viewer-umd.js.map"
   ],
   "scripts": {
     "clean": "rm -rf ./lib ./dist",
