@@ -21,10 +21,9 @@ import {getModelViewer} from '../model_viewer_preview/reducer';
 export function renderProgressBar() {
   getModelViewer()?.addEventListener('progress', onProgress);
   return html`
-  <div class="progress-bar hide" slot="progress-bar">
-    <div class="update-bar"></div>
-  </div>
-  `
+<div class="progress-bar hide" slot="progress-bar">
+<div class="update-bar"></div>
+</div>`;
 }
 
 export const onProgress = (event) => {
@@ -43,8 +42,7 @@ export const onProgress = (event) => {
 
 export function renderARButton() {
   return html`
-  <button slot="ar-button" id="ar-button">
-    View in your space
-  </button>
-  `
+<button slot="ar-button" id="ar-button">
+View in your space
+</button>`;
 }

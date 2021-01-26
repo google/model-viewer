@@ -17,8 +17,7 @@
 
 import {css, CSSResult} from 'lit-element';
 
-export const modelViewerStyles: CSSResult = css`
-body {
+export const modelViewerStyles: CSSResult = css`body {
   margin: 1em;
   padding: 0;
   width: 100vw;
@@ -27,7 +26,7 @@ body {
 
 model-viewer {
   width: 100%;
-  height: 100%;
+  height: 90%;
   background-color: #ffffff;
 }
 `;
@@ -59,8 +58,7 @@ export const progressBarCSS: CSSResult = css`
   border-radius: 25px;
   float: left;
   transition: width 0.3s;
-}
-`;
+}`;
 
 export const arButtonCSS: CSSResult = css`
 #ar-button {

@@ -15,8 +15,7 @@
  *
  */
 
-export const modelViewerTemplate = `
-<!doctype html>
+export const modelViewerTemplate = `<!doctype html>
 <html lang="en">
   <head>
     <title>&lt;model-viewer&gt; template</title>
@@ -24,20 +23,20 @@ export const modelViewerTemplate = `
     <meta name="description" content="&lt;model-viewer&gt; template">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link type="text/css" href="./styles.css" rel="stylesheet"/>
-    <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+    <!-- OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
     <script src="https://unpkg.com/focus-visible@5.0.2/dist/focus-visible.js" defer></script>
   </head>
   <body>
-    <div>modelviewer</div>
-    <script>script</script>
-    <!-- Loads <model-viewer> for modern browsers: -->
+    REPLACEME
+    <!-- Loads <model-viewer> for browsers: -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   </body>
-</html>
-`;
+</html>`;
 
-export const progressBar = `
-// Handles loading the events for <model-viewer>'s slotted progress bar
+export const scriptTemplate = `    <script src="script.js"></script>`;
+
+export const progressBar =
+    `// Handles loading the events for <model-viewer>'s slotted progress bar
 const onProgress = (event) => {
   const progressBar = event.target.querySelector('.progress-bar');
   const updatingBar = event.target.querySelector('.update-bar');
@@ -51,5 +50,4 @@ const onProgress = (event) => {
     }
   }
 };
-document.querySelector('model-viewer').addEventListener('progress', onProgress);
-`
+document.querySelector('model-viewer').addEventListener('progress', onProgress);`;

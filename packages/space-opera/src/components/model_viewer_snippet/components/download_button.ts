@@ -24,8 +24,9 @@ import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
 import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '../../../types.js';
-import {modelViewerTemplate, progressBar} from '../../best_practices/constants.js';
+import {modelViewerTemplate, progressBar, scriptTemplate} from '../../best_practices/constants.js';
 import {getBestPractices} from '../../best_practices/reducer.js';
+import {onProgress} from '../../best_practices/render_best_practices.js';
 import {arButtonCSS, modelViewerStyles, progressBarCSS} from '../../best_practices/styles.css.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
@@ -84,6 +85,8 @@ export async function prepareGlbPayload(
   };
 }
 
+// Fixes some formatting issues with the snippet as it is being placed into the
+// template.
 function beautify_snippet(snippetList: string[]): string {
   let snippet = '';
   let i = 0;
@@ -91,9 +94,9 @@ function beautify_snippet(snippetList: string[]): string {
     if (i == 0) {
       snippet = `${line}\n`;
     } else if (i !== 0 && line.includes('model-viewer')) {
-      snippet = `${snippet}\t\t${line}`;
+      snippet = `${snippet}    ${line}`;
     } else {
-      snippet = `${snippet}\t${line}\n`;
+      snippet = `${snippet}  ${line}\n`;
     }
     i += 1;
   }
@@ -146,14 +149,13 @@ async function prepareZipArchive(
   let template = modelViewerTemplate;
   // Conditionally set script if anything requires javascript. Currently, this
   // is only the progressbar.
-  const script =
-      bestPractices.progressBar ? '<script src="script.js"></script>' : '';
-  const snippet = beautify_snippet(data.snippetText.split('\n'));
+  const script = bestPractices.progressBar ? scriptTemplate : '';
+  let snippet = beautify_snippet(data.snippetText.split('\n'));
+  snippet = `${snippet}\n${script}\n`;
 
   // Replace placeholders in html strings with content
-  template = template.replace('<div>modelviewer</div>', snippet);
-  template = template.replace('<script>script</script>', script);
-  template = template.replace(/(^[ \t]*\n)/gm, '')  // remove multiline newlines
+  template = template.replace('REPLACEME', snippet);
+  template = template.replace(/(^[ \t]*\n)/gm, '')  // remove extra newlines
   zip.file('index.html', template);
 
   // Keep model-viewer snippet
@@ -174,7 +176,9 @@ async function prepareZipArchive(
 
   // Add a script file if any javascript is needed
   if (bestPractices.progressBar) {
-    zip.file('script.js', progressBar);
+    const progressFunction = onProgress.toString();
+    zip.file('script.js', progressFunction);
+    console.log(progressBar);
   }
 
   return {
