@@ -232,6 +232,9 @@ export class ModelViewerPreview extends ConnectedLitElement {
                 if (this.addHotspotMode) {
                   this.addHotspot(event);
                 }
+              },
+              error: (error: CustomEvent) => {
+                this.gltfError = error.detail;
               }
             },
             childElements)}`;
