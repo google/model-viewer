@@ -50,6 +50,6 @@ View in your space
 export function renderARPrompt() {
   return html`
 <div id="ar-prompt">
-  <img src="../../assets/hand.png">
+  <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
 </div>`;
 }

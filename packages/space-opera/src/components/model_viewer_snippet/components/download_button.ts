@@ -150,8 +150,17 @@ async function prepareZipArchive(
   // Conditionally set script if anything requires javascript. Currently, this
   // is only the progressbar.
   const script = bestPractices.progressBar ? scriptTemplate : '';
+  const arPrompt = 'https://modelviewer.dev/shared-assets/icons/hand.png';
+  const arIcon =
+      'https://modelviewer.dev/shared-assets/icons/ic_view_in_ar_new_googblue_48dp.png';
+  const relativePrompt = 'ar_hand_prompt.png';
+  const relativeIcon = 'ar_icon.png';
+
   let snippet = beautify_snippet(data.snippetText.split('\n'));
   snippet = `${snippet}\n${script}\n`;
+  if (bestPractices.arPrompt) {
+    snippet = snippet.replace(arPrompt, relativePrompt);
+  }
 
   // Replace placeholders in html strings with content
   template = template.replace('REPLACEME', snippet);
@@ -170,12 +179,23 @@ async function prepareZipArchive(
     cssText = `${cssText}\n${progressBarCSS.cssText}`;
   }
   if (bestPractices.arButton) {
-    cssText = `${cssText}\n${arButtonCSS.cssText}`;
-    // TODO: Fetch png and add it to ZIP
+    const arCSS = arButtonCSS.cssText.replace(arIcon, relativeIcon);
+    cssText = `${cssText}\n${arCSS}`;
+    const response = await fetch(arIcon);
+    if (!response.ok) {
+      console.log(`Failed to fetch url ${arIcon}`);
+    } else {
+      zip.file(relativeIcon, response.blob());
+    }
   }
   if (bestPractices.arPrompt) {
     cssText = `${cssText}\n${arPromptCSS.cssText}`;
-    // TODO: Fetch hand and add it to ZIP
+    const response = await fetch(arPrompt);
+    if (!response.ok) {
+      console.log(`Failed to fetch url ${arPrompt}`);
+    } else {
+      zip.file(relativePrompt, response.blob());
+    }
   }
   zip.file('styles.css', cssText);
 
