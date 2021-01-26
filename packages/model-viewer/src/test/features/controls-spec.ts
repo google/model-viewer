@@ -241,6 +241,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       test('changes FOV basis when aspect ratio changes', async () => {
         const fov = element.getFieldOfView();
+        expect(fov).to.be.closeTo(DEFAULT_MAX_FOV, .001);
         element.setAttribute('style', 'width: 200px; height: 300px');
 
         await until(() => element.getFieldOfView() !== fov);
