@@ -136,6 +136,8 @@ async function prepareZipArchive(
   // Replace placeholders in html string from constants
   template = template.replace('<div>modelviewer</div>', data.snippetText);
   template = template.replace('<script>progressbar</script>', script);
+  // TODO: Split template on new line, add one indentation to everything but
+  // the first one, and two indentations to the last one.
   zip.file('index.html', template);
 
   // Keep model-viewer snippet

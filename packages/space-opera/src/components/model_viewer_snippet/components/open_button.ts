@@ -65,8 +65,6 @@ export class OpenModal extends ConnectedLitElement {
     this.extraAttributes = getExtraAttributes(state);
   }
 
-  // TODO: When we're saving the snippet either after adding extra attributes or
-  // modifying an existing attribute, we are creating a new independent element.
   async handleSubmitSnippet(value?: string) {
     const textArea = this.snippetViewer.snippet;
     if (!textArea)
@@ -116,7 +114,7 @@ export class OpenModal extends ConnectedLitElement {
 
       // reset poster
       config.poster = undefined;
-      dispatchSetPosterName(undefined);
+      reduxStore.dispatch(dispatchSetPosterName(undefined));
 
       if (config.environmentImage && isObjectUrl(config.environmentImage)) {
         // If new env image is legal, use it
@@ -167,7 +165,7 @@ export class OpenModal extends ConnectedLitElement {
     event.preventDefault();
     this.handleSubmitSnippet();
     if (this.errors.length === 0) {
-      this.isOpen = false;
+      this.close();
     }
   }
 

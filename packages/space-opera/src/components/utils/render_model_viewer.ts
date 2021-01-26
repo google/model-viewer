@@ -74,8 +74,5 @@ export function renderModelViewer(
         @play=${eventHandlers?.play}
         @pause=${eventHandlers?.pause}
         @click=${eventHandlers?.click}
-      >
-      ${childElements}
-    </model-viewer>
-        `;
+      >${childElements}</model-viewer>`;
 }
