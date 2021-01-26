@@ -21,6 +21,8 @@ export const modelViewerStyles: CSSResult = css`
 body {
   margin: 1em;
   padding: 0;
+  width: 100vw;
+  height: 100vh;
 }
 
 model-viewer {

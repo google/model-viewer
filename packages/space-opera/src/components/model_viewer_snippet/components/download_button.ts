@@ -84,6 +84,22 @@ export async function prepareGlbPayload(
   };
 }
 
+function beautify_snippet(snippetList: string[]): string {
+  let snippet = '';
+  let i = 0;
+  for (let line of snippetList) {
+    if (i == 0) {
+      snippet = `${line}\n`;
+    } else if (i !== 0 && line.includes('model-viewer')) {
+      snippet = `${snippet}\t\t${line}`;
+    } else {
+      snippet = `${snippet}\t${line}\n`;
+    }
+    i += 1;
+  }
+  return snippet;
+}
+
 /**
  * Add elements to ZIP as necessary.
  */
@@ -132,12 +148,12 @@ async function prepareZipArchive(
   // is only the progressbar.
   const script =
       bestPractices.progressBar ? '<script src="script.js"></script>' : '';
+  const snippet = beautify_snippet(data.snippetText.split('\n'));
 
-  // Replace placeholders in html string from constants
-  template = template.replace('<div>modelviewer</div>', data.snippetText);
+  // Replace placeholders in html strings with content
+  template = template.replace('<div>modelviewer</div>', snippet);
   template = template.replace('<script>progressbar</script>', script);
-  // TODO: Split template on new line, add one indentation to everything but
-  // the first one, and two indentations to the last one.
+  template = template.replace(/(^[ \t]*\n)/gm, '')  // remove multiline newlines
   zip.file('index.html', template);
 
   // Keep model-viewer snippet
