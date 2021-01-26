@@ -92,8 +92,6 @@ export class ExportPanel extends ConnectedLitElement {
       editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
     }
 
-    // TODO: stop displaying child elements in snippet, find way to still
-    // include these in ZIP export.
     const childElements =
         renderCommonChildElements(this.hotspots, this.bestPractices!);
 
