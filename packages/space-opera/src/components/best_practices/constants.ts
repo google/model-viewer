@@ -29,7 +29,7 @@ export const modelViewerTemplate = `
   </head>
   <body>
     <div>modelviewer</div>
-    <script>progressbar</script>
+    <script>script</script>
     <!-- Loads <model-viewer> for modern browsers: -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   </body>
