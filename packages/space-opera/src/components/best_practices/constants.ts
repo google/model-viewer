@@ -27,6 +27,7 @@ export const modelViewerTemplate = `<!doctype html>
     <script src="https://unpkg.com/focus-visible@5.0.2/dist/focus-visible.js" defer></script>
   </head>
   <body>
+    <!-- <model-viewer> HTML element -->
     REPLACEME
     <!-- Loads <model-viewer> for browsers: -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
