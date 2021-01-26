@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {IS_IE11, IS_IOS} from '../../constants.js';
+import {IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer, ARInterface, ARMixin} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {Constructor, timePasses, waitForEvent} from '../../utilities.js';
@@ -42,9 +42,6 @@ suite('ModelViewerElementBase with ARMixin', () => {
     BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
     suite('AR intents', () => {
-      if (IS_IE11) {
-        return;
-      }
       let element: ModelViewerElementBase&ARInterface;
       let intentUrls: Array<string>;
       let restoreAnchorClick: () => void;

@@ -15,7 +15,6 @@
 
 import {Camera, Vector3} from 'three';
 
-import {IS_IE11} from '../../constants.js';
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
@@ -603,8 +602,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 .to.be.equal(true);
           });
 
-          // TODO(#1141)
-          (IS_IE11 ? test.skip : test)(
+          test(
               'does not prompt users to interact before a model is loaded',
               async () => {
                 element.src = null;
