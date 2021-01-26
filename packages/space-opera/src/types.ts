@@ -57,6 +57,7 @@ export interface ArConfigState {
 export interface BestPracticesState {
   progressBar: boolean;
   arButton: boolean;
+  arPrompt: boolean;
 }
 
 export interface ModelViewerSnippetState {
@@ -104,7 +105,7 @@ export const INITIAL_STATE: State = {
     modelViewerSnippet: {
       arConfig: {},
       animationNames: [],
-      bestPractices: {progressBar: false, arButton: false},
+      bestPractices: {progressBar: true, arButton: true, arPrompt: true},
       config: {},
       hotspots: [],
       camera: INITIAL_CAMERA,

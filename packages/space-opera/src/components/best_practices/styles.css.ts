@@ -17,7 +17,12 @@
 
 import {css, CSSResult} from 'lit-element';
 
-export const modelViewerStyles: CSSResult = css`body {
+export const modelViewerStyles: CSSResult = css`
+:not(:defined) > * {
+  display: none;
+}
+
+body {
   margin: 1em;
   padding: 0;
   width: 100vw;
@@ -92,4 +97,21 @@ export const arButtonCSS: CSSResult = css`
 
 #ar-button:focus-visible {
   outline: 1px solid #4285f4;
+}`;
+
+export const arPromptCSS: CSSResult = css`
+model-viewer > #ar-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 175px;
+  animation: elongate 2s infinite ease-in-out alternate;
+  display: none;
+}
+
+model-viewer[ar-status="session-started"] > #ar-prompt {
+  display: block;
+}
+
+model-viewer > #ar-prompt > img {
+  animation: circle 4s linear infinite;
 }`;

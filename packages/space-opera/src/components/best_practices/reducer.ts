@@ -28,13 +28,19 @@ export function dispatchSetARButton(isUsingCustomARButton: boolean) {
   return {type: SET_AR_BUTTON, payload: isUsingCustomARButton};
 }
 
+const SET_AR_PROMPT = 'SET_AR_PROMPT';
+export function dispatchSetARPrompt(isUsingCustomARPrompt: boolean) {
+  return {type: SET_AR_PROMPT, payload: isUsingCustomARPrompt};
+}
+
 export const getBestPractices = (state: State) =>
     state.entities.modelViewerSnippet.bestPractices;
 
 export function bestPracticesReducer(
     state: BestPracticesState = {
-      progressBar: false,
-      arButton: false
+      progressBar: true,
+      arButton: true,
+      arPrompt: true
     },
     action: Action): BestPracticesState {
   switch (action.type) {
@@ -42,6 +48,8 @@ export function bestPracticesReducer(
       return {...state, progressBar: action.payload};
     case SET_AR_BUTTON:
       return {...state, arButton: action.payload};
+    case SET_AR_PROMPT:
+      return {...state, arPrompt: action.payload};
     default:
       return state;
   }

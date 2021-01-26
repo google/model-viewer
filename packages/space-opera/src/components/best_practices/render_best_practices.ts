@@ -46,3 +46,10 @@ export function renderARButton() {
 View in your space
 </button>`;
 }
+
+export function renderARPrompt() {
+  return html`
+<div id="ar-prompt">
+  <img src="../../assets/hand.png">
+</div>`;
+}

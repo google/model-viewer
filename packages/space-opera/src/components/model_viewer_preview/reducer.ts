@@ -20,7 +20,7 @@ import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
 import {Action, BestPracticesState, State} from '../../types.js';
-import {renderARButton, renderProgressBar} from '../best_practices/render_best_practices.js';
+import {renderARButton, renderARPrompt, renderProgressBar} from '../best_practices/render_best_practices.js';
 import {Camera} from '../camera_settings/camera_state.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {GltfState} from '../model_viewer_preview/types.js';
@@ -35,11 +35,14 @@ export function renderCommonChildElements(
   const childElements: any[] = [
     ...renderHotspots(hotspots),
   ];
-  if (bestPractices?.progressBar) {
+  if (bestPractices.progressBar) {
     childElements.push(renderProgressBar());
   }
-  if (bestPractices?.arButton) {
+  if (bestPractices.arButton) {
     childElements.push(renderARButton());
+  }
+  if (bestPractices.arPrompt) {
+    childElements.push(renderARPrompt());
   }
   return childElements;
 }

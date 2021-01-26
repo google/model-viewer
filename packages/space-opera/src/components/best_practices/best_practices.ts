@@ -20,7 +20,7 @@ import {reduxStore} from '../../space_opera_base';
 import {BestPracticesState, State} from '../../types';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element';
 import {CheckboxElement} from '../shared/checkbox/checkbox';
-import {dispatchSetARButton, dispatchSetProgressBar, getBestPractices} from './reducer';
+import {dispatchSetARButton, dispatchSetARPrompt, dispatchSetProgressBar, getBestPractices} from './reducer';
 
 /**
  * A section of best practices to enable or disable.
@@ -31,6 +31,7 @@ export class BestPractices extends ConnectedLitElement {
 
   @query('me-checkbox#progress-bar') progressBarCheckbox!: CheckboxElement;
   @query('me-checkbox#ar-button') arButtonCheckbox!: CheckboxElement;
+  @query('me-checkbox#ar-prompt') arPromptCheckbox!: CheckboxElement;
 
   stateChanged(state: State) {
     this.bestPractices = getBestPractices(state);
@@ -45,10 +46,14 @@ export class BestPractices extends ConnectedLitElement {
     reduxStore.dispatch(dispatchSetARButton(this.arButtonCheckbox.checked));
   }
 
+  onARPromptChange() {
+    reduxStore.dispatch(dispatchSetARPrompt(this.arPromptCheckbox.checked));
+  }
+
   render() {
     return html`
     <div style="font-size: 14px; font-weight: 500; margin: 0px 0px 10px 0px;">
-      Override Default Slots:
+      Use Custom:
     </div> 
     <me-checkbox 
       id="progress-bar" 
@@ -62,6 +67,13 @@ export class BestPractices extends ConnectedLitElement {
       label="AR Button"
       ?checked="${this.bestPractices?.arButton}"
       @change=${this.onARButtonChange}
+      >
+    </me-checkbox>
+    <me-checkbox 
+      id="ar-prompt" 
+      label="AR Prompt"
+      ?checked="${this.bestPractices?.arPrompt}"
+      @change=${this.onARPromptChange}
       >
     </me-checkbox>
     `;

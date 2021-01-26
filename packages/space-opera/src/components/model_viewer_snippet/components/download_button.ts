@@ -27,7 +27,7 @@ import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '
 import {modelViewerTemplate, progressBar, scriptTemplate} from '../../best_practices/constants.js';
 import {getBestPractices} from '../../best_practices/reducer.js';
 import {onProgress} from '../../best_practices/render_best_practices.js';
-import {arButtonCSS, modelViewerStyles, progressBarCSS} from '../../best_practices/styles.css.js';
+import {arButtonCSS, arPromptCSS, modelViewerStyles, progressBarCSS} from '../../best_practices/styles.css.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getHotspots} from '../../hotspot_panel/reducer.js';
@@ -166,11 +166,16 @@ async function prepareZipArchive(
   if (hasHotspots) {
     cssText = `${cssText}\n${hotspotStyles.cssText}`;
   }
-  if (bestPractices.arButton) {
-    cssText = `${cssText}\n${arButtonCSS.cssText}`;
-  }
   if (bestPractices.progressBar) {
     cssText = `${cssText}\n${progressBarCSS.cssText}`;
+  }
+  if (bestPractices.arButton) {
+    cssText = `${cssText}\n${arButtonCSS.cssText}`;
+    // TODO: Fetch png and add it to ZIP
+  }
+  if (bestPractices.arPrompt) {
+    cssText = `${cssText}\n${arPromptCSS.cssText}`;
+    // TODO: Fetch hand and add it to ZIP
   }
   zip.file('styles.css', cssText);
 

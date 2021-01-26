@@ -23,7 +23,7 @@ import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {toastStyles} from '../../styles.css.js';
 import {ArConfigState, BestPracticesState, ModelViewerSnippetState} from '../../types.js';
-import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
+import {arButtonCSS, arPromptCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {HotspotConfig, toVector3D} from '../hotspot_panel/types.js';
 import {downloadContents, renderCommonChildElements} from '../model_viewer_preview/reducer.js';
@@ -42,8 +42,14 @@ const TOAST_TIME = 7000;  // 7s
  */
 @customElement('mobile-view')
 export class MobileView extends LitElement {
-  static styles =
-      [mobileStyles, toastStyles, hotspotStyles, arButtonCSS, progressBarCSS];
+  static styles = [
+    mobileStyles,
+    toastStyles,
+    hotspotStyles,
+    arButtonCSS,
+    progressBarCSS,
+    arPromptCSS
+  ];
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
