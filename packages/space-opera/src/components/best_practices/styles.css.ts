@@ -17,13 +17,12 @@
 
 import {css, CSSResult} from 'lit-element';
 
-export const modelViewerStyles: CSSResult = css`
-:not(:defined) > * {
+export const modelViewerStyles: CSSResult = css`:not(:defined) > * {
   display: none;
 }
 
 body {
-  margin: 1em;
+  margin: 0;
   padding: 0;
   width: 100vw;
   height: 100vh;
@@ -31,7 +30,7 @@ body {
 
 model-viewer {
   width: 100%;
-  height: 90%;
+  height: 100%;
   background-color: #ffffff;
 }
 `;

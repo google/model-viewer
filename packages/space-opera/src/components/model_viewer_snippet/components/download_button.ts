@@ -26,7 +26,6 @@ import {css, customElement, html, internalProperty} from 'lit-element';
 import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '../../../types.js';
 import {modelViewerTemplate, progressBar, scriptTemplate} from '../../best_practices/constants.js';
 import {getBestPractices} from '../../best_practices/reducer.js';
-import {onProgress} from '../../best_practices/render_best_practices.js';
 import {arButtonCSS, arPromptCSS, modelViewerStyles, progressBarCSS} from '../../best_practices/styles.css.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
@@ -201,9 +200,7 @@ async function prepareZipArchive(
 
   // Add a script file if any javascript is needed
   if (bestPractices.progressBar) {
-    const progressFunction = onProgress.toString();
-    zip.file('script.js', progressFunction);
-    console.log(progressBar);
+    zip.file('script.js', progressBar);
   }
 
   return {
