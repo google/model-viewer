@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
+import {DoubleSide, FrontSide, MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
-import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {AlphaMode, GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
@@ -115,12 +115,75 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return (this[$sourceObject] as GLTFMaterial).emissiveFactor!;
   }
 
+  get alphaCutoff(): number {
+    return (this[$sourceObject] as GLTFMaterial).alphaCutoff!;
+  }
+
+  get alphaMode(): AlphaMode {
+    return (this[$sourceObject] as GLTFMaterial).alphaMode!;
+  }
+
+  get doubleSided(): boolean {
+    return (this[$sourceObject] as GLTFMaterial).doubleSided!;
+  }
+
   setEmissiveFactor(rgb: RGB) {
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       material.emissive.fromArray(rgb);
     }
     (this[$sourceObject] as GLTFMaterial).emissiveFactor = rgb;
+    this[$onUpdate]();
+  }
+
+  setAlphaCutoff(value: number) {
+    (this[$sourceObject] as GLTFMaterial)
+    for (const material of this[$correlatedObjects] as
+         Set<MeshStandardMaterial>) {
+      // This little hack ignores alpha for opaque materials, in order to comply
+      // with the glTF spec.
+      if (!material.alphaTest && !material.transparent) {
+        material.alphaTest = -0.5;
+      } else if (this.alphaMode === 'MASK') {
+        material.alphaTest = value;
+      }
+    }
+    (this[$sourceObject] as GLTFMaterial).alphaCutoff = value;
+    this[$onUpdate]();
+  }
+
+  setAlphaMode(alphaMode: AlphaMode) {
+    (this[$sourceObject] as GLTFMaterial).alphaMode = alphaMode;
+    for (const material of this[$correlatedObjects] as
+         Set<MeshStandardMaterial>) {
+      if (alphaMode === 'BLEND') {
+        material.transparent = true;
+        material.depthWrite = false;
+        this[$onUpdate]();
+      }
+      if (alphaMode === 'OPAQUE') {
+        material.transparent = false;
+        material.depthWrite = true;  // default
+        this[$onUpdate]();
+      }
+      if (alphaMode === 'MASK') {
+        material.transparent = false;
+        material.depthWrite = true;  // default
+        this.setAlphaCutoff(
+            this.alphaCutoff !== undefined ? this.alphaCutoff : 0.5)
+      }
+    }
+  }
+
+  setDoubleSided(doubleSided: boolean) {
+    for (const material of this[$correlatedObjects] as
+         Set<MeshStandardMaterial>) {
+      if (doubleSided == true) {
+        material.side = DoubleSide;
+      } else {
+        material.side = FrontSide;  // default
+      }
+    }
     this[$onUpdate]();
   }
 }
