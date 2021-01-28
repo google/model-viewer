@@ -31,20 +31,20 @@ export function getModelViewer() {
 }
 
 export function renderCommonChildElements(
-    hotspots: HotspotConfig[], bestPractices: BestPracticesState) {
+    hotspots: HotspotConfig[],
+    bestPractices?: BestPracticesState,
+    isEditor?: boolean) {
   const childElements: any[] = [
     ...renderHotspots(hotspots),
   ];
-  if (bestPractices) {
-    if (bestPractices.progressBar) {
-      childElements.push(renderProgressBar());
-    }
-    if (bestPractices.arButton) {
-      childElements.push(renderARButton());
-    }
-    if (bestPractices.arPrompt) {
-      childElements.push(renderARPrompt());
-    }
+  if (bestPractices?.progressBar) {
+    childElements.push(renderProgressBar(isEditor));
+  }
+  if (bestPractices?.arButton && !isEditor) {
+    childElements.push(renderARButton());
+  }
+  if (bestPractices?.arPrompt && !isEditor) {
+    childElements.push(renderARPrompt());
   }
   return childElements;
 }

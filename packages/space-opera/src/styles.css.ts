@@ -92,7 +92,7 @@ export const iblSelectorStyles: CSSResult = css`
 .defaultError {
   margin-top: 0;
   margin-left: 15px;
-  color: #FFFFFF;
+  color: #FF0000;
 }
 
 .EnvironmnetImageDropdown,

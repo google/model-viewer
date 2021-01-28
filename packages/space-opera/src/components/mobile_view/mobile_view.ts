@@ -234,7 +234,8 @@ export class MobileView extends LitElement {
 
     // Renders elements common between mobile and editor.
     const childElements =
-        renderCommonChildElements(this.hotspots, this.bestPractices!);
+        renderCommonChildElements(this.hotspots, this.bestPractices!, false);
+
     return html`
     <div id="overlay"></div>
     <div class="app">

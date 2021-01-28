@@ -16,10 +16,15 @@
  */
 
 import {html} from 'lit-element';
+import {getMobileModelViewer} from '../mobile_view/reducer';
 import {getModelViewer} from '../model_viewer_preview/reducer';
 
-export function renderProgressBar() {
-  getModelViewer()?.addEventListener('progress', onProgress);
+export function renderProgressBar(isEditor) {
+  if (isEditor) {
+    getModelViewer()?.addEventListener('progress', onProgress);
+  } else {
+    getMobileModelViewer()?.addEventListener('progress', onProgress);
+  }
   return html`
 <div class="progress-bar hide" slot="progress-bar">
 <div class="update-bar"></div>
