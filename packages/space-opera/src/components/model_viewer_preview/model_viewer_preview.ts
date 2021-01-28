@@ -196,7 +196,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
     // Renders elements common between mobile and editor.
     const childElements =
-        renderCommonChildElements(this.hotspots, this.bestPractices!);
+        renderCommonChildElements(this.hotspots, this.bestPractices!, true);
 
     // Add additional elements, editor specific.
     childElements.push(refreshMobileButton);
