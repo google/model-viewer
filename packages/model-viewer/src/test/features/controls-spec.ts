@@ -14,8 +14,8 @@
  */
 
 import {Camera, Vector3} from 'three';
+import {IS_IOS} from '../../constants.js';
 
-import {IS_IE11} from '../../constants.js';
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
@@ -240,7 +240,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('changes FOV basis when aspect ratio changes', async () => {
+        if (IS_IOS) {  // Flaky on iOS 13
+          return;
+        }
         const fov = element.getFieldOfView();
+        expect(fov).to.be.closeTo(DEFAULT_MAX_FOV, .001);
         element.setAttribute('style', 'width: 200px; height: 300px');
 
         await until(() => element.getFieldOfView() !== fov);
@@ -602,8 +606,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 .to.be.equal(true);
           });
 
-          // TODO(#1141)
-          (IS_IE11 ? test.skip : test)(
+          test(
               'does not prompt users to interact before a model is loaded',
               async () => {
                 element.src = null;
