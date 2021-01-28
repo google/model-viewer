@@ -28,24 +28,6 @@ module.exports = function(config) {
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
       {
-        pattern:
-            'node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js',
-        watched: false
-      },
-      {
-        pattern: 'node_modules/@webcomponents/webcomponentsjs/bundles/*.js',
-        watched: false,
-        included: false
-      },
-      {
-        pattern: 'node_modules/resize-observer-polyfill/dist/ResizeObserver.js',
-        watched: false
-      },
-      {
-        pattern: 'node_modules/intersection-observer/intersection-observer.js',
-        watched: false
-      },
-      {
         pattern: 'node_modules/focus-visible/dist/focus-visible.js',
         watched: false
       },

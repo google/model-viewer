@@ -17,4 +17,3 @@ Command                         | Description
 ------------------------------- | -----------
 `npm run build`                 | Builds publishable modelviewer.dev website artifacts
 `npm run clean`                 | Deletes all build artifacts
-`npm run create-legacy-bundles` | Generates IE11-compatible script bundles (run `npm run build` first)

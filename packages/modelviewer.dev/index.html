@@ -24,17 +24,6 @@
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
 
-  <!-- The following libraries and polyfills are recommended to maximize browser support -->
-
-  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
-  <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
-  <script src="node_modules/intersection-observer/intersection-observer.js"></script>
-
-  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
-  <script src="node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
@@ -65,7 +54,6 @@
                 <template>
 <!-- Import the component -->
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
-<script type="noexecute" nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 
 <!-- Use it like any other HTML element -->
 <model-viewer src="shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls></model-viewer>
@@ -134,18 +122,11 @@
         <div id="section-browser-support">
           <h3 class="grouping-title grouping-title-new border-bottom">Browser Support</h3>
 
-          <div id="browser-support-icon-group">
-            <div class="icon-desc"><img class="size-24 icon-check" alt="icon-check"><div>Natively supported</div></div>
-            <div class="icon-desc"><img class="size-24 icon-warning" alt="icon-warning"><div>Available with polyfill</div></div>
-            <div class="icon-desc"><img class="size-24 icon-flag" alt="icon-flag"><div>Behind a flag, unstable</div></div>
-            <div class="icon-desc"><img class="size-24 icon-na" alt="icon-na"><div>Not available</div></div>
-          </div>
-
-          <div style="clear:both"></div>
+          <p class="browser-support-desc"><code>&lt;model-viewer&gt;</code> is supported on the last 2 major versions of all evergreen
+            desktop and mobile browsers.</p>
 
           <p class="browser-support-desc">These browser features are
-          <b>required</b> for <span
-          class="attribute">&lt;model-viewer&gt;</span> to work correctly:</p>
+          only needed if you wish to use webxr in ar-modes:</p>
           <table class="browser-support">
             <tr>
               <th>Feature</th>
@@ -154,89 +135,6 @@
               <th><img class="logo-safari" title="Safari" alt="Safari"></th>
               <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
               <th><img class="logo-edge" title="Edge" alt="Edge"></th>
-              <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
-              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
-            </tr>
-            <tr>
-              <td>Custom Elements</td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-            </tr>
-            <tr>
-              <td>Shadow DOM</td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-            </tr>
-          </table>
-
-          <p class="browser-support-desc">These browser features are
-          <b>optional</b> and are only used if available for performance
-          optimization or specific features:</p>
-          <table class="browser-support">
-            <tr>
-              <th>Feature</th>
-              <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
-              <th><img class="logo-canary" title="Canary" alt="Canary"></th>
-              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
-              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
-              <th><img class="logo-edge" title="Edge" alt="Edge"></th>
-              <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
-              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
-            </tr>
-            <tr>
-              <td>Resize Observer</td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-            </tr>
-            <tr>
-              <td>Intersection Observer</td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-check" alt="icon-check"></td>
-            </tr>
-            <tr>
-              <td>:focus-visible</td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-              <td><img class="icon-warning" alt="icon-warning"></td>
-            </tr>
-          </table>
-
-          <p class="browser-support-desc">These browser features are
-          <b>optional</b> and are only needed if you wish to use
-          webxr in ar-modes:</p>
-          <table class="browser-support">
-            <tr>
-              <th>Feature</th>
-              <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
-              <th><img class="logo-canary" title="Canary" alt="Canary"></th>
-              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
-              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
-              <th><img class="logo-edge" title="Edge" alt="Edge"></th>
-              <th><img class="logo-ie" title="IE 11" alt="IE 11"></th>
               <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
             </tr>
 
@@ -247,7 +145,6 @@
               <td><img class="icon-na" alt="icon-na"></td>
               <td><img class="icon-na" alt="icon-na"></td>
               <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-na" alt="icon-na"></td>
               <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
@@ -257,7 +154,6 @@
               <td><img class="icon-na" alt="icon-na"></td>
               <td><img class="icon-na" alt="icon-na"></td>
               <td><img class="icon-check" alt="icon-check"></td>
-              <td><img class="icon-na" alt="icon-na"></td>
               <td><img class="icon-check" alt="icon-check"></td>
             </tr>
             <tr>
@@ -268,9 +164,28 @@
               <td><img class="icon-na" alt="icon-na"></td>
               <td><img class="icon-na" alt="icon-na"></td>
               <td><img class="icon-na" alt="icon-na"></td>
-              <td><img class="icon-na" alt="icon-na"></td>
             </tr>
           </table>
+
+          <div id="browser-support-icon-group">
+            <div class="icon-desc"><img class="size-24 icon-check" alt="icon-check"><div>Natively supported</div></div>
+            <div class="icon-desc"><img class="size-24 icon-warning" alt="icon-warning"><div>Available with polyfill</div></div>
+            <div class="icon-desc"><img class="size-24 icon-flag" alt="icon-flag"><div>Behind a flag, unstable</div></div>
+            <div class="icon-desc"><img class="size-24 icon-na" alt="icon-na"><div>Not available</div></div>
+          </div>
+
+          <div style="clear:both"></div>
+
+          <p class="browser-support-desc"><code>:focus-visible</code> is an as-yet unimplemented web platform feature that enables
+          content authors to style a component on the condition that it received focus in
+          such a way that suggests the focus state should be visibly evident.</p>
+
+          <p class="browser-support-desc">The <code>:focus-visible</code> capability has not been implemented in any stable browsers
+          yet. If <a href="https://github.com/WICG/focus-visible">the polyfill</a> is available on the page, 
+          <code>&lt;model-viewer&gt;</code> will use it and only display focus rings when <code>:focus-visible</code> should apply.</p>
+
+          <p class="browser-support-desc">Check out <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible">this related MDN</a> 
+          article for more details on <code>:focus-visible</code>.</p>
 
         </div>
 
@@ -300,18 +215,10 @@
   <script type="module"
       src="examples/built/dependencies.js">
   </script>
-  <script nomodule
-      src="examples/built/dependencies-legacy.js">
-  </script>
 
-  <!-- Loads <model-viewer> only on modern browsers: -->
+  <!-- Loads <model-viewer> on modern browsers: -->
   <script type="module"
       src="node_modules/@google/model-viewer/dist/model-viewer.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule
-      src="node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
   </script>
 </body>
 </html>

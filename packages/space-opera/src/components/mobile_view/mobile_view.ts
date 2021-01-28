@@ -22,12 +22,12 @@ import {customElement, html, internalProperty, LitElement, query} from 'lit-elem
 import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {toastStyles} from '../../styles.css.js';
-import {ArConfigState, ModelViewerSnippetState} from '../../types.js';
+import {ArConfigState, BestPracticesState, ModelViewerSnippetState} from '../../types.js';
+import {arButtonCSS, arPromptCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {HotspotConfig, toVector3D} from '../hotspot_panel/types.js';
-import {downloadContents} from '../model_viewer_preview/reducer.js';
+import {downloadContents, renderCommonChildElements} from '../model_viewer_preview/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
-import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
 import {styles as mobileStyles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
@@ -42,7 +42,14 @@ const TOAST_TIME = 7000;  // 7s
  */
 @customElement('mobile-view')
 export class MobileView extends LitElement {
-  static styles = [mobileStyles, toastStyles, hotspotStyles];
+  static styles = [
+    mobileStyles,
+    toastStyles,
+    hotspotStyles,
+    arButtonCSS,
+    progressBarCSS,
+    arPromptCSS
+  ];
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
@@ -57,6 +64,7 @@ export class MobileView extends LitElement {
   @internalProperty() extraAttributes: any = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() hotspots: HotspotConfig[] = [];
+  @internalProperty() bestPractices?: BestPracticesState;
   @internalProperty() envImageUrl: string = '';
 
   @internalProperty() pipeId = window.location.search.replace('?id=', '');
@@ -91,6 +99,7 @@ export class MobileView extends LitElement {
     this.config = snippet.config;
     this.camera = snippet.camera;
     this.extraAttributes = snippet.extraAttributes;
+    this.bestPractices = snippet.bestPractices;
 
     // Send a new POST out for each scene-viewer button press
     if (snippet.arConfig.ar) {
@@ -132,12 +141,14 @@ export class MobileView extends LitElement {
     const updatedContent: EditorUpdates = json.updatedContent;
     this.overlay!.style.display = 'block';
 
+    if (updatedContent.stateChanged) {
+      this.updateState(json.snippet, json.urls);
+      await this.updateComplete;
+    }
+
     if (updatedContent.gltfChanged) {
       this.modelViewerUrl =
           gltfToSession(this.pipeId, this.sessionId, updatedContent.gltfId);
-    }
-    if (updatedContent.stateChanged) {
-      this.updateState(json.snippet, json.urls);
     }
 
     if (updatedContent.envChanged) {
@@ -220,7 +231,10 @@ export class MobileView extends LitElement {
     const skyboxImage = (config.useEnvAsSkybox && this.editorUrls?.env) ?
         this.envImageUrl :
         undefined;
-    const childElements = [...renderHotspots(this.hotspots)];
+
+    // Renders elements common between mobile and editor.
+    const childElements =
+        renderCommonChildElements(this.hotspots, this.bestPractices!);
     return html`
     <div id="overlay"></div>
     <div class="app">

@@ -54,9 +54,16 @@ export interface ArConfigState {
   iosSrc?: string;
 }
 
+export interface BestPracticesState {
+  progressBar: boolean;
+  arButton: boolean;
+  arPrompt: boolean;
+}
+
 export interface ModelViewerSnippetState {
   arConfig: ArConfigState;
   animationNames: string[];
+  bestPractices: BestPracticesState;
   camera: Camera;
   config: ModelViewerConfig;
   hotspots: HotspotConfig[];
@@ -98,6 +105,7 @@ export const INITIAL_STATE: State = {
     modelViewerSnippet: {
       arConfig: {},
       animationNames: [],
+      bestPractices: {progressBar: true, arButton: true, arPrompt: true},
       config: {},
       hotspots: [],
       camera: INITIAL_CAMERA,
