@@ -35,14 +35,16 @@ export function renderCommonChildElements(
   const childElements: any[] = [
     ...renderHotspots(hotspots),
   ];
-  if (bestPractices.progressBar) {
-    childElements.push(renderProgressBar());
-  }
-  if (bestPractices.arButton) {
-    childElements.push(renderARButton());
-  }
-  if (bestPractices.arPrompt) {
-    childElements.push(renderARPrompt());
+  if (bestPractices) {
+    if (bestPractices.progressBar) {
+      childElements.push(renderProgressBar());
+    }
+    if (bestPractices.arButton) {
+      childElements.push(renderARButton());
+    }
+    if (bestPractices.arPrompt) {
+      childElements.push(renderARPrompt());
+    }
   }
   return childElements;
 }
