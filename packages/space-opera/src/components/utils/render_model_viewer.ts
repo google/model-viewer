@@ -76,6 +76,5 @@ export function renderModelViewer(
         @click=${eventHandlers?.click}
       >
       ${childElements}
-    </model-viewer>
-        `;
+      </model-viewer>`;
 }
