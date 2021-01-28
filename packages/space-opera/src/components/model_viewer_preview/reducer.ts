@@ -38,7 +38,7 @@ export function renderCommonChildElements(
     ...renderHotspots(hotspots),
   ];
   if (bestPractices?.progressBar) {
-    childElements.push(renderProgressBar());
+    childElements.push(renderProgressBar(isEditor));
   }
   if (bestPractices?.arButton && !isEditor) {
     childElements.push(renderARButton());

@@ -18,6 +18,10 @@
 import {Action, ArConfigState, State} from '../../types.js';
 import {MobileState} from './types.js';
 
+export function getMobileModelViewer() {
+  return document.querySelector('mobile-view')?.modelViewer;
+}
+
 const SET_IOS_SRC = 'SET_IOS_SRC';
 export function dispatchIosSrc(iosSrc: string) {
   return {type: SET_IOS_SRC, payload: iosSrc};
