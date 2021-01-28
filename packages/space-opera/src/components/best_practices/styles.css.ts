@@ -99,6 +99,16 @@ export const arButtonCSS: CSSResult = css`
 }`;
 
 export const arPromptCSS: CSSResult = css`
+@keyframes circle {
+  from { transform: translateX(-50%) rotate(0deg) translateX(50px) rotate(0deg); }
+  to   { transform: translateX(-50%) rotate(360deg) translateX(50px) rotate(-360deg); }
+}
+
+@keyframes elongate {
+  from { transform: translateX(100px); }
+  to   { transform: translateX(-100px); }
+}
+
 model-viewer > #ar-prompt {
   position: absolute;
   left: 50%;
