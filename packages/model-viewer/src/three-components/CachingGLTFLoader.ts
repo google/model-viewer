@@ -16,6 +16,7 @@
 import {Event as ThreeEvent, EventDispatcher} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
@@ -53,6 +54,9 @@ const preloaded = new Map<string, boolean>();
 let dracoDecoderLocation: string;
 const dracoLoader = new DRACOLoader();
 
+let ktx2TranscoderLocation: string;
+const ktx2Loader = new KTX2Loader();
+
 export const $loader = Symbol('loader');
 export const $evictionPolicy = Symbol('evictionPolicy');
 const $GLTFInstance = Symbol('GLTFInstance');
@@ -67,6 +71,15 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
 
   static getDRACODecoderLocation() {
     return dracoDecoderLocation;
+  }
+
+  static setKTX2TranscoderLocation(url: string) {
+    ktx2TranscoderLocation = url;
+    ktx2Loader.setTranscoderPath(url);
+  }
+
+  static getKTX2TranscoderLocation() {
+    return ktx2TranscoderLocation;
   }
 
   static[$evictionPolicy]: CacheEvictionPolicy =
@@ -116,6 +129,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     super();
     this[$GLTFInstance] = GLTFInstance;
     this[$loader].setDRACOLoader(dracoLoader);
+    this[$loader].setKTX2Loader(ktx2Loader);
   }
 
   protected[$loader]: GLTFLoader = new GLTFLoader();
