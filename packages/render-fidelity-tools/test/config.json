@@ -192,7 +192,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "babylon"
+        "babylon",
+        "gltf-sample-viewer"
       ],
       "renderSkybox": true
     },
