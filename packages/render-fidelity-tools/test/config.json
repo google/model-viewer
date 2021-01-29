@@ -480,7 +480,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "model-viewer"
       ]
     },
     {
