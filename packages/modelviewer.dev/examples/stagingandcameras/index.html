@@ -24,18 +24,6 @@
   <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
-  <!-- The following libraries and polyfills are recommended to maximize browser support -->
-
-  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
-  <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
-  <script src="../../node_modules/intersection-observer/intersection-observer.js"></script>
-
-  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
@@ -460,18 +448,10 @@
   <script type="module"
       src="../built/dependencies.js">
   </script>
-  <script nomodule
-      src="../built/dependencies-legacy.js">
-  </script>
 
-  <!-- Loads <model-viewer> only on modern browsers: -->
+  <!-- Loads <model-viewer> on modern browsers: -->
   <script type="module"
       src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule
-      src="../../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
   </script>
 </body>
 </html>

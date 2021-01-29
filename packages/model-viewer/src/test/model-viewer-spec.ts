@@ -21,8 +21,7 @@ const setupModelViewer = async (modelViewer: ModelViewerElement) => {
 
   const modelLoaded = waitForEvent(modelViewer, 'load');
 
-  modelViewer.src = assetPath(
-      'models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf');
+  modelViewer.src = assetPath('models/reflective-sphere.gltf');
 
   modelViewer.minCameraOrbit = 'auto auto 12m';
   modelViewer.maxCameraOrbit = 'auto auto 12m';
