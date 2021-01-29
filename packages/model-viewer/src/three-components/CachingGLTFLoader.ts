@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Event as ThreeEvent, EventDispatcher} from 'three';
+import {Event as ThreeEvent, EventDispatcher, WebGLRenderer} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader';
@@ -80,6 +80,10 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
 
   static getKTX2TranscoderLocation() {
     return ktx2TranscoderLocation;
+  }
+
+  static initializeKTX2Loader(renderer: WebGLRenderer) {
+    ktx2Loader.detectSupport(renderer);
   }
 
   static[$evictionPolicy]: CacheEvictionPolicy =
