@@ -40,7 +40,6 @@ import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
 import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
 import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
-import {load} from './validation_utils.js';
 
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
@@ -230,10 +229,6 @@ export class ImportCard extends LitElement {
     // enable camera controls by default
     reduxStore.dispatch(dispatchCameraControlsEnabled(true));
     reduxStore.dispatch(dispatchSetHotspots([]));
-
-    const report = load(files[0], url);
-    console.log('Report:: ', report);
-    // Set report...
   }
 
   onSnippetOpen() {

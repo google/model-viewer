@@ -21,6 +21,7 @@ import {openModalStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
 import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
+import {validateGltf} from './validation_utils.js';
 
 @customElement('me-validation-modal')
 export class ValidationModal extends LitElement {
@@ -62,12 +63,51 @@ export class Validation extends ConnectedLitElement {
   @query('me-validation-modal#validation-modal')
   validationModal!: ValidationModal;
   @internalProperty() gltfUrl?: string;
+  @internalProperty() report: any = {};
+
+  @internalProperty() severityTitle: string = '';
+  @internalProperty() severityColor: string = '';
+
+  @internalProperty() infoMessages: any = [];
+  @internalProperty() hintMessages: any = [];
+  @internalProperty() warningMessages: any = [];
+  @internalProperty() errorMessages: any = [];
 
   stateChanged(state: State) {
     const newGltfUrl = getGltfUrl(state);
     if (newGltfUrl !== this.gltfUrl && typeof newGltfUrl === 'string') {
       this.gltfUrl = newGltfUrl;
-      // this.validationInfo = load();
+      this.awaitLoad(this.gltfUrl);
+    }
+  }
+
+  async awaitLoad(url: string) {
+    this.report = await validateGltf(url);
+    this.infoMessages = [];
+    this.hintMessages = [];
+    this.warningMessages = [];
+    this.errorMessages = [];
+    this.severityTitle = 'Model Details';
+    this.severityColor = '#202020';
+    if (this.report.issues.numInfos) {
+      this.infoMessages = this.report.infos;
+      this.severityColor = '#2196f3';
+      this.severityTitle = 'Info';
+    }
+    if (this.report.issues.numHints) {
+      this.hintMessages = this.report.hints;
+      this.severityColor = '#8bc34a';
+      this.severityTitle = 'Hint';
+    }
+    if (this.report.issues.numWarnings) {
+      this.warningMessages = this.report.warnings;
+      this.severityColor = '#f9a825';
+      this.severityTitle = 'Warning';
+    }
+    if (this.report.issues.numErrors) {
+      this.errorMessages = this.report.errors;
+      this.severityColor = '#f44336';
+      this.severityTitle = 'Error';
     }
   }
 
@@ -77,10 +117,13 @@ export class Validation extends ConnectedLitElement {
 
   render() {
     return html`
-    <mwc-button unelevated style="align-self: center;"
-      @click=${this.onOpen}>
-      Validation
-    </mwc-button>
+    ${
+        this.severityTitle.length > 0 ? html`
+<mwc-button unelevated style="align-self: center;"
+  @click=${this.onOpen} style="--mdc-theme-primary: ${this.severityColor}">
+  ${this.severityTitle}
+</mwc-button>` :
+                                        html``}
     <me-validation-modal id="validation-modal"></me-validation-modal>
     `;
   }

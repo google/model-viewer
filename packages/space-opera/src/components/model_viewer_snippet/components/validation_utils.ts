@@ -25,26 +25,11 @@ const SEVERITY_MAP = ['Errors', 'Warnings', 'Infos', 'Hints'];
 
 /**
  * Loads a fileset provided by user action.
- * @param  {<string, File>} file
- */
-export function load(file, url) {
-  const rootFile = file.name;
-  const rootPath = '';
-  console.log('load: rootFile', rootFile);
-  console.log('load: rootPath', rootPath);
-  console.log('load: file', file);
-  view(url, file);
-}
-
-/**
  * Passes a model to the viewer, given file and resources.
- * @param  {File|string} rootFile
- * @param  {string} rootPath
- * @param  {<File>} file
  */
-async function view(url, file) {
+export async function validateGltf(url: string) {
   const gltf = await viewerLoad(url);
-  validate(url, file, gltf);
+  return await validate(url, gltf);
 }
 
 async function viewerLoad(url: string) {
@@ -79,13 +64,13 @@ async function viewerLoad(url: string) {
   });
 }
 
-export async function validate(url, file, gltf) {
-  return fetch(url)
+export async function validate(url: string, gltf) {
+  return await fetch(url)
       .then((response) => response.arrayBuffer())
-      .then((buffer) => validateBytes(new Uint8Array(buffer), {
-              externalResourceFunction: (uri) =>
-                  resolveExternalResource(uri, url, file)
-            }))
+      .then(
+          (buffer) => validateBytes(new Uint8Array(buffer), {
+            externalResourceFunction: (uri) => resolveExternalResource(uri, url)
+          }))
       .then((report) => setReport(report, gltf))
       .catch((e) => setReportException(e));
 }
@@ -102,24 +87,11 @@ function setReportException(e) {
  * @param  {Map<string, File>} assetMap
  * @return {Promise<Uint8Array>}
  */
-function resolveExternalResource(uri, url, assetMap) {
+function resolveExternalResource(uri: string, url: string) {
   const baseURL = LoaderUtils.extractUrlBase(url);
-  const normalizedURL = decodeURI(uri)  // validator applies URI encoding.
-                            .replace(baseURL, '')
-                            .replace(/^(\.?\/)/, '');
-
-  let objectURL;
-
-  if (assetMap.has(normalizedURL)) {
-    const object = assetMap.get(normalizedURL);
-    objectURL = URL.createObjectURL(object);
-  }
-
-  return fetch(objectURL || (baseURL + uri))
+  return fetch(baseURL + uri)
       .then((response) => response.arrayBuffer())
       .then((buffer) => {
-        if (objectURL)
-          URL.revokeObjectURL(objectURL);
         return new Uint8Array(buffer);
       });
 }
@@ -141,7 +113,7 @@ function setReport(report, response) {
   report.hints = report.issues.messages.filter((msg) => msg.severity === 3);
   groupMessages(report);
   setResponse(report, response);
-  console.log('report', report);
+  return report;
 }
 
 /**
