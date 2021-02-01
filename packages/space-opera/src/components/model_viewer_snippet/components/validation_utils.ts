@@ -25,41 +25,29 @@ const SEVERITY_MAP = ['Errors', 'Warnings', 'Infos', 'Hints'];
 
 /**
  * Loads a fileset provided by user action.
- * @param  {Map<string, File>} fileMap
+ * @param  {<string, File>} file
  */
-export function load(fileMap) {
-  let rootFile;
-  let rootPath;
-  Array.from(fileMap).forEach(([path, file]) => {
-    if (file.name.match(/\.(gltf|glb)$/)) {
-      rootFile = file;
-      rootPath = path.replace(file.name, '');
-    }
-  });
-
-  if (!rootFile) {
-    console.log('No .gltf or .glb asset found');
-    // onError('No .gltf or .glb asset found.');
-  }
+export function load(file, url) {
+  const rootFile = file.name;
+  const rootPath = '';
   console.log('load: rootFile', rootFile);
   console.log('load: rootPath', rootPath);
-  console.log('load: fileMap', fileMap);
-  view(rootFile, rootPath, fileMap);
+  console.log('load: file', file);
+  view(url, file);
 }
 
 /**
  * Passes a model to the viewer, given file and resources.
  * @param  {File|string} rootFile
  * @param  {string} rootPath
- * @param  {Map<string, File>} fileMap
+ * @param  {<File>} file
  */
-async function view(rootFile, rootPath, fileMap) {
-  const gltf = await viewerLoad(rootFile, rootPath, fileMap);
-  validate(rootFile, rootPath, fileMap, gltf);
+async function view(url, file) {
+  const gltf = await viewerLoad(url);
+  validate(url, file, gltf);
 }
 
-async function viewerLoad(url: string, rootPath: string, assetMap) {
-  const baseURL = LoaderUtils.extractUrlBase(url);
+async function viewerLoad(url: string) {
   const renderer = new WebGLRenderer({antialias: true});
 
   // Load.
@@ -67,22 +55,7 @@ async function viewerLoad(url: string, rootPath: string, assetMap) {
     const manager = new LoadingManager();
 
     // Intercept and override relative URLs.
-    manager.setURLModifier((url: string, path: string) => {
-      // URIs in a glTF file may be escaped, or not. Assume that assetMap is
-      // from an un-escaped source, and decode all URIs before lookups.
-      // See: https://github.com/donmccurdy/three-gltf-viewer/issues/146
-      const normalizedURL = rootPath +
-          decodeURI(url).replace(baseURL, '').replace(/^(\.?\/)/, '');
-
-      if (assetMap.has(normalizedURL)) {
-        const blob = assetMap.get(normalizedURL);
-        const blobURL = URL.createObjectURL(blob);
-        blobURLs.push(blobURL);
-        return blobURL;
-      }
-
-      return (path || '') + url;
-    });
+    manager.setURLModifier(() => {return url});
 
     const loader =
         new GLTFLoader(manager)
@@ -90,8 +63,6 @@ async function viewerLoad(url: string, rootPath: string, assetMap) {
             .setDRACOLoader(
                 new DRACOLoader(manager).setDecoderPath('assets/wasm/'))
             .setKTX2Loader(new KTX2Loader(manager).detectSupport(renderer));
-
-    const blobURLs: string[] = [];
 
     loader.load(url, (gltf) => {
       const scene = gltf.scene || gltf.scenes[0];
@@ -103,26 +74,24 @@ async function viewerLoad(url: string, rootPath: string, assetMap) {
             ' it may contain individual 3D resources.');
       }
 
-      blobURLs.forEach(URL.revokeObjectURL);
-
-      // See: https://github.com/google/draco/issues/349
-      // DRACOLoader.releaseDecoderModule();
-
       resolve(gltf);
     }, undefined, reject);
   });
 }
 
-export async function validate(
-    rootFile, rootPath, assetMap: Map<string, File>, gltf) {
-  return fetch(rootFile!)
+export async function validate(url, file, gltf) {
+  return fetch(url)
       .then((response) => response.arrayBuffer())
       .then((buffer) => validateBytes(new Uint8Array(buffer), {
               externalResourceFunction: (uri) =>
-                  resolveExternalResource(uri, rootFile, rootPath, assetMap)
+                  resolveExternalResource(uri, url, file)
             }))
       .then((report) => setReport(report, gltf))
       .catch((e) => setReportException(e));
+}
+
+function setReportException(e) {
+  console.log('Error,', e);
 }
 
 /**
@@ -133,12 +102,11 @@ export async function validate(
  * @param  {Map<string, File>} assetMap
  * @return {Promise<Uint8Array>}
  */
-function resolveExternalResource(uri, rootFile, rootPath, assetMap) {
-  const baseURL = LoaderUtils.extractUrlBase(rootFile);
-  const normalizedURL = rootPath +
-      decodeURI(uri)  // validator applies URI encoding.
-          .replace(baseURL, '')
-          .replace(/^(\.?\/)/, '');
+function resolveExternalResource(uri, url, assetMap) {
+  const baseURL = LoaderUtils.extractUrlBase(url);
+  const normalizedURL = decodeURI(uri)  // validator applies URI encoding.
+                            .replace(baseURL, '')
+                            .replace(/^(\.?\/)/, '');
 
   let objectURL;
 

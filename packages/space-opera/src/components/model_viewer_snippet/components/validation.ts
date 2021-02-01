@@ -21,7 +21,6 @@ import {openModalStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
 import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
-import {load} from './validation_utils.js';
 
 @customElement('me-validation-modal')
 export class ValidationModal extends LitElement {
