@@ -79,11 +79,129 @@ export class Validation extends ConnectedLitElement {
         .catch((e) => this.setReportException(e));
   }
 
+  /**
+   * Loads a fileset provided by user action.
+   * @param  {Map<string, File>} fileMap
+   */
+  load(fileMap) {
+    let rootFile;
+    let rootPath;
+    Array.from(fileMap).forEach(([path, file]) => {
+      if (file.name.match(/\.(gltf|glb)$/)) {
+        rootFile = file;
+        rootPath = path.replace(file.name, '');
+      }
+    });
+
+    if (!rootFile) {
+      this.onError('No .gltf or .glb asset found.');
+    }
+    console.log('load: rootFile', rootFile);
+    console.log('load: rootPath', rootPath);
+    console.log('load: fileMap', fileMap) this.view(
+        rootFile, rootPath, fileMap);
+  }
+
+  /**
+   * Passes a model to the viewer, given file and resources.
+   * @param  {File|string} rootFile
+   * @param  {string} rootPath
+   * @param  {Map<string, File>} fileMap
+   */
+  view(rootFile, rootPath, fileMap) {
+    if (this.viewer)
+      this.viewer.clear();
+
+    const viewer = this.viewer || this.createViewer();
+
+    const fileURL =
+        typeof rootFile === 'string' ? rootFile : URL.createObjectURL(rootFile);
+
+    const cleanup = () => {
+      this.hideSpinner();
+      if (typeof rootFile === 'object')
+        URL.revokeObjectURL(fileURL);
+    };
+
+    viewer.load(fileURL, rootPath, fileMap)
+        .catch((e) => this.onError(e))
+        .then((gltf) => {
+          console.log('fileUrl', fileURL);
+          console.log('rootFile', rootFile);
+          console.log('rootPath', rootPath);
+          console.log('fileMap', fileMap);
+          console.log('gltf', gltf);
+          if (!this.options.kiosk) {
+            this.validationCtrl.validate(fileURL, rootPath, fileMap, gltf);
+          }
+          cleanup();
+        });
+  }
+
+  viewer.load(url, rootPath, assetMap) {
+    const baseURL = LoaderUtils.extractUrlBase(url);
+
+    // Load.
+    return new Promise((resolve, reject) => {
+      const manager = new LoadingManager();
+
+      // Intercept and override relative URLs.
+      manager.setURLModifier((url, path) => {
+        // URIs in a glTF file may be escaped, or not. Assume that assetMap is
+        // from an un-escaped source, and decode all URIs before lookups.
+        // See: https://github.com/donmccurdy/three-gltf-viewer/issues/146
+        const normalizedURL = rootPath +
+            decodeURI(url).replace(baseURL, '').replace(/^(\.?\/)/, '');
+
+        if (assetMap.has(normalizedURL)) {
+          const blob = assetMap.get(normalizedURL);
+          const blobURL = URL.createObjectURL(blob);
+          blobURLs.push(blobURL);
+          return blobURL;
+        }
+
+        return (path || '') + url;
+      });
+
+      const loader =
+          new GLTFLoader(manager)
+              .setCrossOrigin('anonymous')
+              .setDRACOLoader(
+                  new DRACOLoader(manager).setDecoderPath('assets/wasm/'))
+              .setKTX2Loader(
+                  new KTX2Loader(manager).detectSupport(this.renderer));
+
+      const blobURLs = [];
+
+      loader.load(url, (gltf) => {
+        const scene = gltf.scene || gltf.scenes[0];
+        const clips = gltf.animations || [];
+
+        if (!scene) {
+          // Valid, but not supported by this viewer.
+          throw new Error(
+              'This model contains no scene, and cannot be viewed here. However,' +
+              ' it may contain individual 3D resources.');
+        }
+
+        this.setContent(scene, clips);
+
+        blobURLs.forEach(URL.revokeObjectURL);
+
+        // See: https://github.com/google/draco/issues/349
+        // DRACOLoader.releaseDecoderModule();
+
+        resolve(gltf);
+      }, undefined, reject);
+    });
+  }
+
+
   stateChanged(state: State) {
     const newGltfUrl = getGltfUrl(state);
     if (newGltfUrl !== this.gltfUrl && typeof newGltfUrl === 'string') {
       this.gltfUrl = newGltfUrl;
-      this.validateGltf()
+      this.validate();
     }
   }
 
