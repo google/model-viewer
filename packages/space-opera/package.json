@@ -62,6 +62,7 @@
     "karma-jasmine": "^4.0.1",
     "karma-sourcemap-loader": "^0.3.7",
     "lit-element": "^2.4.0",
+    "gltf-validator": "^2.0.0-dev.3.3",
     "npm-run-all": "^4.1.5",
     "pwa-helpers": "^0.9.1",
     "redux": "^4.0.5",
