@@ -15,11 +15,13 @@
  *
  */
 
+import {validateBytes} from 'gltf-validator';
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {openModalStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
+import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
 
 @customElement('me-validation-modal')
 export class ValidationModal extends ConnectedLitElement {
@@ -62,13 +64,31 @@ export class ValidationModal extends ConnectedLitElement {
 export class Validation extends ConnectedLitElement {
   @query('me-validation-modal#validation-modal')
   validationModal!: ValidationModal;
+  @internalProperty() gltfUrl?: string;
+
+  async validate(assetMap: Map<string, File>, response: Object) {
+    const rootFile = this.gltfUrl;
+    const rootPath = '/';
+    return fetch(rootFile!)
+        .then((response) => response.arrayBuffer())
+        .then((buffer) => validateBytes(new Uint8Array(buffer), {
+                externalResourceFunction: (uri) => this.resolveExternalResource(
+                    uri, rootFile, rootPath, assetMap)
+              }))
+        .then((report) => this.setReport(report, response))
+        .catch((e) => this.setReportException(e));
+  }
+
+  stateChanged(state: State) {
+    const newGltfUrl = getGltfUrl(state);
+    if (newGltfUrl !== this.gltfUrl && typeof newGltfUrl === 'string') {
+      this.gltfUrl = newGltfUrl;
+      this.validateGltf()
+    }
+  }
 
   onOpen() {
     this.validationModal.open();
-  }
-
-  // @ts-ignore
-  stateChanged(state: State) {
   }
 
   render() {
