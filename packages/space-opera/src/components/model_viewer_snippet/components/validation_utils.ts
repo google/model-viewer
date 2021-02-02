@@ -15,6 +15,9 @@
  *
  */
 
+// Code extracted from:
+// https://github.com/donmccurdy/three-gltf-viewer/
+
 import {validateBytes} from 'gltf-validator';
 import {LoaderUtils, LoadingManager, WebGLRenderer} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';

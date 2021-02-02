@@ -311,4 +311,68 @@ export const toastStyles: CSSResult = css`
   z-index: 2;
   cursor: pointer;
 }
-`
+`;
+
+// https://github.com/donmccurdy/three-gltf-viewer/blob/master/style.css
+export const validationStyles: CSSResult = css`
+paper-dialog {
+  background: #FFF;
+  overflow: scroll;
+}
+
+.container {
+  height: auto;
+  max-width: 1000px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.header {
+  font-size: 24px;
+  color: #404040;
+  margin-bottom: 20px;
+}
+
+.cancel {
+  position: sticky;
+  top: 10px;
+  right: 24px;
+  float: right;
+  margin: 0;
+  padding: 0;
+}
+
+.report {
+  padding: 2em;
+  max-width: 860px;
+}
+
+.report h1 {
+  margin-top: 0;
+}
+
+.report p,
+.report ul {
+  line-height: 1.5em;
+}
+
+.report-table {
+  text-align: left;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.report-table thead tr {
+  background: #404040;
+  color: #FFF;
+}
+
+.report-table th,
+.report-table td {
+  padding: 0.5em 1em;
+}
+
+.report-table tr:nth-child(2n) {
+  background: #F0F0F0;
+}
+`;
