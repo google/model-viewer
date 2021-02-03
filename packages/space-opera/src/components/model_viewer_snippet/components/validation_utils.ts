@@ -27,22 +27,25 @@ import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
 const SEVERITY_MAP = ['Errors', 'Warnings', 'Infos', 'Hints'];
 
 /**
- * Loads a fileset provided by user action.
- * Passes a model to the viewer, given file and resources.
+ * Loads a gltf provided by the user.
+ * Passes the gltf to be validated.
  */
 export async function validateGltf(url: string) {
-  const gltf = await viewerLoad(url);
+  const gltf = await loadGltf(url);
   return await validate(url, gltf);
 }
 
-async function viewerLoad(url: string) {
+/**
+ * Loads the gltf using the GLTF Loader.
+ *
+ * @param url The gltf's url in state.entities.gltf.gltfUrl, which is set
+ *     when the model is initially loaded.
+ */
+async function loadGltf(url: string) {
   const renderer = new WebGLRenderer({antialias: true});
 
-  // Load.
   return new Promise((resolve, reject) => {
     const manager = new LoadingManager();
-
-    // Intercept and override relative URLs.
     manager.setURLModifier(() => {return url});
 
     const loader =
@@ -54,7 +57,6 @@ async function viewerLoad(url: string) {
 
     loader.load(url, (gltf) => {
       const scene = gltf.scene || gltf.scenes[0];
-
       if (!scene) {
         // Valid, but not supported by this viewer.
         throw new Error(
@@ -67,7 +69,10 @@ async function viewerLoad(url: string) {
   });
 }
 
-export async function validate(url: string, gltf) {
+/**
+ * Validate gltf from url
+ */
+async function validate(url: string, gltf) {
   return await fetch(url)
       .then((response) => response.arrayBuffer())
       .then(
@@ -84,11 +89,6 @@ function setReportException(e) {
 
 /**
  * Loads a resource (either locally or from the network) and returns it.
- * @param  {string} uri
- * @param  {string} rootFile
- * @param  {string} rootPath
- * @param  {Map<string, File>} assetMap
- * @return {Promise<Uint8Array>}
  */
 function resolveExternalResource(uri: string, url: string) {
   const baseURL = LoaderUtils.extractUrlBase(url);
@@ -100,7 +100,8 @@ function resolveExternalResource(uri: string, url: string) {
 }
 
 /**
- * @param {GLTFValidator.Report} report
+ * Sets the values of the report.
+ * @param {GLTFValidator.Report} report returned object
  */
 function setReport(report, response) {
   report.issues.maxSeverity = -1;
@@ -120,7 +121,7 @@ function setReport(report, response) {
 }
 
 /**
- * @param {Object} response
+ * Adds metadata onto the report.
  */
 function setResponse(report, response) {
   const json = response && response.parser && response.parser.json;
@@ -147,7 +148,7 @@ function setResponse(report, response) {
 }
 
 /**
- * @param {GLTFValidator.Report} report
+ * Orders messages for errors correctly.
  */
 function groupMessages(report) {
   const CODES = {
@@ -189,6 +190,7 @@ function groupMessages(report) {
   });
 }
 
+// Fix html
 function escapeHTML(unsafe) {
   return unsafe.replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -197,6 +199,7 @@ function escapeHTML(unsafe) {
       .replace(/'/g, '&#039;');
 }
 
+// Fix html
 function linkify(text) {
   const urlPattern =
       /\b(?:https?):\/\/[a-z0-9-+&@#\/%?=~_|!:,.;]*[a-z0-9-+&@#\/%=~_|]/gim;
