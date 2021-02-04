@@ -151,6 +151,7 @@ export class Renderer extends EventDispatcher {
     this.textureUtils =
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
     this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
+    CachingGLTFLoader.initializeKTX2Loader(this.threeRenderer);
 
     this.updateRendererSize();
     this.lastTick = performance.now();
