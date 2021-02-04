@@ -302,6 +302,34 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
         </div>
       </div>
     </div>
+
+    <div class="sample">
+      <div id="ktx2Support" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">KTX2 support</h2>
+            <h4>
+              &lt;model-viewer&gt; supports loading glTF models that
+              use <a href="https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_basisu/README.md" target="_blank" rel="noopener">the Basis Universal extension</a> for including KTX v2 textures.
+            </h4>
+            <h4>
+              In order to load such models, an auxilliary decoder is required
+              and will be loaded on-demand from a Google CDN when a basisu model
+              is detected. See the DRACO example above to see how to customize
+              this behavior, using <code>ktx2TranscoderLocation</code> instead
+              of <code>dracoDecoderLocation</code>.
+            </h4>
+          </div>
+          <example-snippet stamp-to="ktx2Support" highlight-as="html">
+            <template>
+<model-viewer camera-controls alt="A 3D model of a fish" src="../../shared-assets/models/BarramundiFish.mixed.glb">
+</model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
   
     <div class="sample">
       <div id="usdzModel" class="demo"></div>
