@@ -33,7 +33,8 @@ const PROGRESS_MASK_BASE_OPACITY = 0.2;
 const DEFAULT_DRACO_DECODER_LOCATION =
     'https://www.gstatic.com/draco/versioned/decoders/1.3.6/';
 
-const DEFAULT_KTX2_TRANSCODER_LOCATION = 'https://www.gstatic.com/FIXME';
+const DEFAULT_KTX2_TRANSCODER_LOCATION =
+    'https://www.gstatic.com/basis-universal/versioned/2020-12-21-ef70ddd/';
 
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
