@@ -68,26 +68,6 @@ export class ValidationModal extends LitElement {
   <ul>
     <li><b>Format:</b> glTF ${this.report.info.version}</li>
     <li><b>Generator:</b> ${this.report.info.generator}</li>
-    ${
-        this.report.info.extras ? html`
-      ${
-                                      this.report.info.extras.title ? html`
-        <li><b>Title:</b> ${this.report.info.extras.title}</li>` :
-                                                                      html``}
-      ${
-                                      this.report.info.extras.author ? html`
-       <li><b>Author:</b> ${this.report.info.extras.author}</li>` :
-                                                                       html``}
-      ${
-                                      this.report.info.extras.license ? html`
-        <li><b>License:</b> ${this.report.info.extras.license}</li>` :
-                                                                        html``}
-      ${
-                                      this.report.info.extras.source ? html`
-        <li><b>Source:</b> ${this.report.info.extras.source}</li>` :
-                                                                       html``}
-    ` :
-                                  html``}
     <li>
       <b>Stats:</b>
       <ul>
