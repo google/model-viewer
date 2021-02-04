@@ -31,6 +31,7 @@ import './components/poster_controls/poster_controls.js';
 import './components/ibl_selector/ibl_selector.js';
 import './components/materials_panel/materials_panel.js';
 import './components/model_viewer_snippet/components/open_button.js';
+import './components/model_viewer_snippet/components/validation.js';
 import './components/model_editor/model_editor.js';
 import './components/model_viewer_preview/model_viewer_preview.js';
 import './components/model_viewer_snippet/model_viewer_snippet.js';
