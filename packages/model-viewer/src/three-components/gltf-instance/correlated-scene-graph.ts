@@ -258,6 +258,7 @@ export class CorrelatedSceneGraph {
           await this.threeGLTF.parser.getDependency('material', materialIndex);
       updatedMaterials.add(materialIndex);
       (object as Mesh).material = material;
+      this.threeGLTF.parser.assignFinalMaterial(object as Mesh);
       onUpdate();
 
       const gltfElement = this.gltf.materials![materialIndex];
@@ -268,7 +269,7 @@ export class CorrelatedSceneGraph {
         this.gltfElementMap.set(gltfElement, threeObjects);
       }
 
-      threeObjects.add(material);
+      threeObjects.add((object as Mesh).material as Material);
     });
 
     return updatedMaterials;

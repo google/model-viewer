@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {IS_IE11} from '../constants.js';
 import ModelViewerElementBase, {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, timePasses, waitForEvent} from '../utilities.js';
@@ -189,7 +188,7 @@ suite('ModelViewerElementBase', () => {
         // for some cases like headless Chrome WebGL might be disabled,
         // so we simulate the scenario.
         // @see https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.forceContextLoss
-        if (threeRenderer.getContext() != null && !IS_IE11) {
+        if (threeRenderer.getContext() != null) {
           threeRenderer.forceContextLoss();
         } else {
           threeRenderer.domElement.dispatchEvent(
@@ -271,12 +270,6 @@ suite('ModelViewerElementBase', () => {
         test(
             'blobs on supported and unsupported browsers are equivalent',
             async () => {
-              // Skip test on IE11 since it doesn't have Response to fetch
-              // arrayBuffer
-              if (IS_IE11) {
-                return;
-              }
-
               let restoreCanvasToBlob = () => {};
               try {
                 restoreCanvasToBlob = spy(

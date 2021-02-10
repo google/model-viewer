@@ -114,7 +114,7 @@ export class OpenModal extends ConnectedLitElement {
 
       // reset poster
       config.poster = undefined;
-      dispatchSetPosterName(undefined);
+      reduxStore.dispatch(dispatchSetPosterName(undefined));
 
       if (config.environmentImage && isObjectUrl(config.environmentImage)) {
         // If new env image is legal, use it
@@ -165,7 +165,7 @@ export class OpenModal extends ConnectedLitElement {
     event.preventDefault();
     this.handleSubmitSnippet();
     if (this.errors.length === 0) {
-      this.isOpen = false;
+      this.close();
     }
   }
 
@@ -306,6 +306,7 @@ export class ImportCard extends LitElement {
         GLB
       </mwc-button>
     </div>
+    <me-validation></me-validation>
     `;
   }
 }

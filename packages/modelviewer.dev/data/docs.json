@@ -144,6 +144,14 @@
         ]
       },
       {
+        "name": "ktx2TranscoderLocation",
+        "htmlName": "ktx2TranscoderLocation",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s KTX2 transcoder location URL. By default, the KTX2 transcoder will be loaded from a Google CDN.",
+        "links": [
+          "<a href=\"../examples/loading/#dracoSupport\"><span class='attribute'>dracoDecoderLocation</span> example</a>"
+        ]
+      },
+      {
         "name": "minimumRenderScale",
         "htmlName": "minimumRenderScale",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1.",
