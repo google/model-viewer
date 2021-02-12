@@ -1,5 +1,5 @@
 // @ts-ignore
-import {computePrimitiveCentroids, GltfState, GltfView, initDracoLib, initKtxLib, loadEnvironment, loadGltf, ToneMaps} from '@khronosgroup/gltf-viewer';
+import {GltfState, GltfView, ResourceLoader} from '@khronosgroup/gltf-viewer';
 import {css, customElement, html, LitElement, property} from 'lit-element';
 
 import {ScenarioConfig} from '../../common.js';
@@ -10,6 +10,7 @@ const $updateSize = Symbol('updateSize');
 const $canvas = Symbol('canvas');
 const $view = Symbol('view');
 const $state = Symbol('state');
+const $resourceLoader = Symbol('resourceLoader');
 const $degToRadians = Symbol('degToRadians');
 
 @customElement('gltf-sample-viewer')
@@ -18,6 +19,7 @@ export class GltfSampleViewer extends LitElement {
   private[$canvas]: HTMLCanvasElement|null;
   private[$view]: GltfView;
   private[$state]: GltfState;
+  private[$resourceLoader]: ResourceLoader;
 
   static get styles() {
     return css`
@@ -44,34 +46,30 @@ export class GltfSampleViewer extends LitElement {
 
   private async[$updateScenario](scenario: ScenarioConfig) {
     if (this[$view] == null) {
-      console.log('test');
       this[$canvas] = this.shadowRoot!.querySelector('canvas');
       this[$view] = new GltfView(
           this[$canvas]!.getContext('webgl2', {alpha: true, antialias: true}));
       this[$state] = this[$view].createState();
-      initDracoLib();
-      initKtxLib(this[$view]);
+      this[$resourceLoader] = this[$view].createResourceLoader();
     }
     this[$updateSize]();
 
-    this[$state].gltf = await loadGltf(scenario.model, this[$view]);
+    this[$state].gltf = await this[$resourceLoader].loadGltf(scenario.model);
 
     const defaultScene = this[$state].gltf.scene;
     this[$state].sceneIndex = defaultScene === undefined ? 0 : defaultScene;
     const scene = this[$state].gltf.scenes[this[$state].sceneIndex];
     scene.applyTransformHierarchy(this[$state].gltf);
-    computePrimitiveCentroids(this[$state].gltf);
 
     const {target, orbit, verticalFoV} = scenario;
     const camera = this[$state].userCamera;
     camera.setVerticalFoV(this[$degToRadians](verticalFoV));
     camera.fitViewToScene(this[$state].gltf, this[$state].sceneIndex);
-    camera.setTarget([target.x, target.y, target.z]);
-    const pitch = this[$degToRadians](orbit.phi - 90);
-    const yaw = this[$degToRadians](orbit.theta);
-    camera.setRotation(yaw, pitch);
-    camera.setZoom(orbit.radius);
 
+    const yaw = this[$degToRadians](orbit.theta);
+    const pitch = this[$degToRadians]((orbit.phi - 90));
+    camera.setRotation(yaw, pitch);
+    camera.setDistanceFromTarget(orbit.radius, [target.x, target.y, target.z]);
     this[$state].renderingParameters.clearColor = [0, 0, 0, 0];
 
     const luts = {
@@ -86,13 +84,15 @@ export class GltfSampleViewer extends LitElement {
     this[$state].renderingParameters.environmentRotation = 0;
 
     this[$state].environment =
-        await loadEnvironment(scenario.lighting, this[$view], luts);
+        await this[$resourceLoader].loadEnvironment(scenario.lighting, luts);
 
-    // this[$state].renderSkybox = renderSkybox;
+    this[$state].renderingParameters.renderEnvironmentMap =
+        scenario.renderSkybox;
 
-    this[$state].renderingParameters.toneMap = ToneMaps.ACES;
+    this[$state].renderingParameters.toneMap = GltfState.ToneMaps.ACES;
 
-    this[$view].renderFrame(this[$state]);
+    this[$view].renderFrame(
+        this[$state], this[$canvas]!.width, this[$canvas]!.height);
     requestAnimationFrame(() => {
       this.dispatchEvent(
           // This notifies the framework that the model is visible and the
@@ -118,7 +118,6 @@ export class GltfSampleViewer extends LitElement {
     canvas.height = height;
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
-    this[$view].updateViewport(width, height);
 
     const aspect = width / height;
 
