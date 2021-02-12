@@ -154,11 +154,20 @@ function createSidebar(category: Category) {
   let subcategories = Object.keys(category);
   subcategories = subcategories.filter(k => k !== 'Title');
 
+  // Link category href (Loading) to first subcategory (Loading, Attributes)
+  let lowerKey = '';
+  for (const subcategory of subcategories) {
+    lowerKey = getLowerCaseKey(subcategory);
+    break;
+  }
+  const href = lowerCaseTitle.concat('-', lowerKey);
+
   const categoryContainer = `
 <div class="category" id=${lowerCaseTitle.concat('aboveHeader')}>
   <h3 id=${lowerCaseTitle.concat('-sidebar')}>
-    <a class="darken" href="#${
-      lowerCaseTitle}" onclick="sidebarClick('title')">${category.Title}</a>
+    <a class="darken" href="#${href}" onclick="sidebarClick()">
+        ${category.Title}
+    </a>
   </h3>
 </div>`;
 

@@ -306,6 +306,7 @@ export class ImportCard extends LitElement {
         GLB
       </mwc-button>
     </div>
+    <me-validation></me-validation>
     `;
   }
 }
