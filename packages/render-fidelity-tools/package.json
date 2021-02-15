@@ -27,7 +27,7 @@
     "@babylonjs/core": "^4.2.0-alpha.26",
     "@babylonjs/loaders": "^4.2.0-alpha.26",
     "@google/model-viewer": "^1.5.0",
-    "@khronosgroup/gltf-viewer": "^1.0.1",
+    "@khronosgroup/gltf-viewer": "^1.0.2",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
     "@polymer/paper-slider": "^3.0.1",
