@@ -18,6 +18,10 @@
     {
       "name": "dspbr-pt",
       "description": "dspbr-pt"
+    },
+    {
+      "name": "gltf-sample-viewer",
+      "description": "gltf-sample-viewer"
     }
   ],
   "scenarios": [
@@ -188,7 +192,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "babylon"
+        "babylon",
+        "gltf-sample-viewer"
       ],
       "renderSkybox": true
     },

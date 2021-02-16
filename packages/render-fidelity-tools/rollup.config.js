@@ -17,6 +17,7 @@ const {nodeResolve: resolve} = require('@rollup/plugin-node-resolve');
 const replace = require('@rollup/plugin-replace');
 const externalGlobals = require('rollup-plugin-external-globals');
 const {basename} = require('path');
+const commonjs = require('@rollup/plugin-commonjs')
 
 const onwarn = (warning, warn) => {
   // Suppress non-actionable warning caused by TypeScript boilerplate:
@@ -26,7 +27,8 @@ const onwarn = (warning, warn) => {
 };
 
 const plugins = [
-  resolve({preferBuiltins: true}),
+  commonjs(),
+  resolve({preferBuiltins: true, browser: true}),
   replace({'Reflect.decorate': 'undefined'}),
   externalGlobals({filament: 'Filament'})
 ];
@@ -59,6 +61,7 @@ const outputOptions = [
   buildTarget('./lib/components/renderers/filament-viewer.js', 'esm'),
   buildTarget('./lib/components/renderers/dspbr-pt-viewer.js', 'esm'),
   buildTarget('./lib/components/renderers/babylon-viewer.js', 'esm'),
+  buildTarget('./lib/components/renderers/gltf-sample-viewer.js', 'esm'),
   buildTarget('./lib/image-comparison-worker.js', 'iife')
 ];
 
