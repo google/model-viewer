@@ -12,7 +12,7 @@
     "test": "karma start --single-run",
     "test:ci": "npm run test",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
-    "update:package-lock": "rm ./package-lock.json && npm i --only=production",
+    "update:package-lock": "rm -f ./package-lock.json && npm i --only=production",
     "watch:test": "karma start",
     "watch:tsc": "tsc -w",
     "watch:rollup": "rollup -c -w",
@@ -31,7 +31,8 @@
     "Emma Freeman <efree@google.com>",
     "Steven An <stevenan@google.com>",
     "James Ma <ziyanma@google.com>",
-    "Emmett Lalish <elalish@google.com>"
+    "Emmett Lalish <elalish@google.com>",
+    "Chris George <chrisgeorge@google.com>"
   ],
   "devDependencies": {
     "@google/model-viewer": "^1.5.0",
@@ -69,7 +70,7 @@
     "remote-redux-devtools": "^0.5.16",
     "@types/remote-redux-devtools": "^0.5.4",
     "rollup": "^2.26.6",
-    "three": "^0.125.2",
+    "three": "^0.126.0",
     "ts-closure-library": "^2019.11.1-1.10",
     "typescript": "4.0.3",
     "qrious": "^4.0.2",
