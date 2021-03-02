@@ -12,11 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*
+animationMixer
+*/
 
-import {property} from 'lit-element';
+import { property } from 'lit-element';
 
-import ModelViewerElementBase, {$hasTransitioned, $needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
-import {Constructor} from '../utilities.js';
+import ModelViewerElementBase, { $hasTransitioned, $needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource } from '../model-viewer-base.js';
+import { Constructor } from '../utilities.js';
 
 const MILLISECONDS_PER_SECOND = 1000.0
 
@@ -25,7 +28,7 @@ const $paused = Symbol('paused');
 
 export declare interface AnimationInterface {
   autoplay: boolean;
-  animationName: string|void;
+  animationName: string | void;
   animationCrossfadeDuration: number;
   readonly availableAnimations: Array<string>;
   readonly paused: boolean;
@@ -36,15 +39,15 @@ export declare interface AnimationInterface {
 }
 
 export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
-    ModelViewerElement: T): Constructor<AnimationInterface>&T => {
+  ModelViewerElement: T): Constructor<AnimationInterface> & T => {
   class AnimationModelViewerElement extends ModelViewerElement {
-    @property({type: Boolean}) autoplay: boolean = false;
-    @property({type: String, attribute: 'animation-name'})
-    animationName: string|undefined = undefined;
-    @property({type: Number, attribute: 'animation-crossfade-duration'})
+    @property({ type: Boolean }) autoplay: boolean = false;
+    @property({ type: String, attribute: 'animation-name' })
+    animationName: string | undefined = undefined;
+    @property({ type: Number, attribute: 'animation-crossfade-duration' })
     animationCrossfadeDuration: number = 300;
 
-    protected[$paused]: boolean = true;
+    protected [$paused]: boolean = true;
 
     /**
      * Returns an array
@@ -145,8 +148,8 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$changeAnimation]() {
       this[$scene].playAnimation(
-          this.animationName,
-          this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND);
+        this.animationName,
+        this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation
