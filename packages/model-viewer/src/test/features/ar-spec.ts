@@ -64,7 +64,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
         restoreAnchorClick();
       });
 
-      suite.only('openSceneViewer', () => {
+      suite('openSceneViewer', () => {
         test('preserves query parameters in model URLs', () => {
           element.src = 'https://example.com/model.gltf?token=foo';
           element.alt = 'Example model';
@@ -101,8 +101,11 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
           const search = new URLSearchParams(new URL(intentUrls[0]).search);
 
-          expect(search.get('sound')).to.equal('http://localhost:9876/bar.ogg');
-          expect(search.get('link')).to.equal('http://localhost:9876/foo.html');
+          // Tests run in different locations
+          expect(search.get('sound')).to.contain('http://');
+          expect(search.get('sound')).to.contain('/bar.ogg');
+          expect(search.get('link')).to.contain('http://');
+          expect(search.get('link')).to.contain('/foo.html');
         });
       });
 
