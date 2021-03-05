@@ -166,6 +166,7 @@ export class ModelScene extends Scene {
       }
       return;
     }
+    this.reset();
     this.url = url;
 
     // If we have pending work due to a previous source change in progress,
@@ -199,6 +200,7 @@ export class ModelScene extends Scene {
     }
 
     this.reset();
+    this.url = url;
     this._currentGLTF = gltf;
 
     if (gltf != null) {
