@@ -64,7 +64,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
         restoreAnchorClick();
       });
 
-      suite('openSceneViewer', () => {
+      suite.only('openSceneViewer', () => {
         test('preserves query parameters in model URLs', () => {
           element.src = 'https://example.com/model.gltf?token=foo';
           element.alt = 'Example model';
@@ -72,28 +72,37 @@ suite('ModelViewerElementBase with ARMixin', () => {
 
           expect(intentUrls.length).to.be.equal(1);
 
-          const url = new URL(intentUrls[0]);
+          const search = new URLSearchParams(new URL(intentUrls[0]).search);
 
-          expect(url.search).to.match(/(%3F|%26|&)token=foo(%26|&|$)/);
+          expect(search.get('token')).to.equal('foo');
         });
 
         test('keeps title and link when supplied', () => {
-          element.src = 'https://example.com/model.gltf?link=foo&title=bar';
+          element.src =
+              'https://example.com/model.gltf?link=http://linkme.com&title=bar';
           element.alt = 'alt';
           (element as any)[$openSceneViewer]();
 
           expect(intentUrls.length).to.be.equal(1);
 
-          const url = new URL(intentUrls[0]);
+          const search = new URLSearchParams(new URL(intentUrls[0]).search);
 
-          expect(url.search).to.match(/(%3F|%26|&)title=bar(%26|&|$)/);
-          expect(url.search).to.not.match(/(%3F|%26|&)title=alt(%26|&|$)/);
+          expect(search.get('title')).to.equal('bar');
+          expect(search.get('link')).to.equal('http://linkme.com/');
+        });
 
-          expect(url.search).to.match(/(%3F|%26|&)link=foo(%26|&|$)/);
-          const linkRegex =
-              `(%3F|%26|&)link=${self.location.toString()}(%26|&|$)`;
-          linkRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-          expect(url.search).to.not.match(new RegExp(linkRegex));
+        test('sets sound and link to absolute URLs', () => {
+          element.src =
+              'https://example.com/model.gltf?link=foo.html&sound=bar.ogg';
+          element.alt = 'alt';
+          (element as any)[$openSceneViewer]();
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const search = new URLSearchParams(new URL(intentUrls[0]).search);
+
+          expect(search.get('sound')).to.equal('http://localhost:9876/bar.ogg');
+          expect(search.get('link')).to.equal('http://localhost:9876/foo.html');
         });
       });
 
