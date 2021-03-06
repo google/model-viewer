@@ -21,7 +21,7 @@ import {customElement, html, LitElement, property, PropertyValues, query} from '
 import {fileModalStyles} from '../../styles.css.js';
 
 interface BlobArrayResolver {
-  resolve: (fileList?: Blob[]|PromiseLike<Blob[]>) => void;
+  resolve: (fileList?: File[]|PromiseLike<File[]>) => void;
   reject: (error?: Error) => void;
 }
 
@@ -38,7 +38,7 @@ export class FileModalElement extends LitElement {
 
   private blobsResolver?: BlobArrayResolver;
 
-  open(): Promise<Blob[]|undefined> {
+  open(): Promise<File[]|undefined> {
     // The user canceled the previous upload
     if (this.blobsResolver !== undefined) {
       this.blobsResolver.resolve(undefined);
@@ -48,7 +48,7 @@ export class FileModalElement extends LitElement {
     // TODO: When user reloads same file, animations don't run...
     this.fileInput.value = '';
     this.fileInput.click();
-    const promise = new Promise<Blob[]>((resolve, reject) => {
+    const promise = new Promise<File[]|undefined>((resolve, reject) => {
       this.blobsResolver = {resolve, reject};
     });
     return promise;
