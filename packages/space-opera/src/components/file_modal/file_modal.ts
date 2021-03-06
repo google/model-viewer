@@ -36,20 +36,20 @@ export class FileModalElement extends LitElement {
   @property({type: String}) accept = '';
   @query('input#file-input') fileInput!: HTMLInputElement;
 
-  private blobsResolver?: FileArrayResolver;
+  private filesResolver?: FileArrayResolver;
 
   open(): Promise<File[]|undefined> {
     // The user canceled the previous upload
-    if (this.blobsResolver !== undefined) {
-      this.blobsResolver.resolve(undefined);
-      delete this.blobsResolver;
+    if (this.filesResolver !== undefined) {
+      this.filesResolver.resolve(undefined);
+      delete this.filesResolver;
     }
     // Reset this, so the user can reload the same file again.
     // TODO: When user reloads same file, animations don't run...
     this.fileInput.value = '';
     this.fileInput.click();
     const promise = new Promise<File[]|undefined>((resolve, reject) => {
-      this.blobsResolver = {resolve, reject};
+      this.filesResolver = {resolve, reject};
     });
     return promise;
   }
@@ -70,22 +70,22 @@ export class FileModalElement extends LitElement {
   }
 
   async onFileChange() {
-    if (!this.blobsResolver) {
+    if (!this.filesResolver) {
       throw new Error('No file upload resolver found');
     }
 
-    const blobs: Blob[] = [];
+    const fileLists: File[] = [];
     const files = this.fileInput.files;
     if (files) {
       for (let i = 0; i < files.length; i++) {
         if (files[i]) {
-          blobs.push(files[i]);
+          fileLists.push(files[i]);
         }
       }
     }
 
-    this.blobsResolver.resolve(blobs);
-    delete this.blobsResolver;
+    this.filesResolver.resolve(fileLists);
+    delete this.filesResolver;
   }
 }
 
