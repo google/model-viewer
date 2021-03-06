@@ -20,7 +20,7 @@ import '@material/mwc-button';
 import {customElement, html, LitElement, property, PropertyValues, query} from 'lit-element';
 import {fileModalStyles} from '../../styles.css.js';
 
-interface BlobArrayResolver {
+interface FileArrayResolver {
   resolve: (fileList?: File[]|PromiseLike<File[]>) => void;
   reject: (error?: Error) => void;
 }
@@ -36,7 +36,7 @@ export class FileModalElement extends LitElement {
   @property({type: String}) accept = '';
   @query('input#file-input') fileInput!: HTMLInputElement;
 
-  private blobsResolver?: BlobArrayResolver;
+  private blobsResolver?: FileArrayResolver;
 
   open(): Promise<File[]|undefined> {
     // The user canceled the previous upload
