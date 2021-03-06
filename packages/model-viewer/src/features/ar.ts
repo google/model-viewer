@@ -276,7 +276,6 @@ configuration or device capabilities');
       locationUrl.hash = noArViewerSigil;
 
       // modelUrl can contain title/link/sound etc.
-      params.set('file', modelUrl.toString());
       params.set('mode', 'ar_only');
       if (!params.has('disable_occlusion')) {
         params.set('disable_occlusion', 'true');
@@ -298,7 +297,7 @@ configuration or device capabilities');
 
       const intent = `intent://arvr.google.com/scene-viewer/1.0?${
           params
-              .toString()}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
+              .toString()+'&file='+encodeURIComponent(modelUrl.toString())}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
           encodeURIComponent(locationUrl.toString())};end;`;
 
       const undoHashChange = () => {
