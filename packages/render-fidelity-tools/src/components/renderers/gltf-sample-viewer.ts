@@ -90,7 +90,8 @@ export class GltfSampleViewer extends LitElement {
         scenario.renderSkybox;
     this[$state].renderingParameters.blurEnvironmentMap = false;
 
-    this[$state].renderingParameters.toneMap = GltfState.ToneMaps.ACES;
+    this[$state].renderingParameters.toneMap =
+        GltfState.ToneMaps.ACES_3D_COMMERCE;
 
     this[$view].renderFrame(
         this[$state], this[$canvas]!.width, this[$canvas]!.height);
