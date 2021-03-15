@@ -10,7 +10,7 @@
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/lib/shader test/renderers/dspbr-pt/",
-    "update:package-lock": "rm ./package-lock.json && npm i --only=production",
+    "update:package-lock": "rm -f ./package-lock.json && npm i --only=production",
     "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/dspbr-pt/shader ./test/renderers/filament/{cmgen,ktx}"
   },
   "contributors": [
@@ -26,7 +26,7 @@
     "@actions/core": "^1.2.4",
     "@babylonjs/core": "^4.2.0-alpha.26",
     "@babylonjs/loaders": "^4.2.0-alpha.26",
-    "@google/model-viewer": "^1.5.0",
+    "@google/model-viewer": "^1.6.0",
     "@khronosgroup/gltf-viewer": "^1.0.4",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",

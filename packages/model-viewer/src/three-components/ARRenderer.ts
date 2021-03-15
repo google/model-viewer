@@ -753,9 +753,13 @@ export class ARRenderer extends EventDispatcher {
         this.lastTick = time;
       }
 
-      // NOTE: Clearing depth caused issues on Samsung devices
-      // @see https://github.com/googlecodelabs/ar-with-webxr/issues/8
-      // this.threeRenderer.clearDepth();
+      // TODO: This is a workaround for a Chrome bug, which should be fixed
+      // soon: https://bugs.chromium.org/p/chromium/issues/detail?id=1184085
+      const gl = this.threeRenderer.context;
+      gl.depthMask(false);
+      gl.clear(gl.DEPTH_BUFFER_BIT);
+      gl.depthMask(true);
+
       this.threeRenderer.render(scene, this.camera);
       isFirstView = false;
     }

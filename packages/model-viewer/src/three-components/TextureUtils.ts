@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Cache, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 import {deserializeUrl} from '../utilities.js';
 
@@ -32,10 +32,6 @@ export interface EnvironmentGenerationConfig {
 }
 
 const GENERATED_SIGMA = 0.04;
-
-// Enable three's loader cache so we don't create redundant
-// Image objects to decode images fetched over the network.
-Cache.enabled = true;
 
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 const ldrLoader = new TextureLoader();

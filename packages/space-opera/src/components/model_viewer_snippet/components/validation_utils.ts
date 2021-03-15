@@ -23,10 +23,37 @@ import {LoaderUtils} from 'three';
 
 const SEVERITY_MAP = ['Errors', 'Warnings', 'Infos', 'Hints'];
 
+export type Report = {
+  info?: {
+    version?: string;
+    generator?: string;
+    drawCallCount?: number;
+    animationCount?: number;
+    materialCount?: number;
+    totalVertexCount?: number;
+    totalTriangleCount?: number;
+  };
+  validatorVersion?: string;
+  issues?: {
+    numErrors?: number;
+    numWarnings?: number;
+    numHints?: number;
+    numInfos?: number;
+  };
+  errors?: Message;
+  warnings?: Message;
+  hints?: Message;
+  infos?: Message; [k: string]: any;
+};
+
+export type Message = {
+  code: string; message: string; pointer: string; [k: string]: any;
+}[];
+
 /**
  * Passes the gltf url to be validated.
  */
-export async function validateGltf(url: string) {
+export async function validateGltf(url: string): Promise<Report> {
   return await fetch(url)
       .then((response) => response.arrayBuffer())
       .then(
