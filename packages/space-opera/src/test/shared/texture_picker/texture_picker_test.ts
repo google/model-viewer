@@ -66,7 +66,7 @@ describe('texture picker test', () => {
         texturePicker.shadowRoot!.querySelector(
             'me-file-modal#textureUpload')! as FileModalElement;
 
-    const openPromise = new Promise<File[]|undefined>(resolve => {
+    const openPromise = new Promise<File[] | undefined>(resolve => {
       resolve([new File(['test'], 'testname', {type: 'image/jpeg'})]);
     });
 

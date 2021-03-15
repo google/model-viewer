@@ -43,11 +43,15 @@ export type Report = {
   errors?: Message;
   warnings?: Message;
   hints?: Message;
-  infos?: Message; [k: string]: any;
+  infos?: Message;
+  [k: string]: any;
 };
 
 export type Message = {
-  code: string; message: string; pointer: string; [k: string]: any;
+  code: string;
+  message: string;
+  pointer: string;
+  [k: string]: any;
 }[];
 
 /**
