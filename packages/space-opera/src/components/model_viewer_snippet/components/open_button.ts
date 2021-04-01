@@ -18,26 +18,28 @@
 import '@material/mwc-button';
 import '../../file_modal/file_modal.js';
 
-import {ModelViewerConfig, parseSnippet} from '@google/model-viewer-editing-adapter/lib/main';
+import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
 import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
 import {dispatchCameraControlsEnabled, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {openModalStyles} from '../../../styles.css.js';
-import {extractStagingConfig, RelativeFilePathsState, State} from '../../../types.js';
+import {ArConfigState, extractStagingConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../camera_settings/camera_state.js';
 import {getCamera} from '../../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
+import {dispatchArConfig, getArConfig} from '../../mobile_view/reducer.js';
 import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
-import {applyRelativeFilePaths, dispatchConfig} from '../reducer.js';
+import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
+import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
@@ -45,18 +47,22 @@ export class OpenModal extends ConnectedLitElement {
 
   @internalProperty() isOpen: boolean = false;
   @internalProperty() config: ModelViewerConfig = {};
+  @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() errors: string[] = [];
   @internalProperty() gltfUrl?: string;
   @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @query('snippet-viewer#snippet-input')
   private readonly snippetViewer!: SnippetViewer;
+  @internalProperty() extraAttributes: any = {};
 
   stateChanged(state: State) {
     this.config = getConfig(state);
+    this.arConfig = getArConfig(state);
     this.camera = getCamera(state);
     this.gltfUrl = getGltfUrl(state);
     this.relativeFilePaths = getRelativeFilePaths(state);
+    this.extraAttributes = getExtraAttributes(state);
   }
 
   async handleSubmitSnippet(value?: string) {
@@ -74,6 +80,10 @@ export class OpenModal extends ConnectedLitElement {
     if (inputText.match(
             /<\s*model-viewer[^>]*\s*>(\n|.)*<\s*\/\s*model-viewer>/)) {
       const config = parseSnippet(inputText);
+      const arConfig = parseSnippetAr(inputText);
+
+      const extraAttributes = parseExtraAttributes(inputText);
+      reduxStore.dispatch(dispatchExtraAttributes(extraAttributes));
 
       const hotspotErrors: Error[] = [];
       const hotspotConfigs = parseHotspotsFromSnippet(inputText, hotspotErrors);
@@ -96,37 +106,39 @@ export class OpenModal extends ConnectedLitElement {
           const fileName = fileNameList[fileNameList.length - 1];
           reduxStore.dispatch(dispatchSetModelName(fileName));
         }
-
-        // reset poster
-        config.poster = undefined;
-        dispatchSetPosterName(undefined);
-
-        if (config.environmentImage && isObjectUrl(config.environmentImage)) {
-          // If new env image is legal, use it
-          const engImageList = config.environmentImage.split('/');
-          const envImageName = engImageList[engImageList.length - 1];
-          reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
-        } else if (this.config.environmentImage) {
-          // else, if there was an env image in the state, leave it alone
-          config.environmentImage = this.config.environmentImage
-        } else {
-          // else, reset env image
-          config.environmentImage = undefined;
-          reduxStore.dispatch(dispatchSetEnvironmentName(undefined));
-        }
-
-        // NOTE: It's important to dispatch these *after* the URL dispatches. If
-        // we dispatch the config and THEN clear the model URL, then
-        // config.animationName is cleared too (animation UI tries to find the
-        // anim by name, can't find it because the model is empty, thus
-        // triggering a change event selecting none).
-        dispatchConfig(config);
-        reduxStore.dispatch(dispatchSetHotspots(hotspotConfigs));
       } catch (e) {
         console.log(
             `Could not download 'src' attribute - OK, ignoring it. Error: ${
                 e.message}`);
       }
+
+      // reset poster
+      config.poster = undefined;
+      reduxStore.dispatch(dispatchSetPosterName(undefined));
+
+      if (config.environmentImage && isObjectUrl(config.environmentImage)) {
+        // If new env image is legal, use it
+        const engImageList = config.environmentImage.split('/');
+        const envImageName = engImageList[engImageList.length - 1];
+        reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
+      } else if (this.config.environmentImage) {
+        // else, if there was an env image in the state, leave it alone
+        config.environmentImage = this.config.environmentImage
+      } else {
+        // else, reset env image
+        config.environmentImage = undefined;
+        reduxStore.dispatch(dispatchSetEnvironmentName(undefined));
+      }
+
+      // NOTE: It's important to dispatch these *after* the URL dispatches. If
+      // we dispatch the config and THEN clear the model URL, then
+      // config.animationName is cleared too (animation UI tries to find the
+      // anim by name, can't find it because the model is empty, thus
+      // triggering a change event selecting none).
+      dispatchConfig(config);
+      reduxStore.dispatch(dispatchSetHotspots(hotspotConfigs));
+      reduxStore.dispatch(dispatchArConfig(arConfig));
+
     } else {
       this.errors = ['Could not find "model-viewer" tag in snippet'];
     }
@@ -153,23 +165,27 @@ export class OpenModal extends ConnectedLitElement {
     event.preventDefault();
     this.handleSubmitSnippet();
     if (this.errors.length === 0) {
-      this.isOpen = false;
+      this.close();
     }
   }
 
   render() {
     // Get the model-viewer snippet for the edit snippet modal
     const editedConfig = {...this.config};
+    const editedArConfig = {...this.arConfig};
     applyCameraEdits(editedConfig, this.camera);
     applyRelativeFilePaths(
         editedConfig, this.gltfUrl, this.relativeFilePaths!, true);
+    if (editedArConfig.iosSrc) {
+      editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
+    }
 
-    const exampleLoadableSnippet =
-        renderModelViewer(editedConfig, {}, undefined);
+    const exampleLoadableSnippet = renderModelViewer(
+        editedConfig, editedArConfig, this.extraAttributes, {}, undefined);
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
-  <div class="FileModalContainer">
+  <div class="FileModalContainer SnippetModal">
     <div class="FileModalHeader">
       <div>Edit Snippet</div>
     </div>
@@ -200,7 +216,7 @@ export class ImportCard extends LitElement {
   @internalProperty() selectedDefaultOption: number = 0;
 
   async onUploadGLB() {
-    const files: any = await this.fileModal.open();
+    const files = await this.fileModal.open();
     if (!files) {
       /// The user canceled the previous upload
       return;
@@ -290,6 +306,7 @@ export class ImportCard extends LitElement {
         GLB
       </mwc-button>
     </div>
+    <me-validation></me-validation>
     `;
   }
 }

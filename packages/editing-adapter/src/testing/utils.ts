@@ -34,16 +34,16 @@ export function createBufferFromString(str: string): ArrayBuffer {
 /**
  * Creates a dummy PNG blob, useful as a test texture
  */
-export async function generatePngBlob(strokeStyle: string = '#f0f'):
+export async function generatePngBlob(strokeStyle: string = '#f0f', size: number = 64):
     Promise<Blob> {
   const canvas = document.createElement('CANVAS') as HTMLCanvasElement;
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
 
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
   context.strokeStyle = strokeStyle;
   context.beginPath();
-  context.arc(32, 32, 30, 0, 2 * Math.PI);
+  context.arc(Math.floor(size / 2), Math.floor(size / 2), 30, 0, 2 * Math.PI);
   context.stroke();
 
   return new Promise((resolve, reject) => {

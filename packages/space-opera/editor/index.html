@@ -22,7 +22,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Model Editor</title>
   <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
-  <link rel="shortcut icon" type="image/png" href="../shared-assets/icons/favicon.png"/>
+  <link rel="shortcut icon" type="image/png" href="../../shared-assets/icons/favicon.png"/>
   <!-- Web animations for paper-dropdown -->
   <script src="../node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
   <script src="../node_modules/js-beautify/js/lib/beautify-html.js"></script>
@@ -105,17 +105,18 @@
   }
 
   me-tabbed-panel {
-    max-height: calc(100vh - 45px);
+    max-height: calc(100vh - 105px);
     overflow-y: auto;
     display: block;
   }
   .privacy {
     color:#BDBDBD;
-    margin: 5px 16px;
+    padding: 5px 16px;
     position: absolute;
     bottom: 0;
     font-size: small;
     z-index: 0;
+    background-color: rgba(32, 33, 36, .75);
   }
   @media only screen and (max-height: 600px) {
     .privacy {
@@ -137,9 +138,10 @@
       <me-tabs>
         <me-tabbed-panel icon="import_export">
           <me-export-panel></me-export-panel>
+          <div style="margin-bottom: 70px;"></div>
           <div class="privacy">
-            This &lt;model-viewer&gt; editor does not send any imported content to servers:
-            <a href="https://policies.google.com/privacy" class="privacy-link">
+            This &lt;model-viewer&gt; editor does not send any imported content to servers except to deploy to your mobile device:
+            <a href="https://policies.google.com/privacy" class="privacy-link" target="_blank">
               Privacy
             </a>
           </div>

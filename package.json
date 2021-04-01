@@ -5,16 +5,14 @@
   "scripts": {
     "test": "./node_modules/.bin/lerna run test --stream",
     "test:ci": "./node_modules/.bin/lerna run test:ci --stream",
-    "test:ci:legacy": "./node_modules/.bin/lerna run test:ci:legacy --stream",
     "bootstrap": "./node_modules/.bin/lerna bootstrap --ci",
     "format": "find packages/**/src -name '*.ts' | grep -v .d.ts | xargs ./node_modules/.bin/clang-format --verbose -i",
     "lint": "./node_modules/.bin/eslint \"packages/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
     "clean": "./node_modules/.bin/lerna run clean --stream",
     "build": "./node_modules/.bin/lerna run build --stream",
-    "build:legacy-support": "./node_modules/.bin/lerna run create-legacy-bundles --stream",
     "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /packages/modelviewer.dev -c-1",
-    "update:package-lock": "rm ./package-lock.json && npm i --only=production && ./node_modules/.bin/lerna run update:package-lock --stream"
+    "update:package-lock": "rm -f ./package-lock.json && npm i && ./node_modules/.bin/lerna run update:package-lock --stream"
   },
   "husky": {
     "hooks": {
@@ -44,8 +42,7 @@
     "eslint-plugin-wc": "^1.2.0",
     "http-server": "^0.12.1",
     "husky": "^4.2.1",
-    "lerna": "^3.20.2",
+    "lerna": "^3.22.1",
     "typescript": "4.0.3"
-  },
-  "dependencies": {}
+  }
 }

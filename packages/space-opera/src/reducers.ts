@@ -18,27 +18,34 @@
 import {combineReducers} from 'redux';
 
 import {animationNamesReducer} from './components/animation_controls/reducer.js';
+import {bestPracticesReducer} from './components/best_practices/reducer.js';
 import {cameraReducer, isDirtyCameraReducer} from './components/camera_settings/reducer.js'
 import {configReducer} from './components/config/reducer.js';
 import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
 import {environmentReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer, origEditsReducer} from './components/materials_panel/reducer.js';
+import {arReducer, mobileReducer} from './components/mobile_view/reducer.js';
 import {gltfReducer} from './components/model_viewer_preview/reducer.js';
+import {extraAttributesReducer} from './components/model_viewer_snippet/reducer.js';
 import {relativeFilePathsReducer} from './components/relative_file_paths/reducer.js';
 
 const gltfEditsReducer =
     combineReducers({edits: editsReducer, origEdits: origEditsReducer});
 
 const modelViewerSnippetReducer = combineReducers({
+  arConfig: arReducer,
   animationNames: animationNamesReducer,
+  bestPractices: bestPracticesReducer,
   camera: cameraReducer,
   config: configReducer,
   hotspots: hotspotsReducer,
   relativeFilePaths: relativeFilePathsReducer,
+  extraAttributes: extraAttributesReducer,
 });
 
 const entitiesReducer = combineReducers({
   isDirtyCamera: isDirtyCameraReducer,
+  mobile: mobileReducer,
   environment: environmentReducer,
   gltf: gltfReducer,
   gltfEdits: gltfEditsReducer,

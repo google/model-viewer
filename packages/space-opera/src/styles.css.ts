@@ -92,7 +92,7 @@ export const iblSelectorStyles: CSSResult = css`
 .defaultError {
   margin-top: 0;
   margin-left: 15px;
-  color: #FFFFFF;
+  color: #FF0000;
 }
 
 .EnvironmnetImageDropdown,
@@ -131,11 +131,8 @@ model-viewer {
   width: 100%;
 }
 
-.ScreenShotButton {
-  border-radius: 50%;
-  border: 1px #4285f4 solid;
+.RefreshMobileButton {
   bottom: 25px;
-  color: #4285f4; /* MATERIAL_COLOR_GOOGLE_BLUE_500 */;
   position: absolute;
   right: 25px;
 }
@@ -165,14 +162,25 @@ model-viewer {
 }
 `;
 
+export const openMobileViewStyles: CSSResult = css`
+:host {
+  --mdc-button-disabled-fill-color: rgba(255,255,255,.88);
+}
+`;
+
 export const openModalStyles: CSSResult = css`
 paper-dialog {
   background: var(--expandable-section-background);
+  top: 20%;
+}
+
+.SnippetModal {
+  min-width: 800px;
 }
 
 .FileModalContainer {
   height: auto;
-  width: 800px;
+  max-width: 800px;
   margin-top: 20px;
   margin-bottom: 20px;
 }
@@ -207,6 +215,19 @@ input[type="file"] {
   padding-top: 10px;
   width: 100%;
 }
+
+.modal-text {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 10px 0px;
+  color: white;
+  word-wrap: break-word;
+  width: 100%;
+}
+
+.piping-link {
+  color: #6495ED;
+}
 `;
 
 // https://www.w3schools.com/howto/howto_js_snackbar.asp
@@ -233,6 +254,30 @@ export const toastStyles: CSSResult = css`
   animation: fadein 0.5s, fadeout 0.5s 3.5s;
 }
 
+#snackbar-mobile {
+  visibility: hidden;
+  max-width: 250px;
+  min-width: 250px;
+  margin-left: -150px;
+  background-color: #455a64;
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  padding: 8px;
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: 30px;
+  font-size: 14px;
+  font-family: Roboto;
+}
+
+#snackbar-mobile.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 6.5s;
+  animation: fadein 0.5s, fadeout 0.5s 6.5s;
+}
+
 @-webkit-keyframes fadein {
   from {bottom: 0; opacity: 0;} 
   to {bottom: 30px; opacity: 1;}
@@ -252,4 +297,82 @@ export const toastStyles: CSSResult = css`
   from {bottom: 30px; opacity: 1;}
   to {bottom: 0; opacity: 0;}
 }
-`
+
+#overlay {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 2;
+  cursor: pointer;
+}
+`;
+
+// https://github.com/donmccurdy/three-gltf-viewer/blob/master/style.css
+export const validationStyles: CSSResult = css`
+paper-dialog {
+  background: #FFF;
+  overflow: scroll;
+}
+
+.container {
+  height: auto;
+  max-width: 1000px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.header {
+  font-size: 24px;
+  color: #404040;
+  margin-bottom: 20px;
+}
+
+.cancel {
+  position: sticky;
+  top: 10px;
+  right: 24px;
+  float: right;
+  margin: 0;
+  padding: 0;
+}
+
+.report {
+  padding: 2em;
+  max-width: 860px;
+}
+
+.report h1 {
+  margin-top: 0;
+}
+
+.report p,
+.report ul {
+  line-height: 1.5em;
+}
+
+.report-table {
+  text-align: left;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.report-table thead tr {
+  background: #404040;
+  color: #FFF;
+}
+
+.report-table th,
+.report-table td {
+  padding: 0.5em 1em;
+}
+
+.report-table tr:nth-child(2n) {
+  background: #F0F0F0;
+}
+`;

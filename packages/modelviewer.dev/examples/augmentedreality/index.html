@@ -25,17 +25,6 @@
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
 
-  <!-- The following libraries and polyfills are recommended to maximize browser support -->
-
-  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
-  <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
-  <script src="../../node_modules/intersection-observer/intersection-observer.js"></script>
-
-  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
@@ -261,7 +250,7 @@
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Augmented Reality</h2>
-            <h4>This demonstrates several augmented reality modes, including <code>webxr</code>, <code>scene-viewer</code>, <code>quick-look</code> &amp; the accompanying attributes, <code>ios-src</code>, <code>quick-look-browsers</code>.</h4>
+            <h4>This demonstrates several augmented reality modes, including <code>webxr</code>, <code>scene-viewer</code>, <code>quick-look</code> &amp; the accompanying attributes, <code>ar</code>, <code>ar-modes</code>, <code>ar-scale</code>, <code>ios-src</code>.</h4>
           </div>
           <example-snippet stamp-to="ar" highlight-as="html">
             <template>
@@ -420,18 +409,10 @@
   <script type="module"
       src="../built/dependencies.js">
   </script>
-  <script nomodule
-      src="../built/dependencies-legacy.js">
-  </script>
 
-  <!-- Loads <model-viewer> only on modern browsers: -->
+  <!-- Loads <model-viewer> on modern browsers: -->
   <script type="module"
       src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule
-      src="../../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
   </script>
 
 </body>

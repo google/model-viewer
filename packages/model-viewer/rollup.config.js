@@ -79,19 +79,6 @@ if (NODE_ENV !== 'development') {
         plugins: pluginsIE11,
         onwarn,
       },
-      {
-        input: './lib/test/index.js',
-        output: {
-          file: './dist/unit-tests-umd.js',
-          format: 'umd',
-          name: 'ModelViewerElementUnitTests'
-        },
-        watch: {
-          include: watchFiles,
-        },
-        plugins: pluginsIE11,
-        onwarn,
-      },
   );
 
   plugins = [

@@ -5,7 +5,7 @@
       {
         "name": "src",
         "htmlName": "src",
-        "description": "The URL to the 3D model. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported, see <a href=\"https://github.com/google/model-viewer#supported-formats\">Supported Formats</a>.",
+        "description": "The URL to the 3D model. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported.",
         "links": [
           "<a href=\"../examples/loading\">Related examples</a>"
         ],
@@ -144,6 +144,14 @@
         ]
       },
       {
+        "name": "ktx2TranscoderLocation",
+        "htmlName": "ktx2TranscoderLocation",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s KTX2 transcoder location URL. By default, the KTX2 transcoder will be loaded from a Google CDN.",
+        "links": [
+          "<a href=\"../examples/loading/#dracoSupport\"><span class='attribute'>dracoDecoderLocation</span> example</a>"
+        ]
+      },
+      {
         "name": "minimumRenderScale",
         "htmlName": "minimumRenderScale",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1.",
@@ -182,7 +190,7 @@
       {
         "name": "getDimensions()",
         "htmlName": "getDimensions",
-        "description": "Returns the model's bounding box dimensions in meters, independent of turntable rotation. The retuned object has x, y, and z properties along with a toString() method."
+        "description": "Returns the model's bounding box dimensions in meters, independent of turntable rotation. The returned object has x, y, and z properties along with a toString() method."
       },
       {
         "name": "toBlob(options: {mimeType, qualityArgument, idealAspect})",
@@ -283,7 +291,7 @@
       {
         "name": "ar-placement",
         "htmlName": "arPlacement",
-        "description": "Selects whether to place the object on the floor (horizotal surface) or a wall (vertical surface) in AR. The back (negative Z) of the object's bounding box will be placed against the wall and the shadow will be put on this surface as well. Note that the different AR modes handle the placement UX differently.",
+        "description": "Selects whether to place the object on the floor (horizontal surface) or a wall (vertical surface) in AR. The back (negative Z) of the object's bounding box will be placed against the wall and the shadow will be put on this surface as well. Note that the different AR modes handle the placement UX differently.",
         "links": [
           "<a href=\"../examples/augmentedreality/#wall\"><span class='attribute'>ar-placement</span> example</a>"
         ],
@@ -299,15 +307,6 @@
         "links": [
           "<a href=\"../examples/augmentedreality/#ar\"><span class='attribute'>ios-src</span> example</a>"
         ]
-      },
-      {
-        "name": "quick-look-browsers",
-        "htmlName": "quickLookBrowsers",
-        "description": "Set this attribute to control which iOS browsers will be allowed to launch AR Quick Look on iOS. Allowed values are \"safari\" and \"chrome\". You can specify any number of browsers separated by whitespace, for example: \"safari chrome\".",
-        "default": {
-          "default": "safari",
-          "options": "safari chrome"
-        }
       }
     ],
     "CSS": [
@@ -541,6 +540,18 @@
           "default": "25deg",
           "options": "angle between 0 and 180 degrees"
         }
+      },
+      {
+        "name": "bounds",
+        "htmlName": "bounds",
+        "description": "Sets the method of calculating the model's bounding box, which affects its shadow's position and default camera framing. Legacy mode is conservative and occasionally results in a bounding box that is too large, especially when used with the orientation attribute. Tight will give precise results and will also account for a custom camera-target, keeping the model always in frame by default. Tight will become the default value in a future release, so check if your seamless poster images need updating.",
+        "default": {
+          "default": "legacy",
+          "options": "tight, legacy"
+        },
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
+        ]
       }
     ],
     "CSS": [
@@ -575,7 +586,7 @@
       {
         "name": "getCameraOrbit()",
         "htmlName": "getCameraOrbit",
-        "description": "Returns the realtime orbital position of the camera. The retuned object has theta, phi, and radius properties along with a toString() method suitable for putting in the camera-orbit attribute. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation.",
+        "description": "Returns the realtime orbital position of the camera. The returned object has theta, phi, and radius properties along with a toString() method suitable for putting in the camera-orbit attribute. Azimuthal (theta) and polar (phi) angles are represented as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>getCameraOrbit</span> example</a>"
         ]
@@ -583,7 +594,7 @@
       {
         "name": "getCameraTarget()",
         "htmlName": "getCameraTarget",
-        "description": "Returns the realtime target position of the camera in meters. The retuned object has x, y, and z properties along with a toString() method suitable for putting in the camera-target attribute. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation.",
+        "description": "Returns the realtime target position of the camera in meters. The returned object has x, y, and z properties along with a toString() method suitable for putting in the camera-target attribute. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>getCameraTarget</span> example</a>"
         ]
@@ -597,6 +608,14 @@
         "name": "jumpCameraToGoal()",
         "htmlName": "jumpCameraToGoal",
         "description": "Changes the camera to its last configured goal state immediately on the next update instead of interpolating the motion over time."
+      },
+      {
+        "name": "updateFraming()",
+        "htmlName": "updateFraming",
+        "description": "Recalculates the camera defaults in case the model has been changed, for instance by the orientation or scale attributes.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#tranforms\"><span class='attribute'>updateFraming</span> example</a>"
+        ]
       },
       {
         "name": "getMinimumFieldOfView()",
@@ -686,10 +705,14 @@
       {
         "name": "environment-image",
         "htmlName": "environmentImage",
-        "description": "Controls the environmental reflection of the model. Normally if <span class='attribute'>skybox-image</span> is set, that image will also be used for the <span class='attribute'>environment-image</span>. Use <span class='attribute'>environment-image</span> to only set the reflection without affecting the background.",
+        "description": "Controls the environmental reflection of the model. Normally if <span class='attribute'>skybox-image</span> is set, that image will also be used for the <span class='attribute'>environment-image</span>. Use <span class='attribute'>environment-image</span> to only set the reflection without affecting the background. If neither is specified, default lighting will be applied. If 'neutral' is specified without a skybox, then a more evenly-lit environment is applied instead.",
         "links": [
           "<a href=\"../examples/lightingandenv/#environmentLighting\">Related examples</a>"
-        ]
+        ],
+        "default": {
+          "default": "empty string",
+          "options": "'neutral' or a URL to a .hdr or .jpg file"
+        }
       },
       {
         "name": "exposure",
@@ -824,7 +847,49 @@
   },
   {
     "Title": "Scene Graph",
+    "Attributes": [
+      {
+        "name": "variant-name",
+        "htmlName": "variantName",
+        "description": "Selects a model variant by name.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "orientation",
+        "htmlName": "orientation",
+        "description": "Rotates the model to the orientation specified by roll, pitch, yaw Euler angles, where yaw is first applied about the Y-axis, then pitch about the new local X-axis (positive is front-down), then roll about the new local Z-axis. If specified before the model loads, automatic camera framing will take this change into account; otherwise the updateFraming() method must be called manually.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
+        ],
+        "default": {
+          "default": "0deg 0deg 0deg",
+          "options": "$roll $pitch $yaw"
+        }
+      },
+      {
+        "name": "scale",
+        "htmlName": "scale",
+        "description": "Scales the model as specified in the X, Y, and Z directions. Scale is applied before orientation. If specified before the model loads, automatic camera framing will take this change into account; otherwise the updateFraming() method must be called manually.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
+        ],
+        "default": {
+          "default": "1 1 1",
+          "options": "$x $y $z"
+        }
+      }
+    ],
     "Properties": [
+      {
+        "name": "availableVariants",
+        "htmlName": "availableVariants",
+        "description": "This property reports an array of strings, corresponding to variants in the loaded model that can be selected with <span class='attribute'>variant-name</span>.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
+        ]
+      },
       {
         "name": "model",
         "htmlName": "model",
@@ -848,7 +913,7 @@
       {
         "name": "scene-graph-ready",
         "htmlName": "sceneGraphReady",
-        "description": "Dispatched when scene-graph access is available and after the model has been loaded. See the <a href='examples/scene-graph.html'>Scene Graph</a> documentation for more details.",
+        "description": "THIS EVENT IS DEPRECATED, as it now fires at the same time as 'load', so please use that event instead.",
         "links": [
           "<a href=\"../examples/scenegraph/#changeMaterial\">Related examples</a>"
         ]

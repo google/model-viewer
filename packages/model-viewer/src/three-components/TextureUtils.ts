@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-import {Cache, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
+import {deserializeUrl} from '../utilities.js';
 
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentScene from './EnvironmentScene.js';
+import EnvironmentSceneAlt from './EvironmentSceneAlt.js';
 
 export interface EnvironmentMapAndSkybox {
   environmentMap: WebGLRenderTarget;
@@ -30,10 +32,6 @@ export interface EnvironmentGenerationConfig {
 }
 
 const GENERATED_SIGMA = 0.04;
-
-// Enable three's loader cache so we don't create redundant
-// Image objects to decode images fetched over the network.
-Cache.enabled = true;
 
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 const ldrLoader = new TextureLoader();
@@ -49,6 +47,7 @@ const userData = {
 
 export default class TextureUtils extends EventDispatcher {
   private generatedEnvironmentMap: WebGLRenderTarget|null = null;
+  private generatedEnvironmentMapAlt: WebGLRenderTarget|null = null;
   private PMREMGenerator: PMREMGenerator;
 
   private skyboxCache = new Map<string, Promise<Texture>>();
@@ -100,12 +99,18 @@ export default class TextureUtils extends EventDispatcher {
    * is a Texture from a WebGLRenderCubeTarget.
    */
   async generateEnvironmentMapAndSkybox(
-      skyboxUrl: string|null = null, environmentMapUrl: string|null = null,
+      skyboxUrl: string|null = null, environmentMap: string|null = null,
       options: EnvironmentGenerationConfig = {}):
       Promise<EnvironmentMapAndSkybox> {
     const {progressTracker} = options;
     const updateGenerationProgress =
         progressTracker != null ? progressTracker.beginActivity() : () => {};
+
+    const useAltEnvironment = environmentMap === 'neutral';
+    if (useAltEnvironment === true) {
+      environmentMap = null;
+    }
+    const environmentMapUrl = deserializeUrl(environmentMap);
 
     try {
       let skyboxLoads: Promise<Texture|null> = Promise.resolve(null);
@@ -126,7 +131,9 @@ export default class TextureUtils extends EventDispatcher {
             this.loadEnvironmentMapFromUrl(skyboxUrl, progressTracker);
       } else {
         // Fallback to generating the environment map
-        environmentMapLoads = this.loadGeneratedEnvironmentMap();
+        environmentMapLoads = useAltEnvironment === true ?
+            this.loadGeneratedEnvironmentMapAlt() :
+            this.loadGeneratedEnvironmentMap();
       }
 
       let [environmentMap, skybox] =
@@ -206,6 +213,22 @@ export default class TextureUtils extends EventDispatcher {
     return Promise.resolve(this.generatedEnvironmentMap!);
   }
 
+  /**
+   * Loads a dynamically generated environment map, designed to be neutral and
+   * color-preserving. Shows less contrast around the different sides of the
+   * object.
+   */
+  private loadGeneratedEnvironmentMapAlt(): Promise<WebGLRenderTarget> {
+    if (this.generatedEnvironmentMapAlt == null) {
+      const defaultScene = new EnvironmentSceneAlt;
+      this.generatedEnvironmentMapAlt =
+          this.PMREMGenerator.fromScene(defaultScene, GENERATED_SIGMA);
+      this.addMetadata(this.generatedEnvironmentMapAlt.texture, null);
+    }
+
+    return Promise.resolve(this.generatedEnvironmentMapAlt!);
+  }
+
   async dispose() {
     const allTargetsLoad: Array<Promise<WebGLRenderTarget>> = [];
 
@@ -231,6 +254,10 @@ export default class TextureUtils extends EventDispatcher {
     if (this.generatedEnvironmentMap != null) {
       this.generatedEnvironmentMap!.dispose();
       this.generatedEnvironmentMap = null;
+    }
+    if (this.generatedEnvironmentMapAlt != null) {
+      this.generatedEnvironmentMapAlt!.dispose();
+      this.generatedEnvironmentMapAlt = null;
     }
   }
 }

@@ -28,9 +28,6 @@ const ModelViewerElement = class extends ModelViewerElementBase {
   }
 };
 
-// Ensure tests are not rescaling
-ModelViewerElement.minimumRenderScale = 1;
-
 customElements.define('model-viewer-renderer', ModelViewerElement);
 
 async function createScene(): Promise<ModelScene> {
@@ -54,6 +51,8 @@ suite('Renderer', () => {
 
   setup(async () => {
     renderer = Renderer.singleton;
+    // Ensure tests are not rescaling
+    ModelViewerElement.minimumRenderScale = 1;
     scene = await createScene();
   });
 

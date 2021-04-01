@@ -30,42 +30,42 @@ export const moveChildren = (from: Object3D, to: Object3D) => {
  *
  * Adapted from Three.js, @see https://github.com/mrdoob/three.js/blob/7e0a78beb9317e580d7fa4da9b5b12be051c6feb/src/math/Box3.js#L241
  */
-export const reduceVertices =
-    (model: Object3D, func: (value: number, vertex: Vector3) => number):
-        number => {
-          let value = 0;
-          const vector = new Vector3();
-          model.traverse((object: any) => {
-            let i, l;
+export const reduceVertices = <T>(
+    model: Object3D, func: (value: T, vertex: Vector3) => T, initialValue: T):
+    T => {
+      let value = initialValue;
+      const vertex = new Vector3();
+      model.traverse((object: any) => {
+        let i, l;
 
-            object.updateWorldMatrix(false, false);
+        object.updateWorldMatrix(false, false);
 
-            let geometry = object.geometry;
+        const geometry = object.geometry;
 
-            if (geometry !== undefined) {
-              if (geometry.isGeometry) {
-                let vertices = geometry.vertices;
+        if (geometry !== undefined) {
+          if (geometry.isGeometry) {
+            const vertices = geometry.vertices;
 
-                for (i = 0, l = vertices.length; i < l; i++) {
-                  vector.copy(vertices[i]);
-                  vector.applyMatrix4(object.matrixWorld);
+            for (i = 0, l = vertices.length; i < l; i++) {
+              vertex.copy(vertices[i]);
+              vertex.applyMatrix4(object.matrixWorld);
 
-                  value = func(value, vector);
-                }
+              value = func(value, vertex);
+            }
 
-              } else if (geometry.isBufferGeometry) {
-                let attribute = geometry.attributes.position;
+          } else if (geometry.isBufferGeometry) {
+            const {position} = geometry.attributes;
 
-                if (attribute !== undefined) {
-                  for (i = 0, l = attribute.count; i < l; i++) {
-                    vector.fromBufferAttribute(attribute, i)
-                        .applyMatrix4(object.matrixWorld);
+            if (position !== undefined) {
+              for (i = 0, l = position.count; i < l; i++) {
+                vertex.fromBufferAttribute(position, i)
+                    .applyMatrix4(object.matrixWorld);
 
-                    value = func(value, vector);
-                  }
-                }
+                value = func(value, vertex);
               }
             }
-          });
-          return value;
-        };
+          }
+        }
+      });
+      return value;
+    };

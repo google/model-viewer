@@ -170,7 +170,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       return sourceUUIDToClonedMaterial.get(material.uuid)!;
     }
 
-    const clone = material.clone();
+    const clone = material.clone() as MeshStandardMaterial;
 
     // Clone the textures manually since material cloning is shallow. The
     // underlying images are still shared.

@@ -36,6 +36,10 @@
         "name": "DRACO Support"
       },
       {
+        "htmlId": "ktx2Support",
+        "name": "KTX2 Support"
+      },
+      {
         "htmlId": "usdzModel",
         "name": "USDZ Model"
       },
@@ -156,6 +160,10 @@
         "name": "Environment Lighting"
       },
       {
+        "htmlId": "neutralLighting",
+        "name": "Neutral Lighting"
+      },
+      {
         "htmlId": "renderExposure",
         "name": "Render Exposure"
       },
@@ -203,6 +211,14 @@
     "name": "Scene Graph",
     "htmlName": "scenegraph",
     "examples": [
+      {
+        "htmlId": "variants",
+        "name": "Variants"
+      },
+      {
+        "htmlId": "transforms",
+        "name": "Transforms"
+      },
       {
         "htmlId": "changeColor",
         "name": "Change Color"

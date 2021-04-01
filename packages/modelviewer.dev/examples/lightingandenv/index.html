@@ -24,19 +24,7 @@
   <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
-  <!-- The following libraries and polyfills are recommended to maximize browser support -->
-
-  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
-  <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
-  <script src="../../node_modules/intersection-observer/intersection-observer.js"></script>
-
-  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
+  
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
@@ -81,6 +69,7 @@ window.oscillate = function(min, max, period, time) {
         </div>
       </div>
     </div>
+
     <div class="sample">
       <div id="litModel" class="demo"></div>
       <div class="content">
@@ -126,6 +115,45 @@ window.oscillate = function(min, max, period, time) {
           <example-snippet stamp-to="environmentLighting" highlight-as="html">
             <template>
 <model-viewer camera-controls environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest, on a pink background" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="neutralLighting" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Showing the difference between our two baked-in lighting environments</h2>
+            <h4>If no environment or skybox is specified, we have a baked-in
+            default scene that is faster to load. It is designed primarily for
+            frontward viewing, but there is also a baked-in neutral lighting
+            environment that is evenly lit on all sides, and can be activated by
+            setting 
+            <span class="attribute">environment-image="neutral"</span>. This
+            lighting has also been roughly calibrated to render colors at nearly
+            their baseColorMap RGB values. You may find the neutral lighting to
+            be more pleasing than the default when using auto-rotate, as shown
+            here, or when object does not have a clear front side.</h4>
+          </div>
+          <example-snippet stamp-to="neutralLighting" highlight-as="html">
+            <template>
+<model-viewer id="neutral-demo" camera-controls auto-rotate environment-image="neutral" alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
+  <label for="neutral">Neutral Lighting: </label>
+  <input id="neutral" type="checkbox" checked="true">
+</model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#neutral-demo');
+  const checkbox = document.querySelector('#neutral');
+  
+  checkbox.addEventListener('change',() => {
+    modelViewer.environmentImage = checkbox.checked ? 'neutral' : '';
+  });
+})();
+</script>
             </template>
           </example-snippet>
         </div>
@@ -299,18 +327,10 @@ window.oscillate = function(min, max, period, time) {
   <script type="module"
       src="../built/dependencies.js">
   </script>
-  <script nomodule
-      src="../built/dependencies-legacy.js">
-  </script>
 
-  <!-- Loads <model-viewer> only on modern browsers: -->
+  <!-- Loads <model-viewer> on modern browsers: -->
   <script type="module"
       src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule
-      src="../../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
   </script>
 </body>
 </html>

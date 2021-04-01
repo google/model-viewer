@@ -24,18 +24,6 @@
   <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
-  <!-- The following libraries and polyfills are recommended to maximize browser support -->
-
-  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
-  <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
-  <script src="../../node_modules/intersection-observer/intersection-observer.js"></script>
-
-  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
@@ -50,20 +38,17 @@
   <script async src='https://www.google-analytics.com/analytics.js'></script>
 
   <style>
-#controls {
+.controls {
   position: absolute;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 64px;
+  flex-direction: column;
+  align-items: left;
+  bottom: 8px;
+  left: 8px;
 }
 
 button {
-  font-size: 2em;
+  font-size: 1.3em;
   margin: 0 0.25em;
 }
   </style>
@@ -75,6 +60,131 @@ button {
   
   <div class="examples-container">
     <div class="sample">
+      <div id="variants" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Swap Model Variants</h2>
+            <p>This demonstrates the use of the glTF <a
+            href="https://www.khronos.org/blog/streamlining-3d-commerce-with-material-variant-support-in-gltf-assets">materials
+            variants extension</a> which allows multiple materials and textures
+            to be packed with a single geometry in a GLB. Our API exposes these
+            variant names as <code>availableVariants</code> and you can select
+            one using the <code>variantName</code> attribute. This is similar
+            functionality to the lower-level scene-graph API below, but in that
+            case it is up to you to choose the right texture URL, rather than
+            having that information stored in the GLB. </p>
+          </div>
+          <example-snippet stamp-to="variants" highlight-as="html">
+            <template>
+<model-viewer id="chair" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb" alt="A 3D model of a chair">
+  <div class="controls">
+    <div>Variant: <select id="variant"></select></div>
+  </div>
+</model-viewer>
+<script>
+const modelViewerVariants = document.querySelector("model-viewer#chair");
+const select = document.querySelector('#variant');
+
+modelViewerVariants.addEventListener('load', () => {
+  const names = modelViewerVariants.availableVariants;
+  for (const name of names) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  }
+});
+
+select.addEventListener('input', (event) => {
+  modelViewerVariants.variantName = event.target.value;
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="transforms" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Model Transformations</h2>
+            <p>This demonstrates the <code>orientation</code> and
+            <code>scale</code> attributes which allow the model to be
+            transformed. Note that if specified before the model loads, they
+            will be taken into account by the automatic camera framing. If they
+            are changed afterwards the camera will not move, so to get new
+            automatic framing the <code>updateFraming()</code> method must be
+            called. Also, the <code>bounds</code> attribute is set to
+            <code>"tight"</code> to keep the transformed model from floating
+            over its shadow.</p>
+          </div>
+          <example-snippet stamp-to="transforms" highlight-as="html">
+            <template>
+<model-viewer id="transform" orientation="20deg 0 0" bounds="tight" shadow-intensity="1" camera-controls ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of a chair">
+  <div class="controls">
+    <div>Roll: <input id="roll" value="20" size="3" class="number"> degrees</div>
+    <div>Pitch: <input id="pitch" value="0" size="3" class="number"> degrees</div>
+    <div>Yaw: <input id="yaw" value="0" size="3" class="number"> degrees</div>
+    <div>
+      Scale: X: <input id="x" value="1" size="3" class="number">, 
+      Y: <input id="y" value="1" size="3" class="number">, 
+      Z: <input id="z" value="1" size="3" class="number">
+    </div>
+    <button id="frame">Update Framing</button>
+  </div>
+</model-viewer>
+<script>
+const modelViewerTransform = document.querySelector("model-viewer#transform");
+const roll = document.querySelector('#roll');
+const pitch = document.querySelector('#pitch');
+const yaw = document.querySelector('#yaw');
+const x = document.querySelector('#x');
+const y = document.querySelector('#y');
+const z = document.querySelector('#z');
+const frame = document.querySelector('#frame');
+
+frame.addEventListener('click', () => {
+  modelViewerTransform.updateFraming();
+});
+
+const updateOrientation = () => {
+  modelViewerTransform.orientation = `${roll.value}deg ${pitch.value}deg ${yaw.value}deg`;
+};
+
+const updateScale = () => {
+  modelViewerTransform.scale = `${x.value} ${y.value} ${z.value}`;
+};
+
+roll.addEventListener('input', () => {
+  updateOrientation();
+});
+pitch.addEventListener('input', () => {
+  updateOrientation();
+});
+yaw.addEventListener('input', () => {
+  updateOrientation();
+});
+x.addEventListener('input', () => {
+  updateScale();
+});
+y.addEventListener('input', () => {
+  updateScale();
+});
+z.addEventListener('input', () => {
+  updateScale();
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
       <div id="changeColor" class="demo"></div>
       <div class="content">
         <div class="wrapper">
@@ -85,17 +195,17 @@ button {
           </div>
           <example-snippet stamp-to="changeColor" highlight-as="html">
             <template>
-<model-viewer id="astronaut" camera-controls interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
-  <div id="controls">
+<model-viewer id="color" camera-controls interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+  <div class="controls", id="color-controls">
     <button data-color="1,0,0,1">Red</button>
     <button data-color="0,1,0,1">Green</button>
     <button data-color="0,0,1,1">Blue</button>
   </div>
 </model-viewer>
 <script>
-const modelViewer = document.querySelector("model-viewer");
+const modelViewerColor = document.querySelector("model-viewer#color");
 
-document.querySelector('#controls').addEventListener('click', (event) => {
+document.querySelector('#color-controls').addEventListener('click', (event) => {
   const colorString = event.target.dataset.color;
 
   if (!colorString) {
@@ -106,7 +216,7 @@ document.querySelector('#controls').addEventListener('click', (event) => {
       .map(numberString => parseFloat(numberString));
 
   console.log('Changing color to: ', color);
-  const [material] = modelViewer.model.materials;
+  const [material] = modelViewerColor.model.materials;
   material.pbrMetallicRoughness.setBaseColorFactor(color);
 });
 </script>
@@ -127,7 +237,7 @@ document.querySelector('#controls').addEventListener('click', (event) => {
           <example-snippet stamp-to="changeMaterial" highlight-as="html">
             <template>
 <model-viewer id="sphere" camera-controls interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a sphere">
-  <div id="controls">
+  <div class="controls">
     <div>
       <p>Metalness: <span id="metalness-value"></span></p>
       <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
@@ -141,7 +251,7 @@ document.querySelector('#controls').addEventListener('click', (event) => {
 <script>
 const modelViewerParameters = document.querySelector("model-viewer#sphere");
 
-modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
+modelViewerParameters.addEventListener("load", (ev) => {
 
   let material = modelViewerParameters.model.materials[0];
 
@@ -181,7 +291,7 @@ modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
           <example-snippet stamp-to="swapTextures" highlight-as="html">
             <template>
 <model-viewer id="lantern" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of a helmet">
-  <div id="controls">
+  <div class="controls">
     <div>
       <p>Diffuse</p>
       <select id="diffuse">
@@ -203,7 +313,7 @@ modelViewerParameters.addEventListener("scene-graph-ready", (ev) => {
 <script type="module">
 const modelViewerTexture = document.querySelector("model-viewer#lantern");
 
-modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
+modelViewerTexture.addEventListener("load", (ev) => {
 
   let material = modelViewerTexture.model.materials[0];
 
@@ -237,7 +347,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
           <example-snippet stamp-to="swapTextures2" highlight-as="html">
             <template>
 <model-viewer id="helmet" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of a helmet">
-  <div id="controls">
+  <div class="controls">
     <div>
       <p>Normals</p>
       <select id="normals">
@@ -266,7 +376,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", (ev) => {
 <script type="module">
 const modelViewerTexture = document.querySelector("model-viewer#helmet");
 
-modelViewerTexture.addEventListener("scene-graph-ready", () => {
+modelViewerTexture.addEventListener("load", () => {
 
   let material = modelViewerTexture.model.materials[0];
 
@@ -306,7 +416,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
           <example-snippet stamp-to="exporter" highlight-as="html">
             <template>
 <model-viewer id="static-model" src="../../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls alt="A 3D model of an astronaut">
-  <div id="controls">
+  <div class="controls">
     <button onclick="exportGLB()">Export GLB</button>
   </div>
 </model-viewer>
@@ -337,7 +447,7 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
           <example-snippet stamp-to="exporterWithOptions" highlight-as="html">
             <template>
 <model-viewer id="animated-model" src="../../shared-assets/models/Horse.glb" autoplay camera-controls alt="A 3D model of a horse galloping">
-  <div id="controls">
+  <div class="controls">
     <button onclick="exportScene(true)">Export GLB</button>
     <button onclick="exportScene(false)">Export GLTF</button>
   </div>
@@ -408,18 +518,10 @@ modelViewerTexture.addEventListener("scene-graph-ready", () => {
   <script type="module"
       src="../built/dependencies.js">
   </script>
-  <script nomodule
-      src="../built/dependencies-legacy.js">
-  </script>
 
-  <!-- Loads <model-viewer> only on modern browsers: -->
+  <!-- Loads <model-viewer> on modern browsers: -->
   <script type="module"
       src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule
-      src="../../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
   </script>
 </body>
 </html>

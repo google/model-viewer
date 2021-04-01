@@ -114,7 +114,7 @@ export class ArtifactCreator {
   async captureAndAnalyzeScreenshot(scenario: ScenarioConfig):
       Promise<ImageComparisonAnalysis> {
     const {rootDirectory, goldens} = this;
-    const {name: scenarioName, dimensions} = scenario;
+    const {name: scenarioName, dimensions, exclude} = scenario;
 
     console.log(
         `start compare model-viewer's golden with model-viewer's screenshot generated from fidelity test:`);
@@ -156,8 +156,13 @@ export class ArtifactCreator {
     // the rmsInDb is negative, and the less negative means the less closer the
     // two images are
     if (rmsInDb > FIDELITY_TEST_THRESHOLD) {
-      throw new Error(`❌ Senarios name: ${scenario.name}, rms distance ratio: ${
-          rmsInDb.toFixed(2)} dB.`);
+      if (exclude?.includes('model-viewer')) {
+        console.log(`❌ Skipped! Senario name: ${
+            scenario.name}, rms distance ratio: ${rmsInDb.toFixed(2)} dB.`)
+      } else {
+        throw new Error(`❌ Senarios name: ${
+            scenario.name}, rms distance ratio: ${rmsInDb.toFixed(2)} dB.`);
+      }
     }
 
     return result;

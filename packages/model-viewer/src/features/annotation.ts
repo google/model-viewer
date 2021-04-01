@@ -138,7 +138,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
         {position: Vector3D, normal: Vector3D}|null {
       const scene = this[$scene];
-      const {width, height, model} = scene;
+      const {width, height, target} = scene;
       pixelPosition.set(pixelX / width, pixelY / height)
           .multiplyScalar(2)
           .subScalar(1);
@@ -149,7 +149,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         return null;
       }
 
-      worldToModel.copy(model.matrixWorld).invert();
+      worldToModel.copy(target.matrixWorld).invert();
       const position = toVector3D(hit.position.applyMatrix4(worldToModel));
 
       worldToModelNormal.getNormalMatrix(worldToModel);
@@ -165,7 +165,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const camera = scene.getCamera();
 
       if (scene.isDirty) {
-        scene.model.updateHotspots(camera.position);
+        scene.updateHotspots(camera.position);
         this[$annotationRenderer].domElement.style.display = '';
         this[$annotationRenderer].render(scene, camera);
       }
@@ -193,7 +193,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           normal: node.dataset.normal,
         });
         this[$hotspotMap].set(node.slot, hotspot);
-        this[$scene].model.addHotspot(hotspot);
+        this[$scene].addHotspot(hotspot);
         // This happens automatically in render(), but we do it early so that
         // the slots appear in the shadow DOM and the elements get attached,
         // allowing us to dispatch events on them.
@@ -214,7 +214,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (hotspot.decrement()) {
-        this[$scene].model.removeHotspot(hotspot);
+        this[$scene].removeHotspot(hotspot);
         this[$hotspotMap].delete(node.slot);
       }
       this[$scene].isDirty = true;

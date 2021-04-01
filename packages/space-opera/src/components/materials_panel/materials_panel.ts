@@ -62,6 +62,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() isNewModel: boolean = true;
   @internalProperty() currentGltfUrl: string = '';
   @internalProperty() isTesting: boolean = false;
+  @internalProperty() isInterpolating: boolean = false;
 
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
   @query('me-slider-with-input#roughness-factor')
@@ -170,6 +171,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   // Logic for interpolating from red emissive factor to the original.
   interpolateMaterial() {
+    this.isInterpolating = true;
     const index = this.selectedMaterialId!;
     const id = this.selectedMaterialId!;
     const originalBaseColor = this.materials[index].baseColorFactor;
@@ -205,6 +207,7 @@ export class MaterialPanel extends ConnectedLitElement {
         const emissiveFactor = originalEmissiveFactor;
         reduxStore.dispatch(dispatchSetEmissiveFactor(
             getEditsMaterials(reduxStore.getState()), {id, emissiveFactor}));
+        this.isInterpolating = false;
       }
     };
     requestAnimationFrame(interpolateStep);
@@ -216,7 +219,8 @@ export class MaterialPanel extends ConnectedLitElement {
       this.selectedMaterialId = Number(value);
       checkFinite(this.selectedMaterialId);
       // Don't interpolate on the initial model load.
-      if (!this.isNewModel && this.isLegalIndex() && !this.isTesting) {
+      if (!this.isNewModel && this.isLegalIndex() && !this.isTesting &&
+          !this.isInterpolating) {
         this.interpolateMaterial();
       }
       this.isNewModel = false;
@@ -235,7 +239,8 @@ export class MaterialPanel extends ConnectedLitElement {
         >${
         this.materials.map(
             (material, id) => html`<paper-item value="${id}">(${id}) ${
-                material.name}</paper-item>`)}
+                material.name ? material.name :
+                                'Unnamed Material'}</paper-item>`)}
       </me-dropdown>
     </me-expandable-tab>
     `;

@@ -23,11 +23,17 @@ import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/uti
 import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
-import {RelativeFilePathsState, State} from '../../../types.js';
+import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '../../../types.js';
+import {modelViewerTemplate, progressBar, scriptTemplate} from '../../best_practices/constants.js';
+import {getBestPractices} from '../../best_practices/reducer.js';
+import {arButtonCSS, arPromptCSS, modelViewerStyles, progressBarCSS} from '../../best_practices/styles.css.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
+import {getHotspots} from '../../hotspot_panel/reducer.js';
+import {getArConfig} from '../../mobile_view/reducer.js';
 import {getGltfModel} from '../../model_viewer_preview/reducer.js';
 import {getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
+import {styles as hotspotStyles} from '../../utils/hotspot/hotspot.css.js';
 
 interface Payload {
   blob: Blob;
@@ -68,7 +74,7 @@ class GenericDownloadButton extends ConnectedLitElement {
   }
 }
 
-async function prepareGlbPayload(
+export async function prepareGlbPayload(
     gltf: GltfModel, modelName: string): Promise<Payload> {
   const glbBuffer = await gltf.packGlb();
   return {
@@ -78,14 +84,35 @@ async function prepareGlbPayload(
   };
 }
 
+// Fixes some formatting issues with the snippet as it is being placed into the
+// template.
+function beautify_snippet(snippetList: string[]): string {
+  let snippet = '';
+  let i = 0;
+  for (let line of snippetList) {
+    if (i == 0) {
+      snippet = `${line}\n`;
+    } else if (i !== 0 && line.includes('model-viewer')) {
+      snippet = `${snippet}    ${line}`;
+    } else {
+      snippet = `${snippet}  ${line}\n`;
+    }
+    i += 1;
+  }
+  return snippet;
+}
+
 /**
  * Add elements to ZIP as necessary.
  */
 async function prepareZipArchive(
     gltf: GltfModel,
     config: ModelViewerConfig,
+    arConfig: ArConfigState,
     data: {snippetText: string},
-    relativeFilePaths: RelativeFilePathsState): Promise<Payload> {
+    relativeFilePaths: RelativeFilePathsState,
+    bestPractices: BestPracticesState,
+    hasHotspots: boolean): Promise<Payload> {
   const zip = new JSZip();
 
   const glb = await prepareGlbPayload(gltf, relativeFilePaths.modelName!);
@@ -109,7 +136,72 @@ async function prepareZipArchive(
     zip.file(relativeFilePaths.posterName!, response.blob());
   }
 
+  // check if legal ios src
+  if (arConfig.iosSrc) {
+    const response = await fetch(arConfig.iosSrc);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch url ${arConfig.iosSrc}`);
+    }
+    zip.file(relativeFilePaths.iosName!, response.blob());
+  }
+
+  let template = modelViewerTemplate;
+  // Conditionally set script if anything requires javascript. Currently, this
+  // is only the progressbar.
+  const script = bestPractices.progressBar ? scriptTemplate : '';
+  const arPrompt = 'https://modelviewer.dev/shared-assets/icons/hand.png';
+  const arIcon =
+      'https://modelviewer.dev/shared-assets/icons/ic_view_in_ar_new_googblue_48dp.png';
+  const relativePrompt = 'ar_hand_prompt.png';
+  const relativeIcon = 'ar_icon.png';
+
+  let snippet = beautify_snippet(data.snippetText.split('\n'));
+  snippet = `${snippet}\n${script}\n`;
+  if (bestPractices.arPrompt) {
+    snippet = snippet.replace(arPrompt, relativePrompt);
+  }
+
+  // Replace placeholders in html strings with content
+  template = template.replace('REPLACEME', snippet);
+  template = template.replace(/(^[ \t]*\n)/gm, '')  // remove extra newlines
+  zip.file('index.html', template);
+
+  // Keep model-viewer snippet
   zip.file('snippet.txt', data.snippetText);
+
+  // Add css file for the model-viewer and other related add ons
+  let cssText = modelViewerStyles.cssText;
+  if (hasHotspots) {
+    cssText = `${cssText}\n${hotspotStyles.cssText}`;
+  }
+  if (bestPractices.progressBar) {
+    cssText = `${cssText}\n${progressBarCSS.cssText}`;
+  }
+  if (bestPractices.arButton) {
+    const arCSS = arButtonCSS.cssText.replace(arIcon, relativeIcon);
+    cssText = `${cssText}\n${arCSS}`;
+    const response = await fetch(arIcon);
+    if (!response.ok) {
+      console.log(`Failed to fetch url ${arIcon}`);
+    } else {
+      zip.file(relativeIcon, response.blob());
+    }
+  }
+  if (bestPractices.arPrompt) {
+    cssText = `${cssText}\n${arPromptCSS.cssText}`;
+    const response = await fetch(arPrompt);
+    if (!response.ok) {
+      console.log(`Failed to fetch url ${arPrompt}`);
+    } else {
+      zip.file(relativePrompt, response.blob());
+    }
+  }
+  zip.file('styles.css', cssText);
+
+  // Add a script file if any javascript is needed
+  if (bestPractices.progressBar) {
+    zip.file('script.js', progressBar);
+  }
 
   return {
     blob: await zip.generateAsync({type: 'blob', compression: 'DEFLATE'}),
@@ -151,21 +243,26 @@ export class ExportZipButton extends GenericDownloadButton {
     const config = getConfig(state);
     const gltf = getGltfModel(state);
     const relativeFilePaths = getRelativeFilePaths(state);
+    const arConfig = getArConfig(state);
+    const bestPractices = getBestPractices(state);
+    const hasHotspots = getHotspots(state).length > 0;
+
     if (!gltf) {
       this.preparePayload = undefined;
       return;
     }
 
-    const urls = new Array<string>();
-    if (config.environmentImage) {
-      urls.push(config.environmentImage);
-    }
-
     // Note that snippet text will necessarily be set manually post-update,
     // and therefore we must pass a containing object (in our case, this) by
     // reference.
-    this.preparePayload = () =>
-        prepareZipArchive(gltf, config, this, relativeFilePaths);
+    this.preparePayload = () => prepareZipArchive(
+        gltf,
+        config,
+        arConfig,
+        this,
+        relativeFilePaths,
+        bestPractices,
+        hasHotspots);
   }
 }
 

@@ -33,6 +33,9 @@ const PROGRESS_MASK_BASE_OPACITY = 0.2;
 const DEFAULT_DRACO_DECODER_LOCATION =
     'https://www.gstatic.com/draco/versioned/decoders/1.3.6/';
 
+const DEFAULT_KTX2_TRANSCODER_LOCATION =
+    'https://www.gstatic.com/basis-universal/versioned/2020-12-21-ef70ddd/';
+
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
 
@@ -69,9 +72,6 @@ const $transitioned = Symbol('transitioned');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
-const $clickHandler = Symbol('clickHandler');
-const $keydownHandler = Symbol('keydownHandler');
-const $progressHandler = Symbol('processHandler');
 const $onClick = Symbol('onClick');
 const $onKeydown = Symbol('onKeydown');
 const $onProgress = Symbol('onProgress');
@@ -89,11 +89,13 @@ export declare interface LoadingInterface {
 
 export declare interface LoadingStaticInterface {
   dracoDecoderLocation: string;
+  ktx2TranscoderLocation: string;
   mapURLs(callback: (url: string) => string): void;
 }
 
 interface ModelViewerGlobalConfig {
   dracoDecoderLocation?: string;
+  ktx2TranscoderLocation?: string;
 }
 
 /**
@@ -155,6 +157,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     static get dracoDecoderLocation() {
       return CachingGLTFLoader.getDRACODecoderLocation();
+    }
+
+    static set ktx2TranscoderLocation(value: string) {
+      CachingGLTFLoader.setKTX2TranscoderLocation(value);
+    }
+
+    static get ktx2TranscoderLocation() {
+      return CachingGLTFLoader.getKTX2TranscoderLocation();
     }
 
     /**
@@ -234,7 +244,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * turntable rotation.
      */
     getDimensions(): Vector3D {
-      return toVector3D(this[$scene].model.size);
+      return toVector3D(this[$scene].size);
     }
 
     protected[$modelIsRevealed] = false;
@@ -262,12 +272,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     protected[$ariaLabelCallToAction] =
         this[$defaultPosterElement].getAttribute('aria-label');
-
-    protected[$clickHandler]: () => void = () => this[$onClick]();
-    protected[$keydownHandler]:
-        (event: KeyboardEvent) => void = (event) => this[$onKeydown](event);
-    protected[$progressHandler]:
-        (event: Event) => void = (event) => this[$onProgress](event);
 
     protected[$updateProgressBar] = throttle((progress: number) => {
       const parentNode = this[$defaultProgressBarElement].parentNode as Element;
@@ -305,10 +309,15 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const ModelViewerElement: ModelViewerGlobalConfig =
           (self as any).ModelViewerElement || {};
+
       const dracoDecoderLocation = ModelViewerElement.dracoDecoderLocation ||
           DEFAULT_DRACO_DECODER_LOCATION;
-
       CachingGLTFLoader.setDRACODecoderLocation(dracoDecoderLocation);
+
+      const ktx2TranscoderLocation =
+          ModelViewerElement.ktx2TranscoderLocation ||
+          DEFAULT_KTX2_TRANSCODER_LOCATION;
+      CachingGLTFLoader.setKTX2TranscoderLocation(ktx2TranscoderLocation);
     }
 
     connectedCallback() {
@@ -317,12 +326,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       // Fired when a user first clicks the model element. Used to
       // change the visibility of a poster image, or start loading
       // a model.
+      this[$posterContainerElement].addEventListener('click', this[$onClick]);
       this[$posterContainerElement].addEventListener(
-          'click', this[$clickHandler]);
-      this[$posterContainerElement].addEventListener(
-          'keydown', this[$keydownHandler]);
-      this[$progressTracker].addEventListener(
-          'progress', this[$progressHandler]);
+          'keydown', this[$onKeydown]);
+      this[$progressTracker].addEventListener('progress', this[$onProgress]);
 
       loadingStatusAnnouncer.registerInstance(this);
     }
@@ -331,11 +338,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.disconnectedCallback();
 
       this[$posterContainerElement].removeEventListener(
-          'click', this[$clickHandler]);
+          'click', this[$onClick]);
       this[$posterContainerElement].removeEventListener(
-          'keydown', this[$keydownHandler]);
-      this[$progressTracker].removeEventListener(
-          'progress', this[$progressHandler]);
+          'keydown', this[$onKeydown]);
+      this[$progressTracker].removeEventListener('progress', this[$onProgress]);
 
       loadingStatusAnnouncer.unregisterInstance(this)
     }
@@ -361,14 +367,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onClick]() {
+    [$onClick] = () => {
       if (this.reveal === RevealStrategy.MANUAL) {
         return;
       }
       this.dismissPoster();
-    }
+    };
 
-    [$onKeydown](event: KeyboardEvent) {
+    [$onKeydown] = (event: KeyboardEvent) => {
       if (this.reveal === RevealStrategy.MANUAL) {
         return;
       }
@@ -382,9 +388,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         default:
           break;
       }
-    }
+    };
 
-    [$onProgress](event: Event) {
+    [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
       this[$lastReportedProgress] =
           Math.max(progress, this[$lastReportedProgress]);
@@ -402,7 +408,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this.dispatchEvent(
           new CustomEvent('progress', {detail: {totalProgress: progress}}));
-    }
+    };
 
     [$shouldAttemptPreload](): boolean {
       return !!this.src &&
@@ -463,7 +469,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     async[$updateSource]() {
       this[$lastReportedProgress] = 0;
-      if (this[$scene].model.currentGLTF == null || this.src == null ||
+      if (this[$scene].currentGLTF == null || this.src == null ||
           !this[$shouldAttemptPreload]()) {
         // Don't show the poster when switching models.
         this.showPoster();

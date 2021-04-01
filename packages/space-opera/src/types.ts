@@ -21,6 +21,7 @@ import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_cl
 import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
 import {HotspotConfig} from './components/hotspot_panel/types.js';
 import {EnvironmentImage, INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/types.js';
+import {MobileState} from './components/mobile_view/types.js';
 import {GltfEdits, GltfState, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/types.js';
 
 interface HotspotsUIState {
@@ -32,6 +33,7 @@ interface UIState {
 }
 
 export interface RelativeFilePathsState {
+  iosName?: string|undefined;
   modelName?: string|undefined;
   environmentName?: string|undefined;
   posterName?: string|undefined;
@@ -46,16 +48,32 @@ interface GltfEditsState {
   origEdits: GltfEdits;
 }
 
-interface ModelViewerSnippetState {
+export interface ArConfigState {
+  ar?: boolean;
+  arModes?: string;
+  iosSrc?: string;
+}
+
+export interface BestPracticesState {
+  progressBar: boolean;
+  arButton: boolean;
+  arPrompt: boolean;
+}
+
+export interface ModelViewerSnippetState {
+  arConfig: ArConfigState;
   animationNames: string[];
+  bestPractices: BestPracticesState;
   camera: Camera;
   config: ModelViewerConfig;
   hotspots: HotspotConfig[];
   relativeFilePaths: RelativeFilePathsState;
+  extraAttributes: any;
 }
 
 export interface EntitiesState {
   isDirtyCamera: boolean;
+  mobile: MobileState;
   environment: EnvironmentState;
   gltf: GltfState;
   gltfEdits: GltfEditsState;
@@ -74,6 +92,10 @@ export const INITIAL_STATE: State = {
   ui: {hotspots: {addHotspot: false}},
   entities: {
     isDirtyCamera: false,
+    mobile: {
+      isRefreshable: false,
+      forcePost: false,
+    },
     environment: {environmentImages: INITIAL_ENVIRONMENT_IMAGES},
     gltf: {gltfJsonString: ''},
     gltfEdits: {
@@ -81,11 +103,14 @@ export const INITIAL_STATE: State = {
       origEdits: INITIAL_GLTF_EDITS,
     },
     modelViewerSnippet: {
+      arConfig: {},
       animationNames: [],
+      bestPractices: {progressBar: true, arButton: true, arPrompt: true},
       config: {},
       hotspots: [],
       camera: INITIAL_CAMERA,
       relativeFilePaths: {},
+      extraAttributes: {},
     },
   },
 };

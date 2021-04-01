@@ -85,11 +85,10 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
       await waitForEvent(element, 'scene-graph-ready');
 
-      material = (element[$scene]
-                      .model.modelContainer.children[0]
-                      .children[0]
-                      .children[0] as Mesh)
-                     .material as MeshStandardMaterial;
+      material =
+          (element[$scene].modelContainer.children[0].children[0].children[0] as
+           Mesh)
+              .material as MeshStandardMaterial;
     });
 
     test('allows the scene graph to be manipulated', async () => {
@@ -147,8 +146,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
         expect(color).to.be.eql([1, 0, 0, 1]);
 
         const newMaterial =
-            (element[$scene].model.modelContainer.children[0].children[0] as
-             Mesh)
+            (element[$scene].modelContainer.children[0].children[0] as Mesh)
                 .material as MeshStandardMaterial;
 
         expect(newMaterial.color).to.include({r: 1, g: 0, b: 0});

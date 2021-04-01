@@ -38,7 +38,7 @@ suite('ModelUtils', () => {
       const maxX = (value: number, vertex: Vector3): number => {
         return Math.max(value, vertex.x);
       };
-      const rightSide = reduceVertices(gltf.scene!, maxX);
+      const rightSide = reduceVertices(gltf.scene!, maxX, 0);
 
       const boundingBox = new Box3();
       boundingBox.setFromObject(gltf.scene!);

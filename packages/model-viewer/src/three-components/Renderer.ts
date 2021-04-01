@@ -151,6 +151,7 @@ export class Renderer extends EventDispatcher {
     this.textureUtils =
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
     this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
+    CachingGLTFLoader.initializeKTX2Loader(this.threeRenderer);
 
     this.updateRendererSize();
     this.lastTick = performance.now();
@@ -356,7 +357,7 @@ export class Renderer extends EventDispatcher {
    * the time that has passed since the last rendered frame.
    */
   preRender(scene: ModelScene, t: number, delta: number) {
-    const {element, exposure, model} = scene;
+    const {element, exposure} = scene;
 
     element[$tick](t, delta);
 
@@ -364,7 +365,7 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !(self as any).isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
-    if (model.updateShadow()) {
+    if (scene.isShadowDirty()) {
       this.threeRenderer.shadowMap.needsUpdate = true;
     }
   }

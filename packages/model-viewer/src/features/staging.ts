@@ -40,7 +40,6 @@ const rotationRateIntrinsics = {
 const $autoRotateStartTime = Symbol('autoRotateStartTime');
 const $radiansPerSecond = Symbol('radiansPerSecond');
 const $syncRotationRate = Symbol('syncRotationRate');
-const $cameraChangeHandler = Symbol('cameraChangeHandler');
 const $onCameraChange = Symbol('onCameraChange');
 
 export declare interface StagingInterface {
@@ -66,20 +65,18 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     private[$autoRotateStartTime] = performance.now();
     private[$radiansPerSecond] = 0;
-    private[$cameraChangeHandler] = (event: CustomEvent<CameraChangeDetails>) =>
-        this[$onCameraChange](event);
 
     connectedCallback() {
       super.connectedCallback();
       this.addEventListener(
-          'camera-change', this[$cameraChangeHandler] as EventListener);
+          'camera-change', this[$onCameraChange] as EventListener);
       this[$autoRotateStartTime] = performance.now();
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
       this.removeEventListener(
-          'camera-change', this[$cameraChangeHandler] as EventListener);
+          'camera-change', this[$onCameraChange] as EventListener);
       this[$autoRotateStartTime] = performance.now();
     }
 
@@ -112,7 +109,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onCameraChange](event: CustomEvent<CameraChangeDetails>) {
+    [$onCameraChange] = (event: CustomEvent<CameraChangeDetails>) => {
       if (!this.autoRotate) {
         return;
       }
@@ -120,7 +117,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (event.detail.source === 'user-interaction') {
         this[$autoRotateStartTime] = performance.now();
       }
-    }
+    };
 
     get turntableRotation(): number {
       return this[$scene].yaw;

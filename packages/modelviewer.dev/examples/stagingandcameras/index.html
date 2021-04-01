@@ -24,18 +24,6 @@
   <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
-
-  <!-- The following libraries and polyfills are recommended to maximize browser support -->
-
-  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
-  <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
-  <script src="../../node_modules/intersection-observer/intersection-observer.js"></script>
-
-  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
-  <script src="../../node_modules/resize-observer-polyfill/dist/ResizeObserver.js"></script>
 
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
@@ -211,7 +199,7 @@
           </div>
           <example-snippet stamp-to="panning" highlight-as="html">
             <template>
-<model-viewer id="pan-demo" camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<model-viewer id="pan-demo" auto-rotate camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
 <script>
 (() => {
   const modelViewer = document.querySelector('#pan-demo');
@@ -225,12 +213,13 @@
   const startPan = () => {
     const orbit = modelViewer.getCameraOrbit();
     const {theta, phi, radius} = orbit;
+    const psi = theta - modelViewer.turntableRotation;
     metersPerPixel = 0.75 * radius / modelViewer.getBoundingClientRect().height;
-    panX = [-Math.cos(theta), 0, Math.sin(theta)];
+    panX = [-Math.cos(psi), 0, Math.sin(psi)];
     panY = [
-      -Math.cos(phi) * Math.sin(theta),
+      -Math.cos(phi) * Math.sin(psi),
       Math.sin(phi),
-      -Math.cos(phi) * Math.cos(theta)
+      -Math.cos(phi) * Math.cos(psi)
     ];
     modelViewer.interactionPrompt = 'none';
   };
@@ -246,6 +235,10 @@
     target.y += dx * panX[1] + dy * panY[1];
     target.z += dx * panX[2] + dy * panY[2];
     modelViewer.cameraTarget = `${target.x}m ${target.y}m ${target.z}m`;
+
+    // This pauses turntable rotation
+    modelViewer.dispatchEvent(new CustomEvent(
+          'camera-change', {detail: {source: 'user-interaction'}}));
   };
 
   const recenter = (pointer) => {
@@ -455,18 +448,10 @@
   <script type="module"
       src="../built/dependencies.js">
   </script>
-  <script nomodule
-      src="../built/dependencies-legacy.js">
-  </script>
 
-  <!-- Loads <model-viewer> only on modern browsers: -->
+  <!-- Loads <model-viewer> on modern browsers: -->
   <script type="module"
       src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
-  </script>
-
-  <!-- Loads <model-viewer> only on old browsers like IE11: -->
-  <script nomodule
-      src="../../node_modules/@google/model-viewer/dist/model-viewer-legacy.js">
   </script>
 </body>
 </html>

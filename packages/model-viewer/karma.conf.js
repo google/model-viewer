@@ -15,7 +15,7 @@
 
 const {applyKarmaHacks} = require('./shared-assets/scripts/karma-hacks.js');
 
-const browserStackTunnelID = applyKarmaHacks();
+applyKarmaHacks();
 
 module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
@@ -27,24 +27,6 @@ module.exports = function(config) {
     ],
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
-      {
-        pattern:
-            'node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js',
-        watched: false
-      },
-      {
-        pattern: 'node_modules/@webcomponents/webcomponentsjs/bundles/*.js',
-        watched: false,
-        included: false
-      },
-      {
-        pattern: 'node_modules/resize-observer-polyfill/dist/ResizeObserver.js',
-        watched: false
-      },
-      {
-        pattern: 'node_modules/intersection-observer/intersection-observer.js',
-        watched: false
-      },
       {
         pattern: 'node_modules/focus-visible/dist/focus-visible.js',
         watched: false
@@ -182,8 +164,7 @@ module.exports = function(config) {
         idleTimeout: 600,
         name: '<model-viewer> Unit Tests',
         project: '<model-viewer>',
-        build: process.env.BROWSER_STACK_BUILD_NAME || browserStackTunnelID,
-        tunnelIdentifier: browserStackTunnelID
+        build: process.env.BROWSER_STACK_BUILD_NAME
       },
 
       reporters: ['BrowserStack', 'mocha'],

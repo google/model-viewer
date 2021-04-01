@@ -15,7 +15,6 @@
 
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
-import {IS_IE11} from '../../constants.js';
 import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {SETTLING_TIME} from '../../three-components/Damper.js';
@@ -75,11 +74,6 @@ class MockXRFrame implements XRFrame {
 }
 
 suite('ARRenderer', () => {
-  // IE11 doesn't support DOMPoint, and will never support AR, so skip.
-  if (IS_IE11) {
-    return;
-  }
-
   let nextId = 0;
   let tagName: string;
   let ModelViewerElement: Constructor<ModelViewerElementBase>;
@@ -196,7 +190,7 @@ suite('ARRenderer', () => {
         width: 200,
         height: 100,
       });
-      await modelScene.setModelSource(assetPath('models/Astronaut.glb'));
+      await modelScene.setSource(assetPath('models/Astronaut.glb'));
       stubWebXrInterface(arRenderer);
       setInputSources([]);
 
@@ -218,7 +212,7 @@ suite('ARRenderer', () => {
     });
 
     test('presents the model at its natural scale', () => {
-      const scale = modelScene.model.getWorldScale(new Vector3());
+      const scale = modelScene.target.getWorldScale(new Vector3());
 
       expect(scale.x).to.be.equal(1);
       expect(scale.y).to.be.equal(1);
@@ -231,7 +225,7 @@ suite('ARRenderer', () => {
       });
 
       test('restores the model to its natural scale', () => {
-        const scale = modelScene.model.getWorldScale(new Vector3());
+        const scale = modelScene.target.getWorldScale(new Vector3());
 
         expect(scale.x).to.be.equal(1);
         expect(scale.y).to.be.equal(1);
@@ -262,12 +256,12 @@ suite('ARRenderer', () => {
 
       test('places the model oriented to the camera', () => {
         const epsilon = 0.0001;
-        const {model, position} = modelScene;
+        const {target, position} = modelScene;
 
         const cameraPosition = arRenderer.camera.position;
         const cameraToHit = new Vector2(
             position.x - cameraPosition.x, position.z - cameraPosition.z);
-        const forward = model.getWorldDirection(new Vector3());
+        const forward = target.getWorldDirection(new Vector3());
         const forwardProjection = new Vector2(forward.x, forward.z);
 
         expect(forward.y).to.be.equal(0);

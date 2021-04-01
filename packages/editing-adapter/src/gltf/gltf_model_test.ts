@@ -52,6 +52,10 @@ const TEST_GLTF_JSON = {
   ],
 };
 
+function isOdd(n: number): boolean {
+  return Math.abs(n % 2) == 1;
+}
+
 async function getByteLengthForUrl(url: string): Promise<number> {
   const response = await fetch(url);
   if (!response.ok) {
@@ -76,9 +80,9 @@ async function generatePngObjectUrl(color: string) {
   return createSafeObjectURL(pngBlob).unsafeUrl;
 }
 
-async function createGltfWithTexture() {
-  const pngBuffer0 = await (await generatePngBlob('#fff')).arrayBuffer();
-  const pngBuffer1 = await (await generatePngBlob('#000')).arrayBuffer();
+async function createGltfWithTexture(size: number = 64) {
+  const pngBuffer0 = await (await generatePngBlob('#fff', size)).arrayBuffer();
+  const pngBuffer1 = await (await generatePngBlob('#000', size)).arrayBuffer();
   const gltfArray =
       new Uint8Array(pngBuffer0.byteLength + pngBuffer1.byteLength);
   gltfArray.set(new Uint8Array(pngBuffer0), 0);
@@ -91,7 +95,6 @@ async function createGltfWithTexture() {
     bufferViews: [
       {
         buffer: 0,
-        byteOffset: 0,
         byteLength: pngBuffer0.byteLength,
       },
       {
@@ -520,6 +523,40 @@ describe('gltf model test', () => {
       expect(gltfJson0.buffers[0].byteLength)
           .toBeLessThanOrEqual(glb1Tex.byteLength - bytesSavedB);
     }
+  });
+
+  it('can delete a texture at a bufferView with undefined byteOffset',
+      async () => {
+        const {model} = await createGltfWithTexture();
+        expect(model.textures.length).toBe(2);
+
+        const glb2Tex = await model.packGlb();
+        const {gltfJson} = unpackGlb(glb2Tex);
+        expect(gltfJson?.bufferViews![0].byteOffset).toBeUndefined()
+
+        const bytesSaved =
+            expectedBytesSaved(await getByteLengthForUrl(model.textures[0].uri));
+        await model.textures[0].delete();
+        expect(model.textures.length).toBe(1);
+        const glb1Tex = await model.packGlb();
+        expect(glb1Tex.byteLength)
+            .toBeLessThanOrEqual(glb2Tex.byteLength - bytesSaved);
+  });
+
+  it('a bufferView with an odd byteLength remains an odd byteLength when ' +
+      'its corresponding texture is replaced with the 68 byte placeholder ' +
+      'image upon deletion',
+      async () => {
+        const oddDimension = 63;
+        const {model, buffers} = await createGltfWithTexture(oddDimension);
+        expect(model.textures.length).toBe(2);
+        expect(isOdd(buffers[0].byteLength)).toBeTrue();
+
+        await model.textures[0].delete();
+        expect(model.textures.length).toBe(1);
+        const glb1Tex = await model.packGlb();
+        const {gltfJson} = unpackGlb(glb1Tex);
+        expect(isOdd(gltfJson?.bufferViews![0].byteLength)).toBeTrue();
   });
 
   it('exports a smaller GLB file after deleting a *newly added* texture',

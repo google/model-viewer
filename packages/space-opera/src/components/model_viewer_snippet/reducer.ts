@@ -19,10 +19,13 @@ import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.j
 import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
 
 import {reduxStore} from '../../space_opera_base.js';
-import {RelativeFilePathsState} from '../../types.js';
+import {Action, ModelViewerSnippetState, RelativeFilePathsState, State} from '../../types.js';
 import {INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchSetCamera} from '../camera_settings/reducer.js';
 import {dispatchSetConfig} from '../config/reducer.js';
+
+export const getModelViewerSnippet = (state: State): ModelViewerSnippetState =>
+    state.entities.modelViewerSnippet;
 
 /**
  * Sets the filepaths of a copy of the config.
@@ -61,4 +64,21 @@ export function dispatchConfig(config?: ModelViewerConfig) {
 
   // Clear camera settings. This is optional!
   reduxStore.dispatch(dispatchSetCamera(INITIAL_CAMERA));
+}
+
+const SET_EXTRA_ATTRIBUTES = 'SET_EXTRA_ATTRIBUTES'
+export function dispatchExtraAttributes(attributes: any) {
+  return {type: SET_EXTRA_ATTRIBUTES, payload: attributes};
+}
+
+export const getExtraAttributes = (state: State): any =>
+    state.entities.modelViewerSnippet.extraAttributes;
+
+export function extraAttributesReducer(state: any = {}, action: Action): any {
+  switch (action.type) {
+    case SET_EXTRA_ATTRIBUTES:
+      return action.payload;
+    default:
+      return state;
+  }
 }
