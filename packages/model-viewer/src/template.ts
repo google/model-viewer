@@ -333,7 +333,7 @@ canvas.show {
 
     <div class="slot progress-bar">
       <slot name="progress-bar">
-        <div id="default-progress-bar" part="default-progress-bar" aria-hidden="true">
+        <div id="default-progress-bar" aria-hidden="true">
           <div class="mask"></div>
           <div class="bar"></div>
         </div>
