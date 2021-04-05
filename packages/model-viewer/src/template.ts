@@ -306,7 +306,7 @@ canvas.show {
         will have their <slot> elements removed by ShadyCSS -->
   <div class="slot poster">
     <slot name="poster">
-      <button type="button" id="default-poster" aria-hidden="true" aria-label="Activate to view in 3D!"></button>
+      <button type="button" id="default-poster" part="default-poster" aria-hidden="true" aria-label="Activate to view in 3D!"></button>
     </slot>
   </div>
 
@@ -333,7 +333,7 @@ canvas.show {
 
     <div class="slot progress-bar">
       <slot name="progress-bar">
-        <div id="default-progress-bar" aria-hidden="true">
+        <div id="default-progress-bar" part="default-progress-bar" aria-hidden="true">
           <div class="mask"></div>
           <div class="bar"></div>
         </div>
@@ -343,6 +343,7 @@ canvas.show {
     <div class="slot exit-webxr-ar-button">
       <slot name="exit-webxr-ar-button">
         <a id="default-exit-webxr-ar-button"
+            part="default-exit-webxr-ar-button"
             tabindex="3"
             aria-label="Exit AR"
             aria-hidden="true">
