@@ -15,7 +15,7 @@
 
 import '../types/webxr.js';
 
-import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Ray, Vector3, WebGLRenderer} from 'three';
+import {Event as ThreeEvent, EventDispatcher, Matrix4, Ray, Vector3, WebGLRenderer} from 'three';
 
 import {$onResize} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
@@ -64,9 +64,9 @@ const hitPosition = new Vector3();
 
 export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
-  public camera: PerspectiveCamera = new PerspectiveCamera();
   public currentSession: XRSession|null = null;
   public placeOnWall = false;
+  public cameraPosition = new Vector3();
 
   private placementBox: PlacementBox|null = null;
   private lastTick: number|null = null;
@@ -74,8 +74,6 @@ export class ARRenderer extends EventDispatcher {
   private oldShadowIntensity: number|null = null;
   private oldBackground: any = null;
   private rafId: number|null = null;
-  private refSpace: XRReferenceSpace|null = null;
-  private viewerRefSpace: XRReferenceSpace|null = null;
   private frame: XRFrame|null = null;
   private initialHitSource: XRHitTestSource|null = null;
   private transientHitTestSource: XRTransientInputHitTestSource|null = null;
@@ -85,7 +83,7 @@ export class ARRenderer extends EventDispatcher {
   private exitWebXRButtonContainer: HTMLElement|null = null;
   private initialModelToWorld: Matrix4|null = null;
 
-  private initialized = false;
+  // private initialized = false;
   private oldTarget = new Vector3();
   private placementComplete = false;
   private isTranslating = false;
@@ -108,53 +106,27 @@ export class ARRenderer extends EventDispatcher {
   constructor(private renderer: Renderer) {
     super();
     this.threeRenderer = renderer.threeRenderer;
-    // Turn this off, as the matrix is set directly from webXR rather than using
-    // postion, rotation, scale.
-    this.camera.matrixAutoUpdate = false;
+    this.threeRenderer.xr.enabled = true;
   }
 
   async resolveARSession(scene: ModelScene): Promise<XRSession> {
     assertIsArCandidate();
 
+
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
+          // @ts-ignore
           domOverlay:
               {root: scene.element.shadowRoot!.querySelector('div.default')}
         });
 
-    const gl = this.threeRenderer.getContext();
-    // `makeXRCompatible` replaced `setCompatibleXRDevice` in Chrome M73 @TODO
-    // #293, handle WebXR API changes. WARNING: this can cause a GL context
-    // loss according to the spec, though current implementations don't do so.
-    await gl.makeXRCompatible();
+    this.threeRenderer.xr.setReferenceSpaceType('local');
 
-    session.updateRenderState(
-        {baseLayer: new XRWebGLLayer(session, gl, {alpha: true})});
-
-    // The render state update takes effect on the next animation frame. Wait
-    // for it so that we get a framebuffer.
-    let waitForXRAnimationFrame = new Promise((resolve, _reject) => {
-      session.requestAnimationFrame(() => resolve());
-    });
-    await waitForXRAnimationFrame;
+    await this.threeRenderer.xr.setSession(session as any);
 
     scene.element[$onResize](window.screen);
-
-    const {framebuffer, framebufferWidth, framebufferHeight} =
-        session.renderState.baseLayer!;
-    // Redirect rendering to the WebXR offscreen framebuffer.
-    // TODO: this method should be added to three.js's exported interface.
-    (this.threeRenderer as any).setFramebuffer(framebuffer);
-    this.threeRenderer.setPixelRatio(1);
-    this.threeRenderer.setSize(framebufferWidth, framebufferHeight, false);
-
-    const exitButton = scene.element.shadowRoot!.querySelector(
-                           '.slot.exit-webxr-ar-button') as HTMLElement;
-    exitButton.classList.add('enabled');
-    exitButton.addEventListener('click', this.onExitWebXRButtonContainerClick);
-    this.exitWebXRButtonContainer = exitButton;
 
     return session;
   }
@@ -187,7 +159,7 @@ export class ARRenderer extends EventDispatcher {
       console.warn('Cannot present while a model is already presenting');
     }
 
-    let waitForAnimationFrame = new Promise((resolve, _reject) => {
+    let waitForAnimationFrame = new Promise<void>((resolve, _reject) => {
       requestAnimationFrame(() => resolve());
     });
 
@@ -200,15 +172,20 @@ export class ARRenderer extends EventDispatcher {
     this._presentedScene = scene;
 
     const currentSession = await this.resolveARSession(scene);
+
     currentSession.addEventListener('end', () => {
       this.postSessionCleanup();
     }, {once: true});
 
-    this.refSpace = await currentSession.requestReferenceSpace('local');
-    this.viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
+    const exitButton = scene.element.shadowRoot!.querySelector(
+                           '.slot.exit-webxr-ar-button') as HTMLElement;
+    exitButton.classList.add('enabled');
+    exitButton.addEventListener('click', this.onExitWebXRButtonContainerClick);
+    this.exitWebXRButtonContainer = exitButton;
 
-    scene.setCamera(this.camera);
-    this.initialized = false;
+    const viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
+
+    // this.initialized = false;
     this.damperRate = INTRO_DAMPER_RATE;
 
     this.turntableRotation = scene.yaw;
@@ -232,8 +209,7 @@ export class ARRenderer extends EventDispatcher {
         new XRRay(
             new DOMPoint(0, 0, 0),
             {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
-    currentSession
-        .requestHitTestSource({space: this.viewerRefSpace!, offsetRay: ray})
+    currentSession.requestHitTestSource({space: viewerRefSpace, offsetRay: ray})
         .then(hitTestSource => {
           this.initialHitSource = hitTestSource;
         });
@@ -245,7 +221,8 @@ export class ARRenderer extends EventDispatcher {
     this.lastTick = performance.now();
 
     // Start the event loop.
-    this.tick();
+    this.threeRenderer.setAnimationLoop(
+        (time: number, frame: any) => this.onWebXRFrame(time, frame));
   }
 
   /**
@@ -383,9 +360,7 @@ export class ARRenderer extends EventDispatcher {
     this.oldShadowIntensity = null;
     this.oldBackground = null;
     this.rafId = null;
-    this.refSpace = null;
     this._presentedScene = null;
-    this.viewerRefSpace = null;
     this.frame = null;
     this.inputSource = null;
 
@@ -396,51 +371,36 @@ export class ARRenderer extends EventDispatcher {
     this.dispatchEvent({type: 'status', status: ARStatus.NOT_PRESENTING});
   }
 
-  private updateCamera(view: XRView) {
-    const {camera} = this;
-    const {matrix: cameraMatrix} = camera;
+  private updateView(view: XRView) {
+    const viewMatrix = view.transform.matrix;
 
-    cameraMatrix.fromArray(view.transform.matrix);
-    camera.updateMatrixWorld(true);
-    // position is not updated when matrix is updated.
-    camera.position.setFromMatrixPosition(cameraMatrix);
+    this.presentedScene!.orientHotspots(
+        Math.atan2(viewMatrix[1], viewMatrix[5]));
 
-    if (!this.initialized) {
-      camera.projectionMatrix.fromArray(view.projectionMatrix);
-      // Have to set the inverse manually when setting matrix directly. This is
-      // needed for raycasting.
-      camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
-      // Orient model toward camera on first frame.
-      const scene = this.presentedScene!;
-      camera.getWorldDirection(vector3);
-      scene.yaw = Math.atan2(-vector3.x, -vector3.z);
-      this.goalYaw = scene.yaw;
-      this.initialModelToWorld = new Matrix4().copy(scene.matrixWorld);
-      scene.setHotspotsVisibility(true);
-      this.initialized = true;
-      this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
-    }
+    this.cameraPosition.set(viewMatrix[12], viewMatrix[13], viewMatrix[14]);
 
-    if (this.initialHitSource != null) {
-      // Target locked to screen center
-      const {position, idealCameraDistance: radius} = this.presentedScene!;
-      camera.getWorldDirection(position);
-      position.multiplyScalar(radius);
-      position.add(camera.position);
-    }
+    // if (!this.initialized) {
+    //   // Orient model toward camera on first frame.
+    //   const scene = this.presentedScene!;
+    //   camera.getWorldDirection(vector3);
+    //   scene.yaw = Math.atan2(-vector3.x, -vector3.z);
+    //   this.goalYaw = scene.yaw;
+    //   this.initialModelToWorld = new Matrix4().copy(scene.matrixWorld);
+    //   scene.setHotspotsVisibility(true);
+    //   this.initialized = true;
+    //   this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
+    // }
 
     // Use automatic dynamic viewport scaling if supported.
-    if (view.requestViewportScale && view.recommendedViewportScale) {
-      const scale = view.recommendedViewportScale;
-      view.requestViewportScale(Math.max(scale, MIN_VIEWPORT_SCALE));
+    if ((view as any).requestViewportScale &&
+        (view as any).recommendedViewportScale) {
+      const scale = (view as any).recommendedViewportScale;
+      (view as any).requestViewportScale(Math.max(scale, MIN_VIEWPORT_SCALE));
     }
     const layer = this.currentSession!.renderState.baseLayer;
     const viewport = layer!.getViewport(view);
     this.threeRenderer.setViewport(
         viewport.x, viewport.y, viewport.width, viewport.height);
-
-    this.presentedScene!.orientHotspots(
-        Math.atan2(cameraMatrix.elements[1], cameraMatrix.elements[5]));
   }
 
   private placeInitially(frame: XRFrame) {
@@ -476,7 +436,8 @@ export class ARRenderer extends EventDispatcher {
   }
 
   private getHitPoint(hitResult: XRHitTestResult): Vector3|null {
-    const pose = hitResult.getPose(this.refSpace!);
+    const refSpace = this.threeRenderer.xr.getReferenceSpace()!;
+    const pose = hitResult.getPose(refSpace);
     if (pose == null) {
       return null;
     }
@@ -521,7 +482,7 @@ export class ARRenderer extends EventDispatcher {
     if (this.placeOnWall === false) {
       const floor = hit.y;
 
-      const origin = this.camera.position.clone();
+      const origin = this.cameraPosition.clone();
       const direction = hit.clone().sub(origin).normalize();
       // Pull camera back enough to be outside of large models.
       origin.sub(direction.multiplyScalar(scene.idealCameraDistance));
@@ -662,7 +623,7 @@ export class ARRenderer extends EventDispatcher {
             this.placementBox!.offsetHeight = offset / scale;
             this.presentedScene!.setShadowScaleAndOffset(scale, offset);
             // Interpolate hit ray up to drag plane
-            const cameraPosition = vector3.copy(this.camera.position);
+            const cameraPosition = vector3.copy(this.cameraPosition);
             const alpha = -offset / (cameraPosition.y - hit.y);
             cameraPosition.multiplyScalar(alpha);
             hit.multiplyScalar(1 - alpha).add(cameraPosition);
@@ -714,20 +675,16 @@ export class ARRenderer extends EventDispatcher {
     scene.yaw = this.yawDamper.update(yaw, this.goalYaw, delta, Math.PI);
   }
 
-  private tick() {
-    this.rafId = this.currentSession!.requestAnimationFrame(
-        (time, frame) => this.onWebXRFrame(time, frame));
-  }
-
   /**
    * Only public to make it testable.
    */
-  public onWebXRFrame(time: number, frame: XRFrame) {
+  public onWebXRFrame(time: number, frame: XRFrame|undefined) {
+    if (!frame) {
+      return;
+    }
     this.frame = frame;
-    const pose = frame.getViewerPose(this.refSpace!);
-
-    // TODO: Notify external observers of tick
-    this.tick();
+    const refSpace = this.threeRenderer.xr.getReferenceSpace()!;
+    const pose = frame.getViewerPose(refSpace);
 
     const scene = this.presentedScene;
     if (pose == null || scene == null) {
@@ -740,7 +697,7 @@ export class ARRenderer extends EventDispatcher {
     // as the main viewpoint.
     let isFirstView: boolean = true;
     for (const view of pose.views) {
-      this.updateCamera(view);
+      this.updateView(view);
 
       if (isFirstView) {
         this.placeInitially(frame);
@@ -760,7 +717,7 @@ export class ARRenderer extends EventDispatcher {
       gl.clear(gl.DEPTH_BUFFER_BIT);
       gl.depthMask(true);
 
-      this.threeRenderer.render(scene, this.camera);
+      this.threeRenderer.render(scene, scene.camera);
       isFirstView = false;
     }
   }

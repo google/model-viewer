@@ -258,7 +258,7 @@ suite('ARRenderer', () => {
         const epsilon = 0.0001;
         const {target, position} = modelScene;
 
-        const cameraPosition = arRenderer.camera.position;
+        const {cameraPosition} = arRenderer;
         const cameraToHit = new Vector2(
             position.x - cameraPosition.x, position.z - cameraPosition.z);
         const forward = target.getWorldDirection(new Vector3());
