@@ -262,7 +262,8 @@ export class Renderer extends EventDispatcher {
     scene.isDirty = true;
 
     if (this.canRender && this.scenes.size > 0) {
-      this.threeRenderer.setAnimationLoop((time: number) => this.render(time));
+      this.threeRenderer.setAnimationLoop(
+          (time: number, frame?: any) => this.render(time, frame));
     }
 
     if (this.debugger != null) {
@@ -370,7 +371,12 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  render(t: number) {
+  render(t: number, frame?: XRFrame) {
+    if (frame != null) {
+      this.arRenderer.onWebXRFrame(t, frame);
+      return;
+    }
+
     const delta = t - this.lastTick;
     this.lastTick = t;
 

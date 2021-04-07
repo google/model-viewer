@@ -15,9 +15,10 @@
 
 import '../types/webxr.js';
 
-import {Event as ThreeEvent, EventDispatcher, Matrix4, Ray, Vector3, WebGLRenderer} from 'three';
+import {Event as ThreeEvent, EventDispatcher, Matrix4, Vector3, WebGLRenderer} from 'three';
 
-import {$onResize} from '../model-viewer-base.js';
+import {ControlsInterface} from '../features/controls.js';
+import ModelViewerElementBase, {$onResize} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {Damper} from './Damper.js';
@@ -81,9 +82,8 @@ export class ARRenderer extends EventDispatcher {
   private _presentedScene: ModelScene|null = null;
   private resolveCleanup: ((...args: any[]) => void)|null = null;
   private exitWebXRButtonContainer: HTMLElement|null = null;
-  private initialModelToWorld: Matrix4|null = null;
 
-  // private initialized = false;
+  private initialized = false;
   private oldTarget = new Vector3();
   private placementComplete = false;
   private isTranslating = false;
@@ -185,7 +185,7 @@ export class ARRenderer extends EventDispatcher {
 
     const viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
 
-    // this.initialized = false;
+    this.initialized = false;
     this.damperRate = INTRO_DAMPER_RATE;
 
     this.turntableRotation = scene.yaw;
@@ -219,10 +219,6 @@ export class ARRenderer extends EventDispatcher {
         new PlacementBox(scene, this.placeOnWall ? 'back' : 'bottom');
     this.placementComplete = false;
     this.lastTick = performance.now();
-
-    // Start the event loop.
-    this.threeRenderer.setAnimationLoop(
-        (time: number, frame: any) => this.onWebXRFrame(time, frame));
   }
 
   /**
@@ -379,23 +375,32 @@ export class ARRenderer extends EventDispatcher {
 
     this.cameraPosition.set(viewMatrix[12], viewMatrix[13], viewMatrix[14]);
 
-    // if (!this.initialized) {
-    //   // Orient model toward camera on first frame.
-    //   const scene = this.presentedScene!;
-    //   camera.getWorldDirection(vector3);
-    //   scene.yaw = Math.atan2(-vector3.x, -vector3.z);
-    //   this.goalYaw = scene.yaw;
-    //   this.initialModelToWorld = new Matrix4().copy(scene.matrixWorld);
-    //   scene.setHotspotsVisibility(true);
-    //   this.initialized = true;
-    //   this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
-    // }
+    if (!this.initialized) {
+      // Orient model toward camera on first frame.
+      const scene = this.presentedScene!;
+      const cameraDirection =
+          vector3.set(viewMatrix[8], viewMatrix[9], viewMatrix[10]);
+      scene.yaw = Math.atan2(cameraDirection.x, cameraDirection.z);
+      this.goalYaw = scene.yaw;
+
+      const {position} = scene;
+      const radius =
+          (scene.element as ModelViewerElementBase & ControlsInterface)
+              .getCameraOrbit()
+              .radius;
+      position.copy(this.cameraPosition)
+          .add(cameraDirection.multiplyScalar(-1 * radius));
+      this.goalPosition.copy(position);
+
+      scene.setHotspotsVisibility(true);
+      this.initialized = true;
+      this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
+    }
 
     // Use automatic dynamic viewport scaling if supported.
-    if ((view as any).requestViewportScale &&
-        (view as any).recommendedViewportScale) {
-      const scale = (view as any).recommendedViewportScale;
-      (view as any).requestViewportScale(Math.max(scale, MIN_VIEWPORT_SCALE));
+    if (view.requestViewportScale && view.recommendedViewportScale) {
+      const scale = view.recommendedViewportScale;
+      view.requestViewportScale(Math.max(scale, MIN_VIEWPORT_SCALE));
     }
     const layer = this.currentSession!.renderState.baseLayer;
     const viewport = layer!.getViewport(view);
@@ -455,57 +460,13 @@ export class ARRenderer extends EventDispatcher {
         null;
   }
 
-  /**
-   * This sets the initial model placement based on the input hit point. The
-   * bottom of the model will be placed on the floor (the shadow will rest on
-   * the input's y-coordinate). The XZ placement is found by first putting the
-   * scene's target at the hit point, drawing a ray from the camera to the
-   * target, and finding the XZ-intersection of this ray with the model's
-   * bounding box. The scene is then translated on the XZ plane to position this
-   * intersection point at the input hit point. If the ray does not intersect,
-   * the target is left at the hit point.
-   *
-   * This ensures the model is placed according to the chosen target, is not
-   * reoriented, and does not intersect the camera even when the model
-   * is large (unless the target is chosen outside of the model's bounding box).
-   *
-   * Only a public method to make it testable.
-   */
   public placeModel(hit: Vector3) {
-    const scene = this.presentedScene!;
-
     this.placementBox!.show = true;
 
-    const goal = this.goalPosition;
-    goal.copy(hit);
-
-    if (this.placeOnWall === false) {
-      const floor = hit.y;
-
-      const origin = this.cameraPosition.clone();
-      const direction = hit.clone().sub(origin).normalize();
-      // Pull camera back enough to be outside of large models.
-      origin.sub(direction.multiplyScalar(scene.idealCameraDistance));
-      const ray = new Ray(origin, direction.normalize());
-
-      const modelToWorld = this.initialModelToWorld!;
-      const modelPosition =
-          new Vector3().setFromMatrixPosition(modelToWorld).add(hit);
-      modelToWorld.setPosition(modelPosition);
-      ray.applyMatrix4(modelToWorld.invert());
-
-      // Make the box tall so that we don't intersect the top face.
-      const {max} = scene.boundingBox;
-      max.y += 10;
-      ray.intersectBox(scene.boundingBox, modelPosition);
-      max.y -= 10;
-
-      if (modelPosition != null) {
-        modelPosition.applyMatrix4(modelToWorld);
-        goal.add(hit).sub(modelPosition);
-      }
-      // Ignore the y-coordinate and set on the floor instead.
-      goal.y = floor;
+    if (this.placeOnWall) {
+      this.goalPosition.copy(hit);
+    } else {
+      this.goalPosition.y = hit.y;
     }
 
     this.updateTarget();
