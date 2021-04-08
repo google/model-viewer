@@ -107,7 +107,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       const duplicateMaterial = Array.isArray(mesh.material) ?
           duplicateMaterials :
           duplicateMaterials[0];
-      const meshBack = new Mesh(mesh.geometry, duplicateMaterial);
+      const meshBack = mesh.clone() as Mesh;
+      meshBack.material = duplicateMaterial;
       meshBack.renderOrder = -1;
       mesh.add(meshBack);
     }
