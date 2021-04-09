@@ -320,6 +320,7 @@ export class ARRenderer extends EventDispatcher {
       scene.removeEventListener('model-load', this.onUpdateScene);
       scene.orientHotspots(0);
       element.requestUpdate('cameraTarget');
+      element.requestUpdate('maxCameraOrbit');
       element[$onResize](element.getBoundingClientRect());
     }
 
@@ -370,6 +371,10 @@ export class ARRenderer extends EventDispatcher {
   private updateView(view: XRView) {
     const viewMatrix = view.transform.matrix;
 
+    const scene = this.presentedScene!;
+    scene.camera.near = 0.1;
+    scene.camera.far = 100;
+
     this.presentedScene!.orientHotspots(
         Math.atan2(viewMatrix[1], viewMatrix[5]));
 
@@ -377,7 +382,6 @@ export class ARRenderer extends EventDispatcher {
 
     if (!this.initialized) {
       // Orient model toward camera on first frame.
-      const scene = this.presentedScene!;
       const cameraDirection =
           vector3.set(viewMatrix[8], viewMatrix[9], viewMatrix[10]);
       scene.yaw = Math.atan2(cameraDirection.x, cameraDirection.z);
