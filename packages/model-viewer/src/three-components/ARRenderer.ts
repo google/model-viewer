@@ -189,8 +189,7 @@ export class ARRenderer extends EventDispatcher {
     this.damperRate = INTRO_DAMPER_RATE;
 
     this.turntableRotation = scene.yaw;
-    scene.yaw = 0;
-    this.goalYaw = 0;
+    this.goalYaw = scene.yaw;
     this.goalScale = 1;
 
     this.oldBackground = scene.background;
@@ -295,9 +294,8 @@ export class ARRenderer extends EventDispatcher {
 
     const scene = this.presentedScene;
     if (scene != null) {
-      const {target, element} = scene;
+      const {element} = scene;
       scene.setCamera(scene.camera);
-      target.remove(this.placementBox!);
 
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
@@ -381,17 +379,16 @@ export class ARRenderer extends EventDispatcher {
     this.cameraPosition.set(viewMatrix[12], viewMatrix[13], viewMatrix[14]);
 
     if (!this.initialized) {
-      // Orient model toward camera on first frame.
+      const {position, element} = scene;
+      const {theta, radius} =
+          (element as ModelViewerElementBase & ControlsInterface)
+              .getCameraOrbit();
+      // Orient model to match the 3D camera view
       const cameraDirection =
           vector3.set(viewMatrix[8], viewMatrix[9], viewMatrix[10]);
-      scene.yaw = Math.atan2(cameraDirection.x, cameraDirection.z);
+      scene.yaw = Math.atan2(cameraDirection.x, cameraDirection.z) - theta;
       this.goalYaw = scene.yaw;
 
-      const {position} = scene;
-      const radius =
-          (scene.element as ModelViewerElementBase & ControlsInterface)
-              .getCameraOrbit()
-              .radius;
       position.copy(this.cameraPosition)
           .add(cameraDirection.multiplyScalar(-1 * radius));
       this.goalPosition.copy(position);
@@ -677,7 +674,7 @@ export class ARRenderer extends EventDispatcher {
 
       // TODO: This is a workaround for a Chrome bug, which should be fixed
       // soon: https://bugs.chromium.org/p/chromium/issues/detail?id=1184085
-      const gl = this.threeRenderer.context;
+      const gl = this.threeRenderer.getContext();
       gl.depthMask(false);
       gl.clear(gl.DEPTH_BUFFER_BIT);
       gl.depthMask(true);
