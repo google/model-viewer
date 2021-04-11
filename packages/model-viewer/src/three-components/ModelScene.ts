@@ -166,6 +166,8 @@ export class ModelScene extends Scene {
       }
       return;
     }
+    this.reset();
+    this.url = url;
 
     // If we have pending work due to a previous source change in progress,
     // cancel it so that we do not incur a race condition:

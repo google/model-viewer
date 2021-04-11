@@ -216,7 +216,7 @@ export class ImportCard extends LitElement {
   @internalProperty() selectedDefaultOption: number = 0;
 
   async onUploadGLB() {
-    const files: any = await this.fileModal.open();
+    const files = await this.fileModal.open();
     if (!files) {
       /// The user canceled the previous upload
       return;

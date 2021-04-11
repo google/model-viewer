@@ -16,6 +16,10 @@
       "description": "Babylon"
     },
     {
+      "name": "gltf-sample-viewer",
+      "description": "gltf-sample-viewer"
+    },
+    {
       "name": "dspbr-pt",
       "description": "dspbr-pt"
     }
@@ -188,7 +192,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "babylon"
+        "babylon",
+        "gltf-sample-viewer"
       ],
       "renderSkybox": true
     },
@@ -475,8 +480,7 @@
         "radius": 4.25
       },
       "exclude": [
-        "dspbr-pt",
-        "model-viewer"
+        "dspbr-pt"
       ]
     },
     {

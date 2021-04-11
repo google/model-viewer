@@ -22,12 +22,13 @@ import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
 import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
 import {validateGltf} from './validation_utils.js';
+import type {Report, Message} from './validation_utils';
 
 @customElement('me-validation-modal')
 export class ValidationModal extends LitElement {
   static styles = [validationStyles];
 
-  @property() report: any = {};
+  @property() report: Report = {};
   @internalProperty() isOpen: boolean = false;
 
   open() {
@@ -38,7 +39,7 @@ export class ValidationModal extends LitElement {
     this.isOpen = false;
   }
 
-  renderTable(color: string, title: string, messages: any[]) {
+  renderTable(color: string, title: string, messages: Message) {
     return html`
 <table class="report-table">
   <thead>
@@ -66,16 +67,16 @@ export class ValidationModal extends LitElement {
 <div class="report">
   <h1>Validation report</h1>
   <ul>
-    <li><b>Format:</b> glTF ${this.report.info.version}</li>
-    <li><b>Generator:</b> ${this.report.info.generator}</li>
+    <li><b>Format:</b> glTF ${this.report.info!.version}</li>
+    <li><b>Generator:</b> ${this.report.info!.generator}</li>
     <li>
       <b>Stats:</b>
       <ul>
-        <li>${this.report.info.drawCallCount} draw calls</li>
-        <li>${this.report.info.animationCount} animations</li>
-        <li>${this.report.info.materialCount} materials</li>
-        <li>${this.report.info.totalVertexCount} vertices</li>
-        <li>${this.report.info.totalTriangleCount} triangles</li>
+        <li>${this.report.info!.drawCallCount} draw calls</li>
+        <li>${this.report.info!.animationCount} animations</li>
+        <li>${this.report.info!.materialCount} materials</li>
+        <li>${this.report.info!.totalVertexCount} vertices</li>
+        <li>${this.report.info!.totalTriangleCount} triangles</li>
       </ul>
     </li>
   </ul>
@@ -100,20 +101,20 @@ export class ValidationModal extends LitElement {
     </div>
     ${this.renderMetaData()}
     ${
-        this.report.issues.numErrors ?
-            this.renderTable('#f44336', 'Error', this.report.errors) :
+        this.report.issues!.numErrors ?
+            this.renderTable('#f44336', 'Error', this.report!.errors!) :
             html``}
    ${
-        this.report.issues.numWarnings ?
-            this.renderTable('#f9a825', 'Warning', this.report.warnings) :
+        this.report.issues!.numWarnings ?
+            this.renderTable('#f9a825', 'Warning', this.report!.warnings!) :
             html``}
    ${
-        this.report.issues.numHints ?
-            this.renderTable('#8bc34a', 'Hint', this.report.hints) :
+        this.report.issues!.numHints ?
+            this.renderTable('#8bc34a', 'Hint', this.report!.hints!) :
             html``}
     ${
-        this.report.issues.numInfos ?
-            this.renderTable('#2196f3', 'Info', this.report.infos) :
+        this.report.issues!.numInfos ?
+            this.renderTable('#2196f3', 'Info', this.report!.infos!) :
             html``}
   </div>
 </paper-dialog>`;
@@ -128,7 +129,7 @@ export class Validation extends ConnectedLitElement {
   @query('me-validation-modal#validation-modal')
   validationModal!: ValidationModal;
   @internalProperty() gltfUrl?: string;
-  @internalProperty() report?: any;
+  @internalProperty() report?: Report;
 
   @internalProperty() severityTitle: string = '';
   @internalProperty() severityColor: string = '';
@@ -145,19 +146,19 @@ export class Validation extends ConnectedLitElement {
     this.report = await validateGltf(url);
     this.severityTitle = 'Model Details';
     this.severityColor = '#3c4043';
-    if (this.report.issues.numInfos) {
+    if (this.report.issues!.numInfos) {
       this.severityColor = '#2196f3';
       this.severityTitle = 'Info';
     }
-    if (this.report.issues.numHints) {
+    if (this.report.issues!.numHints) {
       this.severityColor = '#8bc34a';
       this.severityTitle = 'Hint';
     }
-    if (this.report.issues.numWarnings) {
+    if (this.report.issues!.numWarnings) {
       this.severityColor = '#f9a825';
       this.severityTitle = 'Warning';
     }
-    if (this.report.issues.numErrors) {
+    if (this.report.issues!.numErrors) {
       this.severityColor = '#f44336';
       this.severityTitle = 'Error';
     }
