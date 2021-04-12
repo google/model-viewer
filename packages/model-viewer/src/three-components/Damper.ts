@@ -14,10 +14,7 @@
  */
 
 export const SETTLING_TIME = 10000;  // plenty long enough
-const DECAY_MILLISECONDS = 50;
-const NATURAL_FREQUENCY = 1 / DECAY_MILLISECONDS;
-const NIL_SPEED = 0.0002 * NATURAL_FREQUENCY;
-
+const MIN_DECAY_MILLISECONDS = 0.001;
 const $velocity = Symbol('velocity');
 
 /**
@@ -34,7 +31,11 @@ export class Damper {
 
   update(
       x: number, xGoal: number, timeStepMilliseconds: number,
-      xNormalization: number): number {
+      xNormalization: number, decayMilliseconds: number = 50): number {
+    const naturalFrequency =
+        1 / Math.max(MIN_DECAY_MILLISECONDS, decayMilliseconds);
+    const nilSpeed = 0.0002 * naturalFrequency;
+
     if (x == null || xNormalization === 0) {
       return xGoal;
     }
@@ -45,17 +46,17 @@ export class Damper {
       return x;
     }
     // Exact solution to a critically damped second-order system, where:
-    // acceleration = NATURAL_FREQUENCY * NATURAL_FREQUENCY * (xGoal - x) -
-    // 2 * NATURAL_FREQUENCY * this[$velocity];
+    // acceleration = naturalFrequency * naturalFrequency * (xGoal
+    // - x) - 2 * naturalFrequency * this[$velocity];
     const deltaX = (x - xGoal);
-    const intermediateVelocity = this[$velocity] + NATURAL_FREQUENCY * deltaX;
+    const intermediateVelocity = this[$velocity] + naturalFrequency * deltaX;
     const intermediateX = deltaX + timeStepMilliseconds * intermediateVelocity;
-    const decay = Math.exp(-NATURAL_FREQUENCY * timeStepMilliseconds);
+    const decay = Math.exp(-naturalFrequency * timeStepMilliseconds);
     const newVelocity =
-        (intermediateVelocity - NATURAL_FREQUENCY * intermediateX) * decay;
+        (intermediateVelocity - naturalFrequency * intermediateX) * decay;
     const acceleration =
-        -NATURAL_FREQUENCY * (newVelocity + intermediateVelocity * decay);
-    if (Math.abs(newVelocity) < NIL_SPEED * Math.abs(xNormalization) &&
+        -naturalFrequency * (newVelocity + intermediateVelocity * decay);
+    if (Math.abs(newVelocity) < nilSpeed * Math.abs(xNormalization) &&
         acceleration * deltaX >= 0) {
       // This ensures the controls settle and stop calling this function instead
       // of asymptotically approaching their goal.

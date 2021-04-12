@@ -14,18 +14,18 @@
  */
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
-
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
-
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
+
+
 export interface ModelLoadEvent extends ThreeEvent {
-  url: string
+  url: string;
 }
 
 export interface ModelSceneConfig {
@@ -35,7 +35,7 @@ export interface ModelSceneConfig {
   height: number;
 }
 
-export type IlluminationRole = 'primary'|'secondary'
+export type IlluminationRole = 'primary'|'secondary';
 
 export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Primary: 'primary',
@@ -92,6 +92,8 @@ export class ModelScene extends Scene {
   public exposure = 1;
   public canScale = true;
   public tightBounds = false;
+
+  public interpolationDecayMilliseconds = 50;
 
   private goalTarget = new Vector3();
   private targetDamperX = new Damper();
@@ -308,7 +310,7 @@ export class ModelScene extends Scene {
     this.target.remove(this.modelContainer);
 
     if (center == null) {
-      center = this.boundingBox.getCenter(new Vector3);
+      center = this.boundingBox.getCenter(new Vector3());
     }
 
     const radiusSquared = (value: number, vertex: Vector3): number => {
@@ -393,9 +395,12 @@ export class ModelScene extends Scene {
     if (!goal.equals(target)) {
       const radius = this.idealCameraDistance;
       let {x, y, z} = target;
-      x = this.targetDamperX.update(x, goal.x, delta, radius);
-      y = this.targetDamperY.update(y, goal.y, delta, radius);
-      z = this.targetDamperZ.update(z, goal.z, delta, radius);
+      x = this.targetDamperX.update(
+          x, goal.x, delta, radius, this.interpolationDecayMilliseconds);
+      y = this.targetDamperY.update(
+          y, goal.y, delta, radius, this.interpolationDecayMilliseconds);
+      z = this.targetDamperZ.update(
+          z, goal.z, delta, radius, this.interpolationDecayMilliseconds);
       this.target.position.set(x, y, z);
       this.target.updateMatrixWorld();
       this.setShadowRotation(this.yaw);

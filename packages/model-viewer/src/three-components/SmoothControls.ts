@@ -14,9 +14,9 @@
 
 import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
 import {TouchAction} from '../features/controls.js';
-
 import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
+
 
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = 'rotate'|'scroll'|'zoom';
@@ -132,6 +132,8 @@ export class SmoothControls extends EventDispatcher {
   private thetaDamper = new Damper();
   private phiDamper = new Damper();
   private radiusDamper = new Damper();
+  // Controls the various damper interpolation decays
+  interpolationDecayMilliseconds: number = 50;
   private logFov = Math.log(DEFAULT_OPTIONS.maximumFieldOfView!);
   private goalLogFov = this.logFov;
   private fovDamper = new Damper();
@@ -356,12 +358,11 @@ export class SmoothControls extends EventDispatcher {
         theta - clamp(deltaTheta, -dThetaLimit - dTheta, dThetaLimit - dTheta);
     const goalPhi = phi - deltaPhi;
 
-    const deltaRatio = deltaZoom === 0 ?
-        0 :
-        deltaZoom > 0 ? (maximumRadius! - radius) /
-                (Math.log(maximumFieldOfView!) - this.goalLogFov) :
+    const deltaRatio = deltaZoom === 0 ? 0 :
+        deltaZoom > 0                  ? (maximumRadius! - radius) /
+            (Math.log(maximumFieldOfView!) - this.goalLogFov) :
                         (radius - minimumRadius!) /
-                (this.goalLogFov - Math.log(minimumFieldOfView!));
+            (this.goalLogFov - Math.log(minimumFieldOfView!));
 
     const goalRadius = radius +
         deltaZoom *
@@ -405,14 +406,25 @@ export class SmoothControls extends EventDispatcher {
     }
 
     this.spherical.theta = this.thetaDamper.update(
-        this.spherical.theta, this.goalSpherical.theta, delta, Math.PI);
+        this.spherical.theta,
+        this.goalSpherical.theta,
+        delta,
+        Math.PI,
+        this.interpolationDecayMilliseconds);
 
     this.spherical.phi = this.phiDamper.update(
-        this.spherical.phi, this.goalSpherical.phi, delta, maximumPolarAngle!);
+        this.spherical.phi,
+        this.goalSpherical.phi,
+        delta,
+        maximumPolarAngle!,
+        this.interpolationDecayMilliseconds);
 
     this.spherical.radius = this.radiusDamper.update(
-        this.spherical.radius, this.goalSpherical.radius, delta, maximumRadius!
-    );
+        this.spherical.radius,
+        this.goalSpherical.radius,
+        delta,
+        maximumRadius!,
+        this.interpolationDecayMilliseconds);
 
     this.logFov = this.fovDamper.update(this.logFov, this.goalLogFov, delta, 1);
 
@@ -496,6 +508,7 @@ export class SmoothControls extends EventDispatcher {
     if (TOUCH_EVENT_RE.test(event.type)) {
       const {touches} = event as TouchEvent;
 
+      // tslint:disable-next-line:switch-default
       switch (this.touchMode) {
         case 'zoom':
           if (this.lastTouches.length > 1 && touches.length > 1) {
@@ -536,7 +549,7 @@ export class SmoothControls extends EventDispatcher {
 
     if (event.cancelable) {
       event.preventDefault();
-    };
+    }
   };
 
   private handleSinglePointerMove(pointer: Pointer) {

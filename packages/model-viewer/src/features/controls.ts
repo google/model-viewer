@@ -15,7 +15,6 @@
 
 import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
-
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$ariaLabel, $container, $hasTransitioned, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
@@ -33,6 +32,7 @@ import {timeline} from '../utilities/animation.js';
 // would cause the interaction prompt to glitch unexpectedly
 // @see https://github.com/google/model-viewer/issues/839
 const PROMPT_ANIMATION_TIME = 5000;
+export const DEFAULT_DECAY_MILLISECONDS = 50;
 
 // For timing purposes, a "frame" is a timing agnostic relative unit of time
 // and a "value" is a target value for the keyframe.
@@ -243,6 +243,7 @@ export declare interface ControlsInterface {
   orbitSensitivity: number;
   touchAction: TouchAction;
   bounds: Bounds;
+  interpolationDecayMilliseconds: number;
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
@@ -339,6 +340,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: Boolean, attribute: 'disable-zoom'})
     disableZoom: boolean = false;
+
+    @property({type: Number, attribute: 'interpolation-decay-milliseconds'})
+    interpolationDecayMilliseconds: number = DEFAULT_DECAY_MILLISECONDS;
 
     @property({type: String, attribute: 'bounds'}) bounds: Bounds = 'legacy';
 
@@ -495,6 +499,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('orbitSensitivity')) {
         controls.sensitivity = this.orbitSensitivity;
+      }
+
+      if (changedProperties.has('interpolationDecayMilliseconds')) {
+        controls.interpolationDecayMilliseconds =
+            this.interpolationDecayMilliseconds;
       }
 
       if (this[$jumpCamera] === true) {
