@@ -79,7 +79,6 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$autoRotateStartTime] = performance.now();
     }
 
-    // tslint:disable-next-line:no-any
     updated(changedProperties: Map<string, any>) {
       super.updated(changedProperties);
 
