@@ -132,8 +132,6 @@ export class SmoothControls extends EventDispatcher {
   private thetaDamper = new Damper();
   private phiDamper = new Damper();
   private radiusDamper = new Damper();
-  // Controls the various damper interpolation decays
-  interpolationDecayMilliseconds: number = 50;
   private logFov = Math.log(DEFAULT_OPTIONS.maximumFieldOfView!);
   private goalLogFov = this.logFov;
   private fovDamper = new Damper();

@@ -93,8 +93,6 @@ export class ModelScene extends Scene {
   public canScale = true;
   public tightBounds = false;
 
-  public interpolationDecayMilliseconds = 50;
-
   private goalTarget = new Vector3();
   private targetDamperX = new Damper();
   private targetDamperY = new Damper();
