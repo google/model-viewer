@@ -78,8 +78,6 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
             transparent = true;
             material.side = FrontSide;
           }
-          Renderer.singleton.roughnessMipmapper.generateMipmaps(
-              material as MeshStandardMaterial);
         }
       });
 
@@ -107,7 +105,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       const duplicateMaterial = Array.isArray(mesh.material) ?
           duplicateMaterials :
           duplicateMaterials[0];
-      const meshBack = new Mesh(mesh.geometry, duplicateMaterial);
+      const meshBack = mesh.clone() as Mesh;
+      meshBack.material = duplicateMaterial;
       meshBack.renderOrder = -1;
       mesh.add(meshBack);
     }
@@ -243,6 +242,11 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     // with the glTF spec.
     if (!clone.alphaTest && !clone.transparent) {
       clone.alphaTest = -0.5;
+    }
+
+    if ((clone as any).isMeshStandardMaterial) {
+      Renderer.singleton.roughnessMipmapper.generateMipmaps(
+          clone as MeshStandardMaterial);
     }
 
     sourceUUIDToClonedMaterial.set(material.uuid, clone);
