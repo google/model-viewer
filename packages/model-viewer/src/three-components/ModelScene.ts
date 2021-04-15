@@ -372,6 +372,15 @@ export class ModelScene extends Scene {
   }
 
   /**
+   * Set the decay time of, affects the speed of target transitions.
+   */
+  setTargetDamperDecayTime(decayMilliseconds: number) {
+    this.targetDamperX.setDecayTime(decayMilliseconds);
+    this.targetDamperY.setDecayTime(decayMilliseconds);
+    this.targetDamperZ.setDecayTime(decayMilliseconds);
+  }
+
+  /**
    * Gets the point in model coordinates the model should orbit/pivot around.
    */
   getTarget(): Vector3 {
@@ -395,12 +404,9 @@ export class ModelScene extends Scene {
     if (!goal.equals(target)) {
       const radius = this.idealCameraDistance;
       let {x, y, z} = target;
-      x = this.targetDamperX.update(
-          x, goal.x, delta, radius, this.interpolationDecayMilliseconds);
-      y = this.targetDamperY.update(
-          y, goal.y, delta, radius, this.interpolationDecayMilliseconds);
-      z = this.targetDamperZ.update(
-          z, goal.z, delta, radius, this.interpolationDecayMilliseconds);
+      x = this.targetDamperX.update(x, goal.x, delta, radius);
+      y = this.targetDamperY.update(y, goal.y, delta, radius);
+      z = this.targetDamperZ.update(z, goal.z, delta, radius);
       this.target.position.set(x, y, z);
       this.target.updateMatrixWorld();
       this.setShadowRotation(this.yaw);

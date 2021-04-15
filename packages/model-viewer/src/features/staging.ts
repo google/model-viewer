@@ -21,8 +21,7 @@ import {degreesToRadians} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics} from '../styles/evaluators.js';
 import {numberNode, NumberNode} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
-import {CameraChangeDetails, DEFAULT_DECAY_MILLISECONDS} from './controls.js';
-
+import {CameraChangeDetails} from './controls.js';
 
 
 // How much the model will rotate per
@@ -45,7 +44,6 @@ const $onCameraChange = Symbol('onCameraChange');
 export declare interface StagingInterface {
   autoRotate: boolean;
   autoRotateDelay: number;
-  interpolationDecayMilliseconds: number;
   readonly turntableRotation: number;
   resetTurntableRotation(theta?: number): void;
 }
@@ -63,9 +61,6 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
         {intrinsics: rotationRateIntrinsics, updateHandler: $syncRotationRate})
     @property({type: String, attribute: 'rotation-per-second'})
     rotationPerSecond: string = 'auto';
-
-    @property({type: Number, attribute: 'interpolation-decay-milliseconds'})
-    interpolationDecayMilliseconds: number = DEFAULT_DECAY_MILLISECONDS;
 
     private[$autoRotateStartTime] = performance.now();
     private[$radiansPerSecond] = 0;
@@ -90,10 +85,6 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('autoRotate')) {
         this[$autoRotateStartTime] = performance.now();
-      }
-      if (changedProperties.has('interpolationDecayMilliseconds')) {
-        this[$scene].interpolationDecayMilliseconds =
-            this.interpolationDecayMilliseconds;
       }
     }
 

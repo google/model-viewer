@@ -337,6 +337,15 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
+   * Sets the smoothing decay time.
+   */
+  setDamperDecayTime(decayMilliseconds: number) {
+    this.thetaDamper.setDecayTime(decayMilliseconds);
+    this.phiDamper.setDecayTime(decayMilliseconds);
+    this.radiusDamper.setDecayTime(decayMilliseconds);
+  }
+
+  /**
    * Adjust the orbital position of the camera relative to its current orbital
    * position. Does not let the theta goal get more than pi ahead of the current
    * theta, which ensures interpolation continues in the direction of the delta.
@@ -406,25 +415,14 @@ export class SmoothControls extends EventDispatcher {
     }
 
     this.spherical.theta = this.thetaDamper.update(
-        this.spherical.theta,
-        this.goalSpherical.theta,
-        delta,
-        Math.PI,
-        this.interpolationDecayMilliseconds);
+        this.spherical.theta, this.goalSpherical.theta, delta, Math.PI);
 
     this.spherical.phi = this.phiDamper.update(
-        this.spherical.phi,
-        this.goalSpherical.phi,
-        delta,
-        maximumPolarAngle!,
-        this.interpolationDecayMilliseconds);
+        this.spherical.phi, this.goalSpherical.phi, delta, maximumPolarAngle!);
 
     this.spherical.radius = this.radiusDamper.update(
-        this.spherical.radius,
-        this.goalSpherical.radius,
-        delta,
-        maximumRadius!,
-        this.interpolationDecayMilliseconds);
+        this.spherical.radius, this.goalSpherical.radius, delta, maximumRadius!
+    );
 
     this.logFov = this.fovDamper.update(this.logFov, this.goalLogFov, delta, 1);
 
@@ -508,7 +506,6 @@ export class SmoothControls extends EventDispatcher {
     if (TOUCH_EVENT_RE.test(event.type)) {
       const {touches} = event as TouchEvent;
 
-      // tslint:disable-next-line:switch-default
       switch (this.touchMode) {
         case 'zoom':
           if (this.lastTouches.length > 1 && touches.length > 1) {
@@ -540,6 +537,8 @@ export class SmoothControls extends EventDispatcher {
           break;
         case 'scroll':
           return;
+        default:
+          break;
       }
 
       this.lastTouches = touches;
@@ -655,6 +654,8 @@ export class SmoothControls extends EventDispatcher {
       case KeyCode.RIGHT:
         relevantKey = true;
         this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
+        break;
+      default:
         break;
     }
 
