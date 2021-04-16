@@ -560,7 +560,10 @@
         "default": {
           "default": "50",
           "options": "values greater than 0"
-        }
+        },
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#interpolation\"><span class='attribute'>Interpolation</span> example</a>"
+        ]
       }
     ],
     "CSS": [
