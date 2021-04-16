@@ -18,7 +18,7 @@ import '../types/webxr.js';
 import {Event as ThreeEvent, EventDispatcher, Matrix4, Vector3, WebGLRenderer} from 'three';
 
 import {ControlsInterface} from '../features/controls.js';
-import ModelViewerElementBase, {$onResize} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {Damper} from './Damper.js';
@@ -640,16 +640,14 @@ export class ARRenderer extends EventDispatcher {
   /**
    * Only public to make it testable.
    */
-  public onWebXRFrame(time: number, frame: XRFrame|undefined) {
-    if (!frame) {
-      return;
-    }
+  public onWebXRFrame(time: number, frame: XRFrame) {
     this.frame = frame;
     const refSpace = this.threeRenderer.xr.getReferenceSpace()!;
     const pose = frame.getViewerPose(refSpace);
 
     const scene = this.presentedScene;
-    if (pose == null || scene == null) {
+    if (pose == null || scene == null || !scene.element[$sceneIsReady]()) {
+      this.threeRenderer.clear();
       return;
     }
 
