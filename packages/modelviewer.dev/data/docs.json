@@ -556,7 +556,7 @@
       {
         "name": "interpolation-decay",
         "htmlName": "interpolationDecay",
-        "description": "Attribute that controls model interaction sensitivity, the greater the value for <i>less</i> sensitive the interaction.",
+        "description": "Controls model interaction sensitivity, the smaller the value the more sensitive the interaction will be.",
         "default": {
           "default": "50",
           "options": "values greater than 0"
