@@ -556,7 +556,7 @@
       {
         "name": "interpolation-decay",
         "htmlName": "interpolationDecay",
-        "description": "Controls model interaction sensitivity, the smaller the value the more sensitive the interaction will be.",
+        "description": "Controls the rate of interpolation when the camera or model moves, due to either user interaction or attribute changes. The decay is asymptotic and the value is in milliseconds, where the majority of the movement will occur within this value's time. Doubling this value will cut the speed in half.",
         "default": {
           "default": "50",
           "options": "values greater than 0"
