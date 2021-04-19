@@ -235,12 +235,15 @@ export class ModelScene extends Scene {
 
     this.frameModel();
     this.setShadowIntensity(this.shadowIntensity);
-    this.isDirty = true;
     this.dispatchEvent({type: 'model-load', url: this.url});
   }
 
   reset() {
     this.url = null;
+    this.isDirty = true;
+    if (this.shadow != null) {
+      this.shadow.setIntensity(0);
+    }
     const gltf = this._currentGLTF;
     // Remove all current children
     if (gltf != null) {
