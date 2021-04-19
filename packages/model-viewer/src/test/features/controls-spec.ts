@@ -596,7 +596,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             expect(input.getAttribute('aria-label')).to.be.equal(element.alt);
           });
 
-          test('prompts user to interact when focused', async () => {
+          test.skip('prompts user to interact when focused', async () => {
             input.focus();
 
             await until(
@@ -606,7 +606,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 .to.be.equal(true);
           });
 
-          test(
+          test.skip(
               'does not prompt users to interact before a model is loaded',
               async () => {
                 element.src = null;
