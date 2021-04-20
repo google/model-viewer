@@ -43,3 +43,10 @@ Command                        | Description
 `npm run clean`                | Removes built artifacts from all sub-projects
 
 You should now be ready to work on any of the `<model-viewer>` projects!
+
+## Windows 10 Setup
+Due to dependency issues on Windows we recommend running `<model-viewer>` setup from a WSL2 environment.
+ * [WSL2 Install walkthrough](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+
+And installing Node.js via NVM.
+ * [Node.js/NVM install walkthrough](https://docs.microsoft.com/en-us/windows/nodejs/setup-on-wsl2)
