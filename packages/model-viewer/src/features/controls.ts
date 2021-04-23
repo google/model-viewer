@@ -15,17 +15,16 @@
 
 import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
-
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$ariaLabel, $container, $hasTransitioned, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
+import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
 import {SAFE_RADIUS_RATIO} from '../three-components/ModelScene.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
-
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -175,7 +174,7 @@ const maxCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
 };
 
 export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
-  const center = element[$scene].boundingBox.getCenter(new Vector3);
+  const center = element[$scene].boundingBox.getCenter(new Vector3());
 
   return {
     basis: [
@@ -243,6 +242,7 @@ export declare interface ControlsInterface {
   orbitSensitivity: number;
   touchAction: TouchAction;
   bounds: Bounds;
+  interpolationDecay: number;
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
@@ -339,6 +339,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: Boolean, attribute: 'disable-zoom'})
     disableZoom: boolean = false;
+
+    @property({type: Number, attribute: 'interpolation-decay'})
+    interpolationDecay: number = DECAY_MILLISECONDS;
 
     @property({type: String, attribute: 'bounds'}) bounds: Bounds = 'legacy';
 
@@ -495,6 +498,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('orbitSensitivity')) {
         controls.sensitivity = this.orbitSensitivity;
+      }
+
+      if (changedProperties.has('interpolationDecay')) {
+        controls.setDamperDecayTime(this.interpolationDecay);
+        this[$scene].setTargetDamperDecayTime(this.interpolationDecay);
       }
 
       if (this[$jumpCamera] === true) {
