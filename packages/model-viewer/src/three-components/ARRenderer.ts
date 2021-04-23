@@ -21,7 +21,7 @@ import {ControlsInterface} from '../features/controls.js';
 import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
-import {Damper} from './Damper.js';
+import {Damper, DECAY_MILLISECONDS} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
@@ -37,7 +37,7 @@ const ROTATION_RATE = 1.5;
 // encourage upright use.
 const HIT_ANGLE_DEG = 20;
 // Slow down the dampers for initial placement.
-const INTRO_DAMPER_RATE = 0.4;
+const INTRO_DECAY = 120;
 const SCALE_SNAP_HIGH = 1.2;
 const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
 
@@ -99,7 +99,6 @@ export class ARRenderer extends EventDispatcher {
   private zDamper = new Damper();
   private yawDamper = new Damper();
   private scaleDamper = new Damper();
-  private damperRate = 1;
 
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
@@ -185,7 +184,6 @@ export class ARRenderer extends EventDispatcher {
     const viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
 
     this.initialized = false;
-    this.damperRate = INTRO_DAMPER_RATE;
 
     this.turntableRotation = scene.yaw;
     this.goalYaw = scene.yaw;
@@ -216,6 +214,10 @@ export class ARRenderer extends EventDispatcher {
     this.placementBox =
         new PlacementBox(scene, this.placeOnWall ? 'back' : 'bottom');
     this.placementComplete = false;
+    this.xDamper.setDecayTime(INTRO_DECAY);
+    this.yDamper.setDecayTime(INTRO_DECAY);
+    this.zDamper.setDecayTime(INTRO_DECAY);
+
     this.lastTick = performance.now();
   }
 
@@ -607,7 +609,6 @@ export class ARRenderer extends EventDispatcher {
     if (this.initialHitSource == null &&
         (!goal.equals(position) || this.goalScale !== oldScale)) {
       let {x, y, z} = position;
-      delta *= this.damperRate;
       x = this.xDamper.update(x, goal.x, delta, radius);
       y = this.yDamper.update(y, goal.y, delta, radius);
       z = this.zDamper.update(z, goal.z, delta, radius);
@@ -626,7 +627,9 @@ export class ARRenderer extends EventDispatcher {
           this.placementComplete = true;
           box.show = false;
           scene.setShadowIntensity(AR_SHADOW_INTENSITY);
-          this.damperRate = 1;
+          this.xDamper.setDecayTime(DECAY_MILLISECONDS);
+          this.yDamper.setDecayTime(DECAY_MILLISECONDS);
+          this.zDamper.setDecayTime(DECAY_MILLISECONDS);
         }
       }
     }
