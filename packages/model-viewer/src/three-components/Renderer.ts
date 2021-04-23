@@ -229,7 +229,6 @@ export class Renderer extends EventDispatcher {
       return;
     }
     const scale = this.scaleFactor;
-    console.log(scale);
     this.avgFrameDuration =
         (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
@@ -428,7 +427,6 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(
           0, Math.floor(this.height * dpr) - height, width, height);
       this.threeRenderer.render(scene, scene.getCamera());
-      console.log(scene.url);
 
       if (this.multipleScenesVisible) {
         if (scene.context == null) {
