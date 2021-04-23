@@ -58,7 +58,7 @@
             <p>
               A slot is used here for replacing the default AR button with a custom one - in this case
               the one recommended by SceneViewer. This is not the default only because this way localization of the text is left
-              to whatever system you prefer to use. Note the AR button will only be visible on AR-capable Android devices.
+              to whatever system you prefer to use. Note the AR button will only be visible on AR-capable devices.
             </p>
             <p>
               By styling based on the <code>ar-status</code> attribute, you can add DOM that only shows up in certain modes.
@@ -75,7 +75,7 @@
           </div>
           <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
-<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar ar-scale="fixed" camera-controls alt="A 3D model carousel">
+<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar camera-controls alt="A 3D model carousel">
   
   <button slot="ar-button" id="ar-button">
     View in your space
