@@ -117,7 +117,6 @@ export class ARRenderer extends EventDispatcher {
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
-          // @ts-ignore
           domOverlay:
               {root: scene.element.shadowRoot!.querySelector('div.default')}
         });
