@@ -87,7 +87,7 @@ export default class EnvironmentSceneAlt extends Scene {
 
 
 
-    // +x
+    // +x only on light
     const light3 = new Mesh(geometry, this.createAreaLightMaterial(23));
     light3.position.set(14.0, 12.0, 0.0);
     light3.scale.set(0.1, 5.0, 5.0);
