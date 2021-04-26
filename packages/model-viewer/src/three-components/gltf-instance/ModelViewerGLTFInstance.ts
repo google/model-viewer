@@ -78,6 +78,13 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
             transparent = true;
             material.side = FrontSide;
           }
+          const {threeRenderer, roughnessMipmapper} = Renderer.singleton;
+          // XR must be disabled while doing offscreen rendering or it will
+          // clobber the camera.
+          const {enabled} = threeRenderer.xr;
+          threeRenderer.xr.enabled = false;
+          roughnessMipmapper.generateMipmaps(material as MeshStandardMaterial);
+          threeRenderer.xr.enabled = enabled;
         }
       });
 
@@ -171,49 +178,6 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
 
     const clone = material.clone() as MeshStandardMaterial;
 
-    // Clone the textures manually since material cloning is shallow. The
-    // underlying images are still shared.
-    if (material.map != null) {
-      clone.map = material.map.clone();
-      clone.map.needsUpdate = true;
-    }
-    if (material.normalMap != null) {
-      clone.normalMap = material.normalMap.clone();
-      clone.normalMap.needsUpdate = true;
-    }
-    if (material.emissiveMap != null) {
-      clone.emissiveMap = material.emissiveMap.clone();
-      clone.emissiveMap.needsUpdate = true;
-    }
-
-    if ((material as any).isGLTFSpecularGlossinessMaterial) {
-      if ((material as any).specularMap != null) {
-        (clone as any).specularMap = (material as any).specularMap?.clone();
-        (clone as any).specularMap.needsUpdate = true;
-      }
-      if ((material as any).glossinessMap != null) {
-        (clone as any).glossinessMap = (material as any).glossinessMap?.clone();
-        (clone as any).glossinessMap.needsUpdate = true;
-      }
-    } else {
-      // ao, roughness and metalness sometimes share a texture.
-      if (material.metalnessMap === material.aoMap) {
-        clone.metalnessMap = clone.aoMap;
-      } else if (material.metalnessMap != null) {
-        clone.metalnessMap = material.metalnessMap.clone();
-        clone.metalnessMap.needsUpdate = true;
-      }
-
-      if (material.roughnessMap === material.aoMap) {
-        clone.roughnessMap = clone.aoMap;
-      } else if (material.roughnessMap === material.metalnessMap) {
-        clone.roughnessMap = clone.metalnessMap;
-      } else if (material.roughnessMap != null) {
-        clone.roughnessMap = material.roughnessMap.clone();
-        clone.roughnessMap.needsUpdate = true;
-      }
-    }
-
     // This allows us to patch three's materials, on top of patches already
     // made, for instance GLTFLoader patches SpecularGlossiness materials.
     // Unfortunately, three's program cache differentiates SpecGloss materials
@@ -242,11 +206,6 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     // with the glTF spec.
     if (!clone.alphaTest && !clone.transparent) {
       clone.alphaTest = -0.5;
-    }
-
-    if ((clone as any).isMeshStandardMaterial) {
-      Renderer.singleton.roughnessMipmapper.generateMipmaps(
-          clone as MeshStandardMaterial);
     }
 
     sourceUUIDToClonedMaterial.set(material.uuid, clone);
