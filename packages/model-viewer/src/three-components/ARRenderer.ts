@@ -280,11 +280,6 @@ export class ARRenderer extends EventDispatcher {
   };
 
   private postSessionCleanup() {
-    // The offscreen WebXR framebuffer is now invalid, switch
-    // back to the default framebuffer for canvas output.
-    // TODO: this method should be added to three.js's exported interface.
-    (this.threeRenderer as any).setFramebuffer(null);
-
     const session = this.currentSession;
     if (session != null) {
       session.removeEventListener('selectstart', this.onSelectStart);

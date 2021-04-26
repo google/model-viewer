@@ -539,6 +539,9 @@ export class ModelScene extends Scene {
    */
   setShadowIntensity(shadowIntensity: number) {
     this.shadowIntensity = shadowIntensity;
+    if (this._currentGLTF == null) {
+      return;
+    }
     let shadow = this.shadow;
     const side =
         (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
