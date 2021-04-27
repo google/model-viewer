@@ -299,7 +299,7 @@ export class Renderer extends EventDispatcher {
     let visibleInput = null;
     for (const scene of this.scenes) {
       const {element} = scene;
-      if (element.modelIsVisible) {
+      if (element.modelIsVisible && scene.externalRenderer != null) {
         ++visibleScenes;
         visibleInput = element[$userInputElement];
       }
@@ -318,6 +318,9 @@ export class Renderer extends EventDispatcher {
       canvasElement.classList.remove('show');
     }
     for (const scene of this.scenes) {
+      if (scene.externalRenderer != null) {
+        continue;
+      }
       const userInputElement = scene.element[$userInputElement];
       const canvas = scene.element[$canvas];
       if (multipleScenesVisible) {
@@ -403,6 +406,21 @@ export class Renderer extends EventDispatcher {
       }
       scene.isDirty = false;
       ++scene.renderCount;
+
+      if (scene.externalRenderer != null) {
+        const {matrix, projectionMatrix} = scene.camera;
+        const viewMatrix = matrix.elements.slice();
+        const target = scene.getTarget();
+        viewMatrix[12] += target.x;
+        viewMatrix[13] += target.y;
+        viewMatrix[14] += target.z;
+
+        scene.externalRenderer.render({
+          viewMatrix: viewMatrix,
+          projectionMatrix: projectionMatrix.elements
+        });
+        continue;
+      }
 
       if (!scene.element.modelIsVisible && !this.multipleScenesVisible) {
         // Here we are pre-rendering on the visible canvas, so we must mark the
