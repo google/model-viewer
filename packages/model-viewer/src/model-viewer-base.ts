@@ -39,12 +39,12 @@ const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
 const $resizeObserver = Symbol('resizeObserver');
-const $intersectionObserver = Symbol('intersectionObserver');
 const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $loaded = Symbol('loaded');
 
 export const $updateSize = Symbol('updateSize');
+export const $intersectionObserver = Symbol('intersectionObserver');
 export const $isElementInViewport = Symbol('isElementInViewport');
 export const $announceModelVisibility = Symbol('announceModelVisibility');
 export const $ariaLabel = Symbol('ariaLabel');

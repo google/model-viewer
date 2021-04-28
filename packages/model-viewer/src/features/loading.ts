@@ -360,10 +360,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
       }
 
-      if (changedProperties.has('reveal') || changedProperties.has('loaded')) {
-        if (!this[$sceneIsReady]()) {
-          this[$updateSource]();
-        }
+      if (changedProperties.has('reveal') || changedProperties.has('loading')) {
+        this[$updateSource]();
       }
     }
 
