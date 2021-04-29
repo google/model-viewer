@@ -426,7 +426,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.floor(this.height * dpr) - height, width, height);
-      this.threeRenderer.render(scene, scene.getCamera());
+      this.threeRenderer.render(scene, scene.camera);
 
       if (this.multipleScenesVisible) {
         if (scene.context == null) {

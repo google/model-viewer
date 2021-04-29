@@ -291,7 +291,6 @@ export class ARRenderer extends EventDispatcher {
     const scene = this.presentedScene;
     if (scene != null) {
       const {element} = scene;
-      scene.setCamera(scene.camera);
 
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);

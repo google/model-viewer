@@ -233,7 +233,7 @@ suite('ARRenderer', () => {
       });
 
       test('restores original camera', () => {
-        expect(modelScene.getCamera()).to.be.equal(modelScene.camera);
+        expect(modelScene.camera).to.be.equal(modelScene.camera);
       });
 
       test('restores scene size', () => {

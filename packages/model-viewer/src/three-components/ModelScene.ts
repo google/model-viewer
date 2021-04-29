@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
@@ -70,7 +70,6 @@ export class ModelScene extends Scene {
   public isDirty = false;
   public renderCount = 0;
 
-  public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
@@ -116,8 +115,6 @@ export class ModelScene extends Scene {
     // model is loaded and framing is computed.
     this.camera = new PerspectiveCamera(45, 1, 0.1, 100);
     this.camera.name = 'MainCamera';
-
-    this.activeCamera = this.camera;
 
     this.add(this.target);
 
@@ -349,20 +346,6 @@ export class ModelScene extends Scene {
    */
   getSize(): {width: number, height: number} {
     return {width: this.width, height: this.height};
-  }
-
-  /**
-   * Returns the current camera.
-   */
-  getCamera(): Camera {
-    return this.activeCamera;
-  }
-
-  /**
-   * Sets the passed in camera to be used for rendering.
-   */
-  setCamera(camera: Camera) {
-    this.activeCamera = camera;
   }
 
   /**
@@ -612,7 +595,7 @@ export class ModelScene extends Scene {
    */
   positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
       {position: Vector3, normal: Vector3}|null {
-    raycaster.setFromCamera(pixelPosition, this.getCamera());
+    raycaster.setFromCamera(pixelPosition, this.camera);
     const hits = raycaster.intersectObject(object, true);
 
     if (hits.length === 0) {
