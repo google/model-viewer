@@ -14,6 +14,7 @@
  */
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
@@ -64,6 +65,7 @@ export class ModelScene extends Scene {
   public canvas: HTMLCanvasElement;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
+  public annotationRenderer = new CSS2DRenderer();
   public width = 1;
   public height = 1;
   public aspect = 1;
@@ -273,6 +275,7 @@ export class ModelScene extends Scene {
     }
     this.width = Math.max(width, 1);
     this.height = Math.max(height, 1);
+    this.annotationRenderer.setSize(width, height);
 
     this.aspect = this.width / this.height;
     this.frameModel();
@@ -676,5 +679,15 @@ export class ModelScene extends Scene {
     this.forHotspots((hotspot) => {
       hotspot.visible = visible;
     });
+  }
+
+  postRender() {
+    const {camera} = this;
+
+    if (this.isDirty) {
+      this.updateHotspots(camera.position);
+      this.annotationRenderer.domElement.style.display = '';
+      this.annotationRenderer.render(this, camera);
+    }
   }
 }

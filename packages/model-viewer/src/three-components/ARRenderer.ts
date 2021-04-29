@@ -374,7 +374,12 @@ export class ARRenderer extends EventDispatcher {
     this.cameraPosition.set(viewMatrix[12], viewMatrix[13], viewMatrix[14]);
 
     if (!this.initialized) {
-      const {position, element} = scene;
+      const {position, element, camera} = scene;
+
+      camera.projectionMatrix.copy(
+          this.threeRenderer.xr.getCamera(camera).projectionMatrix);
+      camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+
       const {theta, radius} =
           (element as ModelViewerElementBase & ControlsInterface)
               .getCameraOrbit();
@@ -646,11 +651,6 @@ export class ARRenderer extends EventDispatcher {
       this.threeRenderer.clear();
       return;
     }
-
-    scene.camera.projectionMatrix.copy(
-        this.threeRenderer.xr.getCamera(scene.camera).projectionMatrix);
-    scene.camera.projectionMatrixInverse.copy(scene.camera.projectionMatrix)
-        .invert();
 
     // WebXR may return multiple views, i.e. for headset AR. This
     // isn't really supported at this point, but make a best-effort

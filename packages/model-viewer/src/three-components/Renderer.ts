@@ -374,6 +374,7 @@ export class Renderer extends EventDispatcher {
   render(t: number, frame?: XRFrame) {
     if (frame != null) {
       this.arRenderer.onWebXRFrame(t, frame);
+      this.arRenderer.presentedScene!.postRender();
       return;
     }
 
@@ -401,7 +402,6 @@ export class Renderer extends EventDispatcher {
       if (!scene.isDirty) {
         continue;
       }
-      scene.isDirty = false;
       ++scene.renderCount;
 
       if (!scene.element.modelIsVisible && !this.multipleScenesVisible) {
@@ -428,6 +428,8 @@ export class Renderer extends EventDispatcher {
           0, Math.floor(this.height * dpr) - height, width, height);
       this.threeRenderer.render(scene, scene.camera);
 
+      scene.postRender();
+
       if (this.multipleScenesVisible) {
         if (scene.context == null) {
           scene.createContext();
@@ -444,6 +446,8 @@ export class Renderer extends EventDispatcher {
               this.canvas3D, 0, 0, width, height, 0, 0, width, height);
         }
       }
+
+      scene.isDirty = false;
     }
   }
 
