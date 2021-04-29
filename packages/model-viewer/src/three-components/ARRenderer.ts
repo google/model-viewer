@@ -647,6 +647,11 @@ export class ARRenderer extends EventDispatcher {
       return;
     }
 
+    scene.camera.projectionMatrix.copy(
+        this.threeRenderer.xr.getCamera(scene.camera).projectionMatrix);
+    scene.camera.projectionMatrixInverse.copy(scene.camera.projectionMatrix)
+        .invert();
+
     // WebXR may return multiple views, i.e. for headset AR. This
     // isn't really supported at this point, but make a best-effort
     // attempt to render other views also, using the first view
