@@ -17,7 +17,7 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftSha
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$canvas, $sceneIsReady, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
+import {$canvas, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
@@ -262,7 +262,8 @@ export class Renderer extends EventDispatcher {
     scene.isDirty = true;
 
     if (this.canRender && this.scenes.size > 0) {
-      this.threeRenderer.setAnimationLoop((time: number) => this.render(time));
+      this.threeRenderer.setAnimationLoop(
+          (time: number, frame?: any) => this.render(time, frame));
     }
 
     if (this.debugger != null) {
@@ -370,7 +371,12 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  render(t: number) {
+  render(t: number, frame?: XRFrame) {
+    if (frame != null) {
+      this.arRenderer.onWebXRFrame(t, frame);
+      return;
+    }
+
     const delta = t - this.lastTick;
     this.lastTick = t;
 
@@ -390,10 +396,6 @@ export class Renderer extends EventDispatcher {
     const {dpr, scaleFactor} = this;
 
     for (const scene of this.orderedScenes()) {
-      if (!scene.element[$sceneIsReady]()) {
-        continue;
-      }
-
       this.preRender(scene, t, delta);
 
       if (!scene.isDirty) {
@@ -405,9 +407,9 @@ export class Renderer extends EventDispatcher {
       if (!scene.element.modelIsVisible && !this.multipleScenesVisible) {
         // Here we are pre-rendering on the visible canvas, so we must mark the
         // visible scene dirty to ensure it overwrites us.
-        for (const scene of this.scenes) {
-          if (scene.element.modelIsVisible) {
-            scene.isDirty = true;
+        for (const visibleScene of this.scenes) {
+          if (visibleScene.element.modelIsVisible) {
+            visibleScene.isDirty = true;
           }
         }
       }

@@ -14,7 +14,7 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
-import ModelViewerElementBase, {$canvas, $getModelIsVisible, $loaded, $onResize, $renderer, $scene, $userInputElement} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$canvas, $getModelIsVisible, $onResize, $renderer, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
@@ -88,21 +88,6 @@ suite('Renderer', () => {
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(2, 'scene second render');
       expect(otherScene.renderCount).to.be.equal(1, 'otherScene second render');
-    });
-
-    test('does not render scenes that have not been loaded', () => {
-      scene.element[$loaded] = false;
-      scene.isDirty = true;
-
-      renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(0);
-      expect(scene.isDirty).to.be.eq(true);
-
-      scene.element[$loaded] = true;
-
-      renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(1);
-      expect(!scene.isDirty).to.be.eq(true);
     });
 
     test('uses the proper canvas when unregsitering scenes', () => {

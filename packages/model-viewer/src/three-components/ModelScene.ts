@@ -14,18 +14,18 @@
  */
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
-
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
-
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
+
+
 export interface ModelLoadEvent extends ThreeEvent {
-  url: string
+  url: string;
 }
 
 export interface ModelSceneConfig {
@@ -35,7 +35,7 @@ export interface ModelSceneConfig {
   height: number;
 }
 
-export type IlluminationRole = 'primary'|'secondary'
+export type IlluminationRole = 'primary'|'secondary';
 
 export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Primary: 'primary',
@@ -235,12 +235,15 @@ export class ModelScene extends Scene {
 
     this.frameModel();
     this.setShadowIntensity(this.shadowIntensity);
-    this.isDirty = true;
     this.dispatchEvent({type: 'model-load', url: this.url});
   }
 
   reset() {
     this.url = null;
+    this.isDirty = true;
+    if (this.shadow != null) {
+      this.shadow.setIntensity(0);
+    }
     const gltf = this._currentGLTF;
     // Remove all current children
     if (gltf != null) {
@@ -308,7 +311,7 @@ export class ModelScene extends Scene {
     this.target.remove(this.modelContainer);
 
     if (center == null) {
-      center = this.boundingBox.getCenter(new Vector3);
+      center = this.boundingBox.getCenter(new Vector3());
     }
 
     const radiusSquared = (value: number, vertex: Vector3): number => {
@@ -367,6 +370,15 @@ export class ModelScene extends Scene {
    */
   setTarget(modelX: number, modelY: number, modelZ: number) {
     this.goalTarget.set(-modelX, -modelY, -modelZ);
+  }
+
+  /**
+   * Set the decay time of, affects the speed of target transitions.
+   */
+  setTargetDamperDecayTime(decayMilliseconds: number) {
+    this.targetDamperX.setDecayTime(decayMilliseconds);
+    this.targetDamperY.setDecayTime(decayMilliseconds);
+    this.targetDamperZ.setDecayTime(decayMilliseconds);
   }
 
   /**
@@ -527,6 +539,9 @@ export class ModelScene extends Scene {
    */
   setShadowIntensity(shadowIntensity: number) {
     this.shadowIntensity = shadowIntensity;
+    if (this._currentGLTF == null) {
+      return;
+    }
     let shadow = this.shadow;
     const side =
         (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';

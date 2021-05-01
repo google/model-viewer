@@ -50,6 +50,7 @@ export class Shadow extends DirectionalLight {
   private floor: Mesh;
   private boundingBox = new Box3;
   private size = new Vector3;
+  private shadowScale = 1;
   private isAnimated = false;
   private side: Side = 'bottom';
   public needsUpdate = false;
@@ -160,8 +161,7 @@ export class Shadow extends DirectionalLight {
     camera.bottom = boundingBox.min.z - heightPad;
     camera.top = boundingBox.max.z + heightPad;
 
-    this.setScaleAndOffset(camera.zoom, 0);
-    this.shadow.updateMatrices(this);
+    this.setScaleAndOffset(this.shadowScale, 0);
 
     this.floor.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
     this.needsUpdate = true;
@@ -209,23 +209,15 @@ export class Shadow extends DirectionalLight {
    */
   setScaleAndOffset(scale: number, offset: number) {
     const sizeY = this.size.y;
-    const inverseScale = 1 / scale;
+    const {camera} = this.shadow;
+    this.shadowScale = scale;
+    camera.near = 0;
+    camera.far = sizeY - offset / scale;
+    camera.updateProjectionMatrix();
+    camera.scale.setScalar(scale);
     // Floor plane is up slightly from the bottom of the bounding box to avoid
     // Z-fighting with baked-in shadows and to stay inside the shadow camera.
     const shadowOffset = sizeY * OFFSET;
-    this.floor.position.y = 2 * shadowOffset - sizeY + offset * inverseScale;
-    const {camera} = this.shadow;
-    camera.zoom = scale;
-    camera.near = 0;
-    camera.far = sizeY * scale - offset;
-
-    camera.projectionMatrix.makeOrthographic(
-        camera.left * scale,
-        camera.right * scale,
-        camera.top * scale,
-        camera.bottom * scale,
-        camera.near,
-        camera.far);
-    camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+    this.floor.position.y = 2 * shadowOffset - camera.far;
   }
 }

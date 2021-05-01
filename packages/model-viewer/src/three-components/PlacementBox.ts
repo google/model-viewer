@@ -178,5 +178,6 @@ export class PlacementBox extends Mesh {
     (material as Material).dispose();
     this.geometry.dispose();
     (this.material as Material).dispose();
+    this.parent?.remove(this);
   }
 }
