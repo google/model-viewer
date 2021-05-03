@@ -82,8 +82,11 @@ export class ARRenderer extends EventDispatcher {
   private _presentedScene: ModelScene|null = null;
   private resolveCleanup: ((...args: any[]) => void)|null = null;
   private exitWebXRButtonContainer: HTMLElement|null = null;
+  private overlay: HTMLElement|null = null;
 
   private initialized = false;
+  private projectionMatrix = new Matrix4();
+  private projectionMatrixInverse = new Matrix4();
   private oldTarget = new Vector3();
   private placementComplete = false;
   private isTranslating = false;
@@ -108,23 +111,19 @@ export class ARRenderer extends EventDispatcher {
     this.threeRenderer.xr.enabled = true;
   }
 
-  async resolveARSession(scene: ModelScene): Promise<XRSession> {
+  async resolveARSession(): Promise<XRSession> {
     assertIsArCandidate();
-
 
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
-          domOverlay:
-              {root: scene.element.shadowRoot!.querySelector('div.default')}
+          domOverlay: {root: this.overlay}
         });
 
     this.threeRenderer.xr.setReferenceSpaceType('local');
 
     await this.threeRenderer.xr.setSession(session as any);
-
-    scene.element[$onResize](window.screen);
 
     return session;
   }
@@ -168,8 +167,9 @@ export class ARRenderer extends EventDispatcher {
 
     // This sets isPresenting to true
     this._presentedScene = scene;
+    this.overlay = scene.element.shadowRoot!.querySelector('div.default');
 
-    const currentSession = await this.resolveARSession(scene);
+    const currentSession = await this.resolveARSession();
 
     currentSession.addEventListener('end', () => {
       this.postSessionCleanup();
@@ -291,7 +291,6 @@ export class ARRenderer extends EventDispatcher {
     const scene = this.presentedScene;
     if (scene != null) {
       const {element} = scene;
-      scene.setCamera(scene.camera);
 
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
@@ -354,6 +353,7 @@ export class ARRenderer extends EventDispatcher {
     this._presentedScene = null;
     this.frame = null;
     this.inputSource = null;
+    this.overlay = null;
 
     if (this.resolveCleanup != null) {
       this.resolveCleanup!();
@@ -366,8 +366,9 @@ export class ARRenderer extends EventDispatcher {
     const viewMatrix = view.transform.matrix;
 
     const scene = this.presentedScene!;
-    scene.camera.near = 0.1;
-    scene.camera.far = 100;
+    const {camera} = scene;
+    camera.near = 0.1;
+    camera.far = 100;
 
     this.presentedScene!.orientHotspots(
         Math.atan2(viewMatrix[1], viewMatrix[5]));
@@ -376,6 +377,16 @@ export class ARRenderer extends EventDispatcher {
 
     if (!this.initialized) {
       const {position, element} = scene;
+
+      const {width, height} = this.overlay!.getBoundingClientRect();
+      scene.setSize(width, height);
+
+      if (this.threeRenderer.xr.getSession() != null) {
+        this.projectionMatrix.copy(
+            this.threeRenderer.xr.getCamera(camera).projectionMatrix);
+        this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
+      }
+
       const {theta, radius} =
           (element as ModelViewerElementBase & ControlsInterface)
               .getCameraOrbit();
@@ -393,6 +404,11 @@ export class ARRenderer extends EventDispatcher {
       this.initialized = true;
       this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
+
+    // Ensure the camera uses the AR projection matrix without inverting on
+    // every frame.
+    camera.projectionMatrix.copy(this.projectionMatrix);
+    camera.projectionMatrixInverse.copy(this.projectionMatrixInverse);
 
     // Use automatic dynamic viewport scaling if supported.
     if (view.requestViewportScale && view.recommendedViewportScale) {
