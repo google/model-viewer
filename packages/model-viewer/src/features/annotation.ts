@@ -66,18 +66,6 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
     private[$observer] = new MutationObserver(this[$mutationCallback]);
 
-    constructor(...args: Array<any>) {
-      super(...args);
-
-      const {domElement} = this[$scene].annotationRenderer;
-      const {style} = domElement;
-      style.display = 'none';
-      style.pointerEvents = 'none';
-      style.position = 'absolute';
-      style.top = '0';
-      this.shadowRoot!.querySelector('.default')!.appendChild(domElement);
-    }
-
     connectedCallback() {
       super.connectedCallback();
 
@@ -174,10 +162,6 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         });
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].addHotspot(hotspot);
-        // This happens automatically in render(), but we do it early so that
-        // the slots appear in the shadow DOM and the elements get attached,
-        // allowing us to dispatch events on them.
-        this[$scene].annotationRenderer.domElement.appendChild(hotspot.element);
       }
       this[$scene].isDirty = true;
     }

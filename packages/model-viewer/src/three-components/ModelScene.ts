@@ -127,6 +127,14 @@ export class ModelScene extends Scene {
 
     this.target.add(this.modelContainer);
     this.mixer = new AnimationMixer(this.modelContainer);
+
+    const {domElement} = this.annotationRenderer;
+    const {style} = domElement;
+    style.display = 'none';
+    style.pointerEvents = 'none';
+    style.position = 'absolute';
+    style.top = '0';
+    this.element.shadowRoot!.querySelector('.default')!.appendChild(domElement);
   }
 
   /**
@@ -623,6 +631,10 @@ export class ModelScene extends Scene {
    */
   addHotspot(hotspot: Hotspot) {
     this.target.add(hotspot);
+    // This happens automatically in render(), but we do it early so that
+    // the slots appear in the shadow DOM and the elements get attached,
+    // allowing us to dispatch events on them.
+    this.annotationRenderer.domElement.appendChild(hotspot.element);
   }
 
   removeHotspot(hotspot: Hotspot) {

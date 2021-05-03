@@ -249,12 +249,11 @@ suite('ARRenderer', () => {
       let yaw: number;
 
       setup(async () => {
-        await arRenderer.present(modelScene);
         arRenderer.onWebXRFrame(0, new MockXRFrame(arRenderer.currentSession!));
         yaw = modelScene.yaw;
       });
 
-      test('places the model oriented to the camera', () => {
+      test.only('places the model oriented to the camera', () => {
         const epsilon = 0.0001;
         const {target, position} = modelScene;
 

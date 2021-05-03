@@ -111,10 +111,8 @@ export class ARRenderer extends EventDispatcher {
     this.threeRenderer.xr.enabled = true;
   }
 
-  async resolveARSession(scene: ModelScene): Promise<XRSession> {
+  async resolveARSession(): Promise<XRSession> {
     assertIsArCandidate();
-
-    this.overlay = scene.element.shadowRoot!.querySelector('div.default');
 
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar', {
@@ -169,8 +167,9 @@ export class ARRenderer extends EventDispatcher {
 
     // This sets isPresenting to true
     this._presentedScene = scene;
+    this.overlay = scene.element.shadowRoot!.querySelector('div.default');
 
-    const currentSession = await this.resolveARSession(scene);
+    const currentSession = await this.resolveARSession();
 
     currentSession.addEventListener('end', () => {
       this.postSessionCleanup();
