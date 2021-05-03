@@ -82,6 +82,7 @@ export class ARRenderer extends EventDispatcher {
   private _presentedScene: ModelScene|null = null;
   private resolveCleanup: ((...args: any[]) => void)|null = null;
   private exitWebXRButtonContainer: HTMLElement|null = null;
+  private overlay: HTMLElement|null = null;
 
   private initialized = false;
   private oldTarget = new Vector3();
@@ -111,20 +112,18 @@ export class ARRenderer extends EventDispatcher {
   async resolveARSession(scene: ModelScene): Promise<XRSession> {
     assertIsArCandidate();
 
+    this.overlay = scene.element.shadowRoot!.querySelector('div.default');
 
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
-          domOverlay:
-              {root: scene.element.shadowRoot!.querySelector('div.default')}
+          domOverlay: {root: this.overlay}
         });
 
     this.threeRenderer.xr.setReferenceSpaceType('local');
 
     await this.threeRenderer.xr.setSession(session as any);
-
-    scene.element[$onResize](window.screen);
 
     return session;
   }
@@ -353,6 +352,7 @@ export class ARRenderer extends EventDispatcher {
     this._presentedScene = null;
     this.frame = null;
     this.inputSource = null;
+    this.overlay = null;
 
     if (this.resolveCleanup != null) {
       this.resolveCleanup!();
@@ -375,6 +375,9 @@ export class ARRenderer extends EventDispatcher {
 
     if (!this.initialized) {
       const {position, element, camera} = scene;
+
+      const {width, height} = this.overlay!.getBoundingClientRect();
+      scene.setSize(width, height);
 
       camera.projectionMatrix.copy(
           this.threeRenderer.xr.getCamera(camera).projectionMatrix);
