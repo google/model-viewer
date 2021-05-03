@@ -15,13 +15,11 @@
  */
 
 import {Matrix3, Matrix4, Vector2} from 'three';
-import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import ModelViewerElementBase, {$needsRender, $onResize, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $scene, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
 
-const $annotationRenderer = Symbol('annotationRenderer');
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
 const $observer = Symbol('observer');
@@ -49,7 +47,6 @@ export declare interface AnnotationInterface {
 export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<AnnotationInterface>&T => {
   class AnnotationModelViewerElement extends ModelViewerElement {
-    private[$annotationRenderer] = new CSS2DRenderer();
     private[$hotspotMap] = new Map<string, Hotspot>();
     private[$mutationCallback] = (mutations: Array<unknown>) => {
       mutations.forEach((mutation) => {
@@ -68,18 +65,6 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       });
     };
     private[$observer] = new MutationObserver(this[$mutationCallback]);
-
-    constructor(...args: Array<any>) {
-      super(...args);
-
-      const {domElement} = this[$annotationRenderer];
-      const {style} = domElement;
-      style.display = 'none';
-      style.pointerEvents = 'none';
-      style.position = 'absolute';
-      style.top = '0';
-      this.shadowRoot!.querySelector('.default')!.appendChild(domElement);
-    }
 
     connectedCallback() {
       super.connectedCallback();
@@ -159,23 +144,6 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       return {position: position, normal: normal};
     }
 
-    [$tick](time: number, delta: number) {
-      super[$tick](time, delta);
-      const scene = this[$scene];
-      const camera = scene.getCamera();
-
-      if (scene.isDirty) {
-        scene.updateHotspots(camera.position);
-        this[$annotationRenderer].domElement.style.display = '';
-        this[$annotationRenderer].render(scene, camera);
-      }
-    }
-
-    [$onResize](e: {width: number, height: number}) {
-      super[$onResize](e);
-      this[$annotationRenderer].setSize(e.width, e.height);
-    }
-
     private[$addHotspot](node: Node) {
       if (!(node instanceof HTMLElement &&
             node.slot.indexOf('hotspot') === 0)) {
@@ -194,10 +162,6 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         });
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].addHotspot(hotspot);
-        // This happens automatically in render(), but we do it early so that
-        // the slots appear in the shadow DOM and the elements get attached,
-        // allowing us to dispatch events on them.
-        this[$annotationRenderer].domElement.appendChild(hotspot.element);
       }
       this[$scene].isDirty = true;
     }

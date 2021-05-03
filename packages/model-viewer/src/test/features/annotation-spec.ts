@@ -143,7 +143,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           const hotspotObject2D =
               scene.target.children[numSlots - 1] as Hotspot;
 
-          const camera = element[$scene].getCamera();
+          const camera = element[$scene].camera;
           camera.position.z = 2;
           camera.updateMatrixWorld();
           element[$needsRender]();
@@ -195,7 +195,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       element.setAttribute('style', `width: ${width}px; height: ${height}px`);
       element.src = assetPath('models/cube.gltf');
 
-      const camera = element[$scene].getCamera();
+      const camera = element[$scene].camera;
       camera.position.z = 2;
       camera.updateMatrixWorld();
       await waitForEvent(element, 'load');
