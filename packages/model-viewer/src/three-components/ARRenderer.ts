@@ -85,6 +85,8 @@ export class ARRenderer extends EventDispatcher {
   private overlay: HTMLElement|null = null;
 
   private initialized = false;
+  private projectionMatrix = new Matrix4();
+  private projectionMatrixInverse = new Matrix4();
   private oldTarget = new Vector3();
   private placementComplete = false;
   private isTranslating = false;
@@ -365,8 +367,9 @@ export class ARRenderer extends EventDispatcher {
     const viewMatrix = view.transform.matrix;
 
     const scene = this.presentedScene!;
-    scene.camera.near = 0.1;
-    scene.camera.far = 100;
+    const {camera} = scene;
+    camera.near = 0.1;
+    camera.far = 100;
 
     this.presentedScene!.orientHotspots(
         Math.atan2(viewMatrix[1], viewMatrix[5]));
@@ -374,14 +377,14 @@ export class ARRenderer extends EventDispatcher {
     this.cameraPosition.set(viewMatrix[12], viewMatrix[13], viewMatrix[14]);
 
     if (!this.initialized) {
-      const {position, element, camera} = scene;
+      const {position, element} = scene;
 
       const {width, height} = this.overlay!.getBoundingClientRect();
       scene.setSize(width, height);
 
-      camera.projectionMatrix.copy(
+      this.projectionMatrix.copy(
           this.threeRenderer.xr.getCamera(camera).projectionMatrix);
-      camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+      this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
 
       const {theta, radius} =
           (element as ModelViewerElementBase & ControlsInterface)
@@ -400,6 +403,11 @@ export class ARRenderer extends EventDispatcher {
       this.initialized = true;
       this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
+
+    // Ensure the camera uses the AR projection matrix without inverting on
+    // every frame.
+    camera.projectionMatrix.copy(this.projectionMatrix);
+    camera.projectionMatrixInverse.copy(this.projectionMatrixInverse);
 
     // Use automatic dynamic viewport scaling if supported.
     if (view.requestViewportScale && view.recommendedViewportScale) {
