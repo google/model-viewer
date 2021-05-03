@@ -253,7 +253,7 @@ suite('ARRenderer', () => {
         yaw = modelScene.yaw;
       });
 
-      test.only('places the model oriented to the camera', () => {
+      test('places the model oriented to the camera', () => {
         const epsilon = 0.0001;
         const {target, position} = modelScene;
 

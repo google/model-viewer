@@ -381,9 +381,11 @@ export class ARRenderer extends EventDispatcher {
       const {width, height} = this.overlay!.getBoundingClientRect();
       scene.setSize(width, height);
 
-      this.projectionMatrix.copy(
-          this.threeRenderer.xr.getCamera(camera).projectionMatrix);
-      this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
+      if (this.threeRenderer.xr.getSession() != null) {
+        this.projectionMatrix.copy(
+            this.threeRenderer.xr.getCamera(camera).projectionMatrix);
+        this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
+      }
 
       const {theta, radius} =
           (element as ModelViewerElementBase & ControlsInterface)
