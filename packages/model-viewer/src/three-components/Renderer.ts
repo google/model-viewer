@@ -397,14 +397,18 @@ export class Renderer extends EventDispatcher {
     const {dpr, scaleFactor} = this;
 
     for (const scene of this.orderedScenes()) {
+      const {element} = scene;
+      if (!element.modelIsVisible && scene.renderCount > 0) {
+        continue;
+      }
+
       this.preRender(scene, t, delta);
 
       if (!scene.isDirty) {
         continue;
       }
-      ++scene.renderCount;
 
-      if (!scene.element.modelIsVisible && !this.multipleScenesVisible) {
+      if (!element.modelIsVisible && !this.multipleScenesVisible) {
         // Here we are pre-rendering on the visible canvas, so we must mark the
         // visible scene dirty to ensure it overwrites us.
         for (const visibleScene of this.scenes) {
@@ -448,6 +452,9 @@ export class Renderer extends EventDispatcher {
       }
 
       scene.isDirty = false;
+      if (element.loaded) {
+        ++scene.renderCount;
+      }
     }
   }
 
