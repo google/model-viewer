@@ -53,7 +53,7 @@ function disposeScene(scene: ModelScene) {
   }
 }
 
-suite.only('Renderer', () => {
+suite('Renderer', () => {
   let scene: ModelScene;
   let otherScene: ModelScene;
   let renderer: Renderer;
