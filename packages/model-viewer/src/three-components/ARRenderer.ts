@@ -509,7 +509,7 @@ export class ARRenderer extends EventDispatcher {
         this.lastDragPosition.copy(hitPosition);
       } else if (this.placeOnWall === false) {
         this.isRotating = true;
-        this.lastAngle = axes[0];
+        this.lastAngle = axes[0] * ROTATION_RATE;
       }
     } else if (fingers.length === 2) {
       box.show = true;
@@ -590,9 +590,9 @@ export class ARRenderer extends EventDispatcher {
     }
 
     if (this.isRotating) {
-      const thisDragX = this.inputSource!.gamepad.axes[0];
-      this.goalYaw += (thisDragX - this.lastAngle) * ROTATION_RATE;
-      this.lastAngle = thisDragX;
+      const angle = this.inputSource!.gamepad.axes[0] * ROTATION_RATE;
+      this.goalYaw += angle - this.lastAngle;
+      this.lastAngle = angle;
     } else if (this.isTranslating) {
       fingers.forEach(finger => {
         if (finger.inputSource !== this.inputSource ||
