@@ -34,7 +34,7 @@ const DEFAULT_DRACO_DECODER_LOCATION =
     'https://www.gstatic.com/draco/versioned/decoders/1.3.6/';
 
 const DEFAULT_KTX2_TRANSCODER_LOCATION =
-    'https://www.gstatic.com/basis-universal/versioned/2020-12-21-ef70ddd/';
+    'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/';
 
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
@@ -360,10 +360,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
       }
 
-      if (changedProperties.has('reveal') || changedProperties.has('loaded')) {
-        if (!this[$sceneIsReady]()) {
-          this[$updateSource]();
-        }
+      if (changedProperties.has('reveal') || changedProperties.has('loading')) {
+        this[$updateSource]();
       }
     }
 

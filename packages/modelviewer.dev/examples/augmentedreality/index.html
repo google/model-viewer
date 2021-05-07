@@ -254,7 +254,7 @@
           </div>
           <example-snippet stamp-to="ar" highlight-as="html">
             <template>
-<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
+<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
             </template>
           </example-snippet>
 
@@ -272,7 +272,7 @@
           </div>
           <example-snippet stamp-to="sceneViewer" highlight-as="html">
             <template>
-<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
+<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
   <div id="error" class="hide">AR is not supported on this device</div>
 </model-viewer>
 <script>
@@ -366,7 +366,7 @@
             </div>
             <example-snippet stamp-to="transparentBackground" highlight-as="html">
               <template>
-<div class="background-demo" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;">
+<div class="demo" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;">
   <span style="position: absolute; text-align: center; font-size: 100px; top:50%;">Background</span>
   <model-viewer camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
 </div>

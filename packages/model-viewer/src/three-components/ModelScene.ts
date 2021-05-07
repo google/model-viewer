@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
@@ -65,6 +66,7 @@ export class ModelScene extends Scene {
   public canvas: HTMLCanvasElement;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
+  public annotationRenderer = new CSS2DRenderer();
   public width = 1;
   public height = 1;
   public aspect = 1;
@@ -72,7 +74,6 @@ export class ModelScene extends Scene {
   public renderCount = 0;
   public externalRenderer: RendererInterface|null = null;
 
-  public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
@@ -119,8 +120,6 @@ export class ModelScene extends Scene {
     this.camera = new PerspectiveCamera(45, 1, 0.1, 100);
     this.camera.name = 'MainCamera';
 
-    this.activeCamera = this.camera;
-
     this.add(this.target);
 
     this.setSize(width, height);
@@ -130,6 +129,14 @@ export class ModelScene extends Scene {
 
     this.target.add(this.modelContainer);
     this.mixer = new AnimationMixer(this.modelContainer);
+
+    const {domElement} = this.annotationRenderer;
+    const {style} = domElement;
+    style.display = 'none';
+    style.pointerEvents = 'none';
+    style.position = 'absolute';
+    style.top = '0';
+    this.element.shadowRoot!.querySelector('.default')!.appendChild(domElement);
   }
 
   /**
@@ -288,6 +295,7 @@ export class ModelScene extends Scene {
     }
     this.width = Math.max(width, 1);
     this.height = Math.max(height, 1);
+    this.annotationRenderer.setSize(width, height);
 
     this.aspect = this.width / this.height;
     this.frameModel();
@@ -366,20 +374,6 @@ export class ModelScene extends Scene {
    */
   getSize(): {width: number, height: number} {
     return {width: this.width, height: this.height};
-  }
-
-  /**
-   * Returns the current camera.
-   */
-  getCamera(): Camera {
-    return this.activeCamera;
-  }
-
-  /**
-   * Sets the passed in camera to be used for rendering.
-   */
-  setCamera(camera: Camera) {
-    this.activeCamera = camera;
   }
 
   /**
@@ -629,7 +623,7 @@ export class ModelScene extends Scene {
    */
   positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
       {position: Vector3, normal: Vector3}|null {
-    raycaster.setFromCamera(pixelPosition, this.getCamera());
+    raycaster.setFromCamera(pixelPosition, this.camera);
     const hits = raycaster.intersectObject(object, true);
 
     if (hits.length === 0) {
@@ -654,6 +648,10 @@ export class ModelScene extends Scene {
    */
   addHotspot(hotspot: Hotspot) {
     this.target.add(hotspot);
+    // This happens automatically in render(), but we do it early so that
+    // the slots appear in the shadow DOM and the elements get attached,
+    // allowing us to dispatch events on them.
+    this.annotationRenderer.domElement.appendChild(hotspot.element);
   }
 
   removeHotspot(hotspot: Hotspot) {
@@ -710,5 +708,15 @@ export class ModelScene extends Scene {
     this.forHotspots((hotspot) => {
       hotspot.visible = visible;
     });
+  }
+
+  postRender() {
+    const {camera} = this;
+
+    if (this.isDirty) {
+      this.updateHotspots(camera.position);
+      this.annotationRenderer.domElement.style.display = '';
+      this.annotationRenderer.render(this, camera);
+    }
   }
 }

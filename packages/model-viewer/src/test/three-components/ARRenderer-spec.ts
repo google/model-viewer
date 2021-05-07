@@ -233,7 +233,7 @@ suite('ARRenderer', () => {
       });
 
       test('restores original camera', () => {
-        expect(modelScene.getCamera()).to.be.equal(modelScene.camera);
+        expect(modelScene.camera).to.be.equal(modelScene.camera);
       });
 
       test('restores scene size', () => {
@@ -249,7 +249,6 @@ suite('ARRenderer', () => {
       let yaw: number;
 
       setup(async () => {
-        await arRenderer.present(modelScene);
         arRenderer.onWebXRFrame(0, new MockXRFrame(arRenderer.currentSession!));
         yaw = modelScene.yaw;
       });

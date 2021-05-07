@@ -377,6 +377,7 @@ export class Renderer extends EventDispatcher {
   render(t: number, frame?: XRFrame) {
     if (frame != null) {
       this.arRenderer.onWebXRFrame(t, frame);
+      this.arRenderer.presentedScene!.postRender();
       return;
     }
 
@@ -399,13 +400,16 @@ export class Renderer extends EventDispatcher {
     const {dpr, scaleFactor} = this;
 
     for (const scene of this.orderedScenes()) {
+      const {element} = scene;
+      if (!element.modelIsVisible && scene.renderCount > 0) {
+        continue;
+      }
+
       this.preRender(scene, t, delta);
 
       if (!scene.isDirty) {
         continue;
       }
-      scene.isDirty = false;
-      ++scene.renderCount;
 
       if (scene.externalRenderer != null) {
         const {matrix, projectionMatrix} = scene.camera;
@@ -422,7 +426,7 @@ export class Renderer extends EventDispatcher {
         continue;
       }
 
-      if (!scene.element.modelIsVisible && !this.multipleScenesVisible) {
+      if (!element.modelIsVisible && !this.multipleScenesVisible) {
         // Here we are pre-rendering on the visible canvas, so we must mark the
         // visible scene dirty to ensure it overwrites us.
         for (const visibleScene of this.scenes) {
@@ -444,7 +448,9 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.floor(this.height * dpr) - height, width, height);
-      this.threeRenderer.render(scene, scene.getCamera());
+      this.threeRenderer.render(scene, scene.camera);
+
+      scene.postRender();
 
       if (this.multipleScenesVisible) {
         if (scene.context == null) {
@@ -461,6 +467,11 @@ export class Renderer extends EventDispatcher {
           context2D.drawImage(
               this.canvas3D, 0, 0, width, height, 0, 0, width, height);
         }
+      }
+
+      scene.isDirty = false;
+      if (element.loaded) {
+        ++scene.renderCount;
       }
     }
   }

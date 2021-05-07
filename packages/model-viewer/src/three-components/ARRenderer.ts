@@ -82,15 +82,19 @@ export class ARRenderer extends EventDispatcher {
   private _presentedScene: ModelScene|null = null;
   private resolveCleanup: ((...args: any[]) => void)|null = null;
   private exitWebXRButtonContainer: HTMLElement|null = null;
+  private overlay: HTMLElement|null = null;
 
   private initialized = false;
+  private projectionMatrix = new Matrix4();
+  private projectionMatrixInverse = new Matrix4();
   private oldTarget = new Vector3();
   private placementComplete = false;
   private isTranslating = false;
   private isRotating = false;
-  private isScaling = false;
+  private isTwoFingering = false;
   private lastDragPosition = new Vector3();
-  private lastScalar = 0;
+  private firstRatio = 0;
+  private lastAngle = 0;
   private goalPosition = new Vector3();
   private goalYaw = 0;
   private goalScale = 1;
@@ -108,23 +112,19 @@ export class ARRenderer extends EventDispatcher {
     this.threeRenderer.xr.enabled = true;
   }
 
-  async resolveARSession(scene: ModelScene): Promise<XRSession> {
+  async resolveARSession(): Promise<XRSession> {
     assertIsArCandidate();
-
 
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay'],
-          domOverlay:
-              {root: scene.element.shadowRoot!.querySelector('div.default')}
+          domOverlay: {root: this.overlay}
         });
 
     this.threeRenderer.xr.setReferenceSpaceType('local');
 
     await this.threeRenderer.xr.setSession(session as any);
-
-    scene.element[$onResize](window.screen);
 
     return session;
   }
@@ -168,8 +168,9 @@ export class ARRenderer extends EventDispatcher {
 
     // This sets isPresenting to true
     this._presentedScene = scene;
+    this.overlay = scene.element.shadowRoot!.querySelector('div.default');
 
-    const currentSession = await this.resolveARSession(scene);
+    const currentSession = await this.resolveARSession();
 
     currentSession.addEventListener('end', () => {
       this.postSessionCleanup();
@@ -291,7 +292,6 @@ export class ARRenderer extends EventDispatcher {
     const scene = this.presentedScene;
     if (scene != null) {
       const {element} = scene;
-      scene.setCamera(scene.camera);
 
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
@@ -354,6 +354,7 @@ export class ARRenderer extends EventDispatcher {
     this._presentedScene = null;
     this.frame = null;
     this.inputSource = null;
+    this.overlay = null;
 
     if (this.resolveCleanup != null) {
       this.resolveCleanup!();
@@ -366,8 +367,9 @@ export class ARRenderer extends EventDispatcher {
     const viewMatrix = view.transform.matrix;
 
     const scene = this.presentedScene!;
-    scene.camera.near = 0.1;
-    scene.camera.far = 100;
+    const {camera} = scene;
+    camera.near = 0.1;
+    camera.far = 100;
 
     this.presentedScene!.orientHotspots(
         Math.atan2(viewMatrix[1], viewMatrix[5]));
@@ -376,6 +378,16 @@ export class ARRenderer extends EventDispatcher {
 
     if (!this.initialized) {
       const {position, element} = scene;
+
+      const {width, height} = this.overlay!.getBoundingClientRect();
+      scene.setSize(width, height);
+
+      if (this.threeRenderer.xr.getSession() != null) {
+        this.projectionMatrix.copy(
+            this.threeRenderer.xr.getCamera(camera).projectionMatrix);
+        this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
+      }
+
       const {theta, radius} =
           (element as ModelViewerElementBase & ControlsInterface)
               .getCameraOrbit();
@@ -393,6 +405,11 @@ export class ARRenderer extends EventDispatcher {
       this.initialized = true;
       this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
+
+    // Ensure the camera uses the AR projection matrix without inverting on
+    // every frame.
+    camera.projectionMatrix.copy(this.projectionMatrix);
+    camera.projectionMatrixInverse.copy(this.projectionMatrixInverse);
 
     // Use automatic dynamic viewport scaling if supported.
     if (view.requestViewportScale && view.recommendedViewportScale) {
@@ -492,31 +509,44 @@ export class ARRenderer extends EventDispatcher {
         this.lastDragPosition.copy(hitPosition);
       } else if (this.placeOnWall === false) {
         this.isRotating = true;
-        this.lastScalar = axes[0];
+        this.lastAngle = axes[0] * ROTATION_RATE;
       }
-    } else if (fingers.length === 2 && scene.canScale) {
+    } else if (fingers.length === 2) {
       box.show = true;
-      this.isScaling = true;
-      this.lastScalar = this.fingerSeparation(fingers) / scene.scale.x;
+      this.isTwoFingering = true;
+      const {separation} = this.fingerPolar(fingers);
+      this.firstRatio = separation / scene.scale.x;
     }
   };
 
   private onSelectEnd = () => {
     this.isTranslating = false;
     this.isRotating = false;
-    this.isScaling = false;
+    this.isTwoFingering = false;
     this.inputSource = null;
     this.goalPosition.y +=
         this.placementBox!.offsetHeight * this.presentedScene!.scale.x;
     this.placementBox!.show = false
   };
 
-  private fingerSeparation(fingers: XRTransientInputHitTestResult[]): number {
+  private fingerPolar(fingers: XRTransientInputHitTestResult[]):
+      {separation: number, deltaYaw: number} {
     const fingerOne = fingers[0].inputSource.gamepad.axes;
     const fingerTwo = fingers[1].inputSource.gamepad.axes;
     const deltaX = fingerTwo[0] - fingerOne[0];
     const deltaY = fingerTwo[1] - fingerOne[1];
-    return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const angle = Math.atan2(deltaY, deltaX);
+    let deltaYaw = this.lastAngle - angle;
+    if (deltaYaw > Math.PI) {
+      deltaYaw -= 2 * Math.PI;
+    } else if (deltaYaw < -Math.PI) {
+      deltaYaw += 2 * Math.PI;
+    }
+    this.lastAngle = angle;
+    return {
+      separation: Math.sqrt(deltaX * deltaX + deltaY * deltaY),
+      deltaYaw: deltaYaw
+    };
   }
 
   private processInput(frame: XRFrame) {
@@ -524,7 +554,7 @@ export class ARRenderer extends EventDispatcher {
     if (hitSource == null) {
       return;
     }
-    if (!this.isTranslating && !this.isScaling && !this.isRotating) {
+    if (!this.isTranslating && !this.isTwoFingering && !this.isRotating) {
       return;
     }
     const fingers = frame.getHitTestResultsForTransientInput(hitSource);
@@ -533,32 +563,36 @@ export class ARRenderer extends EventDispatcher {
 
     // Rotating, translating and scaling are mutually exclusive operations; only
     // one can happen at a time, but we can switch during a gesture.
-    if (this.isScaling) {
+    if (this.isTwoFingering) {
       if (fingers.length < 2) {
         // If we lose the second finger, stop scaling (in fact, stop processing
         // input altogether until a new gesture starts).
-        this.isScaling = false;
+        this.isTwoFingering = false;
       } else {
-        const separation = this.fingerSeparation(fingers);
-        const scale = separation / this.lastScalar;
-        this.goalScale =
-            (scale < SCALE_SNAP_HIGH && scale > SCALE_SNAP_LOW) ? 1 : scale;
+        const {separation, deltaYaw} = this.fingerPolar(fingers);
+        this.goalYaw += deltaYaw;
+        if (scene.canScale) {
+          const scale = separation / this.firstRatio;
+          this.goalScale =
+              (scale < SCALE_SNAP_HIGH && scale > SCALE_SNAP_LOW) ? 1 : scale;
+        }
       }
       return;
-    } else if (fingers.length === 2 && scene.canScale) {
+    } else if (fingers.length === 2) {
       // If we were rotating or translating and we get a second finger, switch
       // to scaling instead.
       this.isTranslating = false;
       this.isRotating = false;
-      this.isScaling = true;
-      this.lastScalar = this.fingerSeparation(fingers) / scale;
+      this.isTwoFingering = true;
+      const {separation} = this.fingerPolar(fingers);
+      this.firstRatio = separation / scale;
       return;
     }
 
     if (this.isRotating) {
-      const thisDragX = this.inputSource!.gamepad.axes[0];
-      this.goalYaw += (thisDragX - this.lastScalar) * ROTATION_RATE;
-      this.lastScalar = thisDragX;
+      const angle = this.inputSource!.gamepad.axes[0] * ROTATION_RATE;
+      this.goalYaw += angle - this.lastAngle;
+      this.lastAngle = angle;
     } else if (this.isTranslating) {
       fingers.forEach(finger => {
         if (finger.inputSource !== this.inputSource ||
