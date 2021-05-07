@@ -17,7 +17,7 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftSha
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$canvas, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
+import {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
@@ -296,20 +296,23 @@ export class Renderer extends EventDispatcher {
    */
   private selectCanvas() {
     let visibleScenes = 0;
-    let visibleInput = null;
+    let visibleCanvas = null;
     for (const scene of this.scenes) {
       const {element} = scene;
-      if (element.modelIsVisible && scene.externalRenderer != null) {
+      if (element.modelIsVisible && scene.externalRenderer == null) {
         ++visibleScenes;
-        visibleInput = element[$userInputElement];
+        visibleCanvas = scene.canvas;
       }
+    }
+    if (visibleCanvas == null) {
+      return;
     }
     const multipleScenesVisible = visibleScenes > 1 || USE_OFFSCREEN_CANVAS;
     const {canvasElement} = this;
 
     if (multipleScenesVisible === this.multipleScenesVisible &&
         (multipleScenesVisible ||
-         canvasElement.parentElement === visibleInput)) {
+         canvasElement.parentElement === visibleCanvas.parentElement)) {
       return;
     }
     this.multipleScenesVisible = multipleScenesVisible;
@@ -321,13 +324,12 @@ export class Renderer extends EventDispatcher {
       if (scene.externalRenderer != null) {
         continue;
       }
-      const userInputElement = scene.element[$userInputElement];
       const canvas = scene.element[$canvas];
       if (multipleScenesVisible) {
         canvas.classList.add('show');
         scene.isDirty = true;
-      } else if (userInputElement === visibleInput) {
-        userInputElement.appendChild(canvasElement);
+      } else if (scene.canvas === visibleCanvas) {
+        scene.canvas.parentElement!.appendChild(canvasElement);
         canvasElement.classList.add('show');
         canvas.classList.remove('show');
         scene.isDirty = true;

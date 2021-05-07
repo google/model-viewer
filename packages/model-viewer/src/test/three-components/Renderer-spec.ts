@@ -15,7 +15,7 @@
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
 import {LoadingMixin} from '../../features/loading.js';
-import ModelViewerElementBase, {$canvas, $intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene, $userInputElement} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
@@ -123,9 +123,9 @@ suite('Renderer', () => {
       expect(renderer.canvasElement.classList.contains('show'))
           .to.be.eq(
               false, 'webgl canvas should not be shown with multiple scenes.');
-      expect(scene.element[$canvas].classList.contains('show'))
+      expect(scene.canvas.classList.contains('show'))
           .to.be.eq(true, 'scene canvas should be shown with multiple scenes.');
-      expect(otherScene.element[$canvas].classList.contains('show'))
+      expect(otherScene.canvas.classList.contains('show'))
           .to.be.eq(
               true, 'otherScene canvas should be shown with multiple scenes.');
 
@@ -135,14 +135,13 @@ suite('Renderer', () => {
       if (USE_OFFSCREEN_CANVAS) {
         expect(renderer.canvasElement.classList.contains('show'))
             .to.be.eq(false);
-        expect(otherScene.element[$canvas].classList.contains('show'))
-            .to.be.eq(true);
+        expect(otherScene.canvas.classList.contains('show')).to.be.eq(true);
       } else {
         expect(renderer.canvasElement.parentElement)
-            .to.be.eq(otherScene.element[$userInputElement]);
+            .to.be.eq(otherScene.canvas.parentElement);
         expect(renderer.canvasElement.classList.contains('show'))
             .to.be.eq(true, 'webgl canvas should be shown with single scene.');
-        expect(otherScene.element[$canvas].classList.contains('show'))
+        expect(otherScene.canvas.classList.contains('show'))
             .to.be.eq(
                 false,
                 'otherScene canvas should not be shown when it is the only scene.');
