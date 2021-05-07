@@ -14,23 +14,14 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
-import {LoadingMixin} from '../../features/loading.js';
-import ModelViewerElementBase, {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene} from '../../model-viewer-base.js';
+import {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
-
-const ModelViewerElement = class extends LoadingMixin
-(ModelViewerElementBase) {
-  static get is() {
-    return 'model-viewer-renderer';
-  }
-};
-
-customElements.define('model-viewer-renderer', ModelViewerElement);
 
 function createScene(): ModelScene {
   const element = new ModelViewerElement();
@@ -74,7 +65,7 @@ suite('Renderer', () => {
 
   test('pre-renders eager, invisible scenes', async () => {
     const sourceLoads = waitForEvent(scene.element, 'load');
-    (scene.element as any).loading = 'eager';
+    (scene.element as ModelViewerElement).loading = 'eager';
     await sourceLoads;
 
     renderer.render(performance.now());
