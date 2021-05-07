@@ -19,7 +19,7 @@ import {Event as ThreeEvent} from 'three';
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
-import {ARStatus} from '../three-components/ARRenderer.js';
+import {ARStatus, ARTracking} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
 
 let isWebXRBlocked = false;
@@ -44,6 +44,10 @@ export interface ARStatusDetails {
   status: ARStatus;
 }
 
+export interface ARTrackingDetails {
+  status: ARTracking;
+}
+
 const $arButtonContainer = Symbol('arButtonContainer');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 export const $openSceneViewer = Symbol('openSceneViewer');
@@ -56,6 +60,7 @@ const $preload = Symbol('preload');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
+const $onARTracking = Symbol('onARTracking');
 const $onARTap = Symbol('onARTap');
 const $selectARMode = Symbol('selectARMode');
 
@@ -111,7 +116,16 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
         this.setAttribute('ar-status', status);
         this.dispatchEvent(
             new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
+        if (status === ARStatus.NOT_PRESENTING) {
+          this.removeAttribute('ar-tracking');
+        }
       }
+    };
+
+    private[$onARTracking] = ({status}: ThreeEvent) => {
+      this.setAttribute('ar-tracking', status);
+      this.dispatchEvent(new CustomEvent<ARTrackingDetails>(
+          'ar-tracking', {detail: {status}}));
     };
 
     private[$onARTap] = (event: Event) => {
@@ -126,6 +140,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$renderer].arRenderer.addEventListener('status', this[$onARStatus]);
       this.setAttribute('ar-status', ARStatus.NOT_PRESENTING);
 
+      this[$renderer].arRenderer.addEventListener(
+          'tracking', this[$onARTracking]);
+
       this[$arAnchor].addEventListener('message', this[$onARTap]);
     }
 
@@ -134,6 +151,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$renderer].arRenderer.removeEventListener(
           'status', this[$onARStatus]);
+      this[$renderer].arRenderer.removeEventListener(
+          'tracking', this[$onARTracking]);
 
       this[$arAnchor].removeEventListener('message', this[$onARTap]);
     }

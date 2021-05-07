@@ -85,6 +85,10 @@
     <img src="../../assets/hand.png">
   </div>
 
+  <button id="ar-failure">
+    AR is not tracking!
+  </button>
+
   <div class="slider">
     <div class="slides">
       <button class="slide selected" onclick="switchSrc(this, 'Chair')"
@@ -192,6 +196,18 @@
 
   model-viewer > #ar-prompt > img {
     animation: circle 4s linear infinite;
+  }
+
+  model-viewer > #ar-failure {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 175px;
+    display: none;
+  }
+
+  model-viewer[ar-tracking="not-tracking"] > #ar-failure {
+    display: block;
   }
 
   .slider {
