@@ -89,6 +89,22 @@ interface ToBlobOptions {
   mimeType?: string, qualityArgument?: number, idealAspect?: boolean
 }
 
+export interface FramingInfo {
+  framedRadius: number;
+  fieldOfViewAspect: number;
+}
+
+export interface Camera {
+  viewMatrix: Array<number>;
+  projectionMatrix: Array<number>;
+}
+
+export interface RendererInterface {
+  load(progressCallback: (progress: number) => void): Promise<FramingInfo>;
+  render(camera: Camera): void;
+  resize(width: number, height: number): void;
+}
+
 /**
  * Definition for a basic <model-viewer> element.
  */
@@ -442,6 +458,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } finally {
       this[$updateSize]({width, height});
     };
+  }
+
+  registerRenderer(renderer: RendererInterface) {
+    this[$scene].externalRenderer = renderer;
+  }
+
+  unregisterRenderer() {
+    this[$scene].externalRenderer = null;
   }
 
   get[$ariaLabel]() {

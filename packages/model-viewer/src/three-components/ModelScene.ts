@@ -16,7 +16,8 @@
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
+import {resolveDpr} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
@@ -71,6 +72,7 @@ export class ModelScene extends Scene {
   public aspect = 1;
   public isDirty = false;
   public renderCount = 0;
+  public externalRenderer: RendererInterface|null = null;
 
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
@@ -166,15 +168,25 @@ export class ModelScene extends Scene {
    */
 
   async setSource(
-      url: string|null, progressCallback?: (progress: number) => void) {
+      url: string|null,
+      progressCallback: (progress: number) => void = () => {}) {
     if (!url || url === this.url) {
-      if (progressCallback) {
-        progressCallback(1);
-      }
+      progressCallback(1);
       return;
     }
     this.reset();
     this.url = url;
+
+    if (this.externalRenderer != null) {
+      const framingInfo = await this.externalRenderer.load(progressCallback);
+
+      this.idealCameraDistance = framingInfo.framedRadius / SAFE_RADIUS_RATIO;
+      this.fieldOfViewAspect = framingInfo.fieldOfViewAspect;
+      this.frameModel();
+
+      this.dispatchEvent({type: 'model-load', url: this.url});
+      return;
+    }
 
     // If we have pending work due to a previous source change in progress,
     // cancel it so that we do not incur a race condition:
@@ -287,6 +299,11 @@ export class ModelScene extends Scene {
 
     this.aspect = this.width / this.height;
     this.frameModel();
+
+    if (this.externalRenderer != null) {
+      const dpr = resolveDpr();
+      this.externalRenderer.resize(width * dpr, height * dpr);
+    }
 
     this.isDirty = true;
   }
