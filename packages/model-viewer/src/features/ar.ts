@@ -118,6 +118,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
             new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
         if (status === ARStatus.NOT_PRESENTING) {
           this.removeAttribute('ar-tracking');
+        } else if (status === ARStatus.SESSION_STARTED) {
+          this.setAttribute('ar-tracking', ARTracking.TRACKING);
         }
       }
     };
