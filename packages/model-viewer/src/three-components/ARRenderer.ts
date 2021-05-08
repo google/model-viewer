@@ -26,6 +26,8 @@ import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
 
+// number of initial null pose XRFrames allowed before we post not-tracking
+const INIT_FRAMES = 30;
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
 // estimation, which will be used once available in WebXR.
 const AR_SHADOW_INTENSITY = 0.3;
@@ -59,6 +61,17 @@ export interface ARStatusEvent extends ThreeEvent {
   status: ARStatus,
 }
 
+export type ARTracking = 'tracking'|'not-tracking';
+
+export const ARTracking: {[index: string]: ARTracking} = {
+  TRACKING: 'tracking',
+  NOT_TRACKING: 'not-tracking'
+}
+
+export interface ARTrackingEvent extends ThreeEvent {
+  status: ARTracking,
+}
+
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
@@ -74,7 +87,6 @@ export class ARRenderer extends EventDispatcher {
   private turntableRotation: number|null = null;
   private oldShadowIntensity: number|null = null;
   private oldBackground: any = null;
-  private rafId: number|null = null;
   private frame: XRFrame|null = null;
   private initialHitSource: XRHitTestSource|null = null;
   private transientHitTestSource: XRTransientInputHitTestSource|null = null;
@@ -84,6 +96,8 @@ export class ARRenderer extends EventDispatcher {
   private exitWebXRButtonContainer: HTMLElement|null = null;
   private overlay: HTMLElement|null = null;
 
+  private tracking = true;
+  private frames = 0;
   private initialized = false;
   private projectionMatrix = new Matrix4();
   private projectionMatrixInverse = new Matrix4();
@@ -184,6 +198,8 @@ export class ARRenderer extends EventDispatcher {
 
     const viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
 
+    this.tracking = true;
+    this.frames = 0;
     this.initialized = false;
 
     this.turntableRotation = scene.yaw;
@@ -220,6 +236,7 @@ export class ARRenderer extends EventDispatcher {
     this.zDamper.setDecayTime(INTRO_DECAY);
 
     this.lastTick = performance.now();
+    this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
   }
 
   /**
@@ -285,7 +302,6 @@ export class ARRenderer extends EventDispatcher {
     if (session != null) {
       session.removeEventListener('selectstart', this.onSelectStart);
       session.removeEventListener('selectend', this.onSelectEnd);
-      session.cancelAnimationFrame(this.rafId!);
       this.currentSession = null;
     }
 
@@ -350,7 +366,6 @@ export class ARRenderer extends EventDispatcher {
     this.turntableRotation = null;
     this.oldShadowIntensity = null;
     this.oldBackground = null;
-    this.rafId = null;
     this._presentedScene = null;
     this.frame = null;
     this.inputSource = null;
@@ -403,7 +418,6 @@ export class ARRenderer extends EventDispatcher {
 
       scene.setHotspotsVisibility(true);
       this.initialized = true;
-      this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
     }
 
     // Ensure the camera uses the AR projection matrix without inverting on
@@ -673,13 +687,24 @@ export class ARRenderer extends EventDispatcher {
    */
   public onWebXRFrame(time: number, frame: XRFrame) {
     this.frame = frame;
+    ++this.frames;
     const refSpace = this.threeRenderer.xr.getReferenceSpace()!;
     const pose = frame.getViewerPose(refSpace);
+
+    if (pose == null && this.tracking === true && this.frames > INIT_FRAMES) {
+      this.tracking = false;
+      this.dispatchEvent({type: 'tracking', status: ARTracking.NOT_TRACKING});
+    }
 
     const scene = this.presentedScene;
     if (pose == null || scene == null || !scene.element[$sceneIsReady]()) {
       this.threeRenderer.clear();
       return;
+    }
+
+    if (this.tracking === false) {
+      this.tracking = true;
+      this.dispatchEvent({type: 'tracking', status: ARTracking.TRACKING});
     }
 
     // WebXR may return multiple views, i.e. for headset AR. This

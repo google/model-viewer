@@ -330,6 +330,18 @@
         "links": [
           "<a href=\"../examples/augmentedreality/#webXR\"><span class='attribute'>ar-status</span> example</a>"
         ]
+      },
+      {
+        "name": "ar-tracking",
+        "htmlName": "arTracking",
+        "description": "This read-only attribute enables DOM content to be styled based on the state of the WebXR AR tracking. For instance, a failure message can be shown by scoping a CSS rule to model-viewer[ar-tracking=\"not-tracking\"]. Setting this attribute has no effect. Most AR tracking failures are due to the camera being covered or seeing little discernable texture",
+        "default": {
+          "default": "N/A",
+          "options": "tracking, not-tracking"
+        },
+        "links": [
+          "<a href=\"../examples/augmentedreality/#webXR\"><span class='attribute'>ar-tracking</span> example</a>"
+        ]
       }
     ],
     "Methods": [
@@ -346,6 +358,14 @@
         "description": "Fired when the <span class='attribute'>ar-status</span> attribute above changes. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time AR was initiated but failed to start all of the given modes.",
         "links": [
           "<a href=\"../examples/augmentedreality/#sceneViewer\"><span class='attribute'>ar-status</span> example</a>"
+        ]
+      },
+      {
+        "name": "ar-tracking",
+        "htmlName": "arTracking",
+        "description": "Fired when the <span class='attribute'>ar-tracking</span> attribute above changes. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-tracking</span> attribute, either 'tracking', or 'not-tracking'. This event is only enabled for WebXR AR sessions.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#sceneViewer\"><span class='attribute'>ar-tracking</span> example</a>"
         ]
       },
       {
