@@ -365,11 +365,12 @@ export class SmoothControls extends EventDispatcher {
         theta - clamp(deltaTheta, -dThetaLimit - dTheta, dThetaLimit - dTheta);
     const goalPhi = phi - deltaPhi;
 
-    const deltaRatio = deltaZoom === 0 ? 0 :
-        deltaZoom > 0                  ? (maximumRadius! - radius) /
-            (Math.log(maximumFieldOfView!) - this.goalLogFov) :
+    const deltaRatio = deltaZoom === 0 ?
+        0 :
+        deltaZoom > 0 ? (maximumRadius! - radius) /
+                (Math.log(maximumFieldOfView!) - this.goalLogFov) :
                         (radius - minimumRadius!) /
-            (this.goalLogFov - Math.log(minimumFieldOfView!));
+                (this.goalLogFov - Math.log(minimumFieldOfView!));
 
     const goalRadius = radius +
         deltaZoom *
