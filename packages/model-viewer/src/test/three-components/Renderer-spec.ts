@@ -14,25 +14,30 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
+import {$controls} from '../../features/controls.js';
 import {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene, Camera, RendererInterface} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
-import {waitForEvent} from '../../utilities.js';
+import {resolveDpr, waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
 let externalCamera: Camera;
+let externalWidth = 0;
+let externalHeight = 0;
 
 class ExternalRenderer implements RendererInterface {
   load(callback: (progress: number) => void) {
     callback(1.0);
-    return Promise.resolve({framedRadius: 1, fieldOfViewAspect: 1});
+    return Promise.resolve({framedRadius: 15, fieldOfViewAspect: 2});
   }
   render(camera: Camera) {
     externalCamera = camera;
   }
-  resize(_width: number, _height: number) {
+  resize(width: number, height: number) {
+    externalWidth = width;
+    externalHeight = height;
   }
 }
 
@@ -107,6 +112,18 @@ suite('Renderer with two scenes', () => {
       renderer.render(performance.now());
     });
 
+    test('load sets framing', async () => {
+      expect(externalScene.fieldOfViewAspect).to.be.eq(0);
+
+      const sourceLoads = waitForEvent(externalScene.element, 'load');
+      externalElement[$isElementInViewport] = true;
+      await sourceLoads;
+
+      expect(externalScene.fieldOfViewAspect).to.be.eq(2);
+      expect((externalElement as any)[$controls].options.minimumRadius)
+          .to.be.greaterThan(15);
+    });
+
     test('camera-orbit updates camera in external render method', async () => {
       const sceneVisible = waitForEvent(externalElement, 'poster-dismissed');
       externalElement[$isElementInViewport] = true;
@@ -121,6 +138,16 @@ suite('Renderer with two scenes', () => {
       renderer.render(time + 1000);
 
       expect(externalCamera.viewMatrix[13]).to.not.eq(cameraY);
+    });
+
+    test('resize forwards pixel dimensions', () => {
+      const width = 200;
+      const height = 400;
+      externalElement[$onResize]({width, height});
+
+      const dpr = resolveDpr();
+      expect(externalWidth).to.be.eq(width * dpr);
+      expect(externalHeight).to.be.eq(height * dpr);
     });
   });
 
