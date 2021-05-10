@@ -23,15 +23,16 @@ interface Entry {
 }
 
 interface Category {
-  Title: string, Attributes: Entry[], CSS: Entry[], Properties: Entry[],
-      'Static Properties': Entry[], Methods: Entry[], 'Static Methods': Entry[],
-      Events: Entry[], Slots: Entry[],
+  Title: string, Attributes: Entry[], CSS: Entry[], Parts: Entry[],
+      Properties: Entry[], 'Static Properties': Entry[], Methods: Entry[],
+      'Static Methods': Entry[], Events: Entry[], Slots: Entry[],
 }
 
 const CategoryConstant: Category = {
   Title: '',
   Attributes: [],
   CSS: [],
+  Parts: [],
   Properties: [],
   'Static Properties': [],
   Methods: [],

@@ -316,7 +316,7 @@ canvas.show {
 
   <div class="slot ar-button">
     <slot name="ar-button">
-      <a id="default-ar-button" class="fab"
+      <a id="default-ar-button" part="default-ar-button" class="fab"
           tabindex="2"
           aria-label="View this 3D model up close">
         ${ARGlyph}
@@ -325,7 +325,7 @@ canvas.show {
   </div>
 
   <div class="slot interaction-prompt">
-    <div class="animated-container" part="interaction-prompt">
+    <div class="animated-container">
       <slot name="interaction-prompt" aria-hidden="true">
         ${ControlsPrompt}
       </slot>
@@ -338,15 +338,15 @@ canvas.show {
     <div class="slot progress-bar">
       <slot name="progress-bar">
         <div id="default-progress-bar" aria-hidden="true">
-          <div class="mask"></div>
-          <div class="bar"></div>
+          <div class="mask" part="default-progress-mask"></div>
+          <div class="bar" part="default-progress-bar"></div>
         </div>
       </slot>
     </div>
     
     <div class="slot exit-webxr-ar-button">
       <slot name="exit-webxr-ar-button">
-        <a id="default-exit-webxr-ar-button"
+        <a id="default-exit-webxr-ar-button" part="default-exit-webxr-ar-button"
             tabindex="3"
             aria-label="Exit AR"
             aria-hidden="true">
