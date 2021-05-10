@@ -76,42 +76,6 @@
           "default": "#fff",
           "options": "valid css background-color"
         }
-      },
-      {
-        "name": "--poster-image",
-        "htmlName": "posterImage",
-        "description": "Sets the  <span class='attribute'>background-image</span> of the  <span class='attribute'>poster</span>. This is currently overridden by the  <span class='attribute'>poster</span> attribute if it is set.",
-        "default": {
-          "default": "none",
-          "options": "valid css background-image"
-        }
-      },
-      {
-        "name": "--progress-bar-color",
-        "htmlName": "progressBarColor",
-        "description": "Sets the  <span class='attribute'>background-color</span> of the progress bar.",
-        "default": {
-          "default": "rgba(0, 0, 0, 0.4)",
-          "options": "valid css background-color"
-        }
-      },
-      {
-        "name": "--progress-bar-height",
-        "htmlName": "progressBarHeight",
-        "description": "Sets the  <span class='attribute'>height</span> of the progress bar.",
-        "default": {
-          "default": "5px",
-          "options": "valid css height"
-        }
-      },
-      {
-        "name": "--progress-mask",
-        "htmlName": "progressMask",
-        "description": "Sets the  <span class='attribute'>background</span> of the progress mask.",
-        "default": {
-          "default": "#fff",
-          "options": "valid css background"
-        }
       }
     ],
     "Properties": [
@@ -237,6 +201,18 @@
         "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress."
       }
     ],
+    "Parts": [
+      {
+        "name": "default-progress-bar",
+        "htmlName": "defaultProgressBar",
+        "description": "Scope your CSS to <code>model-viewer::part(default-progress-bar)</code> to change the styling of our default progress bar without replacing it wholesale with a slot. Most common would be probably changing the background-color, height, width, and margins (avoid the transform property as that is how the progress is updated)."
+      },
+      {
+        "name": "default-progress-mask",
+        "htmlName": "defaultProgressMask",
+        "description": "Scope your CSS to <code>model-viewer::part(default-progress-mask)</code> to change the styling of our default progress mask without replacing it wholesale with a slot. Most common would be probably setting display: none to turn off the fading haze over the poster during load."
+      }
+    ],
     "Slots": [
       {
         "name": "poster",
@@ -311,15 +287,6 @@
     ],
     "CSS": [
       {
-        "name": "--ar-button-display",
-        "htmlName": "arButtonDisplay",
-        "description": "Sets the display property of the AR button. Intended to be used to force the button to be hidden. Defaults to block.",
-        "default": {
-          "default": "block",
-          "options": "css display value"
-        }
-      },
-      {
         "name": "ar-status",
         "htmlName": "arStatus",
         "description": "This read-only attribute enables DOM content to be styled based on the status of the WebXR AR presentation. For instance, a prompt for the user to move their phone until the object is successfully placed in their space can be shown by scoping a CSS rule to model-viewer[ar-status=\"session-started\"]. Setting this attribute has no effect.",
@@ -372,6 +339,18 @@
         "name": "quick-look-button-tapped",
         "htmlName": "quickLookButtonTapped",
         "description": "If the user has entered a quick-look AR session on iOS, this event is fired when the action button is tapped. An action button can be defined using URL parameters on the ios-src, see <a href='https://developer.apple.com/documentation/arkit/adding_an_apple_pay_button_or_a_custom_action_in_ar_quick_look'>Apple's documentation</a>."
+      }
+    ],
+    "Parts": [
+      {
+        "name": "default-ar-button",
+        "htmlName": "defaultArButton",
+        "description": "Scope your CSS to <code>model-viewer::part(default-ar-button)</code> to change the styling of our default Enter AR button without replacing it wholesale with a slot. Most common would be probably changing the position or size using transform and margins."
+      },
+      {
+        "name": "default-exit-webxr-ar-button",
+        "htmlName": "defaultExitWebxrArButton",
+        "description": "Scope your CSS to <code>model-viewer::part(default-exit-webxr-ar-button)</code> to change the styling of our default Exit AR button for WebXR mode without replacing it wholesale with a slot. Most common would be probably changing the position or size using transform and margins."
       }
     ],
     "Slots": [
@@ -584,17 +563,6 @@
         "links": [
           "<a href=\"../examples/stagingandcameras/#interpolation\"><span class='attribute'>Interpolation</span> example</a>"
         ]
-      }
-    ],
-    "CSS": [
-      {
-        "name": "--interaction-prompt-display",
-        "htmlName": "interactionPromptDisplay",
-        "description": "Sets the display property of the interaction prompt. Intended to be used to force the prompt to be hidden.",
-        "default": {
-          "default": "flex",
-          "options": "any valid css display"
-        }
       }
     ],
     "Properties": [
