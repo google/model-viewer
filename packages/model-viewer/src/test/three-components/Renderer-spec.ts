@@ -14,30 +14,43 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
-import {LoadingMixin} from '../../features/loading.js';
-import ModelViewerElementBase, {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene} from '../../model-viewer-base.js';
+import {$controls} from '../../features/controls.js';
+import {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene, Camera, RendererInterface} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
-import {waitForEvent} from '../../utilities.js';
+import {resolveDpr, waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
+let externalCamera: Camera;
+let externalWidth = 0;
+let externalHeight = 0;
 
-const ModelViewerElement = class extends LoadingMixin
-(ModelViewerElementBase) {
-  static get is() {
-    return 'model-viewer-renderer';
+class ExternalRenderer implements RendererInterface {
+  load(callback: (progress: number) => void) {
+    callback(1.0);
+    return Promise.resolve({framedRadius: 15, fieldOfViewAspect: 2});
   }
-};
+  render(camera: Camera) {
+    externalCamera = camera;
+  }
+  resize(width: number, height: number) {
+    externalWidth = width;
+    externalHeight = height;
+  }
+}
 
-customElements.define('model-viewer-renderer', ModelViewerElement);
-
-function createScene(): ModelScene {
+function createScene(external: boolean = false): ModelScene {
   const element = new ModelViewerElement();
   document.body.insertBefore(element, document.body.firstChild);
   element[$intersectionObserver]!.unobserve(element);
   element[$isElementInViewport] = false;
 
+  if (external) {
+    const externalRenderer = new ExternalRenderer();
+    element.registerRenderer(externalRenderer);
+  }
   element.src = assetPath('models/Astronaut.glb');
 
   // manual render loop
@@ -48,12 +61,15 @@ function createScene(): ModelScene {
 
 function disposeScene(scene: ModelScene) {
   const {element} = scene;
+  if (scene.externalRenderer != null) {
+    element.unregisterRenderer();
+  }
   if (element.parentNode != null) {
     element.parentNode.removeChild(element);
   }
 }
 
-suite('Renderer', () => {
+suite('Renderer with two scenes', () => {
   let scene: ModelScene;
   let otherScene: ModelScene;
   let renderer: Renderer;
@@ -74,12 +90,65 @@ suite('Renderer', () => {
 
   test('pre-renders eager, invisible scenes', async () => {
     const sourceLoads = waitForEvent(scene.element, 'load');
-    (scene.element as any).loading = 'eager';
+    (scene.element as ModelViewerElement).loading = 'eager';
     await sourceLoads;
 
     renderer.render(performance.now());
     expect(scene.renderCount).to.be.equal(1, 'scene first render');
     expect(otherScene.renderCount).to.be.equal(0, 'otherScene first render');
+  });
+
+  suite('and an externally-rendered scene', () => {
+    let externalScene: ModelScene;
+    let externalElement: ModelViewerElement;
+
+    setup(() => {
+      externalScene = createScene(true);
+      externalElement = externalScene.element as any;
+    });
+
+    teardown(() => {
+      disposeScene(externalScene);
+      renderer.render(performance.now());
+    });
+
+    test('load sets framing', async () => {
+      expect(externalScene.fieldOfViewAspect).to.be.eq(0);
+
+      const sourceLoads = waitForEvent(externalScene.element, 'load');
+      externalElement[$isElementInViewport] = true;
+      await sourceLoads;
+
+      expect(externalScene.fieldOfViewAspect).to.be.eq(2);
+      expect((externalElement as any)[$controls].options.minimumRadius)
+          .to.be.greaterThan(15);
+    });
+
+    test('camera-orbit updates camera in external render method', async () => {
+      const sceneVisible = waitForEvent(externalElement, 'poster-dismissed');
+      externalElement[$isElementInViewport] = true;
+
+      const time = performance.now()
+      renderer.render(time);
+      const cameraY = externalCamera.viewMatrix[13];
+      expect(cameraY).to.not.eq(0);
+
+      externalElement.cameraOrbit = '45deg 45deg 1.6m';
+      await sceneVisible;
+      renderer.render(time + 1000);
+
+      expect(externalCamera.viewMatrix[13]).to.not.eq(cameraY);
+    });
+
+    test('resize forwards pixel dimensions', () => {
+      const width = 200;
+      const height = 400;
+      externalElement[$onResize]({width, height});
+
+      const dpr = resolveDpr();
+      expect(externalWidth).to.be.eq(width * dpr);
+      expect(externalHeight).to.be.eq(height * dpr);
+    });
   });
 
   suite('with two loaded scenes', () => {
