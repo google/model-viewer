@@ -15,6 +15,7 @@
 
 import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
+import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
@@ -226,9 +227,7 @@ configuration or device capabilities');
               !isSceneViewerBlocked) {
             this[$arMode] = ARMode.SCENE_VIEWER;
             break;
-          } else if (
-              value === 'quick-look' && !!this.iosSrc &&
-              IS_AR_QUICKLOOK_CANDIDATE) {
+          } else if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE) {
             this[$arMode] = ARMode.QUICK_LOOK;
             break;
           }
@@ -348,19 +347,29 @@ configuration or device capabilities');
      * Takes a URL to a USDZ file and sets the appropriate fields so that Safari
      * iOS can intent to their AR Quick Look.
      */
-    [$openIOSARQuickLook]() {
-      const modelUrl = new URL(this.iosSrc!, self.location.toString());
-      if (this.arScale === 'fixed') {
-        if (modelUrl.hash) {
-          modelUrl.hash += '&';
+    async[$openIOSARQuickLook]() {
+      let urlString;
+      if (this.iosSrc != null) {
+        const modelUrl = new URL(this.iosSrc!, self.location.toString());
+        if (this.arScale === 'fixed') {
+          if (modelUrl.hash) {
+            modelUrl.hash += '&';
+          }
+          modelUrl.hash += 'allowsContentScaling=0';
         }
-        modelUrl.hash += 'allowsContentScaling=0';
+        urlString = modelUrl.toString();
+      } else {
+        const exporter = new USDZExporter();
+        const usdz = await exporter.parse(this[$scene].modelContainer);
+        urlString =
+            URL.createObjectURL(new Blob([usdz], {type: 'model/vnd.usdz+zip'}));
       }
+
       const anchor = this[$arAnchor];
       anchor.setAttribute('rel', 'ar');
       const img = document.createElement('img');
       anchor.appendChild(img);
-      anchor.setAttribute('href', modelUrl.toString());
+      anchor.setAttribute('href', urlString);
       anchor.click();
       anchor.removeChild(img);
     }
