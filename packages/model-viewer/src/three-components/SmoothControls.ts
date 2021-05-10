@@ -14,9 +14,9 @@
 
 import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
 import {TouchAction} from '../features/controls.js';
-
 import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
+
 
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = 'rotate'|'scroll'|'zoom';
@@ -335,6 +335,15 @@ export class SmoothControls extends EventDispatcher {
   }
 
   /**
+   * Sets the smoothing decay time.
+   */
+  setDamperDecayTime(decayMilliseconds: number) {
+    this.thetaDamper.setDecayTime(decayMilliseconds);
+    this.phiDamper.setDecayTime(decayMilliseconds);
+    this.radiusDamper.setDecayTime(decayMilliseconds);
+  }
+
+  /**
    * Adjust the orbital position of the camera relative to its current orbital
    * position. Does not let the theta goal get more than pi ahead of the current
    * theta, which ensures interpolation continues in the direction of the delta.
@@ -356,12 +365,11 @@ export class SmoothControls extends EventDispatcher {
         theta - clamp(deltaTheta, -dThetaLimit - dTheta, dThetaLimit - dTheta);
     const goalPhi = phi - deltaPhi;
 
-    const deltaRatio = deltaZoom === 0 ?
-        0 :
-        deltaZoom > 0 ? (maximumRadius! - radius) /
-                (Math.log(maximumFieldOfView!) - this.goalLogFov) :
+    const deltaRatio = deltaZoom === 0 ? 0 :
+        deltaZoom > 0                  ? (maximumRadius! - radius) /
+            (Math.log(maximumFieldOfView!) - this.goalLogFov) :
                         (radius - minimumRadius!) /
-                (this.goalLogFov - Math.log(minimumFieldOfView!));
+            (this.goalLogFov - Math.log(minimumFieldOfView!));
 
     const goalRadius = radius +
         deltaZoom *
@@ -516,12 +524,8 @@ export class SmoothControls extends EventDispatcher {
             const {clientX, clientY} = touches[0];
             const dx = Math.abs(clientX - this.lastPointerPosition.clientX);
             const dy = Math.abs(clientY - this.lastPointerPosition.clientY);
-            // If motion is mostly vertical, assume scrolling is the intent,
-            // unless scrolling is not possible. Use window.innerHeight
-            // instead of body.clientHeight so that a full-screen element will
-            // still scroll the URL bar out of the way before locking.
-            if ((touchAction === 'pan-y' && dy > dx &&
-                 document.body.scrollHeight > window.innerHeight) ||
+            // If motion is mostly vertical, assume scrolling is the intent.
+            if ((touchAction === 'pan-y' && dy > dx) ||
                 (touchAction === 'pan-x' && dx > dy)) {
               this.touchMode = 'scroll';
               return;
@@ -531,6 +535,8 @@ export class SmoothControls extends EventDispatcher {
           break;
         case 'scroll':
           return;
+        default:
+          break;
       }
 
       this.lastTouches = touches;
@@ -540,7 +546,7 @@ export class SmoothControls extends EventDispatcher {
 
     if (event.cancelable) {
       event.preventDefault();
-    };
+    }
   };
 
   private handleSinglePointerMove(pointer: Pointer) {
@@ -646,6 +652,8 @@ export class SmoothControls extends EventDispatcher {
       case KeyCode.RIGHT:
         relevantKey = true;
         this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
+        break;
+      default:
         break;
     }
 

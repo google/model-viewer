@@ -14,11 +14,14 @@
  */
 
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
+import {ControlsInterface, ControlsMixin} from '../../features/controls.js';
 
-import ModelViewerElementBase, {$canvas, $renderer} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {SETTLING_TIME} from '../../three-components/Damper.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
+import {Renderer} from '../../three-components/Renderer.js';
+import {waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
 
 
@@ -76,9 +79,10 @@ class MockXRFrame implements XRFrame {
 suite('ARRenderer', () => {
   let nextId = 0;
   let tagName: string;
-  let ModelViewerElement: Constructor<ModelViewerElementBase>;
+  let ModelViewerElement: Constructor<ModelViewerElementBase&ControlsInterface>;
 
-  let element: ModelViewerElementBase;
+  let element: ModelViewerElementBase&ControlsInterface;
+  ;
   let arRenderer: ARRenderer;
   let xrSession: XRSession;
 
@@ -155,7 +159,8 @@ suite('ARRenderer', () => {
 
   setup(() => {
     tagName = `model-viewer-arrenderer-${nextId++}`;
-    ModelViewerElement = class extends ModelViewerElementBase {
+    ModelViewerElement = class extends ControlsMixin
+    (ModelViewerElementBase) {
       static get is() {
         return tagName;
       }
@@ -163,11 +168,8 @@ suite('ARRenderer', () => {
     customElements.define(tagName, ModelViewerElement);
 
     element = new ModelViewerElement();
-    arRenderer = new ARRenderer(element[$renderer]);
-  });
-
-  teardown(async () => {
-    await arRenderer.stopPresenting().catch(() => {});
+    document.body.insertBefore(element, document.body.firstChild);
+    arRenderer = Renderer.singleton.arRenderer;
   });
 
   // NOTE(cdata): It will be a notable day when this test fails
@@ -184,13 +186,10 @@ suite('ARRenderer', () => {
     let oldXRRay: any;
 
     setup(async () => {
-      modelScene = new ModelScene({
-        element: element,
-        canvas: element[$canvas],
-        width: 200,
-        height: 100,
-      });
-      await modelScene.setSource(assetPath('models/Astronaut.glb'));
+      const sourceLoads = waitForEvent(element, 'load');
+      element.src = assetPath('models/Astronaut.glb');
+      await sourceLoads;
+      modelScene = element[$scene];
       stubWebXrInterface(arRenderer);
       setInputSources([]);
 
@@ -207,8 +206,9 @@ suite('ARRenderer', () => {
       await arRenderer.present(modelScene);
     });
 
-    teardown(() => {
+    teardown(async () => {
       (window as any).XRRay = oldXRRay;
+      await arRenderer.stopPresenting().catch(() => {});
     });
 
     test('presents the model at its natural scale', () => {
@@ -233,12 +233,12 @@ suite('ARRenderer', () => {
       });
 
       test('restores original camera', () => {
-        expect(modelScene.getCamera()).to.be.equal(modelScene.camera);
+        expect(modelScene.camera).to.be.equal(modelScene.camera);
       });
 
       test('restores scene size', () => {
-        expect(modelScene.width).to.be.equal(200);
-        expect(modelScene.height).to.be.equal(100);
+        expect(modelScene.width).to.be.equal(300);
+        expect(modelScene.height).to.be.equal(150);
       });
     });
 
@@ -249,7 +249,6 @@ suite('ARRenderer', () => {
       let yaw: number;
 
       setup(async () => {
-        await arRenderer.present(modelScene);
         arRenderer.onWebXRFrame(0, new MockXRFrame(arRenderer.currentSession!));
         yaw = modelScene.yaw;
       });
@@ -258,7 +257,7 @@ suite('ARRenderer', () => {
         const epsilon = 0.0001;
         const {target, position} = modelScene;
 
-        const cameraPosition = arRenderer.camera.position;
+        const {cameraPosition} = arRenderer;
         const cameraToHit = new Vector2(
             position.x - cameraPosition.x, position.z - cameraPosition.z);
         const forward = target.getWorldDirection(new Vector3());

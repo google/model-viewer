@@ -17,9 +17,9 @@ import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$loaded, $needsRender, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
-import {ARStatus} from '../three-components/ARRenderer.js';
+import {ARStatus, ARTracking} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
 
 let isWebXRBlocked = false;
@@ -44,6 +44,10 @@ export interface ARStatusDetails {
   status: ARStatus;
 }
 
+export interface ARTrackingDetails {
+  status: ARTracking;
+}
+
 const $arButtonContainer = Symbol('arButtonContainer');
 const $enterARWithWebXR = Symbol('enterARWithWebXR');
 export const $openSceneViewer = Symbol('openSceneViewer');
@@ -56,6 +60,7 @@ const $preload = Symbol('preload');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
+const $onARTracking = Symbol('onARTracking');
 const $onARTap = Symbol('onARTap');
 const $selectARMode = Symbol('selectARMode');
 
@@ -111,7 +116,18 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
         this.setAttribute('ar-status', status);
         this.dispatchEvent(
             new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
+        if (status === ARStatus.NOT_PRESENTING) {
+          this.removeAttribute('ar-tracking');
+        } else if (status === ARStatus.SESSION_STARTED) {
+          this.setAttribute('ar-tracking', ARTracking.TRACKING);
+        }
       }
+    };
+
+    private[$onARTracking] = ({status}: ThreeEvent) => {
+      this.setAttribute('ar-tracking', status);
+      this.dispatchEvent(new CustomEvent<ARTrackingDetails>(
+          'ar-tracking', {detail: {status}}));
     };
 
     private[$onARTap] = (event: Event) => {
@@ -126,6 +142,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$renderer].arRenderer.addEventListener('status', this[$onARStatus]);
       this.setAttribute('ar-status', ARStatus.NOT_PRESENTING);
 
+      this[$renderer].arRenderer.addEventListener(
+          'tracking', this[$onARTracking]);
+
       this[$arAnchor].addEventListener('message', this[$onARTap]);
     }
 
@@ -134,6 +153,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$renderer].arRenderer.removeEventListener(
           'status', this[$onARStatus]);
+      this[$renderer].arRenderer.removeEventListener(
+          'tracking', this[$onARTracking]);
 
       this[$arAnchor].removeEventListener('message', this[$onARTap]);
     }
@@ -234,7 +255,7 @@ configuration or device capabilities');
     protected async[$enterARWithWebXR]() {
       console.log('Attempting to present in AR...');
 
-      if (!this[$loaded]) {
+      if (!this.loaded) {
         this[$preload] = true;
         this[$updateSource]();
         await waitForEvent(this, 'load');
@@ -268,31 +289,38 @@ configuration or device capabilities');
      * the current device.
      */
     [$openSceneViewer]() {
-      // This is necessary because the original URL might have query
-      // parameters. Since we're appending the whole URL as query parameter,
-      // ? needs to be turned into & to not lose any of them.
-      const gltfSrc = this.src!.replace('?', '&');
       const location = self.location.toString();
       const locationUrl = new URL(location);
-      const modelUrl = new URL(gltfSrc, location);
+      const modelUrl = new URL(this.src!, location);
+      const params = new URLSearchParams(modelUrl.search);
 
       locationUrl.hash = noArViewerSigil;
 
       // modelUrl can contain title/link/sound etc.
-      // These are already URL-encoded, so we shouldn't do that again here.
-      let intentParams = `?file=${modelUrl.toString()}&mode=ar_only`;
-      if (!gltfSrc.includes('&disable_occlusion=')) {
-        intentParams += `&disable_occlusion=true`;
+      params.set('mode', 'ar_only');
+      if (!params.has('disable_occlusion')) {
+        params.set('disable_occlusion', 'true');
       }
       if (this.arScale === 'fixed') {
-        intentParams += `&resizable=false`;
+        params.set('resizable', 'false');
       }
       if (this.arPlacement === 'wall') {
-        intentParams += `&enable_vertical_placement=true`;
+        params.set('enable_vertical_placement', 'true');
+      }
+      if (params.has('sound')) {
+        const soundUrl = new URL(params.get('sound')!, location);
+        params.set('sound', soundUrl.toString());
+      }
+      if (params.has('link')) {
+        const linkUrl = new URL(params.get('link')!, location);
+        params.set('link', linkUrl.toString());
       }
 
-      const intent = `intent://arvr.google.com/scene-viewer/1.0${
-          intentParams}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
+      const intent = `intent://arvr.google.com/scene-viewer/1.0?${
+          params.toString() + '&file=' +
+          encodeURIComponent(
+              modelUrl
+                  .toString())}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
           encodeURIComponent(locationUrl.toString())};end;`;
 
       const undoHashChange = () => {

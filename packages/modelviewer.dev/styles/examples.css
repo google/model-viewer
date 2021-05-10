@@ -371,18 +371,6 @@ model-viewer:focus {
   box-sizing: border-box;
 }
 
-.background-demo {
-  grid-area: demo;
-  position: sticky;
-  top: 0;
-  height: 90vh;
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  border: 0px solid #555;
-  box-sizing: border-box;
-}
-
 .examples-container > .sample > .demo {
   height: 100vh;
 }
@@ -760,18 +748,6 @@ paper-button {
     margin-left: 0;
     visibility: visible;
   }
-
-  .background-demo {
-    grid-area: demo;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    border: 0px solid #555;
-    box-sizing: border-box;
-  }
   
   .examples-container > .sample > #demo-container-1 {
     margin-top: 75px;
@@ -780,7 +756,7 @@ paper-button {
   
   .examples-container > .sample > .demo {
     top: 0;
-    height: 90vh;
+    height: 150vw;
   }
 
   body {
@@ -847,7 +823,6 @@ paper-button {
   }
   .demo {
     position: relative;
-    height: 76vh;
     flex-direction: column-reverse;
     background-color: #455A64;
   }

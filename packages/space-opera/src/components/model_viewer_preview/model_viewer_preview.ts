@@ -29,7 +29,9 @@ import {customElement, html, internalProperty, PropertyValues, query} from 'lit-
 
 import {reduxStore} from '../../space_opera_base.js';
 import {modelViewerPreviewStyles} from '../../styles.css.js';
-import {extractStagingConfig, State} from '../../types.js';
+import {BestPracticesState, extractStagingConfig, State} from '../../types.js';
+import {getBestPractices} from '../best_practices/reducer.js';
+import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
 import {dispatchCameraControlsEnabled, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
@@ -42,12 +44,11 @@ import {dispatchSetForcePost, getRefreshable} from '../mobile_view/reducer.js';
 import {dispatchConfig, getExtraAttributes} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
-import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {applyEdits} from './gltf_edits.js';
 import {dispatchGltfAndEdits} from './gltf_edits.js';
-import {dispatchGltfUrl, downloadContents, getGltfModel, getGltfUrl} from './reducer.js';
+import {dispatchGltfUrl, downloadContents, getGltfModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
@@ -61,7 +62,8 @@ const $autoplay = Symbol('autoplay');
  */
 @customElement('model-viewer-preview')
 export class ModelViewerPreview extends ConnectedLitElement {
-  static styles = [modelViewerPreviewStyles, hotspotStyles];
+  static styles =
+      [modelViewerPreviewStyles, hotspotStyles, arButtonCSS, progressBarCSS];
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
@@ -74,8 +76,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty()[$gltfUrl]?: string;
   @internalProperty() gltfError: string = '';
   @internalProperty() extraAttributes: any = {};
-
   @internalProperty() refreshButtonIsReady: boolean = false;
+  @internalProperty() bestPractices?: BestPracticesState;
 
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;
@@ -89,6 +91,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this[$autoplay] = getConfig(state).autoplay;
     this.extraAttributes = getExtraAttributes(state);
     this.refreshButtonIsReady = getRefreshable(state);
+    this.bestPractices = getBestPractices(state);
   }
 
   firstUpdated() {
@@ -190,9 +193,13 @@ export class ModelViewerPreview extends ConnectedLitElement {
       style="--mdc-theme-primary: #DC143C; border: #DC143C" class="RefreshMobileButton">
       Refresh Mobile
     </mwc-button>`: html``;
-    const childElements =
-        [...renderHotspots(this.hotspots), refreshMobileButton];
 
+    // Renders elements common between mobile and editor.
+    const childElements =
+        renderCommonChildElements(this.hotspots, this.bestPractices!, true);
+
+    // Add additional elements, editor specific.
+    childElements.push(refreshMobileButton);
     if (this.gltfError) {
       childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
           this.gltfError}</div>`);
@@ -232,6 +239,9 @@ export class ModelViewerPreview extends ConnectedLitElement {
                 if (this.addHotspotMode) {
                   this.addHotspot(event);
                 }
+              },
+              error: (error: CustomEvent) => {
+                this.gltfError = error.detail;
               }
             },
             childElements)}`;

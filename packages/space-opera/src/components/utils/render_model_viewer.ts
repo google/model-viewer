@@ -32,6 +32,7 @@ export interface ModelViewerEventHandlers {
   readonly play?: () => void;
   readonly pause?: () => void;
   readonly click?: (event: MouseEvent) => void;
+  readonly error?: (details: CustomEvent) => void;
 }
 
 /**
@@ -74,8 +75,8 @@ export function renderModelViewer(
         @play=${eventHandlers?.play}
         @pause=${eventHandlers?.pause}
         @click=${eventHandlers?.click}
+        @error=${eventHandlers?.error}
       >
       ${childElements}
-    </model-viewer>
-        `;
+      </model-viewer>`;
 }

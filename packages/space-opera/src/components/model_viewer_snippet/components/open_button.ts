@@ -114,7 +114,7 @@ export class OpenModal extends ConnectedLitElement {
 
       // reset poster
       config.poster = undefined;
-      dispatchSetPosterName(undefined);
+      reduxStore.dispatch(dispatchSetPosterName(undefined));
 
       if (config.environmentImage && isObjectUrl(config.environmentImage)) {
         // If new env image is legal, use it
@@ -165,7 +165,7 @@ export class OpenModal extends ConnectedLitElement {
     event.preventDefault();
     this.handleSubmitSnippet();
     if (this.errors.length === 0) {
-      this.isOpen = false;
+      this.close();
     }
   }
 
@@ -216,7 +216,7 @@ export class ImportCard extends LitElement {
   @internalProperty() selectedDefaultOption: number = 0;
 
   async onUploadGLB() {
-    const files: any = await this.fileModal.open();
+    const files = await this.fileModal.open();
     if (!files) {
       /// The user canceled the previous upload
       return;
@@ -306,6 +306,7 @@ export class ImportCard extends LitElement {
         GLB
       </mwc-button>
     </div>
+    <me-validation></me-validation>
     `;
   }
 }

@@ -17,7 +17,7 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftSha
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import {$canvas, $sceneIsReady, $tick, $updateSize, $userInputElement} from '../model-viewer-base.js';
+import {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
@@ -151,6 +151,7 @@ export class Renderer extends EventDispatcher {
     this.textureUtils =
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
     this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
+    CachingGLTFLoader.initializeKTX2Loader(this.threeRenderer);
 
     this.updateRendererSize();
     this.lastTick = performance.now();
@@ -261,7 +262,8 @@ export class Renderer extends EventDispatcher {
     scene.isDirty = true;
 
     if (this.canRender && this.scenes.size > 0) {
-      this.threeRenderer.setAnimationLoop((time: number) => this.render(time));
+      this.threeRenderer.setAnimationLoop(
+          (time: number, frame?: any) => this.render(time, frame));
     }
 
     if (this.debugger != null) {
@@ -294,20 +296,23 @@ export class Renderer extends EventDispatcher {
    */
   private selectCanvas() {
     let visibleScenes = 0;
-    let visibleInput = null;
+    let visibleCanvas = null;
     for (const scene of this.scenes) {
       const {element} = scene;
-      if (element.modelIsVisible) {
+      if (element.modelIsVisible && scene.externalRenderer == null) {
         ++visibleScenes;
-        visibleInput = element[$userInputElement];
+        visibleCanvas = scene.canvas;
       }
+    }
+    if (visibleCanvas == null) {
+      return;
     }
     const multipleScenesVisible = visibleScenes > 1 || USE_OFFSCREEN_CANVAS;
     const {canvasElement} = this;
 
     if (multipleScenesVisible === this.multipleScenesVisible &&
         (multipleScenesVisible ||
-         canvasElement.parentElement === visibleInput)) {
+         canvasElement.parentElement === visibleCanvas.parentElement)) {
       return;
     }
     this.multipleScenesVisible = multipleScenesVisible;
@@ -316,13 +321,15 @@ export class Renderer extends EventDispatcher {
       canvasElement.classList.remove('show');
     }
     for (const scene of this.scenes) {
-      const userInputElement = scene.element[$userInputElement];
+      if (scene.externalRenderer != null) {
+        continue;
+      }
       const canvas = scene.element[$canvas];
       if (multipleScenesVisible) {
         canvas.classList.add('show');
         scene.isDirty = true;
-      } else if (userInputElement === visibleInput) {
-        userInputElement.appendChild(canvasElement);
+      } else if (scene.canvas === visibleCanvas) {
+        scene.canvas.parentElement!.appendChild(canvasElement);
         canvasElement.classList.add('show');
         canvas.classList.remove('show');
         scene.isDirty = true;
@@ -369,7 +376,13 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  render(t: number) {
+  render(t: number, frame?: XRFrame) {
+    if (frame != null) {
+      this.arRenderer.onWebXRFrame(t, frame);
+      this.arRenderer.presentedScene!.postRender();
+      return;
+    }
+
     const delta = t - this.lastTick;
     this.lastTick = t;
 
@@ -389,7 +402,8 @@ export class Renderer extends EventDispatcher {
     const {dpr, scaleFactor} = this;
 
     for (const scene of this.orderedScenes()) {
-      if (!scene.element[$sceneIsReady]()) {
+      const {element} = scene;
+      if (!element.modelIsVisible && scene.renderCount > 0) {
         continue;
       }
 
@@ -398,15 +412,28 @@ export class Renderer extends EventDispatcher {
       if (!scene.isDirty) {
         continue;
       }
-      scene.isDirty = false;
-      ++scene.renderCount;
 
-      if (!scene.element.modelIsVisible && !this.multipleScenesVisible) {
+      if (scene.externalRenderer != null) {
+        const {matrix, projectionMatrix} = scene.camera;
+        const viewMatrix = matrix.elements.slice();
+        const target = scene.getTarget();
+        viewMatrix[12] += target.x;
+        viewMatrix[13] += target.y;
+        viewMatrix[14] += target.z;
+
+        scene.externalRenderer.render({
+          viewMatrix: viewMatrix,
+          projectionMatrix: projectionMatrix.elements
+        });
+        continue;
+      }
+
+      if (!element.modelIsVisible && !this.multipleScenesVisible) {
         // Here we are pre-rendering on the visible canvas, so we must mark the
         // visible scene dirty to ensure it overwrites us.
-        for (const scene of this.scenes) {
-          if (scene.element.modelIsVisible) {
-            scene.isDirty = true;
+        for (const visibleScene of this.scenes) {
+          if (visibleScene.element.modelIsVisible) {
+            visibleScene.isDirty = true;
           }
         }
       }
@@ -423,7 +450,9 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.floor(this.height * dpr) - height, width, height);
-      this.threeRenderer.render(scene, scene.getCamera());
+      this.threeRenderer.render(scene, scene.camera);
+
+      scene.postRender();
 
       if (this.multipleScenesVisible) {
         if (scene.context == null) {
@@ -440,6 +469,11 @@ export class Renderer extends EventDispatcher {
           context2D.drawImage(
               this.canvas3D, 0, 0, width, height, 0, 0, width, height);
         }
+      }
+
+      scene.isDirty = false;
+      if (element.loaded) {
+        ++scene.renderCount;
       }
     }
   }

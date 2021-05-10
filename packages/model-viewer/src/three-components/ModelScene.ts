@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
-
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
-import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
-
+import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
+import {resolveDpr} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
+
+
 export interface ModelLoadEvent extends ThreeEvent {
-  url: string
+  url: string;
 }
 
 export interface ModelSceneConfig {
@@ -35,7 +37,7 @@ export interface ModelSceneConfig {
   height: number;
 }
 
-export type IlluminationRole = 'primary'|'secondary'
+export type IlluminationRole = 'primary'|'secondary';
 
 export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Primary: 'primary',
@@ -64,13 +66,14 @@ export class ModelScene extends Scene {
   public canvas: HTMLCanvasElement;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
+  public annotationRenderer = new CSS2DRenderer();
   public width = 1;
   public height = 1;
   public aspect = 1;
   public isDirty = false;
   public renderCount = 0;
+  public externalRenderer: RendererInterface|null = null;
 
-  public activeCamera: Camera;
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
@@ -117,8 +120,6 @@ export class ModelScene extends Scene {
     this.camera = new PerspectiveCamera(45, 1, 0.1, 100);
     this.camera.name = 'MainCamera';
 
-    this.activeCamera = this.camera;
-
     this.add(this.target);
 
     this.setSize(width, height);
@@ -128,6 +129,14 @@ export class ModelScene extends Scene {
 
     this.target.add(this.modelContainer);
     this.mixer = new AnimationMixer(this.modelContainer);
+
+    const {domElement} = this.annotationRenderer;
+    const {style} = domElement;
+    style.display = 'none';
+    style.pointerEvents = 'none';
+    style.position = 'absolute';
+    style.top = '0';
+    this.element.shadowRoot!.querySelector('.default')!.appendChild(domElement);
   }
 
   /**
@@ -159,11 +168,23 @@ export class ModelScene extends Scene {
    */
 
   async setSource(
-      url: string|null, progressCallback?: (progress: number) => void) {
+      url: string|null,
+      progressCallback: (progress: number) => void = () => {}) {
     if (!url || url === this.url) {
-      if (progressCallback) {
-        progressCallback(1);
-      }
+      progressCallback(1);
+      return;
+    }
+    this.reset();
+    this.url = url;
+
+    if (this.externalRenderer != null) {
+      const framingInfo = await this.externalRenderer.load(progressCallback);
+
+      this.idealCameraDistance = framingInfo.framedRadius / SAFE_RADIUS_RATIO;
+      this.fieldOfViewAspect = framingInfo.fieldOfViewAspect;
+      this.frameModel();
+
+      this.dispatchEvent({type: 'model-load', url: this.url});
       return;
     }
 
@@ -233,12 +254,15 @@ export class ModelScene extends Scene {
 
     this.frameModel();
     this.setShadowIntensity(this.shadowIntensity);
-    this.isDirty = true;
     this.dispatchEvent({type: 'model-load', url: this.url});
   }
 
   reset() {
     this.url = null;
+    this.isDirty = true;
+    if (this.shadow != null) {
+      this.shadow.setIntensity(0);
+    }
     const gltf = this._currentGLTF;
     // Remove all current children
     if (gltf != null) {
@@ -271,9 +295,15 @@ export class ModelScene extends Scene {
     }
     this.width = Math.max(width, 1);
     this.height = Math.max(height, 1);
+    this.annotationRenderer.setSize(width, height);
 
     this.aspect = this.width / this.height;
     this.frameModel();
+
+    if (this.externalRenderer != null) {
+      const dpr = resolveDpr();
+      this.externalRenderer.resize(width * dpr, height * dpr);
+    }
 
     this.isDirty = true;
   }
@@ -306,7 +336,7 @@ export class ModelScene extends Scene {
     this.target.remove(this.modelContainer);
 
     if (center == null) {
-      center = this.boundingBox.getCenter(new Vector3);
+      center = this.boundingBox.getCenter(new Vector3());
     }
 
     const radiusSquared = (value: number, vertex: Vector3): number => {
@@ -347,24 +377,19 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Returns the current camera.
-   */
-  getCamera(): Camera {
-    return this.activeCamera;
-  }
-
-  /**
-   * Sets the passed in camera to be used for rendering.
-   */
-  setCamera(camera: Camera) {
-    this.activeCamera = camera;
-  }
-
-  /**
    * Sets the point in model coordinates the model should orbit/pivot around.
    */
   setTarget(modelX: number, modelY: number, modelZ: number) {
     this.goalTarget.set(-modelX, -modelY, -modelZ);
+  }
+
+  /**
+   * Set the decay time of, affects the speed of target transitions.
+   */
+  setTargetDamperDecayTime(decayMilliseconds: number) {
+    this.targetDamperX.setDecayTime(decayMilliseconds);
+    this.targetDamperY.setDecayTime(decayMilliseconds);
+    this.targetDamperZ.setDecayTime(decayMilliseconds);
   }
 
   /**
@@ -525,6 +550,9 @@ export class ModelScene extends Scene {
    */
   setShadowIntensity(shadowIntensity: number) {
     this.shadowIntensity = shadowIntensity;
+    if (this._currentGLTF == null) {
+      return;
+    }
     let shadow = this.shadow;
     const side =
         (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
@@ -595,7 +623,7 @@ export class ModelScene extends Scene {
    */
   positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
       {position: Vector3, normal: Vector3}|null {
-    raycaster.setFromCamera(pixelPosition, this.getCamera());
+    raycaster.setFromCamera(pixelPosition, this.camera);
     const hits = raycaster.intersectObject(object, true);
 
     if (hits.length === 0) {
@@ -620,6 +648,10 @@ export class ModelScene extends Scene {
    */
   addHotspot(hotspot: Hotspot) {
     this.target.add(hotspot);
+    // This happens automatically in render(), but we do it early so that
+    // the slots appear in the shadow DOM and the elements get attached,
+    // allowing us to dispatch events on them.
+    this.annotationRenderer.domElement.appendChild(hotspot.element);
   }
 
   removeHotspot(hotspot: Hotspot) {
@@ -676,5 +708,15 @@ export class ModelScene extends Scene {
     this.forHotspots((hotspot) => {
       hotspot.visible = visible;
     });
+  }
+
+  postRender() {
+    const {camera} = this;
+
+    if (this.isDirty) {
+      this.updateHotspots(camera.position);
+      this.annotationRenderer.domElement.style.display = '';
+      this.annotationRenderer.render(this, camera);
+    }
   }
 }

@@ -36,6 +36,10 @@
         "name": "DRACO Support"
       },
       {
+        "htmlId": "ktx2Support",
+        "name": "KTX2 Support"
+      },
+      {
         "htmlId": "usdzModel",
         "name": "USDZ Model"
       },

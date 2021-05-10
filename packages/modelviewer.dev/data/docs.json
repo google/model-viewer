@@ -144,6 +144,14 @@
         ]
       },
       {
+        "name": "ktx2TranscoderLocation",
+        "htmlName": "ktx2TranscoderLocation",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s KTX2 transcoder location URL. By default, the KTX2 transcoder will be loaded from a Google CDN.",
+        "links": [
+          "<a href=\"../examples/loading/#dracoSupport\"><span class='attribute'>dracoDecoderLocation</span> example</a>"
+        ]
+      },
+      {
         "name": "minimumRenderScale",
         "htmlName": "minimumRenderScale",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1.",
@@ -182,7 +190,7 @@
       {
         "name": "getDimensions()",
         "htmlName": "getDimensions",
-        "description": "Returns the model's bounding box dimensions in meters, independent of turntable rotation. The retuned object has x, y, and z properties along with a toString() method."
+        "description": "Returns the model's bounding box dimensions in meters, independent of turntable rotation. The returned object has x, y, and z properties along with a toString() method."
       },
       {
         "name": "toBlob(options: {mimeType, qualityArgument, idealAspect})",
@@ -283,7 +291,7 @@
       {
         "name": "ar-placement",
         "htmlName": "arPlacement",
-        "description": "Selects whether to place the object on the floor (horizotal surface) or a wall (vertical surface) in AR. The back (negative Z) of the object's bounding box will be placed against the wall and the shadow will be put on this surface as well. Note that the different AR modes handle the placement UX differently.",
+        "description": "Selects whether to place the object on the floor (horizontal surface) or a wall (vertical surface) in AR. The back (negative Z) of the object's bounding box will be placed against the wall and the shadow will be put on this surface as well. Note that the different AR modes handle the placement UX differently.",
         "links": [
           "<a href=\"../examples/augmentedreality/#wall\"><span class='attribute'>ar-placement</span> example</a>"
         ],
@@ -322,6 +330,18 @@
         "links": [
           "<a href=\"../examples/augmentedreality/#webXR\"><span class='attribute'>ar-status</span> example</a>"
         ]
+      },
+      {
+        "name": "ar-tracking",
+        "htmlName": "arTracking",
+        "description": "This read-only attribute enables DOM content to be styled based on the state of the WebXR AR tracking. For instance, a failure message can be shown by scoping a CSS rule to model-viewer[ar-tracking=\"not-tracking\"]. Setting this attribute has no effect. Most AR tracking failures are due to the camera being covered or seeing little discernable texture",
+        "default": {
+          "default": "N/A",
+          "options": "tracking, not-tracking"
+        },
+        "links": [
+          "<a href=\"../examples/augmentedreality/#webXR\"><span class='attribute'>ar-tracking</span> example</a>"
+        ]
       }
     ],
     "Methods": [
@@ -338,6 +358,14 @@
         "description": "Fired when the <span class='attribute'>ar-status</span> attribute above changes. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time AR was initiated but failed to start all of the given modes.",
         "links": [
           "<a href=\"../examples/augmentedreality/#sceneViewer\"><span class='attribute'>ar-status</span> example</a>"
+        ]
+      },
+      {
+        "name": "ar-tracking",
+        "htmlName": "arTracking",
+        "description": "Fired when the <span class='attribute'>ar-tracking</span> attribute above changes. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-tracking</span> attribute, either 'tracking', or 'not-tracking'. This event is only enabled for WebXR AR sessions.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#sceneViewer\"><span class='attribute'>ar-tracking</span> example</a>"
         ]
       },
       {
@@ -544,6 +572,18 @@
         "links": [
           "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
         ]
+      },
+      {
+        "name": "interpolation-decay",
+        "htmlName": "interpolationDecay",
+        "description": "Controls the rate of interpolation when the camera or model moves, due to either user interaction or attribute changes. The decay is asymptotic and the value is in milliseconds, where the majority of the movement will occur within this value's time. Doubling this value will cut the speed in half.",
+        "default": {
+          "default": "50",
+          "options": "values greater than 0"
+        },
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#interpolation\"><span class='attribute'>Interpolation</span> example</a>"
+        ]
       }
     ],
     "CSS": [
@@ -578,7 +618,7 @@
       {
         "name": "getCameraOrbit()",
         "htmlName": "getCameraOrbit",
-        "description": "Returns the realtime orbital position of the camera. The retuned object has theta, phi, and radius properties along with a toString() method suitable for putting in the camera-orbit attribute. Azimuthal (theta) and polar (phi) angles are representred as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation.",
+        "description": "Returns the realtime orbital position of the camera. The returned object has theta, phi, and radius properties along with a toString() method suitable for putting in the camera-orbit attribute. Azimuthal (theta) and polar (phi) angles are represented as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>getCameraOrbit</span> example</a>"
         ]
@@ -586,7 +626,7 @@
       {
         "name": "getCameraTarget()",
         "htmlName": "getCameraTarget",
-        "description": "Returns the realtime target position of the camera in meters. The retuned object has x, y, and z properties along with a toString() method suitable for putting in the camera-target attribute. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation.",
+        "description": "Returns the realtime target position of the camera in meters. The returned object has x, y, and z properties along with a toString() method suitable for putting in the camera-target attribute. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>getCameraTarget</span> example</a>"
         ]

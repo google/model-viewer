@@ -33,6 +33,9 @@ const PROGRESS_MASK_BASE_OPACITY = 0.2;
 const DEFAULT_DRACO_DECODER_LOCATION =
     'https://www.gstatic.com/draco/versioned/decoders/1.3.6/';
 
+const DEFAULT_KTX2_TRANSCODER_LOCATION =
+    'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/';
+
 const SPACE_KEY = 32;
 const ENTER_KEY = 13;
 
@@ -86,11 +89,13 @@ export declare interface LoadingInterface {
 
 export declare interface LoadingStaticInterface {
   dracoDecoderLocation: string;
+  ktx2TranscoderLocation: string;
   mapURLs(callback: (url: string) => string): void;
 }
 
 interface ModelViewerGlobalConfig {
   dracoDecoderLocation?: string;
+  ktx2TranscoderLocation?: string;
 }
 
 /**
@@ -152,6 +157,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     static get dracoDecoderLocation() {
       return CachingGLTFLoader.getDRACODecoderLocation();
+    }
+
+    static set ktx2TranscoderLocation(value: string) {
+      CachingGLTFLoader.setKTX2TranscoderLocation(value);
+    }
+
+    static get ktx2TranscoderLocation() {
+      return CachingGLTFLoader.getKTX2TranscoderLocation();
     }
 
     /**
@@ -296,10 +309,15 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const ModelViewerElement: ModelViewerGlobalConfig =
           (self as any).ModelViewerElement || {};
+
       const dracoDecoderLocation = ModelViewerElement.dracoDecoderLocation ||
           DEFAULT_DRACO_DECODER_LOCATION;
-
       CachingGLTFLoader.setDRACODecoderLocation(dracoDecoderLocation);
+
+      const ktx2TranscoderLocation =
+          ModelViewerElement.ktx2TranscoderLocation ||
+          DEFAULT_KTX2_TRANSCODER_LOCATION;
+      CachingGLTFLoader.setKTX2TranscoderLocation(ktx2TranscoderLocation);
     }
 
     connectedCallback() {
@@ -342,10 +360,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
       }
 
-      if (changedProperties.has('reveal') || changedProperties.has('loaded')) {
-        if (!this[$sceneIsReady]()) {
-          this[$updateSource]();
-        }
+      if (changedProperties.has('reveal') || changedProperties.has('loading')) {
+        this[$updateSource]();
       }
     }
 

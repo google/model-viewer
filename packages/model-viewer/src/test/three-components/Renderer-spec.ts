@@ -14,7 +14,8 @@
  */
 
 import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
-import ModelViewerElementBase, {$canvas, $getModelIsVisible, $loaded, $onResize, $renderer, $scene, $userInputElement} from '../../model-viewer-base.js';
+import {LoadingMixin} from '../../features/loading.js';
+import ModelViewerElementBase, {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
@@ -22,7 +23,8 @@ import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
 
-const ModelViewerElement = class extends ModelViewerElementBase {
+const ModelViewerElement = class extends LoadingMixin
+(ModelViewerElementBase) {
   static get is() {
     return 'model-viewer-renderer';
   }
@@ -30,53 +32,64 @@ const ModelViewerElement = class extends ModelViewerElementBase {
 
 customElements.define('model-viewer-renderer', ModelViewerElement);
 
-async function createScene(): Promise<ModelScene> {
+function createScene(): ModelScene {
   const element = new ModelViewerElement();
   document.body.insertBefore(element, document.body.firstChild);
-  const sourceLoads = waitForEvent(element, 'load');
+  element[$intersectionObserver]!.unobserve(element);
+  element[$isElementInViewport] = false;
+
   element.src = assetPath('models/Astronaut.glb');
-  element[$getModelIsVisible] = () => {
-    return true;
-  };
+
   // manual render loop
   element[$renderer].threeRenderer.setAnimationLoop(null);
-  await sourceLoads;
 
   return element[$scene];
 }
 
+function disposeScene(scene: ModelScene) {
+  const {element} = scene;
+  if (element.parentNode != null) {
+    element.parentNode.removeChild(element);
+  }
+}
+
 suite('Renderer', () => {
   let scene: ModelScene;
+  let otherScene: ModelScene;
   let renderer: Renderer;
 
-  setup(async () => {
+  setup(() => {
     renderer = Renderer.singleton;
     // Ensure tests are not rescaling
     ModelViewerElement.minimumRenderScale = 1;
-    scene = await createScene();
+    scene = createScene();
+    otherScene = createScene();
   });
 
   teardown(() => {
-    const {element} = scene;
-    if (element.parentNode != null) {
-      element.parentNode.removeChild(element);
-    }
+    disposeScene(scene);
+    disposeScene(otherScene);
     renderer.render(performance.now());
   });
 
-  suite('render', () => {
-    let otherScene: ModelScene;
+  test('pre-renders eager, invisible scenes', async () => {
+    const sourceLoads = waitForEvent(scene.element, 'load');
+    (scene.element as any).loading = 'eager';
+    await sourceLoads;
 
+    renderer.render(performance.now());
+    expect(scene.renderCount).to.be.equal(1, 'scene first render');
+    expect(otherScene.renderCount).to.be.equal(0, 'otherScene first render');
+  });
+
+  suite('with two loaded scenes', () => {
     setup(async () => {
-      otherScene = await createScene();
-    });
-
-    teardown(() => {
-      const {element} = otherScene;
-      if (element.parentNode != null) {
-        element.parentNode.removeChild(element);
-      }
-      renderer.render(performance.now());
+      const sceneVisible = waitForEvent(scene.element, 'poster-dismissed');
+      const otherSceneVisible =
+          waitForEvent(otherScene.element, 'poster-dismissed');
+      scene.element[$isElementInViewport] = true;
+      otherScene.element[$isElementInViewport] = true;
+      await Promise.all([sceneVisible, otherSceneVisible]);
     });
 
     test('renders only dirty scenes', () => {
@@ -90,19 +103,18 @@ suite('Renderer', () => {
       expect(otherScene.renderCount).to.be.equal(1, 'otherScene second render');
     });
 
-    test('does not render scenes that have not been loaded', () => {
-      scene.element[$loaded] = false;
+    test('renders only visible scenes', () => {
+      renderer.render(performance.now());
+      expect(scene.renderCount).to.be.equal(1, 'scene first render');
+      expect(otherScene.renderCount).to.be.equal(1, 'otherScene first render');
+
       scene.isDirty = true;
+      otherScene.isDirty = true;
+      otherScene.element[$isElementInViewport] = false;
 
       renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(0);
-      expect(scene.isDirty).to.be.eq(true);
-
-      scene.element[$loaded] = true;
-
-      renderer.render(performance.now());
-      expect(scene.renderCount).to.be.equal(1);
-      expect(!scene.isDirty).to.be.eq(true);
+      expect(scene.renderCount).to.be.equal(2, 'scene second render');
+      expect(otherScene.renderCount).to.be.equal(1, 'otherScene second render');
     });
 
     test('uses the proper canvas when unregsitering scenes', () => {
@@ -111,9 +123,9 @@ suite('Renderer', () => {
       expect(renderer.canvasElement.classList.contains('show'))
           .to.be.eq(
               false, 'webgl canvas should not be shown with multiple scenes.');
-      expect(scene.element[$canvas].classList.contains('show'))
+      expect(scene.canvas.classList.contains('show'))
           .to.be.eq(true, 'scene canvas should be shown with multiple scenes.');
-      expect(otherScene.element[$canvas].classList.contains('show'))
+      expect(otherScene.canvas.classList.contains('show'))
           .to.be.eq(
               true, 'otherScene canvas should be shown with multiple scenes.');
 
@@ -123,14 +135,13 @@ suite('Renderer', () => {
       if (USE_OFFSCREEN_CANVAS) {
         expect(renderer.canvasElement.classList.contains('show'))
             .to.be.eq(false);
-        expect(otherScene.element[$canvas].classList.contains('show'))
-            .to.be.eq(true);
+        expect(otherScene.canvas.classList.contains('show')).to.be.eq(true);
       } else {
         expect(renderer.canvasElement.parentElement)
-            .to.be.eq(otherScene.element[$userInputElement]);
+            .to.be.eq(otherScene.canvas.parentElement);
         expect(renderer.canvasElement.classList.contains('show'))
             .to.be.eq(true, 'webgl canvas should be shown with single scene.');
-        expect(otherScene.element[$canvas].classList.contains('show'))
+        expect(otherScene.canvas.classList.contains('show'))
             .to.be.eq(
                 false,
                 'otherScene canvas should not be shown when it is the only scene.');

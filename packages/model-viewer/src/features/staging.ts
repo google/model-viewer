@@ -15,15 +15,14 @@
  */
 
 import {property} from 'lit-element';
-
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$hasTransitioned, $renderer, $scene, $tick} from '../model-viewer-base.js';
 import {degreesToRadians} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics} from '../styles/evaluators.js';
 import {numberNode, NumberNode} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
-
 import {CameraChangeDetails} from './controls.js';
+
 
 // How much the model will rotate per
 // second in radians:

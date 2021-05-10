@@ -299,7 +299,11 @@ canvas.show {
   <div class="userInput" tabindex="0" role="img"
       aria-label="A depiction of a 3D model"
       aria-live="polite">
-    <canvas></canvas>
+      <div class="slot canvas">
+        <slot name="canvas">
+          <canvas></canvas>
+        </slot>
+      </div>
   </div>
 
   <!-- NOTE(cdata): We need to wrap slots because browsers without ShadowDOM

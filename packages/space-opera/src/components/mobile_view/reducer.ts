@@ -18,6 +18,10 @@
 import {Action, ArConfigState, State} from '../../types.js';
 import {MobileState} from './types.js';
 
+export function getMobileModelViewer() {
+  return document.querySelector('mobile-view')?.modelViewer;
+}
+
 const SET_IOS_SRC = 'SET_IOS_SRC';
 export function dispatchIosSrc(iosSrc: string) {
   return {type: SET_IOS_SRC, payload: iosSrc};
@@ -69,6 +73,9 @@ export function dispatchSetForcePost(forcePost: boolean) {
 
 export const getRefreshable = (state: State) =>
     state.entities.mobile.isRefreshable;
+
+// Allow the ability to trigger a postInfo (for a mobile device) from anywhere
+// in the code.
 export const getForcePost = (state: State) => state.entities.mobile.forcePost;
 
 export function mobileReducer(

@@ -39,12 +39,12 @@ const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
 const $resizeObserver = Symbol('resizeObserver');
-const $intersectionObserver = Symbol('intersectionObserver');
 const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
+const $loaded = Symbol('loaded');
 
-export const $loaded = Symbol('loaded');
 export const $updateSize = Symbol('updateSize');
+export const $intersectionObserver = Symbol('intersectionObserver');
 export const $isElementInViewport = Symbol('isElementInViewport');
 export const $announceModelVisibility = Symbol('announceModelVisibility');
 export const $ariaLabel = Symbol('ariaLabel');
@@ -87,6 +87,22 @@ export const toVector3D = (v: Vector3) => {
 
 interface ToBlobOptions {
   mimeType?: string, qualityArgument?: number, idealAspect?: boolean
+}
+
+export interface FramingInfo {
+  framedRadius: number;
+  fieldOfViewAspect: number;
+}
+
+export interface Camera {
+  viewMatrix: Array<number>;
+  projectionMatrix: Array<number>;
+}
+
+export interface RendererInterface {
+  load(progressCallback: (progress: number) => void): Promise<FramingInfo>;
+  render(camera: Camera): void;
+  resize(width: number, height: number): void;
 }
 
 /**
@@ -249,20 +265,21 @@ export default class ModelViewerElementBase extends UpdatingElement {
     if (HAS_RESIZE_OBSERVER) {
       // Set up a resize observer so we can scale our canvas
       // if our <model-viewer> changes
-      this[$resizeObserver] = new ResizeObserver((entries) => {
-        // Don't resize anything if in AR mode; otherwise the canvas
-        // scaling to fullscreen on entering AR will clobber the flat/2d
-        // dimensions of the element.
-        if (this[$renderer].isPresenting) {
-          return;
-        }
+      this[$resizeObserver] =
+          new ResizeObserver((entries: Array<ResizeObserverEntry>) => {
+            // Don't resize anything if in AR mode; otherwise the canvas
+            // scaling to fullscreen on entering AR will clobber the flat/2d
+            // dimensions of the element.
+            if (this[$renderer].isPresenting) {
+              return;
+            }
 
-        for (let entry of entries) {
-          if (entry.target === this) {
-            this[$updateSize](entry.contentRect);
-          }
-        }
-      });
+            for (let entry of entries) {
+              if (entry.target === this) {
+                this[$updateSize](entry.contentRect);
+              }
+            }
+          });
     }
 
     if (HAS_INTERSECTION_OBSERVER) {
@@ -441,6 +458,14 @@ export default class ModelViewerElementBase extends UpdatingElement {
     } finally {
       this[$updateSize]({width, height});
     };
+  }
+
+  registerRenderer(renderer: RendererInterface) {
+    this[$scene].externalRenderer = renderer;
+  }
+
+  unregisterRenderer() {
+    this[$scene].externalRenderer = null;
   }
 
   get[$ariaLabel]() {

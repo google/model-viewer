@@ -16,7 +16,7 @@
 import {Vector3} from 'three';
 
 import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
-import ModelViewerElementBase, {$loaded, $needsRender, $scene, Vector3D} from '../../model-viewer-base';
+import ModelViewerElementBase, {$needsRender, $scene, Vector3D} from '../../model-viewer-base';
 import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {timePasses, waitForEvent} from '../../utilities';
@@ -143,10 +143,9 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           const hotspotObject2D =
               scene.target.children[numSlots - 1] as Hotspot;
 
-          const camera = element[$scene].getCamera();
+          const camera = element[$scene].camera;
           camera.position.z = 2;
           camera.updateMatrixWorld();
-          element[$loaded] = true;
           element[$needsRender]();
 
           await waitForEvent(hotspot2, 'hotspot-visibility');
@@ -196,7 +195,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       element.setAttribute('style', `width: ${width}px; height: ${height}px`);
       element.src = assetPath('models/cube.gltf');
 
-      const camera = element[$scene].getCamera();
+      const camera = element[$scene].camera;
       camera.position.z = 2;
       camera.updateMatrixWorld();
       await waitForEvent(element, 'load');
