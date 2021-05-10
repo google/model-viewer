@@ -154,11 +154,14 @@ export class ARRenderer extends EventDispatcher {
    * Resolves to true if the renderer has detected all the necessary qualities
    * to support presentation in AR.
    */
-  async supportsPresentation() {
+  async supportsPresentation(): Promise<boolean> {
     try {
       assertIsArCandidate();
       return await navigator.xr!.isSessionSupported('immersive-ar');
     } catch (error) {
+      console.warn('Request to present in WebXR denied:');
+      console.warn(error);
+      console.warn('Falling back to next ar-mode');
       return false;
     }
   }
