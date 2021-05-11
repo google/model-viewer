@@ -335,14 +335,14 @@ configuration or device capabilities');
      * iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      if (this.arAutogenerateUsdz && !this[$generatedIosUrl]) {
+      if (this.arAutogenerateUsdz) {
         this[$arButtonContainer].classList.remove('enabled');
         await this.prepareUSDZ();
         this[$arButtonContainer].classList.add('enabled');
       }
-      const modelUrl = this.arAutogenerateUsdz ?
-          new URL(this[$generatedIosUrl]!, self.location.toString()) :
-          new URL(this.iosSrc!, self.location.toString());
+      const modelUrl = new URL(
+          this.arAutogenerateUsdz ? this[$generatedIosUrl]! : this.iosSrc!,
+          self.location.toString());
       if (this.arScale === 'fixed') {
         if (modelUrl.hash) {
           modelUrl.hash += '&';
@@ -359,14 +359,6 @@ configuration or device capabilities');
       }
       anchor.click();
       anchor.removeChild(img);
-    }
-
-    [$onModelLoad]() {
-      super[$onModelLoad]();
-      if (this.arAutogenerateUsdz && this[$generatedIosUrl] != null) {
-        URL.revokeObjectURL(this[$generatedIosUrl]!);
-        this[$generatedIosUrl] = null;
-      }
     }
 
     async prepareUSDZ() {
