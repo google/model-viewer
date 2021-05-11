@@ -15,9 +15,10 @@
 
 import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
+import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$needsRender, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
@@ -72,6 +73,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<ARInterface>&T => {
   class ARModelViewerElement extends ModelViewerElement {
     @property({type: Boolean, attribute: 'ar'}) ar: boolean = false;
+    @property({type: Boolean, attribute: 'ar-autogenerate-usdz'})
+    arAutogenerateUsdz: boolean = false;
 
     @property({type: String, attribute: 'ar-scale'}) arScale: string = 'auto';
 
@@ -206,7 +209,8 @@ configuration or device capabilities');
             this[$arMode] = ARMode.SCENE_VIEWER;
             break;
           } else if (
-              value === 'quick-look' && !!this.iosSrc &&
+              value === 'quick-look' &&
+              (this.arAutogenerateUsdz || !!this.iosSrc) &&
               IS_AR_QUICKLOOK_CANDIDATE) {
             this[$arMode] = ARMode.QUICK_LOOK;
             break;
@@ -327,7 +331,12 @@ configuration or device capabilities');
      * Takes a URL to a USDZ file and sets the appropriate fields so that Safari
      * iOS can intent to their AR Quick Look.
      */
-    [$openIOSARQuickLook]() {
+    async[$openIOSARQuickLook]() {
+      if (this.arAutogenerateUsdz && !this.iosSrc) {
+        this[$arButtonContainer].classList.remove('enabled');
+        await this.prepareUSDZ();
+        this[$arButtonContainer].classList.add('enabled');
+      }
       const modelUrl = new URL(this.iosSrc!, self.location.toString());
       if (this.arScale === 'fixed') {
         if (modelUrl.hash) {
@@ -340,8 +349,49 @@ configuration or device capabilities');
       const img = document.createElement('img');
       anchor.appendChild(img);
       anchor.setAttribute('href', modelUrl.toString());
+      if (this.arAutogenerateUsdz) {
+        anchor.setAttribute('download', 'model.usdz');
+      }
       anchor.click();
       anchor.removeChild(img);
+    }
+
+    [$onModelLoad]() {
+      super[$onModelLoad]();
+      if (this.arAutogenerateUsdz && !!this.iosSrc) {
+        URL.revokeObjectURL(this.iosSrc);
+        this.iosSrc = null;
+      }
+    }
+
+    async prepareUSDZ() {
+      const updateSourceProgress = this[$progressTracker].beginActivity();
+      const scene = this[$scene];
+
+      const shadow = scene.shadow;
+      let visible = false;
+
+      // Remove shadow from export
+      if (shadow != null) {
+        visible = shadow.visible;
+        shadow.visible = false;
+      }
+
+      updateSourceProgress(0.2);
+
+      const exporter = new USDZExporter();
+      const arraybuffer = await exporter.parse(scene.modelContainer);
+      const blob = new Blob([arraybuffer], {
+        type: 'application/octet-stream',
+      });
+
+      this.iosSrc = URL.createObjectURL(blob);
+
+      updateSourceProgress(1);
+
+      if (shadow != null) {
+        shadow.visible = visible;
+      }
     }
   }
 
