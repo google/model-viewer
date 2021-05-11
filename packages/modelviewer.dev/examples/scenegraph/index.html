@@ -77,7 +77,7 @@ button {
           </div>
           <example-snippet stamp-to="variants" highlight-as="html">
             <template>
-<model-viewer id="chair" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb" alt="A 3D model of a chair">
+<model-viewer id="chair" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a chair">
   <div class="controls">
     <div>Variant: <select id="variant"></select></div>
   </div>
@@ -124,7 +124,7 @@ select.addEventListener('input', (event) => {
           </div>
           <example-snippet stamp-to="transforms" highlight-as="html">
             <template>
-<model-viewer id="transform" orientation="20deg 0 0" bounds="tight" shadow-intensity="1" camera-controls ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of a chair">
+<model-viewer id="transform" orientation="20deg 0 0" bounds="tight" shadow-intensity="1" camera-controls ar ar-modes="webxr scene-viewer quick-look" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of a chair">
   <div class="controls">
     <div>Roll: <input id="roll" value="20" size="3" class="number"> degrees</div>
     <div>Pitch: <input id="pitch" value="0" size="3" class="number"> degrees</div>
@@ -195,7 +195,7 @@ z.addEventListener('input', () => {
           </div>
           <example-snippet stamp-to="changeColor" highlight-as="html">
             <template>
-<model-viewer id="color" camera-controls interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+<model-viewer id="color" camera-controls interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of an astronaut">
   <div class="controls", id="color-controls">
     <button data-color="1,0,0,1">Red</button>
     <button data-color="0,1,0,1">Green</button>
@@ -236,7 +236,7 @@ document.querySelector('#color-controls').addEventListener('click', (event) => {
           </div>
           <example-snippet stamp-to="changeMaterial" highlight-as="html">
             <template>
-<model-viewer id="sphere" camera-controls interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a sphere">
+<model-viewer id="sphere" camera-controls interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a sphere">
   <div class="controls">
     <div>
       <p>Metalness: <span id="metalness-value"></span></p>
@@ -290,7 +290,7 @@ modelViewerParameters.addEventListener("load", (ev) => {
           </div>
           <example-snippet stamp-to="swapTextures" highlight-as="html">
             <template>
-<model-viewer id="lantern" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of a helmet">
+<model-viewer id="lantern" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
   <div class="controls">
     <div>
       <p>Diffuse</p>
@@ -346,7 +346,7 @@ modelViewerTexture.addEventListener("load", (ev) => {
           </div>
           <example-snippet stamp-to="swapTextures2" highlight-as="html">
             <template>
-<model-viewer id="helmet" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" alt="A 3D model of a helmet">
+<model-viewer id="helmet" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
   <div class="controls">
     <div>
       <p>Normals</p>

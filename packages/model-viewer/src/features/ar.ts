@@ -32,7 +32,7 @@ export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'none';
 const deserializeARModes = enumerationDeserializer<ARMode>(
     ['quick-look', 'scene-viewer', 'webxr', 'none']);
 
-const DEFAULT_AR_MODES = 'webxr scene-viewer quick-look';
+const DEFAULT_AR_MODES = 'webxr scene-viewer';
 
 const ARMode: {[index: string]: ARMode} = {
   QUICK_LOOK: 'quick-look',
@@ -231,6 +231,12 @@ configuration or device capabilities');
             this[$arMode] = ARMode.QUICK_LOOK;
             break;
           }
+        }
+
+        // The presence of ios-src overrides the absence of quick-look ar-mode.
+        if (!this.canActivateAR && this.iosSrc != null &&
+            IS_AR_QUICKLOOK_CANDIDATE) {
+          this[$arMode] = ARMode.QUICK_LOOK;
         }
       }
 
