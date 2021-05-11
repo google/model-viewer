@@ -258,7 +258,7 @@ export class ARRenderer extends EventDispatcher {
       await this.currentSession!.end();
       await cleanupPromise;
     } catch (error) {
-      console.warn('Error while trying to end AR session');
+      console.warn('Error while trying to end WebXR AR session');
       console.warn(error);
 
       this.postSessionCleanup();
