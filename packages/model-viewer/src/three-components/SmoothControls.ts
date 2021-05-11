@@ -341,6 +341,7 @@ export class SmoothControls extends EventDispatcher {
     this.thetaDamper.setDecayTime(decayMilliseconds);
     this.phiDamper.setDecayTime(decayMilliseconds);
     this.radiusDamper.setDecayTime(decayMilliseconds);
+    this.fovDamper.setDecayTime(decayMilliseconds);
   }
 
   /**
