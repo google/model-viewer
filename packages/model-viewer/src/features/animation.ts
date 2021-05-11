@@ -112,7 +112,8 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](_time: number, delta: number) {
       super[$tick](_time, delta);
 
-      if (this[$paused] || !this[$hasTransitioned]()) {
+      if (this[$paused] ||
+          (!this[$hasTransitioned]() && !this[$renderer].isPresenting)) {
         return;
       }
 

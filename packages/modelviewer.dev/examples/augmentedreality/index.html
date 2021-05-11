@@ -75,7 +75,7 @@
           </div>
           <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
-<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar camera-controls alt="A 3D model carousel">
+<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model carousel">
   
   <button slot="ar-button" id="ar-button">
     View in your space
@@ -84,6 +84,10 @@
   <div id="ar-prompt">
     <img src="../../assets/hand.png">
   </div>
+
+  <button id="ar-failure">
+    AR is not tracking!
+  </button>
 
   <div class="slider">
     <div class="slides">
@@ -194,6 +198,18 @@
     animation: circle 4s linear infinite;
   }
 
+  model-viewer > #ar-failure {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 175px;
+    display: none;
+  }
+
+  model-viewer[ar-tracking="not-tracking"] > #ar-failure {
+    display: block;
+  }
+
   .slider {
     width: 100%;
     text-align: center;
@@ -254,7 +270,7 @@
           </div>
           <example-snippet stamp-to="ar" highlight-as="html">
             <template>
-<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
+<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
             </template>
           </example-snippet>
 
@@ -272,7 +288,7 @@
           </div>
           <example-snippet stamp-to="sceneViewer" highlight-as="html">
             <template>
-<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
+<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
   <div id="error" class="hide">AR is not supported on this device</div>
 </model-viewer>
 <script>
@@ -319,7 +335,7 @@
           </div>
           <example-snippet stamp-to="wall" highlight-as="html">
             <template>
-<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" camera-controls alt="A 3D model of some wall art"></model-viewer>
+<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of some wall art"></model-viewer>
             </template>
           </example-snippet>
 
@@ -366,9 +382,9 @@
             </div>
             <example-snippet stamp-to="transparentBackground" highlight-as="html">
               <template>
-<div class="background-demo" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;">
+<div class="demo" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;">
   <span style="position: absolute; text-align: center; font-size: 100px; top:50%;">Background</span>
-  <model-viewer camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
+  <model-viewer camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
 </div>
               </template>
             </example-snippet>

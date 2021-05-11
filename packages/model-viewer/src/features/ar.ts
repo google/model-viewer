@@ -20,7 +20,7 @@ import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter';
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
-import {ARStatus} from '../three-components/ARRenderer.js';
+import {ARStatus, ARTracking} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
 
 let isWebXRBlocked = false;
@@ -32,7 +32,7 @@ export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'none';
 const deserializeARModes = enumerationDeserializer<ARMode>(
     ['quick-look', 'scene-viewer', 'webxr', 'none']);
 
-const DEFAULT_AR_MODES = 'webxr scene-viewer quick-look';
+const DEFAULT_AR_MODES = 'webxr scene-viewer';
 
 const ARMode: {[index: string]: ARMode} = {
   QUICK_LOOK: 'quick-look',
@@ -43,6 +43,10 @@ const ARMode: {[index: string]: ARMode} = {
 
 export interface ARStatusDetails {
   status: ARStatus;
+}
+
+export interface ARTrackingDetails {
+  status: ARTracking;
 }
 
 const $arButtonContainer = Symbol('arButtonContainer');
@@ -58,6 +62,7 @@ const $generatedIosUrl = Symbol('generatedIosUrl');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
+const $onARTracking = Symbol('onARTracking');
 const $onARTap = Symbol('onARTap');
 const $selectARMode = Symbol('selectARMode');
 
@@ -115,7 +120,18 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
         this.setAttribute('ar-status', status);
         this.dispatchEvent(
             new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
+        if (status === ARStatus.NOT_PRESENTING) {
+          this.removeAttribute('ar-tracking');
+        } else if (status === ARStatus.SESSION_STARTED) {
+          this.setAttribute('ar-tracking', ARTracking.TRACKING);
+        }
       }
+    };
+
+    private[$onARTracking] = ({status}: ThreeEvent) => {
+      this.setAttribute('ar-tracking', status);
+      this.dispatchEvent(new CustomEvent<ARTrackingDetails>(
+          'ar-tracking', {detail: {status}}));
     };
 
     private[$onARTap] = (event: Event) => {
@@ -130,6 +146,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$renderer].arRenderer.addEventListener('status', this[$onARStatus]);
       this.setAttribute('ar-status', ARStatus.NOT_PRESENTING);
 
+      this[$renderer].arRenderer.addEventListener(
+          'tracking', this[$onARTracking]);
+
       this[$arAnchor].addEventListener('message', this[$onARTap]);
     }
 
@@ -138,6 +157,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$renderer].arRenderer.removeEventListener(
           'status', this[$onARStatus]);
+      this[$renderer].arRenderer.removeEventListener(
+          'tracking', this[$onARTracking]);
 
       this[$arAnchor].removeEventListener('message', this[$onARTap]);
     }
@@ -213,6 +234,12 @@ configuration or device capabilities');
             this[$arMode] = ARMode.QUICK_LOOK;
             break;
           }
+        }
+
+        // The presence of ios-src overrides the absence of quick-look ar-mode.
+        if (!this.canActivateAR && this.iosSrc != null &&
+            IS_AR_QUICKLOOK_CANDIDATE) {
+          this[$arMode] = ARMode.QUICK_LOOK;
         }
       }
 
@@ -346,6 +373,7 @@ configuration or device capabilities');
         }
         modelUrl.hash += 'allowsContentScaling=0';
       }
+
 
       const anchor = this[$arAnchor];
       anchor.setAttribute('rel', 'ar');

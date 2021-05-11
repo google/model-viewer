@@ -76,42 +76,6 @@
           "default": "#fff",
           "options": "valid css background-color"
         }
-      },
-      {
-        "name": "--poster-image",
-        "htmlName": "posterImage",
-        "description": "Sets the  <span class='attribute'>background-image</span> of the  <span class='attribute'>poster</span>. This is currently overridden by the  <span class='attribute'>poster</span> attribute if it is set.",
-        "default": {
-          "default": "none",
-          "options": "valid css background-image"
-        }
-      },
-      {
-        "name": "--progress-bar-color",
-        "htmlName": "progressBarColor",
-        "description": "Sets the  <span class='attribute'>background-color</span> of the progress bar.",
-        "default": {
-          "default": "rgba(0, 0, 0, 0.4)",
-          "options": "valid css background-color"
-        }
-      },
-      {
-        "name": "--progress-bar-height",
-        "htmlName": "progressBarHeight",
-        "description": "Sets the  <span class='attribute'>height</span> of the progress bar.",
-        "default": {
-          "default": "5px",
-          "options": "valid css height"
-        }
-      },
-      {
-        "name": "--progress-mask",
-        "htmlName": "progressMask",
-        "description": "Sets the  <span class='attribute'>background</span> of the progress mask.",
-        "default": {
-          "default": "#fff",
-          "options": "valid css background"
-        }
       }
     ],
     "Properties": [
@@ -237,6 +201,18 @@
         "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress."
       }
     ],
+    "Parts": [
+      {
+        "name": "default-progress-bar",
+        "htmlName": "defaultProgressBar",
+        "description": "Scope your CSS to <code>model-viewer::part(default-progress-bar)</code> to change the styling of our default progress bar without replacing it wholesale with a slot. Most common would be probably changing the background-color, height, width, and margins (avoid the transform property as that is how the progress is updated)."
+      },
+      {
+        "name": "default-progress-mask",
+        "htmlName": "defaultProgressMask",
+        "description": "Scope your CSS to <code>model-viewer::part(default-progress-mask)</code> to change the styling of our default progress mask without replacing it wholesale with a slot. Most common would be probably setting display: none to turn off the fading haze over the poster during load."
+      }
+    ],
     "Slots": [
       {
         "name": "poster",
@@ -267,13 +243,13 @@
       {
         "name": "ar-modes",
         "htmlName": "arModes",
-        "description": "A prioritized list of the types of AR experiences to enable. Allowed values are \"webxr\", to launch the AR experience in the browser, \"scene-viewer\", to launch the <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a> app, \"quick-look\", to launch the iOS Quick Look app. You can specify any number of modes separated by whitespace.",
+        "description": "A prioritized list of the types of AR experiences to enable. Allowed values are \"webxr\", to launch the AR experience in the browser, \"scene-viewer\", to launch the <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a> app, \"quick-look\", to launch the iOS Quick Look app. You can specify any number of modes separated by whitespace. Note that the presence of an ios-src will enable quick-look by itself; specifying quick-look here allows us to generate a USDZ on the fly rather than downloading a separate ios-src file.",
         "links": [
           "<a href=\"../examples/augmentedreality/\">Related examples</a>"
         ],
         "default": {
-          "default": "webxr scene-viewer quick-look",
-          "options": "prioritized list of allowed modes"
+          "default": "webxr scene-viewer",
+          "options": "prioritized list possible AR modes: webxr, scene-viewer, and quick-look"
         }
       },
       {
@@ -303,22 +279,13 @@
       {
         "name": "ios-src",
         "htmlName": "iosSrc",
-        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari.",
+        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari. The presence of this attribute will automatically enable the quick-look ar-mode, however it is no longer necessary. If instead the quick-look ar-mode is specified and ios-src is not specified, then we will generate a USDZ on the fly when the AR button is pressed. This means modifications via the scene-graph API will now be reflected in Quick Look. Hoowever, USDZ generation is not perfect, for instance animations are not yet supported, so in some cases supplying ios-src may give better results.",
         "links": [
           "<a href=\"../examples/augmentedreality/#ar\"><span class='attribute'>ios-src</span> example</a>"
         ]
       }
     ],
     "CSS": [
-      {
-        "name": "--ar-button-display",
-        "htmlName": "arButtonDisplay",
-        "description": "Sets the display property of the AR button. Intended to be used to force the button to be hidden. Defaults to block.",
-        "default": {
-          "default": "block",
-          "options": "css display value"
-        }
-      },
       {
         "name": "ar-status",
         "htmlName": "arStatus",
@@ -329,6 +296,18 @@
         },
         "links": [
           "<a href=\"../examples/augmentedreality/#webXR\"><span class='attribute'>ar-status</span> example</a>"
+        ]
+      },
+      {
+        "name": "ar-tracking",
+        "htmlName": "arTracking",
+        "description": "This read-only attribute enables DOM content to be styled based on the state of the WebXR AR tracking. For instance, a failure message can be shown by scoping a CSS rule to model-viewer[ar-tracking=\"not-tracking\"]. Setting this attribute has no effect. Most AR tracking failures are due to the camera being covered or seeing little discernable texture",
+        "default": {
+          "default": "N/A",
+          "options": "tracking, not-tracking"
+        },
+        "links": [
+          "<a href=\"../examples/augmentedreality/#webXR\"><span class='attribute'>ar-tracking</span> example</a>"
         ]
       }
     ],
@@ -349,9 +328,29 @@
         ]
       },
       {
+        "name": "ar-tracking",
+        "htmlName": "arTracking",
+        "description": "Fired when the <span class='attribute'>ar-tracking</span> attribute above changes. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-tracking</span> attribute, either 'tracking', or 'not-tracking'. This event is only enabled for WebXR AR sessions.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#sceneViewer\"><span class='attribute'>ar-tracking</span> example</a>"
+        ]
+      },
+      {
         "name": "quick-look-button-tapped",
         "htmlName": "quickLookButtonTapped",
         "description": "If the user has entered a quick-look AR session on iOS, this event is fired when the action button is tapped. An action button can be defined using URL parameters on the ios-src, see <a href='https://developer.apple.com/documentation/arkit/adding_an_apple_pay_button_or_a_custom_action_in_ar_quick_look'>Apple's documentation</a>."
+      }
+    ],
+    "Parts": [
+      {
+        "name": "default-ar-button",
+        "htmlName": "defaultArButton",
+        "description": "Scope your CSS to <code>model-viewer::part(default-ar-button)</code> to change the styling of our default Enter AR button without replacing it wholesale with a slot. Most common would be probably changing the position or size using transform and margins."
+      },
+      {
+        "name": "default-exit-webxr-ar-button",
+        "htmlName": "defaultExitWebxrArButton",
+        "description": "Scope your CSS to <code>model-viewer::part(default-exit-webxr-ar-button)</code> to change the styling of our default Exit AR button for WebXR mode without replacing it wholesale with a slot. Most common would be probably changing the position or size using transform and margins."
       }
     ],
     "Slots": [
@@ -564,17 +563,6 @@
         "links": [
           "<a href=\"../examples/stagingandcameras/#interpolation\"><span class='attribute'>Interpolation</span> example</a>"
         ]
-      }
-    ],
-    "CSS": [
-      {
-        "name": "--interaction-prompt-display",
-        "htmlName": "interactionPromptDisplay",
-        "description": "Sets the display property of the interaction prompt. Intended to be used to force the prompt to be hidden.",
-        "default": {
-          "default": "flex",
-          "options": "any valid css display"
-        }
       }
     ],
     "Properties": [
