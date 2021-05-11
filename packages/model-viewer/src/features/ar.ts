@@ -330,7 +330,7 @@ configuration or device capabilities');
      * iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      const generateUsdz = !!this.iosSrc;
+      const generateUsdz = !this.iosSrc;
 
       this[$arButtonContainer].classList.remove('enabled');
 
