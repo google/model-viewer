@@ -253,7 +253,7 @@ configuration or device capabilities');
     }
 
     protected async[$enterARWithWebXR]() {
-      console.log('Attempting to present in AR...');
+      console.log('Attempting to present in AR with WebXR...');
 
       if (!this.loaded) {
         this[$preload] = true;
@@ -269,10 +269,11 @@ configuration or device capabilities');
         arRenderer.placeOnWall = this.arPlacement === 'wall';
         await arRenderer.present(this[$scene]);
       } catch (error) {
-        console.warn('Error while trying to present to AR');
+        console.warn('Error while trying to present in AR with WebXR');
         console.error(error);
         await this[$renderer].arRenderer.stopPresenting();
         isWebXRBlocked = true;
+        console.warn('Falling back to next ar-mode');
         await this[$selectARMode]();
         this.activateAR();
       } finally {
@@ -332,6 +333,8 @@ configuration or device capabilities');
           // because hash-only changes modify the URL in-place without
           // navigating:
           self.history.back();
+          console.warn('Error while trying to present in AR with Scene Viewer');
+          console.warn('Falling back to next ar-mode');
           this[$selectARMode]();
           // Would be nice to activateAR() here, but webXR fails due to not
           // seeing a user activation.
@@ -341,6 +344,7 @@ configuration or device capabilities');
       self.addEventListener('hashchange', undoHashChange, {once: true});
 
       this[$arAnchor].setAttribute('href', intent);
+      console.log('Attempting to present in AR with Scene Viewer...');
       this[$arAnchor].click();
     }
 
@@ -361,6 +365,7 @@ configuration or device capabilities');
       const img = document.createElement('img');
       anchor.appendChild(img);
       anchor.setAttribute('href', modelUrl.toString());
+      console.log('Attempting to present in AR with Quick Look...');
       anchor.click();
       anchor.removeChild(img);
     }
