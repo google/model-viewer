@@ -18,7 +18,7 @@ import {Event as ThreeEvent} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
@@ -74,8 +74,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<ARInterface>&T => {
   class ARModelViewerElement extends ModelViewerElement {
     @property({type: Boolean, attribute: 'ar'}) ar: boolean = false;
-    @property({type: Boolean, attribute: 'ar-autogenerate-usdz'})
-    arAutogenerateUsdz: boolean = false;
 
     @property({type: String, attribute: 'ar-scale'}) arScale: string = 'auto';
 
@@ -211,10 +209,7 @@ configuration or device capabilities');
               !isSceneViewerBlocked) {
             this[$arMode] = ARMode.SCENE_VIEWER;
             break;
-          } else if (
-              value === 'quick-look' &&
-              (this.arAutogenerateUsdz || !!this.iosSrc) &&
-              IS_AR_QUICKLOOK_CANDIDATE) {
+          } else if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE) {
             this[$arMode] = ARMode.QUICK_LOOK;
             break;
           }
@@ -335,34 +330,43 @@ configuration or device capabilities');
      * iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      if (this.arAutogenerateUsdz) {
-        this[$arButtonContainer].classList.remove('enabled');
-        await this.prepareUSDZ();
-        this[$arButtonContainer].classList.add('enabled');
-      }
+      const generateUsdz = !!this.iosSrc;
+
+      this[$arButtonContainer].classList.remove('enabled');
+
       const modelUrl = new URL(
-          this.arAutogenerateUsdz ? this[$generatedIosUrl]! : this.iosSrc!,
+          generateUsdz ? await this.prepareUSDZ() : this.iosSrc!,
           self.location.toString());
+
+      this[$arButtonContainer].classList.add('enabled');
+
       if (this.arScale === 'fixed') {
         if (modelUrl.hash) {
           modelUrl.hash += '&';
         }
         modelUrl.hash += 'allowsContentScaling=0';
       }
+
       const anchor = this[$arAnchor];
       anchor.setAttribute('rel', 'ar');
       const img = document.createElement('img');
       anchor.appendChild(img);
       anchor.setAttribute('href', modelUrl.toString());
-      if (this.arAutogenerateUsdz) {
+      if (generateUsdz) {
         anchor.setAttribute('download', 'model.usdz');
       }
       anchor.click();
       anchor.removeChild(img);
     }
 
-    async prepareUSDZ() {
+    async prepareUSDZ(): Promise<string> {
       const updateSourceProgress = this[$progressTracker].beginActivity();
+
+      if (this[$generatedIosUrl] != null) {
+        URL.revokeObjectURL(this[$generatedIosUrl]!);
+        this[$generatedIosUrl] = null;
+      }
+
       const scene = this[$scene];
 
       const shadow = scene.shadow;
@@ -382,13 +386,16 @@ configuration or device capabilities');
         type: 'application/octet-stream',
       });
 
-      this[$generatedIosUrl] = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+      this[$generatedIosUrl] = url;
 
       updateSourceProgress(1);
 
       if (shadow != null) {
         shadow.visible = visible;
       }
+
+      return url;
     }
   }
 
