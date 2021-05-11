@@ -54,6 +54,7 @@ const $arMode = Symbol('arMode');
 const $arModes = Symbol('arModes');
 const $arAnchor = Symbol('arAnchor');
 const $preload = Symbol('preload');
+const $generatedIosUrl = Symbol('generatedIosUrl');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
@@ -102,6 +103,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
     protected[$preload] = false;
+
+    private[$generatedIosUrl]: string|null = null;
 
     private[$onARButtonContainerClick] = (event: Event) => {
       event.preventDefault();
@@ -332,12 +335,14 @@ configuration or device capabilities');
      * iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
-      if (this.arAutogenerateUsdz && !this.iosSrc) {
+      if (this.arAutogenerateUsdz && !this[$generatedIosUrl]) {
         this[$arButtonContainer].classList.remove('enabled');
         await this.prepareUSDZ();
         this[$arButtonContainer].classList.add('enabled');
       }
-      const modelUrl = new URL(this.iosSrc!, self.location.toString());
+      const modelUrl = this.arAutogenerateUsdz ?
+          new URL(this[$generatedIosUrl]!, self.location.toString()) :
+          new URL(this.iosSrc!, self.location.toString());
       if (this.arScale === 'fixed') {
         if (modelUrl.hash) {
           modelUrl.hash += '&';
@@ -358,9 +363,9 @@ configuration or device capabilities');
 
     [$onModelLoad]() {
       super[$onModelLoad]();
-      if (this.arAutogenerateUsdz && !!this.iosSrc) {
-        URL.revokeObjectURL(this.iosSrc);
-        this.iosSrc = null;
+      if (this.arAutogenerateUsdz && this[$generatedIosUrl] != null) {
+        URL.revokeObjectURL(this[$generatedIosUrl]!);
+        this[$generatedIosUrl] = null;
       }
     }
 
@@ -385,7 +390,7 @@ configuration or device capabilities');
         type: 'application/octet-stream',
       });
 
-      this.iosSrc = URL.createObjectURL(blob);
+      this[$generatedIosUrl] = URL.createObjectURL(blob);
 
       updateSourceProgress(1);
 
