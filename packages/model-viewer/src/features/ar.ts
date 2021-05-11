@@ -15,9 +15,10 @@
 
 import {property} from 'lit-element';
 import {Event as ThreeEvent} from 'three';
+import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$needsRender, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus, ARTracking} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
@@ -31,7 +32,7 @@ export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'none';
 const deserializeARModes = enumerationDeserializer<ARMode>(
     ['quick-look', 'scene-viewer', 'webxr', 'none']);
 
-const DEFAULT_AR_MODES = 'webxr scene-viewer quick-look';
+const DEFAULT_AR_MODES = 'webxr scene-viewer';
 
 const ARMode: {[index: string]: ARMode} = {
   QUICK_LOOK: 'quick-look',
@@ -57,6 +58,7 @@ const $arMode = Symbol('arMode');
 const $arModes = Symbol('arModes');
 const $arAnchor = Symbol('arAnchor');
 const $preload = Symbol('preload');
+const $generatedIosUrl = Symbol('generatedIosUrl');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
@@ -104,6 +106,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
     protected[$preload] = false;
+
+    private[$generatedIosUrl]: string|null = null;
 
     private[$onARButtonContainerClick] = (event: Event) => {
       event.preventDefault();
@@ -226,12 +230,16 @@ configuration or device capabilities');
               !isSceneViewerBlocked) {
             this[$arMode] = ARMode.SCENE_VIEWER;
             break;
-          } else if (
-              value === 'quick-look' && !!this.iosSrc &&
-              IS_AR_QUICKLOOK_CANDIDATE) {
+          } else if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE) {
             this[$arMode] = ARMode.QUICK_LOOK;
             break;
           }
+        }
+
+        // The presence of ios-src overrides the absence of quick-look ar-mode.
+        if (!this.canActivateAR && this.iosSrc != null &&
+            IS_AR_QUICKLOOK_CANDIDATE) {
+          this[$arMode] = ARMode.QUICK_LOOK;
         }
       }
 
@@ -352,22 +360,75 @@ configuration or device capabilities');
      * Takes a URL to a USDZ file and sets the appropriate fields so that Safari
      * iOS can intent to their AR Quick Look.
      */
-    [$openIOSARQuickLook]() {
-      const modelUrl = new URL(this.iosSrc!, self.location.toString());
+    async[$openIOSARQuickLook]() {
+      const generateUsdz = !this.iosSrc;
+
+      this[$arButtonContainer].classList.remove('enabled');
+
+      const modelUrl = new URL(
+          generateUsdz ? await this.prepareUSDZ() : this.iosSrc!,
+          self.location.toString());
+
+      this[$arButtonContainer].classList.add('enabled');
+
       if (this.arScale === 'fixed') {
         if (modelUrl.hash) {
           modelUrl.hash += '&';
         }
         modelUrl.hash += 'allowsContentScaling=0';
       }
+
+
       const anchor = this[$arAnchor];
       anchor.setAttribute('rel', 'ar');
       const img = document.createElement('img');
       anchor.appendChild(img);
       anchor.setAttribute('href', modelUrl.toString());
+      if (generateUsdz) {
+        anchor.setAttribute('download', 'model.usdz');
+      }
       console.log('Attempting to present in AR with Quick Look...');
       anchor.click();
       anchor.removeChild(img);
+    }
+
+    async prepareUSDZ(): Promise<string> {
+      const updateSourceProgress = this[$progressTracker].beginActivity();
+
+      if (this[$generatedIosUrl] != null) {
+        URL.revokeObjectURL(this[$generatedIosUrl]!);
+        this[$generatedIosUrl] = null;
+      }
+
+      const scene = this[$scene];
+
+      const shadow = scene.shadow;
+      let visible = false;
+
+      // Remove shadow from export
+      if (shadow != null) {
+        visible = shadow.visible;
+        shadow.visible = false;
+      }
+
+      updateSourceProgress(0.2);
+
+      const exporter = new USDZExporter();
+      const arraybuffer = await exporter.parse(scene.modelContainer);
+      const blob = new Blob([arraybuffer], {
+        type: 'application/octet-stream',
+      });
+
+      const url = URL.createObjectURL(blob);
+      this[$generatedIosUrl] = url;
+
+      updateSourceProgress(1);
+
+      if (shadow != null) {
+        shadow.visible = visible;
+      }
+
+      return url;
     }
   }
 
