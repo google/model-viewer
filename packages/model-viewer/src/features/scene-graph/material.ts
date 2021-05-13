@@ -117,23 +117,33 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   setBaseColorMap(uri: string) {
-    this[$pbrMetallicRoughness].setBaseColorMap(uri);
+    if (this[$pbrMetallicRoughness] !== null) {
+      this[$pbrMetallicRoughness].setBaseColorMap(uri);
+    }
   }
 
   setMetallicRoughnessMap(uri: string) {
-    this[$pbrMetallicRoughness].setMetallicRoughnessMap(uri);
+    if (this[$pbrMetallicRoughness] !== null) {
+      this[$pbrMetallicRoughness].setMetallicRoughnessMap(uri);
+    }
   }
 
   setNormalMap(uri: string) {
-    this[$normalTexture]!.texture.source.setURI(uri);
+    if (this[$normalTexture] !== null) {
+      this[$normalTexture]!.texture.source.setURI(uri);
+    }
   }
 
   setOcclusionMap(uri: string) {
-    this[$occlusionTexture]!.texture.source.setURI(uri);
+    if (this[$occlusionTexture] !== null) {
+      this[$occlusionTexture]!.texture.source.setURI(uri);
+    }
   }
 
   setEmissiveMap(uri: string) {
-    this[$emissiveTexture]!.texture.source.setURI(uri);
+    if (this[$emissiveTexture] !== null) {
+      this[$emissiveTexture]!.texture.source.setURI(uri);
+    }
   }
 
   setEmissiveFactor(rgb: RGB) {

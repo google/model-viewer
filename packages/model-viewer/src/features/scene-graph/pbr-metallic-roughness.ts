@@ -106,11 +106,15 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
   }
 
   setBaseColorMap(uri: string) {
-    this[$baseColorTexture]!.texture.source.setURI(uri);
+    if (this[$baseColorTexture] !== null) {
+      this[$baseColorTexture]!.texture.source.setURI(uri);
+    }
   }
 
   setMetallicRoughnessMap(uri: string) {
-    this[$metallicRoughnessTexture]!.texture.source.setURI(uri);
+    if (this[$metallicRoughnessTexture] !== null) {
+      this[$metallicRoughnessTexture]!.texture.source.setURI(uri);
+    }
   }
 
   setBaseColorFactor(rgba: RGBA) {
