@@ -318,11 +318,11 @@ modelViewerTexture.addEventListener("load", (ev) => {
   let material = modelViewerTexture.model.materials[0];
 
   document.querySelector('#diffuse').addEventListener('input', (event) => {
-    material.setBaseColorMap(event.target.value);
+    material.pbrMetallicRoughness.setBaseColorMap(event.target.value);
   });
 
   document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
-    material.setMetallicRoughnessMap(event.target.value);
+    material.pbrMetallicRoughness.setMetallicRoughnessMap(event.target.value);
   });
 })
 

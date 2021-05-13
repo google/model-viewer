@@ -116,18 +116,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return (this[$sourceObject] as GLTFMaterial).emissiveFactor!;
   }
 
-  setBaseColorMap(uri: string) {
-    if (this[$pbrMetallicRoughness] !== null) {
-      this[$pbrMetallicRoughness].setBaseColorMap(uri);
-    }
-  }
-
-  setMetallicRoughnessMap(uri: string) {
-    if (this[$pbrMetallicRoughness] !== null) {
-      this[$pbrMetallicRoughness].setMetallicRoughnessMap(uri);
-    }
-  }
-
   setNormalMap(uri: string) {
     if (this[$normalTexture] !== null) {
       this[$normalTexture]!.texture.source.setURI(uri);
