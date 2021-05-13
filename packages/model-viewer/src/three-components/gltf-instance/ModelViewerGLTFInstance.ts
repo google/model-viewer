@@ -22,6 +22,8 @@ import {alphaChunk} from '../shader-chunk/alphatest_fragment.glsl.js';
 
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
+
+
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 
@@ -177,6 +179,24 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     }
 
     const clone = material.clone() as MeshStandardMaterial;
+    if (material.map != null) {
+      material.map = material.map.clone();
+    }
+    if (material.normalMap != null) {
+      material.normalMap = material.normalMap.clone();
+    }
+    if (material.aoMap != null) {
+      material.aoMap = material.aoMap.clone();
+    }
+    if (material.emissiveMap != null) {
+      material.emissiveMap = material.emissiveMap.clone();
+    }
+    if (material.metalnessMap != null) {
+      material.metalnessMap = material.metalnessMap.clone();
+    }
+    if (material.roughnessMap != null) {
+      material.roughnessMap = material.roughnessMap.clone();
+    }
 
     // This allows us to patch three's materials, on top of patches already
     // made, for instance GLTFLoader patches SpecularGlossiness materials.
