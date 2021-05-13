@@ -54,10 +54,10 @@ button {
   </style>
 </head>
 <body>
-<div class="examples-page">  
+<div class="examples-page">
   <div class="sidebar" id="sidenav"></div>
   <div id="toggle"></div>
-  
+
   <div class="examples-container">
     <div class="sample">
       <div id="variants" class="demo"></div>
@@ -130,8 +130,8 @@ select.addEventListener('input', (event) => {
     <div>Pitch: <input id="pitch" value="0" size="3" class="number"> degrees</div>
     <div>Yaw: <input id="yaw" value="0" size="3" class="number"> degrees</div>
     <div>
-      Scale: X: <input id="x" value="1" size="3" class="number">, 
-      Y: <input id="y" value="1" size="3" class="number">, 
+      Scale: X: <input id="x" value="1" size="3" class="number">,
+      Y: <input id="y" value="1" size="3" class="number">,
       Z: <input id="z" value="1" size="3" class="number">
     </div>
     <button id="frame">Update Framing</button>
@@ -268,7 +268,7 @@ modelViewerParameters.addEventListener("load", (ev) => {
     material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
     metalnessDisplay.textContent = event.target.value;
   });
-  
+
   document.querySelector('#roughness').addEventListener('input', (event) => {
     material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
     roughnessDisplay.textContent = event.target.value;
@@ -317,16 +317,12 @@ modelViewerTexture.addEventListener("load", (ev) => {
 
   let material = modelViewerTexture.model.materials[0];
 
-  let applyPBRTexture = (channel, event) => {
-    material.pbrMetallicRoughness[channel].texture.source.setURI(event.target.value);
-  }
-  
   document.querySelector('#diffuse').addEventListener('input', (event) => {
-    applyPBRTexture('baseColorTexture', event);
+    material.setBaseColorMap(event.target.value);
   });
-  
+
   document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
-    applyPBRTexture('metallicRoughnessTexture', event);
+    material.setMetallicRoughnessMap(event.target.value);
   });
 })
 
@@ -380,20 +376,16 @@ modelViewerTexture.addEventListener("load", () => {
 
   let material = modelViewerTexture.model.materials[0];
 
-  let applyTexture = (channel, event) => {
-    material[channel].texture.source.setURI(event.target.value);
-  }
-
   document.querySelector('#normals').addEventListener('input', (event) => {
-    applyTexture('normalTexture', event);
+    material.setNormalMap(event.target.value);
   });
-  
+
   document.querySelector('#occlusion').addEventListener('input', (event) => {
-    applyTexture('occlusionTexture', event);
+    material.setOcclusionMap(event.target.value);
   });
-  
+
   document.querySelector('#emission').addEventListener('input', (event) => {
-    applyTexture('emissiveTexture', event);
+    material.setEmissiveMap(event.target.value);
   });
 });
 

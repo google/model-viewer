@@ -17,10 +17,11 @@ import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
-import {RGBA} from './api.js';
-import {PBRMetallicRoughness as PBRMetallicRoughnessInterface} from './api.js';
+import {PBRMetallicRoughness as PBRMetallicRoughnessInterface, RGBA} from './api.js';
 import {TextureInfo} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+
+
 
 const $threeMaterials = Symbol('threeMaterials');
 const $baseColorTexture = Symbol('baseColorTexture');
@@ -102,6 +103,14 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
   get metallicRoughnessTexture(): TextureInfo|null {
     return this[$metallicRoughnessTexture];
+  }
+
+  setBaseColorMap(uri: string) {
+    this[$baseColorTexture]!.texture.source.setURI(uri);
+  }
+
+  setMetallicRoughnessMap(uri: string) {
+    this[$metallicRoughnessTexture]!.texture.source.setURI(uri);
   }
 
   setBaseColorFactor(rgba: RGBA) {

@@ -23,6 +23,7 @@ import {TextureInfo} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
+
 const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
 const $normalTexture = Symbol('normalTexture');
 const $occlusionTexture = Symbol('occlusionTexture');
@@ -113,6 +114,26 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   get emissiveFactor(): RGB {
     return (this[$sourceObject] as GLTFMaterial).emissiveFactor!;
+  }
+
+  setBaseColorMap(uri: string) {
+    this[$pbrMetallicRoughness].setBaseColorMap(uri);
+  }
+
+  setMetallicRoughnessMap(uri: string) {
+    this[$pbrMetallicRoughness].setMetallicRoughnessMap(uri);
+  }
+
+  setNormalMap(uri: string) {
+    this[$normalTexture]!.texture.source.setURI(uri);
+  }
+
+  setOcclusionMap(uri: string) {
+    this[$occlusionTexture]!.texture.source.setURI(uri);
+  }
+
+  setEmissiveMap(uri: string) {
+    this[$emissiveTexture]!.texture.source.setURI(uri);
   }
 
   setEmissiveFactor(rgb: RGB) {
