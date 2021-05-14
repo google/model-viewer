@@ -72,6 +72,12 @@
               SceneViewer or QuickLook, as these are native apps. Only through WebXR, now our default AR mode, can this be
               achieved, as the AR session is still inside of the browser. This also removes the need to redownload the model.
             </p>
+            <p>
+              Note that by specifically including <code>quick-look</code> in
+              <code>ar-modes</code>, but not specifying an <code>ios-src</code>,
+              the USDZ will instead be auto-generated when the user clicks the
+              AR button on iOS to launch Quick Look. 
+            </p>
           </div>
           <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
@@ -269,7 +275,7 @@
             <h4>This demonstrates several augmented reality modes, including
             <code>webxr</code>, <code>scene-viewer</code>,
             <code>quick-look</code> &amp; the accompanying attributes,
-            <code>ar</code>, <code>ar-modes</code>, <code>ar-scale</code>,
+            <code>ar</code>, <code>ar-scale</code>,
             <code>ios-src</code>.</h4>
             <p>
               Note that WebXR mode requires the page be served on HTTPS and if
@@ -277,10 +283,18 @@
               <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy/xr-spatial-tracking">
                 <code>xr-spatial-tracking</code></a> policy.
             </p>
+            <p>
+              In this example an <code>ios-src</code> attribute is specified,
+              which enables Quick Look on iOS even if it is not specified in
+              <code>ar-modes</code>. This requires an extra download, but can be
+              useful if the auto-generated USDZ is not adequate (for instance it
+              does not support animations yet). Also, this source can be either
+              a .usdz or a .reality file.
+            </p>
           </div>
           <example-snippet stamp-to="ar" highlight-as="html">
             <template>
-<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-scale="fixed" ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
+<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-scale="fixed" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
             </template>
           </example-snippet>
 
