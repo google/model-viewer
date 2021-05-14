@@ -121,6 +121,13 @@ select.addEventListener('input', (event) => {
             called. Also, the <code>bounds</code> attribute is set to
             <code>"tight"</code> to keep the transformed model from floating
             over its shadow.</p>
+            <p>Note that these changes can be made in AR as well, but only in
+            WebXR mode, as this is the only mode that remains in the browser.
+            Changes you made ahead of time will not be reflected in Scene
+            Viewer, since this app downloads the original model again from its
+            URL. iOS Quick Look will reflect your changes as long as
+            <code>ios-src</code> is not specified, since in this case a USDZ
+            will be generated on the fly from the current state.</p>
           </div>
           <example-snippet stamp-to="transforms" highlight-as="html">
             <template>
@@ -191,7 +198,11 @@ z.addEventListener('input', () => {
           <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph</h4>
           <div class="heading">
             <h2 class="demo-title">Change Material Base Color</h2>
-            <p>This is an experimental feature, and the API is considered highly unstable. Please try it out, but be prepared for it to change!</p>
+            <p>This is an experimental feature, and the API is considered highly
+            unstable. Please try it out, but be prepared for it to change!</p>
+            <p>As above, you can change these values in AR, but only in WebXR
+            mode. iOS Quick Look does not reflect these color changes as USDZ
+            does not appear to support colors multiplied onto textures.</p>
           </div>
           <example-snippet stamp-to="changeColor" highlight-as="html">
             <template>
@@ -233,6 +244,9 @@ document.querySelector('#color-controls').addEventListener('click', (event) => {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Change Material Metalness and Roughness Factors</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+            mode. iOS Quick Look does reflect these property changes since they
+            are not also textured.</p>
           </div>
           <example-snippet stamp-to="changeMaterial" highlight-as="html">
             <template>
@@ -287,6 +301,9 @@ modelViewerParameters.addEventListener("load", (ev) => {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Swap textures - Diffuse/MetallicRoughness</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+            mode. iOS Quick Look reflects these texture changes so long as the
+            USDZ is auto-generated.</p>
           </div>
           <example-snippet stamp-to="swapTextures" highlight-as="html">
             <template>
@@ -343,6 +360,9 @@ modelViewerTexture.addEventListener("load", (ev) => {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Swap textures - Normals/Occlusion/Emission</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+              mode. iOS Quick Look reflects these texture changes so long as the
+              USDZ is auto-generated.</p>
           </div>
           <example-snippet stamp-to="swapTextures2" highlight-as="html">
             <template>
