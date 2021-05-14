@@ -58,7 +58,6 @@ const $arMode = Symbol('arMode');
 const $arModes = Symbol('arModes');
 const $arAnchor = Symbol('arAnchor');
 const $preload = Symbol('preload');
-const $generatedIosUrl = Symbol('generatedIosUrl');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
@@ -106,8 +105,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
     protected[$preload] = false;
-
-    private[$generatedIosUrl]: string|null = null;
 
     private[$onARButtonContainerClick] = (event: Event) => {
       event.preventDefault();
@@ -365,11 +362,8 @@ configuration or device capabilities');
 
       this[$arButtonContainer].classList.remove('enabled');
 
-      const modelUrl = new URL(
-          generateUsdz ? await this.prepareUSDZ() : this.iosSrc!,
-          self.location.toString());
-
-      this[$arButtonContainer].classList.add('enabled');
+      const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
+      const modelUrl = new URL(objectURL, self.location.toString());
 
       if (this.arScale === 'fixed') {
         if (modelUrl.hash) {
@@ -377,7 +371,6 @@ configuration or device capabilities');
         }
         modelUrl.hash += 'allowsContentScaling=0';
       }
-
 
       const anchor = this[$arAnchor];
       anchor.setAttribute('rel', 'ar');
@@ -390,15 +383,14 @@ configuration or device capabilities');
       console.log('Attempting to present in AR with Quick Look...');
       anchor.click();
       anchor.removeChild(img);
+      if (generateUsdz) {
+        URL.revokeObjectURL(objectURL);
+      }
+      this[$arButtonContainer].classList.add('enabled');
     }
 
     async prepareUSDZ(): Promise<string> {
       const updateSourceProgress = this[$progressTracker].beginActivity();
-
-      if (this[$generatedIosUrl] != null) {
-        URL.revokeObjectURL(this[$generatedIosUrl]!);
-        this[$generatedIosUrl] = null;
-      }
 
       const scene = this[$scene];
 
@@ -416,11 +408,10 @@ configuration or device capabilities');
       const exporter = new USDZExporter();
       const arraybuffer = await exporter.parse(scene.modelContainer);
       const blob = new Blob([arraybuffer], {
-        type: 'application/octet-stream',
+        type: 'model/vnd.usdz+zip',
       });
 
       const url = URL.createObjectURL(blob);
-      this[$generatedIosUrl] = url;
 
       updateSourceProgress(1);
 
