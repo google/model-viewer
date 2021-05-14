@@ -22,8 +22,6 @@ import {alphaChunk} from '../shader-chunk/alphatest_fragment.glsl.js';
 
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
-
-
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 

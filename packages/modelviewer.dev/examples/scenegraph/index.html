@@ -54,10 +54,10 @@ button {
   </style>
 </head>
 <body>
-<div class="examples-page">
+<div class="examples-page">  
   <div class="sidebar" id="sidenav"></div>
   <div id="toggle"></div>
-
+  
   <div class="examples-container">
     <div class="sample">
       <div id="variants" class="demo"></div>
@@ -130,8 +130,8 @@ select.addEventListener('input', (event) => {
     <div>Pitch: <input id="pitch" value="0" size="3" class="number"> degrees</div>
     <div>Yaw: <input id="yaw" value="0" size="3" class="number"> degrees</div>
     <div>
-      Scale: X: <input id="x" value="1" size="3" class="number">,
-      Y: <input id="y" value="1" size="3" class="number">,
+      Scale: X: <input id="x" value="1" size="3" class="number">, 
+      Y: <input id="y" value="1" size="3" class="number">, 
       Z: <input id="z" value="1" size="3" class="number">
     </div>
     <button id="frame">Update Framing</button>
@@ -268,7 +268,7 @@ modelViewerParameters.addEventListener("load", (ev) => {
     material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
     metalnessDisplay.textContent = event.target.value;
   });
-
+  
   document.querySelector('#roughness').addEventListener('input', (event) => {
     material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
     roughnessDisplay.textContent = event.target.value;
@@ -317,12 +317,16 @@ modelViewerTexture.addEventListener("load", (ev) => {
 
   let material = modelViewerTexture.model.materials[0];
 
+  let applyPBRTexture = (channel, event) => {
+    material.pbrMetallicRoughness[channel].texture.source.setURI(event.target.value);
+  }
+  
   document.querySelector('#diffuse').addEventListener('input', (event) => {
-    material.pbrMetallicRoughness.setBaseColorMap(event.target.value);
+    applyPBRTexture('baseColorTexture', event);
   });
-
+  
   document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
-    material.pbrMetallicRoughness.setMetallicRoughnessMap(event.target.value);
+    applyPBRTexture('metallicRoughnessTexture', event);
   });
 })
 
@@ -376,16 +380,20 @@ modelViewerTexture.addEventListener("load", () => {
 
   let material = modelViewerTexture.model.materials[0];
 
+  let applyTexture = (channel, event) => {
+    material[channel].texture.source.setURI(event.target.value);
+  }
+
   document.querySelector('#normals').addEventListener('input', (event) => {
-    material.setNormalMap(event.target.value);
+    applyTexture('normalTexture', event);
   });
-
+  
   document.querySelector('#occlusion').addEventListener('input', (event) => {
-    material.setOcclusionMap(event.target.value);
+    applyTexture('occlusionTexture', event);
   });
-
+  
   document.querySelector('#emission').addEventListener('input', (event) => {
-    material.setEmissiveMap(event.target.value);
+    applyTexture('emissiveTexture', event);
   });
 });
 
