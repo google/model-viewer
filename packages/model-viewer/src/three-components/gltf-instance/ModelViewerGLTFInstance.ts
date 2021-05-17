@@ -115,7 +115,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       const meshBack = mesh.clone() as Mesh;
       meshBack.material = duplicateMaterial;
       meshBack.renderOrder = -1;
-      mesh.add(meshBack);
+      mesh.parent!.add(meshBack);
     }
 
     return prepared;
