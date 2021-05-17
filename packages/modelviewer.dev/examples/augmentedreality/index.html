@@ -72,10 +72,16 @@
               SceneViewer or QuickLook, as these are native apps. Only through WebXR, now our default AR mode, can this be
               achieved, as the AR session is still inside of the browser. This also removes the need to redownload the model.
             </p>
+            <p>
+              Note that by specifically including <code>quick-look</code> in
+              <code>ar-modes</code>, but not specifying an <code>ios-src</code>,
+              the USDZ will instead be auto-generated when the user clicks the
+              AR button on iOS to launch Quick Look. 
+            </p>
           </div>
           <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
-<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar camera-controls alt="A 3D model carousel">
+<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model carousel">
   
   <button slot="ar-button" id="ar-button">
     View in your space
@@ -84,6 +90,10 @@
   <div id="ar-prompt">
     <img src="../../assets/hand.png">
   </div>
+
+  <button id="ar-failure">
+    AR is not tracking!
+  </button>
 
   <div class="slider">
     <div class="slides">
@@ -194,6 +204,18 @@
     animation: circle 4s linear infinite;
   }
 
+  model-viewer > #ar-failure {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 175px;
+    display: none;
+  }
+
+  model-viewer[ar-tracking="not-tracking"] > #ar-failure {
+    display: block;
+  }
+
   .slider {
     width: 100%;
     text-align: center;
@@ -250,11 +272,29 @@
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Augmented Reality</h2>
-            <h4>This demonstrates several augmented reality modes, including <code>webxr</code>, <code>scene-viewer</code>, <code>quick-look</code> &amp; the accompanying attributes, <code>ar</code>, <code>ar-modes</code>, <code>ar-scale</code>, <code>ios-src</code>.</h4>
+            <h4>This demonstrates several augmented reality modes, including
+            <code>webxr</code>, <code>scene-viewer</code>,
+            <code>quick-look</code> &amp; the accompanying attributes,
+            <code>ar</code>, <code>ar-scale</code>,
+            <code>ios-src</code>.</h4>
+            <p>
+              Note that WebXR mode requires the page be served on HTTPS and if
+              enclosed in an iframe, that iframe must allow your origin the
+              <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy/xr-spatial-tracking">
+                <code>xr-spatial-tracking</code></a> policy.
+            </p>
+            <p>
+              In this example an <code>ios-src</code> attribute is specified,
+              which enables Quick Look on iOS even if it is not specified in
+              <code>ar-modes</code>. This requires an extra download, but can be
+              useful if the auto-generated USDZ is not adequate (for instance it
+              does not support animations yet). Also, this source can be either
+              a .usdz or a .reality file.
+            </p>
           </div>
           <example-snippet stamp-to="ar" highlight-as="html">
             <template>
-<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
+<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-scale="fixed" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz"></model-viewer>
             </template>
           </example-snippet>
 
@@ -272,7 +312,7 @@
           </div>
           <example-snippet stamp-to="sceneViewer" highlight-as="html">
             <template>
-<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" ar-scale="auto" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
+<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
   <div id="error" class="hide">AR is not supported on this device</div>
 </model-viewer>
 <script>
@@ -319,7 +359,7 @@
           </div>
           <example-snippet stamp-to="wall" highlight-as="html">
             <template>
-<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" camera-controls alt="A 3D model of some wall art"></model-viewer>
+<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of some wall art"></model-viewer>
             </template>
           </example-snippet>
 
@@ -366,9 +406,9 @@
             </div>
             <example-snippet stamp-to="transparentBackground" highlight-as="html">
               <template>
-<div class="background-demo" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;">
+<div class="demo" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;">
   <span style="position: absolute; text-align: center; font-size: 100px; top:50%;">Background</span>
-  <model-viewer camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
+  <model-viewer camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
 </div>
               </template>
             </example-snippet>

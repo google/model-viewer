@@ -2,16 +2,13 @@
   padding: 10px 40px;
 }
 
-p {
-  display: inline;
-}
-
 .footerDocumentation {
   margin-top: 500px;
 }
 
 .attribute-name,
 .cs-name,
+.part-name,
 .propertie-name,
 .staticPropertie-name,
 .method-name,
@@ -25,6 +22,7 @@ p {
 
 .attribute-definition,
 .cs-definition,
+.part-definition,
 .propertie-definition,
 .staticPropertie-definition,
 .method-definition,
@@ -40,6 +38,7 @@ p {
 
 .attribute-container,
 .cs-container,
+.part-container,
 .propertie-container,
 .staticPropertie-container,
 .method-container,
