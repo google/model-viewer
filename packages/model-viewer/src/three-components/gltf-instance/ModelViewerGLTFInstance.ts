@@ -178,22 +178,28 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
 
     const clone = material.clone() as MeshStandardMaterial;
     if (material.map != null) {
-      material.map = material.map.clone();
+      clone.map = material.map.clone();
+      clone.map.needsUpdate = true;
     }
     if (material.normalMap != null) {
-      material.normalMap = material.normalMap.clone();
+      clone.normalMap = material.normalMap.clone();
+      clone.normalMap.needsUpdate = true;
     }
     if (material.aoMap != null) {
-      material.aoMap = material.aoMap.clone();
+      clone.aoMap = material.aoMap.clone();
+      clone.aoMap.needsUpdate = true;
     }
     if (material.emissiveMap != null) {
-      material.emissiveMap = material.emissiveMap.clone();
+      clone.emissiveMap = material.emissiveMap.clone();
+      clone.emissiveMap.needsUpdate = true;
     }
     if (material.metalnessMap != null) {
-      material.metalnessMap = material.metalnessMap.clone();
+      clone.metalnessMap = material.metalnessMap.clone();
+      clone.metalnessMap.needsUpdate = true;
     }
     if (material.roughnessMap != null) {
-      material.roughnessMap = material.roughnessMap.clone();
+      clone.roughnessMap = material.roughnessMap.clone();
+      clone.roughnessMap.needsUpdate = true;
     }
 
     // This allows us to patch three's materials, on top of patches already
