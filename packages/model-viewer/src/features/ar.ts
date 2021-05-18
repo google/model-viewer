@@ -303,7 +303,7 @@ configuration or device capabilities');
       locationUrl.hash = noArViewerSigil;
 
       // modelUrl can contain title/link/sound etc.
-      params.set('mode', 'ar_only');
+      params.set('mode', 'ar_preferred');
       if (!params.has('disable_occlusion')) {
         params.set('disable_occlusion', 'true');
       }
