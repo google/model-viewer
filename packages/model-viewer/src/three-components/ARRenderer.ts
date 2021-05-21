@@ -587,7 +587,9 @@ export class ARRenderer extends EventDispatcher {
         this.isTwoFingering = false;
       } else {
         const {separation, deltaYaw} = this.fingerPolar(fingers);
-        this.goalYaw += deltaYaw;
+        if (this.placeOnWall === false) {
+          this.goalYaw += deltaYaw;
+        }
         if (scene.canScale) {
           const scale = separation / this.firstRatio;
           this.goalScale =
