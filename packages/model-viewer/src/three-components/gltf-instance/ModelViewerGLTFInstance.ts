@@ -186,7 +186,10 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     }
 
     // Clones the roughnessMap if it exists.
-    const roughnessMap: Texture|null = material.roughnessMap!.clone();
+    let roughnessMap: Texture|null = null;
+    if (material.roughnessMap) {
+      roughnessMap = material.roughnessMap!.clone();
+    }
 
     // Assigns the roughnessMap to the cloned material and generates mipmaps.
     if (roughnessMap !== null) {
