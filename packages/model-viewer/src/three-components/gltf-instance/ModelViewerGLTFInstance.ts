@@ -188,18 +188,15 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     // Clones the roughnessMap if it exists.
     let roughnessMap: Texture|null = null;
     if (material.roughnessMap) {
-      roughnessMap = material.roughnessMap!.clone();
+      roughnessMap = material.roughnessMap.clone();
     }
 
     // Assigns the roughnessMap to the cloned material and generates mipmaps.
-    if (roughnessMap !== null) {
+    if (roughnessMap !== null && roughnessMap != null) {
       roughnessMap.needsUpdate = true;
       clone.roughnessMap = roughnessMap;
 
-      // Generates mipmaps from the clone of the roughnessMap
-      // TODO (b/188906197) Render artifacts when generating mipmaps after
-      // cloning (texture). Move back to 'scene.traverse()' when bug is
-      // resolved.
+      // Generates mipmaps from the clone of the roughnessMap.
       const {threeRenderer, roughnessMipmapper} = Renderer.singleton;
       // XR must be disabled while doing offscreen rendering or it will
       // clobber the camera.
