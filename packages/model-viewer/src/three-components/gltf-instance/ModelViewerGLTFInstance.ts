@@ -185,12 +185,18 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       clone.emissiveMap.needsUpdate = true;
     }
 
+    // Clones the roughnessMap if it exists.
     const roughnessMap: Texture|null = material.roughnessMap!.clone();
 
+    // Assigns the roughnessMap to the cloned material and generates mipmaps.
     if (roughnessMap !== null) {
       roughnessMap.needsUpdate = true;
       clone.roughnessMap = roughnessMap;
 
+      // Generates mipmaps from the clone of the roughnessMap
+      // TODO (b/188906197) Render artifacts when generating mipmaps after
+      // cloning (texture). Move back to 'scene.traverse()' when bug is
+      // resolved.
       const {threeRenderer, roughnessMipmapper} = Renderer.singleton;
       // XR must be disabled while doing offscreen rendering or it will
       // clobber the camera.
@@ -200,6 +206,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       threeRenderer.xr.enabled = enabled;
     }
 
+    // Checks if roughnessMap and metalnessMap share the same texture and
+    // either clones or assigns.
     if (material.roughnessMap === material.metalnessMap) {
       clone.metalnessMap = roughnessMap;
     } else if (material.metalnessMap != null) {
@@ -207,6 +215,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       clone.metalnessMap.needsUpdate = true;
     }
 
+    // Checks if roughnessMap and aoMap share the same texture and
+    // either clones or assigns.
     if (material.roughnessMap === material.aoMap) {
       clone.aoMap = roughnessMap;
     } else if (material.aoMap != null) {
