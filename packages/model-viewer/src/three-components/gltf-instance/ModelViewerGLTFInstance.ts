@@ -22,6 +22,8 @@ import {alphaChunk} from '../shader-chunk/alphatest_fragment.glsl.js';
 
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
+
+
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 
@@ -183,7 +185,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       clone.emissiveMap.needsUpdate = true;
     }
 
-    const roughnessMap: Texture|null = material!.roughnessMap!.clone();
+    const roughnessMap: Texture|null = material.roughnessMap!.clone();
 
     if (roughnessMap !== null) {
       roughnessMap.needsUpdate = true;
@@ -206,7 +208,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     }
 
     if (material.roughnessMap === material.aoMap) {
-      clone.metalnessMap = roughnessMap;
+      clone.aoMap = roughnessMap;
     } else if (material.aoMap != null) {
       clone.aoMap = material.aoMap.clone();
       clone.aoMap.needsUpdate = true;
