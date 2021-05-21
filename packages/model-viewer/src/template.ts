@@ -171,30 +171,16 @@ canvas.show {
   left: 0;
   width: 100%;
   height: var(--progress-bar-height, 5px);
+  background-color: var(--progress-bar-color, rgba(0, 0, 0, 0.4));
   transition: transform 0.09s;
   transform-origin: top left;
   transform: scaleX(0);
   overflow: hidden;
 }
 
-#default-progress-bar > .bar:before {
-  content: '';
-  display: block;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-
-  background-color: var(--progress-bar-color, rgba(0, 0, 0, 0.4));
-
-  transition: none;
-  transform-origin: top left;
-  transform: translateY(0);
-}
-
-#default-progress-bar > .bar.hide:before {
-  transition: transform 0.3s 1s;
-  transform: translateY(-100%);
+#default-progress-bar > .bar.hide {
+  transition: opacity 0.3s 1s;
+  opacity: 0;
 }
 
 .slot.interaction-prompt {
