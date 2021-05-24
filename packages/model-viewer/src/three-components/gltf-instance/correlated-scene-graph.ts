@@ -119,26 +119,38 @@ export class CorrelatedSceneGraph {
     const cloneThreeObjectMap: ThreeObjectToGLTFElementHandleMap = new Map();
     const cloneGLTFELementMap: GLTFElementToThreeObjectMap = new Map();
 
+    const defaultMaterial = {name: 'Default'} as Material;
+    const defaultReference = {type: 'materials', index: -1} as GLTFReference;
+
     for (let i = 0; i < originalThreeGLTF.scenes.length; i++) {
       this[$parallelTraverseThreeScene](
           originalThreeGLTF.scenes[i],
           cloneThreeGLTF.scenes[i],
           (object: ThreeSceneObject, cloneObject: ThreeSceneObject) => {
-            const elementReference =
+            let elementReference =
                 upstreamCorrelatedSceneGraph.threeObjectMap.get(object);
 
-            if (elementReference != null) {
-              const {type, index} = elementReference;
-              const cloneElement = cloneGLTF[type]![index];
-
-              cloneThreeObjectMap.set(cloneObject, {type, index});
-
-              const cloneObjects: Set<typeof cloneObject> =
-                  cloneGLTFELementMap.get(cloneElement) || new Set();
-              cloneObjects.add(cloneObject);
-
-              cloneGLTFELementMap.set(cloneElement, cloneObjects);
+            if (elementReference == null) {
+              if (defaultReference.index < 0) {
+                if (cloneGLTF.materials == null) {
+                  cloneGLTF.materials = [];
+                }
+                defaultReference.index = cloneGLTF.materials.length;
+                cloneGLTF.materials.push(defaultMaterial);
+              }
+              elementReference = defaultReference;
             }
+
+            const {type, index} = elementReference;
+            const cloneElement = cloneGLTF[type]![index];
+
+            cloneThreeObjectMap.set(cloneObject, {type, index});
+
+            const cloneObjects: Set<typeof cloneObject> =
+                cloneGLTFELementMap.get(cloneElement) || new Set();
+            cloneObjects.add(cloneObject);
+
+            cloneGLTFELementMap.set(cloneElement, cloneObjects);
           });
     }
 

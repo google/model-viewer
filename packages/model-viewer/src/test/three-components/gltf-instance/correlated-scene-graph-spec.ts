@@ -93,7 +93,7 @@ suite('correlated-scene-graph', () => {
     });
 
     suite('when correlating a cloned glTF', () => {
-      test('ignores the GLTFLoader "default" material', async () => {
+      test('creates a GLTFLoader "default" material', async () => {
         const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
         const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
@@ -105,11 +105,16 @@ suite('correlated-scene-graph', () => {
         const cloneCorrelatedSceneGraph =
             CorrelatedSceneGraph.from(cloneThreeGLTF, correlatedSceneGraph);
 
+        let name;
         cloneCorrelatedSceneGraph.threeObjectMap.forEach(
-            (_reference, threeObject) => {
-              expect((threeObject as MeshStandardMaterial).isMaterial)
-                  .to.be.undefined;
+            (reference, threeObject) => {
+              if ((threeObject as MeshStandardMaterial).isMaterial) {
+                name =
+                    cloneCorrelatedSceneGraph.gltf.materials![reference.index]
+                        .name;
+              }
             });
+        expect(name).to.be.eq('Default');
       });
     });
   });
