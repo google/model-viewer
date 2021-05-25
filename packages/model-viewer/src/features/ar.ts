@@ -64,6 +64,7 @@ const $onARStatus = Symbol('onARStatus');
 const $onARTracking = Symbol('onARTracking');
 const $onARTap = Symbol('onARTap');
 const $selectARMode = Symbol('selectARMode');
+const $triggerLoad = Symbol('triggerLoad');
 
 export declare interface ARInterface {
   ar: boolean;
@@ -260,12 +261,7 @@ configuration or device capabilities');
     protected async[$enterARWithWebXR]() {
       console.log('Attempting to present in AR with WebXR...');
 
-      if (!this.loaded) {
-        this[$preload] = true;
-        this[$updateSource]();
-        await waitForEvent(this, 'load');
-        this[$preload] = false;
-      }
+      await this[$triggerLoad]();
 
       try {
         this[$arButtonContainer].removeEventListener(
@@ -283,6 +279,15 @@ configuration or device capabilities');
         this.activateAR();
       } finally {
         this[$selectARMode]();
+      }
+    }
+
+    async[$triggerLoad]() {
+      if (!this.loaded) {
+        this[$preload] = true;
+        this[$updateSource]();
+        await waitForEvent(this, 'load');
+        this[$preload] = false;
       }
     }
 
@@ -391,6 +396,8 @@ configuration or device capabilities');
 
     async prepareUSDZ(): Promise<string> {
       const updateSourceProgress = this[$progressTracker].beginActivity();
+
+      await this[$triggerLoad]();
 
       const scene = this[$scene];
 
