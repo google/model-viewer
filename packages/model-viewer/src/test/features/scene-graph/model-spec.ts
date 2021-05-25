@@ -24,9 +24,19 @@ import {assetPath, loadThreeGLTF} from '../../helpers.js';
 const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
+const KHRONOS_TRIANGLE_GLB_PATH =
+    assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
 
 suite('scene-graph/model', () => {
   suite('Model', () => {
+    test('creates a "default" material, when none is specified', async () => {
+      const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+
+      expect(model.materials.length).to.be.eq(1);
+      expect(model.materials[0].name).to.be.eq('Default');
+    });
+
     test.skip('exposes a list of materials in the scene', async () => {
       // TODO: This test is skipped because [$correlatedObjects] can contain
       // unused materials, because it can contain a base material and the
