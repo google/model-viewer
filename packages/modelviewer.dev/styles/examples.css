@@ -371,7 +371,7 @@ model-viewer:focus {
   box-sizing: border-box;
 }
 
-.examples-container > .sample > .demo {
+.sample > .demo {
   height: 100vh;
 }
 
@@ -754,7 +754,7 @@ paper-button {
     padding-top: 0px;
   }
   
-  .examples-container > .sample > .demo {
+  .sample > .demo {
     top: 0;
     height: 150vw;
   }

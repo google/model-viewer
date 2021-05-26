@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, DoubleSide, FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Shader} from 'three';
+import {BackSide, DoubleSide, FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Shader, Texture} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
@@ -21,6 +21,8 @@ import {Renderer} from '../Renderer.js';
 import {alphaChunk} from '../shader-chunk/alphatest_fragment.glsl.js';
 
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
+
+
 
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
@@ -78,13 +80,6 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
             transparent = true;
             material.side = FrontSide;
           }
-          const {threeRenderer, roughnessMipmapper} = Renderer.singleton;
-          // XR must be disabled while doing offscreen rendering or it will
-          // clobber the camera.
-          const {enabled} = threeRenderer.xr;
-          threeRenderer.xr.enabled = false;
-          roughnessMipmapper.generateMipmaps(material as MeshStandardMaterial);
-          threeRenderer.xr.enabled = enabled;
         }
       });
 
@@ -115,7 +110,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       const meshBack = mesh.clone() as Mesh;
       meshBack.material = duplicateMaterial;
       meshBack.renderOrder = -1;
-      mesh.add(meshBack);
+      mesh.parent!.add(meshBack);
     }
 
     return prepared;
@@ -178,22 +173,55 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
 
     const clone = material.clone() as MeshStandardMaterial;
     if (material.map != null) {
-      material.map = material.map.clone();
+      clone.map = material.map.clone();
+      clone.map.needsUpdate = true;
     }
     if (material.normalMap != null) {
-      material.normalMap = material.normalMap.clone();
-    }
-    if (material.aoMap != null) {
-      material.aoMap = material.aoMap.clone();
+      clone.normalMap = material.normalMap.clone();
+      clone.normalMap.needsUpdate = true;
     }
     if (material.emissiveMap != null) {
-      material.emissiveMap = material.emissiveMap.clone();
+      clone.emissiveMap = material.emissiveMap.clone();
+      clone.emissiveMap.needsUpdate = true;
     }
-    if (material.metalnessMap != null) {
-      material.metalnessMap = material.metalnessMap.clone();
-    }
+
+    // Clones the roughnessMap if it exists.
+    let roughnessMap: Texture|null = null;
     if (material.roughnessMap != null) {
-      material.roughnessMap = material.roughnessMap.clone();
+      roughnessMap = material.roughnessMap.clone();
+    }
+
+    // Assigns the roughnessMap to the cloned material and generates mipmaps.
+    if (roughnessMap != null) {
+      roughnessMap.needsUpdate = true;
+      clone.roughnessMap = roughnessMap;
+
+      // Generates mipmaps from the clone of the roughnessMap.
+      const {threeRenderer, roughnessMipmapper} = Renderer.singleton;
+      // XR must be disabled while doing offscreen rendering or it will
+      // clobber the camera.
+      const {enabled} = threeRenderer.xr;
+      threeRenderer.xr.enabled = false;
+      roughnessMipmapper.generateMipmaps(clone as MeshStandardMaterial);
+      threeRenderer.xr.enabled = enabled;
+    }
+
+    // Checks if roughnessMap and metalnessMap share the same texture and
+    // either clones or assigns.
+    if (material.roughnessMap === material.metalnessMap) {
+      clone.metalnessMap = roughnessMap;
+    } else if (material.metalnessMap != null) {
+      clone.metalnessMap = material.metalnessMap.clone();
+      clone.metalnessMap.needsUpdate = true;
+    }
+
+    // Checks if roughnessMap and aoMap share the same texture and
+    // either clones or assigns.
+    if (material.roughnessMap === material.aoMap) {
+      clone.aoMap = roughnessMap;
+    } else if (material.aoMap != null) {
+      clone.aoMap = material.aoMap.clone();
+      clone.aoMap.needsUpdate = true;
     }
 
     // This allows us to patch three's materials, on top of patches already
