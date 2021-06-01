@@ -23,7 +23,7 @@
     "node": ">=6.0.0"
   },
   "dependencies": {
-    "@google/model-viewer": "^1.7.1",
+    "@google/model-viewer": "^1.7.2",
     "@types/prismjs": "^1.9.0",
     "@types/resize-observer-browser": "^0.1.2",
     "@webcomponents/webcomponentsjs": "~2.1.3",
