@@ -140,6 +140,8 @@ export class ARRenderer extends EventDispatcher {
 
     await this.threeRenderer.xr.setSession(session as any);
 
+    (this.threeRenderer.xr as any).cameraAutoUpdate = false;
+
     return session;
   }
 
@@ -389,6 +391,8 @@ export class ARRenderer extends EventDispatcher {
     camera.near = 0.1;
     camera.far = 100;
 
+    (this.threeRenderer.xr as any).updateCamera(camera);
+
     this.presentedScene!.orientHotspots(
         Math.atan2(viewMatrix[1], viewMatrix[5]));
 
@@ -402,7 +406,8 @@ export class ARRenderer extends EventDispatcher {
 
       if (this.threeRenderer.xr.getSession() != null) {
         this.projectionMatrix.copy(
-            this.threeRenderer.xr.getCamera(camera).projectionMatrix);
+            //@ts-ignore
+            this.threeRenderer.xr.getCamera().projectionMatrix);
         this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
       }
 
