@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {USE_OFFSCREEN_CANVAS} from '../../constants.js';
 import {$controls} from '../../features/controls.js';
 import {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene, Camera, RendererInterface} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
@@ -189,7 +188,7 @@ suite('Renderer with two scenes', () => {
     test('uses the proper canvas when unregsitering scenes', () => {
       renderer.render(performance.now());
 
-      expect(renderer.canvasElement.classList.contains('show'))
+      expect(renderer.canvas3D.classList.contains('show'))
           .to.be.eq(
               false, 'webgl canvas should not be shown with multiple scenes.');
       expect(scene.canvas.classList.contains('show'))
@@ -201,20 +200,14 @@ suite('Renderer with two scenes', () => {
       renderer.unregisterScene(scene);
       renderer.render(performance.now());
 
-      if (USE_OFFSCREEN_CANVAS) {
-        expect(renderer.canvasElement.classList.contains('show'))
-            .to.be.eq(false);
-        expect(otherScene.canvas.classList.contains('show')).to.be.eq(true);
-      } else {
-        expect(renderer.canvasElement.parentElement)
-            .to.be.eq(otherScene.canvas.parentElement);
-        expect(renderer.canvasElement.classList.contains('show'))
-            .to.be.eq(true, 'webgl canvas should be shown with single scene.');
-        expect(otherScene.canvas.classList.contains('show'))
-            .to.be.eq(
-                false,
-                'otherScene canvas should not be shown when it is the only scene.');
-      }
+      expect(renderer.canvas3D.parentElement)
+          .to.be.eq(otherScene.canvas.parentElement);
+      expect(renderer.canvas3D.classList.contains('show'))
+          .to.be.eq(true, 'webgl canvas should be shown with single scene.');
+      expect(otherScene.canvas.classList.contains('show'))
+          .to.be.eq(
+              false,
+              'otherScene canvas should not be shown when it is the only scene.');
     });
 
     suite('when resizing', () => {
