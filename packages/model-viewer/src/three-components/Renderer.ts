@@ -379,7 +379,6 @@ export class Renderer extends EventDispatcher {
   render(t: number, frame?: XRFrame) {
     if (frame != null) {
       this.arRenderer.onWebXRFrame(t, frame);
-      this.arRenderer.presentedScene!.postRender();
       return;
     }
 
@@ -452,8 +451,6 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(
           0, Math.floor(this.height * dpr) - height, width, height);
       this.threeRenderer.render(scene, scene.camera);
-
-      scene.postRender();
 
       if (this.multipleScenesVisible) {
         if (scene.context == null) {

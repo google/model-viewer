@@ -16,7 +16,7 @@
 
 import {Matrix3, Matrix4, Vector2} from 'three';
 
-import ModelViewerElementBase, {$needsRender, $scene, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
 
@@ -92,6 +92,18 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$observer].disconnect();
       } else {
         ShadyDOM.unobserveChildren(this[$observer]);
+      }
+    }
+
+    [$tick](time: number, delta: number) {
+      super[$tick](time, delta);
+      const scene = this[$scene];
+      const {camera, annotationRenderer} = scene;
+
+      if (scene.isDirty) {
+        scene.updateHotspots(camera.position);
+        annotationRenderer.domElement.style.display = '';
+        annotationRenderer.render(scene, camera);
       }
     }
 
