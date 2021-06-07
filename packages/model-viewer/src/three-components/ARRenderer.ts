@@ -80,7 +80,6 @@ export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
   public currentSession: XRSession|null = null;
   public placeOnWall = false;
-  public cameraPosition = new Vector3();
 
   private placementBox: PlacementBox|null = null;
   private lastTick: number|null = null;
@@ -139,6 +138,8 @@ export class ARRenderer extends EventDispatcher {
     this.threeRenderer.xr.setReferenceSpaceType('local');
 
     await this.threeRenderer.xr.setSession(session as any);
+
+    (this.threeRenderer.xr as any).cameraAutoUpdate = false;
 
     return session;
   }
@@ -389,10 +390,10 @@ export class ARRenderer extends EventDispatcher {
     camera.near = 0.1;
     camera.far = 100;
 
+    (this.threeRenderer.xr as any).updateCamera(camera);
+
     this.presentedScene!.orientHotspots(
         Math.atan2(viewMatrix[1], viewMatrix[5]));
-
-    this.cameraPosition.set(viewMatrix[12], viewMatrix[13], viewMatrix[14]);
 
     if (!this.initialized) {
       const {position, element} = scene;
@@ -402,7 +403,8 @@ export class ARRenderer extends EventDispatcher {
 
       if (this.threeRenderer.xr.getSession() != null) {
         this.projectionMatrix.copy(
-            this.threeRenderer.xr.getCamera(camera).projectionMatrix);
+            //@ts-ignore
+            this.threeRenderer.xr.getCamera().projectionMatrix);
         this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
       }
 
@@ -415,7 +417,7 @@ export class ARRenderer extends EventDispatcher {
       scene.yaw = Math.atan2(cameraDirection.x, cameraDirection.z) - theta;
       this.goalYaw = scene.yaw;
 
-      position.copy(this.cameraPosition)
+      position.copy(scene.camera.position)
           .add(cameraDirection.multiplyScalar(-1 * radius));
       this.goalPosition.copy(position);
 
@@ -634,7 +636,7 @@ export class ARRenderer extends EventDispatcher {
             this.placementBox!.offsetHeight = offset / scale;
             this.presentedScene!.setShadowScaleAndOffset(scale, offset);
             // Interpolate hit ray up to drag plane
-            const cameraPosition = vector3.copy(this.cameraPosition);
+            const cameraPosition = vector3.copy(scene.camera.position);
             const alpha = -offset / (cameraPosition.y - hit.y);
             cameraPosition.multiplyScalar(alpha);
             hit.multiplyScalar(1 - alpha).add(cameraPosition);

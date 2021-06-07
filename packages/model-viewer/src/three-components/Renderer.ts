@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGL1Renderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
@@ -67,7 +67,7 @@ export class Renderer extends EventDispatcher {
     this._singleton = new Renderer({debug: isDebugMode()});
   }
 
-  public threeRenderer!: WebGL1Renderer;
+  public threeRenderer!: WebGLRenderer;
   public canvasElement: HTMLCanvasElement;
   public canvas3D: HTMLCanvasElement|OffscreenCanvas;
   public textureUtils: TextureUtils|null;
@@ -121,7 +121,7 @@ export class Renderer extends EventDispatcher {
     this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
 
     try {
-      this.threeRenderer = new WebGL1Renderer({
+      this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
         alpha: true,
         antialias: true,
@@ -379,7 +379,6 @@ export class Renderer extends EventDispatcher {
   render(t: number, frame?: XRFrame) {
     if (frame != null) {
       this.arRenderer.onWebXRFrame(t, frame);
-      this.arRenderer.presentedScene!.postRender();
       return;
     }
 
@@ -452,8 +451,6 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(
           0, Math.floor(this.height * dpr) - height, width, height);
       this.threeRenderer.render(scene, scene.camera);
-
-      scene.postRender();
 
       if (this.multipleScenesVisible) {
         if (scene.context == null) {

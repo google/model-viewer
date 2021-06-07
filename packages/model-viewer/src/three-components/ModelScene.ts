@@ -15,9 +15,11 @@
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
+
 import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
+
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
@@ -708,15 +710,5 @@ export class ModelScene extends Scene {
     this.forHotspots((hotspot) => {
       hotspot.visible = visible;
     });
-  }
-
-  postRender() {
-    const {camera} = this;
-
-    if (this.isDirty) {
-      this.updateHotspots(camera.position);
-      this.annotationRenderer.domElement.style.display = '';
-      this.annotationRenderer.render(this, camera);
-    }
   }
 }
