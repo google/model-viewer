@@ -203,7 +203,7 @@ const parseExpression = (() => {
  * An ident is something like a function name or the keyword "auto".
  */
 const parseIdent = (() => {
-  const NOT_IDENT_RE = /[^a-z^0-9^_^\-^\u0240-\uffff]/i;
+  const NOT_IDENT_RE = /[^a-z0-9_\-\u0240-\uffff]/i;
 
   return (inputString: string): ParseResult<IdentNode> => {
     const match = inputString.match(NOT_IDENT_RE);
