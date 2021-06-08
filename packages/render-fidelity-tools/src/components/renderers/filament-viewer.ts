@@ -218,7 +218,7 @@ export class FilamentViewer extends LitElement {
       await fetchFilamentAssets([iblUrl, skyboxUrl]);
       const ibl = this[$engine].createIblFromKtx(iblUrl);
       this[$scene].setIndirectLight(ibl);
-      this[$ibl] = ibl
+      this[$ibl] = ibl;
       ibl.setIntensity(1.0);
       ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
 
@@ -243,7 +243,7 @@ export class FilamentViewer extends LitElement {
 
     const asset = this[$currentAsset]!;
 
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       console.log('Loading resources for', modelUrl);
       asset.loadResources(resolve, () => {}, basepath(modelUrl), 1);
     });

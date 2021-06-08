@@ -455,7 +455,7 @@ export function editsReducer(
 
 // Orig Edits //////////////
 
-const SET_ORIG_EDITS = 'SET_ORIG_EDITS'
+const SET_ORIG_EDITS = 'SET_ORIG_EDITS';
 export function dispatchSetOrigEdits(origEdits: GltfEdits) {
   return {type: SET_ORIG_EDITS, payload: origEdits};
 }

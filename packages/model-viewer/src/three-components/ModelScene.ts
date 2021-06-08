@@ -16,7 +16,6 @@
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
-import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
 
@@ -148,11 +147,7 @@ export class ModelScene extends Scene {
    * there are more than one.
    */
   createContext() {
-    if (USE_OFFSCREEN_CANVAS) {
-      this.context = this.canvas.getContext('bitmaprenderer')!;
-    } else {
-      this.context = this.canvas.getContext('2d')!;
-    }
+    this.context = this.canvas.getContext('2d')!;
   }
 
   /**
