@@ -69,25 +69,26 @@ const run = async (
     command: string,
     args: Array<string>,
     environmentVariables = {},
-    workingDirectory = process.cwd()) => new Promise((resolve, reject) => {
-  const childProcess = spawn(command, args, {
-    cwd: workingDirectory,
-    env: {...process.env, ...environmentVariables},
-    stdio: ['ignore', 'inherit', 'inherit']
-  });
+    workingDirectory = process.cwd()) =>
+    new Promise<void>((resolve, reject) => {
+      const childProcess = spawn(command, args, {
+        cwd: workingDirectory,
+        env: {...process.env, ...environmentVariables},
+        stdio: ['ignore', 'inherit', 'inherit']
+      });
 
-  childProcess.once('error', (error: any) => {
-    warn(error);
-  });
+      childProcess.once('error', (error: any) => {
+        warn(error);
+      });
 
-  childProcess.once('exit', (code) => {
-    if (code === 0) {
-      resolve();
-    } else {
-      reject(new Error('Command failed'));
-    }
-  });
-});
+      childProcess.once('exit', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error('Command failed'));
+        }
+      });
+    });
 
 const updateScreenshots = async (config: ImageComparisonConfig) => {
   const {scenarios} = config;
