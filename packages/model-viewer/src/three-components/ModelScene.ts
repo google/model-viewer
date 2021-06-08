@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -78,6 +78,7 @@ export class ModelScene extends Scene {
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
+  public xrCamera: Camera|null = null;
 
   public url: string|null = null;
   public target = new Object3D();
@@ -148,6 +149,10 @@ export class ModelScene extends Scene {
    */
   createContext() {
     this.context = this.canvas.getContext('2d')!;
+  }
+
+  getCamera(): Camera {
+    return this.xrCamera != null ? this.xrCamera : this.camera;
   }
 
   /**
@@ -620,7 +625,7 @@ export class ModelScene extends Scene {
    */
   positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
       {position: Vector3, normal: Vector3}|null {
-    raycaster.setFromCamera(pixelPosition, this.camera);
+    raycaster.setFromCamera(pixelPosition, this.getCamera());
     const hits = raycaster.intersectObject(object, true);
 
     if (hits.length === 0) {
