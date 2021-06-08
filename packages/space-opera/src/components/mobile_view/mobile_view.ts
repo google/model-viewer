@@ -31,7 +31,6 @@ import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 
 import {styles as mobileStyles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
-
 import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
 
 const TOAST_TIME = 7000;  // 7s
@@ -90,7 +89,7 @@ export class MobileView extends LitElement {
           [hotspot.position.x, hotspot.position.y, hotspot.position.z]);
       if (hotspot.normal) {
         hotspot.normal =
-            toVector3D([hotspot.normal.x, hotspot.normal.y, hotspot.normal.z])
+            toVector3D([hotspot.normal.x, hotspot.normal.y, hotspot.normal.z]);
       }
     }
 

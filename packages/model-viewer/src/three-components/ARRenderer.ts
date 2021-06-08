@@ -66,7 +66,7 @@ export type ARTracking = 'tracking'|'not-tracking';
 export const ARTracking: {[index: string]: ARTracking} = {
   TRACKING: 'tracking',
   NOT_TRACKING: 'not-tracking'
-}
+};
 
 export interface ARTrackingEvent extends ThreeEvent {
   status: ARTracking,

@@ -20,6 +20,7 @@ import {dirname, join, resolve} from 'path';
 
 import {ImageComparisonConfig} from '../common.js';
 import {ConfigReader} from '../config-reader.js';
+
 import {rendererScreenshot} from './update-screenshots/renderer-screenshot.js';
 
 const require = module.createRequire(import.meta.url);
@@ -36,7 +37,7 @@ const config = require(configPath);
 
 const {renderers} = config;
 const goldensDirectory = join(rootDirectory, 'goldens');
-const renderersDirectory = join(rootDirectory, 'renderers')
+const renderersDirectory = join(rootDirectory, 'renderers');
 
 let scenarioWhitelist: Set<string>|null = null;
 let rendererWhitelist: Set<string>|null = null;

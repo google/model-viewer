@@ -58,7 +58,7 @@ export class RendererConfiguration extends LitElement {
       if (this.configUrl == null) {
         this.config = null;
       } else {
-        this.config = await (await fetch(this.configUrl)).json()
+        this.config = await (await fetch(this.configUrl)).json();
       }
     }
 

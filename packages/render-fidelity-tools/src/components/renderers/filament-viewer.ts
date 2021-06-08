@@ -218,7 +218,7 @@ export class FilamentViewer extends LitElement {
       await fetchFilamentAssets([iblUrl, skyboxUrl]);
       const ibl = this[$engine].createIblFromKtx(iblUrl);
       this[$scene].setIndirectLight(ibl);
-      this[$ibl] = ibl
+      this[$ibl] = ibl;
       ibl.setIntensity(1.0);
       ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
 

@@ -158,7 +158,7 @@ export class ArtifactCreator {
     if (rmsInDb > FIDELITY_TEST_THRESHOLD) {
       if (exclude?.includes('model-viewer')) {
         console.log(`❌ Skipped! Senario name: ${
-            scenario.name}, rms distance ratio: ${rmsInDb.toFixed(2)} dB.`)
+            scenario.name}, rms distance ratio: ${rmsInDb.toFixed(2)} dB.`);
       } else {
         throw new Error(`❌ Senarios name: ${
             scenario.name}, rms distance ratio: ${rmsInDb.toFixed(2)} dB.`);

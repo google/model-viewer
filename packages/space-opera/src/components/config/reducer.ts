@@ -86,7 +86,7 @@ export function dispatchSetReveal(reveal?: string) {
   return {type: SET_REVEAL, payload: reveal};
 }
 
-const SET_CONFIG = 'SET_CONFIG'
+const SET_CONFIG = 'SET_CONFIG';
 export function dispatchSetConfig(config: ModelViewerConfig) {
   return {type: SET_CONFIG, payload: config};
 }

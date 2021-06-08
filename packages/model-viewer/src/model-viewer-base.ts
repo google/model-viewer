@@ -454,7 +454,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
           resolve(blob);
         }, mimeType, qualityArgument);
-      })
+      });
     } finally {
       this[$updateSize]({width, height});
     };

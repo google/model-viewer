@@ -18,8 +18,6 @@
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
 import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url';
 import {customElement, html, internalProperty, query} from 'lit-element';
-// @ts-ignore, the qrious package isn't typed
-import QRious from 'qrious';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {openMobileViewStyles} from '../../styles.css.js';
@@ -31,8 +29,8 @@ import {getEdits} from '../materials_panel/reducer.js';
 import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {getModelViewerSnippet} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
-import {MobileModal} from './components/mobile_modal.js';
 
+import {MobileModal} from './components/mobile_modal.js';
 import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetForcePost, dispatchSetRefreshable, getArConfig, getForcePost, getRefreshable} from './reducer.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
