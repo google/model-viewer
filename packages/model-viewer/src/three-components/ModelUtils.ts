@@ -85,9 +85,7 @@ export const reduceVertices = <T>(
 
               for (i = 0, l = position.count; i < l; i++) {
                 vertex.fromBufferAttribute(position, i);
-                if (position.normalized) {
-                  vertex.multiplyScalar(scale);
-                }
+                vertex.multiplyScalar(scale);
                 vertex.applyMatrix4(object.matrixWorld);
 
                 value = func(value, vertex);
