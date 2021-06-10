@@ -98,7 +98,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
       const scene = this[$scene];
-      const {camera, annotationRenderer} = scene;
+      const {annotationRenderer} = scene;
+      const camera = scene.getCamera();
 
       if (scene.isDirty) {
         scene.updateHotspots(camera.position);

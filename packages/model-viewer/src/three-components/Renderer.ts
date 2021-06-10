@@ -405,8 +405,9 @@ export class Renderer extends EventDispatcher {
       }
 
       if (scene.externalRenderer != null) {
-        scene.camera.updateMatrix();
-        const {matrix, projectionMatrix} = scene.camera;
+        const camera = scene.getCamera();
+        camera.updateMatrix();
+        const {matrix, projectionMatrix} = camera;
         const viewMatrix = matrix.elements.slice();
         const target = scene.getTarget();
         viewMatrix[12] += target.x;

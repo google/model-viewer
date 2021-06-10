@@ -15,7 +15,7 @@
 
 import '../types/webxr.js';
 
-import {Event as ThreeEvent, EventDispatcher, Matrix4, Vector3, WebGLRenderer} from 'three';
+import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
 
 import {ControlsInterface} from '../features/controls.js';
 import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';
@@ -75,6 +75,7 @@ export interface ARTrackingEvent extends ThreeEvent {
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
+const camera = new PerspectiveCamera(45, 1, 0.1, 100);
 
 export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
@@ -98,8 +99,6 @@ export class ARRenderer extends EventDispatcher {
   private tracking = true;
   private frames = 0;
   private initialized = false;
-  private projectionMatrix = new Matrix4();
-  private projectionMatrixInverse = new Matrix4();
   private oldTarget = new Vector3();
   private placementComplete = false;
   private isTranslating = false;
@@ -330,6 +329,7 @@ export class ARRenderer extends EventDispatcher {
       }
       const point = this.oldTarget;
       scene.setTarget(point.x, point.y, point.z);
+      scene.xrCamera = null;
 
       scene.removeEventListener('model-load', this.onUpdateScene);
       scene.orientHotspots(0);
@@ -383,17 +383,18 @@ export class ARRenderer extends EventDispatcher {
   }
 
   private updateView(view: XRView) {
-    const viewMatrix = view.transform.matrix;
-
     const scene = this.presentedScene!;
-    const {camera} = scene;
-    camera.near = 0.1;
-    camera.far = 100;
 
     (this.threeRenderer.xr as any).updateCamera(camera);
+    //@ts-ignore
+    const xrCamera = this.threeRenderer.xr.getCamera();
 
-    this.presentedScene!.orientHotspots(
-        Math.atan2(viewMatrix[1], viewMatrix[5]));
+    xrCamera.position.copy(camera.position);
+    xrCamera.quaternion.copy(camera.quaternion);
+    xrCamera.scale.copy(camera.scale);
+
+    const {elements} = xrCamera.matrixWorld;
+    scene.orientHotspots(Math.atan2(elements[1], elements[5]));
 
     if (!this.initialized) {
       const {position, element} = scene;
@@ -401,34 +402,24 @@ export class ARRenderer extends EventDispatcher {
       const {width, height} = this.overlay!.getBoundingClientRect();
       scene.setSize(width, height);
 
-      if (this.threeRenderer.xr.getSession() != null) {
-        this.projectionMatrix.copy(
-            //@ts-ignore
-            this.threeRenderer.xr.getCamera().projectionMatrix);
-        this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
-      }
+      scene.xrCamera = xrCamera;
+      xrCamera.projectionMatrixInverse.copy(xrCamera.projectionMatrix).invert();
 
       const {theta, radius} =
           (element as ModelViewerElementBase & ControlsInterface)
               .getCameraOrbit();
       // Orient model to match the 3D camera view
-      const cameraDirection =
-          vector3.set(viewMatrix[8], viewMatrix[9], viewMatrix[10]);
-      scene.yaw = Math.atan2(cameraDirection.x, cameraDirection.z) - theta;
+      const cameraDirection = scene.xrCamera.getWorldDirection(vector3);
+      scene.yaw = Math.atan2(-cameraDirection.x, -cameraDirection.z) - theta;
       this.goalYaw = scene.yaw;
 
-      position.copy(scene.camera.position)
-          .add(cameraDirection.multiplyScalar(-1 * radius));
+      position.copy(scene.xrCamera.position)
+          .add(cameraDirection.multiplyScalar(radius));
       this.goalPosition.copy(position);
 
       scene.setHotspotsVisibility(true);
       this.initialized = true;
     }
-
-    // Ensure the camera uses the AR projection matrix without inverting on
-    // every frame.
-    camera.projectionMatrix.copy(this.projectionMatrix);
-    camera.projectionMatrixInverse.copy(this.projectionMatrixInverse);
 
     // Use automatic dynamic viewport scaling if supported.
     if (view.requestViewportScale && view.recommendedViewportScale) {
@@ -636,7 +627,7 @@ export class ARRenderer extends EventDispatcher {
             this.placementBox!.offsetHeight = offset / scale;
             this.presentedScene!.setShadowScaleAndOffset(scale, offset);
             // Interpolate hit ray up to drag plane
-            const cameraPosition = vector3.copy(scene.camera.position);
+            const cameraPosition = vector3.copy(scene.getCamera().position);
             const alpha = -offset / (cameraPosition.y - hit.y);
             cameraPosition.multiplyScalar(alpha);
             hit.multiplyScalar(1 - alpha).add(cameraPosition);
@@ -740,7 +731,7 @@ export class ARRenderer extends EventDispatcher {
       gl.clear(gl.DEPTH_BUFFER_BIT);
       gl.depthMask(true);
 
-      this.threeRenderer.render(scene, scene.camera);
+      this.threeRenderer.render(scene, scene.getCamera());
       isFirstView = false;
     }
   }
