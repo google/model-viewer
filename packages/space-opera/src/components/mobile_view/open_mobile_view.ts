@@ -15,7 +15,6 @@
  *
  */
 
-import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
@@ -25,7 +24,7 @@ import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
 import {getEdits} from '../materials_panel/reducer.js';
-import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
+import {getGltfUrl, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {getModelViewerSnippet} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
@@ -33,7 +32,7 @@ import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js'
 import {MobileModal} from './components/mobile_modal.js';
 import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetForcePost, dispatchSetRefreshable, getArConfig, getForcePost, getRefreshable} from './reducer.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
-import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
+import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareUSDZ, usdzToSession} from './utils.js';
 
 const REFRESH_DELAY = 20000;  // 20s
 
@@ -59,7 +58,6 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() urls: URLs = {gltf: '', env: '', usdz: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', usdz: ''};
-  @internalProperty() gltfModel?: GltfModel;
   @internalProperty() snippet: any = {};
   @internalProperty() lastSnippetSent: any = {};
 
@@ -80,7 +78,6 @@ export class OpenMobileView extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
-    this.gltfModel = getGltfModel(state);
     const gltfURL = getGltfUrl(state);
     if (gltfURL !== undefined) {
       this.isDeployable = true;
@@ -271,7 +268,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
     const gltfBlob = (updatedContent.gltfChanged ||
                       (haveStale && staleContent.gltfChanged)) ?
-        await prepareGlbBlob(this.gltfModel!) :
+        await getModelViewer()!.exportScene() :
         undefined;
 
     let envBlob;
