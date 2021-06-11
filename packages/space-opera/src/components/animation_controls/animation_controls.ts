@@ -26,9 +26,9 @@ import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../config/reducer';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {getModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
-import {getAnimationNames} from './reducer.js';
 
 interface AnimationControlsInterface {
   autoplay?: boolean;
@@ -45,7 +45,7 @@ export class AnimationControls extends ConnectedLitElement {
   @internalProperty() config: AnimationControlsInterface = {};
 
   stateChanged(state: State) {
-    this.animationNames = getAnimationNames(state);
+    this.animationNames = getModelViewer()?.availableAnimations ?? [];
     this.config = getConfig(state);
   }
 

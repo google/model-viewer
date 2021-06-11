@@ -87,7 +87,6 @@ export interface BestPracticesState {
 
 export interface ModelViewerSnippetState {
   arConfig: ArConfigState;
-  animationNames: string[];
   bestPractices: BestPracticesState;
   camera: Camera;
   config: ModelViewerConfig;
@@ -129,7 +128,6 @@ export const INITIAL_STATE: State = {
     },
     modelViewerSnippet: {
       arConfig: {},
-      animationNames: [],
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},
       config: {},
       hotspots: [],

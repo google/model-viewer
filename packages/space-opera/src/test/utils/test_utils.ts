@@ -27,11 +27,20 @@ export const until =
   }
 }
 
+export const waitForEvent =
+    (target: EventTarget, eventName: string): Promise<Event> =>
+        new Promise(resolve => {
+          function handler(event: Event) {
+            resolve(event);
+            target.removeEventListener(eventName, handler);
+          }
+          target.addEventListener(eventName, handler);
+        });
+
 /**
  * Fully clones a JSON object tree.
  */
-export function
-cloneJson<T>(json: T): T {
+export function cloneJson<T>(json: T): T {
   return JSON.parse(JSON.stringify(json));
 }
 

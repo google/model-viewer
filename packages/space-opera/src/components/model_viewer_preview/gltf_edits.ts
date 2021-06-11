@@ -18,10 +18,8 @@
 import {GltfModel, TextureHandle} from '@google/model-viewer-editing-adapter/lib/main.js'
 
 import {reduxStore} from '../../space_opera_base.js';
-import {dispatchSetAnimationNames} from '../animation_controls/reducer.js';
 import {applyMaterials, createMaterials, Texture} from '../materials_panel/material_state.js';
-import {dispatchSetEdits, getEdits} from '../materials_panel/reducer.js';
-import {dispatchSetOrigEdits} from '../materials_panel/reducer.js';
+import {dispatchSetEdits, dispatchSetOrigEdits, getEdits} from '../materials_panel/reducer.js';
 
 import {dispatchGltfJsonString, dispatchSetGltf, getGltfModel} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
@@ -77,9 +75,7 @@ export function getGltfEdits(model: GltfModel): GltfEdits {
 }
 
 class DispatchGltfArgs {
-  constructor(
-      readonly gltf: GltfModel|undefined, readonly edits: GltfEdits,
-      readonly animationNames: string[], readonly jsonString: string) {
+  constructor(readonly gltf: GltfModel|undefined, readonly edits: GltfEdits) {
   }
 }
 
@@ -104,8 +100,7 @@ function dispatchGltf(args?: DispatchGltfArgs, isFromPoster?: boolean) {
     reduxStore.dispatch(dispatchSetEdits(edits));
   }
   reduxStore.dispatch(dispatchSetOrigEdits(edits));
-  reduxStore.dispatch(dispatchSetAnimationNames(args.animationNames));
-  reduxStore.dispatch(dispatchGltfJsonString(args.jsonString));
+  reduxStore.dispatch(dispatchGltfJsonString((gltf?.jsonString) ?? ''));
 }
 
 /**
@@ -120,8 +115,5 @@ export function dispatchGltfAndEdits(
   // existing edits (with null previousEdits) to this new model and not
   // dispatch new edits.
   const edits = gltf ? getGltfEdits(gltf) : {...INITIAL_GLTF_EDITS};
-  dispatchGltf(
-      new DispatchGltfArgs(
-          gltf, edits, (gltf?.animationNames) ?? [], (gltf?.jsonString) ?? ''),
-      isFromPoster);
+  dispatchGltf(new DispatchGltfArgs(gltf, edits), isFromPoster);
 }

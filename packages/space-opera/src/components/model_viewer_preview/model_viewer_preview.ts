@@ -175,11 +175,9 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   protected render() {
-    // If the gltf model has a URL, it must be more recent
-    const currentSrc = this[$gltf]?.getModelViewerSource() ?? this[$gltfUrl];
     const editedConfig = {
       ...this.config,
-      src: currentSrc,
+      src: this[$gltfUrl],
       // Always enable camera controls for preview
       cameraControls: true
     };
