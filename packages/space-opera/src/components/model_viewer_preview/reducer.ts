@@ -16,7 +16,6 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
 import {Action, BestPracticesState, State} from '../../types.js';
@@ -25,6 +24,7 @@ import {Camera} from '../camera_settings/camera_state.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {GltfState} from '../model_viewer_preview/types.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
+import {radToDeg} from '../utils/reducer_utils.js';
 
 export function getModelViewer() {
   return document.querySelector('model-viewer-preview')?.modelViewer;

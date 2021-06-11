@@ -15,7 +15,6 @@
  *
  */
 
-import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
 import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
@@ -23,6 +22,32 @@ import {HotspotConfig} from './components/hotspot_panel/types.js';
 import {EnvironmentImage, INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/types.js';
 import {MobileState} from './components/mobile_view/types.js';
 import {GltfEdits, GltfState, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/types.js';
+
+export interface ModelViewerConfig {
+  animationName?: string;
+  autoRotate?: boolean;
+  autoplay?: boolean;
+  bgColor?: string;
+  cameraControls?: boolean;
+  // Note user may set camera orbit from mouse drag or UI input.
+  cameraOrbit?: string;
+  cameraTarget?: string;
+  fieldOfView?: string;
+  environmentImage?: string;  // IBL/HDRI lighting
+  exposure?: number;  // Environment for hdr environment, used as ibl intensity
+  poster?: string;    // Display an image before model finished loading
+  reveal?: string;    // Controls when the model should be revealed
+  shadowIntensity?: number;
+  shadowSoftness?: number;
+  maxCameraOrbit?: string;
+  maxFov?: string;  // Field of view
+  minCameraOrbit?: string;
+  minFov?: string;  // Field of view
+  src?: string;
+  // This doesn't correspond to a modelviewer attribute, but ultimately MVC is
+  // app state - not MV state.
+  useEnvAsSkybox?: boolean;
+}
 
 interface HotspotsUIState {
   addHotspot: boolean;

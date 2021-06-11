@@ -19,11 +19,12 @@ import '@material/mwc-icon-button';
 import '../popup/popup.js';
 import '../../file_modal/file_modal.js';
 
-import {checkFinite, IMAGE_MIME_TYPES} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {createSafeObjectURL, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, LitElement, property, query} from 'lit-element';
 
 import {FileModalElement} from '../../file_modal/file_modal.js';
+import {createSafeObjectURL, SafeObjectUrl} from '../../utils/create_object_url.js';
+import {IMAGE_MIME_TYPES} from '../../utils/gltf_constants.js';
+import {checkFinite} from '../../utils/reducer_utils.js';
 
 import {styles} from './texture_picker.css.js';
 

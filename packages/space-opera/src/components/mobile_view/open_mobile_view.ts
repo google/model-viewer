@@ -16,7 +16,6 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
-import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url';
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
@@ -29,6 +28,7 @@ import {getEdits} from '../materials_panel/reducer.js';
 import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {getModelViewerSnippet} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
+import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
 
 import {MobileModal} from './components/mobile_modal.js';
 import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetForcePost, dispatchSetRefreshable, getArConfig, getForcePost, getRefreshable} from './reducer.js';

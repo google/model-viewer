@@ -18,14 +18,14 @@
 
 import '../../components/animation_controls/animation_controls.js';
 
-import {createBufferFromString, GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 
 import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
-import {dispatchAnimationName, dispatchAutoplayEnabled} from '../../components/config/reducer.js';
-import {getConfig} from '../../components/config/reducer.js';
+import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../../components/config/reducer.js';
 import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/gltf_edits.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {reduxStore} from '../../space_opera_base.js';
+import {createBufferFromString} from '../utils/test_utils.js';
 
 const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
 const EXAMPLE_BIN_AS_ARRAY_BUFFER =

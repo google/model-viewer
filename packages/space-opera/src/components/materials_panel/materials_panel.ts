@@ -27,8 +27,6 @@ import '@polymer/paper-item';
 import '@polymer/paper-slider';
 import '@material/mwc-icon-button';
 
-import {ALPHA_BLEND_MODES, checkFinite, DEFAULT_EMISSIVE_FACTOR} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, property, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
@@ -41,9 +39,11 @@ import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 import {TexturePicker} from '../shared/texture_picker/texture_picker.js';
+import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '../utils/create_object_url.js';
+import {ALPHA_BLEND_MODES, DEFAULT_EMISSIVE_FACTOR} from '../utils/gltf_constants.js';
+import {checkFinite} from '../utils/reducer_utils.js';
 
-import {TexturesById} from './material_state.js';
-import {Material} from './material_state.js';
+import {Material, TexturesById} from './material_state.js';
 import {styles} from './materials_panel.css.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
 

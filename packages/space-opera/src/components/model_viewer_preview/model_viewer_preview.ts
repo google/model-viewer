@@ -23,7 +23,6 @@
 import '@material/mwc-icon-button';
 
 import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
@@ -43,11 +42,11 @@ import {getEdits, getOrigEdits} from '../materials_panel/reducer.js';
 import {dispatchSetForcePost, getRefreshable} from '../mobile_view/reducer.js';
 import {dispatchConfig, getExtraAttributes} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
+import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
-import {applyEdits} from './gltf_edits.js';
-import {dispatchGltfAndEdits} from './gltf_edits.js';
+import {applyEdits, dispatchGltfAndEdits} from './gltf_edits.js';
 import {dispatchGltfUrl, downloadContents, getGltfModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 

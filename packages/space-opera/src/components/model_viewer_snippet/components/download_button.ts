@@ -18,7 +18,6 @@
 import '@material/mwc-button';
 
 import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 // tslint:disable-next-line:enforce-name-casing JSZip is a class.
 import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
@@ -33,6 +32,7 @@ import {getHotspots} from '../../hotspot_panel/reducer.js';
 import {getArConfig} from '../../mobile_view/reducer.js';
 import {getGltfModel} from '../../model_viewer_preview/reducer.js';
 import {getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
+import {safeDownloadCallback} from '../../utils/create_object_url.js';
 import {styles as hotspotStyles} from '../../utils/hotspot/hotspot.css.js';
 
 interface Payload {

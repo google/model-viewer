@@ -19,7 +19,6 @@
  * @fileoverview Inspector panel for GLTF/GLB files.
  */
 
-import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, internalProperty, PropertyValues} from 'lit-element';
 
 import {State} from '../../types.js';
@@ -27,6 +26,7 @@ import {ConnectedLitElement} from '../connected_lit_element/connected_lit_elemen
 import {TexturesById} from '../materials_panel/material_state.js';
 import {getEdits} from '../materials_panel/reducer.js';
 import {getGltfJsonString} from '../model_viewer_preview/reducer.js';
+import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '../utils/create_object_url.js';
 
 const $texturesById = Symbol('texturesById');
 

@@ -16,17 +16,17 @@
  */
 
 
-import {arrayBufferEqualityTester, createBufferFromString, generatePngBlob, GlTf, GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {cloneJson} from '@google/model-viewer-editing-adapter/lib/util/clone_json.js'
+import {GlTf, GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 
 import {applyCameraEdits, Camera} from '../components/camera_settings/camera_state.js';
 import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEdits, getEditsMaterials, getEditsTextures} from '../components/materials_panel/reducer.js';
-import {applyEdits, generateTextureId, getGltfEdits} from '../components/model_viewer_preview/gltf_edits.js';
-import {dispatchGltfAndEdits} from '../components/model_viewer_preview/gltf_edits.js';
+import {applyEdits, dispatchGltfAndEdits, generateTextureId, getGltfEdits} from '../components/model_viewer_preview/gltf_edits.js';
 import {dispatchGltfUrl, getGltfModel, getGltfUrl} from '../components/model_viewer_preview/reducer.js';
 import {INITIAL_GLTF_EDITS} from '../components/model_viewer_preview/types.js';
 import {reduxStore} from '../space_opera_base.js';
+
+import {arrayBufferEqualityTester, cloneJson, createBufferFromString, generatePngBlob} from './utils/test_utils.js';
 
 const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
 const EXAMPLE_BIN_AS_ARRAY_BUFFER =

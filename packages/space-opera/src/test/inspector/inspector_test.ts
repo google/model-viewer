@@ -18,11 +18,12 @@
 
 import '../../components/inspector/inspector.js';
 
-import {createBufferFromString, generatePngBlob, GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
+import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js';
 
 import {InspectorPanel} from '../../components/inspector/inspector.js';
 import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/gltf_edits.js';
+import {createSafeObjectURL} from '../../components/utils/create_object_url.js';
+import {createBufferFromString, generatePngBlob} from '../utils/test_utils.js';
 
 // Bin data
 const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
