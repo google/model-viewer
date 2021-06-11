@@ -17,13 +17,12 @@
 
 import '../../components/model_viewer_preview/model_viewer_preview.js';
 
-import {GlTf, GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js';
-
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getGltfModel, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
-import {createSafeObjectUrlFromArrayBuffer} from '../../components/utils/create_object_url.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {until} from '../utils/test_utils.js';
+
+const CUBE_GLTF_PATH = '../base/shared-assets/models/cube.gltf';
 
 xdescribe('ModelViewerPreview', () => {
   let preview: ModelViewerPreview;
@@ -44,15 +43,7 @@ xdescribe('ModelViewerPreview', () => {
   });
 
   it('updates ', async () => {
-    const gltfJson = {
-      asset: {'generator': 'FBX2glTF', 'version': '2.0'},
-    } as GlTf;
-    const gltf = new GltfModel(gltfJson, null);
-    const url =
-        createSafeObjectUrlFromArrayBuffer(await gltf.packGlb()).unsafeUrl;
-    await preview.updateComplete;
-    expect(getGltfModel(reduxStore.getState())).toBeUndefined();
-    reduxStore.dispatch(dispatchGltfUrl(url));
+    reduxStore.dispatch(dispatchGltfUrl(CUBE_GLTF_PATH));
     // It may be several event loops before the preview downloads the model, so
     // loop until it happens. This will timeout if there is a bug.
     await until(() => getGltfModel(reduxStore.getState()) !== undefined);

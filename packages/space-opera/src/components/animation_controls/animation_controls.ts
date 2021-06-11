@@ -23,17 +23,12 @@ import '@polymer/paper-item';
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
-import {State} from '../../types.js';
+import {ModelViewerConfig, State} from '../../types.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../config/reducer';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
-
-interface AnimationControlsInterface {
-  autoplay?: boolean;
-  animationName?: string;
-}
 
 /**
  * Animation controls for gltf and model-viewer.
@@ -42,7 +37,7 @@ interface AnimationControlsInterface {
 export class AnimationControls extends ConnectedLitElement {
   @query('me-checkbox#animation-autoplay') autoplayCheckbox?: CheckboxElement;
   @internalProperty() animationNames: string[] = [];
-  @internalProperty() config: AnimationControlsInterface = {};
+  @internalProperty() config: ModelViewerConfig = {};
 
   stateChanged(state: State) {
     this.animationNames = getModelViewer()?.availableAnimations ?? [];
