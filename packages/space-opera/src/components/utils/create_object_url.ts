@@ -65,7 +65,7 @@ export function createSafeObjectUrlFromArrayBuffer(contents: ArrayBuffer) {
  */
 // Underscore var name needed for NPM build
 // tslint:disable-next-line:enforce-name-casing
-export function safeDownloadCallback(blob: Blob, filename: string, _: string) {
+export function safeDownloadCallback(blob: Blob, filename: string) {
   return () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

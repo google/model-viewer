@@ -130,7 +130,7 @@ export class PosterControlsElement extends ConnectedLitElement {
     if (!modelViewer || !this.poster)
       return;
     safeDownloadCallback(
-        await (await fetch(this.poster)).blob(), 'poster.png', '')();
+        await (await fetch(this.poster)).blob(), 'poster.png')();
   }
 }
 
