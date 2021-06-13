@@ -125,12 +125,12 @@ export const normalizeUnit = (() => {
   };
 
   return (node: NumberNode, fallback: NumberNode = ZERO) => {
-    let {number, unit} = node;
-
-    if (!isFinite(number)) {
-      number = fallback.number;
-      unit = fallback.unit;
+    if (!isFinite(node.number)) {
+      node.number = fallback.number;
+      node.unit = fallback.unit;
     }
+
+    const {unit} = node;
 
     if (unit == null) {
       return node;

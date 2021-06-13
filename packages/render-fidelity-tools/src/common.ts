@@ -221,10 +221,8 @@ export class ImageComparator {
     }
 
     return {
-      imageBuffers: {
-        delta: deltaImage ? deltaImage.buffer : null,
-        blackWhite: blackWhiteImage ? blackWhiteImage.buffer : null
-      }
+      imageBuffers:
+          {delta: deltaImage.buffer, blackWhite: blackWhiteImage.buffer}
     };
   }
 

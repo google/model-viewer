@@ -163,7 +163,7 @@ async function prepareZipArchive(
 
   // Replace placeholders in html strings with content
   template = template.replace('REPLACEME', snippet);
-  template = template.replace(/(^[ \t]*\n)/gm, '')  // remove extra newlines
+  template = template.replace(/(^[ \t]*\n)/gm, '');  // remove extra newlines
   zip.file('index.html', template);
 
   // Keep model-viewer snippet

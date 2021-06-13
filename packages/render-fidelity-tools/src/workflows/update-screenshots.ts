@@ -20,6 +20,7 @@ import {dirname, join, resolve} from 'path';
 
 import {ImageComparisonConfig} from '../common.js';
 import {ConfigReader} from '../config-reader.js';
+
 import {rendererScreenshot} from './update-screenshots/renderer-screenshot.js';
 
 const require = module.createRequire(import.meta.url);
@@ -36,7 +37,7 @@ const config = require(configPath);
 
 const {renderers} = config;
 const goldensDirectory = join(rootDirectory, 'goldens');
-const renderersDirectory = join(rootDirectory, 'renderers')
+const renderersDirectory = join(rootDirectory, 'renderers');
 
 let scenarioWhitelist: Set<string>|null = null;
 let rendererWhitelist: Set<string>|null = null;
@@ -68,25 +69,26 @@ const run = async (
     command: string,
     args: Array<string>,
     environmentVariables = {},
-    workingDirectory = process.cwd()) => new Promise((resolve, reject) => {
-  const childProcess = spawn(command, args, {
-    cwd: workingDirectory,
-    env: {...process.env, ...environmentVariables},
-    stdio: ['ignore', 'inherit', 'inherit']
-  });
+    workingDirectory = process.cwd()) =>
+    new Promise<void>((resolve, reject) => {
+      const childProcess = spawn(command, args, {
+        cwd: workingDirectory,
+        env: {...process.env, ...environmentVariables},
+        stdio: ['ignore', 'inherit', 'inherit']
+      });
 
-  childProcess.once('error', (error: any) => {
-    warn(error);
-  });
+      childProcess.once('error', (error: any) => {
+        warn(error);
+      });
 
-  childProcess.once('exit', (code) => {
-    if (code === 0) {
-      resolve();
-    } else {
-      reject(new Error('Command failed'));
-    }
-  });
-});
+      childProcess.once('exit', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error('Command failed'));
+        }
+      });
+    });
 
 const updateScreenshots = async (config: ImageComparisonConfig) => {
   const {scenarios} = config;

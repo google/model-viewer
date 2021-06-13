@@ -16,7 +16,6 @@
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
-import {USE_OFFSCREEN_CANVAS} from '../constants.js';
 import {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -68,8 +67,7 @@ export class Renderer extends EventDispatcher {
   }
 
   public threeRenderer!: WebGLRenderer;
-  public canvasElement: HTMLCanvasElement;
-  public canvas3D: HTMLCanvasElement|OffscreenCanvas;
+  public canvas3D: HTMLCanvasElement;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
   public roughnessMipmapper: RoughnessMipmapper;
@@ -111,13 +109,8 @@ export class Renderer extends EventDispatcher {
 
     this.dpr = resolveDpr();
 
-    this.canvasElement = document.createElement('canvas');
-    this.canvasElement.id = 'webgl-canvas';
-
-    this.canvas3D = USE_OFFSCREEN_CANVAS ?
-        this.canvasElement.transferControlToOffscreen() :
-        this.canvasElement;
-
+    this.canvas3D = document.createElement('canvas');
+    this.canvas3D.id = 'webgl-canvas';
     this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
 
     try {
@@ -199,8 +192,8 @@ export class Renderer extends EventDispatcher {
     const heightCSS = height / scale;
     // The canvas element must by styled outside of three due to the offscreen
     // canvas not being directly stylable.
-    this.canvasElement.style.width = `${widthCSS}px`;
-    this.canvasElement.style.height = `${heightCSS}px`;
+    this.canvas3D.style.width = `${widthCSS}px`;
+    this.canvas3D.style.height = `${heightCSS}px`;
 
     // Each scene's canvas must match the renderer size. In general they can be
     // larger than the element that contains them, but the overflow is hidden
@@ -235,8 +228,8 @@ export class Renderer extends EventDispatcher {
     const width = this.width / scale;
     const height = this.height / scale;
 
-    this.canvasElement.style.width = `${width}px`;
-    this.canvasElement.style.height = `${height}px`;
+    this.canvas3D.style.width = `${width}px`;
+    this.canvas3D.style.height = `${height}px`;
     for (const scene of this.scenes) {
       const {style} = scene.canvas;
       style.width = `${width}px`;
@@ -284,8 +277,7 @@ export class Renderer extends EventDispatcher {
   }
 
   displayCanvas(scene: ModelScene): HTMLCanvasElement {
-    return this.multipleScenesVisible ? scene.element[$canvas] :
-                                        this.canvasElement;
+    return this.multipleScenesVisible ? scene.element[$canvas] : this.canvas3D;
   }
 
   /**
@@ -307,18 +299,18 @@ export class Renderer extends EventDispatcher {
     if (visibleCanvas == null) {
       return;
     }
-    const multipleScenesVisible = visibleScenes > 1 || USE_OFFSCREEN_CANVAS;
-    const {canvasElement} = this;
+    const multipleScenesVisible = visibleScenes > 1;
+    const {canvas3D} = this;
 
     if (multipleScenesVisible === this.multipleScenesVisible &&
         (multipleScenesVisible ||
-         canvasElement.parentElement === visibleCanvas.parentElement)) {
+         canvas3D.parentElement === visibleCanvas.parentElement)) {
       return;
     }
     this.multipleScenesVisible = multipleScenesVisible;
 
     if (multipleScenesVisible) {
-      canvasElement.classList.remove('show');
+      canvas3D.classList.remove('show');
     }
     for (const scene of this.scenes) {
       if (scene.externalRenderer != null) {
@@ -329,8 +321,8 @@ export class Renderer extends EventDispatcher {
         canvas.classList.add('show');
         scene.isDirty = true;
       } else if (scene.canvas === visibleCanvas) {
-        scene.canvas.parentElement!.appendChild(canvasElement);
-        canvasElement.classList.add('show');
+        scene.canvas.parentElement!.appendChild(canvas3D);
+        canvas3D.classList.add('show');
         canvas.classList.remove('show');
         scene.isDirty = true;
       }
@@ -413,8 +405,9 @@ export class Renderer extends EventDispatcher {
       }
 
       if (scene.externalRenderer != null) {
-        scene.camera.updateMatrix();
-        const {matrix, projectionMatrix} = scene.camera;
+        const camera = scene.getCamera();
+        camera.updateMatrix();
+        const {matrix, projectionMatrix} = camera;
         const viewMatrix = matrix.elements.slice();
         const target = scene.getTarget();
         viewMatrix[12] += target.x;
@@ -456,17 +449,10 @@ export class Renderer extends EventDispatcher {
         if (scene.context == null) {
           scene.createContext();
         }
-        if (USE_OFFSCREEN_CANVAS) {
-          const contextBitmap = scene.context as ImageBitmapRenderingContext;
-          const bitmap =
-              (this.canvas3D as OffscreenCanvas).transferToImageBitmap();
-          contextBitmap.transferFromImageBitmap(bitmap);
-        } else {
-          const context2D = scene.context as CanvasRenderingContext2D;
-          context2D.clearRect(0, 0, width, height);
-          context2D.drawImage(
-              this.canvas3D, 0, 0, width, height, 0, 0, width, height);
-        }
+        const context2D = scene.context as CanvasRenderingContext2D;
+        context2D.clearRect(0, 0, width, height);
+        context2D.drawImage(
+            this.canvas3D, 0, 0, width, height, 0, 0, width, height);
       }
 
       scene.isDirty = false;
