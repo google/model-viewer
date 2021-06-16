@@ -129,16 +129,16 @@ export class ARRenderer extends EventDispatcher {
     this.xrLight = new XREstimatedLight(this.threeRenderer);
 
     this.xrLight.addEventListener('estimationstart', () => {
-      if (!this.isPresenting) {
+      if (!this.isPresenting || this.xrLight == null) {
         return;
       }
 
       const scene = this.presentedScene!;
-      scene.add(this.xrLight!);
+      scene.add(this.xrLight);
 
-      if (this.xrLight!.environment) {
+      if (this.xrLight.environment) {
         this.oldEnvironment = scene.environment;
-        scene.environment = this.xrLight!.environment;
+        scene.environment = this.xrLight.environment;
       }
     });
   }
@@ -331,8 +331,8 @@ export class ARRenderer extends EventDispatcher {
     if (scene != null) {
       const {element} = scene;
 
-      if (this.xrLight!.parent != null) {
-        scene.remove(this.xrLight!);
+      if (this.xrLight != null && this.xrLight.parent != null) {
+        scene.remove(this.xrLight);
         if (this.oldEnvironment != null) {
           scene.environment = this.oldEnvironment;
           this.oldEnvironment = null;
