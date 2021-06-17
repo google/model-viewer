@@ -25,8 +25,11 @@ import {BufferAttribute, InterleavedBufferAttribute, Object3D, Vector3} from 'th
  */
 export const getNormalizedComponentScale =
     (buffer: BufferAttribute|InterleavedBufferAttribute) => {
-      const array: ArrayLike<number> = buffer.array;
+      if (!buffer.normalized) {
+        return 1;
+      }
 
+      const array: ArrayLike<number> = buffer.array;
       if (array instanceof Int8Array) {
         return 1 / 127;
       } else if (array instanceof Uint8Array) {
@@ -36,7 +39,6 @@ export const getNormalizedComponentScale =
       } else if (array instanceof Uint16Array) {
         return 1 / 65535;
       }
-
       return 1;
     };
 /**
