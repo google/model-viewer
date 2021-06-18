@@ -92,8 +92,8 @@ export function dispatchGltfJsonString(gltfJsonString?: string) {
 }
 
 export const getGltfUrl = (state: State) => state.entities.gltf.gltfUrl;
-export const getGltfJsonString = (state: State) =>
-    state.entities.gltf.gltfJsonString;
+export const getGltfJsonString = () =>
+    JSON.stringify(getModelViewer()?.originalJson, null, 2);
 export const getGltfModel = (state: State) => state.entities.gltf.gltf;
 
 export function gltfReducer(

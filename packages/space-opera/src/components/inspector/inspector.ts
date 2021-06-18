@@ -46,7 +46,7 @@ export class InspectorPanel extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this[$texturesById] = getEdits(state).texturesById;
-    this.gltfJsonstring = getGltfJsonString(state);
+    this.gltfJsonstring = getGltfJsonString();
   }
 
   private async updateTextures(texturesById: TexturesById|undefined) {

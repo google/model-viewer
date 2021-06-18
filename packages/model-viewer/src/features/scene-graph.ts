@@ -20,7 +20,7 @@ import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GL
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
-import {Variants} from '../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, Variants} from '../three-components/gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
 
@@ -44,6 +44,7 @@ export interface SceneGraphInterface {
   readonly availableVariants: Array<string>;
   orientation: string;
   scale: string;
+  readonly originalJson: GLTF|null;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
 }
 
@@ -74,6 +75,10 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     get availableVariants() {
       return this[$variants];
+    }
+
+    get originalJson() {
+      return this[$currentGLTF]?.parser.json;
     }
 
     /**
