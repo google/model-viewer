@@ -98,6 +98,7 @@ export class ARRenderer extends EventDispatcher {
   private exitWebXRButtonContainer: HTMLElement|null = null;
   private overlay: HTMLElement|null = null;
   private xrLight: XREstimatedLight|null = null;
+  private environmentEstimation = false;
 
   private tracking = true;
   private frames = 0;
@@ -136,7 +137,7 @@ export class ARRenderer extends EventDispatcher {
       const scene = this.presentedScene!;
       scene.add(this.xrLight);
 
-      if (this.xrLight.environment) {
+      if (this.environmentEstimation && this.xrLight.environment) {
         this.oldEnvironment = scene.environment;
         scene.environment = this.xrLight.environment;
       }
@@ -188,7 +189,8 @@ export class ARRenderer extends EventDispatcher {
   /**
    * Present a scene in AR
    */
-  async present(scene: ModelScene): Promise<void> {
+  async present(scene: ModelScene, environmentEstimation: boolean = false):
+      Promise<void> {
     if (this.isPresenting) {
       console.warn('Cannot present while a model is already presenting');
     }
@@ -205,6 +207,8 @@ export class ARRenderer extends EventDispatcher {
     // This sets isPresenting to true
     this._presentedScene = scene;
     this.overlay = scene.element.shadowRoot!.querySelector('div.default');
+
+    this.environmentEstimation = environmentEstimation;
 
     const currentSession = await this.resolveARSession();
 
