@@ -58,7 +58,6 @@ const $arMode = Symbol('arMode');
 const $arModes = Symbol('arModes');
 const $arAnchor = Symbol('arAnchor');
 const $preload = Symbol('preload');
-const $xrEnvironment = Symbol('xrEnvironment');
 
 const $onARButtonContainerClick = Symbol('onARButtonContainerClick');
 const $onARStatus = Symbol('onARStatus');
@@ -72,7 +71,8 @@ export declare interface ARInterface {
   arModes: string;
   arScale: string;
   iosSrc: string|null;
-  xrEnvironment: boolean, readonly canActivateAR: boolean;
+  xrEnvironment: boolean;
+  readonly canActivateAR: boolean;
   activateAR(): Promise<void>;
 }
 
@@ -110,7 +110,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$arModes]: Set<ARMode> = new Set();
     protected[$arMode]: ARMode = ARMode.NONE;
     protected[$preload] = false;
-    private[$xrEnvironment] = false;
 
     private[$onARButtonContainerClick] = (event: Event) => {
       event.preventDefault();
@@ -185,10 +184,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('arModes')) {
         this[$arModes] = deserializeARModes(this.arModes);
-      }
-
-      if (changedProperties.has('xrEnvironment')) {
-        this[$xrEnvironment] = this.xrEnvironment;
       }
 
       this[$selectARMode]();
@@ -277,7 +272,7 @@ configuration or device capabilities');
             'click', this[$onARButtonContainerClick]);
         const {arRenderer} = this[$renderer];
         arRenderer.placeOnWall = this.arPlacement === 'wall';
-        await arRenderer.present(this[$scene], this[$xrEnvironment]);
+        await arRenderer.present(this[$scene], this.xrEnvironment);
       } catch (error) {
         console.warn('Error while trying to present in AR with WebXR');
         console.error(error);
