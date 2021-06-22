@@ -16,6 +16,7 @@
 import '../types/webxr.js';
 
 import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
+import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight';
 
 import {ControlsInterface} from '../features/controls.js';
 import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';
@@ -87,6 +88,7 @@ export class ARRenderer extends EventDispatcher {
   private turntableRotation: number|null = null;
   private oldShadowIntensity: number|null = null;
   private oldBackground: any = null;
+  private oldEnvironment: any = null;
   private frame: XRFrame|null = null;
   private initialHitSource: XRHitTestSource|null = null;
   private transientHitTestSource: XRTransientInputHitTestSource|null = null;
@@ -95,6 +97,8 @@ export class ARRenderer extends EventDispatcher {
   private resolveCleanup: ((...args: any[]) => void)|null = null;
   private exitWebXRButtonContainer: HTMLElement|null = null;
   private overlay: HTMLElement|null = null;
+  private xrLight: XREstimatedLight|null = null;
+  private environmentEstimation = false;
 
   private tracking = true;
   private frames = 0;
@@ -122,6 +126,22 @@ export class ARRenderer extends EventDispatcher {
     super();
     this.threeRenderer = renderer.threeRenderer;
     this.threeRenderer.xr.enabled = true;
+
+    this.xrLight = new XREstimatedLight(this.threeRenderer);
+
+    this.xrLight.addEventListener('estimationstart', () => {
+      if (!this.isPresenting || this.xrLight == null) {
+        return;
+      }
+
+      const scene = this.presentedScene!;
+      scene.add(this.xrLight);
+
+      if (this.environmentEstimation && this.xrLight.environment) {
+        this.oldEnvironment = scene.environment;
+        scene.environment = this.xrLight.environment;
+      }
+    });
   }
 
   async resolveARSession(): Promise<XRSession> {
@@ -130,7 +150,7 @@ export class ARRenderer extends EventDispatcher {
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
-          optionalFeatures: ['dom-overlay'],
+          optionalFeatures: ['dom-overlay', 'light-estimation'],
           domOverlay: {root: this.overlay}
         });
 
@@ -169,7 +189,8 @@ export class ARRenderer extends EventDispatcher {
   /**
    * Present a scene in AR
    */
-  async present(scene: ModelScene): Promise<void> {
+  async present(scene: ModelScene, environmentEstimation: boolean = false):
+      Promise<void> {
     if (this.isPresenting) {
       console.warn('Cannot present while a model is already presenting');
     }
@@ -186,6 +207,8 @@ export class ARRenderer extends EventDispatcher {
     // This sets isPresenting to true
     this._presentedScene = scene;
     this.overlay = scene.element.shadowRoot!.querySelector('div.default');
+
+    this.environmentEstimation = environmentEstimation;
 
     const currentSession = await this.resolveARSession();
 
@@ -311,6 +334,14 @@ export class ARRenderer extends EventDispatcher {
     const scene = this.presentedScene;
     if (scene != null) {
       const {element} = scene;
+
+      if (this.xrLight != null && this.xrLight.parent != null) {
+        scene.remove(this.xrLight);
+        if (this.oldEnvironment != null) {
+          scene.environment = this.oldEnvironment;
+          this.oldEnvironment = null;
+        }
+      }
 
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);

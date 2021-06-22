@@ -71,6 +71,7 @@ export declare interface ARInterface {
   arModes: string;
   arScale: string;
   iosSrc: string|null;
+  xrEnvironment: boolean;
   readonly canActivateAR: boolean;
   activateAR(): Promise<void>;
 }
@@ -89,6 +90,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     arModes: string = DEFAULT_AR_MODES;
 
     @property({type: String, attribute: 'ios-src'}) iosSrc: string|null = null;
+
+    @property({type: Boolean, attribute: 'xr-environment'})
+    xrEnvironment: boolean = false;
 
     get canActivateAR(): boolean {
       return this[$arMode] !== ARMode.NONE;
@@ -268,7 +272,7 @@ configuration or device capabilities');
             'click', this[$onARButtonContainerClick]);
         const {arRenderer} = this[$renderer];
         arRenderer.placeOnWall = this.arPlacement === 'wall';
-        await arRenderer.present(this[$scene]);
+        await arRenderer.present(this[$scene], this.xrEnvironment);
       } catch (error) {
         console.warn('Error while trying to present in AR with WebXR');
         console.error(error);
