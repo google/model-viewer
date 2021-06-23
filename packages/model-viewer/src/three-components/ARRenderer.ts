@@ -15,7 +15,8 @@
 
 import '../types/webxr.js';
 
-import {Event as ThreeEvent, EventDispatcher, Matrix4, Vector3, WebGLRenderer} from 'three';
+import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
+import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight';
 
 import {ControlsInterface} from '../features/controls.js';
 import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';
@@ -66,7 +67,7 @@ export type ARTracking = 'tracking'|'not-tracking';
 export const ARTracking: {[index: string]: ARTracking} = {
   TRACKING: 'tracking',
   NOT_TRACKING: 'not-tracking'
-}
+};
 
 export interface ARTrackingEvent extends ThreeEvent {
   status: ARTracking,
@@ -75,18 +76,19 @@ export interface ARTrackingEvent extends ThreeEvent {
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
+const camera = new PerspectiveCamera(45, 1, 0.1, 100);
 
 export class ARRenderer extends EventDispatcher {
   public threeRenderer: WebGLRenderer;
   public currentSession: XRSession|null = null;
   public placeOnWall = false;
-  public cameraPosition = new Vector3();
 
   private placementBox: PlacementBox|null = null;
   private lastTick: number|null = null;
   private turntableRotation: number|null = null;
   private oldShadowIntensity: number|null = null;
   private oldBackground: any = null;
+  private oldEnvironment: any = null;
   private frame: XRFrame|null = null;
   private initialHitSource: XRHitTestSource|null = null;
   private transientHitTestSource: XRTransientInputHitTestSource|null = null;
@@ -95,12 +97,12 @@ export class ARRenderer extends EventDispatcher {
   private resolveCleanup: ((...args: any[]) => void)|null = null;
   private exitWebXRButtonContainer: HTMLElement|null = null;
   private overlay: HTMLElement|null = null;
+  private xrLight: XREstimatedLight|null = null;
+  private environmentEstimation = false;
 
   private tracking = true;
   private frames = 0;
   private initialized = false;
-  private projectionMatrix = new Matrix4();
-  private projectionMatrixInverse = new Matrix4();
   private oldTarget = new Vector3();
   private placementComplete = false;
   private isTranslating = false;
@@ -124,6 +126,22 @@ export class ARRenderer extends EventDispatcher {
     super();
     this.threeRenderer = renderer.threeRenderer;
     this.threeRenderer.xr.enabled = true;
+
+    this.xrLight = new XREstimatedLight(this.threeRenderer);
+
+    this.xrLight.addEventListener('estimationstart', () => {
+      if (!this.isPresenting || this.xrLight == null) {
+        return;
+      }
+
+      const scene = this.presentedScene!;
+      scene.add(this.xrLight);
+
+      if (this.environmentEstimation && this.xrLight.environment) {
+        this.oldEnvironment = scene.environment;
+        scene.environment = this.xrLight.environment;
+      }
+    });
   }
 
   async resolveARSession(): Promise<XRSession> {
@@ -132,13 +150,15 @@ export class ARRenderer extends EventDispatcher {
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
-          optionalFeatures: ['dom-overlay'],
+          optionalFeatures: ['dom-overlay', 'light-estimation'],
           domOverlay: {root: this.overlay}
         });
 
     this.threeRenderer.xr.setReferenceSpaceType('local');
 
     await this.threeRenderer.xr.setSession(session as any);
+
+    (this.threeRenderer.xr as any).cameraAutoUpdate = false;
 
     return session;
   }
@@ -169,7 +189,8 @@ export class ARRenderer extends EventDispatcher {
   /**
    * Present a scene in AR
    */
-  async present(scene: ModelScene): Promise<void> {
+  async present(scene: ModelScene, environmentEstimation: boolean = false):
+      Promise<void> {
     if (this.isPresenting) {
       console.warn('Cannot present while a model is already presenting');
     }
@@ -186,6 +207,8 @@ export class ARRenderer extends EventDispatcher {
     // This sets isPresenting to true
     this._presentedScene = scene;
     this.overlay = scene.element.shadowRoot!.querySelector('div.default');
+
+    this.environmentEstimation = environmentEstimation;
 
     const currentSession = await this.resolveARSession();
 
@@ -312,6 +335,14 @@ export class ARRenderer extends EventDispatcher {
     if (scene != null) {
       const {element} = scene;
 
+      if (this.xrLight != null && this.xrLight.parent != null) {
+        scene.remove(this.xrLight);
+        if (this.oldEnvironment != null) {
+          scene.environment = this.oldEnvironment;
+          this.oldEnvironment = null;
+        }
+      }
+
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
       scene.setShadowScaleAndOffset(1, 0);
@@ -329,6 +360,7 @@ export class ARRenderer extends EventDispatcher {
       }
       const point = this.oldTarget;
       scene.setTarget(point.x, point.y, point.z);
+      scene.xrCamera = null;
 
       scene.removeEventListener('model-load', this.onUpdateScene);
       scene.orientHotspots(0);
@@ -382,17 +414,18 @@ export class ARRenderer extends EventDispatcher {
   }
 
   private updateView(view: XRView) {
-    const viewMatrix = view.transform.matrix;
-
     const scene = this.presentedScene!;
-    const {camera} = scene;
-    camera.near = 0.1;
-    camera.far = 100;
 
-    this.presentedScene!.orientHotspots(
-        Math.atan2(viewMatrix[1], viewMatrix[5]));
+    (this.threeRenderer.xr as any).updateCamera(camera);
+    //@ts-ignore
+    const xrCamera = this.threeRenderer.xr.getCamera();
 
-    this.cameraPosition.set(viewMatrix[12], viewMatrix[13], viewMatrix[14]);
+    xrCamera.position.copy(camera.position);
+    xrCamera.quaternion.copy(camera.quaternion);
+    xrCamera.scale.copy(camera.scale);
+
+    const {elements} = xrCamera.matrixWorld;
+    scene.orientHotspots(Math.atan2(elements[1], elements[5]));
 
     if (!this.initialized) {
       const {position, element} = scene;
@@ -400,33 +433,24 @@ export class ARRenderer extends EventDispatcher {
       const {width, height} = this.overlay!.getBoundingClientRect();
       scene.setSize(width, height);
 
-      if (this.threeRenderer.xr.getSession() != null) {
-        this.projectionMatrix.copy(
-            this.threeRenderer.xr.getCamera(camera).projectionMatrix);
-        this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
-      }
+      scene.xrCamera = xrCamera;
+      xrCamera.projectionMatrixInverse.copy(xrCamera.projectionMatrix).invert();
 
       const {theta, radius} =
           (element as ModelViewerElementBase & ControlsInterface)
               .getCameraOrbit();
       // Orient model to match the 3D camera view
-      const cameraDirection =
-          vector3.set(viewMatrix[8], viewMatrix[9], viewMatrix[10]);
-      scene.yaw = Math.atan2(cameraDirection.x, cameraDirection.z) - theta;
+      const cameraDirection = scene.xrCamera.getWorldDirection(vector3);
+      scene.yaw = Math.atan2(-cameraDirection.x, -cameraDirection.z) - theta;
       this.goalYaw = scene.yaw;
 
-      position.copy(this.cameraPosition)
-          .add(cameraDirection.multiplyScalar(-1 * radius));
+      position.copy(scene.xrCamera.position)
+          .add(cameraDirection.multiplyScalar(radius));
       this.goalPosition.copy(position);
 
       scene.setHotspotsVisibility(true);
       this.initialized = true;
     }
-
-    // Ensure the camera uses the AR projection matrix without inverting on
-    // every frame.
-    camera.projectionMatrix.copy(this.projectionMatrix);
-    camera.projectionMatrixInverse.copy(this.projectionMatrixInverse);
 
     // Use automatic dynamic viewport scaling if supported.
     if (view.requestViewportScale && view.recommendedViewportScale) {
@@ -634,7 +658,7 @@ export class ARRenderer extends EventDispatcher {
             this.placementBox!.offsetHeight = offset / scale;
             this.presentedScene!.setShadowScaleAndOffset(scale, offset);
             // Interpolate hit ray up to drag plane
-            const cameraPosition = vector3.copy(this.cameraPosition);
+            const cameraPosition = vector3.copy(scene.getCamera().position);
             const alpha = -offset / (cameraPosition.y - hit.y);
             cameraPosition.multiplyScalar(alpha);
             hit.multiplyScalar(1 - alpha).add(cameraPosition);
@@ -738,7 +762,7 @@ export class ARRenderer extends EventDispatcher {
       gl.clear(gl.DEPTH_BUFFER_BIT);
       gl.depthMask(true);
 
-      this.threeRenderer.render(scene, scene.camera);
+      this.threeRenderer.render(scene, scene.getCamera());
       isFirstView = false;
     }
   }

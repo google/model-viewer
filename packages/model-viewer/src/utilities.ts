@@ -14,6 +14,7 @@
  */
 
 import {EventDispatcher} from 'three';
+
 import {HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_WEBXR_AR_CANDIDATE} from './constants.js';
 
 export type Constructor<T = object, U = object> = {
@@ -189,8 +190,7 @@ export const resolveDpr: () => number = (() => {
  */
 export const isDebugMode = (() => {
   const debugQueryParameterName = 'model-viewer-debug-mode';
-  const debugQueryParameter =
-      new RegExp(`[\?&]${debugQueryParameterName}(&|$)`);
+  const debugQueryParameter = new RegExp(`[?&]${debugQueryParameterName}(&|$)`);
 
   return () => ((self as any).ModelViewerElement &&
                 (self as any).ModelViewerElement.debugMode) ||

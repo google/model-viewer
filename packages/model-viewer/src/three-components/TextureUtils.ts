@@ -20,7 +20,7 @@ import {deserializeUrl} from '../utilities.js';
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentScene from './EnvironmentScene.js';
-import EnvironmentSceneAlt from './EvironmentSceneAlt.js';
+import EnvironmentSceneAlt from './EnvironmentSceneAlt.js';
 
 export interface EnvironmentMapAndSkybox {
   environmentMap: WebGLRenderTarget;

@@ -347,13 +347,14 @@ class TextureHandleCache {
     const cachedHandle = this.textureHandlesById.get(texId);
     // Handles may become invalid if they were garbage collected, so check
     // that.
-    if (cachedHandle && isTextureHandleValid(this.model, cachedHandle)) {
+    if (cachedHandle && await isTextureHandleValid(this.model, cachedHandle)) {
       finalHandle = cachedHandle;
     } else {
       // Set by content and get new handle.
       finalHandle = await createNewHandle();
     }
-    if (!finalHandle || !isTextureHandleValid(this.model, finalHandle)) {
+    if (!finalHandle ||
+        !(await isTextureHandleValid(this.model, finalHandle))) {
       throw new Error(`Could not get a valid handle for texId ${texId}`);
     }
     this.textureHandlesById.set(texId, finalHandle);

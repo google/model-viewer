@@ -70,8 +70,15 @@ module.exports = function(config) {
 
     // Note setting --browsers on the command-line always overrides this list.
     browsers: [
-      'ChromeHeadless',
+      'ChromeHeadlessNoSandbox',
     ],
+
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox'],
+      }
+    },
   });
 
 

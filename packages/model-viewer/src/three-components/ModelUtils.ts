@@ -12,8 +12,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Object3D, Vector3} from 'three';
+import {BufferAttribute, InterleavedBufferAttribute, Object3D, Vector3} from 'three';
 
+
+/**
+ * Gets a scale value to perform inverse quantization of a vertex value
+ * Reference:
+ * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_mesh_quantization#encoding-quantized-data
+ * @param buffer A gltf vertex buffer
+ * @returns A scale value based on KHR_mesh_quantization or 1 if the buffer is
+ *     not quantized.
+ */
+export const getNormalizedComponentScale =
+    (buffer: BufferAttribute|InterleavedBufferAttribute) => {
+      if (!buffer.normalized) {
+        return 1;
+      }
+
+      const array: ArrayLike<number> = buffer.array;
+      if (array instanceof Int8Array) {
+        return 1 / 127;
+      } else if (array instanceof Uint8Array) {
+        return 1 / 255;
+      } else if (array instanceof Int16Array) {
+        return 1 / 32767;
+      } else if (array instanceof Uint16Array) {
+        return 1 / 65535;
+      }
+      return 1;
+    };
 /**
  * Moves Three.js objects from one parent to another
  */
@@ -49,7 +76,6 @@ export const reduceVertices = <T>(
             for (i = 0, l = vertices.length; i < l; i++) {
               vertex.copy(vertices[i]);
               vertex.applyMatrix4(object.matrixWorld);
-
               value = func(value, vertex);
             }
 
@@ -57,9 +83,12 @@ export const reduceVertices = <T>(
             const {position} = geometry.attributes;
 
             if (position !== undefined) {
+              const scale = getNormalizedComponentScale(position);
+
               for (i = 0, l = position.count; i < l; i++) {
-                vertex.fromBufferAttribute(position, i)
-                    .applyMatrix4(object.matrixWorld);
+                vertex.fromBufferAttribute(position, i);
+                vertex.multiplyScalar(scale);
+                vertex.applyMatrix4(object.matrixWorld);
 
                 value = func(value, vertex);
               }

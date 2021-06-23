@@ -88,6 +88,7 @@ describe('material panel test', () => {
   });
 
   it('reflects textures in GLTF', async () => {
+    panel.selectedMaterialId = 0;
     await panel.updateComplete;
     const actualTexturesById = panel.texturesById!.values().next().value;
     expect(actualTexturesById).toBeDefined();
@@ -156,9 +157,10 @@ describe('material panel test', () => {
      });
 
   it('clears model textures on MR null texture input', async () => {
-    const texturePicker = panel.metallicRoughnessTexturePicker!;
     panel.selectedMaterialId = 1;
     await panel.updateComplete;
+    const texturePicker = panel.metallicRoughnessTexturePicker!;
+    await texturePicker.updateComplete;
 
     const clearTextureOption =
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
@@ -193,6 +195,7 @@ describe('material panel test', () => {
     panel.selectedMaterialId = 1;
     await panel.updateComplete;
     const texturePicker = panel.normalTexturePicker!;
+    await texturePicker.updateComplete;
 
     const clearTextureOption =
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
@@ -227,6 +230,7 @@ describe('material panel test', () => {
     panel.selectedMaterialId = 1;
     await panel.updateComplete;
     const texturePicker = panel.emissiveTexturePicker!;
+    await texturePicker.updateComplete;
 
     const clearTextureOption =
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
@@ -261,6 +265,7 @@ describe('material panel test', () => {
     panel.selectedMaterialId = 1;
     await panel.updateComplete;
     const texturePicker = panel.occlusionTexturePicker!;
+    await texturePicker.updateComplete;
 
     const clearTextureOption =
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;

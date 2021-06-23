@@ -13,8 +13,10 @@
  */
 
 import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
+
 import {TouchAction} from '../features/controls.js';
 import {clamp} from '../utilities.js';
+
 import {Damper, SETTLING_TIME} from './Damper.js';
 
 

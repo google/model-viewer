@@ -14,8 +14,8 @@
  */
 
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
-import {ControlsInterface, ControlsMixin} from '../../features/controls.js';
 
+import {ControlsInterface, ControlsMixin} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {SETTLING_TIME} from '../../three-components/Damper.js';
@@ -255,9 +255,9 @@ suite('ARRenderer', () => {
 
       test('places the model oriented to the camera', () => {
         const epsilon = 0.0001;
-        const {target, position} = modelScene;
+        const {target, position, camera} = modelScene;
 
-        const {cameraPosition} = arRenderer;
+        const cameraPosition = camera.position;
         const cameraToHit = new Vector2(
             position.x - cameraPosition.x, position.z - cameraPosition.z);
         const forward = target.getWorldDirection(new Vector3());

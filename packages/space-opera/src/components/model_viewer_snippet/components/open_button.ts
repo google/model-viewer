@@ -39,6 +39,7 @@ import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
 import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
+
 import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 
 @customElement('me-open-modal')
@@ -123,7 +124,7 @@ export class OpenModal extends ConnectedLitElement {
         reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
       } else if (this.config.environmentImage) {
         // else, if there was an env image in the state, leave it alone
-        config.environmentImage = this.config.environmentImage
+        config.environmentImage = this.config.environmentImage;
       } else {
         // else, reset env image
         config.environmentImage = undefined;

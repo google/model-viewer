@@ -44,13 +44,6 @@ export const IS_MOBILE = (() => {
 
 export const IS_CHROMEOS = /\bCrOS\b/.test(navigator.userAgent);
 
-// Disabling offscreen canvas for now because it is slower and has bugs relating
-// to janky updates and out of sync frames.
-export const USE_OFFSCREEN_CANVAS = false;
-// Boolean((self as any).OffscreenCanvas) &&
-//     Boolean((self as any).OffscreenCanvas.prototype.transferToImageBitmap) &&
-//     !IS_CHROMEOS;  // TODO(elalish): file a bug on inverted renders
-
 export const IS_ANDROID = /android/i.test(navigator.userAgent);
 
 // Prior to iOS 13, detecting iOS Safari was relatively straight-forward.
