@@ -15,7 +15,7 @@
 
 import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
-import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {ExtensionDictionary, GLTF, Material as GLTFMaterial, NormalTextureInfo, OcclusionTextureInfo, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
@@ -23,10 +23,34 @@ import {TextureInfo} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
+
 const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
 const $normalTexture = Symbol('normalTexture');
 const $occlusionTexture = Symbol('occlusionTexture');
 const $emissiveTexture = Symbol('emissiveTexture');
+
+class EmptyNormalTexture implements NormalTextureInfo {
+  scale?: number|undefined;
+  index: number = -1;
+  texCoord?: number|undefined;
+  extensions?: ExtensionDictionary|undefined;
+  extras?: unknown;
+}
+
+class EmptyOcclusionTexture implements OcclusionTextureInfo {
+  strength: number|undefined = 1;
+  index: number = -1;
+  texCoord?: number|undefined;
+  extensions?: ExtensionDictionary|undefined;
+  extras?: unknown;
+}
+
+class EmptyTexture implements GLTFTextureInfo {
+  index: number = -1;
+  texCoord?: number|undefined;
+  extensions?: ExtensionDictionary|undefined;
+  extras?: unknown;
+}
 
 /**
  * Material facade implementation for Three.js materials
@@ -53,7 +77,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
         onUpdate, gltf, material.pbrMetallicRoughness, correlatedMaterials);
 
-    const {normalTexture, occlusionTexture, emissiveTexture} = material;
+    let {normalTexture, occlusionTexture, emissiveTexture} = material;
 
     const normalTextures = new Set<ThreeTexture>();
     const occlusionTextures = new Set<ThreeTexture>();
@@ -64,14 +88,26 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
       if (normalTexture != null && normalMap != null) {
         normalTextures.add(normalMap);
+      } else {
+        normalTexture = new EmptyNormalTexture();
+        material.normalMap = new ThreeTexture();
+        normalTextures.add(material.normalMap);
       }
 
       if (occlusionTexture != null && aoMap != null) {
         occlusionTextures.add(aoMap);
+      } else {
+        occlusionTexture = new EmptyOcclusionTexture();
+        material.aoMap = new ThreeTexture();
+        occlusionTextures.add(material.aoMap);
       }
 
       if (emissiveTexture != null && emissiveMap != null) {
         emissiveTextures.add(emissiveMap);
+      } else {
+        emissiveTexture = new EmptyTexture();
+        material.emissiveMap = new ThreeTexture();
+        emissiveTextures.add(material.emissiveMap);
       }
     }
 

@@ -18,9 +18,10 @@ import {Texture as ThreeTexture} from 'three';
 import {GLTF, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Texture as TextureInterface} from './api.js';
-import {Image} from './image.js';
+import {EmptyImage, Image} from './image.js';
 import {Sampler} from './sampler.js';
 import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
+
 
 
 const $source = Symbol('source');
@@ -45,12 +46,14 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
         {};
     this[$sampler] = new Sampler(onUpdate, sampler, correlatedTextures);
 
-    if (gltf.images != null && imageIndex != null) {
+    if (gltf.images != null && imageIndex != null && imageIndex !== -1) {
       const image = gltf.images[imageIndex];
 
       if (image != null) {
         this[$source] = new Image(onUpdate, image, correlatedTextures);
       }
+    } else if (imageIndex === -1) {
+      this[$source] = new Image(onUpdate, new EmptyImage(), correlatedTextures);
     }
   }
 
