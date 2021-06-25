@@ -16,15 +16,18 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/api';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
 import {Action, BestPracticesState, State} from '../../types.js';
 import {renderARButton, renderARPrompt, renderProgressBar} from '../best_practices/render_best_practices.js';
 import {Camera} from '../camera_settings/camera_state.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
-import {GltfState} from '../model_viewer_preview/types.js';
+import {GltfState, INITIAL_MODEL_STATE, ModelState} from '../model_viewer_preview/types.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {radToDeg} from '../utils/reducer_utils.js';
+
+const THUMBNAIL_SIZE = 256;
 
 export function getModelViewer() {
   return document.querySelector('model-viewer-preview')?.modelViewer;
@@ -75,6 +78,40 @@ export async function downloadContents(url: string): Promise<ArrayBuffer> {
   return blob.arrayBuffer();
 }
 
+async function pushThumbnail(
+    thumbnailsById: Map<string, string>, textureInfo: TextureInfo|null) {
+  if (textureInfo == null) {
+    return;
+  }
+  const {source} = textureInfo.texture;
+  const cacheKey =
+      (source.type == 'external' ? source.uri :
+                                   source.bufferView!.toString()) as string;
+  if (!thumbnailsById.has(cacheKey)) {
+    thumbnailsById.set(
+        cacheKey, await source.createThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE));
+  }
+}
+
+async function createThumbnails(): Promise<Map<string, string>> {
+  const thumbnailsById = new Map<string, string>();
+  for (const material of getModelViewer()!.model?.materials!) {
+    const {
+      pbrMetallicRoughness,
+      normalTexture,
+      emissiveTexture,
+      occlusionTexture
+    } = material;
+    const {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;
+    await pushThumbnail(thumbnailsById, normalTexture);
+    await pushThumbnail(thumbnailsById, emissiveTexture);
+    await pushThumbnail(thumbnailsById, occlusionTexture);
+    await pushThumbnail(thumbnailsById, baseColorTexture);
+    await pushThumbnail(thumbnailsById, metallicRoughnessTexture);
+  };
+  return thumbnailsById;
+}
+
 /** The user has requested a new GLTF/GLB for editing. */
 const SET_GLTF = 'SET_GLTF'
 export function dispatchSetGltf(gltf: GltfModel|undefined) {
@@ -89,6 +126,12 @@ export function dispatchGltfUrl(gltfUrl?: string|undefined) {
 const SET_GLTF_JSON_STRING = 'SET_GLTF_JSON_STRING'
 export function dispatchGltfJsonString(gltfJsonString?: string) {
   return {type: SET_GLTF_JSON_STRING, payload: gltfJsonString};
+}
+
+const SET_THUMBNAILS = 'SET_THUMBNAILS'
+export async function dispatchThumbnails() {
+  const thumbnailsById = await createThumbnails();
+  return {type: SET_THUMBNAILS, payload: thumbnailsById};
 }
 
 export const getGltfUrl = (state: State) => state.entities.gltf.gltfUrl;
@@ -114,6 +157,18 @@ export function gltfReducer(
       return {
         ...state, gltfJsonString: action.payload
       }
+    default:
+      return state;
+  }
+}
+
+export function modelReducer(
+    state: ModelState = INITIAL_MODEL_STATE, action: Action): ModelState {
+  switch (action.type) {
+    case SET_THUMBNAILS:
+      return {...state, thumbnailsById: action.payload};
+    case SET_GLTF_JSON_STRING:
+      return {...state, originalGltfJson: action.payload};
     default:
       return state;
   }

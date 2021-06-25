@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-import {ImageLoader, Texture as ThreeTexture} from 'three';
+import {ImageLoader, Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene, Texture as ThreeTexture, WebGLRenderTarget} from 'three';
 
+import {blobCanvas} from '../../model-viewer-base.js';
 import {EmbeddedImage as GLTFEmbeddedImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {Renderer} from '../../three-components/Renderer.js';
 
 import {Image as ImageInterface} from './api.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const loader = new ImageLoader();
+const quadMaterial = new MeshBasicMaterial();
+const quad = new PlaneGeometry(2, 2);
 
 const $threeTextures = Symbol('threeTextures');
-const $uri = Symbol('uri');
 const $bufferViewImages = Symbol('bufferViewImages');
 
 /**
@@ -34,17 +37,12 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
-  private[$uri]: string|undefined = undefined;
   private[$bufferViewImages]: WeakMap<ThreeTexture, unknown> = new WeakMap();
 
   constructor(
       onUpdate: () => void, image: GLTFImage,
       correlatedTextures: Set<ThreeTexture>) {
     super(onUpdate, image, correlatedTextures);
-
-    if ((image as GLTFExternalImage).uri != null) {
-      this[$uri] = (image as GLTFExternalImage).uri;
-    }
 
     if ((image as GLTFEmbeddedImage).bufferView != null) {
       for (const texture of correlatedTextures) {
@@ -58,7 +56,11 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   }
 
   get uri(): string|undefined {
-    return this[$uri];
+    return (this[$sourceObject] as GLTFExternalImage).uri;
+  }
+
+  get bufferView(): number|undefined {
+    return (this[$sourceObject] as GLTFEmbeddedImage).bufferView;
   }
 
   get type(): 'embedded'|'external' {
@@ -66,8 +68,6 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   }
 
   async setURI(uri: string): Promise<void> {
-    this[$uri] = uri;
-
     const image = await new Promise((resolve, reject) => {
       loader.load(uri, resolve, undefined, reject);
     });
@@ -86,5 +86,38 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       texture.needsUpdate = true;
     }
     this[$onUpdate]();
+  }
+
+  async createThumbnail(width: number, height: number): Promise<string> {
+    const scene = new Scene();
+    quadMaterial.map = [...this[$threeTextures]][0];
+    const mesh = new Mesh(quad, quadMaterial);
+    scene.add(mesh);
+    const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const {threeRenderer} = Renderer.singleton;
+    const renderTarget = new WebGLRenderTarget(width, height);
+    threeRenderer.setRenderTarget(renderTarget);
+    threeRenderer.render(scene, camera);
+    threeRenderer.setRenderTarget(null);
+
+    const buffer = new Uint8Array(width * height * 4);
+    threeRenderer.readRenderTargetPixels(
+        renderTarget, 0, 0, width, height, buffer);
+
+    blobCanvas.width = width;
+    blobCanvas.height = height;
+    const blobContext = blobCanvas.getContext('2d')!;
+    const imageData = blobContext.createImageData(width, height);
+    imageData.data.set(buffer);
+    blobContext.putImageData(imageData, 0, 0);
+
+    return new Promise<string>(
+        async (resolve, reject) => {blobCanvas.toBlob(blob => {
+          if (!blob) {
+            return reject('Failed to capture thumbnail.');
+          }
+          resolve(URL.createObjectURL(blob));
+        }, 'image/png')});
   }
 }

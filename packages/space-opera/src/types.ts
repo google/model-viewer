@@ -21,7 +21,7 @@ import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.
 import {HotspotConfig} from './components/hotspot_panel/types.js';
 import {EnvironmentImage, INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/types.js';
 import {MobileState} from './components/mobile_view/types.js';
-import {GltfEdits, GltfState, INITIAL_GLTF_EDITS} from './components/model_viewer_preview/types.js';
+import {GltfEdits, GltfState, INITIAL_GLTF_EDITS, INITIAL_MODEL_STATE, ModelState} from './components/model_viewer_preview/types.js';
 
 export interface ModelViewerConfig {
   animationName?: string;
@@ -101,6 +101,7 @@ export interface EntitiesState {
   environment: EnvironmentState;
   gltf: GltfState;
   gltfEdits: GltfEditsState;
+  model: ModelState;
   modelViewerSnippet: ModelViewerSnippetState;
 }
 
@@ -126,6 +127,7 @@ export const INITIAL_STATE: State = {
       edits: INITIAL_GLTF_EDITS,
       origEdits: INITIAL_GLTF_EDITS,
     },
+    model: INITIAL_MODEL_STATE,
     modelViewerSnippet: {
       arConfig: {},
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},

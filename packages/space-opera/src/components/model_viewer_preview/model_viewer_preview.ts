@@ -22,7 +22,7 @@
 
 import '@material/mwc-icon-button';
 
-import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
 
@@ -47,7 +47,7 @@ import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {applyEdits, dispatchGltfAndEdits} from './gltf_edits.js';
-import {dispatchGltfUrl, downloadContents, getGltfModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
+import {dispatchGltfJsonString, dispatchGltfUrl, dispatchThumbnails, downloadContents, getGltfJsonString, getGltfModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
@@ -77,6 +77,12 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty() extraAttributes: any = {};
   @internalProperty() refreshButtonIsReady: boolean = false;
   @internalProperty() bestPractices?: BestPracticesState;
+
+  // The loadComplete promise is a testing hook that resolves once all async
+  // load-related operations have completed. Await this promise after causing a
+  // gltfUrl to be dispatched and after awaiting this element's updateComplete.
+  loadComplete?: Promise<void>;
+  private resolveLoad = () => {};
 
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;
@@ -157,6 +163,9 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.enforcePlayAnimation();
 
     if (changedProperties.has($gltfUrl)) {
+      this.loadComplete = new Promise((resolve) => {
+        this.resolveLoad = resolve;
+      });
       this.onGltfUrlChanged();
     }
 
@@ -245,12 +254,15 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   // Handle the case when the model is loaded for the first time.
-  private onModelLoaded() {
+  private async onModelLoaded() {
+    reduxStore.dispatch(await dispatchThumbnails());
+    reduxStore.dispatch(dispatchGltfJsonString(getGltfJsonString()));
     // only update on poster reveal
     if (this.modelViewer && this.modelViewer.reveal === 'interaction') {
-      this.onGltfUrlChanged();
+      await this.onGltfUrlChanged();
     }
     this.enforcePlayAnimation();
+    this.resolveLoad();
   }
 
   private onModelVisible() {

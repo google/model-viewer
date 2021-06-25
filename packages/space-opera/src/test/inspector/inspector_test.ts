@@ -22,7 +22,6 @@ import {InspectorPanel} from '../../components/inspector/inspector.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
-import {waitForEvent} from '../utils/test_utils.js';
 
 const ASTRONAUT_PATH = '../base/shared-assets/models/Astronaut.glb';
 
@@ -39,8 +38,8 @@ describe('loader inspector pane test', () => {
     document.body.appendChild(inspectorPane);
 
     reduxStore.dispatch(dispatchGltfUrl(ASTRONAUT_PATH));
-    await waitForEvent(getModelViewer()!, 'load');
-
+    await preview.updateComplete;
+    await preview.loadComplete;
     await inspectorPane.updateComplete;
   });
 
@@ -58,8 +57,6 @@ describe('loader inspector pane test', () => {
   });
 
   it('uploads images in the bin to the inspector pane', async () => {
-    await inspectorPane.updateTexturesComplete;
-
     const texImage = inspectorPane.shadowRoot!.querySelector<HTMLImageElement>(
         '.texture-images img')!;
     expect(texImage).toBeDefined();

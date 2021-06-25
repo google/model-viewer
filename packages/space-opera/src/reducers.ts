@@ -24,7 +24,7 @@ import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/red
 import {environmentReducer} from './components/ibl_selector/reducer.js'
 import {editsReducer, origEditsReducer} from './components/materials_panel/reducer.js';
 import {arReducer, mobileReducer} from './components/mobile_view/reducer.js';
-import {gltfReducer} from './components/model_viewer_preview/reducer.js';
+import {gltfReducer, modelReducer} from './components/model_viewer_preview/reducer.js';
 import {extraAttributesReducer} from './components/model_viewer_snippet/reducer.js';
 import {relativeFilePathsReducer} from './components/relative_file_paths/reducer.js';
 
@@ -47,6 +47,7 @@ const entitiesReducer = combineReducers({
   environment: environmentReducer,
   gltf: gltfReducer,
   gltfEdits: gltfEditsReducer,
+  model: modelReducer,
   modelViewerSnippet: modelViewerSnippetReducer
 });
 
