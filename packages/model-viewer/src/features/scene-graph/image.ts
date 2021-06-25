@@ -16,7 +16,7 @@
 import {ImageLoader, Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene, Texture as ThreeTexture, WebGLRenderTarget} from 'three';
 
 import {blobCanvas} from '../../model-viewer-base.js';
-import {EmbeddedImage as GLTFEmbeddedImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Renderer} from '../../three-components/Renderer.js';
 
 import {Image as ImageInterface} from './api.js';
@@ -44,7 +44,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       correlatedTextures: Set<ThreeTexture>) {
     super(onUpdate, image, correlatedTextures);
 
-    if ((image as GLTFEmbeddedImage).bufferView != null) {
+    if ((image as GLTFImage).bufferView != null) {
       for (const texture of correlatedTextures) {
         this[$bufferViewImages].set(texture, texture.image);
       }
@@ -52,15 +52,15 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   }
 
   get name(): string {
-    return (this[$sourceObject] as any).name || '';
+    return (this[$sourceObject] as GLTFImage).name || '';
   }
 
   get uri(): string|undefined {
-    return (this[$sourceObject] as GLTFExternalImage).uri;
+    return (this[$sourceObject] as GLTFImage).uri;
   }
 
   get bufferView(): number|undefined {
-    return (this[$sourceObject] as GLTFEmbeddedImage).bufferView;
+    return (this[$sourceObject] as GLTFImage).bufferView;
   }
 
   get type(): 'embedded'|'external' {
@@ -68,6 +68,8 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   }
 
   async setURI(uri: string): Promise<void> {
+    (this[$sourceObject] as GLTFImage).uri = uri;
+
     const image = await new Promise((resolve, reject) => {
       loader.load(uri, resolve, undefined, reject);
     });
@@ -77,7 +79,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       // (this would happen if it started out as embedded), then fall back to
       // the cached object URL created by GLTFLoader:
       if (image == null &&
-          (this[$sourceObject] as GLTFEmbeddedImage).bufferView != null) {
+          (this[$sourceObject] as GLTFImage).bufferView != null) {
         texture.image = this[$bufferViewImages].get(texture);
       } else {
         texture.image = image;
