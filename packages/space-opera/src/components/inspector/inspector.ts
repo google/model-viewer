@@ -23,6 +23,7 @@ import {customElement, html, internalProperty} from 'lit-element';
 
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {getModel} from '../model_viewer_preview/reducer.js';
 
 /**
  * The inspector.
@@ -33,8 +34,9 @@ export class InspectorPanel extends ConnectedLitElement {
   @internalProperty() thumbnails: string[] = [];
 
   stateChanged(state: State) {
-    this.thumbnails = [...state.entities.model.thumbnailsById.values()];
-    this.gltfJsonstring = state.entities.model.originalGltfJson;
+    const model = getModel(state);
+    this.thumbnails = [...model.thumbnailsById.values()];
+    this.gltfJsonstring = model.originalGltfJson;
   }
 
   render() {

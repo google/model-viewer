@@ -16,7 +16,7 @@
  */
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/api';
+import {Image, TextureInfo} from '@google/model-viewer/lib/features/scene-graph/api';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
 import {Action, BestPracticesState, State} from '../../types.js';
@@ -78,18 +78,21 @@ export async function downloadContents(url: string): Promise<ArrayBuffer> {
   return blob.arrayBuffer();
 }
 
+export function getTextureId(gltfImage: Image): string {
+  return gltfImage.type == 'external' ? gltfImage.uri! :
+                                        gltfImage.bufferView!.toString();
+}
+
 async function pushThumbnail(
     thumbnailsById: Map<string, string>, textureInfo: TextureInfo|null) {
   if (textureInfo == null) {
     return;
   }
   const {source} = textureInfo.texture;
-  const cacheKey =
-      (source.type == 'external' ? source.uri :
-                                   source.bufferView!.toString()) as string;
-  if (!thumbnailsById.has(cacheKey)) {
+  const id = getTextureId(source);
+  if (!thumbnailsById.has(id)) {
     thumbnailsById.set(
-        cacheKey, await source.createThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE));
+        id, await source.createThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE));
   }
 }
 
@@ -138,6 +141,7 @@ export const getGltfUrl = (state: State) => state.entities.gltf.gltfUrl;
 export const getGltfJsonString = () =>
     JSON.stringify(getModelViewer()?.originalJson, null, 2);
 export const getGltfModel = (state: State) => state.entities.gltf.gltf;
+export const getModel = (state: State) => state.entities.model;
 
 export function gltfReducer(
     state: GltfState = {

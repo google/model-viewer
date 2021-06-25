@@ -80,7 +80,7 @@ describe('material panel test', () => {
   });
 
   it('selector reflects materials in GLTF', async () => {
-    panel.selectedMaterialId = 0;
+    panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
     expect(panel.selectedBaseColor).toEqual([0.8, 0.8, 0.2, 1.0]);
     expect(panel.selectedRoughnessFactor).toEqual(0.9);
@@ -88,7 +88,7 @@ describe('material panel test', () => {
   });
 
   it('reflects textures in GLTF', async () => {
-    panel.selectedMaterialId = 0;
+    panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
     const actualTexturesById = panel.texturesById!.values().next().value;
     expect(actualTexturesById).toBeDefined();
@@ -102,7 +102,7 @@ describe('material panel test', () => {
   // Input/click
   it('applies changes to model textures on base color texture picker input',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
        await panel.updateComplete;
        const texturePicker = panel.baseColorTexturePicker!;
        texturePicker.selectedIndex = 0;
@@ -122,7 +122,7 @@ describe('material panel test', () => {
      });
 
   it('clears model textures on base color null texture input', async () => {
-    panel.selectedMaterialId = 1;
+    panel.selectedMaterialIndex = 1;
     await panel.updateComplete;
     const texturePicker = panel.baseColorTexturePicker!;
     await texturePicker.updateComplete;
@@ -139,7 +139,7 @@ describe('material panel test', () => {
 
   it('applies changes to model textures on MR texture picker input',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
        await panel.updateComplete;
        const texturePicker = panel.metallicRoughnessTexturePicker!;
        texturePicker.selectedIndex = 1;
@@ -153,11 +153,11 @@ describe('material panel test', () => {
        expect(reduxStore.getState()
                   .entities.gltfEdits.edits.materials[0]
                   .metallicRoughnessTextureId)
-           .toEqual(expectedTextureId);
+           .toEqual(expectedTextureId!);
      });
 
   it('clears model textures on MR null texture input', async () => {
-    panel.selectedMaterialId = 1;
+    panel.selectedMaterialIndex = 1;
     await panel.updateComplete;
     const texturePicker = panel.metallicRoughnessTexturePicker!;
     await texturePicker.updateComplete;
@@ -174,7 +174,7 @@ describe('material panel test', () => {
 
   it('applies changes to model textures on normal texture picker input',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
        await panel.updateComplete;
        const texturePicker = panel.normalTexturePicker!;
        texturePicker.selectedIndex = 2;
@@ -192,7 +192,7 @@ describe('material panel test', () => {
      });
 
   it('clears model textures on normal null texture input', async () => {
-    panel.selectedMaterialId = 1;
+    panel.selectedMaterialIndex = 1;
     await panel.updateComplete;
     const texturePicker = panel.normalTexturePicker!;
     await texturePicker.updateComplete;
@@ -209,7 +209,7 @@ describe('material panel test', () => {
 
   it('applies changes to model textures on emissive texture picker input',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
        await panel.updateComplete;
        const texturePicker = panel.emissiveTexturePicker!;
        texturePicker.selectedIndex = 2;
@@ -227,7 +227,7 @@ describe('material panel test', () => {
      });
 
   it('clears model textures on emissive null texture input', async () => {
-    panel.selectedMaterialId = 1;
+    panel.selectedMaterialIndex = 1;
     await panel.updateComplete;
     const texturePicker = panel.emissiveTexturePicker!;
     await texturePicker.updateComplete;
@@ -244,7 +244,7 @@ describe('material panel test', () => {
 
   it('applies changes to model textures on occlusion texture picker input',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
        await panel.updateComplete;
        const texturePicker = panel.occlusionTexturePicker!;
        texturePicker.selectedIndex = 2;
@@ -262,7 +262,7 @@ describe('material panel test', () => {
      });
 
   it('clears model textures on occlusion null texture input', async () => {
-    panel.selectedMaterialId = 1;
+    panel.selectedMaterialIndex = 1;
     await panel.updateComplete;
     const texturePicker = panel.occlusionTexturePicker!;
     await texturePicker.updateComplete;
@@ -278,7 +278,7 @@ describe('material panel test', () => {
   });
 
   it('applies changes to model textures on double sided change', async () => {
-    panel.selectedMaterialId = 0;
+    panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
     const doubleSidedCheckbox =
         panel.shadowRoot!.querySelector('me-checkbox#doubleSidedCheckbox') as
@@ -295,7 +295,7 @@ describe('material panel test', () => {
   // Upload
   it('adds a base color texture to model textures on base color texture upload',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
 
        await panel.updateComplete;
        const texturePicker = panel.baseColorTexturePicker!;
@@ -314,7 +314,7 @@ describe('material panel test', () => {
 
   it('adds a normal texture to model textures on normal texture upload',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
 
        await panel.updateComplete;
        const texturePicker = panel.normalTexturePicker!;
@@ -333,7 +333,7 @@ describe('material panel test', () => {
 
   it('adds a metallic-roughness texture to model textures on MR texture upload',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
 
        await panel.updateComplete;
        const texturePicker = panel.metallicRoughnessTexturePicker!;
@@ -352,7 +352,7 @@ describe('material panel test', () => {
 
   it('adds a emissive texture to model textures on emissive texture upload',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
 
        await panel.updateComplete;
        const texturePicker = panel.emissiveTexturePicker!;
@@ -371,7 +371,7 @@ describe('material panel test', () => {
 
   it('adds a occlusion texture to model textures on occlusion texture upload',
      async () => {
-       panel.selectedMaterialId = 0;
+       panel.selectedMaterialIndex = 0;
 
        await panel.updateComplete;
        const texturePicker = panel.occlusionTexturePicker!;
@@ -389,7 +389,7 @@ describe('material panel test', () => {
      });
 
   it('applies changes to model textures on emissiveFactor change', async () => {
-    panel.selectedMaterialId = 0;
+    panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
 
     panel.emissiveFactorPicker.selectedColorHex = '#ff0000';
@@ -401,7 +401,7 @@ describe('material panel test', () => {
   });
 
   it('applies changes to model textures on alpha mode change', async () => {
-    panel.selectedMaterialId = 0;
+    panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
 
     const dropdown = panel.shadowRoot!.querySelector(
@@ -415,7 +415,7 @@ describe('material panel test', () => {
   });
 
   it('applies changes to model textures on alpha cutoff change', async () => {
-    panel.selectedMaterialId = 0;
+    panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
 
     const dropdown = panel.shadowRoot!.querySelector(

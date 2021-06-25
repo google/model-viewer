@@ -60,7 +60,7 @@ export class TexturePicker extends LitElement {
                 type="radio"
                 name="textureSelect"
                 @click="${this.onTextureChange}">
-              <img class="TextureImage" src="${imageUrl.url}">
+              <img class="TextureImage" src="${imageUrl}">
             </label>
             `)}
           <div slot="label" id="nullTextureSquare" class="NullTextureSquareInList" @click=${
@@ -87,7 +87,7 @@ export class TexturePicker extends LitElement {
       return html`
           <div slot="label" class="TextureSquare">
           <img class="TextureImage" src="${
-          this.images[this.selectedIndex].url}"></div>`;
+          this.images[this.selectedIndex]}"></div>`;
     }
   }
 
