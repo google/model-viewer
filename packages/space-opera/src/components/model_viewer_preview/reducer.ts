@@ -172,7 +172,8 @@ export function modelReducer(
     case SET_THUMBNAILS:
       return {...state, thumbnailsById: action.payload};
     case SET_GLTF_JSON_STRING:
-      return {...state, originalGltfJson: action.payload};
+      const gltf = !!action.payload ? JSON.parse(action.payload) : undefined;
+      return {...state, originalGltfJson: action.payload, originalGltf: gltf};
     default:
       return state;
   }

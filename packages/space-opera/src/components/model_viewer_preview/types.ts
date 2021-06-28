@@ -17,6 +17,7 @@
 
 import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
 
+import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 import {Material, Texture, TexturesById} from '../materials_panel/material_state.js';
 
 /**
@@ -46,9 +47,11 @@ export interface GltfState {
 export const INITIAL_MODEL_STATE: ModelState = {
   thumbnailsById: new Map<string, string>(),
   originalGltfJson: '',
+  originalGltf: {asset: {version: '2.0'}}
 };
 
 export interface ModelState {
   thumbnailsById: Map<string, string>;
   originalGltfJson: string;
+  originalGltf: GLTF;
 }

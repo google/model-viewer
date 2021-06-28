@@ -31,6 +31,7 @@ import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, property, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
+import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -45,7 +46,7 @@ import {checkFinite} from '../utils/reducer_utils.js';
 
 import {Material, TexturesById} from './material_state.js';
 import {styles} from './materials_panel.css.js';
-import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicFactor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchRoughnessFactor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
+import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
 
 
 /** Material panel. */
@@ -62,6 +63,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() thumbnailsById?: Map<string, string>;
   @internalProperty() thumbnailUrls: string[] = [];
   @internalProperty() thumbnailIds: string[] = [];
+  @internalProperty() originalGltf?: GLTF;
 
   @internalProperty() isNewModel: boolean = true;
   @internalProperty() currentGltfUrl: string = '';
@@ -109,6 +111,7 @@ export class MaterialPanel extends ConnectedLitElement {
     this.thumbnailsById = model.thumbnailsById;
     this.thumbnailUrls = [...this.thumbnailsById.values()];
     this.thumbnailIds = [...this.thumbnailsById.keys()];
+    this.originalGltf = model.originalGltf;
 
     if (this.texturesById !== getEditsTextures(state)) {
       this.texturesById = getEditsTextures(state);
@@ -123,8 +126,12 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
-  getMaterial(id: number) {
-    return getModelViewer()?.model?.materials[id];
+  getMaterial(index: number) {
+    return getModelViewer()?.model?.materials[index];
+  }
+
+  getOriginalMaterial(index: number) {
+    return this.originalGltf!.materials![index];
   }
 
   async performUpdate() {
@@ -568,17 +575,19 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   revertMetallicFactor() {
-    const id = this.safeSelectedMaterialId;
-    const metallicFactor = this.originalMaterials[id].metallicFactor;
-    reduxStore.dispatch(dispatchMetallicFactor(
-        getEditsMaterials(reduxStore.getState()), {id, metallicFactor}));
+    const index = this.selectedMaterialIndex!;
+    const factor =
+        this.getOriginalMaterial(index).pbrMetallicRoughness!.metallicFactor!;
+    this.metallicFactorSlider.value = factor;
+    this.getMaterial(index)!.pbrMetallicRoughness.setMetallicFactor(factor);
   }
 
   revertRoughnessFactor() {
-    const id = this.safeSelectedMaterialId;
-    const roughnessFactor = this.originalMaterials[id].roughnessFactor;
-    reduxStore.dispatch(dispatchRoughnessFactor(
-        getEditsMaterials(reduxStore.getState()), {id, roughnessFactor}));
+    const index = this.selectedMaterialIndex!;
+    const factor =
+        this.getOriginalMaterial(index).pbrMetallicRoughness!.roughnessFactor!;
+    this.roughnessFactorSlider.value = factor;
+    this.getMaterial(index)!.pbrMetallicRoughness.setRoughnessFactor(factor);
   }
 
   revertBaseColorFactor() {
