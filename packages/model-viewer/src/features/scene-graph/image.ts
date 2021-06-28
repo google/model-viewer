@@ -27,7 +27,6 @@ const quadMaterial = new MeshBasicMaterial();
 const quad = new PlaneGeometry(2, 2);
 
 const $threeTextures = Symbol('threeTextures');
-const $bufferViewImages = Symbol('bufferViewImages');
 
 /**
  * Image facade implementation for Three.js textures
@@ -35,20 +34,6 @@ const $bufferViewImages = Symbol('bufferViewImages');
 export class Image extends ThreeDOMElement implements ImageInterface {
   private get[$threeTextures]() {
     return this[$correlatedObjects] as Set<ThreeTexture>;
-  }
-
-  private[$bufferViewImages]: WeakMap<ThreeTexture, unknown> = new WeakMap();
-
-  constructor(
-      onUpdate: () => void, image: GLTFImage,
-      correlatedTextures: Set<ThreeTexture>) {
-    super(onUpdate, image, correlatedTextures);
-
-    if ((image as GLTFImage).bufferView != null) {
-      for (const texture of correlatedTextures) {
-        this[$bufferViewImages].set(texture, texture.image);
-      }
-    }
   }
 
   get name(): string {
@@ -75,16 +60,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     });
 
     for (const texture of this[$threeTextures]) {
-      // If the URI is set to null but the Image had an associated buffer view
-      // (this would happen if it started out as embedded), then fall back to
-      // the cached object URL created by GLTFLoader:
-      if (image == null &&
-          (this[$sourceObject] as GLTFImage).bufferView != null) {
-        texture.image = this[$bufferViewImages].get(texture);
-      } else {
-        texture.image = image;
-      }
-
+      texture.image = image;
       texture.needsUpdate = true;
     }
     this[$onUpdate]();
