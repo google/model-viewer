@@ -40,13 +40,12 @@ import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 import {TexturePicker} from '../shared/texture_picker/texture_picker.js';
-import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '../utils/create_object_url.js';
 import {ALPHA_BLEND_MODES} from '../utils/gltf_constants.js';
 import {checkFinite} from '../utils/reducer_utils.js';
 
-import {Material, TexturesById} from './material_state.js';
+import {Material} from './material_state.js';
 import {styles} from './materials_panel.css.js';
-import {dispatchAddOcclusionTexture, dispatchDoubleSided, dispatchMaterialBaseColor, dispatchOcclusionTexture, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
+import {dispatchDoubleSided, dispatchMaterialBaseColor, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getOrigEdits} from './reducer.js';
 
 
 /** Material panel. */
@@ -58,7 +57,6 @@ export class MaterialPanel extends ConnectedLitElement {
 
   @internalProperty() materials: Material[] = [];
   @internalProperty() originalMaterials: Material[] = [];
-  @internalProperty() texturesById?: TexturesById;
 
   @internalProperty() thumbnailsById?: Map<string, string>;
   @internalProperty() thumbnailUrls: string[] = [];
@@ -92,10 +90,6 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('me-slider-with-input#alpha-cutoff')
   alphaCutoffSlider?: SliderWithInputElement;
 
-  private safeTextureUrls: SafeObjectUrl[] = [];
-  private safeUrlIds: string[] = [];
-  private safeTextureUrlsDirty = false;
-
   stateChanged(state: State) {
     this.materials = getEditsMaterials(state);
     this.originalMaterials = getOrigEdits(state).materials;
@@ -112,11 +106,6 @@ export class MaterialPanel extends ConnectedLitElement {
     this.thumbnailUrls = [...this.thumbnailsById.values()];
     this.thumbnailIds = [...this.thumbnailsById.keys()];
     this.originalGltf = model.originalGltf;
-
-    if (this.texturesById !== getEditsTextures(state)) {
-      this.texturesById = getEditsTextures(state);
-      this.safeTextureUrlsDirty = true;
-    }
 
     // If a new model is loaded, don't interpolate material
     const gltfUrl = getGltfUrl(state);
@@ -143,30 +132,6 @@ export class MaterialPanel extends ConnectedLitElement {
     const selectedColorRgb =
         rgba.slice(0, 3).map((color: number) => Math.round(color * 255));
     return color.rgbArrayToHex(selectedColorRgb);
-  }
-
-  async performUpdate() {
-    if (this.safeTextureUrlsDirty) {
-      // Clear this *before* the async call, in case someone else sets it again.
-      this.safeTextureUrlsDirty = false;
-      await this.updateTextureUrls();
-    }
-    await super.performUpdate();
-  }
-
-  private async updateTextureUrls() {
-    // Work with local variables to avoid possible race conditions.
-    const newUrls: SafeObjectUrl[] = [];
-    const safeUrlIds: string[] = [];
-    if (this.texturesById) {
-      for (const [id, texture] of this.texturesById) {
-        const newUrl = await createSafeObjectUrlFromUnsafe(texture.uri);
-        newUrls.push(newUrl);
-        safeUrlIds.push(id);
-      }
-    }
-    this.safeTextureUrls = newUrls;
-    this.safeUrlIds = safeUrlIds;
   }
 
   /* Interpolate base color as curr approaches duration */
@@ -374,7 +339,7 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.baseColorTexturePicker.selectedIndex === undefined) {
       return undefined;
     }
-    return this.safeUrlIds[this.baseColorTexturePicker.selectedIndex];
+    return this.thumbnailIds[this.baseColorTexturePicker.selectedIndex];
   }
 
   get selectedMetallicRoughnessTextureId(): string|null {
@@ -394,7 +359,7 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.normalTexturePicker.selectedIndex === undefined) {
       return undefined;
     }
-    return this.safeUrlIds[this.normalTexturePicker.selectedIndex];
+    return this.thumbnailIds[this.normalTexturePicker.selectedIndex];
   }
 
   get selectedEmissiveTextureId(): string|undefined {
@@ -404,7 +369,7 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.emissiveTexturePicker.selectedIndex === undefined) {
       return undefined;
     }
-    return this.safeUrlIds[this.emissiveTexturePicker.selectedIndex];
+    return this.thumbnailIds[this.emissiveTexturePicker.selectedIndex];
   }
 
   get selectedOcclusionTextureId(): string|undefined {
@@ -414,7 +379,7 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.occlusionTexturePicker.selectedIndex === undefined) {
       return undefined;
     }
-    return this.safeUrlIds[this.occlusionTexturePicker.selectedIndex];
+    return this.thumbnailIds[this.occlusionTexturePicker.selectedIndex];
   }
 
   onBaseColorTextureChange() {
@@ -509,10 +474,9 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
 
-    const id = this.selectedMaterialIndex;
     const textureId = this.selectedOcclusionTextureId;
-    reduxStore.dispatch(dispatchOcclusionTexture(
-        getEditsMaterials(reduxStore.getState()), {id, textureId}));
+    this.getMaterial(this.selectedMaterialIndex)
+        ?.occlusionTexture?.texture.source.setURI(textureId!);
   }
 
   onOcclusionTextureUpload(event: CustomEvent) {
@@ -520,12 +484,9 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
 
-    const id = this.selectedMaterialIndex;
     const uri = event.detail;
-    reduxStore.dispatch(dispatchAddOcclusionTexture(
-        getEditsMaterials(reduxStore.getState()),
-        getEditsTextures(reduxStore.getState()),
-        {id, uri}));
+    this.getMaterial(this.selectedMaterialIndex)
+        ?.occlusionTexture?.texture.source.setURI(uri);
   }
 
   onAlphaModeSelect() {
@@ -629,10 +590,11 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   revertOcclusionTexture() {
-    const id = this.safeSelectedMaterialId;
-    const textureId = this.originalMaterials[id].occlusionTextureId;
-    reduxStore.dispatch(dispatchOcclusionTexture(
-        getEditsMaterials(reduxStore.getState()), {id, textureId}));
+    const index = this.selectedMaterialIndex!;
+    const texture = this.getOriginalMaterial(index)?.occlusionTexture;
+    const id = this.getOriginalTextureId(texture!.index);
+    this.occlusionTexturePicker!.selectedIndex = this.thumbnailIds.indexOf(id);
+    this.getMaterial(index)?.occlusionTexture?.texture.source.setURI(id);
   }
 
   revertAlphaCutoff() {
@@ -845,11 +807,20 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   renderOcclusionTextureTab() {
-    if (this.selectedMaterialIndex === undefined) {
+    if (this.selectedMaterialIndex == null) {
       return;
     }
-    const material = this.materials[this.selectedMaterialIndex];
-    const currentTextureId = material.occlusionTextureId;
+
+    const material = this.getMaterial(this.selectedMaterialIndex);
+    if (material == null) {
+      return;
+    }
+
+    const {occlusionTexture} = material;
+    const id = occlusionTexture ?
+        getTextureId(occlusionTexture.texture.source) :
+        undefined;
+
     return html`
   <me-expandable-tab tabName="Occlusion">
     <div slot="content">
@@ -859,11 +830,10 @@ export class MaterialPanel extends ConnectedLitElement {
           title="Revert to original occlusion texture"
           @click=${this.revertOcclusionTexture}></mwc-icon-button>
           <me-texture-picker .selectedIndex=${
-        currentTextureId ?
-            this.safeUrlIds.indexOf(currentTextureId) :
-            undefined} id="occlusion-texture-picker" @texture-changed=${
+        id ? this.thumbnailIds.indexOf(id) :
+             undefined} id="occlusion-texture-picker" @texture-changed=${
         this.onOcclusionTextureChange} @texture-uploaded=${
-        this.onOcclusionTextureUpload} .images=${this.safeTextureUrls}>
+        this.onOcclusionTextureUpload} .images=${this.thumbnailUrls}>
           </me-texture-picker>
         </div>
       </me-section-row>

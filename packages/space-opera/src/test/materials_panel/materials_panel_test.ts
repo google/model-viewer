@@ -87,17 +87,18 @@ describe('material panel test', () => {
     expect(panel.selectedMetallicFactor).toEqual(0.4);
   });
 
-  it('reflects textures in GLTF', async () => {
-    panel.selectedMaterialIndex = 0;
-    await panel.updateComplete;
-    const actualTexturesById = panel.texturesById!.values().next().value;
-    expect(actualTexturesById).toBeDefined();
-    expect(actualTexturesById.uri).toBe('originalTexture.png');
+  // it('reflects textures in GLTF', async () => {
+  //   panel.selectedMaterialIndex = 0;
+  //   await panel.updateComplete;
+  //   const actualTexturesById = panel.texturesById!.values().next().value;
+  //   expect(actualTexturesById).toBeDefined();
+  //   expect(actualTexturesById.uri).toBe('originalTexture.png');
 
-    const texturePicker = panel.shadowRoot!.querySelector('me-texture-picker')!;
-    await texturePicker.updateComplete;
-    expect(texturePicker!.images.length).toBe(5);
-  });
+  //   const texturePicker =
+  //   panel.shadowRoot!.querySelector('me-texture-picker')!; await
+  //   texturePicker.updateComplete;
+  //   expect(texturePicker!.images.length).toBe(5);
+  // });
 
   // Input/click
   it('applies changes to model textures on base color texture picker input',
