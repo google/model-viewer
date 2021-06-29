@@ -17,10 +17,11 @@ import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
-import {RGBA} from './api.js';
-import {PBRMetallicRoughness as PBRMetallicRoughnessInterface} from './api.js';
+import {PBRMetallicRoughness as PBRMetallicRoughnessInterface, RGBA} from './api.js';
 import {TextureInfo} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+
+
 
 const $threeMaterials = Symbol('threeMaterials');
 const $baseColorTexture = Symbol('baseColorTexture');
@@ -55,13 +56,15 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       pbrMetallicRoughness.metallicFactor = 0;
     }
 
-    const {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;
+    let {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;
     const baseColorTextures = new Set<ThreeTexture>();
     const metallicRoughnessTextures = new Set<ThreeTexture>();
 
     for (const material of correlatedMaterials) {
       if (baseColorTexture != null && material.map != null) {
         baseColorTextures.add(material.map);
+      } else {
+        baseColorTexture = {index: -1};
       }
 
       // NOTE: GLTFLoader users the same texture for metalnessMap and
@@ -69,18 +72,36 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       // @see https://github.com/mrdoob/three.js/blob/b4473c25816df4a09405c7d887d5c418ef47ee76/examples/js/loaders/GLTFLoader.js#L2173-L2174
       if (metallicRoughnessTexture != null && material.metalnessMap != null) {
         metallicRoughnessTextures.add(material.metalnessMap);
+      } else {
+        metallicRoughnessTexture = {index: -1};
       }
     }
 
-    if (baseColorTextures.size > 0) {
-      this[$baseColorTexture] =
-          new TextureInfo(onUpdate, gltf, baseColorTexture!, baseColorTextures);
-    }
+    this[$baseColorTexture] = new TextureInfo(
+        onUpdate,
+        gltf,
+        baseColorTexture!,
+        baseColorTextures,
+        // Applicator applies texture to material.
+        (texture: ThreeTexture) => {
+          for (const material of correlatedMaterials) {
+            material.map = texture;
+            material.needsUpdate = true;
+          }
+        });
 
-    if (metallicRoughnessTextures.size > 0) {
-      this[$metallicRoughnessTexture] = new TextureInfo(
-          onUpdate, gltf, metallicRoughnessTexture!, metallicRoughnessTextures);
-    }
+    this[$metallicRoughnessTexture] = new TextureInfo(
+        onUpdate,
+        gltf,
+        metallicRoughnessTexture!,
+        metallicRoughnessTextures,
+        // Applicator applies texture to material.
+        (texture: ThreeTexture) => {
+          for (const material of correlatedMaterials) {
+            material.metalnessMap = texture;
+            material.needsUpdate = true;
+          }
+        });
   }
 
 

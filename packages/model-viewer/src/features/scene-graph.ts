@@ -20,21 +20,21 @@ import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GL
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
-import {Variants} from '../three-components/gltf-instance/gltf-2.0.js';
+import {Image as GLTFImage, Texture as GLTFTexture, Variants} from '../three-components/gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
-import {GLTFImageDefinition} from './scene-graph/image.js';
 import {Material} from './scene-graph/material.js';
 import {Model} from './scene-graph/model.js';
-import {GLTFTextureDefinition, Texture as ModelViewerTexture} from './scene-graph/texture';
+import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
 
 const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
 const $variants = Symbol('variants');
+const $provideOnUpdate = Symbol('provideOnUpdate');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
@@ -93,19 +93,26 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     static Texture: Constructor<Texture>;
     static Image: Constructor<Image>;
 
+    private[$provideOnUpdate](): () => void {
+      const onUpdate = () => {
+        this[$needsRender]();
+      };
+      return onUpdate
+    }
+
     async createTexture(uri: string): Promise<ModelViewerTexture|null> {
       const currentGLTF = this[$currentGLTF];
       if (currentGLTF) {
         const texture = await new TextureLoader().load(uri);
         const textures = new Set<Texture>();
-        const textureDef = new GLTFTextureDefinition();
-        const imageDef = new GLTFImageDefinition(uri);
+        const textureDef = {source: -1} as GLTFTexture;
+        const imageDef = {name: 'null_image', uri: 'null_image'} as GLTFImage;
         textures.add(texture);
 
         const {gltf} = currentGLTF.correlatedSceneGraph;
 
         return new ModelViewerTexture(
-            () => {}, gltf, textureDef, textures, imageDef);
+            this[$provideOnUpdate](), gltf, textureDef, textures, imageDef);
       }
 
       return null;
@@ -125,18 +132,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           return;
         }
 
-        const onUpdate = () => {
-          this[$needsRender]();
-        };
-
-        const updatedMaterials =
-            threeGLTF.correlatedSceneGraph.loadVariant(variantIndex, onUpdate);
+        const updatedMaterials = threeGLTF.correlatedSceneGraph.loadVariant(
+            variantIndex, this[$provideOnUpdate]());
         const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
         for (const index of updatedMaterials) {
           const material = gltf.materials![index];
           this[$model]!.materials[index] = new Material(
-              onUpdate,
+              this[$provideOnUpdate](),
               gltf,
               material,
               gltfElementMap.get(material) as Set<MeshStandardMaterial>);

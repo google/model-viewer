@@ -15,7 +15,7 @@
 
 import {ImageLoader, Texture as ThreeTexture} from 'three';
 
-import {EmbeddedImage as GLTFEmbeddedImage, ExtensionDictionary, ExternalImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {EmbeddedImage as GLTFEmbeddedImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Image as ImageInterface} from './api.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
@@ -27,27 +27,7 @@ const loader = new ImageLoader();
 const $threeTextures = Symbol('threeTextures');
 const $uri = Symbol('uri');
 const $bufferViewImages = Symbol('bufferViewImages');
-
-export class GLTFImageDefinition implements ExternalImage {
-  name?: string|undefined = 'null_image';
-  uri: string = 'null_image';
-  extensions?: ExtensionDictionary|undefined;
-  extras?: unknown;
-  constructor(
-      uri: string, name?: string, extensions?: ExtensionDictionary,
-      extras?: unknown) {
-    this.uri = uri;
-    if (name) {
-      this.name = name;
-    }
-    if (extensions) {
-      this.extensions = extensions;
-    }
-    if (extras) {
-      this.extras = extras;
-    }
-  }
-}
+export const $applyTexture = Symbol('applyTexture');
 
 /**
  * Image facade implementation for Three.js textures
@@ -111,7 +91,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     this[$onUpdate]();
   }
 
-  applyTexture(applicator: ((texture: ThreeTexture) => void)|undefined) {
+  [$applyTexture](applicator: ((texture: ThreeTexture) => void)|undefined) {
     if (applicator) {
       for (const texture of this[$threeTextures]) {
         applicator(texture);

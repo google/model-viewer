@@ -15,10 +15,10 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {ExtensionDictionary, Extras, GLTF, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, Image as GLTFImage, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Texture as TextureInterface} from './api.js';
-import {GLTFImageDefinition, Image} from './image.js';
+import {Image} from './image.js';
 import {Sampler} from './sampler.js';
 import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
@@ -26,13 +26,6 @@ import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const $source = Symbol('source');
 const $sampler = Symbol('sampler');
-export class GLTFTextureDefinition implements GLTFTexture {
-  name?: string;
-  sampler?: number;
-  source: number = -1;
-  extensions?: ExtensionDictionary;
-  extras?: Extras;
-}
 
 /**
  * Material facade implementation for Three.js materials
@@ -46,7 +39,7 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
       gltf: GLTF,
       texture: GLTFTexture,
       correlatedTextures: Set<ThreeTexture>,
-      externalImageDef?: GLTFImageDefinition,
+      externalImageDef?: GLTFImage,
   ) {
     super(onUpdate, texture, correlatedTextures);
 
@@ -65,7 +58,7 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
       }
     } else if (imageIndex === -1) {
       if (!externalImageDef) {
-        externalImageDef = new GLTFImageDefinition('', texture.name);
+        externalImageDef = {name: texture.name} as GLTFImage;
       }
       this[$source] = new Image(onUpdate, externalImageDef, correlatedTextures);
     }

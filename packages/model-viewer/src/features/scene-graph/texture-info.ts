@@ -18,6 +18,7 @@ import {Texture as ThreeTexture} from 'three';
 import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {TextureInfo as TextureInfoInterface} from './api.js';
+import {$applyTexture} from './image.js';
 import {Texture} from './texture.js';
 import {ThreeDOMElement} from './three-dom-element.js';
 
@@ -44,8 +45,7 @@ export class TextureInfo extends ThreeDOMElement implements
     super(onUpdate, textureInfo, correlatedTextures);
     this[$textureApplicator] = textureApplicator;
     const {index: textureIndex} = textureInfo;
-    const texture = gltf.textures![textureIndex];
-
+    const texture = gltf.textures ? gltf.textures[textureIndex] : null;
 
     if (texture != null) {
       this[$texture] = new Texture(onUpdate, gltf, texture, correlatedTextures);
@@ -59,7 +59,7 @@ export class TextureInfo extends ThreeDOMElement implements
   setTexture(texture: Texture): void {
     if (this[$textureApplicator]) {
       this[$texture] = texture;
-      this[$texture].source.applyTexture(this[$textureApplicator]);
+      this[$texture].source[$applyTexture](this[$textureApplicator]);
     }
   }
 }
