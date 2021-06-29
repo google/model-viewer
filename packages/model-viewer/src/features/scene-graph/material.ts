@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
+import {LinearEncoding, MeshStandardMaterial, PixelFormat, RedFormat, RepeatWrapping, RGBFormat, sRGBEncoding, Texture as ThreeTexture, TextureEncoding} from 'three';
 
 import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -28,6 +28,58 @@ const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
 const $normalTexture = Symbol('normalTexture');
 const $occlusionTexture = Symbol('occlusionTexture');
 const $emissiveTexture = Symbol('emissiveTexture');
+export const $provideApplicator = Symbol('TextureApplicator');
+
+// Defines what a texture will be used for.
+export enum TextureUsage {
+  Base,
+  Metallic,
+  Normal,
+  Occlusion,
+  Emissive,
+}
+
+// Helper class for applying a texture to materials.
+export class TextureApplicator {
+  // Returns a lambda for applying a texture, with the specified state, to a
+  // material.
+  static[$provideApplicator](
+      onUpdate: () => void,
+      correlatedMaterials: Set<MeshStandardMaterial>|undefined,
+      usage: TextureUsage, encodding: TextureEncoding, format: PixelFormat) {
+    return (texture: ThreeTexture) => {
+      if (correlatedMaterials) {
+        for (const material of correlatedMaterials) {
+          texture.encoding = encodding;
+          texture.format = format;
+          texture.wrapS = RepeatWrapping;
+          texture.wrapT = RepeatWrapping;
+          texture.flipY = false;
+          material.needsUpdate = true;
+          switch (usage) {
+            case TextureUsage.Base:
+              material.map = texture;
+              break;
+            case TextureUsage.Metallic:
+              material.metalnessMap = texture;
+              break;
+            case TextureUsage.Normal:
+              material.normalMap = texture;
+              break;
+            case TextureUsage.Occlusion:
+              material.aoMap = texture;
+              break;
+            case TextureUsage.Emissive:
+              material.emissiveMap = texture;
+              break;
+            default:
+          }
+        }
+        onUpdate();
+      }
+    };
+  }
+}
 
 /**
  * Material facade implementation for Three.js materials
@@ -87,39 +139,39 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         gltf,
         normalTexture!,
         normalTextures,
-        // Applicator applies texture to material.
-        (texture: ThreeTexture) => {
-          for (const material of correlatedMaterials) {
-            material.normalMap = texture;
-            material.needsUpdate = true;
-          }
-        });
+        // Applicator provides method for applying a texture to a material.
+        TextureApplicator[$provideApplicator](
+            onUpdate,
+            correlatedMaterials,
+            TextureUsage.Normal,
+            LinearEncoding,
+            RGBFormat));
 
     this[$occlusionTexture] = new TextureInfo(
         onUpdate,
         gltf,
         occlusionTexture!,
         occlusionTextures,
-        // Applicator applies texture to material.
-        (texture: ThreeTexture) => {
-          for (const material of correlatedMaterials) {
-            material.aoMap = texture;
-            material.needsUpdate = true;
-          }
-        });
+        // Applicator provides method for applying a texture to a material.
+        TextureApplicator[$provideApplicator](
+            onUpdate,
+            correlatedMaterials,
+            TextureUsage.Occlusion,
+            LinearEncoding,
+            RedFormat));
 
     this[$emissiveTexture] = new TextureInfo(
         onUpdate,
         gltf,
         emissiveTexture!,
         emissiveTextures,
-        // Applicator applies texture to material.
-        (texture: ThreeTexture) => {
-          for (const material of correlatedMaterials) {
-            material.emissiveMap = texture;
-            material.needsUpdate = true;
-          }
-        });
+        // Applicator provides method for applying a texture to a material.
+        TextureApplicator[$provideApplicator](
+            onUpdate,
+            correlatedMaterials,
+            TextureUsage.Emissive,
+            sRGBEncoding,
+            RGBFormat));
   }
 
   get name(): string {

@@ -35,6 +35,7 @@ const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
 const $variants = Symbol('variants');
 const $provideOnUpdate = Symbol('provideOnUpdate');
+const $loadTexture = Symbol('loadTexture');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
@@ -100,20 +101,32 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       return onUpdate
     }
 
+    // Load texture helper waits for the texture and image to finish loading
+    // before returning.
+    async[$loadTexture](uri: string) {
+      let result: Texture|null = null;
+      await new Promise(resolve => {
+        return new TextureLoader().load(uri, texture => {
+          resolve(texture);
+        });
+      }).then(completedTexture => {
+        result = completedTexture as Texture;
+      });
+      return result;
+    }
+
     async createTexture(uri: string): Promise<ModelViewerTexture|null> {
       const currentGLTF = this[$currentGLTF];
-      if (currentGLTF) {
-        const texture = await new TextureLoader().load(uri);
-        const textures = new Set<Texture>();
-        const textureDef = {source: -1} as GLTFTexture;
-        const imageDef = {name: 'null_image', uri: 'null_image'} as GLTFImage;
-        textures.add(texture);
-
-        const {gltf} = currentGLTF.correlatedSceneGraph;
-
-        return new ModelViewerTexture(
-            this[$provideOnUpdate](), gltf, textureDef, textures, imageDef);
+      const texture = await this[$loadTexture](uri) as Texture | null;
+      if (!currentGLTF || !texture) {
+        return null;
       }
+      const textureDef = {source: -1} as GLTFTexture;
+      const imageDef = {name: 'null_image', uri: 'null_image'} as GLTFImage;
+      const textures = new Set<Texture>([texture]);
+      const {gltf} = currentGLTF.correlatedSceneGraph;
+      return new ModelViewerTexture(
+          this[$provideOnUpdate](), gltf, textureDef, textures, imageDef);
 
       return null;
     }

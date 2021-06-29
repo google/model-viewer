@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
+import {LinearEncoding, MeshStandardMaterial, RGBAFormat, RGBFormat, sRGBEncoding, Texture as ThreeTexture} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface, RGBA} from './api.js';
+import {$provideApplicator, TextureApplicator, TextureUsage} from './material.js';
 import {TextureInfo} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
@@ -82,26 +83,26 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
         gltf,
         baseColorTexture!,
         baseColorTextures,
-        // Applicator applies texture to material.
-        (texture: ThreeTexture) => {
-          for (const material of correlatedMaterials) {
-            material.map = texture;
-            material.needsUpdate = true;
-          }
-        });
+        // Applicator provides method for applying a texture to a material.
+        TextureApplicator[$provideApplicator](
+            onUpdate,
+            correlatedMaterials,
+            TextureUsage.Base,
+            sRGBEncoding,
+            RGBAFormat));
 
     this[$metallicRoughnessTexture] = new TextureInfo(
         onUpdate,
         gltf,
         metallicRoughnessTexture!,
         metallicRoughnessTextures,
-        // Applicator applies texture to material.
-        (texture: ThreeTexture) => {
-          for (const material of correlatedMaterials) {
-            material.metalnessMap = texture;
-            material.needsUpdate = true;
-          }
-        });
+        // Applicator provides method for applying a texture to a material.
+        TextureApplicator[$provideApplicator](
+            onUpdate,
+            correlatedMaterials,
+            TextureUsage.Metallic,
+            LinearEncoding,
+            RGBFormat));
   }
 
 
