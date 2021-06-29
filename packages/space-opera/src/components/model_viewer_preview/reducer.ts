@@ -139,7 +139,7 @@ export async function dispatchThumbnails() {
 
 export const getGltfUrl = (state: State) => state.entities.gltf.gltfUrl;
 export const getGltfJsonString = () =>
-    JSON.stringify(getModelViewer()?.originalJson, null, 2);
+    JSON.stringify(getModelViewer()?.gltfJson, null, 2);
 export const getGltfModel = (state: State) => state.entities.gltf.gltf;
 export const getModel = (state: State) => state.entities.model;
 

@@ -44,7 +44,7 @@ export interface SceneGraphInterface {
   readonly availableVariants: Array<string>;
   orientation: string;
   scale: string;
-  readonly originalJson: GLTF|null;
+  readonly gltfJson: GLTF|undefined;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
 }
 
@@ -77,8 +77,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$variants];
     }
 
-    get originalJson() {
-      return this[$currentGLTF]?.parser.json;
+    get gltfJson() {
+      return this[$currentGLTF]?.correlatedSceneGraph.gltf;
     }
 
     /**
