@@ -46,7 +46,7 @@ import {checkFinite} from '../utils/reducer_utils.js';
 
 import {Material, TexturesById} from './material_state.js';
 import {styles} from './materials_panel.css.js';
-import {dispatchAddBaseColorTexture, dispatchAddEmissiveTexture, dispatchAddMetallicRoughnessTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
+import {dispatchAddEmissiveTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
 
 
 /** Material panel. */
@@ -132,6 +132,12 @@ export class MaterialPanel extends ConnectedLitElement {
 
   getOriginalMaterial(index: number) {
     return this.originalGltf!.materials![index];
+  }
+
+  rgbaToHex(rgba: RGBA): string {
+    const selectedColorRgb =
+        rgba.slice(0, 3).map((color: number) => Math.round(color * 255));
+    return color.rgbArrayToHex(selectedColorRgb);
   }
 
   async performUpdate() {
@@ -325,10 +331,8 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
-    const index = this.selectedMaterialIndex;
-    const baseColorFactor = this.selectedBaseColor;
-    reduxStore.dispatch(dispatchMaterialBaseColor(
-        getEditsMaterials(reduxStore.getState()), {index, baseColorFactor}));
+    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
+        .setBaseColorFactor(this.selectedBaseColor);
   }
 
   onRoughnessChange() {
@@ -411,23 +415,19 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
-    const id = this.selectedMaterialIndex;
     const textureId = this.selectedBaseColorTextureId;
-    reduxStore.dispatch(dispatchBaseColorTexture(
-        getEditsMaterials(reduxStore.getState()), {id, textureId}));
+    this.getMaterial(this.selectedMaterialIndex)
+        ?.pbrMetallicRoughness.baseColorTexture?.texture.source.setURI(
+            textureId!);
   }
 
   onBaseColorTextureUpload(event: CustomEvent) {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
-
-    const id = this.selectedMaterialIndex;
     const uri = event.detail;
-    reduxStore.dispatch(dispatchAddBaseColorTexture(
-        getEditsMaterials(reduxStore.getState()),
-        getEditsTextures(reduxStore.getState()),
-        {id, uri}));
+    this.getMaterial(this.selectedMaterialIndex)
+        ?.pbrMetallicRoughness.baseColorTexture?.texture.source.setURI(uri);
   }
 
   onMetallicRoughnessTextureChange() {
@@ -444,13 +444,10 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
-
-    const id = this.selectedMaterialIndex;
     const uri = event.detail;
-    reduxStore.dispatch(dispatchAddMetallicRoughnessTexture(
-        getEditsMaterials(reduxStore.getState()),
-        getEditsTextures(reduxStore.getState()),
-        {id, uri}));
+    this.getMaterial(this.selectedMaterialIndex)
+        ?.pbrMetallicRoughness.metallicRoughnessTexture?.texture.source.setURI(
+            uri);
   }
 
   onNormalTextureChange() {
@@ -592,9 +589,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
   revertBaseColorFactor() {
     const index = this.safeSelectedMaterialId;
-    const baseColorFactor = this.originalMaterials[index].baseColorFactor;
-    reduxStore.dispatch(dispatchMaterialBaseColor(
-        getEditsMaterials(reduxStore.getState()), {index, baseColorFactor}));
+    const factor =
+        this.getOriginalMaterial(index).pbrMetallicRoughness!.baseColorFactor!;
+    this.baseColorPicker.selectedColorHex = this.rgbaToHex(factor);
+    this.getMaterial(index)!.pbrMetallicRoughness.setBaseColorFactor(factor);
   }
 
   revertBaseColorTexture() {
@@ -714,15 +712,22 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   renderBaseColorTab() {
-    if (this.selectedMaterialIndex === undefined) {
+    if (this.selectedMaterialIndex == null) {
       return;
     }
-    const currentTextureId =
-        this.materials[this.selectedMaterialIndex].baseColorTextureId;
-    const material = this.materials[this.selectedMaterialIndex];
-    const selectedColorRgb = material.baseColorFactor.slice(0, 3).map(
-        (color: number) => Math.round(color * 255));
-    const selectedColorHex = color.rgbArrayToHex(selectedColorRgb);
+
+    const material = this.getMaterial(this.selectedMaterialIndex);
+    if (material == null) {
+      return;
+    }
+
+    const {pbrMetallicRoughness} = material;
+    const {baseColorFactor, baseColorTexture} = pbrMetallicRoughness;
+    const id = baseColorTexture ?
+        getTextureId(baseColorTexture.texture.source) :
+        undefined;
+    const selectedColorHex = this.rgbaToHex(baseColorFactor);
+
     return html`
   <me-expandable-tab tabName="Base Color" .open=${true}>
     <div slot="content">
@@ -743,12 +748,11 @@ export class MaterialPanel extends ConnectedLitElement {
           title="Revert to original base color texture"
             @click=${this.revertBaseColorTexture}></mwc-icon-button>
           <me-texture-picker .selectedIndex=${
-        currentTextureId ?
-            this.safeUrlIds.indexOf(currentTextureId) :
-            undefined} id="base-color-texture-picker" @texture-changed=${
+        id ? this.thumbnailIds.indexOf(id) :
+             undefined} id="base-color-texture-picker" @texture-changed=${
         this.onBaseColorTextureChange} @texture-uploaded=${
         this.onBaseColorTextureUpload} .images=${
-        this.safeTextureUrls}></me-texture-picker>
+        this.thumbnailUrls}></me-texture-picker>
         </div>
       </me-section-row>
     </div>
