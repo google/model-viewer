@@ -90,41 +90,59 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         normalTextures.add(normalMap);
       } else {
         normalTexture = new EmptyNormalTexture();
-        material.normalMap = new ThreeTexture();
-        normalTextures.add(material.normalMap);
       }
 
       if (occlusionTexture != null && aoMap != null) {
         occlusionTextures.add(aoMap);
       } else {
         occlusionTexture = new EmptyOcclusionTexture();
-        material.aoMap = new ThreeTexture();
-        occlusionTextures.add(material.aoMap);
       }
 
       if (emissiveTexture != null && emissiveMap != null) {
         emissiveTextures.add(emissiveMap);
       } else {
         emissiveTexture = new EmptyTexture();
-        material.emissiveMap = new ThreeTexture();
-        emissiveTextures.add(material.emissiveMap);
       }
     }
 
-    if (normalTextures.size > 0) {
-      this[$normalTexture] =
-          new TextureInfo(onUpdate, gltf, normalTexture!, normalTextures);
-    }
+    this[$normalTexture] = new TextureInfo(
+        onUpdate,
+        gltf,
+        normalTexture!,
+        normalTextures,
+        // Applicator applies texture to material.
+        (texture: ThreeTexture) => {
+          for (const material of correlatedMaterials) {
+            material.normalMap = texture;
+            material.needsUpdate = true;
+          }
+        });
 
-    if (occlusionTextures.size > 0) {
-      this[$occlusionTexture] =
-          new TextureInfo(onUpdate, gltf, occlusionTexture!, occlusionTextures);
-    }
+    this[$occlusionTexture] = new TextureInfo(
+        onUpdate,
+        gltf,
+        occlusionTexture!,
+        occlusionTextures,
+        // Applicator applies texture to material.
+        (texture: ThreeTexture) => {
+          for (const material of correlatedMaterials) {
+            material.aoMap = texture;
+            material.needsUpdate = true;
+          }
+        });
 
-    if (emissiveTextures.size > 0) {
-      this[$emissiveTexture] =
-          new TextureInfo(onUpdate, gltf, emissiveTexture!, emissiveTextures);
-    }
+    this[$emissiveTexture] = new TextureInfo(
+        onUpdate,
+        gltf,
+        emissiveTexture!,
+        emissiveTextures,
+        // Applicator applies texture to material.
+        (texture: ThreeTexture) => {
+          for (const material of correlatedMaterials) {
+            material.emissiveMap = texture;
+            material.needsUpdate = true;
+          }
+        });
   }
 
   get name(): string {

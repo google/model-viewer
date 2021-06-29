@@ -15,10 +15,10 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {GLTF, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {ExtensionDictionary, Extras, GLTF, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Texture as TextureInterface} from './api.js';
-import {EmptyImage, Image} from './image.js';
+import {GLTFImageDefinition, Image} from './image.js';
 import {Sampler} from './sampler.js';
 import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
@@ -26,6 +26,13 @@ import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const $source = Symbol('source');
 const $sampler = Symbol('sampler');
+export class GLTFTextureDefinition implements GLTFTexture {
+  name?: string;
+  sampler?: number;
+  source: number = -1;
+  extensions?: ExtensionDictionary;
+  extras?: Extras;
+}
 
 /**
  * Material facade implementation for Three.js materials
@@ -35,8 +42,12 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   private[$sampler]: Sampler;
 
   constructor(
-      onUpdate: () => void, gltf: GLTF, texture: GLTFTexture,
-      correlatedTextures: Set<ThreeTexture>) {
+      onUpdate: () => void,
+      gltf: GLTF,
+      texture: GLTFTexture,
+      correlatedTextures: Set<ThreeTexture>,
+      externalImageDef?: GLTFImageDefinition,
+  ) {
     super(onUpdate, texture, correlatedTextures);
 
     const {sampler: samplerIndex, source: imageIndex} = texture;
@@ -53,7 +64,10 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
         this[$source] = new Image(onUpdate, image, correlatedTextures);
       }
     } else if (imageIndex === -1) {
-      this[$source] = new Image(onUpdate, new EmptyImage(), correlatedTextures);
+      if (!externalImageDef) {
+        externalImageDef = new GLTFImageDefinition('', texture.name);
+      }
+      this[$source] = new Image(onUpdate, externalImageDef, correlatedTextures);
     }
   }
 

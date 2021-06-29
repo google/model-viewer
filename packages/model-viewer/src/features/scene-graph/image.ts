@@ -28,11 +28,25 @@ const $threeTextures = Symbol('threeTextures');
 const $uri = Symbol('uri');
 const $bufferViewImages = Symbol('bufferViewImages');
 
-export class EmptyImage implements ExternalImage {
-  name?: string|undefined = 'placeholder';
-  uri: string = 'placeholder';
+export class GLTFImageDefinition implements ExternalImage {
+  name?: string|undefined = 'null_image';
+  uri: string = 'null_image';
   extensions?: ExtensionDictionary|undefined;
   extras?: unknown;
+  constructor(
+      uri: string, name?: string, extensions?: ExtensionDictionary,
+      extras?: unknown) {
+    this.uri = uri;
+    if (name) {
+      this.name = name;
+    }
+    if (extensions) {
+      this.extensions = extensions;
+    }
+    if (extras) {
+      this.extras = extras;
+    }
+  }
 }
 
 /**
@@ -95,5 +109,13 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       texture.needsUpdate = true;
     }
     this[$onUpdate]();
+  }
+
+  applyTexture(applicator: ((texture: ThreeTexture) => void)|undefined) {
+    if (applicator) {
+      for (const texture of this[$threeTextures]) {
+        applicator(texture);
+      }
+    }
   }
 }

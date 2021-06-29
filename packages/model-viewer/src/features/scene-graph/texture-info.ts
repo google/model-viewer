@@ -15,7 +15,7 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {GLTF, Texture as GLTFTexture, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {TextureInfo as TextureInfoInterface} from './api.js';
 import {Texture} from './texture.js';
@@ -24,10 +24,7 @@ import {ThreeDOMElement} from './three-dom-element.js';
 
 
 const $texture = Symbol('texture');
-
-class EmptyTexture implements GLTFTexture {
-  source: number = -1;
-}
+const $textureApplicator = Symbol('textureApplicator');
 
 /**
  * TextureInfo facade implementation for Three.js materials
@@ -35,24 +32,34 @@ class EmptyTexture implements GLTFTexture {
 export class TextureInfo extends ThreeDOMElement implements
     TextureInfoInterface {
   private[$texture]: Texture;
+  private[$textureApplicator]: ((texture: ThreeTexture) => void)|undefined;
 
   constructor(
-      onUpdate: () => void, gltf: GLTF, textureInfo: GLTFTextureInfo,
-      correlatedTextures: Set<ThreeTexture>) {
+      onUpdate: () => void,
+      gltf: GLTF,
+      textureInfo: GLTFTextureInfo,
+      correlatedTextures: Set<ThreeTexture>,
+      textureApplicator?: (texture: ThreeTexture) => void,
+  ) {
     super(onUpdate, textureInfo, correlatedTextures);
-
+    this[$textureApplicator] = textureApplicator;
     const {index: textureIndex} = textureInfo;
     const texture = gltf.textures![textureIndex];
 
+
     if (texture != null) {
       this[$texture] = new Texture(onUpdate, gltf, texture, correlatedTextures);
-    } else {
-      this[$texture] =
-          new Texture(onUpdate, gltf, new EmptyTexture(), correlatedTextures);
     }
   }
 
   get texture(): Texture {
     return this[$texture];
+  }
+
+  setTexture(texture: Texture): void {
+    if (this[$textureApplicator]) {
+      this[$texture] = texture;
+      this[$texture].source.applyTexture(this[$textureApplicator]);
+    }
   }
 }

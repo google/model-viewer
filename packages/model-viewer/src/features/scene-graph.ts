@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, MeshStandardMaterial} from 'three';
+import {Euler, MeshStandardMaterial, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
@@ -24,9 +24,13 @@ import {Variants} from '../three-components/gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
 
-import {Image, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
+import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
+import {GLTFImageDefinition} from './scene-graph/image.js';
 import {Material} from './scene-graph/material.js';
 import {Model} from './scene-graph/model.js';
+import {GLTFTextureDefinition, Texture as ModelViewerTexture} from './scene-graph/texture';
+
+
 
 const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
@@ -45,6 +49,7 @@ export interface SceneGraphInterface {
   orientation: string;
   scale: string;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
+  createTexture(uri: string): Promise<ModelViewerTexture|null>;
 }
 
 /**
@@ -87,6 +92,25 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     static TextureInfo: Constructor<TextureInfo>;
     static Texture: Constructor<Texture>;
     static Image: Constructor<Image>;
+
+    async createTexture(uri: string): Promise<ModelViewerTexture|null> {
+      const currentGLTF = this[$currentGLTF];
+      if (currentGLTF) {
+        const texture = await new TextureLoader().load(uri);
+        const textures = new Set<Texture>();
+        const textureDef = new GLTFTextureDefinition();
+        const imageDef = new GLTFImageDefinition(uri);
+        textures.add(texture);
+
+        const {gltf} = currentGLTF.correlatedSceneGraph;
+
+        return new ModelViewerTexture(
+            () => {}, gltf, textureDef, textures, imageDef);
+      }
+
+      return null;
+    }
+
 
     updated(changedProperties: Map<string, any>) {
       super.updated(changedProperties);
