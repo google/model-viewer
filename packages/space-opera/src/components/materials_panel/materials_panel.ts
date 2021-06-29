@@ -46,7 +46,7 @@ import {checkFinite} from '../utils/reducer_utils.js';
 
 import {Material, TexturesById} from './material_state.js';
 import {styles} from './materials_panel.css.js';
-import {dispatchAddEmissiveTexture, dispatchAddNormalTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchMetallicRoughnessTexture, dispatchNormalTexture, dispatchOcclusionTexture, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
+import {dispatchAddEmissiveTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
 
 
 /** Material panel. */
@@ -132,6 +132,11 @@ export class MaterialPanel extends ConnectedLitElement {
 
   getOriginalMaterial(index: number) {
     return this.originalGltf!.materials![index];
+  }
+
+  getOriginalTextureId(index: number) {
+    const imageIndex = this.originalGltf!.textures![index].source!;
+    return getTextureId(this.originalGltf!.images![imageIndex]);
   }
 
   rgbaToHex(rgba: RGBA): string {
@@ -455,10 +460,9 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
 
-    const id = this.selectedMaterialIndex;
     const textureId = this.selectedNormalTextureId;
-    reduxStore.dispatch(dispatchNormalTexture(
-        getEditsMaterials(reduxStore.getState()), {id, textureId}));
+    this.getMaterial(this.selectedMaterialIndex)
+        ?.normalTexture?.texture.source.setURI(textureId!);
   }
 
   onNormalTextureUpload(event: CustomEvent) {
@@ -466,12 +470,9 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
 
-    const id = this.selectedMaterialIndex;
     const uri = event.detail;
-    reduxStore.dispatch(dispatchAddNormalTexture(
-        getEditsMaterials(reduxStore.getState()),
-        getEditsTextures(reduxStore.getState()),
-        {id, uri}));
+    this.getMaterial(this.selectedMaterialIndex)
+        ?.normalTexture?.texture.source.setURI(uri);
   }
 
   onEmissiveTextureChange() {
@@ -565,10 +566,15 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   revertMetallicRoughnessTexture() {
-    const id = this.safeSelectedMaterialId;
-    const textureId = this.originalMaterials[id].metallicRoughnessTextureId;
-    reduxStore.dispatch(dispatchMetallicRoughnessTexture(
-        getEditsMaterials(reduxStore.getState()), {id, textureId}));
+    const index = this.selectedMaterialIndex!;
+    const texture = this.getOriginalMaterial(index)
+                        ?.pbrMetallicRoughness!.metallicRoughnessTexture;
+    const id = this.getOriginalTextureId(texture!.index);
+    this.metallicRoughnessTexturePicker!.selectedIndex =
+        this.thumbnailIds.indexOf(id);
+    this.getMaterial(index)
+        ?.pbrMetallicRoughness.metallicRoughnessTexture?.texture.source.setURI(
+            id);
   }
 
   revertMetallicFactor() {
@@ -761,11 +767,19 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   renderNormalTextureTab() {
-    if (this.selectedMaterialIndex === undefined) {
+    if (this.selectedMaterialIndex == null) {
       return;
     }
-    const material = this.materials[this.selectedMaterialIndex];
-    const currentTextureId = material.normalTextureId;
+
+    const material = this.getMaterial(this.selectedMaterialIndex);
+    if (material == null) {
+      return;
+    }
+
+    const {normalTexture} = material;
+    const id =
+        normalTexture ? getTextureId(normalTexture.texture.source) : undefined;
+
     return html`
   <me-expandable-tab tabName="Normal Map">
     <div slot="content">
@@ -775,11 +789,10 @@ export class MaterialPanel extends ConnectedLitElement {
           title="Revert to original normal map texture"
             @click=${this.revertNormalTexture}></mwc-icon-button>
           <me-texture-picker .selectedIndex=${
-        currentTextureId ?
-            this.safeUrlIds.indexOf(currentTextureId) :
-            undefined} id="normal-texture-picker" @texture-changed=${
+        id ? this.thumbnailIds.indexOf(id) :
+             undefined} id="normal-texture-picker" @texture-changed=${
         this.onNormalTextureChange} @texture-uploaded=${
-        this.onNormalTextureUpload} .images=${this.safeTextureUrls}>
+        this.onNormalTextureUpload} .images=${this.thumbnailUrls}>
           </me-texture-picker>
         </div>
       </me-section-row>
