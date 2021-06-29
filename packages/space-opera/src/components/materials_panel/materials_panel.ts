@@ -46,7 +46,7 @@ import {checkFinite} from '../utils/reducer_utils.js';
 
 import {Material, TexturesById} from './material_state.js';
 import {styles} from './materials_panel.css.js';
-import {dispatchAddEmissiveTexture, dispatchAddOcclusionTexture, dispatchBaseColorTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchNormalTexture, dispatchOcclusionTexture, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
+import {dispatchAddEmissiveTexture, dispatchAddOcclusionTexture, dispatchDoubleSided, dispatchEmissiveTexture, dispatchMaterialBaseColor, dispatchOcclusionTexture, dispatchSetAlphaCutoff, dispatchSetAlphaMode, dispatchSetEmissiveFactor, getEditsMaterials, getEditsTextures, getOrigEdits} from './reducer.js';
 
 
 /** Material panel. */
@@ -602,17 +602,21 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   revertBaseColorTexture() {
-    const id = this.safeSelectedMaterialId;
-    const textureId = this.originalMaterials[id].baseColorTextureId;
-    reduxStore.dispatch(dispatchBaseColorTexture(
-        getEditsMaterials(reduxStore.getState()), {id, textureId}));
+    const index = this.selectedMaterialIndex!;
+    const texture =
+        this.getOriginalMaterial(index)?.pbrMetallicRoughness!.baseColorTexture;
+    const id = this.getOriginalTextureId(texture!.index);
+    this.baseColorTexturePicker!.selectedIndex = this.thumbnailIds.indexOf(id);
+    this.getMaterial(index)
+        ?.pbrMetallicRoughness.baseColorTexture?.texture.source.setURI(id);
   }
 
   revertNormalTexture() {
-    const id = this.safeSelectedMaterialId;
-    const textureId = this.originalMaterials[id].normalTextureId;
-    reduxStore.dispatch(dispatchNormalTexture(
-        getEditsMaterials(reduxStore.getState()), {id, textureId}));
+    const index = this.selectedMaterialIndex!;
+    const texture = this.getOriginalMaterial(index)?.normalTexture;
+    const id = this.getOriginalTextureId(texture!.index);
+    this.normalTexturePicker!.selectedIndex = this.thumbnailIds.indexOf(id);
+    this.getMaterial(index)?.normalTexture?.texture.source.setURI(id);
   }
 
   revertEmissiveTexture() {
