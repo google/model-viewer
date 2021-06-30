@@ -236,6 +236,10 @@
         "name": "Swap Textures 2"
       },
       {
+        "htmlId": "createTexturesExample",
+        "name": "Create Textures"
+      },
+      {
         "htmlId": "exporter",
         "name": "Exporter"
       },

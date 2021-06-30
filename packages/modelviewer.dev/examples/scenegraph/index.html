@@ -337,7 +337,7 @@ modelViewerTexture.addEventListener("load", (ev) => {
   let applyPBRTexture = (channel, event) => {
     material.pbrMetallicRoughness[channel].texture.source.setURI(event.target.value);
   }
-  
+
   document.querySelector('#diffuse').addEventListener('input', (event) => {
     applyPBRTexture('baseColorTexture', event);
   });
@@ -400,24 +400,76 @@ modelViewerTexture.addEventListener("load", () => {
 
   let material = modelViewerTexture.model.materials[0];
 
-  let applyTexture = (channel, event) => {
-    material[channel].texture.source.setURI(event.target.value);
+  let createAndApplyTexture = async (channel, event) => {
+    let texture = await modelViewerTexture.createTexture(event.target.value);
+    material[channel].setTexture(texture);
   }
 
   document.querySelector('#normals').addEventListener('input', (event) => {
-    applyTexture('normalTexture', event);
+    createAndApplyTexture('normalTexture', event);
   });
   
   document.querySelector('#occlusion').addEventListener('input', (event) => {
-    applyTexture('occlusionTexture', event);
+    createAndApplyTexture('occlusionTexture', event);
   });
   
   document.querySelector('#emission').addEventListener('input', (event) => {
-    applyTexture('emissiveTexture', event);
+    createAndApplyTexture('emissiveTexture', event);
   });
 });
 
 </script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="sample">
+      <div id="createTexturesExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Create a new texture</h2>
+            <p>Create a new texture and add it to a model</p>
+          </div>
+          <example-snippet stamp-to="createTexturesExample" highlight-as="html">
+            <template>
+<model-viewer id="helmet" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
+  <div class="controls">
+    <div>
+      <p>Normals</p>
+      <select id="normals">
+        <option></option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
+      </select>
+    </div>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture = document.querySelector("model-viewer#helmet");
+
+modelViewerTexture.addEventListener("load", () => {
+
+  let material = modelViewerTexture.model.materials[0];
+
+  let createAndApplyTexture = async (channel, event) => {
+      let texture = await modelViewerTexture.createTexture(event.target.value);
+      material[channel].setTexture(texture);
+  }
+
+  document.querySelector('#normals').addEventListener('input', (event) => {
+    createAndApplyTexture('normalTexture', event);
+  });
+});
+
+</script>
+
+
+
             </template>
           </example-snippet>
         </div>
