@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, MeshStandardMaterial, Texture, TextureLoader} from 'three';
+import {Euler, MeshStandardMaterial, RepeatWrapping, RGBAFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
@@ -35,7 +35,7 @@ const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
 const $variants = Symbol('variants');
 const $provideOnUpdate = Symbol('provideOnUpdate');
-const $loadTexture = Symbol('loadTexture');
+const $textureLoader = Symbol('textureLoader');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
@@ -63,6 +63,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$model]: Model|undefined = undefined;
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
     protected[$variants]: Array<string> = [];
+    private[$textureLoader] = new TextureLoader();
 
     @property({type: String, attribute: 'variant-name'})
     variantName: string|undefined = undefined;
@@ -101,26 +102,20 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       return onUpdate
     }
 
-    // Load texture helper waits for the texture and image to finish loading
-    // before returning.
-    async[$loadTexture](uri: string) {
-      let result: Texture|null = null;
-      await new Promise(resolve => {
-        return new TextureLoader().load(uri, texture => {
-          resolve(texture);
-        });
-      }).then(completedTexture => {
-        result = completedTexture as Texture;
-      });
-      return result;
-    }
-
     async createTexture(uri: string): Promise<ModelViewerTexture|null> {
       const currentGLTF = this[$currentGLTF];
-      const texture = await this[$loadTexture](uri) as Texture | null;
+      const texture: Texture = await new Promise<Texture>(
+          (resolve) => this[$textureLoader].load(uri, resolve));
       if (!currentGLTF || !texture) {
         return null;
       }
+      // Applies default settings.
+      texture.encoding = sRGBEncoding;
+      texture.format = RGBAFormat;
+      texture.wrapS = RepeatWrapping;
+      texture.wrapT = RepeatWrapping;
+      texture.flipY = false;
+
       const textureDef = {source: -1} as GLTFTexture;
       const imageDef = {name: 'null_image', uri: 'null_image'} as GLTFImage;
       const textures = new Set<Texture>([texture]);

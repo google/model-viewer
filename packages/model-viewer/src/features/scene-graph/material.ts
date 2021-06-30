@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {LinearEncoding, MeshStandardMaterial, PixelFormat, RedFormat, RepeatWrapping, RGBFormat, sRGBEncoding, Texture as ThreeTexture, TextureEncoding} from 'three';
+import {LinearEncoding, MeshStandardMaterial, PixelFormat, RedFormat, RGBFormat, sRGBEncoding, Texture as ThreeTexture, TextureEncoding} from 'three';
 
 import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -46,15 +46,12 @@ export class TextureApplicator {
   static[$provideApplicator](
       onUpdate: () => void,
       correlatedMaterials: Set<MeshStandardMaterial>|undefined,
-      usage: TextureUsage, encodding: TextureEncoding, format: PixelFormat) {
+      usage: TextureUsage, encoding: TextureEncoding, format: PixelFormat) {
     return (texture: ThreeTexture) => {
       if (correlatedMaterials) {
         for (const material of correlatedMaterials) {
-          texture.encoding = encodding;
+          texture.encoding = encoding;
           texture.format = format;
-          texture.wrapS = RepeatWrapping;
-          texture.wrapT = RepeatWrapping;
-          texture.flipY = false;
           material.needsUpdate = true;
           switch (usage) {
             case TextureUsage.Base:
