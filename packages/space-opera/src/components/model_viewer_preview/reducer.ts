@@ -23,7 +23,7 @@ import {Action, BestPracticesState, State} from '../../types.js';
 import {renderARButton, renderARPrompt, renderProgressBar} from '../best_practices/render_best_practices.js';
 import {Camera} from '../camera_settings/camera_state.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
-import {GltfState, INITIAL_MODEL_STATE, ModelState} from '../model_viewer_preview/types.js';
+import {GltfState, ModelState} from '../model_viewer_preview/types.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {radToDeg} from '../utils/reducer_utils.js';
 
@@ -137,6 +137,18 @@ export async function dispatchThumbnails() {
   return {type: SET_THUMBNAILS, payload: thumbnailsById};
 }
 
+const SET_MODEL = 'SET_MODEL'
+export async function dispatchModel() {
+  const thumbnailsById = await createThumbnails();
+  const originalGltfJson = JSON.stringify(getModelViewer()?.gltfJson, null, 2);
+  // Make a deep copy of the JSON so changes are not reflected.
+  const originalGltf = JSON.parse(originalGltfJson);
+  return {
+    type: SET_MODEL,
+    payload: {thumbnailsById, originalGltf, originalGltfJson}
+  };
+}
+
 export const getGltfUrl = (state: State) => state.entities.gltf.gltfUrl;
 export const getGltfJsonString = () =>
     JSON.stringify(getModelViewer()?.gltfJson, null, 2);
@@ -167,13 +179,10 @@ export function gltfReducer(
 }
 
 export function modelReducer(
-    state: ModelState = INITIAL_MODEL_STATE, action: Action): ModelState {
+    state: ModelState|null = null, action: Action): ModelState|null {
   switch (action.type) {
-    case SET_THUMBNAILS:
-      return {...state, thumbnailsById: action.payload};
-    case SET_GLTF_JSON_STRING:
-      const gltf = !!action.payload ? JSON.parse(action.payload) : undefined;
-      return {...state, originalGltfJson: action.payload, originalGltf: gltf};
+    case SET_MODEL:
+      return {...action.payload};
     default:
       return state;
   }

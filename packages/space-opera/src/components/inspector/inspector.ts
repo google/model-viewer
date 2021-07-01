@@ -35,6 +35,9 @@ export class InspectorPanel extends ConnectedLitElement {
 
   stateChanged(state: State) {
     const model = getModel(state);
+    if (model == null) {
+      return;
+    }
     this.thumbnails = [...model.thumbnailsById.values()];
     this.gltfJsonstring = model.originalGltfJson;
   }

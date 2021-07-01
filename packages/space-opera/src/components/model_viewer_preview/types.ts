@@ -44,12 +44,6 @@ export interface GltfState {
   gltfJsonString: string;
 }
 
-export const INITIAL_MODEL_STATE: ModelState = {
-  thumbnailsById: new Map<string, string>(),
-  originalGltfJson: '',
-  originalGltf: {asset: {version: '2.0'}}
-};
-
 export interface ModelState {
   thumbnailsById: Map<string, string>;
   originalGltfJson: string;

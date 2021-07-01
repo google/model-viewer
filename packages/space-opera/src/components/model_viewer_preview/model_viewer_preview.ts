@@ -22,9 +22,9 @@
 
 import '@material/mwc-icon-button';
 
-import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main.js';
+import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-import {customElement, html, internalProperty, PropertyValues, query} from 'lit-element';
+import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {modelViewerPreviewStyles} from '../../styles.css.js';
@@ -46,8 +46,7 @@ import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js'
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
-import {applyEdits, dispatchGltfAndEdits} from './gltf_edits.js';
-import {dispatchGltfJsonString, dispatchGltfUrl, dispatchThumbnails, downloadContents, getGltfJsonString, getGltfModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
+import {dispatchGltfUrl, dispatchModel, getGltfModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
 import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
 
 const $edits = Symbol('edits');
@@ -110,73 +109,13 @@ export class ModelViewerPreview extends ConnectedLitElement {
     }
 
     // Clear potential poster settings.
-    let isFromPoster = false;
     if (this.modelViewer.reveal === 'interaction' ||
         this.modelViewer.reveal === 'manual') {
       this.modelViewer.reveal = 'auto';
-      isFromPoster = true;
     } else {
       this.modelViewer.reveal = 'auto';
     }
     this.modelViewer.poster = this.config.poster || '';
-
-    const url = this[$gltfUrl];
-    if (url) {
-      try {
-        this.gltfError = '';
-        const glbContents = await downloadContents(url);
-
-        const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
-        const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
-        dispatchGltfAndEdits(gltf, isFromPoster);
-        if (isFromPoster) {
-          this.updateGltf(false, this[$origEdits]);
-        }
-      } catch (error) {
-        this.gltfError = error.message;
-      }
-    } else {
-      dispatchGltfAndEdits(undefined);
-    }
-  }
-
-  // We need to do different things depending on if both GLTF and edits changed,
-  // or if only edits changed.
-  private async updateGltf(gltfChanged: boolean, previousEdits?: GltfEdits) {
-    // NOTE: There is a potential race here. If another update is running, we
-    // may finish before it, and it would overwrite our correct results. We'll
-    // live with this for now. If it becomes an issue, the proper solution is
-    // probably to do async operations only at the data level, not affecting
-    // the UI until data is ready.
-
-    if (gltfChanged) {
-      // Got a new GLTF, assume that previous edits were not applied yet.
-      previousEdits = undefined;
-    }
-    const gltf = this[$gltf];
-    if (gltf) {
-      await applyEdits(gltf, this[$edits], previousEdits);
-    }
-  }
-
-  protected updated(changedProperties: PropertyValues) {
-    this.enforcePlayAnimation();
-
-    if (changedProperties.has($gltfUrl)) {
-      this.loadComplete = new Promise((resolve) => {
-        this.resolveLoad = resolve;
-      });
-      this.onGltfUrlChanged();
-    }
-
-    const previousEdits =
-        changedProperties.get($edits) as GltfEdits | undefined;
-    const gltfChanged = changedProperties.has($gltf);
-
-    // Only call if needed - otherwise infinite-async-loops are possible.
-    if (previousEdits || gltfChanged) {
-      this.updateGltf(gltfChanged, previousEdits);
-    }
   }
 
   forcePost() {
@@ -255,8 +194,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
   // Handle the case when the model is loaded for the first time.
   private async onModelLoaded() {
-    reduxStore.dispatch(await dispatchThumbnails());
-    reduxStore.dispatch(dispatchGltfJsonString(getGltfJsonString()));
+    reduxStore.dispatch(await dispatchModel());
     // only update on poster reveal
     if (this.modelViewer && this.modelViewer.reveal === 'interaction') {
       await this.onGltfUrlChanged();
