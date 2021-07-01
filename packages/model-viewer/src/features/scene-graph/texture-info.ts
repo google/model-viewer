@@ -54,18 +54,11 @@ export class TextureInfo extends ThreeDOMElement implements
   }
 
   setTexture(texture: Texture|null): void {
-    let threeTexture: ThreeTexture|null = null;
+    const threeTexture: ThreeTexture|null =
+        texture != null ? texture.source[$threeTexture] : null;
     let encoding: TextureEncoding = sRGBEncoding;
+    this[$texture] = texture;
 
-    // Assigns the passed in textures threeTexture to the material. Otherwise
-    // the texture is cleared by removing setting the material texture and
-    // the model-viewer texture to null.
-    if (texture) {
-      threeTexture = texture.source[$threeTexture];
-    } else {
-      // Removes texture from the texture-info.
-      this[$texture] = null;
-    }
     switch (this[$textureContext][$usage]) {
       case TextureUsage.Base:
         this[$textureContext][$material].map = threeTexture;
