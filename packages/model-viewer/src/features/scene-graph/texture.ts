@@ -15,12 +15,13 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {GLTF, Image as GLTFImage, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Texture as TextureInterface} from './api.js';
 import {Image} from './image.js';
+import {$gltfTexture, $threeTexture, TextureContext} from './material.js';
 import {Sampler} from './sampler.js';
-import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 
@@ -34,33 +35,20 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   private[$source]: Image;
   private[$sampler]: Sampler;
 
-  constructor(
-      onUpdate: () => void,
-      gltf: GLTF,
-      texture: GLTFTexture,
-      correlatedTextures: Set<ThreeTexture>,
-      externalImageDef?: GLTFImage,
-  ) {
-    super(onUpdate, texture, correlatedTextures);
+  constructor(context: TextureContext) {
+    super(
+        context.onUpdate,
+        context[$gltfTexture],
+        new Set<ThreeTexture>([context[$threeTexture]!]));
+    this[$sampler] = new Sampler(context);
+    this[$source] = new Image(context);
+  }
 
-    const {sampler: samplerIndex, source: imageIndex} = texture;
-
-    const sampler = (gltf.samplers != null && samplerIndex != null) ?
-        gltf.samplers[samplerIndex] :
-        {};
-    this[$sampler] = new Sampler(onUpdate, sampler, correlatedTextures);
-
-    if (imageIndex === -1) {
-      if (!externalImageDef) {
-        externalImageDef = {name: texture.name} as GLTFImage;
-      }
-      this[$source] = new Image(onUpdate, externalImageDef, correlatedTextures);
-    } else if (gltf.images && imageIndex != null) {
-      const image = gltf.images[imageIndex];
-      if (image) {
-        this[$source] = new Image(onUpdate, image, correlatedTextures);
-      }
-    }
+  applyNewContext(context: TextureContext): void {
+    (this[$onUpdate] as () => void) = context.onUpdate;
+    (this[$sourceObject] as GLTFElement) = context[$gltfTexture];
+    this[$sampler] = new Sampler(context);
+    this[$source] = new Image(context);
   }
 
   get name(): string {

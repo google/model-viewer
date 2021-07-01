@@ -20,12 +20,12 @@ import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GL
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
-import {Image as GLTFImage, Texture as GLTFTexture, Variants} from '../three-components/gltf-instance/gltf-2.0.js';
+import {Variants} from '../three-components/gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
-import {Material} from './scene-graph/material.js';
+import {Material, TextureContext} from './scene-graph/material.js';
 import {Model} from './scene-graph/model.js';
 import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
@@ -112,12 +112,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       texture.wrapT = RepeatWrapping;
       texture.flipY = false;
 
-      const textureDef = {source: -1} as GLTFTexture;
-      const imageDef = {name: 'null_image', uri: 'null_image'} as GLTFImage;
-      const textures = new Set<Texture>([texture]);
-      const {gltf} = currentGLTF.correlatedSceneGraph;
-      return new ModelViewerTexture(
-          this[$onUpdate], gltf, textureDef, textures, imageDef);
+      return new ModelViewerTexture(TextureContext.createFromTexture(texture));
     }
 
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {LinearEncoding, MeshStandardMaterial, RGBAFormat, RGBFormat, sRGBEncoding, Texture as ThreeTexture} from 'three';
+import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -82,31 +82,21 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       return set.values().next().value;
     };
 
-    this[$baseColorTexture] = new TextureInfo(
+    this[$baseColorTexture] = new TextureInfo(new TextureContext(
         onUpdate,
         gltf,
-        baseColorTexture!,
-        baseColorTextures,
-        new TextureContext(
-            onUpdate,
-            firstValue(correlatedMaterials),
-            firstValue(baseColorTextures),
-            TextureUsage.Occlusion,
-            sRGBEncoding,
-            RGBAFormat));
+        firstValue(correlatedMaterials),
+        firstValue(baseColorTextures),
+        TextureUsage.Occlusion,
+        baseColorTexture!));
 
-    this[$metallicRoughnessTexture] = new TextureInfo(
+    this[$metallicRoughnessTexture] = new TextureInfo(new TextureContext(
         onUpdate,
         gltf,
-        metallicRoughnessTexture!,
-        metallicRoughnessTextures,
-        new TextureContext(
-            onUpdate,
-            firstValue(correlatedMaterials),
-            firstValue(baseColorTextures),
-            TextureUsage.Metallic,
-            LinearEncoding,
-            RGBFormat));
+        firstValue(correlatedMaterials),
+        firstValue(metallicRoughnessTextures),
+        TextureUsage.Metallic,
+        metallicRoughnessTexture!));
   }
 
 

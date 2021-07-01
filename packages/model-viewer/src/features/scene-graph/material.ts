@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {LinearEncoding, MeshStandardMaterial, PixelFormat, RedFormat, RGBFormat, sRGBEncoding, Texture as ThreeTexture, TextureEncoding} from 'three';
+import {MeshStandardMaterial, PixelFormat, Texture as ThreeTexture, TextureEncoding} from 'three';
 
-import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {Asset, GLTF, Image as GLTFImage, Material as GLTFMaterial, Sampler as GLTFSampler, Texture as GLTFTexture, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
@@ -31,10 +31,15 @@ const $emissiveTexture = Symbol('emissiveTexture');
 const $backingThreeMaterial = Symbol('backingThreeMaterial');
 export const $provideApplicator = Symbol('TextureApplicator');
 export const $material = Symbol('material');
-export const $texture = Symbol('texture');
+export const $threeTexture = Symbol('threeTexture');
 export const $usage = Symbol('usage');
 export const $encoding = Symbol('encoding');
 export const $format = Symbol('format');
+export const $gltf = Symbol('gltf');
+export const $gltfTextureInfo = Symbol('gltfTextureInfo');
+export const $gltfTexture = Symbol('gltfTexture');
+export const $gltfSampler = Symbol('gltfSampler');
+export const $gltfImage = Symbol('gltfImage');
 
 // Defines what a texture will be used for.
 export enum TextureUsage {
@@ -44,26 +49,80 @@ export enum TextureUsage {
   Occlusion,
   Emissive,
 }
+
+/**
+ * TextureContext holds the glTF and Three data needed for creating and updating
+ * a texture in one place.
+ */
 export class TextureContext {
-  [$material]: MeshStandardMaterial;
-  [$texture]: ThreeTexture|null = null;
+  [$gltf]: GLTF;
+  [$material]: MeshStandardMaterial|null;
+  [$threeTexture]: ThreeTexture|null = null;
+  [$gltfTextureInfo]: GLTFTextureInfo;
+  [$gltfTexture]: GLTFTexture;
+  [$gltfSampler]: GLTFSampler;
+  [$gltfImage]: GLTFImage;
   [$usage]: TextureUsage;
   [$encoding]: TextureEncoding;
   [$format]: PixelFormat;
   onUpdate: () => void;
+
+  // Creates context from Texture
+  static createFromTexture(texture: ThreeTexture): TextureContext {
+    const gltf = {
+      asset: {} as Asset,
+      textures: [{source: -1}],
+      samplers: [{}],
+      images: [{name: 'null_image', uri: 'null_image'}],
+    };
+    return new TextureContext(
+        () => {},
+        gltf,
+        null,
+        texture,
+        TextureUsage.Base,
+        {index: -1} as GLTFTextureInfo,
+    );
+  }
+
   constructor(
-      onUpdate: () => void, material: MeshStandardMaterial,
+      onUpdate: () => void, gltf: GLTF, material: MeshStandardMaterial|null,
       texture: ThreeTexture|null, textureUsage: TextureUsage,
-      encoding: TextureEncoding, format: PixelFormat) {
+      gltfTextureInfo: GLTFTextureInfo) {
     this.onUpdate = onUpdate;
+    this[$gltf] = gltf;
     this[$material] = material;
-    this[$texture] = texture;
+    this[$threeTexture] = texture;
     this[$usage] = textureUsage;
-    this[$encoding] = encoding;
-    this[$format] = format;
+
+    // Gathers glTF texture info data.
+    this[$gltfTextureInfo] =
+        gltfTextureInfo ? gltfTextureInfo : {index: -1} as GLTFTextureInfo;
+
+    // Gathers glTF texture data.
+    if (gltf.textures && this[$gltfTextureInfo]!.index !== -1) {
+      this[$gltfTexture] = gltf.textures[gltfTextureInfo.index];
+    } else {
+      this[$gltfTexture] = {source: -1} as GLTFTexture;
+    }
+    // Gathers glTF sampler data.
+    const {sampler: samplerIndex} = this[$gltfTexture]!;
+    this[$gltfSampler] = (gltf.samplers != null && samplerIndex != null) ?
+        gltf.samplers[samplerIndex] :
+        {};
+
+    // Gathers glTF image data.
+    const {source: imageIndex} = this[$gltfTexture];
+    if (imageIndex === -1) {
+      this[$gltfImage] = {name: 'adhoc_image', uri: 'adhoc_image'};
+    } else if (gltf.images && imageIndex != null) {
+      const image = gltf.images[imageIndex];
+      this[$gltfImage] = image;
+    } else {
+      this[$gltfImage] = {name: 'null_image', uri: 'null_image'};
+    }
   }
 }
-
 
 /**
  * Material facade implementation for Three.js materials
@@ -131,44 +190,30 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       return set.values().next().value;
     };
 
-    this[$normalTexture] = new TextureInfo(
+    this[$normalTexture] = new TextureInfo(new TextureContext(
         onUpdate,
         gltf,
-        normalTextureDef!,
-        normalTextures,
-        new TextureContext(
-            onUpdate,
-            this[$backingThreeMaterial],
-            firstValue(normalTextures),
-            TextureUsage.Normal,
-            LinearEncoding,
-            RGBFormat));
+        this[$backingThreeMaterial],
+        firstValue(normalTextures),
+        TextureUsage.Normal,
+        normalTextureDef!));
 
-    this[$occlusionTexture] = new TextureInfo(
+    this[$occlusionTexture] = new TextureInfo(new TextureContext(
         onUpdate,
         gltf,
-        occlusionTexture!,
-        occlusionTextures,
-        new TextureContext(
-            onUpdate,
-            this[$backingThreeMaterial],
-            firstValue(occlusionTextures),
-            TextureUsage.Occlusion,
-            LinearEncoding,
-            RedFormat));
+        this[$backingThreeMaterial],
+        firstValue(occlusionTextures),
+        TextureUsage.Occlusion,
+        occlusionTexture!));
 
-    this[$emissiveTexture] = new TextureInfo(
+    this[$emissiveTexture] = new TextureInfo(new TextureContext(
         onUpdate,
         gltf,
+        this[$backingThreeMaterial],
+        firstValue(emissiveTextures),
+        TextureUsage.Emissive,
         emissiveTexture!,
-        emissiveTextures,
-        new TextureContext(
-            onUpdate,
-            this[$backingThreeMaterial],
-            firstValue(emissiveTextures),
-            TextureUsage.Emissive,
-            sRGBEncoding,
-            RGBFormat));
+        ));
   }
 
   get name(): string {

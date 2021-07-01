@@ -15,51 +15,53 @@
 
 import {ImageLoader, Texture as ThreeTexture} from 'three';
 
-import {EmbeddedImage as GLTFEmbeddedImage, ExternalImage as GLTFExternalImage, Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {EmbeddedImage as GLTFEmbeddedImage, Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Image as ImageInterface} from './api.js';
-import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$gltf, $gltfImage, $gltfTexture, $threeTexture, TextureContext} from './material.js';
+import {$onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 
 const loader = new ImageLoader();
 
-const $threeTextures = Symbol('threeTextures');
-export const $threeTexture = Symbol('threeTextures');
+// const $threeTextures = Symbol('threeTextures');
+export const $underlyingTexture = Symbol('threeTextures');
 const $uri = Symbol('uri');
 const $bufferViewImages = Symbol('bufferViewImages');
+const $context = Symbol('context');
 export const $applyTexture = Symbol('applyTexture');
 
 /**
  * Image facade implementation for Three.js textures
  */
 export class Image extends ThreeDOMElement implements ImageInterface {
-  private get[$threeTextures]() {
-    return this[$correlatedObjects] as Set<ThreeTexture>;
+  get[$underlyingTexture]() {
+    return this[$context][$threeTexture];
   }
-  private get[$threeTexture]() {
-    return (this[$correlatedObjects] as Set<ThreeTexture>)
-        .values()
-        .next()
-        .value;
-  }
+
   private[$uri]: string|undefined = undefined;
   private[$bufferViewImages]: WeakMap<ThreeTexture, unknown> = new WeakMap();
 
-  constructor(
-      onUpdate: () => void, image: GLTFImage,
-      correlatedTextures: Set<ThreeTexture>) {
-    super(onUpdate, image, correlatedTextures);
+  private[$context]: TextureContext;
+  constructor(context: TextureContext) {
+    super(
+        context.onUpdate, Image.getGLTFImage(context), new Set<ThreeTexture>());
+    this[$context] = context;
+  }
 
-    if ((image as GLTFExternalImage).uri != null) {
-      this[$uri] = (image as GLTFExternalImage).uri;
+  private static getGLTFImage(context: TextureContext): GLTFImage {
+    const gltf = context[$gltf];
+    const {source: imageIndex} = context[$gltfTexture]!;
+    if (imageIndex === -1) {
+      context[$gltfImage] = {name: 'adhoc_image', uri: 'adhoc_image'};
+    } else if (gltf.images && imageIndex != null) {
+      const image = gltf.images[imageIndex];
+      context[$gltfImage] = image;
+    } else {
+      context[$gltfImage] = {name: 'null_image', uri: 'null_image'};
     }
-
-    if ((image as GLTFEmbeddedImage).bufferView != null) {
-      for (const texture of correlatedTextures) {
-        this[$bufferViewImages].set(texture, texture.image);
-      }
-    }
+    return context[$gltfImage]!;
   }
 
   get name(): string {
@@ -81,7 +83,8 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       loader.load(uri, resolve, undefined, reject);
     });
 
-    for (const texture of this[$threeTextures]) {
+    const texture = this[$context][$threeTexture];
+    if (texture) {
       // If the URI is set to null but the Image had an associated buffer view
       // (this would happen if it started out as embedded), then fall back to
       // the cached object URL created by GLTFLoader:
@@ -91,17 +94,17 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       } else {
         texture.image = image;
       }
-
       texture.needsUpdate = true;
+      this[$onUpdate]();
     }
-    this[$onUpdate]();
   }
 
-  [$applyTexture](applicator: ((texture: ThreeTexture) => void)|undefined) {
-    if (applicator) {
-      for (const texture of this[$threeTextures]) {
-        applicator(texture);
-      }
-    }
-  }
+  // [$applyTexture](applicator: ((texture: ThreeTexture) => void)|undefined) {
+  //   if (applicator) {
+  //     const texture = this[$context][$threeTexture];
+  //     if (texture) {
+  //       applicator(texture);
+  //     }
+  //   }
+  // }
 }

@@ -18,7 +18,10 @@ import {Texture as ThreeTexture} from 'three';
 import {MagFilter, MinFilter, Sampler as GLTFSampler, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Sampler as SamplerInterface} from './api.js';
+import {$gltfSampler, $threeTexture, TextureContext} from './material.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+
+
 
 const isMinFilter = (() => {
   const minFilterValues: Array<MinFilter> =
@@ -65,9 +68,8 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
-  constructor(
-      onUpdate: () => void, sampler: GLTFSampler,
-      correlatedTextures: Set<ThreeTexture>) {
+  constructor(context: TextureContext) {
+    const sampler = context[$gltfSampler];
     // These defaults represent a convergence of glTF defaults for wrap mode and
     // Three.js defaults for filters. Per glTF 2.0 spec, a renderer may choose
     // its own defaults for filters.
@@ -86,7 +88,10 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
       sampler.wrapT = 10497;
     }
 
-    super(onUpdate, sampler, correlatedTextures);
+    super(
+        context.onUpdate,
+        sampler,
+        new Set<ThreeTexture>([context[$threeTexture]!]));
   }
 
   get name(): string {
