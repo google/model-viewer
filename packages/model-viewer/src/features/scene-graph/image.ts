@@ -25,7 +25,6 @@ import {$onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js'
 
 const loader = new ImageLoader();
 
-// const $threeTextures = Symbol('threeTextures');
 export const $underlyingTexture = Symbol('threeTextures');
 const $uri = Symbol('uri');
 const $bufferViewImages = Symbol('bufferViewImages');
@@ -98,13 +97,4 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       this[$onUpdate]();
     }
   }
-
-  // [$applyTexture](applicator: ((texture: ThreeTexture) => void)|undefined) {
-  //   if (applicator) {
-  //     const texture = this[$context][$threeTexture];
-  //     if (texture) {
-  //       applicator(texture);
-  //     }
-  //   }
-  // }
 }
