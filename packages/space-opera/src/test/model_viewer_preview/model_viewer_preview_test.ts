@@ -18,9 +18,8 @@
 import '../../components/model_viewer_preview/model_viewer_preview.js';
 
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
-import {dispatchGltfUrl, getGltfModel, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
+import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
-import {until} from '../utils/test_utils.js';
 
 const CUBE_GLTF_PATH = '../base/shared-assets/models/cube.gltf';
 
@@ -46,6 +45,7 @@ xdescribe('ModelViewerPreview', () => {
     reduxStore.dispatch(dispatchGltfUrl(CUBE_GLTF_PATH));
     // It may be several event loops before the preview downloads the model, so
     // loop until it happens. This will timeout if there is a bug.
-    await until(() => getGltfModel(reduxStore.getState()) !== undefined);
+    await preview.updateComplete;
+    await preview.loadComplete;
   });
 });

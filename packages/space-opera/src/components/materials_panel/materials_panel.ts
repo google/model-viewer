@@ -33,9 +33,10 @@ import * as color from 'ts-closure-library/lib/color/color';  // from //third_pa
 
 import {TextureInfo} from '../../../../model-viewer/lib/features/scene-graph/texture-info.js';
 import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
+import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getModel, getModelViewer, getTextureId} from '../model_viewer_preview/reducer.js';
+import {dispatchModelDirty, getModel, getModelViewer, getTextureId} from '../model_viewer_preview/reducer.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
@@ -88,7 +89,8 @@ export class MaterialPanel extends ConnectedLitElement {
       return;
     }
 
-    if (this.thumbnailsById !== model.thumbnailsById) {
+    if (model.thumbnailsById != null &&
+        this.thumbnailsById !== model.thumbnailsById) {
       this.thumbnailsById = model.thumbnailsById;
       this.thumbnailUrls = [...this.thumbnailsById.values()];
       this.thumbnailIds = [...this.thumbnailsById.keys()];
@@ -152,12 +154,6 @@ export class MaterialPanel extends ConnectedLitElement {
     ];
   }
 
-  isLegalIndex() {
-    return (
-        this.selectedMaterialIndex < this.thumbnailIds.length &&
-        this.selectedMaterialIndex >= 0)
-  }
-
   // Logic for interpolating from red emissive factor to the original.
   interpolateMaterial() {
     this.isInterpolating = true;
@@ -170,9 +166,6 @@ export class MaterialPanel extends ConnectedLitElement {
 
     const interpolateStep = (timestamp: number) => {
       // New model is loaded mid interpolation
-      if (!this.isLegalIndex()) {
-        return;
-      }
       if (start === -1) {
         start = timestamp;
       }
@@ -229,8 +222,7 @@ export class MaterialPanel extends ConnectedLitElement {
         this.getTextureIndex(emissiveTexture);
 
     // Don't interpolate on the initial model load.
-    if (!this.isNewModel && this.isLegalIndex() && !this.isTesting &&
-        !this.isInterpolating) {
+    if (!this.isNewModel && !this.isTesting && !this.isInterpolating) {
       this.interpolateMaterial();
     }
     this.isNewModel = false;
@@ -400,6 +392,7 @@ export class MaterialPanel extends ConnectedLitElement {
     this.getMaterial(this.selectedMaterialIndex)
         ?.pbrMetallicRoughness.baseColorTexture?.texture.source.setURI(
             textureId!);
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onBaseColorTextureUpload(event: CustomEvent) {
@@ -419,6 +412,7 @@ export class MaterialPanel extends ConnectedLitElement {
     this.getMaterial(this.selectedMaterialIndex)
         ?.pbrMetallicRoughness.metallicRoughnessTexture?.texture.source.setURI(
             textureId!);
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onMetallicRoughnessTextureUpload(event: CustomEvent) {
@@ -429,6 +423,7 @@ export class MaterialPanel extends ConnectedLitElement {
     this.getMaterial(this.selectedMaterialIndex)
         ?.pbrMetallicRoughness.metallicRoughnessTexture?.texture.source.setURI(
             uri);
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onNormalTextureChange() {
@@ -439,6 +434,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const textureId = this.selectedNormalTextureId;
     this.getMaterial(this.selectedMaterialIndex)
         ?.normalTexture?.texture.source.setURI(textureId!);
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onNormalTextureUpload(event: CustomEvent) {
@@ -459,6 +455,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const textureId = this.selectedEmissiveTextureId;
     this.getMaterial(this.selectedMaterialIndex)
         ?.emissiveTexture?.texture.source.setURI(textureId!);
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onEmissiveTextureUpload(event: CustomEvent) {
@@ -477,6 +474,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     this.getMaterial(this.selectedMaterialIndex)!.setEmissiveFactor(
         this.selectedEmissiveFactor);
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onOcclusionTextureChange() {
@@ -487,6 +485,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const textureId = this.selectedOcclusionTextureId;
     this.getMaterial(this.selectedMaterialIndex)
         ?.occlusionTexture?.texture.source.setURI(textureId!);
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onOcclusionTextureUpload(event: CustomEvent) {
@@ -510,12 +509,14 @@ export class MaterialPanel extends ConnectedLitElement {
     if (!selectedMode) {
       return;
     }
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onAlphaCutoffChange() {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   revertMetallicRoughnessTexture() {
@@ -523,7 +524,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const texture = this.getOriginalMaterial(index)
                         ?.pbrMetallicRoughness!.metallicRoughnessTexture;
     const id = this.getOriginalTextureId(texture!.index);
-    this.metallicRoughnessTexturePicker!.selectedIndex =
+    this.metallicRoughnessTexturePicker.selectedIndex =
         this.thumbnailIds.indexOf(id);
     this.onMetallicRoughnessTextureChange();
   }
@@ -557,7 +558,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const texture =
         this.getOriginalMaterial(index)?.pbrMetallicRoughness!.baseColorTexture;
     const id = this.getOriginalTextureId(texture!.index);
-    this.baseColorTexturePicker!.selectedIndex = this.thumbnailIds.indexOf(id);
+    this.baseColorTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onBaseColorTextureChange();
   }
 
@@ -565,7 +566,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const index = this.selectedMaterialIndex;
     const texture = this.getOriginalMaterial(index)?.normalTexture;
     const id = this.getOriginalTextureId(texture!.index);
-    this.normalTexturePicker!.selectedIndex = this.thumbnailIds.indexOf(id);
+    this.normalTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onNormalTextureChange();
   }
 
@@ -573,7 +574,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const index = this.selectedMaterialIndex;
     const texture = this.getOriginalMaterial(index)?.emissiveTexture;
     const id = this.getOriginalTextureId(texture!.index);
-    this.emissiveTexturePicker!.selectedIndex = this.thumbnailIds.indexOf(id);
+    this.emissiveTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onEmissiveTextureChange();
   }
 
@@ -588,7 +589,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const index = this.selectedMaterialIndex;
     const texture = this.getOriginalMaterial(index)?.occlusionTexture;
     const id = this.getOriginalTextureId(texture!.index);
-    this.occlusionTexturePicker!.selectedIndex = this.thumbnailIds.indexOf(id);
+    this.occlusionTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onOcclusionTextureChange();
   }
 

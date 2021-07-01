@@ -22,13 +22,12 @@
 
 import '@material/mwc-icon-button';
 
-import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {modelViewerPreviewStyles} from '../../styles.css.js';
-import {BestPracticesState, extractStagingConfig, State} from '../../types.js';
+import {BestPracticesState, extractStagingConfig, ModelViewerConfig, State} from '../../types.js';
 import {getBestPractices} from '../best_practices/reducer.js';
 import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
@@ -38,7 +37,6 @@ import {ConnectedLitElement} from '../connected_lit_element/connected_lit_elemen
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
-import {getEdits, getOrigEdits} from '../materials_panel/reducer.js';
 import {dispatchSetForcePost, getRefreshable} from '../mobile_view/reducer.js';
 import {dispatchConfig, getExtraAttributes} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
@@ -46,13 +44,9 @@ import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js'
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
-import {dispatchGltfUrl, dispatchModel, getGltfModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
-import {GltfEdits, INITIAL_GLTF_EDITS} from './types.js';
+import {dispatchGltfUrl, dispatchModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
 
-const $edits = Symbol('edits');
-const $origEdits = Symbol('origEdits');
 const $gltfUrl = Symbol('gltfUrl');
-const $gltf = Symbol('gltf');
 const $autoplay = Symbol('autoplay');
 
 /**
@@ -68,9 +62,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() addHotspotMode = false;
   @internalProperty()[$autoplay]?: boolean;
-  @internalProperty()[$edits]: GltfEdits = INITIAL_GLTF_EDITS;
-  @internalProperty()[$origEdits]: GltfEdits = INITIAL_GLTF_EDITS;
-  @internalProperty()[$gltf]?: GltfModel;
   @internalProperty()[$gltfUrl]?: string;
   @internalProperty() gltfError: string = '';
   @internalProperty() extraAttributes: any = {};
@@ -88,9 +79,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.camera = getCamera(state);
     this.config = getConfig(state);
     this.hotspots = getHotspots(state);
-    this[$origEdits] = getOrigEdits(state);
-    this[$edits] = getEdits(state);
-    this[$gltf] = getGltfModel(state);
     this[$gltfUrl] = getGltfUrl(state);
     this[$autoplay] = getConfig(state).autoplay;
     this.extraAttributes = getExtraAttributes(state);

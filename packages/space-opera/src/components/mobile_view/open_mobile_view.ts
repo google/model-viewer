@@ -19,12 +19,11 @@ import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {openMobileViewStyles} from '../../styles.css.js';
-import {ArConfigState, State} from '../../types.js';
+import {ArConfigState, ModelViewerSnippetState, State} from '../../types.js';
 import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
-import {getEdits} from '../materials_panel/reducer.js';
-import {getGltfUrl, getModelViewer} from '../model_viewer_preview/reducer.js';
+import {getGltfUrl, getModel, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {getModelViewerSnippet} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
@@ -58,8 +57,9 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() urls: URLs = {gltf: '', env: '', usdz: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', usdz: ''};
-  @internalProperty() snippet: any = {};
-  @internalProperty() lastSnippetSent: any = {};
+  @internalProperty() snippet!: ModelViewerSnippetState;
+  @internalProperty() lastSnippetSent!: ModelViewerSnippetState;
+  @internalProperty() modelIsDirty = false;
 
   @query('mobile-modal') mobileModal!: MobileModal;
   @internalProperty() haveReceivedResponse: boolean = false;
@@ -79,9 +79,7 @@ export class OpenMobileView extends ConnectedLitElement {
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
     const gltfURL = getGltfUrl(state);
-    if (gltfURL !== undefined) {
-      this.isDeployable = true;
-    }
+    this.isDeployable = gltfURL !== undefined;
 
     // Update urls with most recent from redux state.
     // If the values are different from this.lastUrlsSent, values are sent when
@@ -92,10 +90,8 @@ export class OpenMobileView extends ConnectedLitElement {
       usdz: this.arConfig.iosSrc
     };
 
-    this.snippet = {
-      ...getModelViewerSnippet(state),
-      edits: getEdits(state),
-    };
+    this.snippet = getModelViewerSnippet(state);
+    this.modelIsDirty = !!getModel(state)?.isDirty;
 
     this.contentHasChanged = this.getContentHasChanged();
     // only update if different, need conditional because it would infinitely
@@ -127,15 +123,6 @@ export class OpenMobileView extends ConnectedLitElement {
         this.urls.env.substr(this.urls.env.length - 4) === '.hdr';
   }
 
-  editsHaveChanged() {
-    if (this.snippet.edits !== undefined &&
-        this.lastSnippetSent.edits !== undefined) {
-      return JSON.stringify(this.snippet.edits) !==
-          JSON.stringify(this.lastSnippetSent.edits);
-    }
-    return false;
-  }
-
   stateHasChanged() {
     return JSON.stringify(this.snippet) !==
         JSON.stringify(this.lastSnippetSent);
@@ -147,7 +134,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
   isNewModel() {
     return this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
-        this.editsHaveChanged();
+        this.modelIsDirty;
   }
 
   // Used for non-stale sessions, to only send updated content.

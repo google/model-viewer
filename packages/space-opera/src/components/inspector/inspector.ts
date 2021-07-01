@@ -30,7 +30,7 @@ import {getModel} from '../model_viewer_preview/reducer.js';
  */
 @customElement('me-inspector-panel')
 export class InspectorPanel extends ConnectedLitElement {
-  @internalProperty() gltfJsonstring: string = '';
+  @internalProperty() gltfJsonstring?: string = '';
   @internalProperty() thumbnails: string[] = [];
 
   stateChanged(state: State) {
@@ -38,7 +38,9 @@ export class InspectorPanel extends ConnectedLitElement {
     if (model == null) {
       return;
     }
-    this.thumbnails = [...model.thumbnailsById.values()];
+    if (model.thumbnailsById != null) {
+      this.thumbnails = [...model.thumbnailsById.values()];
+    }
     this.gltfJsonstring = model.originalGltfJson;
   }
 
