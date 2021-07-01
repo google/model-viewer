@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, MeshStandardMaterial, RepeatWrapping, RGBAFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
+import {Euler, MeshStandardMaterial, RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
@@ -34,7 +34,7 @@ import {Texture as ModelViewerTexture} from './scene-graph/texture';
 const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
 const $variants = Symbol('variants');
-const $provideOnUpdate = Symbol('provideOnUpdate');
+const $onUpdate = Symbol('onUpdate');
 const $textureLoader = Symbol('textureLoader');
 
 interface SceneExportOptions {
@@ -95,11 +95,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     static Texture: Constructor<Texture>;
     static Image: Constructor<Image>;
 
-    private[$provideOnUpdate](): () => void {
-      const onUpdate = () => {
-        this[$needsRender]();
-      };
-      return onUpdate
+    private[$onUpdate]() {
+      this[$needsRender]();
     }
 
     async createTexture(uri: string): Promise<ModelViewerTexture|null> {
@@ -111,7 +108,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
       // Applies default settings.
       texture.encoding = sRGBEncoding;
-      texture.format = RGBAFormat;
       texture.wrapS = RepeatWrapping;
       texture.wrapT = RepeatWrapping;
       texture.flipY = false;
@@ -121,9 +117,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       const textures = new Set<Texture>([texture]);
       const {gltf} = currentGLTF.correlatedSceneGraph;
       return new ModelViewerTexture(
-          this[$provideOnUpdate](), gltf, textureDef, textures, imageDef);
-
-      return null;
+          this[$onUpdate], gltf, textureDef, textures, imageDef);
     }
 
 
@@ -141,13 +135,13 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
 
         const updatedMaterials = threeGLTF.correlatedSceneGraph.loadVariant(
-            variantIndex, this[$provideOnUpdate]());
+            variantIndex, this[$onUpdate]);
         const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
         for (const index of updatedMaterials) {
           const material = gltf.materials![index];
           this[$model]!.materials[index] = new Material(
-              this[$provideOnUpdate](),
+              this[$onUpdate],
               gltf,
               material,
               gltfElementMap.get(material) as Set<MeshStandardMaterial>);

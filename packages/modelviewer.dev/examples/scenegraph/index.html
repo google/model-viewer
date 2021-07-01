@@ -432,36 +432,45 @@ modelViewerTexture.addEventListener("load", () => {
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">Create a new texture</h2>
-            <p>Create a new texture and add it to a model</p>
+            <h2 class="demo-title">Swap textures - Normals/Occlusion/Emission</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+              mode. iOS Quick Look reflects these texture changes so long as the
+              USDZ is auto-generated.</p>
           </div>
           <example-snippet stamp-to="createTexturesExample" highlight-as="html">
             <template>
-<model-viewer id="helmet" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
+<model-viewer id="duck" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
   <div class="controls">
     <div>
       <p>Normals</p>
-      <select id="normals">
-        <option></option>
+      <select id="normals2">
+        <option>None</option>
         <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
         <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
       </select>
     </div>
-  </div>
 </model-viewer>
 <script type="module">
-const modelViewerTexture = document.querySelector("model-viewer#helmet");
+const modelViewerTexture = document.querySelector("model-viewer#duck");
 
 modelViewerTexture.addEventListener("load", () => {
 
   let material = modelViewerTexture.model.materials[0];
 
   let createAndApplyTexture = async (channel, event) => {
+    if(event.target.value == "None"){
+      // Clears the texture.
+      material[channel].setTexture(null);
+    }else if(event.target.value) {
+      // Creates a new texture.
       let texture = await modelViewerTexture.createTexture(event.target.value);
+      // Applies the new texture to the specified channel.
       material[channel].setTexture(texture);
+    } 
   }
 
-  document.querySelector('#normals').addEventListener('input', (event) => {
+  document.querySelector('#normals2').addEventListener('input', (event) => {
     createAndApplyTexture('normalTexture', event);
   });
 });

@@ -18,7 +18,7 @@ import {LinearEncoding, MeshStandardMaterial, RGBAFormat, RGBFormat, sRGBEncodin
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface, RGBA} from './api.js';
-import {$provideApplicator, TextureApplicator, TextureUsage} from './material.js';
+import {TextureContext, TextureUsage} from './material.js';
 import {TextureInfo} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
@@ -78,16 +78,20 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       }
     }
 
+    const firstValue = <Type>(set: Set<Type>): Type => {
+      return set.values().next().value;
+    };
+
     this[$baseColorTexture] = new TextureInfo(
         onUpdate,
         gltf,
         baseColorTexture!,
         baseColorTextures,
-        // Applicator provides method for applying a texture to a material.
-        TextureApplicator[$provideApplicator](
+        new TextureContext(
             onUpdate,
-            correlatedMaterials,
-            TextureUsage.Base,
+            firstValue(correlatedMaterials),
+            firstValue(baseColorTextures),
+            TextureUsage.Occlusion,
             sRGBEncoding,
             RGBAFormat));
 
@@ -96,10 +100,10 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
         gltf,
         metallicRoughnessTexture!,
         metallicRoughnessTextures,
-        // Applicator provides method for applying a texture to a material.
-        TextureApplicator[$provideApplicator](
+        new TextureContext(
             onUpdate,
-            correlatedMaterials,
+            firstValue(correlatedMaterials),
+            firstValue(baseColorTextures),
             TextureUsage.Metallic,
             LinearEncoding,
             RGBFormat));

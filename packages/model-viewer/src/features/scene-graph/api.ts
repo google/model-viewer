@@ -126,7 +126,7 @@ export declare interface TextureInfo {
   /**
    * The Texture being referenced by this TextureInfo
    */
-  readonly texture: Texture;
+  readonly texture: Texture|null;
 }
 
 /**

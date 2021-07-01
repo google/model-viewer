@@ -28,7 +28,13 @@ const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
 const $normalTexture = Symbol('normalTexture');
 const $occlusionTexture = Symbol('occlusionTexture');
 const $emissiveTexture = Symbol('emissiveTexture');
+const $backingThreeMaterial = Symbol('backingThreeMaterial');
 export const $provideApplicator = Symbol('TextureApplicator');
+export const $material = Symbol('material');
+export const $texture = Symbol('texture');
+export const $usage = Symbol('usage');
+export const $encoding = Symbol('encoding');
+export const $format = Symbol('format');
 
 // Defines what a texture will be used for.
 export enum TextureUsage {
@@ -38,45 +44,26 @@ export enum TextureUsage {
   Occlusion,
   Emissive,
 }
-
-// Helper class for applying a texture to materials.
-export class TextureApplicator {
-  // Returns a lambda for applying a texture, with the specified state, to a
-  // material.
-  static[$provideApplicator](
-      onUpdate: () => void,
-      correlatedMaterials: Set<MeshStandardMaterial>|undefined,
-      usage: TextureUsage, encoding: TextureEncoding, format: PixelFormat) {
-    return (texture: ThreeTexture) => {
-      if (correlatedMaterials) {
-        for (const material of correlatedMaterials) {
-          texture.encoding = encoding;
-          texture.format = format;
-          material.needsUpdate = true;
-          switch (usage) {
-            case TextureUsage.Base:
-              material.map = texture;
-              break;
-            case TextureUsage.Metallic:
-              material.metalnessMap = texture;
-              break;
-            case TextureUsage.Normal:
-              material.normalMap = texture;
-              break;
-            case TextureUsage.Occlusion:
-              material.aoMap = texture;
-              break;
-            case TextureUsage.Emissive:
-              material.emissiveMap = texture;
-              break;
-            default:
-          }
-        }
-        onUpdate();
-      }
-    };
+export class TextureContext {
+  [$material]: MeshStandardMaterial;
+  [$texture]: ThreeTexture|null = null;
+  [$usage]: TextureUsage;
+  [$encoding]: TextureEncoding;
+  [$format]: PixelFormat;
+  onUpdate: () => void;
+  constructor(
+      onUpdate: () => void, material: MeshStandardMaterial,
+      texture: ThreeTexture|null, textureUsage: TextureUsage,
+      encoding: TextureEncoding, format: PixelFormat) {
+    this.onUpdate = onUpdate;
+    this[$material] = material;
+    this[$texture] = texture;
+    this[$usage] = textureUsage;
+    this[$encoding] = encoding;
+    this[$format] = format;
   }
 }
+
 
 /**
  * Material facade implementation for Three.js materials
@@ -87,35 +74,44 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$normalTexture]: TextureInfo|null = null;
   private[$occlusionTexture]: TextureInfo|null = null;
   private[$emissiveTexture]: TextureInfo|null = null;
-
+  get[$backingThreeMaterial](): MeshStandardMaterial {
+    return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
+        .values()
+        .next()
+        .value;
+  }
   constructor(
-      onUpdate: () => void, gltf: GLTF, material: GLTFMaterial,
+      onUpdate: () => void, gltf: GLTF, gltfMaterial: GLTFMaterial,
       correlatedMaterials: Set<MeshStandardMaterial>|undefined) {
-    super(onUpdate, material, correlatedMaterials);
+    super(onUpdate, gltfMaterial, correlatedMaterials);
 
     if (correlatedMaterials == null) {
       return;
     }
+    if (correlatedMaterials.size > 1) {
+      console.exception('Material correlation must be 1:1');
+    }
 
-    if (material.pbrMetallicRoughness == null) {
-      material.pbrMetallicRoughness = {};
+    if (gltfMaterial.pbrMetallicRoughness == null) {
+      gltfMaterial.pbrMetallicRoughness = {};
     }
     this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
-        onUpdate, gltf, material.pbrMetallicRoughness, correlatedMaterials);
+        onUpdate, gltf, gltfMaterial.pbrMetallicRoughness, correlatedMaterials);
 
-    let {normalTexture, occlusionTexture, emissiveTexture} = material;
+    let {normalTexture: normalTextureDef, occlusionTexture, emissiveTexture} =
+        gltfMaterial;
 
     const normalTextures = new Set<ThreeTexture>();
     const occlusionTextures = new Set<ThreeTexture>();
     const emissiveTextures = new Set<ThreeTexture>();
 
-    for (const material of correlatedMaterials) {
-      const {normalMap, aoMap, emissiveMap} = material;
+    for (const gltfMaterial of correlatedMaterials) {
+      const {normalMap, aoMap, emissiveMap} = gltfMaterial;
 
-      if (normalTexture != null && normalMap != null) {
+      if (normalTextureDef != null && normalMap != null) {
         normalTextures.add(normalMap);
       } else {
-        normalTexture = {index: -1};
+        normalTextureDef = {index: -1};
       }
 
       if (occlusionTexture != null && aoMap != null) {
@@ -131,15 +127,19 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       }
     }
 
+    const firstValue = (set: Set<ThreeTexture>): ThreeTexture => {
+      return set.values().next().value;
+    };
+
     this[$normalTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        normalTexture!,
+        normalTextureDef!,
         normalTextures,
-        // Applicator provides method for applying a texture to a material.
-        TextureApplicator[$provideApplicator](
+        new TextureContext(
             onUpdate,
-            correlatedMaterials,
+            this[$backingThreeMaterial],
+            firstValue(normalTextures),
             TextureUsage.Normal,
             LinearEncoding,
             RGBFormat));
@@ -149,10 +149,10 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         gltf,
         occlusionTexture!,
         occlusionTextures,
-        // Applicator provides method for applying a texture to a material.
-        TextureApplicator[$provideApplicator](
+        new TextureContext(
             onUpdate,
-            correlatedMaterials,
+            this[$backingThreeMaterial],
+            firstValue(occlusionTextures),
             TextureUsage.Occlusion,
             LinearEncoding,
             RedFormat));
@@ -162,10 +162,10 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         gltf,
         emissiveTexture!,
         emissiveTextures,
-        // Applicator provides method for applying a texture to a material.
-        TextureApplicator[$provideApplicator](
+        new TextureContext(
             onUpdate,
-            correlatedMaterials,
+            this[$backingThreeMaterial],
+            firstValue(emissiveTextures),
             TextureUsage.Emissive,
             sRGBEncoding,
             RGBFormat));

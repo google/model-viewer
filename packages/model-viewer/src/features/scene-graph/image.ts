@@ -25,6 +25,7 @@ import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './t
 const loader = new ImageLoader();
 
 const $threeTextures = Symbol('threeTextures');
+export const $threeTexture = Symbol('threeTextures');
 const $uri = Symbol('uri');
 const $bufferViewImages = Symbol('bufferViewImages');
 export const $applyTexture = Symbol('applyTexture');
@@ -36,7 +37,12 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   private get[$threeTextures]() {
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
-
+  private get[$threeTexture]() {
+    return (this[$correlatedObjects] as Set<ThreeTexture>)
+        .values()
+        .next()
+        .value;
+  }
   private[$uri]: string|undefined = undefined;
   private[$bufferViewImages]: WeakMap<ThreeTexture, unknown> = new WeakMap();
 

@@ -50,17 +50,16 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
         {};
     this[$sampler] = new Sampler(onUpdate, sampler, correlatedTextures);
 
-    if (gltf.images != null && imageIndex != null && imageIndex !== -1) {
-      const image = gltf.images[imageIndex];
-
-      if (image != null) {
-        this[$source] = new Image(onUpdate, image, correlatedTextures);
-      }
-    } else if (imageIndex === -1) {
+    if (imageIndex === -1) {
       if (!externalImageDef) {
         externalImageDef = {name: texture.name} as GLTFImage;
       }
       this[$source] = new Image(onUpdate, externalImageDef, correlatedTextures);
+    } else if (gltf.images && imageIndex != null) {
+      const image = gltf.images[imageIndex];
+      if (image) {
+        this[$source] = new Image(onUpdate, image, correlatedTextures);
+      }
     }
   }
 
