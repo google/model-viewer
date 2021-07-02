@@ -15,9 +15,6 @@
  *
  */
 
-
-import '../../components/inspector/inspector.js';
-
 import {InspectorPanel} from '../../components/inspector/inspector.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';

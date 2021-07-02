@@ -15,15 +15,13 @@
  *
  */
 
-import '../../components/model_viewer_preview/model_viewer_preview.js';
-
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 const CUBE_GLTF_PATH = '../base/shared-assets/models/cube.gltf';
 
-xdescribe('ModelViewerPreview', () => {
+describe('ModelViewerPreview', () => {
   let preview: ModelViewerPreview;
 
   beforeEach(async () => {
@@ -41,11 +39,21 @@ xdescribe('ModelViewerPreview', () => {
     expect(getModelViewer()).toBeTruthy();
   });
 
-  it('updates ', async () => {
-    reduxStore.dispatch(dispatchGltfUrl(CUBE_GLTF_PATH));
-    // It may be several event loops before the preview downloads the model, so
-    // loop until it happens. This will timeout if there is a bug.
-    await preview.updateComplete;
-    await preview.loadComplete;
+  describe('With an untextured model', () => {
+    beforeEach(async () => {
+      reduxStore.dispatch(dispatchGltfUrl(CUBE_GLTF_PATH));
+      await preview.updateComplete;
+      await preview.loadComplete;
+    });
+
+    it('sets the URL', () => {});
+
+    it('produces the correct materials', () => {});
+
+    it('loading gltf without pbr works and gets proper default values',
+       async () => {});
+
+    it('loading a gltf with textures results in the correct app state',
+       async () => {});
   });
 });

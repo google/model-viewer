@@ -15,64 +15,32 @@
  *
  */
 
-
-import '../../components/materials_panel/materials_panel.js';
-
-import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
-
 import {MaterialPanel} from '../../components/materials_panel/materials_panel.js';
-import {dispatchSetAlphaCutoff, getEditsMaterials, getEditsTextures} from '../../components/materials_panel/reducer.js';
-import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/gltf_edits.js';
+import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
+import {dispatchGltfUrl, getTextureId} from '../../components/model_viewer_preview/reducer.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../../components/shared/slider_with_input/slider_with_input.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-const TEST_GLTF_JSON = {
-  asset: {generator: 'FBX2glTF', version: '2.0'},
-  samplers: [{magFilter: 9729, minFilter: 9987, wrapS: 10497, wrapT: 10497}],
-  images: [
-    {uri: 'originalTexture.png'},
-    {uri: 'metallic.png'},
-    {uri: 'normal.png'}
-  ],
-  textures: [
-    {source: 0, sampler: 0},
-    {source: 1, sampler: 0},
-    {source: 2, sampler: 0}
-  ],
-  materials: [{name: 'no tex'}, {name: 'with tex'}],
-};
-
-async function createGltfWithTextures() {
-  const model = new GltfModel(TEST_GLTF_JSON, null);
-  const pbrApi0 = (await model.materials)[0].pbrMetallicRoughness;
-  await pbrApi0.setBaseColorFactor([0.8, 0.8, 0.2, 1.0]);
-  await pbrApi0.setRoughnessFactor(0.9);
-  await pbrApi0.setMetallicFactor(0.4);
-
-  const matApi1 = (await model.materials)[1];
-  await matApi1.setNormalTexture('normal.png');
-  await matApi1.pbrMetallicRoughness.setBaseColorTexture('originalTexture.png');
-  await matApi1.pbrMetallicRoughness.setMetallicRoughnessTexture(
-      'metallic.png');
-  await matApi1.setEmissiveTexture('emissive.png');
-  await matApi1.setOcclusionTexture('occlusion.png');
-  return model;
-}
+const CUBES_GLTF_PATH = '../base/shared-assets/models/cubes.gltf';
 
 describe('material panel test', () => {
+  let preview: ModelViewerPreview;
   let panel: MaterialPanel;
-  let gltf: GltfModel;
 
   beforeEach(async () => {
+    preview = new ModelViewerPreview();
+    document.body.appendChild(preview);
+    await preview.updateComplete;
+
     panel = new MaterialPanel();
     panel.isTesting = true;
     document.body.appendChild(panel);
 
+    reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
+    await preview.updateComplete;
+    await preview.loadComplete;
     await panel.updateComplete;
-
-    gltf = await createGltfWithTextures();
-    await dispatchGltfAndEdits(gltf);
   });
 
   afterEach(() => {
@@ -87,18 +55,22 @@ describe('material panel test', () => {
     expect(panel.selectedMetallicFactor).toEqual(0.4);
   });
 
-  // it('reflects textures in GLTF', async () => {
-  //   panel.selectedMaterialIndex = 0;
-  //   await panel.updateComplete;
-  //   const actualTexturesById = panel.texturesById!.values().next().value;
-  //   expect(actualTexturesById).toBeDefined();
-  //   expect(actualTexturesById.uri).toBe('originalTexture.png');
+  it('material edits where roughness and metallic factors are initially undefined works',
+     async () => {});
 
-  //   const texturePicker =
-  //   panel.shadowRoot!.querySelector('me-texture-picker')!; await
-  //   texturePicker.updateComplete;
-  //   expect(texturePicker!.images.length).toBe(5);
-  // });
+  it('should reuse textures when applying edits to the same model',
+     async () => {});
+
+  it('reflects textures in GLTF', async () => {
+    panel.selectedMaterialIndex = 0;
+    await panel.updateComplete;
+    const firstUrl = panel.thumbnailUrls.values().next().value;
+    expect(firstUrl).toBe('originalTexture.png');
+
+    const texturePicker = panel.shadowRoot!.querySelector('me-texture-picker')!;
+    await texturePicker.updateComplete;
+    expect(texturePicker!.images.length).toBe(5);
+  });
 
   // Input/click
   it('applies changes to model textures on base color texture picker input',
@@ -112,14 +84,12 @@ describe('material panel test', () => {
        const textureOptionInput =
            texturePicker.shadowRoot!.querySelector('input')!;
        textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedBaseColorTextureId;
+       const expectedTextureId = panel.selectedBaseColorTextureId!;
 
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.materials[0]
-                  .baseColorTextureId)
-           .toEqual(
-               expectedTextureId,
-           );
+       const {baseColorTexture} =
+           panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
+       expect(getTextureId(baseColorTexture!.texture.source))
+           .toEqual(expectedTextureId);
      });
 
   it('clears model textures on base color null texture input', async () => {
@@ -132,10 +102,9 @@ describe('material panel test', () => {
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     textureOptionInput.dispatchEvent(new Event('click'));
 
-    expect(reduxStore.getState()
-               .entities.gltfEdits.edits.materials[1]
-               .baseColorTextureId)
-        .toEqual(undefined);
+    const {baseColorTexture} =
+        panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
+    expect(getTextureId(baseColorTexture!.texture.source)).toEqual('undefined');
   });
 
   it('applies changes to model textures on MR texture picker input',
@@ -149,12 +118,12 @@ describe('material panel test', () => {
        const textureOptionInput =
            texturePicker.shadowRoot!.querySelector('input')!;
        textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedMetallicRoughnessTextureId;
+       const expectedTextureId = panel.selectedMetallicRoughnessTextureId!;
 
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.materials[0]
-                  .metallicRoughnessTextureId)
-           .toEqual(expectedTextureId!);
+       const {metallicRoughnessTexture} =
+           panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
+       expect(getTextureId(metallicRoughnessTexture!.texture.source))
+           .toEqual(expectedTextureId);
      });
 
   it('clears model textures on MR null texture input', async () => {
@@ -167,10 +136,10 @@ describe('material panel test', () => {
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     clearTextureOption.dispatchEvent(new Event('click'));
 
-    expect(reduxStore.getState()
-               .entities.gltfEdits.edits.materials[1]
-               .metallicRoughnessTextureId)
-        .not.toBeDefined();
+    const {metallicRoughnessTexture} =
+        panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
+    expect(getTextureId(metallicRoughnessTexture!.texture.source))
+        .toEqual('undefined');
   });
 
   it('applies changes to model textures on normal texture picker input',
@@ -184,11 +153,10 @@ describe('material panel test', () => {
        const textureOptionInput =
            texturePicker.shadowRoot!.querySelector('input')!;
        textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedNormalTextureId;
+       const expectedTextureId = panel.selectedNormalTextureId!;
 
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.materials[0]
-                  .normalTextureId)
+       const {normalTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
+       expect(getTextureId(normalTexture!.texture.source))
            .toEqual(expectedTextureId);
      });
 
@@ -202,10 +170,8 @@ describe('material panel test', () => {
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     clearTextureOption.dispatchEvent(new Event('click'));
 
-    expect(reduxStore.getState()
-               .entities.gltfEdits.edits.materials[1]
-               .normalTextureId)
-        .not.toBeDefined();
+    const {normalTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
+    expect(getTextureId(normalTexture!.texture.source)).toEqual('undefined');
   });
 
   it('applies changes to model textures on emissive texture picker input',
@@ -219,11 +185,11 @@ describe('material panel test', () => {
        const textureOptionInput =
            texturePicker.shadowRoot!.querySelector('input')!;
        textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedEmissiveTextureId;
+       const expectedTextureId = panel.selectedEmissiveTextureId!;
 
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.materials[0]
-                  .emissiveTextureId)
+       const {emissiveTexture} =
+           panel.getMaterial(panel.selectedMaterialIndex)!;
+       expect(getTextureId(emissiveTexture!.texture.source))
            .toEqual(expectedTextureId);
      });
 
@@ -237,10 +203,8 @@ describe('material panel test', () => {
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     clearTextureOption.dispatchEvent(new Event('click'));
 
-    expect(reduxStore.getState()
-               .entities.gltfEdits.edits.materials[1]
-               .emissiveTextureId)
-        .not.toBeDefined();
+    const {emissiveTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
+    expect(getTextureId(emissiveTexture!.texture.source)).toEqual('undefined');
   });
 
   it('applies changes to model textures on occlusion texture picker input',
@@ -254,11 +218,11 @@ describe('material panel test', () => {
        const textureOptionInput =
            texturePicker.shadowRoot!.querySelector('input')!;
        textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedOcclusionTextureId;
+       const expectedTextureId = panel.selectedOcclusionTextureId!;
 
-       expect(reduxStore.getState()
-                  .entities.gltfEdits.edits.materials[0]
-                  .occlusionTextureId)
+       const {occlusionTexture} =
+           panel.getMaterial(panel.selectedMaterialIndex)!;
+       expect(getTextureId(occlusionTexture!.texture.source))
            .toEqual(expectedTextureId);
      });
 
@@ -272,10 +236,8 @@ describe('material panel test', () => {
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     clearTextureOption.dispatchEvent(new Event('click'));
 
-    expect(reduxStore.getState()
-               .entities.gltfEdits.edits.materials[1]
-               .occlusionTextureId)
-        .not.toBeDefined();
+    const {occlusionTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
+    expect(getTextureId(occlusionTexture!.texture.source)).toEqual('undefined');
   });
 
   it('applies changes to model textures on double sided change', async () => {
@@ -289,8 +251,7 @@ describe('material panel test', () => {
     doubleSidedCheckbox.checked = true;
     doubleSidedCheckbox.dispatchEvent(new Event('change'));
 
-    expect(getEditsMaterials(reduxStore.getState())[0].doubleSided)
-        .toEqual(true);
+    expect(false).toEqual(true);
   });
 
   // Upload
@@ -306,11 +267,9 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(getEditsTextures(reduxStore.getState())
-                  .get(reduxStore.getState()
-                           .entities.gltfEdits.edits.materials[0]
-                           .baseColorTextureId!)!.uri)
-           .toEqual('fooUrl');
+       const {baseColorTexture} =
+           panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
+       expect(getTextureId(baseColorTexture!.texture.source)).toEqual('fooUrl');
      });
 
   it('adds a normal texture to model textures on normal texture upload',
@@ -325,11 +284,8 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(getEditsTextures(reduxStore.getState())
-                  .get(reduxStore.getState()
-                           .entities.gltfEdits.edits.materials[0]
-                           .normalTextureId!)!.uri)
-           .toEqual('fooUrl');
+       const {normalTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
+       expect(getTextureId(normalTexture!.texture.source)).toEqual('fooUrl');
      });
 
   it('adds a metallic-roughness texture to model textures on MR texture upload',
@@ -344,10 +300,9 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(getEditsTextures(reduxStore.getState())
-                  .get(reduxStore.getState()
-                           .entities.gltfEdits.edits.materials[0]
-                           .metallicRoughnessTextureId!)!.uri)
+       const {metallicRoughnessTexture} =
+           panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
+       expect(getTextureId(metallicRoughnessTexture!.texture.source))
            .toEqual('fooUrl');
      });
 
@@ -363,11 +318,9 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(getEditsTextures(reduxStore.getState())
-                  .get(reduxStore.getState()
-                           .entities.gltfEdits.edits.materials[0]
-                           .emissiveTextureId!)!.uri)
-           .toEqual('fooUrl');
+       const {emissiveTexture} =
+           panel.getMaterial(panel.selectedMaterialIndex)!;
+       expect(getTextureId(emissiveTexture!.texture.source)).toEqual('fooUrl');
      });
 
   it('adds a occlusion texture to model textures on occlusion texture upload',
@@ -382,11 +335,9 @@ describe('material panel test', () => {
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
-       expect(getEditsTextures(reduxStore.getState())
-                  .get(reduxStore.getState()
-                           .entities.gltfEdits.edits.materials[0]
-                           .occlusionTextureId!)!.uri)
-           .toEqual('fooUrl');
+       const {occlusionTexture} =
+           panel.getMaterial(panel.selectedMaterialIndex)!;
+       expect(getTextureId(occlusionTexture!.texture.source)).toEqual('fooUrl');
      });
 
   it('applies changes to model textures on emissiveFactor change', async () => {
@@ -395,10 +346,9 @@ describe('material panel test', () => {
 
     panel.emissiveFactorPicker.selectedColorHex = '#ff0000';
     panel.emissiveFactorPicker.dispatchEvent(new Event('change'));
-    expect(reduxStore.getState()
-               .entities.gltfEdits.edits.materials[0]
-               .emissiveFactor)
-        .toEqual([1, 0, 0]);
+
+    const {emissiveFactor} = panel.getMaterial(panel.selectedMaterialIndex)!;
+    expect(emissiveFactor).toEqual([1, 0, 0]);
   });
 
   it('applies changes to model textures on alpha mode change', async () => {
@@ -411,8 +361,7 @@ describe('material panel test', () => {
     const maskItem =
         dropdown.querySelector('paper-item[value="MASK"]') as HTMLElement;
     maskItem.click();
-    expect(getEditsMaterials(reduxStore.getState())[0].alphaMode)
-        .toEqual('MASK');
+    expect(false).toEqual(true);
   });
 
   it('applies changes to model textures on alpha cutoff change', async () => {
@@ -447,12 +396,6 @@ describe('material panel test', () => {
     alphaCutoffSlider.value = 1;
     alphaCutoffSlider.dispatchEvent(new Event('change'));
 
-    expect(getEditsMaterials(reduxStore.getState())[0].alphaCutoff).toEqual(1);
-
-    reduxStore.dispatch(dispatchSetAlphaCutoff(
-        getEditsMaterials(reduxStore.getState()), {id: 0, alphaCutoff: 0}));
-    await panel.updateComplete;
-
-    expect(alphaCutoffSlider.value).toEqual(0);
+    expect(0).toEqual(1);
   });
 });
