@@ -71,9 +71,8 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
 
   get canRefresh(): boolean {
-    return this.isDeployed &&
-        (this.haveReceivedResponse &&
-         (!this.isSendingData && this.contentHasChanged));
+    return this.isDeployed && this.haveReceivedResponse &&
+        !this.isSendingData && this.contentHasChanged;
   }
 
   stateChanged(state: State) {
@@ -111,11 +110,9 @@ export class OpenMobileView extends ConnectedLitElement {
 
   // True if any content we'd send to the mobile view has changed.
   getContentHasChanged(): boolean {
-    return (
-        (this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz) &&
-         this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf)) ||
-        this.stateHasChanged() ||
-        this.isNewSource(this.urls.env, this.lastUrlsSent.env));
+    return this.stateHasChanged() || this.isNewModel() ||
+        this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz) ||
+        this.isNewSource(this.urls.env, this.lastUrlsSent.env);
   }
 
   envIsHdr(): boolean {
