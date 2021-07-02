@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial, PixelFormat, Texture as ThreeTexture, TextureEncoding} from 'three';
+import {MeshStandardMaterial, Texture as ThreeTexture, TextureEncoding} from 'three';
 
 import {Asset, GLTF, Image as GLTFImage, Material as GLTFMaterial, Sampler as GLTFSampler, Texture as GLTFTexture, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -34,7 +34,6 @@ export const $material = Symbol('material');
 export const $threeTexture = Symbol('threeTexture');
 export const $usage = Symbol('usage');
 export const $encoding = Symbol('encoding');
-export const $format = Symbol('format');
 export const $gltf = Symbol('gltf');
 export const $gltfTextureInfo = Symbol('gltfTextureInfo');
 export const $gltfTexture = Symbol('gltfTexture');
@@ -55,26 +54,45 @@ export enum TextureUsage {
  * a texture in one place.
  */
 export class TextureContext {
+  // Holds a reference to the glTF file data.
   [$gltf]: GLTF;
+  // Holds a reference to the Three data that backs the material object.
   [$material]: MeshStandardMaterial|null;
+  // Holds a reference to the Three data that backs the texture object.
   [$threeTexture]: ThreeTexture|null = null;
+
+  /**
+   * GLTF state representation, this is the backing data behind the
+   * model-viewer implementation of texture and it's dependencies (TextureInfo,
+   * Sampler, and Image)
+   */
+  // Data backs the Model-Viewer TextureInfo.
   [$gltfTextureInfo]: GLTFTextureInfo;
+  // Data backs the Model-Viewer Texture.
   [$gltfTexture]: GLTFTexture;
+  // Data backs the Model-Viewer Sampler.
   [$gltfSampler]: GLTFSampler;
+  // Data backs the Model-Viewer Image.
   [$gltfImage]: GLTFImage;
+
+  // Texture usage defines the how the texture is used (ie Normal, Emissive...
+  // etc)
   [$usage]: TextureUsage;
+  // Defines the encoding of the texture (ie Linear, sRGB, etc...)
   [$encoding]: TextureEncoding;
-  [$format]: PixelFormat;
   onUpdate: () => void;
 
   // Creates context from Texture
   static createFromTexture(texture: ThreeTexture): TextureContext {
+    // Creates an empty glTF data set, allows for creating a texture that's not
+    // bound to a material.
     const gltf = {
       asset: {} as Asset,
       textures: [{source: -1}],
       samplers: [{}],
       images: [{name: 'null_image', uri: 'null_image'}],
     };
+
     return new TextureContext(
         () => {},
         gltf,
@@ -157,8 +175,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
         onUpdate, gltf, gltfMaterial.pbrMetallicRoughness, correlatedMaterials);
 
-    let {normalTexture: normalTextureDef, occlusionTexture, emissiveTexture} =
-        gltfMaterial;
+    let {normalTexture, occlusionTexture, emissiveTexture} = gltfMaterial;
 
     const normalTextures = new Set<ThreeTexture>();
     const occlusionTextures = new Set<ThreeTexture>();
@@ -167,10 +184,10 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     for (const gltfMaterial of correlatedMaterials) {
       const {normalMap, aoMap, emissiveMap} = gltfMaterial;
 
-      if (normalTextureDef != null && normalMap != null) {
+      if (normalTexture != null && normalMap != null) {
         normalTextures.add(normalMap);
       } else {
-        normalTextureDef = {index: -1};
+        normalTexture = {index: -1};
       }
 
       if (occlusionTexture != null && aoMap != null) {
@@ -196,7 +213,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         this[$backingThreeMaterial],
         firstValue(normalTextures),
         TextureUsage.Normal,
-        normalTextureDef!));
+        normalTexture!));
 
     this[$occlusionTexture] = new TextureInfo(new TextureContext(
         onUpdate,
