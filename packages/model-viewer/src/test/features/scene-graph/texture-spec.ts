@@ -27,7 +27,7 @@ const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
-suite.only('scene-graph/texture', () => {
+suite('scene-graph/texture', () => {
   suite('Texture', () => {
     test('Create a texture', async () => {
       const element = new ModelViewerElement();
