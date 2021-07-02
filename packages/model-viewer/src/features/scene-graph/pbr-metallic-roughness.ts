@@ -87,7 +87,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
         gltf,
         firstValue(correlatedMaterials),
         firstValue(baseColorTextures),
-        TextureUsage.Occlusion,
+        TextureUsage.Base,
         baseColorTexture!));
 
     this[$metallicRoughnessTexture] = new TextureInfo(new TextureContext(
