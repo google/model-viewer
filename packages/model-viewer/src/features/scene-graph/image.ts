@@ -15,10 +15,10 @@
 
 import {ImageLoader, Texture as ThreeTexture} from 'three';
 
-import {EmbeddedImage as GLTFEmbeddedImage, Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {EmbeddedImage as GLTFEmbeddedImage} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Image as ImageInterface} from './api.js';
-import {$gltf, $gltfImage, $gltfTexture, $threeTexture, TextureContext} from './material.js';
+import {$gltfImage, $threeTexture, TextureContext} from './material.js';
 import {$onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
@@ -44,23 +44,8 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
   private[$context]: TextureContext;
   constructor(context: TextureContext) {
-    super(
-        context.onUpdate, Image.getGLTFImage(context), new Set<ThreeTexture>());
+    super(context.onUpdate, context[$gltfImage], new Set<ThreeTexture>());
     this[$context] = context;
-  }
-
-  private static getGLTFImage(context: TextureContext): GLTFImage {
-    const gltf = context[$gltf];
-    const {source: imageIndex} = context[$gltfTexture]!;
-    if (imageIndex === -1) {
-      context[$gltfImage] = {name: 'adhoc_image', uri: 'adhoc_image'};
-    } else if (gltf.images && imageIndex != null) {
-      const image = gltf.images[imageIndex];
-      context[$gltfImage] = image;
-    } else {
-      context[$gltfImage] = {name: 'null_image', uri: 'null_image'};
-    }
-    return context[$gltfImage]!;
   }
 
   get name(): string {
