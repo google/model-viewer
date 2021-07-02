@@ -20,6 +20,7 @@ import {ModelViewerPreview} from '../../components/model_viewer_preview/model_vi
 import {dispatchGltfUrl, getTextureId} from '../../components/model_viewer_preview/reducer.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../../components/shared/slider_with_input/slider_with_input.js';
+import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 const CUBES_GLTF_PATH = '../base/shared-assets/models/cubes.gltf';
@@ -29,6 +30,7 @@ describe('material panel test', () => {
   let panel: MaterialPanel;
 
   beforeEach(async () => {
+    reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
     await preview.updateComplete;
@@ -38,12 +40,12 @@ describe('material panel test', () => {
     document.body.appendChild(panel);
 
     reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
-    await preview.updateComplete;
     await preview.loadComplete;
     await panel.updateComplete;
   });
 
   afterEach(() => {
+    document.body.removeChild(preview);
     document.body.removeChild(panel);
   });
 

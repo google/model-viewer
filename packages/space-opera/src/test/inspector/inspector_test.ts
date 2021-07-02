@@ -18,6 +18,7 @@
 import {InspectorPanel} from '../../components/inspector/inspector.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
+import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 const ASTRONAUT_PATH = '../base/shared-assets/models/Astronaut.glb';
@@ -27,6 +28,7 @@ describe('loader inspector pane test', () => {
   let inspectorPane: InspectorPanel;
 
   beforeEach(async () => {
+    reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
     await preview.updateComplete;
@@ -35,7 +37,6 @@ describe('loader inspector pane test', () => {
     document.body.appendChild(inspectorPane);
 
     reduxStore.dispatch(dispatchGltfUrl(ASTRONAUT_PATH));
-    await preview.updateComplete;
     await preview.loadComplete;
     await inspectorPane.updateComplete;
   });
@@ -49,14 +50,14 @@ describe('loader inspector pane test', () => {
     const textContent =
         inspectorPane.shadowRoot!.querySelector(
                                      '.inspector-content')!.textContent!;
-    expect(textContent).toBeDefined();
+    expect(textContent).toBeTruthy();
     expect(JSON.parse(textContent)).toEqual(getModelViewer()!.gltfJson);
   });
 
   it('uploads images in the bin to the inspector pane', async () => {
     const texImage = inspectorPane.shadowRoot!.querySelector<HTMLImageElement>(
         '.texture-images img')!;
-    expect(texImage).toBeDefined();
+    expect(texImage).toBeTruthy();
     // Check that an object URL was generated
     expect(texImage.src).toMatch(/^blob:http/);
   });

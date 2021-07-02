@@ -22,6 +22,7 @@ import {DEFAULT_MAX_PITCH, PitchLimits} from '../../../components/camera_setting
 import {dispatchPitchLimits, getCamera} from '../../../components/camera_settings/reducer.js';
 import {ModelViewerPreview} from '../../../components/model_viewer_preview/model_viewer_preview.js';
 import {getModelViewer} from '../../../components/model_viewer_preview/reducer.js';
+import {dispatchReset} from '../../../reducers.js';
 import {reduxStore} from '../../../space_opera_base.js';
 
 xdescribe('pitch limits editor test', () => {
@@ -29,6 +30,7 @@ xdescribe('pitch limits editor test', () => {
   let preview: ModelViewerPreview;
 
   beforeEach(async () => {
+    reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
     await preview.updateComplete;

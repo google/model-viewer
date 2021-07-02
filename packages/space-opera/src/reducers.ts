@@ -26,6 +26,7 @@ import {arReducer, mobileReducer} from './components/mobile_view/reducer.js';
 import {modelReducer} from './components/model_viewer_preview/reducer.js';
 import {extraAttributesReducer} from './components/model_viewer_snippet/reducer.js';
 import {relativeFilePathsReducer} from './components/relative_file_paths/reducer.js';
+import {INITIAL_STATE} from './types.js';
 
 const modelViewerSnippetReducer = combineReducers({
   arConfig: arReducer,
@@ -47,7 +48,19 @@ const entitiesReducer = combineReducers({
 
 const uiReducer = combineReducers({hotspots: hotspotsUiReducer});
 
-export const rootReducer =
+const combinedReducer =
     combineReducers({entities: entitiesReducer, ui: uiReducer});
+
+export const RESET_STORE = 'RESET_STORE';
+export function dispatchReset() {
+  return {type: RESET_STORE};
+};
+
+export const rootReducer = (state, action) => {
+  if (action.type === RESET_STORE) {
+    state = INITIAL_STATE;
+  }
+  return combinedReducer(state, action);
+};
 
 export type RootState = ReturnType<typeof rootReducer>

@@ -17,6 +17,7 @@
 
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
+import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 const CUBE_GLTF_PATH = '../base/shared-assets/models/cube.gltf';
@@ -25,6 +26,7 @@ describe('ModelViewerPreview', () => {
   let preview: ModelViewerPreview;
 
   beforeEach(async () => {
+    reduxStore.dispatch(dispatchReset());
     expect(getModelViewer()).toBeUndefined();
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);

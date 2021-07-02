@@ -46,9 +46,6 @@ import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {dispatchGltfUrl, dispatchModel, getGltfUrl, renderCommonChildElements} from './reducer.js';
 
-const $gltfUrl = Symbol('gltfUrl');
-const $autoplay = Symbol('autoplay');
-
 /**
  * Renders and updates the model-viewer tag, serving as a preview of the edits.
  */
@@ -61,8 +58,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() addHotspotMode = false;
-  @internalProperty()[$autoplay]?: boolean;
-  @internalProperty()[$gltfUrl]?: string;
+  @internalProperty() autoplay?: boolean;
+  @internalProperty() gltfUrl?: string;
   @internalProperty() gltfError: string = '';
   @internalProperty() extraAttributes: any = {};
   @internalProperty() refreshButtonIsReady: boolean = false;
@@ -79,11 +76,18 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.camera = getCamera(state);
     this.config = getConfig(state);
     this.hotspots = getHotspots(state);
-    this[$gltfUrl] = getGltfUrl(state);
-    this[$autoplay] = getConfig(state).autoplay;
+    this.autoplay = getConfig(state).autoplay;
     this.extraAttributes = getExtraAttributes(state);
     this.refreshButtonIsReady = getRefreshable(state);
     this.bestPractices = getBestPractices(state);
+
+    const gltfUrl = getGltfUrl(state);
+    if (gltfUrl !== this.gltfUrl) {
+      this.loadComplete = new Promise((resolve) => {
+        this.resolveLoad = resolve;
+      });
+      this.gltfUrl = gltfUrl;
+    }
   }
 
   firstUpdated() {
@@ -113,7 +117,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   protected render() {
     const editedConfig = {
       ...this.config,
-      src: this[$gltfUrl],
+      src: this.gltfUrl,
       // Always enable camera controls for preview
       cameraControls: true
     };
@@ -134,12 +138,12 @@ export class ModelViewerPreview extends ConnectedLitElement {
     // Add additional elements, editor specific.
     childElements.push(refreshMobileButton);
     if (this.gltfError) {
-      childElements.push(html`<div class="ErrorText">Error loading GLB:<br/>${
+      childElements.push(html`<div class="ErrorText">Error loading glTF:<br/>${
           this.gltfError}</div>`);
     } else if (!hasModel) {
       childElements.push(
           html
-          `<div class="HelpText">Drag a GLB here!<br/><small>And HDRs for lighting</small></div>`);
+          `<div class="HelpText">Drag a glTF or GLB here!<br/><small>And HDRs for lighting</small></div>`);
     }
 
     const emptyARConfig = {};
@@ -205,7 +209,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (this.modelViewer && this.modelViewer.loaded) {
       // Calling play with no animation name will result in the first animation
       // getting played. Don't want that.
-      if (this[$autoplay] && this.config.animationName) {
+      if (this.autoplay && this.config.animationName) {
         this.modelViewer.play();
       } else {
         this.modelViewer.pause();
@@ -248,7 +252,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
       const file = event.dataTransfer.items[0].getAsFile();
       if (!file)
         return;
-      if (file.name.match(/\.(glb)$/i)) {
+      if (file.name.match(/\.(glb|gltf)$/i)) {
         const arrayBuffer = await file.arrayBuffer();
         reduxStore.dispatch(dispatchSetModelName(file.name));
         const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;

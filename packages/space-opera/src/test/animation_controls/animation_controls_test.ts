@@ -23,6 +23,7 @@ import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../../c
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
+import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {waitForEvent} from '../utils/test_utils.js';
 
@@ -33,6 +34,7 @@ describe('animation controls test', () => {
   let animationControls: AnimationControls;
 
   beforeEach(async () => {
+    reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
     await preview.updateComplete;
