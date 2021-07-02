@@ -20,8 +20,7 @@ import resolve from '@rollup/plugin-node-resolve';
 
 const watchFiles = [
   'lib/**',
-  '../model-viewer/lib/**',
-  '../editing-adapter/lib/**'
+  '../model-viewer/lib/**'
 ];
 
 const plugins = [
