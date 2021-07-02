@@ -23,7 +23,7 @@ import {ArConfigState, ModelViewerSnippetState, State} from '../../types.js';
 import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
-import {getGltfUrl, getModel, getModelViewer} from '../model_viewer_preview/reducer.js';
+import {dispatchModelDirty, getGltfUrl, getModel, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {getModelViewerSnippet} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
@@ -276,6 +276,7 @@ export class OpenMobileView extends ConnectedLitElement {
     this.lastUrlsSent['usdz'] = this.urls['usdz'];
     this.lastUrlsSent['gltf'] = this.urls['gltf'];
 
+    reduxStore.dispatch(dispatchModelDirty(false));
     this.contentHasChanged = this.getContentHasChanged();
     reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
   }

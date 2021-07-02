@@ -303,37 +303,6 @@ export class MaterialPanel extends ConnectedLitElement {
     return checkFinite(Number(this.alphaCutoffSlider.value));
   }
 
-  onBaseColorChange() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
-        .setBaseColorFactor(this.selectedBaseColor);
-  }
-
-  onRoughnessChange() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
-        .setRoughnessFactor(this.selectedRoughnessFactor);
-  }
-
-  onMetallicChange() {
-    if (this.selectedMaterialIndex == null) {
-      throw new Error('No material selected');
-    }
-    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
-        .setMetallicFactor(this.selectedMetallicFactor);
-  }
-
-  onDoubleSidedChange(_event: Event) {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-    // const doubleSided = (event.target as HTMLInputElement).checked;
-  }
-
   get selectedBaseColorTextureId(): string|undefined {
     if (!this.baseColorTexturePicker) {
       throw new Error('Texture picker is not defined');
@@ -382,6 +351,41 @@ export class MaterialPanel extends ConnectedLitElement {
       return undefined;
     }
     return this.thumbnailIds[this.occlusionTexturePicker.selectedIndex];
+  }
+
+  onBaseColorChange() {
+    if (this.selectedMaterialIndex === undefined) {
+      throw new Error('No material selected');
+    }
+    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
+        .setBaseColorFactor(this.selectedBaseColor);
+    reduxStore.dispatch(dispatchModelDirty());
+  }
+
+  onRoughnessChange() {
+    if (this.selectedMaterialIndex === undefined) {
+      throw new Error('No material selected');
+    }
+    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
+        .setRoughnessFactor(this.selectedRoughnessFactor);
+    reduxStore.dispatch(dispatchModelDirty());
+  }
+
+  onMetallicChange() {
+    if (this.selectedMaterialIndex == null) {
+      throw new Error('No material selected');
+    }
+    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
+        .setMetallicFactor(this.selectedMetallicFactor);
+    reduxStore.dispatch(dispatchModelDirty());
+  }
+
+  onDoubleSidedChange(_event: Event) {
+    if (this.selectedMaterialIndex === undefined) {
+      throw new Error('No material selected');
+    }
+    // const doubleSided = (event.target as HTMLInputElement).checked;
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onBaseColorTextureChange() {
