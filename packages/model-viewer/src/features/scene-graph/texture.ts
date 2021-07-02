@@ -21,7 +21,7 @@ import {Texture as TextureInterface} from './api.js';
 import {Image} from './image.js';
 import {$gltfTexture, $threeTexture, TextureContext} from './material.js';
 import {Sampler} from './sampler.js';
-import {$onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 
@@ -47,6 +47,8 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   applyNewContext(context: TextureContext): void {
     (this[$onUpdate] as () => void) = context.onUpdate;
     (this[$sourceObject] as GLTFElement) = context[$gltfTexture];
+    (this[$correlatedObjects] as Set<ThreeTexture>) =
+        new Set<ThreeTexture>([context[$threeTexture]!]);
     this[$sampler] = new Sampler(context);
     this[$source] = new Image(context);
   }

@@ -15,8 +15,10 @@
 
 import {Texture as ThreeTexture} from 'three';
 
+import {$underlyingTexture} from '../../../features/scene-graph/image.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
+import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
 
@@ -25,30 +27,127 @@ const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
-suite('scene-graph/texture', () => {
+suite.only('scene-graph/texture', () => {
   suite('Texture', () => {
-    test('do a texture thing', async () => {
+    test('Create a texture', async () => {
       const element = new ModelViewerElement();
       element.src = ASTRONAUT_GLB_PATH;
       document.body.insertBefore(element, document.body.firstChild);
       await waitForEvent(element, 'load');
 
-      const path = assetPath('features/scene-graph/Default_albedo.jpg');
+      const path = assetPath(
+          'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png');
       const texture = await element.createTexture(path);
       expect(texture).to.not.be.null;
+    });
+
+    test('Set a texture', async () => {
+      const element = new ModelViewerElement();
+      element.src = ASTRONAUT_GLB_PATH;
+      document.body.insertBefore(element, document.body.firstChild);
+      await waitForEvent(element, 'load');
+
+      const path = assetPath(
+          'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png');
+      const texture = await element.createTexture(path);
+
+      // Gets new UUID to compare with UUID of texture accessible through the
+      // material.
+      const newUUID: string|undefined =
+          texture?.source[$underlyingTexture]?.uuid;
 
       element.model!.materials[0]
           .pbrMetallicRoughness.baseColorTexture!.setTexture(texture);
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .pbrMetallicRoughness.baseColorTexture?.[$correlatedObjects]
-              ?.values()
-              .next()
-              .value;
+              .pbrMetallicRoughness.baseColorTexture?.texture
+              ?.source[$underlyingTexture]!;
 
-      const image: HTMLImageElement = threeTexture.image;
-      expect(image.src).to.be.equal('features/scene-graph/Default_albedo.jpg');
+      expect(threeTexture.uuid).to.be.equal(newUUID);
+    });
+
+    test('Verify legacy correlatedObjects are updated.', async () => {
+      const element = new ModelViewerElement();
+      element.src = ASTRONAUT_GLB_PATH;
+      document.body.insertBefore(element, document.body.firstChild);
+      await waitForEvent(element, 'load');
+
+      const path = assetPath(
+          'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png');
+      const texture = await element.createTexture(path);
+      const newUUID: string|undefined =
+          texture?.source[$underlyingTexture]?.uuid;
+
+      element.model!.materials[0]
+          .pbrMetallicRoughness.baseColorTexture!.setTexture(texture);
+
+      const uuidFromTextureInfoObject: string =
+          (element.model!.materials[0]
+               .pbrMetallicRoughness.baseColorTexture?.[$correlatedObjects]
+               ?.values()
+               .next()
+               .value as ThreeTexture)
+              .uuid;
+      expect(uuidFromTextureInfoObject).to.be.equal(newUUID);
+
+      const uuidFromTextureObject: string =
+          (element.model!.materials[0]
+               .pbrMetallicRoughness.baseColorTexture?.[$correlatedObjects]
+               ?.values()
+               .next()
+               .value as ThreeTexture)
+              .uuid;
+      expect(uuidFromTextureObject).to.be.equal(newUUID);
+
+      const uuidFromSamplerObject: string =
+          (element.model!.materials[0]
+               .pbrMetallicRoughness.baseColorTexture?.texture
+               ?.sampler[$correlatedObjects]
+               ?.values()
+               .next()
+               .value as ThreeTexture)
+              .uuid;
+      expect(uuidFromSamplerObject).to.be.equal(newUUID);
+
+      const uuidFromImageObject: string =
+          (element.model!.materials[0]
+               .pbrMetallicRoughness.baseColorTexture?.texture
+               ?.source[$correlatedObjects]
+               ?.values()
+               .next()
+               .value as ThreeTexture)
+              .uuid;
+      expect(uuidFromImageObject).to.be.equal(newUUID);
+    });
+
+    test('Set a texture and then setURI', async () => {
+      const element = new ModelViewerElement();
+      element.src = ASTRONAUT_GLB_PATH;
+      document.body.insertBefore(element, document.body.firstChild);
+      await waitForEvent(element, 'load');
+
+      const texture = await element.createTexture(assetPath(
+          'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png'));
+
+      element.model!.materials[0]
+          .pbrMetallicRoughness.baseColorTexture!.setTexture(texture);
+
+      const imageFromSetTexture = texture?.source[$underlyingTexture]?.image;
+      expect(imageFromSetTexture).to.not.be.null;
+
+      await element.model!.materials[0]
+          .pbrMetallicRoughness.baseColorTexture?.texture?.source
+          .setURI(assetPath(
+              'models/glTF-Sample-Models/2.0/CesiumMan/glTF/CesiumMan_img0.jpg'));
+
+      const imageFromSetURI =
+          element.model!.materials[0]
+              .pbrMetallicRoughness.baseColorTexture?.texture
+              ?.source[$underlyingTexture]
+              ?.image;
+
+      expect(imageFromSetURI).to.not.be.equal(imageFromSetTexture);
     });
   });
 });

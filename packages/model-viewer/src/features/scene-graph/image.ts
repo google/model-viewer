@@ -44,7 +44,10 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
   private[$context]: TextureContext;
   constructor(context: TextureContext) {
-    super(context.onUpdate, context[$gltfImage], new Set<ThreeTexture>());
+    super(
+        context.onUpdate,
+        context[$gltfImage],
+        new Set<ThreeTexture>([context[$threeTexture]!]));
     this[$context] = context;
   }
 

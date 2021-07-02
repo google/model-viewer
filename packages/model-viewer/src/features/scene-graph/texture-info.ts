@@ -19,7 +19,7 @@ import {TextureInfo as TextureInfoInterface} from './api.js';
 import {$underlyingTexture} from './image.js';
 import {$gltfTextureInfo, $material, $threeTexture, $usage, TextureContext, TextureUsage} from './material.js';
 import {Texture} from './texture.js';
-import {ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, ThreeDOMElement} from './three-dom-element.js';
 
 
 
@@ -52,6 +52,13 @@ export class TextureInfo extends ThreeDOMElement implements
         texture != null ? texture.source[$underlyingTexture] : null;
     let encoding: TextureEncoding = sRGBEncoding;
     this[$texture] = texture;
+    this[$textureContext][$threeTexture] = threeTexture;
+    // Ensures correlatedObjects is up to date.
+    const correlatedObjects = (this[$correlatedObjects] as Set<ThreeTexture>);
+    correlatedObjects.clear();
+    if (threeTexture != null) {
+      correlatedObjects.add(threeTexture);
+    }
 
     switch (this[$textureContext][$usage]) {
       case TextureUsage.Base:
