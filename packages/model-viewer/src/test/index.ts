@@ -50,6 +50,7 @@ import './features/scene-graph-spec.js';
 import './features/scene-graph/model-spec.js';
 import './features/ar-spec.js';
 import './features/scene-graph/texture-spec.js';
+import './features/scene-graph/material-spec.js';
 
 
 try {
