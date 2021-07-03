@@ -29,7 +29,7 @@ const HELMET_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
 const REPLACEMENT_TEXTURE_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png');
-suite.only('scene-graph/material', () => {
+suite('scene-graph/material', () => {
   suite('Test Texture Slots', () => {
     let element: ModelViewerElement;
     let texture: Texture|null;
