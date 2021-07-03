@@ -20,8 +20,8 @@ import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GL
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
-import {Variants} from '../three-components/gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
 import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
@@ -92,12 +92,10 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('variantName')) {
-        const variants = this[$variants];
         const threeGLTF = this[$currentGLTF];
         const {variantName} = this;
 
-        const variantIndex = variants.findIndex((v) => v === variantName);
-        if (threeGLTF == null || variantIndex < 0) {
+        if (threeGLTF == null) {
           return;
         }
 
@@ -105,18 +103,20 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$needsRender]();
         };
 
-        const updatedMaterials =
-            threeGLTF.correlatedSceneGraph.loadVariant(variantIndex, onUpdate);
+        const updatedMaterialsPromise =
+            threeGLTF.correlatedSceneGraph.loadVariant(variantName!, onUpdate);
         const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
-        for (const index of updatedMaterials) {
-          const material = gltf.materials![index];
-          this[$model]!.materials[index] = new Material(
-              onUpdate,
-              gltf,
-              material,
-              gltfElementMap.get(material) as Set<MeshStandardMaterial>);
-        }
+        updatedMaterialsPromise.then(updatedMaterials => {
+          for (const index of updatedMaterials) {
+            const material = gltf.materials![index];
+            this[$model]!.materials[index] = new Material(
+                onUpdate,
+                gltf,
+                material,
+                gltfElementMap.get(material) as Set<MeshStandardMaterial>);
+          }
+        });
       }
 
       if (changedProperties.has('orientation') ||
@@ -166,15 +166,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         // KHR_materials_variants extension spec:
         // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
 
-        const {gltfExtensions} = currentGLTF.userData;
-        if (gltfExtensions != null) {
-          const extension = gltfExtensions['KHR_materials_variants'];
-
-          if (extension != null) {
-            this[$variants] =
-                (extension.variants as Variants).map(variant => variant.name);
-            this.requestUpdate('variantName');
-          }
+        if ('variants' in currentGLTF.userData) {
+          this[$variants] = currentGLTF.userData.variants.slice();
+          this.requestUpdate('variantName');
         }
       }
 
@@ -210,8 +204,22 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           shadow.visible = false;
         }
 
-        const exporter = new GLTFExporter();
-        exporter.parse(scene.modelContainer, (gltf) => {
+        const currentGLTF = this[$currentGLTF];
+
+        if (currentGLTF != null && 'functions' in currentGLTF.userData &&
+            'ensureLoadVariants' in currentGLTF.userData.functions) {
+          // Ensure all variant materials are loaded because some of them may
+          // not be loaded yet.
+          await currentGLTF.userData.functions.ensureLoadVariants(scene);
+        }
+
+        const exporter =
+            new GLTFExporter()
+                // @ts-ignore
+                .register(
+                    (writer: any) =>
+                        new GLTFExporterMaterialsVariantsExtension(writer));
+        exporter.parse(scene.modelContainer, (gltf: object) => {
           return resolve(
               new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
                 type: opts.binary ? 'application/octet-stream' :

@@ -1,7 +1,7 @@
 import {Group, Material, Mesh, Object3D, Texture} from 'three';
 import {GLTF as ThreeGLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import {GLTF, GLTFElement, VariantMappings} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 export type ThreeSceneObject = Object3D|Material|Texture;
 type ThreeSceneObjectCallback = (a: ThreeSceneObject, b: ThreeSceneObject) =>
@@ -240,49 +240,33 @@ export class CorrelatedSceneGraph {
     this[$threeObjectMap] = threeObjectMap;
   }
 
-  loadVariant(variantIndex: number, onUpdate: () => void = () => {}):
-      Set<number> {
+  async loadVariant(variantName: string, onUpdate: () => void = () => {}):
+      Promise<Set<number>> {
     const updatedMaterials = new Set<number>();
 
-    this.threeGLTF.scene.traverse(async (object) => {
-      const {gltfExtensions} = object.userData;
-      if (!(object as Mesh).isMesh || gltfExtensions == null) {
-        return;
-      }
+    if (!('variants' in this.threeGLTF.userData) ||
+        !('functions' in this.threeGLTF.userData) ||
+        !('selectVariant' in this.threeGLTF.userData.functions)) {
+      return updatedMaterials;
+    }
 
-      const meshVariantData = gltfExtensions['KHR_materials_variants'];
-      if (meshVariantData == null) {
-        return;
-      }
-
-      let materialIndex = -1;
-      for (const mapping of (meshVariantData.mappings as VariantMappings)) {
-        if (mapping.variants.indexOf(variantIndex) >= 0) {
-          materialIndex = mapping.material;
-          break;
-        }
-      }
-      if (materialIndex < 0) {
-        return;
-      }
-
-      const material =
-          await this.threeGLTF.parser.getDependency('material', materialIndex);
-      updatedMaterials.add(materialIndex);
-      (object as Mesh).material = material;
-      this.threeGLTF.parser.assignFinalMaterial(object as Mesh);
-      onUpdate();
-
-      const gltfElement = this.gltf.materials![materialIndex];
-      let threeObjects = this.gltfElementMap.get(gltfElement);
-
-      if (threeObjects == null) {
-        threeObjects = new Set();
-        this.gltfElementMap.set(gltfElement, threeObjects);
-      }
-
-      threeObjects.add((object as Mesh).material as Material);
-    });
+    await this.threeGLTF.userData.functions.selectVariant(
+        this.threeGLTF.scene,
+        variantName,
+        true,
+        (object: Object3D,
+         _oldMaterial: Material,
+         gltfMaterialIndex: number) => {
+          updatedMaterials.add(gltfMaterialIndex);
+          const gltfElement = this.gltf.materials![gltfMaterialIndex];
+          let threeObjects = this.gltfElementMap.get(gltfElement);
+          if (threeObjects == null) {
+            threeObjects = new Set();
+            this.gltfElementMap.set(gltfElement, threeObjects);
+          }
+          threeObjects.add((object as Mesh).material as Material);
+          onUpdate();
+        });
 
     return updatedMaterials;
   }
