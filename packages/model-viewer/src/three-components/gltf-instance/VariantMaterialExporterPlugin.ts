@@ -1,8 +1,28 @@
+/* @license
+ * Copyright 2021 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Materials variants extension
  *
  * Specification:
- * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
+ * https://github.com/takahirox/three-gltf-extensions/tree/main/loaders/KHR_materials_variants
+ */
+
+/**
+ * The code in this file is based on
+ * https://github.com/takahirox/three-gltf-extensions/tree/main/exporters/KHR_materials_variants
  */
 
 import {Material, Mesh, Object3D} from 'three';
@@ -19,8 +39,10 @@ const compatibleObject = (object: Object3D) => {
       object.userData &&  // just in case
       object.userData.variantMaterials &&
       // Is this line costly?
-      !!Object
-            .values(object.userData.variantMaterials　as {material: Material}[])
+      !!Array
+            .from((object.userData.variantMaterials as
+                   Map<string, {material: Material | null}>)
+                      .values())
             .filter(m => compatibleMaterial(m.material));
 };
 
@@ -28,7 +50,7 @@ const compatibleObject = (object: Object3D) => {
  * @param material {THREE.Material}
  * @return {boolean}
  */
-const compatibleMaterial = (material: Material) => {
+const compatibleMaterial = (material: Material|null) => {
   // @TODO: support multi materials?
   return material && material.isMaterial && !Array.isArray(material);
 };
@@ -47,24 +69,26 @@ export default class GLTFExporterMaterialsVariantsExtension {
 
   beforeParse(objects: Object3D[]) {
     // Find all variant names and store them to the table
-    const variantNameTable: {[key: string]: boolean} = {};
+    const variantNameTable = new Map<string, boolean>();
     for (const object of objects) {
       object.traverse(o => {
         if (!compatibleObject(o)) {
           return;
         }
         const variantMaterials = o.userData.variantMaterials;
-        for (const variantName in variantMaterials) {
-          const variantMaterial = variantMaterials[variantName];
+        for (const variantName of variantMaterials.keys()) {
+          const variantMaterial = variantMaterials.get(variantName);
           // Ignore unloaded variant materials
           if (compatibleMaterial(variantMaterial.material)) {
-            variantNameTable[variantName] = true;
+            variantNameTable.set(variantName, true);
           }
         }
       });
     }
     // We may want to sort?
-    Object.keys(variantNameTable).forEach(name => this.variantNames.push(name));
+    for (const name of variantNameTable.keys()) {
+      this.variantNames.push(name);
+    }
   }
 
   writeMesh(mesh: Mesh, meshDef: any) {
@@ -74,10 +98,11 @@ export default class GLTFExporterMaterialsVariantsExtension {
 
     const userData = mesh.userData;
     const variantMaterials = userData.variantMaterials;
-    const mappingTable:
-        {[key: string]: {material: number, variants: number[]}} = {};
-    for (const variantName in variantMaterials) {
-      const variantMaterialInstance = variantMaterials[variantName].material;
+    const mappingTable　=
+        new Map<number, {material: number, variants: number[]}>();
+    for (const variantName of variantMaterials.keys()) {
+      const variantMaterialInstance =
+          variantMaterials.get(variantName).material;
       if (!compatibleMaterial(variantMaterialInstance)) {
         continue;
       }
@@ -85,14 +110,15 @@ export default class GLTFExporterMaterialsVariantsExtension {
           this.variantNames.indexOf(variantName);  // Shouldn't be -1
       const materialIndex =
           this.writer.processMaterial(variantMaterialInstance);
-      if (!mappingTable[materialIndex]) {
-        mappingTable[materialIndex] = {material: materialIndex, variants: []};
+      if (!mappingTable.has(materialIndex)) {
+        mappingTable.set(
+            materialIndex, {material: materialIndex, variants: []});
       }
-      mappingTable[materialIndex].variants.push(variantIndex);
+      mappingTable.get(materialIndex)!.variants.push(variantIndex);
     }
 
     const mappingsDef =
-        Object.values(mappingTable)
+        Array.from(mappingTable.values())
             .map((m => {return m.variants.sort((a, b) => a - b) && m}))
             .sort((a, b) => a.material - b.material);
 

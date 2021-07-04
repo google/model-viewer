@@ -214,8 +214,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
 
         const exporter =
-            new GLTFExporter()
-                // @ts-ignore
+            (new GLTFExporter() as any)
                 .register(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));

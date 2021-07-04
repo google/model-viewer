@@ -1,8 +1,28 @@
+/* @license
+ * Copyright 2021 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Materials variants extension
  *
  * Specification:
  * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
+ */
+
+/**
+ * The code in this file is based on
+ * https://github.com/takahirox/three-gltf-extensions/tree/main/loaders/KHR_materials_variants
  */
 
 import {Material, Mesh, Object3D} from 'three';
@@ -20,7 +40,7 @@ import {GLTF, GLTFLoaderPlugin, GLTFParser} from 'three/examples/jsm/loaders/GLT
  */
 const ensureUniqueNames = (variantNames: string[]) => {
   const uniqueNames = [];
-  const knownNames: {[key: string]: boolean} = {};
+  const knownNames = new Map<string, boolean>();
 
   for (const name of variantNames) {
     let uniqueName = name;
@@ -28,10 +48,10 @@ const ensureUniqueNames = (variantNames: string[]) => {
     // @TODO: An easy solution.
     //        O(N^2) in the worst scenario where N is variantNames.length.
     //        Fix me if needed.
-    while (knownNames[uniqueName] !== undefined) {
+    while (knownNames.has(uniqueName)) {
       uniqueName = name + '.' + (++suffix);
     }
-    knownNames[uniqueName] = true;
+    knownNames.set(uniqueName, true);
     uniqueNames.push(uniqueName);
   }
 
@@ -44,18 +64,16 @@ const ensureUniqueNames = (variantNames: string[]) => {
  * @param
  *     extensionDef {glTF.meshes[n].primitive.extensions.KHR_materials_variants}
  * @param variantNames {Array<string>} Required to be unique names
- * @return {Object}
+ * @return {Map}
  */
 const mappingsArrayToTable = (extensionDef: any, variantNames: string[]) => {
-  const table:
-      {[key: string]:
-           {material: Material|null, gltfMaterialIndex: number}} = {};
+  const table =
+      new Map<string, {material: Material | null, gltfMaterialIndex: number}>();
   for (const mapping of extensionDef.mappings) {
     for (const variant of mapping.variants) {
-      table[variantNames[variant]] = {
-        material: null,
-        gltfMaterialIndex: mapping.material
-      };
+      table.set(
+          variantNames[variant],
+          {material: null, gltfMaterialIndex: mapping.material});
     }
   }
   return table;
@@ -90,7 +108,8 @@ export default class GLTFMaterialsVariantsExtension implements
     const parser = this.parser;
     const json = parser.json;
 
-    if (!json.extensions || !json.extensions[this.name]) {
+    if (json.extensions === undefined ||
+        json.extensions[this.name] === undefined) {
       return null;
     }
 
@@ -169,7 +188,7 @@ export default class GLTFMaterialsVariantsExtension implements
       let gltfMaterialIndex = null;
 
       if (variantName === null ||
-          !object.userData.variantMaterials[variantName]) {
+          !object.userData.variantMaterials.has(variantName)) {
         object.material = object.userData.originalMaterial;
         if (parser.associations.has(object.material as Material)) {
           gltfMaterialIndex =
@@ -177,7 +196,7 @@ export default class GLTFMaterialsVariantsExtension implements
         }
       } else {
         const variantMaterialParam =
-            object.userData.variantMaterials[variantName];
+            object.userData.variantMaterials.get(variantName);
 
         if (variantMaterialParam.material) {
           object.material = variantMaterialParam.material;
@@ -206,8 +225,8 @@ export default class GLTFMaterialsVariantsExtension implements
       const currentMaterial = object.material;
       const variantMaterials = object.userData.variantMaterials;
       const pending = [];
-      for (const variantName in variantMaterials) {
-        const variantMaterial = variantMaterials[variantName];
+      for (const variantName of variantMaterials.keys()) {
+        const variantMaterial = variantMaterials.get(variantName);
         if (variantMaterial.material) {
           continue;
         }
@@ -216,7 +235,7 @@ export default class GLTFMaterialsVariantsExtension implements
                          .then((material: Material) => {
                            object.material = material;
                            parser.assignFinalMaterial(object);
-                           variantMaterials[variantName].material =
+                           variantMaterials.get(variantName).material =
                                object.material;
                          }));
       }
