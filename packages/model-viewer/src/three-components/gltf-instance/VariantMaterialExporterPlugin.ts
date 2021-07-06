@@ -69,7 +69,7 @@ export default class GLTFExporterMaterialsVariantsExtension {
 
   beforeParse(objects: Object3D[]) {
     // Find all variant names and store them to the table
-    const variantNameTable = new Map<string, boolean>();
+    const variantNameSet = new Set<string>();
     for (const object of objects) {
       object.traverse(o => {
         if (!compatibleObject(o)) {
@@ -80,15 +80,13 @@ export default class GLTFExporterMaterialsVariantsExtension {
           const variantMaterial = variantMaterials.get(variantName);
           // Ignore unloaded variant materials
           if (compatibleMaterial(variantMaterial.material)) {
-            variantNameTable.set(variantName, true);
+            variantNameSet.add(variantName);
           }
         }
       });
     }
     // We may want to sort?
-    for (const name of variantNameTable.keys()) {
-      this.variantNames.push(name);
-    }
+    variantNameSet.forEach(name => this.variantNames.push(name));
   }
 
   writeMesh(mesh: Mesh, meshDef: any) {

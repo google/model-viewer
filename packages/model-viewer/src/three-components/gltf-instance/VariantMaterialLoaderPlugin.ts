@@ -40,7 +40,7 @@ import {GLTF, GLTFLoaderPlugin, GLTFParser} from 'three/examples/jsm/loaders/GLT
  */
 const ensureUniqueNames = (variantNames: string[]) => {
   const uniqueNames = [];
-  const knownNames = new Map<string, boolean>();
+  const knownNames = new Set<string>();
 
   for (const name of variantNames) {
     let uniqueName = name;
@@ -51,7 +51,7 @@ const ensureUniqueNames = (variantNames: string[]) => {
     while (knownNames.has(uniqueName)) {
       uniqueName = name + '.' + (++suffix);
     }
-    knownNames.set(uniqueName, true);
+    knownNames.add(uniqueName);
     uniqueNames.push(uniqueName);
   }
 
