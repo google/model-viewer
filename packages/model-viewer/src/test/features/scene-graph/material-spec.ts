@@ -18,7 +18,7 @@ import {Texture as ThreeTexture} from 'three';
 import {$underlyingTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
-import {timePasses, waitForEvent} from '../../../utilities.js';
+import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
 
@@ -41,8 +41,6 @@ suite('scene-graph/material', () => {
       await waitForEvent(element, 'load');
 
       texture = await element.createTexture(REPLACEMENT_TEXTURE_PATH);
-
-      await timePasses();
     });
 
     teardown(() => {

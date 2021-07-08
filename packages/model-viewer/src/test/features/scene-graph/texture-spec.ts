@@ -19,7 +19,7 @@ import {$underlyingTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
-import {timePasses, waitForEvent} from '../../../utilities.js';
+import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
 
@@ -43,8 +43,6 @@ suite('scene-graph/texture', () => {
 
       element.model!.materials[0]
           .pbrMetallicRoughness.baseColorTexture!.setTexture(texture);
-
-      await timePasses();
     });
 
     teardown(() => {
