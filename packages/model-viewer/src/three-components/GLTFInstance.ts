@@ -151,11 +151,38 @@ export class GLTFInstance implements GLTF {
     // TODO(#195,#1003): We don't currently support multiple scenes, so we don't
     // bother cloning extra scenes for now:
     const scene = SkeletonUtils.clone(this.scene) as Group;
+    cloneVariantMaterials(scene, this.scene);
     const scenes = [scene];
     const userData = source.userData ? {...source.userData} : {};
     return {...source, scene, scenes, userData};
   }
 }
+
+// Variant materials and original material instances are stored under
+// object.userData.variantMaterials/originalMaterial.
+// Three.js Object3D.clone() doesn't clone Three.js objects under
+// .userData so this function is a workaround.
+const cloneVariantMaterials = (dst: Object3D, src: Object3D) => {
+  traversePair(dst, src, (dst, src) => {
+    if (src.userData.variantMaterials !== undefined) {
+      dst.userData.variantMaterials = new Map(src.userData.variantMaterials);
+    }
+    if (src.userData.originalMaterial !== undefined) {
+      dst.userData.originalMaterial = src.userData.originalMaterial;
+    }
+  });
+};
+
+const traversePair =
+    (obj1: Object3D,
+     obj2: Object3D,
+     callback: (obj1: Object3D, obj2: Object3D) => void) => {
+      callback(obj1, obj2);
+      // Assume obj1 and obj2 have the same tree structure
+      for (let i = 0; i < obj1.children.length; i++) {
+        traversePair(obj1.children[i], obj2.children[i], callback);
+      }
+    };
 
 export type GLTFInstanceConstructor =
     Constructor<GLTFInstance, {prepare: typeof GLTFInstance['prepare']}>;
