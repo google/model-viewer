@@ -32,7 +32,7 @@ const plugins = [
       return null;
     },
   },
-  resolve({dedupe: ['three']}),
+  resolve(),
   commonjs()
 ];
 
