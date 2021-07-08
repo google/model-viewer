@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial, Texture as ThreeTexture, TextureEncoding} from 'three';
+import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
-import {Asset, GLTF, Image as GLTFImage, Material as GLTFMaterial, Sampler as GLTFSampler, Texture as GLTFTexture, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
-import {TextureInfo} from './texture-info.js';
+import {TextureInfo, TextureUsage} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
@@ -29,118 +29,6 @@ const $normalTexture = Symbol('normalTexture');
 const $occlusionTexture = Symbol('occlusionTexture');
 const $emissiveTexture = Symbol('emissiveTexture');
 const $backingThreeMaterial = Symbol('backingThreeMaterial');
-export const $provideApplicator = Symbol('TextureApplicator');
-export const $material = Symbol('material');
-export const $threeTexture = Symbol('threeTexture');
-export const $usage = Symbol('usage');
-export const $encoding = Symbol('encoding');
-export const $gltf = Symbol('gltf');
-export const $gltfTextureInfo = Symbol('gltfTextureInfo');
-export const $gltfTexture = Symbol('gltfTexture');
-export const $gltfSampler = Symbol('gltfSampler');
-export const $gltfImage = Symbol('gltfImage');
-
-// Defines what a texture will be used for.
-export enum TextureUsage {
-  Base,
-  Metallic,
-  Normal,
-  Occlusion,
-  Emissive,
-}
-
-/**
- * TextureContext holds the glTF and Three data needed for creating and updating
- * a texture in one place.
- */
-export class TextureContext {
-  // Holds a reference to the glTF file data.
-  [$gltf]: GLTF;
-  // Holds a reference to the Three data that backs the material object.
-  [$material]: MeshStandardMaterial|null;
-  // Holds a reference to the Three data that backs the texture object.
-  [$threeTexture]: ThreeTexture|null = null;
-
-  /**
-   * GLTF state representation, this is the backing data behind the
-   * model-viewer implementation of texture and it's dependencies (TextureInfo,
-   * Sampler, and Image)
-   */
-  // Data backs the Model-Viewer TextureInfo.
-  [$gltfTextureInfo]: GLTFTextureInfo;
-  // Data backs the Model-Viewer Texture.
-  [$gltfTexture]: GLTFTexture;
-  // Data backs the Model-Viewer Sampler.
-  [$gltfSampler]: GLTFSampler;
-  // Data backs the Model-Viewer Image.
-  [$gltfImage]: GLTFImage;
-
-  // Texture usage defines the how the texture is used (ie Normal, Emissive...
-  // etc)
-  [$usage]: TextureUsage;
-  // Defines the encoding of the texture (ie Linear, sRGB, etc...)
-  [$encoding]: TextureEncoding;
-  onUpdate: () => void;
-
-  // Creates context from Texture
-  static createFromTexture(texture: ThreeTexture): TextureContext {
-    // Creates an empty glTF data set, allows for creating a texture that's not
-    // bound to a material.
-    const gltf = {
-      asset: {} as Asset,
-      textures: [{source: -1}],
-      samplers: [{}],
-      images: [{name: 'null_image', uri: 'null_image'}],
-    };
-
-    return new TextureContext(
-        () => {},
-        gltf,
-        null,
-        texture,
-        TextureUsage.Base,
-        {index: -1} as GLTFTextureInfo,
-    );
-  }
-
-  constructor(
-      onUpdate: () => void, gltf: GLTF, material: MeshStandardMaterial|null,
-      texture: ThreeTexture|null, textureUsage: TextureUsage,
-      gltfTextureInfo: GLTFTextureInfo) {
-    this.onUpdate = onUpdate;
-    this[$gltf] = gltf;
-    this[$material] = material;
-    this[$threeTexture] = texture;
-    this[$usage] = textureUsage;
-
-    // Gathers glTF texture info data.
-    this[$gltfTextureInfo] =
-        gltfTextureInfo ? gltfTextureInfo : {index: -1} as GLTFTextureInfo;
-
-    // Gathers glTF texture data.
-    if (gltf.textures && this[$gltfTextureInfo]!.index !== -1) {
-      this[$gltfTexture] = gltf.textures[gltfTextureInfo.index];
-    } else {
-      this[$gltfTexture] = {source: -1} as GLTFTexture;
-    }
-    // Gathers glTF sampler data.
-    const {sampler: samplerIndex} = this[$gltfTexture]!;
-    this[$gltfSampler] = (gltf.samplers != null && samplerIndex != null) ?
-        gltf.samplers[samplerIndex] :
-        {};
-
-    // Gathers glTF image data.
-    const {source: imageIndex} = this[$gltfTexture];
-    if (imageIndex === -1) {
-      this[$gltfImage] = {name: 'adhoc_image', uri: 'adhoc_image'};
-    } else if (gltf.images && imageIndex != null) {
-      const image = gltf.images[imageIndex];
-      this[$gltfImage] = image;
-    } else {
-      this[$gltfImage] = {name: 'null_image', uri: 'null_image'};
-    }
-  }
-}
 
 /**
  * Material facade implementation for Three.js materials
@@ -164,9 +52,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
     if (correlatedMaterials == null) {
       return;
-    }
-    if (correlatedMaterials.size > 1) {
-      console.exception('Material correlation must be 1:1');
     }
 
     if (gltfMaterial.pbrMetallicRoughness == null) {
@@ -207,30 +92,29 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       return set.values().next().value;
     };
 
-    this[$normalTexture] = new TextureInfo(new TextureContext(
+    this[$normalTexture] = new TextureInfo(
         onUpdate,
         gltf,
         this[$backingThreeMaterial],
         firstValue(normalTextures),
         TextureUsage.Normal,
-        normalTexture!));
+        normalTexture!);
 
-    this[$occlusionTexture] = new TextureInfo(new TextureContext(
+    this[$occlusionTexture] = new TextureInfo(
         onUpdate,
         gltf,
         this[$backingThreeMaterial],
         firstValue(occlusionTextures),
         TextureUsage.Occlusion,
-        occlusionTexture!));
+        occlusionTexture!);
 
-    this[$emissiveTexture] = new TextureInfo(new TextureContext(
+    this[$emissiveTexture] = new TextureInfo(
         onUpdate,
         gltf,
         this[$backingThreeMaterial],
         firstValue(emissiveTextures),
         TextureUsage.Emissive,
-        emissiveTexture!,
-        ));
+        emissiveTexture!);
   }
 
   get name(): string {

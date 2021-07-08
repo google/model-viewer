@@ -19,7 +19,7 @@ import {$underlyingTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
-import {waitForEvent} from '../../../utilities.js';
+import {timePasses, waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
 
@@ -32,7 +32,7 @@ suite('scene-graph/texture', () => {
     let element: ModelViewerElement;
     let texture: Texture|null;
 
-    const init = async () => {
+    setup(async () => {
       element = new ModelViewerElement();
       element.src = ASTRONAUT_GLB_PATH;
       document.body.insertBefore(element, document.body.firstChild);
@@ -43,15 +43,21 @@ suite('scene-graph/texture', () => {
 
       element.model!.materials[0]
           .pbrMetallicRoughness.baseColorTexture!.setTexture(texture);
-    };
+
+      await timePasses();
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
+      texture = null;
+    });
+
 
     test('Create a texture', async () => {
-      await init();
       expect(texture).to.not.be.null;
     });
 
     test('Set a texture', async () => {
-      await init();
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined =
@@ -66,7 +72,6 @@ suite('scene-graph/texture', () => {
     });
 
     test('Verify legacy correlatedObjects are updated.', async () => {
-      await init();
       const newUUID: string|undefined =
           texture?.source[$underlyingTexture]?.uuid;
 
@@ -111,7 +116,6 @@ suite('scene-graph/texture', () => {
     });
 
     test('Set a texture and then setURI', async () => {
-      await init();
       const imageFromSetTexture = texture?.source[$underlyingTexture]?.image;
       expect(imageFromSetTexture).to.not.be.null;
 

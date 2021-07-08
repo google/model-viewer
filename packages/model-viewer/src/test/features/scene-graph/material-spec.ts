@@ -18,7 +18,7 @@ import {Texture as ThreeTexture} from 'three';
 import {$underlyingTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
-import {waitForEvent} from '../../../utilities.js';
+import {timePasses, waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
 
@@ -34,18 +34,23 @@ suite('scene-graph/material', () => {
     let element: ModelViewerElement;
     let texture: Texture|null;
 
-    const init = async () => {
+    setup(async () => {
       element = new ModelViewerElement();
       element.src = HELMET_GLB_PATH;
       document.body.insertBefore(element, document.body.firstChild);
       await waitForEvent(element, 'load');
 
       texture = await element.createTexture(REPLACEMENT_TEXTURE_PATH);
-    };
+
+      await timePasses();
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
+      texture = null;
+    });
 
     test('Set a new base map', async () => {
-      await init();
-
       element.model!.materials[0]
           .pbrMetallicRoughness.baseColorTexture!.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
@@ -62,8 +67,6 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new metallicRoughness map', async () => {
-      await init();
-
       element.model!.materials[0]
           .pbrMetallicRoughness.metallicRoughnessTexture!.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
@@ -80,8 +83,6 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new normal map', async () => {
-      await init();
-
       element.model!.materials[0].normalTexture!.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
@@ -96,8 +97,6 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new occlusion map', async () => {
-      await init();
-
       element.model!.materials[0].occlusionTexture!.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
@@ -112,8 +111,6 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new emissive map', async () => {
-      await init();
-
       element.model!.materials[0].emissiveTexture!.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.

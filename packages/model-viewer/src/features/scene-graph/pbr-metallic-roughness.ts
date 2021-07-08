@@ -18,8 +18,7 @@ import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface, RGBA} from './api.js';
-import {TextureContext, TextureUsage} from './material.js';
-import {TextureInfo} from './texture-info.js';
+import {TextureInfo, TextureUsage} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
@@ -82,21 +81,21 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       return set.values().next().value;
     };
 
-    this[$baseColorTexture] = new TextureInfo(new TextureContext(
+    this[$baseColorTexture] = new TextureInfo(
         onUpdate,
         gltf,
         firstValue(correlatedMaterials),
         firstValue(baseColorTextures),
         TextureUsage.Base,
-        baseColorTexture!));
+        baseColorTexture!);
 
-    this[$metallicRoughnessTexture] = new TextureInfo(new TextureContext(
+    this[$metallicRoughnessTexture] = new TextureInfo(
         onUpdate,
         gltf,
         firstValue(correlatedMaterials),
         firstValue(metallicRoughnessTextures),
         TextureUsage.Metallic,
-        metallicRoughnessTexture!));
+        metallicRoughnessTexture!);
   }
 
 

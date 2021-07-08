@@ -18,7 +18,7 @@ import {ImageLoader, Texture as ThreeTexture} from 'three';
 import {EmbeddedImage as GLTFEmbeddedImage} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Image as ImageInterface} from './api.js';
-import {$gltfImage, $threeTexture, TextureContext} from './material.js';
+import {$gltfImage, $threeTexture, TextureInfo} from './texture-info.js';
 import {$onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
@@ -28,7 +28,7 @@ const loader = new ImageLoader();
 export const $underlyingTexture = Symbol('threeTextures');
 const $uri = Symbol('uri');
 const $bufferViewImages = Symbol('bufferViewImages');
-const $context = Symbol('context');
+const $textureInfo = Symbol('textureInfo');
 export const $applyTexture = Symbol('applyTexture');
 
 /**
@@ -36,19 +36,19 @@ export const $applyTexture = Symbol('applyTexture');
  */
 export class Image extends ThreeDOMElement implements ImageInterface {
   get[$underlyingTexture]() {
-    return this[$context][$threeTexture];
+    return this[$textureInfo][$threeTexture];
   }
 
   private[$uri]: string|undefined = undefined;
   private[$bufferViewImages]: WeakMap<ThreeTexture, unknown> = new WeakMap();
 
-  private[$context]: TextureContext;
-  constructor(context: TextureContext) {
+  private[$textureInfo]: TextureInfo;
+  constructor(textureInfo: TextureInfo) {
     super(
-        context.onUpdate,
-        context[$gltfImage],
-        new Set<ThreeTexture>([context[$threeTexture]!]));
-    this[$context] = context;
+        textureInfo.onUpdate,
+        textureInfo[$gltfImage],
+        new Set<ThreeTexture>([textureInfo[$threeTexture]!]));
+    this[$textureInfo] = textureInfo;
   }
 
   get name(): string {
@@ -70,7 +70,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       loader.load(uri, resolve, undefined, reject);
     });
 
-    const texture = this[$context][$threeTexture];
+    const texture = this[$textureInfo][$threeTexture];
     if (texture) {
       // If the URI is set to null but the Image had an associated buffer view
       // (this would happen if it started out as embedded), then fall back to
