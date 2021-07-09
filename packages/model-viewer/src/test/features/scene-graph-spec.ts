@@ -25,6 +25,7 @@ const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
+const CUBES_GLB_PATH = assetPath('models/cubes.gltf');
 const SUNRISE_IMG_PATH = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 
 suite('ModelViewerElementBase with SceneGraphMixin', () => {
@@ -57,7 +58,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
   suite('scene export', () => {
     suite('with a loaded model', () => {
       setup(async () => {
-        element.src = ASTRONAUT_GLB_PATH;
+        element.src = CUBES_GLB_PATH;
 
         await waitForEvent(element, 'load');
         await rafPasses();
@@ -73,6 +74,31 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
         const exported = await element.exportScene({binary: true});
         expect(exported).to.be.not.undefined;
         expect(exported.size).to.be.greaterThan(500);
+      });
+
+      test('has variants', () => {
+        expect(element[$scene].currentGLTF!.userData.variants.length)
+            .to.be.eq(3);
+        const glTFroot = element[$scene].modelContainer.children[0];
+        expect(glTFroot.children[0].userData.variantMaterials.size).to.be.eq(3);
+        expect(glTFroot.children[1].userData.variantMaterials.size).to.be.eq(3);
+      });
+
+      test('exports and reimports the model with variants', async () => {
+        const exported = await element.exportScene({binary: true});
+        const url = URL.createObjectURL(exported);
+        element.src = url;
+        await waitForEvent(element, 'load');
+        await rafPasses();
+
+        expect(element[$scene].currentGLTF!.userData.variants.length)
+            .to.be.eq(3);
+        // TODO: export is putting in an extra node layer, because the loader
+        // gives us a Group, but if the exporter doesn't get a Scene, then it
+        // wraps everything in an "AuxScene" node. Feels like a three.js bug.
+        const glTFroot = element[$scene].modelContainer.children[0].children[0];
+        expect(glTFroot.children[0].userData.variantMaterials.size).to.be.eq(3);
+        expect(glTFroot.children[1].userData.variantMaterials.size).to.be.eq(3);
       });
     });
   });
