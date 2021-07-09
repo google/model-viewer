@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, MeshStandardMaterial} from 'three';
+import {Euler, MeshStandardMaterial, RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
@@ -24,13 +24,19 @@ import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelVi
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
 import {Constructor} from '../utilities.js';
 
-import {Image, PBRMetallicRoughness, Sampler, Texture, TextureInfo} from './scene-graph/api.js';
+import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
 import {Material} from './scene-graph/material.js';
 import {Model} from './scene-graph/model.js';
+import {Texture as ModelViewerTexture} from './scene-graph/texture';
+import {$createFromTexture, TextureInfo as SceneGraphTextureInfo} from './scene-graph/texture-info.js';
+
+
 
 const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
 const $variants = Symbol('variants');
+const $onUpdate = Symbol('onUpdate');
+const $textureLoader = Symbol('textureLoader');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
@@ -45,6 +51,7 @@ export interface SceneGraphInterface {
   orientation: string;
   scale: string;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
+  createTexture(uri: string): Promise<ModelViewerTexture|null>;
 }
 
 /**
@@ -57,6 +64,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$model]: Model|undefined = undefined;
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
     protected[$variants]: Array<string> = [];
+    private[$textureLoader] = new TextureLoader();
 
     @property({type: String, attribute: 'variant-name'})
     variantName: string|undefined = undefined;
@@ -88,6 +96,28 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     static Texture: Constructor<Texture>;
     static Image: Constructor<Image>;
 
+    private[$onUpdate]() {
+      this[$needsRender]();
+    }
+
+    async createTexture(uri: string): Promise<ModelViewerTexture|null> {
+      const currentGLTF = this[$currentGLTF];
+      const texture: Texture = await new Promise<Texture>(
+          (resolve) => this[$textureLoader].load(uri, resolve));
+      if (!currentGLTF || !texture) {
+        return null;
+      }
+      // Applies default settings.
+      texture.encoding = sRGBEncoding;
+      texture.wrapS = RepeatWrapping;
+      texture.wrapT = RepeatWrapping;
+      texture.flipY = false;
+
+      return new ModelViewerTexture(
+          SceneGraphTextureInfo[$createFromTexture](texture));
+    }
+
+
     updated(changedProperties: Map<string, any>) {
       super.updated(changedProperties);
 
@@ -99,19 +129,16 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           return;
         }
 
-        const onUpdate = () => {
-          this[$needsRender]();
-        };
-
         const updatedMaterialsPromise =
-            threeGLTF.correlatedSceneGraph.loadVariant(variantName!, onUpdate);
+            threeGLTF.correlatedSceneGraph.loadVariant(
+                variantName!, this[$onUpdate]);
         const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
         updatedMaterialsPromise.then(updatedMaterials => {
           for (const index of updatedMaterials) {
             const material = gltf.materials![index];
             this[$model]!.materials[index] = new Material(
-                onUpdate,
+                this[$onUpdate],
                 gltf,
                 material,
                 gltfElementMap.get(material) as Set<MeshStandardMaterial>);
