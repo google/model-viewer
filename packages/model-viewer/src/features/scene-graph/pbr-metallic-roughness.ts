@@ -50,10 +50,10 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       pbrMetallicRoughness.baseColorFactor = [1, 1, 1, 1];
     }
     if (pbrMetallicRoughness.roughnessFactor == null) {
-      pbrMetallicRoughness.roughnessFactor = 0;
+      pbrMetallicRoughness.roughnessFactor = 1;
     }
     if (pbrMetallicRoughness.metallicFactor == null) {
-      pbrMetallicRoughness.metallicFactor = 0;
+      pbrMetallicRoughness.metallicFactor = 1;
     }
 
     let {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;

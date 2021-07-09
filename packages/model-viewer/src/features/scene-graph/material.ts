@@ -60,6 +60,10 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
         onUpdate, gltf, gltfMaterial.pbrMetallicRoughness, correlatedMaterials);
 
+    if (gltfMaterial.emissiveFactor == null) {
+      gltfMaterial.emissiveFactor = [0, 0, 0];
+    }
+
     let {normalTexture, occlusionTexture, emissiveTexture} = gltfMaterial;
 
     const normalTextures = new Set<ThreeTexture>();
