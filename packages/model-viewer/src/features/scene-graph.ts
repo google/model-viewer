@@ -218,7 +218,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                 .register(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
-        exporter.parse(scene.modelContainer, (gltf: object) => {
+        exporter.parse(scene.modelContainer.children[0], (gltf: object) => {
           return resolve(
               new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
                 type: opts.binary ? 'application/octet-stream' :

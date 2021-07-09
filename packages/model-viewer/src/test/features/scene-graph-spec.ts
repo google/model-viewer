@@ -93,8 +93,10 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
         expect(element[$scene].currentGLTF!.userData.variants.length)
             .to.be.eq(3);
-        const glTFroot =
-            element[$scene].modelContainer.children[0].children[0].children[0];
+        // TODO: export is putting in an extra node layer, because the loader
+        // gives us a Group, but if the exporter doesn't get a Scene, then it
+        // wraps everything in an "AuxScene" node. Feels like a three.js bug.
+        const glTFroot = element[$scene].modelContainer.children[0].children[0];
         expect(glTFroot.children[0].userData.variantMaterials.size).to.be.eq(3);
         expect(glTFroot.children[1].userData.variantMaterials.size).to.be.eq(3);
       });
