@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, DoubleSide, FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Shader, Texture} from 'three';
+import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Shader, Texture} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
@@ -49,8 +49,6 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
 
     const {scene} = prepared;
 
-    const meshesToDuplicate: Mesh[] = [];
-
     scene.traverse((node: Object3D) => {
       // Set a high renderOrder while we're here to ensure the model
       // always renders on top of the skysphere
@@ -66,52 +64,10 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       if (!node.name) {
         node.name = node.uuid;
       }
-      if (!(node as Mesh).isMesh) {
-        return;
-      }
-      node.castShadow = true;
-      const mesh = node as Mesh;
-      let transparent = false;
-      const materials =
-          Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      materials.forEach(material => {
-        if ((material as any).isMeshStandardMaterial) {
-          if (material.transparent && material.side === DoubleSide) {
-            transparent = true;
-            material.side = FrontSide;
-          }
-        }
-      });
-
-      if (transparent) {
-        meshesToDuplicate.push(mesh);
+      if ((node as Mesh).isMesh) {
+        node.castShadow = true;
       }
     });
-
-    // We duplicate transparent, double-sided meshes and render the back face
-    // before the front face. This creates perfect triangle sorting for all
-    // convex meshes. Sorting artifacts can still appear when you can see
-    // through more than two layers of a given mesh, but this can usually be
-    // mitigated by the author splitting the mesh into mostly convex regions.
-    // The performance cost is not too great as the same shader is reused and
-    // the same number of fragments are processed; only the vertex shader is run
-    // twice. @see https://threejs.org/examples/webgl_materials_physical_transparency.html
-    for (const mesh of meshesToDuplicate) {
-      const materials =
-          Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      const duplicateMaterials = materials.map((material) => {
-        const backMaterial = material.clone();
-        backMaterial.side = BackSide;
-        return backMaterial;
-      });
-      const duplicateMaterial = Array.isArray(mesh.material) ?
-          duplicateMaterials :
-          duplicateMaterials[0];
-      const meshBack = mesh.clone() as Mesh;
-      meshBack.material = duplicateMaterial;
-      meshBack.renderOrder = -1;
-      mesh.parent!.add(meshBack);
-    }
 
     return prepared;
   }

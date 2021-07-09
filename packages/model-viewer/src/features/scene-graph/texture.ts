@@ -15,12 +15,14 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {GLTF, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Texture as TextureInterface} from './api.js';
 import {Image} from './image.js';
 import {Sampler} from './sampler.js';
-import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$gltfTexture, $threeTexture, TextureInfo} from './texture-info.js';
+import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+
 
 
 const $source = Symbol('source');
@@ -33,25 +35,22 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   private[$source]: Image;
   private[$sampler]: Sampler;
 
-  constructor(
-      onUpdate: () => void, gltf: GLTF, texture: GLTFTexture,
-      correlatedTextures: Set<ThreeTexture>) {
-    super(onUpdate, texture, correlatedTextures);
+  constructor(textureInfo: TextureInfo) {
+    super(
+        textureInfo.onUpdate,
+        textureInfo[$gltfTexture],
+        new Set<ThreeTexture>([textureInfo[$threeTexture]!]));
+    this[$sampler] = new Sampler(textureInfo);
+    this[$source] = new Image(textureInfo);
+  }
 
-    const {sampler: samplerIndex, source: imageIndex} = texture;
-
-    const sampler = (gltf.samplers != null && samplerIndex != null) ?
-        gltf.samplers[samplerIndex] :
-        {};
-    this[$sampler] = new Sampler(onUpdate, sampler, correlatedTextures);
-
-    if (gltf.images != null && imageIndex != null) {
-      const image = gltf.images[imageIndex];
-
-      if (image != null) {
-        this[$source] = new Image(onUpdate, image, correlatedTextures);
-      }
-    }
+  applyNewTextureInfo(textureInfo: TextureInfo): void {
+    (this[$onUpdate] as () => void) = textureInfo.onUpdate;
+    (this[$sourceObject] as GLTFElement) = textureInfo[$gltfTexture];
+    (this[$correlatedObjects] as Set<ThreeTexture>) =
+        new Set<ThreeTexture>([textureInfo[$threeTexture]!]);
+    this[$sampler] = new Sampler(textureInfo);
+    this[$source] = new Image(textureInfo);
   }
 
   get name(): string {

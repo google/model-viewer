@@ -23,7 +23,7 @@ import {SliderWithInputElement} from '../../components/shared/slider_with_input/
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-const CUBES_GLTF_PATH = '../base/shared-assets/models/cubes.gltf';
+const CUBE_GLTF_PATH = '../base/shared-assets/models/cube.gltf';
 
 describe('material panel test', () => {
   let preview: ModelViewerPreview;
@@ -39,7 +39,7 @@ describe('material panel test', () => {
     panel.isTesting = true;
     document.body.appendChild(panel);
 
-    reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
+    reduxStore.dispatch(dispatchGltfUrl(CUBE_GLTF_PATH));
     await preview.loadComplete;
     await panel.updateComplete;
   });

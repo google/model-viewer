@@ -20,20 +20,34 @@ import {Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.
 import {Renderer} from '../../three-components/Renderer.js';
 
 import {Image as ImageInterface} from './api.js';
-import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$gltfImage, $threeTexture, TextureInfo} from './texture-info.js';
+import {$onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+
+
 
 const loader = new ImageLoader();
 const quadMaterial = new MeshBasicMaterial();
 const quad = new PlaneGeometry(2, 2);
 
-const $threeTextures = Symbol('threeTextures');
+export const $underlyingTexture = Symbol('threeTextures');
+const $textureInfo = Symbol('textureInfo');
+export const $applyTexture = Symbol('applyTexture');
 
 /**
  * Image facade implementation for Three.js textures
  */
 export class Image extends ThreeDOMElement implements ImageInterface {
-  private get[$threeTextures]() {
-    return this[$correlatedObjects] as Set<ThreeTexture>;
+  get[$underlyingTexture]() {
+    return this[$textureInfo][$threeTexture];
+  }
+
+  private[$textureInfo]: TextureInfo;
+  constructor(textureInfo: TextureInfo) {
+    super(
+        textureInfo.onUpdate,
+        textureInfo[$gltfImage],
+        new Set<ThreeTexture>([textureInfo[$threeTexture]!]));
+    this[$textureInfo] = textureInfo;
   }
 
   get name(): string {
@@ -59,16 +73,15 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       loader.load(uri, resolve, undefined, reject);
     });
 
-    for (const texture of this[$threeTextures]) {
-      texture.image = image;
-      texture.needsUpdate = true;
-    }
+    const texture = this[$textureInfo][$threeTexture]!;
+    texture.image = image;
+    texture.needsUpdate = true;
     this[$onUpdate]();
   }
 
   async createThumbnail(width: number, height: number): Promise<string> {
     const scene = new Scene();
-    quadMaterial.map = [...this[$threeTextures]][0];
+    quadMaterial.map = this[$textureInfo][$threeTexture];
     const mesh = new Mesh(quad, quadMaterial);
     scene.add(mesh);
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);

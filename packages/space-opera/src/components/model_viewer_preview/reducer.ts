@@ -98,6 +98,7 @@ async function pushThumbnail(
 async function createThumbnails(): Promise<Map<string, string>> {
   const thumbnailsById = new Map<string, string>();
   for (const material of getModelViewer()!.model?.materials!) {
+    console.log(material);
     const {
       pbrMetallicRoughness,
       normalTexture,

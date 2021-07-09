@@ -19,14 +19,16 @@ import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instan
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
-import {TextureInfo} from './texture-info.js';
+import {TextureInfo, TextureUsage} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+
 
 
 const $pbrMetallicRoughness = Symbol('pbrMetallicRoughness');
 const $normalTexture = Symbol('normalTexture');
 const $occlusionTexture = Symbol('occlusionTexture');
 const $emissiveTexture = Symbol('emissiveTexture');
+const $backingThreeMaterial = Symbol('backingThreeMaterial');
 
 /**
  * Material facade implementation for Three.js materials
@@ -37,62 +39,86 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$normalTexture]: TextureInfo|null = null;
   private[$occlusionTexture]: TextureInfo|null = null;
   private[$emissiveTexture]: TextureInfo|null = null;
-
+  get[$backingThreeMaterial](): MeshStandardMaterial {
+    return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
+        .values()
+        .next()
+        .value;
+  }
   constructor(
-      onUpdate: () => void, gltf: GLTF, material: GLTFMaterial,
+      onUpdate: () => void, gltf: GLTF, gltfMaterial: GLTFMaterial,
       correlatedMaterials: Set<MeshStandardMaterial>|undefined) {
-    super(onUpdate, material, correlatedMaterials);
+    super(onUpdate, gltfMaterial, correlatedMaterials);
 
     if (correlatedMaterials == null) {
       return;
     }
 
-    if (material.pbrMetallicRoughness == null) {
-      material.pbrMetallicRoughness = {};
+    if (gltfMaterial.pbrMetallicRoughness == null) {
+      gltfMaterial.pbrMetallicRoughness = {};
     }
     this[$pbrMetallicRoughness] = new PBRMetallicRoughness(
-        onUpdate, gltf, material.pbrMetallicRoughness, correlatedMaterials);
+        onUpdate, gltf, gltfMaterial.pbrMetallicRoughness, correlatedMaterials);
 
-    if (material.emissiveFactor == null) {
-      material.emissiveFactor = [0, 0, 0];
+    if (gltfMaterial.emissiveFactor == null) {
+      gltfMaterial.emissiveFactor = [0, 0, 0];
     }
 
-    const {normalTexture, occlusionTexture, emissiveTexture} = material;
+    let {normalTexture, occlusionTexture, emissiveTexture} = gltfMaterial;
 
     const normalTextures = new Set<ThreeTexture>();
     const occlusionTextures = new Set<ThreeTexture>();
     const emissiveTextures = new Set<ThreeTexture>();
 
-    for (const material of correlatedMaterials) {
-      const {normalMap, aoMap, emissiveMap} = material;
+    for (const gltfMaterial of correlatedMaterials) {
+      const {normalMap, aoMap, emissiveMap} = gltfMaterial;
 
       if (normalTexture != null && normalMap != null) {
         normalTextures.add(normalMap);
+      } else {
+        normalTexture = {index: -1};
       }
 
       if (occlusionTexture != null && aoMap != null) {
         occlusionTextures.add(aoMap);
+      } else {
+        occlusionTexture = {index: -1};
       }
 
       if (emissiveTexture != null && emissiveMap != null) {
         emissiveTextures.add(emissiveMap);
+      } else {
+        emissiveTexture = {index: -1};
       }
     }
 
-    if (normalTextures.size > 0) {
-      this[$normalTexture] =
-          new TextureInfo(onUpdate, gltf, normalTexture!, normalTextures);
-    }
+    const firstValue = (set: Set<ThreeTexture>): ThreeTexture => {
+      return set.values().next().value;
+    };
 
-    if (occlusionTextures.size > 0) {
-      this[$occlusionTexture] =
-          new TextureInfo(onUpdate, gltf, occlusionTexture!, occlusionTextures);
-    }
+    this[$normalTexture] = new TextureInfo(
+        onUpdate,
+        gltf,
+        this[$backingThreeMaterial],
+        firstValue(normalTextures),
+        TextureUsage.Normal,
+        normalTexture!);
 
-    if (emissiveTextures.size > 0) {
-      this[$emissiveTexture] =
-          new TextureInfo(onUpdate, gltf, emissiveTexture!, emissiveTextures);
-    }
+    this[$occlusionTexture] = new TextureInfo(
+        onUpdate,
+        gltf,
+        this[$backingThreeMaterial],
+        firstValue(occlusionTextures),
+        TextureUsage.Occlusion,
+        occlusionTexture!);
+
+    this[$emissiveTexture] = new TextureInfo(
+        onUpdate,
+        gltf,
+        this[$backingThreeMaterial],
+        firstValue(emissiveTextures),
+        TextureUsage.Emissive,
+        emissiveTexture!);
   }
 
   get name(): string {
