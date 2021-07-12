@@ -32,8 +32,8 @@ const $metallicRoughnessTexture = Symbol('metallicRoughnessTexture');
  */
 export class PBRMetallicRoughness extends ThreeDOMElement implements
     PBRMetallicRoughnessInterface {
-  private[$baseColorTexture]: TextureInfo|null = null;
-  private[$metallicRoughnessTexture]: TextureInfo|null = null;
+  private[$baseColorTexture]: TextureInfo;
+  private[$metallicRoughnessTexture]: TextureInfo;
 
   private get[$threeMaterials](): Set<MeshStandardMaterial> {
     return this[$correlatedObjects] as Set<MeshStandardMaterial>;
@@ -111,11 +111,11 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     return (this[$sourceObject] as GLTFPBRMetallicRoughness).roughnessFactor!;
   }
 
-  get baseColorTexture(): TextureInfo|null {
+  get baseColorTexture(): TextureInfo {
     return this[$baseColorTexture];
   }
 
-  get metallicRoughnessTexture(): TextureInfo|null {
+  get metallicRoughnessTexture(): TextureInfo {
     return this[$metallicRoughnessTexture];
   }
 
