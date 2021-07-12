@@ -51,7 +51,7 @@ export interface SceneGraphInterface {
   readonly availableVariants: Array<string>;
   orientation: string;
   scale: string;
-  readonly orginialGltfJson: GLTF|undefined;
+  readonly originalGltfJson: GLTF|undefined;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
   createTexture(uri: string): Promise<ModelViewerTexture|null>;
 }
