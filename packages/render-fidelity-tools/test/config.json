@@ -76,6 +76,23 @@
       }
     },
     {
+      "name": "khronos-AttenuationTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AttenuationTest/glTF/AttenuationTest.gltf",
+      "dimensions": {
+        "width": 512,
+        "height": 1024
+      },
+      "target": {
+        "y": 3.6
+      },
+      "orbit": {
+        "radius": 11.2
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-Corset",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Corset/glTF/Corset.gltf",
       "dimensions": {
