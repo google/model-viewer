@@ -79,14 +79,10 @@
       "name": "khronos-AttenuationTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AttenuationTest/glTF/AttenuationTest.gltf",
       "dimensions": {
-        "width": 1072,
-        "height": 1024
-      },
-      "target": {
-        "y": 0.0
+        "width": 1024
       },
       "orbit": {
-        "radius": 22.2
+        "radius": 22.00
       },
       "exclude": [
         "dspbr-pt"
