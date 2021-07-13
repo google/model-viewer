@@ -99,7 +99,7 @@ export async function createPoster() {
   orbitString.textContent = `${orbit.theta}rad ${orbit.phi}rad auto`;
   viewer.fieldOfView = 'auto';
   viewer.jumpCameraToGoal();
-  await new Promise(resolve => requestAnimationFrame(() => resolve()));
+  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
   URL.revokeObjectURL(posterUrl);
   const blob = await viewer.toBlob({mimeType: 'image/png', idealAspect: true});
   posterUrl = URL.createObjectURL(blob);
