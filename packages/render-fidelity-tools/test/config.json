@@ -352,6 +352,16 @@
       ]
     },
     {
+      "name": "khronos-ClearCoatTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ClearCoatTest/glTF/ClearCoatTest.gltf",
+      "orbit": {
+        "radius": 20
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-TwoSidedPlane",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TwoSidedPlane/glTF/TwoSidedPlane.gltf",
       "orbit": {
