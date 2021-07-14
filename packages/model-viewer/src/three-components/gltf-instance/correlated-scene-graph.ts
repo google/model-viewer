@@ -135,7 +135,7 @@ export class CorrelatedSceneGraph {
             if (((object as Mesh).isMesh || (object as Material).isMaterial) &&
                 elementReference == null) {
               // Checks if default material was allready addded to the gltf.
-              if (cloneGLTF.materials) {
+              if (cloneGLTF.materials && cloneGLTF.materials.length) {
                 const material =
                     cloneGLTF.materials[cloneGLTF.materials.length - 1];
                 if (material.name === 'Default') {
@@ -151,9 +151,10 @@ export class CorrelatedSceneGraph {
                 defaultReference.index = cloneGLTF.materials.length;
                 cloneGLTF.materials.push(defaultMaterial);
               }
+
+              elementReference = defaultReference;
             }
 
-            elementReference = defaultReference;
 
             if (elementReference == null) {
               return;
