@@ -1,4 +1,4 @@
-import {Group, Material, Mesh, MeshStandardMaterial, Object3D, Texture} from 'three';
+import {Group, Material, Mesh, Object3D, Texture} from 'three';
 import {GLTF as ThreeGLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
@@ -24,31 +24,6 @@ const $parallelTraverseThreeScene = Symbol('parallelTraverseThreeScene');
 const $correlateOriginalThreeGLTF = Symbol('correlateOriginalThreeGLTF');
 const $correlateCloneThreeGLTF = Symbol('correlateCloneThreeGLTF');
 
-const $defaultMaterial = Symbol('defaultMaterial');
-
-interface ParserCacheInterface {
-  DefaultMaterial: MeshStandardMaterial;
-}
-interface ParserInterface {
-  cache: ParserCacheInterface;
-}
-
-// Helper class for reading cache information from the parser.
-class ParserCache {
-  private[$defaultMaterial]: MeshStandardMaterial|null = null;
-  constructor(parser: ParserInterface) {
-    if (parser.cache) {
-      this[$defaultMaterial] = parser.cache!.DefaultMaterial;
-    }
-  }
-
-  get defaultMaterialUUID() {
-    if (this[$defaultMaterial]) {
-      return this[$defaultMaterial]!.uuid;
-    }
-    return '';
-  }
-}
 /**
  * The Three.js GLTFLoader provides us with an in-memory representation
  * of a glTF in terms of Three.js constructs. It also provides us with a copy
@@ -148,10 +123,11 @@ export class CorrelatedSceneGraph {
 
     const defaultMaterial = {name: 'Default'} as Material;
     const defaultReference = {type: 'materials', index: -1} as GLTFReference;
-
-    // Gets the parser cache.
-    const parserCache =
-        new ParserCache(cloneThreeGLTF.parser as unknown as ParserInterface);
+    if (cloneGLTF.materials == null) {
+      cloneGLTF.materials = [];
+    }
+    defaultReference.index = cloneGLTF.materials.length;
+    cloneGLTF.materials.push(defaultMaterial);
 
     for (let i = 0; i < originalThreeGLTF.scenes.length; i++) {
       this[$parallelTraverseThreeScene](
@@ -161,34 +137,20 @@ export class CorrelatedSceneGraph {
             const elementReference =
                 upstreamCorrelatedSceneGraph.threeObjectMap.get(object);
 
-            const getMaterial = (mesh: Mesh) => {
-              return mesh.material as MeshStandardMaterial;
-            };
-            // Only sets up default material if the mesh references it.
-            if ((object as Mesh).isMesh &&
-                getMaterial(object as Mesh).uuid ===
-                    parserCache.defaultMaterialUUID) {
-              if (defaultReference.index < 0) {
-                if (cloneGLTF.materials == null) {
-                  cloneGLTF.materials = [];
-                }
-                defaultReference.index = cloneGLTF.materials.length;
-                cloneGLTF.materials.push(defaultMaterial);
-              }
+            if (elementReference == null) {
+              return;
             }
 
-            if (elementReference != null) {
-              const {type, index} = elementReference;
-              const cloneElement = cloneGLTF[type]![index];
+            const {type, index} = elementReference;
+            const cloneElement = cloneGLTF[type]![index];
 
-              cloneThreeObjectMap.set(cloneObject, {type, index});
+            cloneThreeObjectMap.set(cloneObject, {type, index});
 
-              const cloneObjects: Set<typeof cloneObject> =
-                  cloneGLTFELementMap.get(cloneElement) || new Set();
-              cloneObjects.add(cloneObject);
+            const cloneObjects: Set<typeof cloneObject> =
+                cloneGLTFELementMap.get(cloneElement) || new Set();
+            cloneObjects.add(cloneObject);
 
-              cloneGLTFELementMap.set(cloneElement, cloneObjects);
-            }
+            cloneGLTFELementMap.set(cloneElement, cloneObjects);
           });
     }
 
