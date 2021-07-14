@@ -122,7 +122,7 @@ export class TextureInfo extends ThreeDOMElement implements
       this[$gltfImage] = {name: 'null_image', uri: 'null_image'};
     }
 
-    this[$texture] = new Texture(this);
+    this[$texture] = texture != null ? new Texture(this) : null;
   }
 
   // Creates context from Texture

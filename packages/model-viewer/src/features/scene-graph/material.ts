@@ -36,9 +36,9 @@ const $backingThreeMaterial = Symbol('backingThreeMaterial');
 export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$pbrMetallicRoughness]: PBRMetallicRoughness;
 
-  private[$normalTexture]: TextureInfo|null = null;
-  private[$occlusionTexture]: TextureInfo|null = null;
-  private[$emissiveTexture]: TextureInfo|null = null;
+  private[$normalTexture]: TextureInfo;
+  private[$occlusionTexture]: TextureInfo;
+  private[$emissiveTexture]: TextureInfo;
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
         .values()
@@ -125,15 +125,15 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return this[$pbrMetallicRoughness];
   }
 
-  get normalTexture(): TextureInfo|null {
+  get normalTexture(): TextureInfo {
     return this[$normalTexture];
   }
 
-  get occlusionTexture(): TextureInfo|null {
+  get occlusionTexture(): TextureInfo {
     return this[$occlusionTexture];
   }
 
-  get emissiveTexture(): TextureInfo|null {
+  get emissiveTexture(): TextureInfo {
     return this[$emissiveTexture];
   }
 
