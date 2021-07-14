@@ -123,19 +123,37 @@ export class CorrelatedSceneGraph {
 
     const defaultMaterial = {name: 'Default'} as Material;
     const defaultReference = {type: 'materials', index: -1} as GLTFReference;
-    if (cloneGLTF.materials == null) {
-      cloneGLTF.materials = [];
-    }
-    defaultReference.index = cloneGLTF.materials.length;
-    cloneGLTF.materials.push(defaultMaterial);
 
     for (let i = 0; i < originalThreeGLTF.scenes.length; i++) {
       this[$parallelTraverseThreeScene](
           originalThreeGLTF.scenes[i],
           cloneThreeGLTF.scenes[i],
           (object: ThreeSceneObject, cloneObject: ThreeSceneObject) => {
-            const elementReference =
+            let elementReference =
                 upstreamCorrelatedSceneGraph.threeObjectMap.get(object);
+
+            if (((object as Mesh).isMesh || (object as Material).isMaterial) &&
+                elementReference == null) {
+              // Checks if default material was allready addded to the gltf.
+              if (cloneGLTF.materials) {
+                const material =
+                    cloneGLTF.materials[cloneGLTF.materials.length - 1];
+                if (material.name === 'Default') {
+                  defaultReference.index = cloneGLTF.materials.length - 1;
+                }
+              }
+
+              // Adds the defaul material if the default material was not added.
+              if (defaultReference.index < 0) {
+                if (cloneGLTF.materials == null) {
+                  cloneGLTF.materials = [];
+                }
+                defaultReference.index = cloneGLTF.materials.length;
+                cloneGLTF.materials.push(defaultMaterial);
+              }
+            }
+
+            elementReference = defaultReference;
 
             if (elementReference == null) {
               return;
