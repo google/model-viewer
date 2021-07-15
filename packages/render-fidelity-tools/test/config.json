@@ -391,7 +391,7 @@
       "orbit": {
         "theta": -60,
         "phi": 80,
-        "radius": 20
+        "radius": 286
       },
       "exclude": [
         "dspbr-pt"
