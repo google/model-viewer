@@ -1,0 +1,157 @@
+<!--
+/* @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; - Fidelity Test Results</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/png" href="../shared-assets/icons/favicon.png"/>
+
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+<style>
+  @import url('https://fonts.googleapis.com/css?family=Rubik:400,500');
+  body {
+    margin: 1em;
+    background-color: #f7f7f7;
+    font-family: 'Rubik', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    color: rgba(0,0,0,.87);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  p {
+    max-width: 1000px;
+    text-align: left;
+  }
+  .icon-modelviewer-black {
+    background-image: url(../../assets/ic_modelviewer.svg);
+  }
+  .icon-button {
+    margin-left: -4px;
+    margin-right: 8px;
+    width: 34px;
+    height: 34px;
+    background-size: 34px;
+  }
+  .inner-home {
+    display: flex;
+    align-items: center;
+    font-size: 1.1em;
+    text-decoration: none;
+  }
+  .home {
+    padding: 20px;
+    overflow: auto;
+    white-space: nowrap;
+  }
+  .lockup {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    color: rgba(0,0,0,.87);
+  }
+  .attribute {
+    white-space: pre-wrap !important;
+    font-family: 'Roboto Mono', monospace;
+    color: black;
+  }
+  .attribute:hover {
+    text-decoration: underline;
+    color: #444444;
+  }
+</style>
+</head>
+<body>
+  <div class="home lockup">
+    <a href="../" class="sidebar-mv inner-home">
+      <div class="icon-button icon-modelviewer-black inner-home"></div>
+      <div class="inner-home"><span class="attribute">&lt;model-viewer&gt;</span></div>
+    </a>
+  </div>
+  <div align="center">
+    <h2>Render Fidelity Comparison Results</h2>
+  
+    <p>The purpose of <a href="https://www.khronos.org/gltf/"
+    target="_blank" rel="noopener">glTF</a> is to standardize Physically-Based Rendering (PBR)
+    materials such that you can be confident your model will appear as intended
+    in any lighting environment in any renderer. This is a very ambitious goal,
+    as real-time rendering at this level of quality is still very much an area
+    of active research with improvements being made constantly. This site
+    demonstrates where we are on that path to convergence and highlights areas
+    that could still use improvement. We are comparing the most popular web
+    renderers: <a href="https://threejs.org/" target="_blank" rel="noopener">three.js</a>
+    (represented by &lt;model-viewer&gt;), <a
+    href="https://google.github.io/filament/webgl/"
+    target="_blank" rel="noopener">filament.js</a>, and <a href="https://www.babylonjs.com/"
+    target="_blank" rel="noopener">babylon.js</a>. If any other renderers would like to be
+    included, please open a PR adding them to the <a
+    href="https://github.com/google/model-viewer/tree/master/packages/render-fidelity-tools/src/components/renderers"
+    target="_blank" rel="noopener">render-fidelity-tools</a>
+    package.</p>
+
+    <p>In addition, we are showing a ground-truth render provided by <a
+    href="https://github.com/DassaultSystemes-Technology/dspbr-pt"
+    target="_blank" rel="noopener">dspbr-pt</a>, which is a very slow path-tracing renderer
+    based on three.js. The advantage it provides is simplicity: without the
+    speed requirement it can be made clear and readable and as it runs with more
+    and more samples it approaches the physical result with far fewer
+    approximations than are necessary in real-time renderers.</p>
+
+    <p>The first set of scenarios are for demonstrating material capabilities,
+    so these are primarily fidelity tests. Following these are simpler cases
+    that test glTF spec conformance, but are not particularly interesting for
+    fidelity. At the bottom are the Furnace Test and the Directional Light Test.
+    The Furnace Test checks energy conservation and the correct result is the
+    whole 7x7 grid of metal-rough spheres being invisible (indistinguishable
+    from the background). The top (metal) and bottom (dielectric) rows are
+    passing, while the mixtures lose some energy. The Directional Light Test
+    checks the worst-case scenario for environmental lighting approximations:
+    the case where a single bright pixel represents a directional light. The
+    Filament version uses an actual directional light, so this is the ground
+    truth.</p>
+      
+    <p>In &lt;model-viewer&gt;, we do not consider rendering changes to be breaking
+    changes, as our quality is incrementally improving with every release.
+    However, the difference between the renders you see here bounds how much you
+    can expect our rendering to change going forward. Note the largest
+    differences are in the handling of transparent materials, as this is quite
+    difficult to get right, so the largest changes will likely be here.</p>
+      
+    <p>We show a simple logarithmic metric on an average of the pixel
+    differences, excluding the transparent background. This is <b>not</b> a
+    perceptual metric, so take it with a grain of salt. It is mostly there to
+    help us identify regressions.</p>
+
+    <p><a href="https://policies.google.com/privacy">Privacy</a></p>
+  </div>
+
+  <image-comparison-app src="./results/config.json"></image-comparison-app>
+
+  <script type="module" src="../dist/image-comparison-app.js"></script>
+
+</body>
+</html>

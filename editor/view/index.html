@@ -1,0 +1,54 @@
+<!--
+ @license
+ Copyright 2020 Google LLC. All Rights Reserved.
+ Licensed under the Apache License, Version 2.0 (the 'License');
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an 'AS IS' BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; editor">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Model Editor</title>
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+  <link rel="shortcut icon" type="image/png" href="../../../shared-assets/icons/favicon.png"/>
+  <!-- Web animations for paper-dropdown -->
+  <script src="../../node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
+  <script src="../../node_modules/js-beautify/js/lib/beautify-html.js"></script>
+  <script src="../../node_modules/js-beautify/js/lib/beautify-css.js"></script>
+  <script>
+  // Necessary hack for Redux. See: https://github.com/reduxjs/redux/pull/2910
+  window.process = {
+    env: {
+      NODE_ENV :'production'
+    }
+  };
+  </script>
+  <script type="module" src="../../dist/space-opera.js"></script>
+</head>
+<style>
+  :root {
+    --expandable-section-background: #2b2d30;
+    --expandable-section-text: #EEEEEE;
+    --text-on-expandable-background: #F5F5F5;
+    --number-input-background: #212121;
+  }
+
+  body {
+    margin: 0
+  }
+</style>
+<body>
+  <mobile-view></mobile-view>
+</body>

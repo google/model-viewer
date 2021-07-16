@@ -1,0 +1,158 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 11505,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 11505,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 11505,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 11505,
+      "type": "VEC3",
+      "max": [
+        0.019474864,
+        0.05784153,
+        0.019474864
+      ],
+      "min": [
+        -0.0194748752,
+        0.0,
+        -0.0194748677
+      ]
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5123,
+      "count": 54972,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "generator": "glTF Tools for Unity",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 92040
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 92040,
+      "byteLength": 138060
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 230100,
+      "byteLength": 184080
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 414180,
+      "byteLength": 138060
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 552240,
+      "byteLength": 109944
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "Corset.bin",
+      "byteLength": 662184
+    }
+  ],
+  "images": [
+    {
+      "uri": "Corset_baseColor.png"
+    },
+    {
+      "uri": "Corset_occlusionRoughnessMetallic.png"
+    },
+    {
+      "uri": "Corset_normal.png"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "TEXCOORD_0": 0,
+            "NORMAL": 1,
+            "TANGENT": 2,
+            "POSITION": 3
+          },
+          "indices": 4,
+          "material": 0
+        }
+      ],
+      "name": "pCube49"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      },
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "name": "Corset_O"
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "rotation": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "name": "Corset"
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "source": 0
+    },
+    {
+      "source": 1
+    },
+    {
+      "source": 2
+    }
+  ]
+}

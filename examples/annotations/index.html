@@ -1,0 +1,346 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Annotations</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; annotation examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+</head>
+<body>
+
+<div class="examples-page">
+  <div class="sidebar" id="sidenav"></div>
+  <div id="toggle"></div>
+  <div class="examples-container">
+    <div class="sample">
+      <div id="addHotspots" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Annotations. </span></h4>
+          <p>
+            Use &lt;model-viewer&gt; to make your models interactive.
+            This page showcases how you can add hotspots to your scene. Child elements are hotspots if their slot begins with "hotspot".
+            The data-position attribute specifies the 3D position of the hotspot in model coordinates, using the same format as the
+            camera-target attribute. The data-normal attribute specifies the normal vector defining the "front" of the hotspot.
+            When this normal is pointed away from the viewer, the hotspot's opacity becomes --min-hotspot-opacity. The
+            <a href="../tester.html">interactive example</a> lets you drag and drop your own models and add hotspots by clicking
+            and displays the corresponding position and normal attributes which you can copy into your own page.
+          </p>
+          <p>
+            You can also specify an attribute to be toggled when the hotspot changes between hidden and visible with data-visibility-attribute.
+            For example, if you set data-visibility-attribute="visible", then &lt;model-viewer&gt; will toggle the data-visible attribute on
+            that hotspot element. This makes it easier to write CSS that styles a hotspot based on its visibility.
+          </p>
+          <p>
+            When a hotspot's visibility changes, it will dispatch a "hotspot-visibility" event, and event.detail.visible will be true or false
+            depending on whether the hotspot is facing the camera.
+          </p>
+          <div class="heading">
+            <h2 class="demo-title">Add hotspots</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="addHotspots" highlight-as="html">
+            <template>
+<style>
+  button{
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    border: none;
+    background-color: blue;
+    box-sizing: border-box;
+  }
+
+  button[slot="hotspot-hand"]{
+    --min-hotspot-opacity: 0;
+    background-color: red;
+  }
+
+  button[slot="hotspot-foot"]:not([data-visible]) {
+    background-color: transparent;
+    border: 3px solid blue;
+  }
+
+  #annotation{
+    background-color: #888888;
+    position: absolute;
+    transform: translate(10px, 10px);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  /* This keeps child nodes hidden while the element loads */
+  :not(:defined) > * {
+    display: none;
+  }
+</style>
+<model-viewer id="hotspot-demo" ar ar-modes="webxr" camera-controls src="../../shared-assets/models/Astronaut.glb" style="--poster-color:#ffffff00;" alt="A 3D model of an astronaut.">
+  <button slot="hotspot-visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
+  <button slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
+    <div id="annotation">This hotspot disappears completely</div>
+  </button>
+  <button slot="hotspot-foot" data-position="0.16 0.1 0.17" data-normal="-0.07 0.97 0.23" data-visibility-attribute="visible"></button>
+  <div id="annotation">This annotation is fixed in screen-space</div>
+</model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="dimensions" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Show Dimensions. </span></h4>
+          <p>
+            Hotspots don't have to be on the model; they can be at arbitrary
+            points in 3D space. Here we demonstrate using hotspots to show a
+            model's dimensions, entirely styled with CSS. A JavaScript function
+            is used to automatically set the dimension values by querying the
+            &lt;model-viewer&gt; element.
+          </p>
+          <p>
+            By using WebXR mode, this markup works equally well in AR. Note that
+            because the text is not part of the 3D rendering it is easier to
+            read and more accessible. 
+          </p>
+          <example-snippet stamp-to="dimensions" highlight-as="html">
+            <template>
+<style>
+  #controls {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    max-width: unset;
+    transform: unset;
+  }
+
+  .dot{
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    background: #fff;
+    --min-hotspot-opacity: 0;
+  }
+
+  .dim{
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    color: rgba(0, 0, 0, 0.8);
+    display: block;
+    font-family: Futura, Helvetica Neue, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    max-width: 128px;
+    overflow-wrap: break-word;
+    padding: 0.5em 1em;
+    position: absolute;
+    width: max-content;
+    height: max-content;
+    transform: translate3d(-50%, -50%, 0);
+    --min-hotspot-opacity: 0;
+  }
+
+  .show{
+    --min-hotspot-opacity: 1;
+  }
+
+  .hide{
+    display: none;
+  }
+  /* This keeps child nodes hidden while the element loads */
+  :not(:defined) > * {
+    display: none;
+  }
+</style>
+<model-viewer id="dimension-demo" ar ar-modes="webxr" ar-scale="fixed" camera-orbit="-30deg auto auto" max-camera-orbit="auto 100deg auto" shadow-intensity="1" camera-controls src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
+  <button slot="hotspot-dot+X-Y+Z" class="dot" data-position="1 -1 1" data-normal="1 0 0"></button>
+  <button slot="hotspot-dim+X-Y" class="dim" data-position="1 -1 0" data-normal="1 0 0"></button>
+  <button slot="hotspot-dot+X-Y-Z" class="dot" data-position="1 -1 -1" data-normal="1 0 0"></button>
+  <button slot="hotspot-dim+X-Z" class="dim" data-position="1 0 -1" data-normal="1 0 0"></button>
+  <button slot="hotspot-dot+X+Y-Z" class="dot show" data-position="1 1 -1" data-normal="0 1 0"></button>
+  <button slot="hotspot-dim+Y-Z" class="dim show" data-position="0 -1 -1" data-normal="0 1 0"></button>
+  <button slot="hotspot-dot-X+Y-Z" class="dot show" data-position="-1 1 -1" data-normal="0 1 0"></button>
+  <button slot="hotspot-dim-X-Z" class="dim" data-position="-1 0 -1" data-normal="-1 0 0"></button>
+  <button slot="hotspot-dot-X-Y-Z" class="dot" data-position="-1 -1 -1" data-normal="-1 0 0"></button>
+  <button slot="hotspot-dim-X-Y" class="dim" data-position="-1 -1 0" data-normal="-1 0 0"></button>
+  <button slot="hotspot-dot-X-Y+Z" class="dot" data-position="-1 -1 1" data-normal="-1 0 0"></button>
+
+  <div id="controls" class="dim">
+    <label for="src">Product:</label>
+    <select id="src">
+      <option value="../../assets/ShopifyModels/Chair.glb">Chair</option>
+      <option value="../../assets/ShopifyModels/Mixer.glb">Mixer</option>
+      <option value="../../assets/ShopifyModels/GeoPlanter.glb">Cactus</option>
+    </select><br/>
+
+    <label for="show-dimensions">Show Dimensions:</label>
+    <input id="show-dimensions" type="checkbox" checked="true">
+  </div>
+</model-viewer>
+
+<script type="module">
+  const modelViewer = document.querySelector('#dimension-demo');
+
+  modelViewer.querySelector('#src').addEventListener('input', (event) => {
+    modelViewer.src = event.target.value;
+  });
+
+  const checkbox = modelViewer.querySelector('#show-dimensions');
+  checkbox.addEventListener('change', () => {
+    modelViewer.querySelectorAll('button').forEach((hotspot) => {
+      if (checkbox.checked) {
+        hotspot.classList.remove('hide');
+      } else {
+        hotspot.classList.add('hide');
+      }
+    });
+  });
+
+  modelViewer.addEventListener('load', () => {
+    const center = modelViewer.getCameraTarget();
+    const size = modelViewer.getDimensions();
+    const x2 = size.x / 2;
+    const y2 = size.y / 2;
+    const z2 = size.z / 2;
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dot+X-Y+Z',
+      position: `${center.x + x2} ${center.y - y2} ${center.z + z2}`
+    });
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dim+X-Y',
+      position: `${center.x + x2} ${center.y - y2} ${center.z}`
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent =
+        `${(size.z * 100).toFixed(0)} cm`;
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dot+X-Y-Z',
+      position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`
+    });
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dim+X-Z',
+      position: `${center.x + x2} ${center.y} ${center.z - z2}`
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent =
+        `${(size.y * 100).toFixed(0)} cm`;
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dot+X+Y-Z',
+      position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`
+    });
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dim+Y-Z',
+      position: `${center.x} ${center.y + y2} ${center.z - z2}`
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent =
+        `${(size.x * 100).toFixed(0)} cm`;
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dot-X+Y-Z',
+      position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`
+    });
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dim-X-Z',
+      position: `${center.x - x2} ${center.y} ${center.z - z2}`
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent =
+        `${(size.y * 100).toFixed(0)} cm`;
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dot-X-Y-Z',
+      position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`
+    });
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dim-X-Y',
+      position: `${center.x - x2} ${center.y - y2} ${center.z}`
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent =
+        `${(size.z * 100).toFixed(0)} cm`;
+
+    modelViewer.updateHotspot({
+      name: 'hotspot-dot-X-Y+Z',
+      position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`
+    });
+  });
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <ul>
+        <li class="attribution">
+          <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+      </ul>
+      <div style="margin-top:24px;" class="copyright">©Copyright 2019 Google Inc. Licensed under the Apache License 2.0.</div>
+      <div id='footer-links'></div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../../examples/built/docs-and-examples.js">
+</script>
+<script type="module">
+  (() => { init('examples-annotations'); })();
+  (() => { initFooterLinks();})();
+</script>
+
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="../built/dependencies.js">
+  </script>
+
+  <!-- Loads <model-viewer> on modern browsers: -->
+  <script type="module"
+      src="../../node_modules/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+</body>
+</html>

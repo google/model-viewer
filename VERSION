@@ -1,0 +1,13 @@
+commit b9bce2a1dc15fff19971c90a2234968b31d9f409
+Author: Emmett Lalish <elalish@google.com>
+Date:   Fri Jul 16 11:35:17 2021 -0700
+
+    Add createThumbnails (#2566)
+    
+    * pulling model-viewer changes out of editor branch
+    
+    * changed json getter to clone as loaded gltf
+    
+    * fix typo
+    
+    * revert some changes

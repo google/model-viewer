@@ -1,0 +1,224 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt;</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Easily display interactive 3D models on the web and in AR">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+</head>
+<body>
+
+  <div class="sample">
+    <div id="demo-container" class="demo"></div>
+    <div class="content">
+      <div class="wrapper">
+        <div class="heading">
+          <div class="lockup zero-interaction"><div class="icon-button icon-modelviewer-black"></div><h1><span class="attribute">&lt;model-viewer&gt;</span></h1></div>
+          <h3 class="slogan" style="font-weight:400;">Easily display interactive 3D models on the web & in AR</h3>
+        </div>
+
+          <div id="section-quick-start">
+            <h3 class="grouping-title grouping-title-new quick-start">Quick Start</h3>
+            <div class="quick-start-example">
+              <example-snippet inert-script stamp-to="demo-container" highlight-as="html">
+                <template>
+<!-- Import the component -->
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+<!-- Use it like any other HTML element -->
+<model-viewer src="shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut" ar ar-modes="webxr scene-viewer quick-look" environment-image="neutral" auto-rotate camera-controls></model-viewer>
+                </template>
+              </example-snippet>
+            </div>
+          </div>
+
+          <a href="https://bundlephobia.com/result?p=@google/model-viewer">
+            <img src="https://badgen.net/bundlephobia/minzip/@google/model-viewer" alt="Min Zip" />
+          </a>
+          <a href="https://github.com/google/model-viewer/releases">
+            <img src="https://img.shields.io/github/v/release/google/model-viewer" alt="Latest Release" />
+          </a>
+          <br />
+          <a href="https://twitter.com/intent/follow?screen_name=modelviewer">
+            <img src="https://img.shields.io/twitter/follow/modelviewer?style=social&logo=twitter" alt="follow on Twitter" />
+          </a>
+          <a href="https://github.com/google/model-viewer/discussions">
+            <img src="https://img.shields.io/github/stars/google/model-viewer.svg?style=social&label=Star&maxAge=2592000" alt="Github Discussions" />
+          </a>
+
+        <div id="section-documentation">
+          <h3 class="grouping-title grouping-title-new border-bottom">Documentation</h3>
+          <ol class="new-list-example">
+            <li>
+              <h4>
+                API <a href="docs/index.html">documentation</a> &amp; <a href="examples/loading/index.html">examples</a>
+              </h4>
+            </li>
+          </ol>
+        </div>
+
+        <div id="section-editor">
+          <h3 class="grouping-title grouping-title-new border-bottom">Model Editor</h3>
+          <ol class="new-list-example">
+            <li>
+              <h4>
+                Use the <a href="editor">Model Editor</a> to prepare your GLB models for the web
+              </h4>
+            </li>
+            <li>
+              <h4>
+                <a href="examples/tester.html">Interactive Viewer</a> (Legacy)
+              </h4>
+            </li>
+          </ol>
+        </div>
+
+        <div id="section-metrics">
+          <h3 class="grouping-title grouping-title-new border-bottom">Metrics</h3>
+          <ol class="new-list-example">
+            <li>
+              <h4>
+                <a href="examples/lighthouse.html">Performance</a>
+              </h4>
+            </li>
+            <li>
+              <h4>
+                <a href="fidelity">glTF Fidelity Comparison</a>
+              </h4>
+            </li>
+          </ol>
+        </div>
+
+        <div id="section-browser-support">
+          <h3 class="grouping-title grouping-title-new border-bottom">Browser Support</h3>
+
+          <p class="browser-support-desc"><code>&lt;model-viewer&gt;</code> is supported on the last two major versions of all evergreen
+            desktop and mobile browsers, plus the last two versions of Safari (on MacOS and iOS).</p>
+
+          <p class="browser-support-desc">These browser features are
+          only needed if you wish to use webxr in ar-modes:</p>
+          <table class="browser-support">
+            <tr>
+              <th>Feature</th>
+              <th><img class="logo-chrome" title="Chrome" alt="Chrome"></th>
+              <th><img class="logo-canary" title="Canary" alt="Canary"></th>
+              <th><img class="logo-safari" title="Safari" alt="Safari"></th>
+              <th><img class="logo-firefox" title="Firefox" alt="Firefox"></th>
+              <th><img class="logo-edge" title="Edge" alt="Edge"></th>
+              <th><img class="logo-samsung" title="Samsung Internet" alt="Samsung Internet"></th>
+            </tr>
+
+            <tr>
+              <td>WebXR Device API</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+            <tr>
+              <td>WebXR HitTest API</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+            </tr>
+            <tr>
+              <td>WebXR DOM Overlay API</td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-check" alt="icon-check"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+              <td><img class="icon-na" alt="icon-na"></td>
+            </tr>
+          </table>
+
+          <div id="browser-support-icon-group">
+            <div class="icon-desc"><img class="size-24 icon-check" alt="icon-check"><div>Natively supported</div></div>
+            <div class="icon-desc"><img class="size-24 icon-warning" alt="icon-warning"><div>Available with polyfill</div></div>
+            <div class="icon-desc"><img class="size-24 icon-flag" alt="icon-flag"><div>Behind a flag, unstable</div></div>
+            <div class="icon-desc"><img class="size-24 icon-na" alt="icon-na"><div>Not available</div></div>
+          </div>
+
+          <div style="clear:both"></div>
+
+          <p class="browser-support-desc"><code>:focus-visible</code> is an as-yet unimplemented web platform feature that enables
+          content authors to style a component on the condition that it received focus in
+          such a way that suggests the focus state should be visibly evident.</p>
+
+          <p class="browser-support-desc">The <code>:focus-visible</code> capability has not been implemented in any stable browsers
+          yet. If <a href="https://github.com/WICG/focus-visible">the polyfill</a> is available on the page, 
+          <code>&lt;model-viewer&gt;</code> will use it and only display focus rings when <code>:focus-visible</code> should apply.</p>
+
+          <p class="browser-support-desc">Check out <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible">this related MDN</a> 
+          article for more details on <code>:focus-visible</code>.</p>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <ul>
+      <li class="attribution">
+        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+      </li>
+    </ul>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div id='footer-links'></div>
+  </div>
+
+  <script type="module" src="./examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { initFooterLinks();})();
+  </script>
+
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="examples/built/dependencies.js">
+  </script>
+
+  <!-- Loads <model-viewer> on modern browsers: -->
+  <script type="module"
+      src="node_modules/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+</body>
+</html>
