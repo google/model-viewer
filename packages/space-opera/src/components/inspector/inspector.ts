@@ -24,6 +24,7 @@ import {customElement, html, internalProperty} from 'lit-element';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getModel} from '../model_viewer_preview/reducer.js';
+import {Thumbnail} from '../model_viewer_preview/types.js';
 
 /**
  * The inspector.
@@ -31,7 +32,7 @@ import {getModel} from '../model_viewer_preview/reducer.js';
 @customElement('me-inspector-panel')
 export class InspectorPanel extends ConnectedLitElement {
   @internalProperty() gltfJsonstring?: string = '';
-  @internalProperty() thumbnails: string[] = [];
+  @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
 
   stateChanged(state: State) {
     const model = getModel(state);
@@ -39,18 +40,19 @@ export class InspectorPanel extends ConnectedLitElement {
       return;
     }
     if (model.thumbnailsById != null) {
-      this.thumbnails = [...model.thumbnailsById.values()];
+      this.thumbnailsById = model.thumbnailsById;
     }
     this.gltfJsonstring = model.originalGltfJson;
   }
 
   render() {
+    const thumbnails = [...this.thumbnailsById.values()];
     return html`
         <div>
           <div class="texture-images">
             ${
-        this.thumbnails.map(
-            objectUrl => html`<img width="100" src="${objectUrl}">`)}
+        thumbnails.map(
+            thumbnail => html`<img width="100" src="${thumbnail.objectUrl}">`)}
           </div>
           <pre class="inspector-content">${
         this.gltfJsonstring || 'No model loaded'}

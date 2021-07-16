@@ -22,7 +22,7 @@ import {Action, BestPracticesState, State} from '../../types.js';
 import {renderARButton, renderARPrompt, renderProgressBar} from '../best_practices/render_best_practices.js';
 import {Camera} from '../camera_settings/camera_state.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
-import {ModelState} from '../model_viewer_preview/types.js';
+import {ModelState, Thumbnail} from '../model_viewer_preview/types.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {radToDeg} from '../utils/reducer_utils.js';
 
@@ -83,7 +83,7 @@ export function getTextureId(gltfImage: {uri?: string, bufferView?: number}):
 }
 
 async function pushThumbnail(
-    thumbnailsById: Map<string, string>, textureInfo: TextureInfo) {
+    thumbnailsById: Map<string, Thumbnail>, textureInfo: TextureInfo) {
   const {texture} = textureInfo;
   if (texture == null) {
     return;
@@ -91,13 +91,15 @@ async function pushThumbnail(
   const {source} = texture;
   const id = getTextureId(source);
   if (!thumbnailsById.has(id)) {
-    thumbnailsById.set(
-        id, await source.createThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE));
+    thumbnailsById.set(id, {
+      objectUrl: await source.createThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE),
+      texture
+    });
   }
 }
 
-async function createThumbnails(): Promise<Map<string, string>> {
-  const thumbnailsById = new Map<string, string>();
+async function createThumbnails(): Promise<Map<string, Thumbnail>> {
+  const thumbnailsById = new Map<string, Thumbnail>();
   for (const material of getModelViewer()!.model?.materials!) {
     console.log(material);
     const {

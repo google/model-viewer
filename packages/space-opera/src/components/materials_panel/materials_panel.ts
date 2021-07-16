@@ -37,6 +37,7 @@ import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchModelDirty, getModel, getModelViewer, getTextureId} from '../model_viewer_preview/reducer.js';
+import {Thumbnail} from '../model_viewer_preview/types.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
@@ -52,7 +53,7 @@ import {styles} from './materials_panel.css.js';
 export class MaterialPanel extends ConnectedLitElement {
   static styles = styles;
 
-  @internalProperty() thumbnailsById?: Map<string, string>;
+  @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
   @internalProperty() thumbnailUrls: string[] = [];
   @internalProperty() thumbnailIds: string[] = [];
   @internalProperty() originalGltf?: GLTF;
@@ -89,24 +90,26 @@ export class MaterialPanel extends ConnectedLitElement {
       return;
     }
 
-    if (model.thumbnailsById != null &&
-        this.thumbnailsById !== model.thumbnailsById) {
-      this.thumbnailsById = model.thumbnailsById;
-      this.thumbnailUrls = [...this.thumbnailsById.values()];
-      this.thumbnailIds = [...this.thumbnailsById.keys()];
-    }
-
     // If a new model is loaded, don't interpolate material
     const gltf = model.originalGltf;
     if (this.originalGltf !== gltf) {
       this.isNewModel = true;
       this.originalGltf = gltf;
       this.selectedMaterialIndex = 0;
+      if (model.thumbnailsById != null) {
+        this.thumbnailsById = new Map(model.thumbnailsById);
+        this.thumbnailIds = [];
+        this.thumbnailUrls = [];
+        for (const [id, thumbnail] of this.thumbnailsById) {
+          this.thumbnailIds.push(id);
+          this.thumbnailUrls.push(thumbnail.objectUrl);
+        }
+      }
     }
   }
 
-  getMaterial(index: number) {
-    return getModelViewer()?.model?.materials[index];
+  getMaterial() {
+    return getModelViewer()!.model!.materials[this.selectedMaterialIndex];
   }
 
   getOriginalMaterial(index: number) {
@@ -192,7 +195,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onSelectMaterial() {
-    const material = this.getMaterial(this.selectedMaterialIndex);
+    const material = this.getMaterial();
     if (material == null) {
       return;
     }
@@ -259,12 +262,11 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedBaseColor(): RGBA {
-    const index = this.selectedMaterialIndex;
-    if (index === undefined) {
+    if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
     const alphaFactor =
-        this.getMaterial(index)!.pbrMetallicRoughness.baseColorFactor[3];
+        this.getMaterial()!.pbrMetallicRoughness.baseColorFactor[3];
     const selectedColor = color.hexToRgb(this.baseColorPicker.selectedColorHex);
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
@@ -361,8 +363,8 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
-    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
-        .setBaseColorFactor(this.selectedBaseColor);
+    this.getMaterial()!.pbrMetallicRoughness.setBaseColorFactor(
+        this.selectedBaseColor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -370,8 +372,8 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
-    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
-        .setRoughnessFactor(this.selectedRoughnessFactor);
+    this.getMaterial()!.pbrMetallicRoughness.setRoughnessFactor(
+        this.selectedRoughnessFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -379,8 +381,8 @@ export class MaterialPanel extends ConnectedLitElement {
     if (this.selectedMaterialIndex == null) {
       throw new Error('No material selected');
     }
-    this.getMaterial(this.selectedMaterialIndex)!.pbrMetallicRoughness
-        .setMetallicFactor(this.selectedMetallicFactor);
+    this.getMaterial()!.pbrMetallicRoughness.setMetallicFactor(
+        this.selectedMetallicFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -397,9 +399,8 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
     const textureId = this.selectedBaseColorTextureId;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.pbrMetallicRoughness.baseColorTexture?.texture.source.setURI(
-            textureId!);
+    this.getMaterial().pbrMetallicRoughness.baseColorTexture.setTexture(
+        this.thumbnailsById.get(textureId));
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -408,8 +409,8 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
     const uri = event.detail;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.pbrMetallicRoughness.baseColorTexture?.texture.source.setURI(uri);
+    this.getMaterial()
+        .pbrMetallicRoughness.baseColorTexture.texture.source.setURI(uri);
   }
 
   onMetallicRoughnessTextureChange() {
@@ -417,8 +418,8 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
     const textureId = this.selectedMetallicRoughnessTextureId;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.pbrMetallicRoughness.metallicRoughnessTexture?.texture.source.setURI(
+    this.getMaterial()
+        .pbrMetallicRoughness.metallicRoughnessTexture.texture.source.setURI(
             textureId!);
     reduxStore.dispatch(dispatchModelDirty());
   }
@@ -428,8 +429,8 @@ export class MaterialPanel extends ConnectedLitElement {
       throw new Error('No material selected');
     }
     const uri = event.detail;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.pbrMetallicRoughness.metallicRoughnessTexture?.texture.source.setURI(
+    this.getMaterial()
+        .pbrMetallicRoughness.metallicRoughnessTexture.texture.source.setURI(
             uri);
     reduxStore.dispatch(dispatchModelDirty());
   }
@@ -440,8 +441,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
 
     const textureId = this.selectedNormalTextureId;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.normalTexture?.texture.source.setURI(textureId!);
+    this.getMaterial().normalTexture.texture.source.setURI(textureId!);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -451,8 +451,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
 
     const uri = event.detail;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.normalTexture?.texture.source.setURI(uri);
+    this.getMaterial().normalTexture.texture.source.setURI(uri);
   }
 
   onEmissiveTextureChange() {
@@ -461,8 +460,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
 
     const textureId = this.selectedEmissiveTextureId;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.emissiveTexture?.texture.source.setURI(textureId!);
+    this.getMaterial().emissiveTexture.texture.source.setURI(textureId!);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -472,16 +470,14 @@ export class MaterialPanel extends ConnectedLitElement {
     }
 
     const uri = event.detail;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.emissiveTexture?.texture.source.setURI(uri);
+    this.getMaterial().emissiveTexture.texture.source.setURI(uri);
   }
 
   onEmissiveFactorChanged() {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
-    this.getMaterial(this.selectedMaterialIndex)!.setEmissiveFactor(
-        this.selectedEmissiveFactor);
+    this.getMaterial()!.setEmissiveFactor(this.selectedEmissiveFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -491,8 +487,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
 
     const textureId = this.selectedOcclusionTextureId;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.occlusionTexture?.texture.source.setURI(textureId!);
+    this.getMaterial().occlusionTexture.texture.source.setURI(textureId!);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -502,8 +497,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
 
     const uri = event.detail;
-    this.getMaterial(this.selectedMaterialIndex)
-        ?.occlusionTexture?.texture.source.setURI(uri);
+    this.getMaterial().occlusionTexture.texture.source.setURI(uri);
   }
 
   onAlphaModeSelect() {

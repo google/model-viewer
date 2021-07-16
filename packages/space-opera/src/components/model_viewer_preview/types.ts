@@ -15,11 +15,17 @@
  *
  */
 
+import {Texture} from '../../../../model-viewer/lib/features/scene-graph/api.js';
 import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
+
+export interface Thumbnail {
+  objectUrl: string;
+  texture: Texture;
+}
 
 export interface ModelState {
   gltfUrl?: string;
-  thumbnailsById?: Map<string, string>;
+  thumbnailsById?: Map<string, Thumbnail>;
   originalGltfJson?: string;
   originalGltf?: GLTF;
   isDirty?: boolean;
