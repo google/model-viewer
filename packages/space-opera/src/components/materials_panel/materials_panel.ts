@@ -112,8 +112,8 @@ export class MaterialPanel extends ConnectedLitElement {
     return getModelViewer()!.model!.materials[this.selectedMaterialIndex];
   }
 
-  getOriginalMaterial(index: number) {
-    return this.originalGltf!.materials![index];
+  getOriginalMaterial() {
+    return this.originalGltf!.materials![this.selectedMaterialIndex];
   }
 
   getOriginalTextureId(index: number) {
@@ -164,7 +164,6 @@ export class MaterialPanel extends ConnectedLitElement {
   // Logic for interpolating from red emissive factor to the original.
   interpolateMaterial() {
     this.isInterpolating = true;
-    const index = this.selectedMaterialIndex;
     const originalBaseColor = this.selectedBaseColor;
     const originalEmissiveFactor = this.selectedEmissiveFactor;
 
@@ -179,11 +178,11 @@ export class MaterialPanel extends ConnectedLitElement {
 
       const baseColorFactor = this.getInterpolatedColor(
           originalBaseColor, timestamp - start, DURATION);
-      this.getMaterial(index)!.pbrMetallicRoughness.setBaseColorFactor(
+      this.getMaterial().pbrMetallicRoughness.setBaseColorFactor(
           baseColorFactor);
       const emissiveFactor = this.getInterpolatedEmissive(
           originalEmissiveFactor, timestamp - start, DURATION);
-      this.getMaterial(index)!.setEmissiveFactor(emissiveFactor);
+      this.getMaterial().setEmissiveFactor(emissiveFactor);
 
       if (timestamp - start <= DURATION) {
         requestAnimationFrame(interpolateStep);
@@ -522,9 +521,8 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   revertMetallicRoughnessTexture() {
-    const index = this.selectedMaterialIndex;
-    const texture = this.getOriginalMaterial(index)
-                        ?.pbrMetallicRoughness!.metallicRoughnessTexture;
+    const texture = this.getOriginalMaterial()
+                        .pbrMetallicRoughness!.metallicRoughnessTexture;
     const id = this.getOriginalTextureId(texture!.index);
     this.metallicRoughnessTexturePicker.selectedIndex =
         this.thumbnailIds.indexOf(id);
@@ -532,64 +530,56 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   revertMetallicFactor() {
-    const index = this.selectedMaterialIndex;
     const factor =
-        this.getOriginalMaterial(index).pbrMetallicRoughness!.metallicFactor!;
+        this.getOriginalMaterial().pbrMetallicRoughness!.metallicFactor!;
     this.metallicFactorSlider.value = factor;
     this.onMetallicChange();
   }
 
   revertRoughnessFactor() {
-    const index = this.selectedMaterialIndex;
     const factor =
-        this.getOriginalMaterial(index).pbrMetallicRoughness!.roughnessFactor!;
+        this.getOriginalMaterial().pbrMetallicRoughness!.roughnessFactor!;
     this.roughnessFactorSlider.value = factor;
     this.onRoughnessChange();
   }
 
   revertBaseColorFactor() {
-    const index = this.selectedMaterialIndex;
     const factor =
-        this.getOriginalMaterial(index).pbrMetallicRoughness!.baseColorFactor!;
+        this.getOriginalMaterial().pbrMetallicRoughness!.baseColorFactor!;
     this.baseColorPicker.selectedColorHex = this.rgbToHex(factor);
     this.onBaseColorChange();
   }
 
   revertBaseColorTexture() {
-    const index = this.selectedMaterialIndex;
     const texture =
-        this.getOriginalMaterial(index)?.pbrMetallicRoughness!.baseColorTexture;
+        this.getOriginalMaterial()?.pbrMetallicRoughness!.baseColorTexture;
     const id = this.getOriginalTextureId(texture!.index);
     this.baseColorTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onBaseColorTextureChange();
   }
 
   revertNormalTexture() {
-    const index = this.selectedMaterialIndex;
-    const texture = this.getOriginalMaterial(index)?.normalTexture;
+    const texture = this.getOriginalMaterial()?.normalTexture;
     const id = this.getOriginalTextureId(texture!.index);
     this.normalTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onNormalTextureChange();
   }
 
   revertEmissiveTexture() {
-    const index = this.selectedMaterialIndex;
-    const texture = this.getOriginalMaterial(index)?.emissiveTexture;
+    const texture = this.getOriginalMaterial()?.emissiveTexture;
     const id = this.getOriginalTextureId(texture!.index);
     this.emissiveTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onEmissiveTextureChange();
   }
 
   revertEmissiveFactor() {
-    const index = this.selectedMaterialIndex;
-    const factor = this.getOriginalMaterial(index).emissiveFactor!;
+    const factor = this.getOriginalMaterial().emissiveFactor!;
     this.emissiveFactorPicker.selectedColorHex = this.rgbToHex(factor);
     this.onEmissiveFactorChanged();
   }
 
   revertOcclusionTexture() {
-    const index = this.selectedMaterialIndex;
-    const texture = this.getOriginalMaterial(index)?.occlusionTexture;
+    const texture = this.getOriginalMaterial()?.occlusionTexture;
     const id = this.getOriginalTextureId(texture!.index);
     this.occlusionTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onOcclusionTextureChange();
