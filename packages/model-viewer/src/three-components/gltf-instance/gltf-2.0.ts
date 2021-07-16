@@ -188,22 +188,14 @@ export interface Node {
   extras?: Extras;
 }
 
-export interface ExternalImage {
+export interface Image {
   name?: string;
-  uri: string;
+  uri?: string;
+  bufferView?: number;
+  mimeType?: string;
   extensions?: ExtensionDictionary;
   extras?: Extras;
 }
-
-export interface EmbeddedImage {
-  name?: string;
-  bufferView: number;
-  mimeType: string;
-  extensions?: ExtensionDictionary;
-  extras?: Extras;
-}
-
-export type Image = ExternalImage|EmbeddedImage;
 
 export interface Scene {
   name?: string;
