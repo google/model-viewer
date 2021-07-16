@@ -50,7 +50,7 @@ suite('scene-graph/material', () => {
 
     test('Set a new base map', async () => {
       element.model!.materials[0]
-          .pbrMetallicRoughness.baseColorTexture!.setTexture(texture);
+          .pbrMetallicRoughness.baseColorTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined =
@@ -66,7 +66,7 @@ suite('scene-graph/material', () => {
 
     test('Set a new metallicRoughness map', async () => {
       element.model!.materials[0]
-          .pbrMetallicRoughness.metallicRoughnessTexture!.setTexture(texture);
+          .pbrMetallicRoughness.metallicRoughnessTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined =
@@ -81,7 +81,7 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new normal map', async () => {
-      element.model!.materials[0].normalTexture!.setTexture(texture);
+      element.model!.materials[0].normalTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined =
@@ -95,7 +95,7 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new occlusion map', async () => {
-      element.model!.materials[0].occlusionTexture!.setTexture(texture);
+      element.model!.materials[0].occlusionTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined =
@@ -109,7 +109,7 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new emissive map', async () => {
-      element.model!.materials[0].emissiveTexture!.setTexture(texture);
+      element.model!.materials[0].emissiveTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined =
