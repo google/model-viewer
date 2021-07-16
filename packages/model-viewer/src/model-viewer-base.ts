@@ -32,8 +32,7 @@ const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
 const UNSIZED_MEDIA_WIDTH = 300;
 const UNSIZED_MEDIA_HEIGHT = 150;
 
-const blobCanvas = document.createElement('canvas');
-let blobContext: CanvasRenderingContext2D|null = null;
+export const blobCanvas = document.createElement('canvas');
 
 const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
@@ -420,10 +419,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     blobCanvas.height = outputHeight;
     try {
       return new Promise<Blob>(async (resolve, reject) => {
-        if (blobContext == null) {
-          blobContext = blobCanvas.getContext('2d');
-        }
-        blobContext!.drawImage(
+        blobCanvas.getContext('2d')!.drawImage(
             this[$renderer].displayCanvas(this[$scene]),
             offsetX,
             offsetY,
