@@ -76,6 +76,19 @@
       }
     },
     {
+      "name": "khronos-AttenuationTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AttenuationTest/glTF/AttenuationTest.gltf",
+      "dimensions": {
+        "width": 1024
+      },
+      "orbit": {
+        "radius": 22.00
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-Corset",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Corset/glTF/Corset.gltf",
       "dimensions": {
@@ -346,6 +359,16 @@
       },
       "orbit": {
         "radius": 7.8
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-ClearCoatTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ClearCoatTest/glTF/ClearCoatTest.gltf",
+      "orbit": {
+        "radius": 20
       },
       "exclude": [
         "dspbr-pt"

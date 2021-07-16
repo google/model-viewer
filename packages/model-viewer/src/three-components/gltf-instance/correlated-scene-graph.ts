@@ -3,6 +3,8 @@ import {GLTF as ThreeGLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFL
 
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
+
+
 export type ThreeSceneObject = Object3D|Material|Texture;
 type ThreeSceneObjectCallback = (a: ThreeSceneObject, b: ThreeSceneObject) =>
     void;
@@ -130,7 +132,18 @@ export class CorrelatedSceneGraph {
             let elementReference =
                 upstreamCorrelatedSceneGraph.threeObjectMap.get(object);
 
-            if (elementReference == null) {
+            if (((object as Mesh).isMesh || (object as Material).isMaterial) &&
+                elementReference == null) {
+              // Checks if default material was allready addded to the gltf.
+              if (cloneGLTF.materials && cloneGLTF.materials.length) {
+                const material =
+                    cloneGLTF.materials[cloneGLTF.materials.length - 1];
+                if (material.name === 'Default') {
+                  defaultReference.index = cloneGLTF.materials.length - 1;
+                }
+              }
+
+              // Adds the defaul material if the default material was not added.
               if (defaultReference.index < 0) {
                 if (cloneGLTF.materials == null) {
                   cloneGLTF.materials = [];
@@ -138,7 +151,13 @@ export class CorrelatedSceneGraph {
                 defaultReference.index = cloneGLTF.materials.length;
                 cloneGLTF.materials.push(defaultMaterial);
               }
+
               elementReference = defaultReference;
+            }
+
+
+            if (elementReference == null) {
+              return;
             }
 
             const {type, index} = elementReference;
