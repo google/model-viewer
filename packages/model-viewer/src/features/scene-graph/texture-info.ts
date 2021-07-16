@@ -51,7 +51,7 @@ export enum TextureUsage {
  */
 export class TextureInfo extends ThreeDOMElement implements
     TextureInfoInterface {
-  private[$texture]: Texture;
+  private[$texture]: Texture|null;
 
   // Holds a reference to the glTF file data.
   [$gltf]: GLTF;
@@ -146,7 +146,7 @@ export class TextureInfo extends ThreeDOMElement implements
     );
   }
 
-  get texture(): Texture {
+  get texture(): Texture|null {
     return this[$texture];
   }
 
@@ -154,7 +154,7 @@ export class TextureInfo extends ThreeDOMElement implements
     const threeTexture: ThreeTexture|null =
         texture != null ? texture.source[$underlyingTexture] : null;
     let encoding: TextureEncoding = sRGBEncoding;
-    this[$texture] = texture ?? new Texture(this);
+    this[$texture] = texture;
     this[$threeTexture] = threeTexture;
     // Ensures correlatedObjects is up to date.
     const correlatedObjects = (this[$correlatedObjects] as Set<ThreeTexture>);
