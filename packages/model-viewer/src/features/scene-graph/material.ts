@@ -66,57 +66,69 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
     let {normalTexture, occlusionTexture, emissiveTexture} = gltfMaterial;
 
-    const normalTextures = new Set<ThreeTexture>();
-    const occlusionTextures = new Set<ThreeTexture>();
-    const emissiveTextures = new Set<ThreeTexture>();
+    let normalTextures: ThreeTexture|null = null;
+    let occlusionTextures: ThreeTexture|null = null;
+    let emissiveTextures: ThreeTexture|null = null;
 
-    for (const gltfMaterial of correlatedMaterials) {
-      const {normalMap, aoMap, emissiveMap} = gltfMaterial;
+    const {normalMap, aoMap, emissiveMap} =
+        correlatedMaterials.values().next().value;
 
-      if (normalTexture != null && normalMap != null) {
-        normalTextures.add(normalMap);
-      } else {
-        normalTexture = {index: -1};
-      }
-
-      if (occlusionTexture != null && aoMap != null) {
-        occlusionTextures.add(aoMap);
-      } else {
-        occlusionTexture = {index: -1};
-      }
-
-      if (emissiveTexture != null && emissiveMap != null) {
-        emissiveTextures.add(emissiveMap);
-      } else {
-        emissiveTexture = {index: -1};
-      }
+    if (normalTexture != null && normalMap != null) {
+      normalTextures = normalMap;
+    } else {
+      normalTexture = {index: -1};
     }
 
-    const firstValue = (set: Set<ThreeTexture>): ThreeTexture => {
-      return set.values().next().value;
-    };
+    if (occlusionTexture != null && aoMap != null) {
+      occlusionTextures = aoMap;
+    } else {
+      occlusionTexture = {index: -1};
+    }
+
+    if (emissiveTexture != null && emissiveMap != null) {
+      emissiveTextures = emissiveMap;
+    } else {
+      emissiveTexture = {index: -1};
+    }
+
+    for (const gltfMaterial of correlatedMaterials) {
+      const {
+        normalMap: verifyNormalMap,
+        aoMap: verifyAoMap,
+        emissiveMap: verifyEmissiveMap
+      } = gltfMaterial;
+      if (verifyNormalMap !== normalMap) {
+        console.error('Normal map differs between homegenous materials');
+      }
+      if (verifyAoMap !== aoMap) {
+        console.error('AO map differs between homegenous materials');
+      }
+      if (verifyEmissiveMap !== emissiveMap) {
+        console.error('Emissive map differs between homegenous materials');
+      }
+    }
 
     this[$normalTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        this[$backingThreeMaterial],
-        firstValue(normalTextures),
+        correlatedMaterials,
+        normalTextures,
         TextureUsage.Normal,
         normalTexture!);
 
     this[$occlusionTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        this[$backingThreeMaterial],
-        firstValue(occlusionTextures),
+        correlatedMaterials,
+        occlusionTextures,
         TextureUsage.Occlusion,
         occlusionTexture!);
 
     this[$emissiveTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        this[$backingThreeMaterial],
-        firstValue(emissiveTextures),
+        correlatedMaterials,
+        emissiveTextures,
         TextureUsage.Emissive,
         emissiveTexture!);
   }

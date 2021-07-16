@@ -56,7 +56,7 @@ export class TextureInfo extends ThreeDOMElement implements
   // Holds a reference to the glTF file data.
   [$gltf]: GLTF;
   // Holds a reference to the Three data that backs the material object.
-  [$material]: MeshStandardMaterial|null;
+  [$material]: Set<MeshStandardMaterial>|null;
   // Holds a reference to the Three data that backs the texture object.
   [$threeTexture]: ThreeTexture|null = null;
 
@@ -82,13 +82,13 @@ export class TextureInfo extends ThreeDOMElement implements
   onUpdate: () => void;
 
   constructor(
-      onUpdate: () => void, gltf: GLTF, material: MeshStandardMaterial|null,
-      texture: ThreeTexture|null, textureUsage: TextureUsage,
-      gltfTextureInfo: GLTFTextureInfo) {
+      onUpdate: () => void, gltf: GLTF,
+      material: Set<MeshStandardMaterial>|null, texture: ThreeTexture|null,
+      textureUsage: TextureUsage, gltfTextureInfo: GLTFTextureInfo) {
     super(
         onUpdate,
         gltfTextureInfo ? gltfTextureInfo : {index: -1},
-        new Set<ThreeTexture>([texture!]));
+        new Set<ThreeTexture>(texture ? [texture] : []));
 
     this.onUpdate = onUpdate;
     this[$gltf] = gltf;
@@ -121,6 +121,7 @@ export class TextureInfo extends ThreeDOMElement implements
     } else {
       this[$gltfImage] = {name: 'null_image', uri: 'null_image'};
     }
+
 
     this[$texture] = texture != null ? new Texture(this) : null;
   }
@@ -163,27 +164,33 @@ export class TextureInfo extends ThreeDOMElement implements
       correlatedObjects.add(threeTexture);
     }
 
-    switch (this[$usage]) {
-      case TextureUsage.Base:
-        this[$material]!.map = threeTexture;
-        break;
-      case TextureUsage.Metallic:
-        encoding = LinearEncoding;
-        this[$material]!.metalnessMap = threeTexture;
-        break;
-      case TextureUsage.Normal:
-        encoding = LinearEncoding;
-        this[$material]!.normalMap = threeTexture;
-        break;
-      case TextureUsage.Occlusion:
-        encoding = LinearEncoding;
-        this[$material]!.aoMap = threeTexture;
-        break;
-      case TextureUsage.Emissive:
-        this[$material]!.emissiveMap = threeTexture;
-        break;
-      default:
+    if (this[$material]) {
+      for (const material of this[$material]!) {
+        switch (this[$usage]) {
+          case TextureUsage.Base:
+            material.map = threeTexture;
+            break;
+          case TextureUsage.Metallic:
+            encoding = LinearEncoding;
+            material.metalnessMap = threeTexture;
+            break;
+          case TextureUsage.Normal:
+            encoding = LinearEncoding;
+            material.normalMap = threeTexture;
+            break;
+          case TextureUsage.Occlusion:
+            encoding = LinearEncoding;
+            material.aoMap = threeTexture;
+            break;
+          case TextureUsage.Emissive:
+            material.emissiveMap = threeTexture;
+            break;
+          default:
+        }
+        material.needsUpdate = true;
+      }
     }
+
     if (threeTexture) {
       // Updates the encoding for the texture, affects all references.
       threeTexture.encoding = encoding;
@@ -192,7 +199,7 @@ export class TextureInfo extends ThreeDOMElement implements
       // Applies the existing context to the new texture.
       this[$texture]!.applyNewTextureInfo(this);
     }
-    this[$material]!.needsUpdate = true;
+    // this[$material]!.needsUpdate = true;
     this.onUpdate();
   }
 }

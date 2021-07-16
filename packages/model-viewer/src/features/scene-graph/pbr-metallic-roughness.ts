@@ -56,44 +56,47 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       pbrMetallicRoughness.metallicFactor = 1;
     }
 
-    let {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;
-    const baseColorTextures = new Set<ThreeTexture>();
-    const metallicRoughnessTextures = new Set<ThreeTexture>();
+    const baseColorTexture =
+        pbrMetallicRoughness.baseColorTexture ?? {index: -1};
+
+    const metallicRoughnessTexture =
+        pbrMetallicRoughness.metallicRoughnessTexture ?? {index: -1};
+
+    const baseColorTextures: ThreeTexture|null =
+        correlatedMaterials.values().next().value ?
+        correlatedMaterials.values().next().value.map :
+        null;
+
+    // NOTE: GLTFLoader users the same texture for metalnessMap and
+    // roughnessMap in this case
+    // @see https://github.com/mrdoob/three.js/blob/b4473c25816df4a09405c7d887d5c418ef47ee76/examples/js/loaders/GLTFLoader.js#L2173-L2174
+    const metallicRoughnessTextures: ThreeTexture|null =
+        correlatedMaterials.values().next().value ?
+        correlatedMaterials.values().next().value.metalnessMap :
+        null;
 
     for (const material of correlatedMaterials) {
-      if (baseColorTexture != null && material.map != null) {
-        baseColorTextures.add(material.map);
-      } else {
-        baseColorTexture = {index: -1};
+      if (baseColorTextures !== material.map) {
+        console.error('Base map differs between homegenous materials');
       }
-
-      // NOTE: GLTFLoader users the same texture for metalnessMap and
-      // roughnessMap in this case
-      // @see https://github.com/mrdoob/three.js/blob/b4473c25816df4a09405c7d887d5c418ef47ee76/examples/js/loaders/GLTFLoader.js#L2173-L2174
-      if (metallicRoughnessTexture != null && material.metalnessMap != null) {
-        metallicRoughnessTextures.add(material.metalnessMap);
-      } else {
-        metallicRoughnessTexture = {index: -1};
+      if (metallicRoughnessTextures !== material.metalnessMap) {
+        console.error('Metallness map differs between homegenous materials');
       }
     }
-
-    const firstValue = <Type>(set: Set<Type>): Type => {
-      return set.values().next().value;
-    };
 
     this[$baseColorTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        firstValue(correlatedMaterials),
-        firstValue(baseColorTextures),
+        correlatedMaterials,
+        baseColorTextures,
         TextureUsage.Base,
         baseColorTexture!);
 
     this[$metallicRoughnessTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        firstValue(correlatedMaterials),
-        firstValue(metallicRoughnessTextures),
+        correlatedMaterials,
+        metallicRoughnessTextures,
         TextureUsage.Metallic,
         metallicRoughnessTexture!);
   }
