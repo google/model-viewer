@@ -386,18 +386,6 @@
       ]
     },
     {
-      "name": "khronos-Fox",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf",
-      "orbit": {
-        "theta": -60,
-        "phi": 80,
-        "radius": 286
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
       "name": "khronos-GlamVelvetSofa",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/GlamVelvetSofa/glTF/GlamVelvetSofa.gltf",
       "dimensions": {
