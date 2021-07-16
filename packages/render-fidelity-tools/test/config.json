@@ -405,6 +405,17 @@
       ]
     },
     {
+      "name": "khronos-MaterialsVariantsShoe",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe/glTF/MaterialsVariantsShoe.gltf",
+      "orbit": {
+        "theta":35,
+        "phi": 49
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-ReciprocatingSaw",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ReciprocatingSaw/glTF-Binary/ReciprocatingSaw.glb",
       "dimensions": {
