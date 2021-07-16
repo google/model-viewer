@@ -388,6 +388,9 @@
     {
       "name": "khronos-Fox",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf",
+      "target": {
+        "y": 30
+      },
       "orbit": {
         "theta": -60,
         "phi": 80,
