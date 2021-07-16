@@ -26,6 +26,20 @@
   ],
   "scenarios": [
     {
+      "name": "khronos-DragonAttenuation",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DragonAttenuation/glTF/DragonAttenuation.gltf",
+      "dimensions": {
+        "height": 120,
+        "width": 130
+      },
+      "orbit": {
+        "radius": 12.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-BoomBox",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf",
       "orbit": {
@@ -369,16 +383,6 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ClearCoatTest/glTF/ClearCoatTest.gltf",
       "orbit": {
         "radius": 20
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-DragonAttenuation",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DragonAttenuation/glTF/DragonAttenuation.gltf",
-      "orbit": {
-        "radius": 12.0
       },
       "exclude": [
         "dspbr-pt"
