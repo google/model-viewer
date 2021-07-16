@@ -386,6 +386,22 @@
       ]
     },
     {
+      "name": "khronos-GlamVelvetSofa",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/GlamVelvetSofa/glTF/GlamVelvetSofa.gltf",
+      "dimensions": {
+        "width": 512,
+        "height": 250
+      },
+      "orbit": {
+        "theta": 2,
+        "phi": 70.0,
+        "radius":2.2
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-GearboxAssy",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/GearboxAssy/glTF/GearboxAssy.gltf",
       "dimensions": {
