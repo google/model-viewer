@@ -51,7 +51,7 @@ export interface SceneGraphInterface {
   readonly availableVariants: Array<string>;
   orientation: string;
   scale: string;
-  readonly gltfJson: GLTF|undefined;
+  readonly originalGltfJson: GLTF|undefined;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
   createTexture(uri: string): Promise<ModelViewerTexture|null>;
 }
@@ -86,8 +86,12 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$variants];
     }
 
-    get gltfJson() {
-      return this[$currentGLTF]?.correlatedSceneGraph.gltf;
+    /**
+     * Returns a deep copy of the gltf JSON as loaded. It will not reflect
+     * changes to the scene-graph, nor will editing it have any effect.
+     */
+    get originalGltfJson() {
+      return JSON.parse(JSON.stringify(this[$currentGLTF]?.parser.json));
     }
 
     /**
