@@ -118,9 +118,13 @@ export class MaterialPanel extends ConnectedLitElement {
     return getTextureId(this.originalGltf!.images![imageIndex]);
   }
 
-  getTextureIndex(texture: TextureInfo|null) {
-    const id = texture ? getTextureId(texture.texture.source) : undefined;
-    return id ? this.thumbnailIds.indexOf(id) : undefined;
+  getTextureIndex(textureInfo: TextureInfo) {
+    const {texture} = textureInfo;
+    if (texture == null) {
+      return undefined;
+    }
+    const id = getTextureId(texture.source);
+    return this.thumbnailIds.indexOf(id);
   }
 
   rgbToHex(rgba: RGBA|RGB): string {

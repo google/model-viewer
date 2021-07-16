@@ -90,7 +90,7 @@ describe('material panel test', () => {
 
        const {baseColorTexture} =
            panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
-       expect(getTextureId(baseColorTexture!.texture.source))
+       expect(getTextureId(baseColorTexture.texture!.source))
            .toEqual(expectedTextureId);
      });
 
@@ -106,7 +106,7 @@ describe('material panel test', () => {
 
     const {baseColorTexture} =
         panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
-    expect(getTextureId(baseColorTexture!.texture.source)).toEqual('undefined');
+    expect(getTextureId(baseColorTexture.texture!.source)).toEqual('undefined');
   });
 
   it('applies changes to model textures on MR texture picker input',
@@ -124,7 +124,7 @@ describe('material panel test', () => {
 
        const {metallicRoughnessTexture} =
            panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
-       expect(getTextureId(metallicRoughnessTexture!.texture.source))
+       expect(getTextureId(metallicRoughnessTexture.texture!.source))
            .toEqual(expectedTextureId);
      });
 
@@ -140,7 +140,7 @@ describe('material panel test', () => {
 
     const {metallicRoughnessTexture} =
         panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
-    expect(getTextureId(metallicRoughnessTexture!.texture.source))
+    expect(getTextureId(metallicRoughnessTexture.texture!.source))
         .toEqual('undefined');
   });
 
@@ -158,7 +158,7 @@ describe('material panel test', () => {
        const expectedTextureId = panel.selectedNormalTextureId!;
 
        const {normalTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
-       expect(getTextureId(normalTexture!.texture.source))
+       expect(getTextureId(normalTexture.texture!.source))
            .toEqual(expectedTextureId);
      });
 
@@ -173,7 +173,7 @@ describe('material panel test', () => {
     clearTextureOption.dispatchEvent(new Event('click'));
 
     const {normalTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
-    expect(getTextureId(normalTexture!.texture.source)).toEqual('undefined');
+    expect(getTextureId(normalTexture.texture!.source)).toEqual('undefined');
   });
 
   it('applies changes to model textures on emissive texture picker input',
@@ -191,7 +191,7 @@ describe('material panel test', () => {
 
        const {emissiveTexture} =
            panel.getMaterial(panel.selectedMaterialIndex)!;
-       expect(getTextureId(emissiveTexture!.texture.source))
+       expect(getTextureId(emissiveTexture.texture!.source))
            .toEqual(expectedTextureId);
      });
 
@@ -206,7 +206,7 @@ describe('material panel test', () => {
     clearTextureOption.dispatchEvent(new Event('click'));
 
     const {emissiveTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
-    expect(getTextureId(emissiveTexture!.texture.source)).toEqual('undefined');
+    expect(getTextureId(emissiveTexture.texture!.source)).toEqual('undefined');
   });
 
   it('applies changes to model textures on occlusion texture picker input',
@@ -224,7 +224,7 @@ describe('material panel test', () => {
 
        const {occlusionTexture} =
            panel.getMaterial(panel.selectedMaterialIndex)!;
-       expect(getTextureId(occlusionTexture!.texture.source))
+       expect(getTextureId(occlusionTexture.texture!.source))
            .toEqual(expectedTextureId);
      });
 
@@ -239,7 +239,7 @@ describe('material panel test', () => {
     clearTextureOption.dispatchEvent(new Event('click'));
 
     const {occlusionTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
-    expect(getTextureId(occlusionTexture!.texture.source)).toEqual('undefined');
+    expect(getTextureId(occlusionTexture.texture!.source)).toEqual('undefined');
   });
 
   it('applies changes to model textures on double sided change', async () => {
@@ -271,7 +271,7 @@ describe('material panel test', () => {
        // texture.
        const {baseColorTexture} =
            panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
-       expect(getTextureId(baseColorTexture!.texture.source)).toEqual('fooUrl');
+       expect(getTextureId(baseColorTexture.texture!.source)).toEqual('fooUrl');
      });
 
   it('adds a normal texture to model textures on normal texture upload',
@@ -287,7 +287,7 @@ describe('material panel test', () => {
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
        const {normalTexture} = panel.getMaterial(panel.selectedMaterialIndex)!;
-       expect(getTextureId(normalTexture!.texture.source)).toEqual('fooUrl');
+       expect(getTextureId(normalTexture.texture!.source)).toEqual('fooUrl');
      });
 
   it('adds a metallic-roughness texture to model textures on MR texture upload',
@@ -304,7 +304,7 @@ describe('material panel test', () => {
        // texture.
        const {metallicRoughnessTexture} =
            panel.getMaterial(panel.selectedMaterialIndex)!.pbrMetallicRoughness;
-       expect(getTextureId(metallicRoughnessTexture!.texture.source))
+       expect(getTextureId(metallicRoughnessTexture.texture!.source))
            .toEqual('fooUrl');
      });
 
@@ -322,7 +322,7 @@ describe('material panel test', () => {
        // texture.
        const {emissiveTexture} =
            panel.getMaterial(panel.selectedMaterialIndex)!;
-       expect(getTextureId(emissiveTexture!.texture.source)).toEqual('fooUrl');
+       expect(getTextureId(emissiveTexture.texture!.source)).toEqual('fooUrl');
      });
 
   it('adds a occlusion texture to model textures on occlusion texture upload',
@@ -339,7 +339,7 @@ describe('material panel test', () => {
        // texture.
        const {occlusionTexture} =
            panel.getMaterial(panel.selectedMaterialIndex)!;
-       expect(getTextureId(occlusionTexture!.texture.source)).toEqual('fooUrl');
+       expect(getTextureId(occlusionTexture.texture!.source)).toEqual('fooUrl');
      });
 
   it('applies changes to model textures on emissiveFactor change', async () => {

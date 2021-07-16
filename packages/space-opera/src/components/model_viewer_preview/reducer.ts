@@ -83,11 +83,12 @@ export function getTextureId(gltfImage: {uri?: string, bufferView?: number}):
 }
 
 async function pushThumbnail(
-    thumbnailsById: Map<string, string>, textureInfo: TextureInfo|null) {
-  if (textureInfo == null) {
+    thumbnailsById: Map<string, string>, textureInfo: TextureInfo) {
+  const {texture} = textureInfo;
+  if (texture == null) {
     return;
   }
-  const {source} = textureInfo.texture;
+  const {source} = texture;
   const id = getTextureId(source);
   if (!thumbnailsById.has(id)) {
     thumbnailsById.set(
@@ -123,7 +124,8 @@ export function dispatchGltfUrl(gltfUrl?: string|undefined) {
 const SET_MODEL = 'SET_MODEL';
 export async function dispatchModel() {
   const thumbnailsById = await createThumbnails();
-  const originalGltfJson = JSON.stringify(getModelViewer()?.gltfJson, null, 2);
+  const originalGltfJson =
+      JSON.stringify(getModelViewer()?.originalGltfJson, null, 2);
   // Make a deep copy of the JSON so changes are not reflected.
   const originalGltf = JSON.parse(originalGltfJson);
   return {
