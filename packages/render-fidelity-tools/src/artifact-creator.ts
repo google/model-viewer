@@ -134,7 +134,7 @@ export class ArtifactCreator {
       throw new Error(`❌ Model-viewer's screenshot of ${
           scenarioName} is not captured correctly (value is null).`);
     }
-    const screenshotImage = pngjs.PNG.sync.read(screenshot).data;
+    const screenshotImage = pngjs.PNG.sync.read(screenshot as Buffer).data;
 
     const modelViewerIndex = 0;
     const modelViewerGoldenPath = join(
