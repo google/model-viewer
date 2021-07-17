@@ -59,3 +59,23 @@ export async function createSafeObjectUrlFromUnsafe(unsafeUri: string):
 export function createSafeObjectUrlFromArrayBuffer(contents: ArrayBuffer) {
   return createSafeObjectURL(new Blob([new Uint8Array(contents)]));
 }
+
+/**
+ * Return a closure which will initiate download of the given blob
+ */
+// Underscore var name needed for NPM build
+// tslint:disable-next-line:enforce-name-casing
+export function safeDownloadCallback(blob: Blob, filename: string) {
+  return () => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 250);
+  };
+}

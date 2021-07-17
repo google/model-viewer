@@ -26,14 +26,9 @@ import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../config/reducer';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
+import {getModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
-import {getAnimationNames} from './reducer.js';
-
-interface AnimationControlsInterface {
-  autoplay?: boolean;
-  animationName?: string;
-}
 
 /**
  * Animation controls for gltf and model-viewer.
@@ -42,11 +37,14 @@ interface AnimationControlsInterface {
 export class AnimationControls extends ConnectedLitElement {
   @query('me-checkbox#animation-autoplay') autoplayCheckbox?: CheckboxElement;
   @internalProperty() animationNames: string[] = [];
-  @internalProperty() config: AnimationControlsInterface = {};
+  @internalProperty() selectedAnimation: string|undefined = undefined;
+  @internalProperty() autoplay: boolean = false;
 
   stateChanged(state: State) {
-    this.animationNames = getAnimationNames(state);
-    this.config = getConfig(state);
+    this.animationNames = getModelViewer()?.availableAnimations ?? [];
+    const config = getConfig(state);
+    this.selectedAnimation = config.animationName;
+    this.autoplay = !!config.autoplay;
   }
 
   // Specifically overriding a super class method.
@@ -57,9 +55,9 @@ export class AnimationControls extends ConnectedLitElement {
   }
 
   render() {
-    let selectedAnimationIndex = this.config.animationName ?
+    let selectedAnimationIndex = this.selectedAnimation ?
         this.animationNames.findIndex(
-            (name) => name === this.config.animationName) :
+            (name) => name === this.selectedAnimation) :
         0;  // Select first animation as model-viewer default
 
     if (selectedAnimationIndex === -1) {
@@ -82,7 +80,7 @@ export class AnimationControls extends ConnectedLitElement {
     })}
           </me-dropdown>
           <me-checkbox id="animation-autoplay" label="Autoplay"
-            ?checked="${!!this.config.autoplay}"
+            ?checked="${!!this.autoplay}"
             @change=${this.onAutoplayChange}></me-checkbox>
         </div>
       </me-expandable-tab>

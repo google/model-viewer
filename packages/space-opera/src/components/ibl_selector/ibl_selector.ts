@@ -24,12 +24,11 @@ import '@polymer/paper-item';
 import '@material/mwc-button';
 import '../file_modal/file_modal.js';
 
-import {IMAGE_MIME_TYPES, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {iblSelectorStyles} from '../../styles.css.js';
-import {State} from '../../types.js';
+import {ModelViewerConfig, State} from '../../types.js';
 import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
@@ -37,6 +36,7 @@ import {dispatchSetEnvironmentName} from '../relative_file_paths/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
+import {IMAGE_MIME_TYPES} from '../utils/gltf_constants.js';
 
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage, getEnvironmentImages} from './reducer.js';
 import {DEFAULT_EXPOSURE, DEFAULT_SHADOW_INTENSITY, DEFAULT_SHADOW_SOFTNESS, EnvironmentImage} from './types.js';

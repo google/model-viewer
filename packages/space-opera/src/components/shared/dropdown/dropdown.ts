@@ -19,10 +19,11 @@ import '@polymer/paper-dropdown-menu/paper-dropdown-menu';
 import '@polymer/paper-listbox';
 import '@polymer/paper-item';
 
-import {checkFinite} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {PaperDropdownMenuElement} from '@polymer/paper-dropdown-menu/paper-dropdown-menu';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {customElement, html, LitElement, property, query} from 'lit-element';
+
+import {checkFinite} from '../../utils/reducer_utils.js';
 
 import {styles} from './dropdown.css.js';
 

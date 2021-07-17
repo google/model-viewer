@@ -15,8 +15,9 @@
  *
  */
 
-import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {roundToDigits} from '@google/model-viewer-editing-adapter/lib/util/math.js'
+import {ModelViewerConfig} from '../../types.js';
+import {roundToDigits} from '../utils/reducer_utils.js';
+
 import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
 
 const DIGITS = 4;
