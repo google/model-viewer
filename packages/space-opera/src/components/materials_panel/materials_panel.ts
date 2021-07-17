@@ -36,7 +36,7 @@ import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {dispatchModelDirty, getModel, getModelViewer, getTextureId} from '../model_viewer_preview/reducer.js';
+import {dispatchModelDirty, getModel, getModelViewer, getTextureId, pushThumbnail} from '../model_viewer_preview/reducer.js';
 import {Thumbnail} from '../model_viewer_preview/types.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
@@ -393,23 +393,42 @@ export class MaterialPanel extends ConnectedLitElement {
     reduxStore.dispatch(dispatchModelDirty());
   }
 
-  onBaseColorTextureChange() {
+  onTextureChange(textureId: string|undefined, textureInfo: TextureInfo) {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
-    const textureId = this.selectedBaseColorTextureId;
-    this.getMaterial().pbrMetallicRoughness.baseColorTexture.setTexture(
-        this.thumbnailsById.get(textureId));
+    const texture = textureId != null ?
+        this.thumbnailsById.get(textureId)?.texture :
+        undefined;
+    textureInfo.setTexture(texture ?? null);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
-  onBaseColorTextureUpload(event: CustomEvent) {
+  async onTextureUpload(uri: string, textureInfo: TextureInfo) {
     if (this.selectedMaterialIndex === undefined) {
       throw new Error('No material selected');
     }
-    const uri = event.detail;
-    this.getMaterial()
-        .pbrMetallicRoughness.baseColorTexture.texture.source.setURI(uri);
+    if (this.thumbnailsById.has(uri)) {
+      console.log('URL collision! Texture not updated.');
+      return;
+    }
+    const texture = await getModelViewer()?.createTexture(uri);
+    if (texture == null) {
+      return;
+    }
+    textureInfo.setTexture(texture);
+    pushThumbnail(this.thumbnailsById, textureInfo);
+  }
+
+  onBaseColorTextureChange() {
+    this.onTextureChange(
+        this.selectedBaseColorTextureId,
+        this.getMaterial().pbrMetallicRoughness.baseColorTexture);
+  }
+
+  onBaseColorTextureUpload(event: CustomEvent) {
+    this.onTextureUpload(
+        event.detail, this.getMaterial().pbrMetallicRoughness.baseColorTexture);
   }
 
   onMetallicRoughnessTextureChange() {

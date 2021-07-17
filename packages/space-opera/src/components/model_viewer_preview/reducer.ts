@@ -82,7 +82,7 @@ export function getTextureId(gltfImage: {uri?: string, bufferView?: number}):
   return gltfImage.uri ?? gltfImage.bufferView!.toString();
 }
 
-async function pushThumbnail(
+export async function pushThumbnail(
     thumbnailsById: Map<string, Thumbnail>, textureInfo: TextureInfo) {
   const {texture} = textureInfo;
   if (texture == null) {
