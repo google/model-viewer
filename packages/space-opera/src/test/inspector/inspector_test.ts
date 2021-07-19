@@ -51,7 +51,7 @@ describe('loader inspector pane test', () => {
         inspectorPane.shadowRoot!.querySelector(
                                      '.inspector-content')!.textContent!;
     expect(textContent).toBeTruthy();
-    expect(JSON.parse(textContent)).toEqual(getModelViewer()!.gltfJson);
+    expect(JSON.parse(textContent)).toEqual(getModelViewer()!.originalGltfJson);
   });
 
   it('uploads images in the bin to the inspector pane', async () => {
