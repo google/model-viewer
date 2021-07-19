@@ -54,8 +54,8 @@ export class MaterialPanel extends ConnectedLitElement {
   static styles = styles;
 
   @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
-  @internalProperty() thumbnailUrls: string[] = [];
-  @internalProperty() thumbnailIds: string[] = [];
+  private thumbnailUrls: string[] = [];
+  private thumbnailIds: string[] = [];
   @internalProperty() originalGltf?: GLTF;
 
   @internalProperty() isNewModel: boolean = true;
@@ -318,12 +318,12 @@ export class MaterialPanel extends ConnectedLitElement {
     return this.thumbnailIds[this.baseColorTexturePicker.selectedIndex];
   }
 
-  get selectedMetallicRoughnessTextureId(): string|null {
+  get selectedMetallicRoughnessTextureId(): string|undefined {
     if (!this.metallicRoughnessTexturePicker) {
       throw new Error('Texture picker is not defined');
     }
     if (this.metallicRoughnessTexturePicker.selectedIndex == null) {
-      return null;
+      return undefined;
     }
     return this.thumbnailIds[this.metallicRoughnessTexturePicker.selectedIndex];
   }
@@ -394,20 +394,14 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onTextureChange(textureId: string|undefined, textureInfo: TextureInfo) {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
     const texture = textureId != null ?
         this.thumbnailsById.get(textureId)?.texture :
         undefined;
-    textureInfo.setTexture(texture ?? null);
+    textureInfo.setTexture(texture as any ?? null);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   async onTextureUpload(uri: string, textureInfo: TextureInfo) {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
     if (this.thumbnailsById.has(uri)) {
       console.log('URL collision! Texture not updated.');
       return;
@@ -417,7 +411,14 @@ export class MaterialPanel extends ConnectedLitElement {
       return;
     }
     textureInfo.setTexture(texture);
-    pushThumbnail(this.thumbnailsById, textureInfo);
+    const id = await pushThumbnail(this.thumbnailsById, textureInfo);
+    // Trigger async panel update / render
+    this.thumbnailsById = new Map(this.thumbnailsById);
+    if (id != null) {
+      this.thumbnailIds.push(id);
+      this.thumbnailUrls.push(this.thumbnailsById.get(id)!.objectUrl);
+    }
+    reduxStore.dispatch(dispatchModelDirty());
   }
 
   onBaseColorTextureChange() {
@@ -432,63 +433,33 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onMetallicRoughnessTextureChange() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-    const textureId = this.selectedMetallicRoughnessTextureId;
-    this.getMaterial()
-        .pbrMetallicRoughness.metallicRoughnessTexture.texture.source.setURI(
-            textureId!);
-    reduxStore.dispatch(dispatchModelDirty());
+    this.onTextureChange(
+        this.selectedMetallicRoughnessTextureId,
+        this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
   onMetallicRoughnessTextureUpload(event: CustomEvent) {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-    const uri = event.detail;
-    this.getMaterial()
-        .pbrMetallicRoughness.metallicRoughnessTexture.texture.source.setURI(
-            uri);
-    reduxStore.dispatch(dispatchModelDirty());
+    this.onTextureUpload(
+        event.detail,
+        this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
   onNormalTextureChange() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-
-    const textureId = this.selectedNormalTextureId;
-    this.getMaterial().normalTexture.texture.source.setURI(textureId!);
-    reduxStore.dispatch(dispatchModelDirty());
+    this.onTextureChange(
+        this.selectedNormalTextureId, this.getMaterial().normalTexture);
   }
 
   onNormalTextureUpload(event: CustomEvent) {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-
-    const uri = event.detail;
-    this.getMaterial().normalTexture.texture.source.setURI(uri);
+    this.onTextureUpload(event.detail, this.getMaterial().normalTexture);
   }
 
   onEmissiveTextureChange() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-
-    const textureId = this.selectedEmissiveTextureId;
-    this.getMaterial().emissiveTexture.texture.source.setURI(textureId!);
-    reduxStore.dispatch(dispatchModelDirty());
+    this.onTextureChange(
+        this.selectedEmissiveTextureId, this.getMaterial().emissiveTexture);
   }
 
   onEmissiveTextureUpload(event: CustomEvent) {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-
-    const uri = event.detail;
-    this.getMaterial().emissiveTexture.texture.source.setURI(uri);
+    this.onTextureUpload(event.detail, this.getMaterial().emissiveTexture);
   }
 
   onEmissiveFactorChanged() {
@@ -500,22 +471,12 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onOcclusionTextureChange() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-
-    const textureId = this.selectedOcclusionTextureId;
-    this.getMaterial().occlusionTexture.texture.source.setURI(textureId!);
-    reduxStore.dispatch(dispatchModelDirty());
+    this.onTextureChange(
+        this.selectedOcclusionTextureId, this.getMaterial().occlusionTexture);
   }
 
   onOcclusionTextureUpload(event: CustomEvent) {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-
-    const uri = event.detail;
-    this.getMaterial().occlusionTexture.texture.source.setURI(uri);
+    this.onTextureUpload(event.detail, this.getMaterial().occlusionTexture);
   }
 
   onAlphaModeSelect() {

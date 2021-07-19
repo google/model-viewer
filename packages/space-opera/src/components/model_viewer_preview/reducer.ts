@@ -83,10 +83,11 @@ export function getTextureId(gltfImage: {uri?: string, bufferView?: number}):
 }
 
 export async function pushThumbnail(
-    thumbnailsById: Map<string, Thumbnail>, textureInfo: TextureInfo) {
+    thumbnailsById: Map<string, Thumbnail>,
+    textureInfo: TextureInfo): Promise<string|null> {
   const {texture} = textureInfo;
   if (texture == null) {
-    return;
+    return null;
   }
   const {source} = texture;
   const id = getTextureId(source);
@@ -96,6 +97,7 @@ export async function pushThumbnail(
       texture
     });
   }
+  return id;
 }
 
 async function createThumbnails(): Promise<Map<string, Thumbnail>> {
