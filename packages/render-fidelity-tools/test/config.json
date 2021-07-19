@@ -211,6 +211,17 @@
       "renderSkybox": true
     },
     {
+      "name": "khronos-MorphStressTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MorphStressTest/glTF/MorphStressTest.gltf",
+      "orbit": {
+        "radius": 8
+      },
+      "exclude": [
+        "dspbr-pt",
+        "gltf-sample-viewer"
+      ]
+    },
+    {
       "name": "khronos-EnvironmentTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
       "dimensions": {
