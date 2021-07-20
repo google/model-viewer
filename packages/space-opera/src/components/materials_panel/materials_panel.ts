@@ -419,6 +419,7 @@ export class MaterialPanel extends ConnectedLitElement {
       this.thumbnailUrls.push(this.thumbnailsById.get(id)!.objectUrl);
     }
     reduxStore.dispatch(dispatchModelDirty());
+    this.dispatchEvent(new CustomEvent('texture-upload-complete'));
   }
 
   onBaseColorTextureChange() {

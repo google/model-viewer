@@ -22,8 +22,10 @@ import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../../components/shared/slider_with_input/slider_with_input.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
+import {waitForEvent} from '../utils/test_utils.js';
 
 const CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
+const TEXTURE_PATH = '../base/shared-assets/models/ORM.png';
 
 describe('material panel test', () => {
   let preview: ModelViewerPreview;
@@ -144,76 +146,58 @@ describe('material panel test', () => {
     expect(metallicRoughnessTexture.texture).toEqual(null);
   });
 
-  it('applies changes to model textures on normal texture picker input',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       const texturePicker = panel.normalTexturePicker!;
-       texturePicker.selectedIndex = 2;
-       await texturePicker.updateComplete;
-
-       const textureOptionInput =
-           texturePicker.shadowRoot!.querySelector('input')!;
-       textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedNormalTextureId!;
-
-       const {normalTexture} = panel.getMaterial();
-       expect(getTextureId(normalTexture.texture!.source))
-           .toEqual(expectedTextureId);
-     });
-
-  it('clears model textures on normal null texture input', async () => {
-    panel.selectedMaterialIndex = 1;
+  it('normal texture picker input can change and clear texture', async () => {
+    panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
     const texturePicker = panel.normalTexturePicker!;
+    texturePicker.selectedIndex = 1;
     await texturePicker.updateComplete;
+
+    const textureOptionInput =
+        texturePicker.shadowRoot!.querySelector('input')!;
+    textureOptionInput.dispatchEvent(new Event('click'));
+    const expectedTextureId = panel.selectedNormalTextureId!;
+
+    const {normalTexture} = panel.getMaterial();
+    expect(getTextureId(normalTexture.texture!.source))
+        .toEqual(expectedTextureId);
 
     const clearTextureOption =
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     clearTextureOption.dispatchEvent(new Event('click'));
 
-    const {normalTexture} = panel.getMaterial();
-    expect(getTextureId(normalTexture.texture!.source)).toEqual('undefined');
+    expect(normalTexture.texture).toEqual(null);
   });
 
-  it('applies changes to model textures on emissive texture picker input',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       const texturePicker = panel.emissiveTexturePicker!;
-       texturePicker.selectedIndex = 2;
-       await texturePicker.updateComplete;
-
-       const textureOptionInput =
-           texturePicker.shadowRoot!.querySelector('input')!;
-       textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedEmissiveTextureId!;
-
-       const {emissiveTexture} = panel.getMaterial();
-       expect(getTextureId(emissiveTexture.texture!.source))
-           .toEqual(expectedTextureId);
-     });
-
-  it('clears model textures on emissive null texture input', async () => {
+  it('emissive texture picker input can change and clear texture', async () => {
     panel.selectedMaterialIndex = 1;
     await panel.updateComplete;
     const texturePicker = panel.emissiveTexturePicker!;
+    texturePicker.selectedIndex = 0;
     await texturePicker.updateComplete;
+
+    const textureOptionInput =
+        texturePicker.shadowRoot!.querySelector('input')!;
+    textureOptionInput.dispatchEvent(new Event('click'));
+    const expectedTextureId = panel.selectedEmissiveTextureId!;
+
+    const {emissiveTexture} = panel.getMaterial();
+    expect(getTextureId(emissiveTexture.texture!.source))
+        .toEqual(expectedTextureId);
 
     const clearTextureOption =
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     clearTextureOption.dispatchEvent(new Event('click'));
 
-    const {emissiveTexture} = panel.getMaterial();
-    expect(getTextureId(emissiveTexture.texture!.source)).toEqual('undefined');
+    expect(emissiveTexture.texture).toEqual(null);
   });
 
-  it('applies changes to model textures on occlusion texture picker input',
+  it('occlusion texture picker input can change and clear texture',
      async () => {
        panel.selectedMaterialIndex = 0;
        await panel.updateComplete;
        const texturePicker = panel.occlusionTexturePicker!;
-       texturePicker.selectedIndex = 2;
+       texturePicker.selectedIndex = 0;
        await texturePicker.updateComplete;
 
        const textureOptionInput =
@@ -224,21 +208,13 @@ describe('material panel test', () => {
        const {occlusionTexture} = panel.getMaterial();
        expect(getTextureId(occlusionTexture.texture!.source))
            .toEqual(expectedTextureId);
+
+       const clearTextureOption =
+           texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
+       clearTextureOption.dispatchEvent(new Event('click'));
+
+       expect(occlusionTexture.texture).toEqual(null);
      });
-
-  it('clears model textures on occlusion null texture input', async () => {
-    panel.selectedMaterialIndex = 1;
-    await panel.updateComplete;
-    const texturePicker = panel.occlusionTexturePicker!;
-    await texturePicker.updateComplete;
-
-    const clearTextureOption =
-        texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
-    clearTextureOption.dispatchEvent(new Event('click'));
-
-    const {occlusionTexture} = panel.getMaterial();
-    expect(getTextureId(occlusionTexture.texture!.source)).toEqual('undefined');
-  });
 
   it('applies changes to model textures on double sided change', async () => {
     panel.selectedMaterialIndex = 0;
@@ -262,13 +238,15 @@ describe('material panel test', () => {
        await panel.updateComplete;
        const texturePicker = panel.baseColorTexturePicker!;
        texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: 'fooUrl'}));
+           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
+       await waitForEvent(panel, 'texture-upload-complete');
        await panel.updateComplete;
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
        const {baseColorTexture} = panel.getMaterial().pbrMetallicRoughness;
-       expect(getTextureId(baseColorTexture.texture!.source)).toEqual('fooUrl');
+       expect(getTextureId(baseColorTexture.texture!.source))
+           .toEqual(TEXTURE_PATH);
      });
 
   it('adds a normal texture to model textures on normal texture upload',
@@ -278,13 +256,15 @@ describe('material panel test', () => {
        await panel.updateComplete;
        const texturePicker = panel.normalTexturePicker!;
        texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: 'fooUrl'}));
+           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
+       await waitForEvent(panel, 'texture-upload-complete');
        await panel.updateComplete;
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
        const {normalTexture} = panel.getMaterial();
-       expect(getTextureId(normalTexture.texture!.source)).toEqual('fooUrl');
+       expect(getTextureId(normalTexture.texture!.source))
+           .toEqual(TEXTURE_PATH);
      });
 
   it('adds a metallic-roughness texture to model textures on MR texture upload',
@@ -294,7 +274,8 @@ describe('material panel test', () => {
        await panel.updateComplete;
        const texturePicker = panel.metallicRoughnessTexturePicker!;
        texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: 'fooUrl'}));
+           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
+       await waitForEvent(panel, 'texture-upload-complete');
        await panel.updateComplete;
 
        // Check that the uri of the texture at material 0 is the newly uploaded
@@ -302,7 +283,7 @@ describe('material panel test', () => {
        const {metallicRoughnessTexture} =
            panel.getMaterial().pbrMetallicRoughness;
        expect(getTextureId(metallicRoughnessTexture.texture!.source))
-           .toEqual('fooUrl');
+           .toEqual(TEXTURE_PATH);
      });
 
   it('adds a emissive texture to model textures on emissive texture upload',
@@ -312,13 +293,15 @@ describe('material panel test', () => {
        await panel.updateComplete;
        const texturePicker = panel.emissiveTexturePicker!;
        texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: 'fooUrl'}));
+           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
+       await waitForEvent(panel, 'texture-upload-complete');
        await panel.updateComplete;
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
        const {emissiveTexture} = panel.getMaterial();
-       expect(getTextureId(emissiveTexture.texture!.source)).toEqual('fooUrl');
+       expect(getTextureId(emissiveTexture.texture!.source))
+           .toEqual(TEXTURE_PATH);
      });
 
   it('adds a occlusion texture to model textures on occlusion texture upload',
@@ -328,13 +311,15 @@ describe('material panel test', () => {
        await panel.updateComplete;
        const texturePicker = panel.occlusionTexturePicker!;
        texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: 'fooUrl'}));
+           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
+       await waitForEvent(panel, 'texture-upload-complete');
        await panel.updateComplete;
 
        // Check that the uri of the texture at material 0 is the newly uploaded
        // texture.
        const {occlusionTexture} = panel.getMaterial();
-       expect(getTextureId(occlusionTexture.texture!.source)).toEqual('fooUrl');
+       expect(getTextureId(occlusionTexture.texture!.source))
+           .toEqual(TEXTURE_PATH);
      });
 
   it('applies changes to model textures on emissiveFactor change', async () => {
