@@ -56,31 +56,40 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       pbrMetallicRoughness.metallicFactor = 1;
     }
 
-    const baseColorTexture =
-        pbrMetallicRoughness.baseColorTexture ?? {index: -1};
+    let {
+      baseColorTexture: gltfBaseColorTexture,
+      metallicRoughnessTexture: gltfMetallicRoughnessTexture
+    } = pbrMetallicRoughness;
 
-    const metallicRoughnessTexture =
-        pbrMetallicRoughness.metallicRoughnessTexture ?? {index: -1};
+    let baseColorTexture: ThreeTexture|null = null;
+    let metallicRoughnessTexture: ThreeTexture|null = null;
 
-    const baseColorTextures: ThreeTexture|null =
-        correlatedMaterials.values().next().value ?
-        correlatedMaterials.values().next().value.map :
-        null;
+    const {map, metalnessMap} = correlatedMaterials.values().next().value;
 
-    // NOTE: GLTFLoader users the same texture for metalnessMap and
-    // roughnessMap in this case
-    // @see https://github.com/mrdoob/three.js/blob/b4473c25816df4a09405c7d887d5c418ef47ee76/examples/js/loaders/GLTFLoader.js#L2173-L2174
-    const metallicRoughnessTextures: ThreeTexture|null =
-        correlatedMaterials.values().next().value ?
-        correlatedMaterials.values().next().value.metalnessMap :
-        null;
+    if (map != null && gltfBaseColorTexture != null) {
+      baseColorTexture = map;
+    } else {
+      gltfBaseColorTexture = {index: -1};
+    }
 
+    if (metalnessMap != null && gltfMetallicRoughnessTexture != null) {
+      metallicRoughnessTexture = metalnessMap;
+    } else {
+      gltfMetallicRoughnessTexture = {index: -1};
+    }
+
+    const message = (textureType: string) => {
+      console.info(`A group of three.js materials are represented as a
+        single material but share different ${textureType} textures.`);
+    };
     for (const material of correlatedMaterials) {
-      if (baseColorTextures !== material.map) {
-        console.error('Base map differs between homegenous materials');
+      const verifyMap = material.map ?? null;
+      const verifyMetalnessMap = material.metalnessMap ?? null;
+      if (baseColorTexture !== verifyMap) {
+        message('base');
       }
-      if (metallicRoughnessTextures !== material.metalnessMap) {
-        console.error('Metallness map differs between homegenous materials');
+      if (metallicRoughnessTexture !== verifyMetalnessMap) {
+        message('metalness');
       }
     }
 
@@ -88,17 +97,17 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
         onUpdate,
         gltf,
         correlatedMaterials,
-        baseColorTextures,
+        baseColorTexture,
         TextureUsage.Base,
-        baseColorTexture!);
+        gltfBaseColorTexture!);
 
     this[$metallicRoughnessTexture] = new TextureInfo(
         onUpdate,
         gltf,
         correlatedMaterials,
-        metallicRoughnessTextures,
+        metallicRoughnessTexture,
         TextureUsage.Metallic,
-        metallicRoughnessTexture!);
+        gltfMetallicRoughnessTexture!);
   }
 
 

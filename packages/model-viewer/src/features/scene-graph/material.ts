@@ -64,33 +64,41 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       gltfMaterial.emissiveFactor = [0, 0, 0];
     }
 
-    let {normalTexture, occlusionTexture, emissiveTexture} = gltfMaterial;
+    let {
+      normalTexture: gltfNormalTexture,
+      occlusionTexture: gltfOcculsionTexture,
+      emissiveTexture: gltfEmissiveTexture
+    } = gltfMaterial;
 
-    let normalTextures: ThreeTexture|null = null;
-    let occlusionTextures: ThreeTexture|null = null;
-    let emissiveTextures: ThreeTexture|null = null;
+    let normalTexture: ThreeTexture|null = null;
+    let occlusionTexture: ThreeTexture|null = null;
+    let emissiveTexture: ThreeTexture|null = null;
 
     const {normalMap, aoMap, emissiveMap} =
         correlatedMaterials.values().next().value;
 
-    if (normalTexture != null && normalMap != null) {
-      normalTextures = normalMap;
+    if (gltfNormalTexture != null && normalMap != null) {
+      normalTexture = normalMap;
     } else {
-      normalTexture = {index: -1};
+      gltfNormalTexture = {index: -1};
     }
 
-    if (occlusionTexture != null && aoMap != null) {
-      occlusionTextures = aoMap;
+    if (gltfOcculsionTexture != null && aoMap != null) {
+      occlusionTexture = aoMap;
     } else {
-      occlusionTexture = {index: -1};
+      gltfOcculsionTexture = {index: -1};
     }
 
-    if (emissiveTexture != null && emissiveMap != null) {
-      emissiveTextures = emissiveMap;
+    if (gltfEmissiveTexture != null && emissiveMap != null) {
+      emissiveTexture = emissiveMap;
     } else {
-      emissiveTexture = {index: -1};
+      gltfEmissiveTexture = {index: -1};
     }
 
+    const message = (textureType: string) => {
+      console.info(`A group of three.js materials are represented as a
+        single material but share different ${textureType} textures.`);
+    };
     for (const gltfMaterial of correlatedMaterials) {
       const {
         normalMap: verifyNormalMap,
@@ -98,13 +106,13 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         emissiveMap: verifyEmissiveMap
       } = gltfMaterial;
       if (verifyNormalMap !== normalMap) {
-        console.error('Normal map differs between homegenous materials');
+        message('normal');
       }
       if (verifyAoMap !== aoMap) {
-        console.error('AO map differs between homegenous materials');
+        message('occlusion');
       }
       if (verifyEmissiveMap !== emissiveMap) {
-        console.error('Emissive map differs between homegenous materials');
+        message('emissive');
       }
     }
 
@@ -112,25 +120,25 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         onUpdate,
         gltf,
         correlatedMaterials,
-        normalTextures,
+        normalTexture,
         TextureUsage.Normal,
-        normalTexture!);
+        gltfNormalTexture!);
 
     this[$occlusionTexture] = new TextureInfo(
         onUpdate,
         gltf,
         correlatedMaterials,
-        occlusionTextures,
+        occlusionTexture,
         TextureUsage.Occlusion,
-        occlusionTexture!);
+        gltfOcculsionTexture!);
 
     this[$emissiveTexture] = new TextureInfo(
         onUpdate,
         gltf,
         correlatedMaterials,
-        emissiveTextures,
+        emissiveTexture,
         TextureUsage.Emissive,
-        emissiveTexture!);
+        gltfEmissiveTexture!);
   }
 
   get name(): string {
