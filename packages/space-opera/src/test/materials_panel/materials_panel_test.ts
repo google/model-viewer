@@ -23,7 +23,7 @@ import {SliderWithInputElement} from '../../components/shared/slider_with_input/
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-const CUBE_GLTF_PATH = '../base/shared-assets/models/cube.gltf';
+const CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
 
 describe('material panel test', () => {
   let preview: ModelViewerPreview;
@@ -52,9 +52,15 @@ describe('material panel test', () => {
   it('selector reflects materials in GLTF', async () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
-    expect(panel.selectedBaseColor).toEqual([0.8, 0.8, 0.2, 1.0]);
-    expect(panel.selectedRoughnessFactor).toEqual(0.9);
-    expect(panel.selectedMetallicFactor).toEqual(0.4);
+    expect(panel.selectedBaseColor).toEqual([1, 0, 1, 1]);
+    expect(panel.selectedRoughnessFactor).toEqual(0.2);
+    expect(panel.selectedMetallicFactor).toEqual(1);
+
+    panel.selectedMaterialIndex = 1;
+    await panel.updateComplete;
+    expect(panel.selectedBaseColor).toEqual([1, 1, 0, 1]);
+    expect(panel.selectedRoughnessFactor).toEqual(1);
+    expect(panel.selectedMetallicFactor).toEqual(1);
   });
 
   it('material edits where roughness and metallic factors are initially undefined works',
@@ -66,18 +72,16 @@ describe('material panel test', () => {
   it('reflects textures in GLTF', async () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
-    const firstUrl = panel.thumbnailsById.keys().next().value;
-    expect(firstUrl).toBe('originalTexture.png');
 
     const texturePicker = panel.shadowRoot!.querySelector('me-texture-picker')!;
     await texturePicker.updateComplete;
-    expect(texturePicker!.images.length).toBe(5);
+    expect(texturePicker!.images.length).toBe(2);
   });
 
   // Input/click
   it('applies changes to model textures on base color texture picker input',
      async () => {
-       panel.selectedMaterialIndex = 0;
+       panel.selectedMaterialIndex = 1;
        await panel.updateComplete;
        const texturePicker = panel.baseColorTexturePicker!;
        texturePicker.selectedIndex = 0;
@@ -104,7 +108,7 @@ describe('material panel test', () => {
     textureOptionInput.dispatchEvent(new Event('click'));
 
     const {baseColorTexture} = panel.getMaterial().pbrMetallicRoughness;
-    expect(getTextureId(baseColorTexture.texture!.source)).toEqual('undefined');
+    expect(baseColorTexture.texture).toEqual(null);
   });
 
   it('applies changes to model textures on MR texture picker input',
@@ -137,8 +141,7 @@ describe('material panel test', () => {
     clearTextureOption.dispatchEvent(new Event('click'));
 
     const {metallicRoughnessTexture} = panel.getMaterial().pbrMetallicRoughness;
-    expect(getTextureId(metallicRoughnessTexture.texture!.source))
-        .toEqual('undefined');
+    expect(metallicRoughnessTexture.texture).toEqual(null);
   });
 
   it('applies changes to model textures on normal texture picker input',
