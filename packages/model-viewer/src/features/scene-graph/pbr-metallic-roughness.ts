@@ -56,46 +56,58 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       pbrMetallicRoughness.metallicFactor = 1;
     }
 
-    let {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;
-    const baseColorTextures = new Set<ThreeTexture>();
-    const metallicRoughnessTextures = new Set<ThreeTexture>();
+    let {
+      baseColorTexture: gltfBaseColorTexture,
+      metallicRoughnessTexture: gltfMetallicRoughnessTexture
+    } = pbrMetallicRoughness;
 
-    for (const material of correlatedMaterials) {
-      if (baseColorTexture != null && material.map != null) {
-        baseColorTextures.add(material.map);
-      } else {
-        baseColorTexture = {index: -1};
-      }
+    let baseColorTexture: ThreeTexture|null = null;
+    let metallicRoughnessTexture: ThreeTexture|null = null;
 
-      // NOTE: GLTFLoader users the same texture for metalnessMap and
-      // roughnessMap in this case
-      // @see https://github.com/mrdoob/three.js/blob/b4473c25816df4a09405c7d887d5c418ef47ee76/examples/js/loaders/GLTFLoader.js#L2173-L2174
-      if (metallicRoughnessTexture != null && material.metalnessMap != null) {
-        metallicRoughnessTextures.add(material.metalnessMap);
-      } else {
-        metallicRoughnessTexture = {index: -1};
-      }
+    const {map, metalnessMap} = correlatedMaterials.values().next().value;
+
+    if (map != null && gltfBaseColorTexture != null) {
+      baseColorTexture = map;
+    } else {
+      gltfBaseColorTexture = {index: -1};
     }
 
-    const firstValue = <Type>(set: Set<Type>): Type => {
-      return set.values().next().value;
+    if (metalnessMap != null && gltfMetallicRoughnessTexture != null) {
+      metallicRoughnessTexture = metalnessMap;
+    } else {
+      gltfMetallicRoughnessTexture = {index: -1};
+    }
+
+    const message = (textureType: string) => {
+      console.info(`A group of three.js materials are represented as a
+        single material but share different ${textureType} textures.`);
     };
+    for (const material of correlatedMaterials) {
+      const verifyMap = material.map ?? null;
+      const verifyMetalnessMap = material.metalnessMap ?? null;
+      if (baseColorTexture !== verifyMap) {
+        message('base');
+      }
+      if (metallicRoughnessTexture !== verifyMetalnessMap) {
+        message('metalness');
+      }
+    }
 
     this[$baseColorTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        firstValue(correlatedMaterials),
-        firstValue(baseColorTextures),
+        correlatedMaterials,
+        baseColorTexture,
         TextureUsage.Base,
-        baseColorTexture!);
+        gltfBaseColorTexture!);
 
     this[$metallicRoughnessTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        firstValue(correlatedMaterials),
-        firstValue(metallicRoughnessTextures),
+        correlatedMaterials,
+        metallicRoughnessTexture,
         TextureUsage.Metallic,
-        metallicRoughnessTexture!);
+        gltfMetallicRoughnessTexture!);
   }
 
 

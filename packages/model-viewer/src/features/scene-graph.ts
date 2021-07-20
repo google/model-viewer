@@ -36,7 +36,7 @@ import {$createFromTexture, TextureInfo as SceneGraphTextureInfo} from './scene-
 const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
 const $variants = Symbol('variants');
-const $onUpdate = Symbol('onUpdate');
+const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
 const $textureLoader = Symbol('textureLoader');
 
 interface SceneExportOptions {
@@ -106,8 +106,10 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     static Texture: Constructor<Texture>;
     static Image: Constructor<Image>;
 
-    private[$onUpdate]() {
-      this[$needsRender]();
+    private[$getOnUpdateMethod]() {
+      return () => {
+        this[$needsRender]();
+      };
     }
 
     async createTexture(uri: string): Promise<ModelViewerTexture|null> {
@@ -141,14 +143,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         const updatedMaterialsPromise =
             threeGLTF.correlatedSceneGraph.loadVariant(
-                variantName!, this[$onUpdate]);
+                variantName!, this[$getOnUpdateMethod]);
         const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
         updatedMaterialsPromise.then(updatedMaterials => {
           for (const index of updatedMaterials) {
             const material = gltf.materials![index];
             this[$model]!.materials[index] = new Material(
-                this[$onUpdate],
+                this[$getOnUpdateMethod],
                 gltf,
                 material,
                 gltfElementMap.get(material) as Set<MeshStandardMaterial>);
