@@ -64,61 +64,81 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       gltfMaterial.emissiveFactor = [0, 0, 0];
     }
 
-    let {normalTexture, occlusionTexture, emissiveTexture} = gltfMaterial;
+    let {
+      normalTexture: gltfNormalTexture,
+      occlusionTexture: gltfOcculsionTexture,
+      emissiveTexture: gltfEmissiveTexture
+    } = gltfMaterial;
 
-    const normalTextures = new Set<ThreeTexture>();
-    const occlusionTextures = new Set<ThreeTexture>();
-    const emissiveTextures = new Set<ThreeTexture>();
+    let normalTexture: ThreeTexture|null = null;
+    let occlusionTexture: ThreeTexture|null = null;
+    let emissiveTexture: ThreeTexture|null = null;
 
-    for (const gltfMaterial of correlatedMaterials) {
-      const {normalMap, aoMap, emissiveMap} = gltfMaterial;
+    const {normalMap, aoMap, emissiveMap} =
+        correlatedMaterials.values().next().value;
 
-      if (normalTexture != null && normalMap != null) {
-        normalTextures.add(normalMap);
-      } else {
-        normalTexture = {index: -1};
-      }
-
-      if (occlusionTexture != null && aoMap != null) {
-        occlusionTextures.add(aoMap);
-      } else {
-        occlusionTexture = {index: -1};
-      }
-
-      if (emissiveTexture != null && emissiveMap != null) {
-        emissiveTextures.add(emissiveMap);
-      } else {
-        emissiveTexture = {index: -1};
-      }
+    if (gltfNormalTexture != null && normalMap != null) {
+      normalTexture = normalMap;
+    } else {
+      gltfNormalTexture = {index: -1};
     }
 
-    const firstValue = (set: Set<ThreeTexture>): ThreeTexture => {
-      return set.values().next().value;
+    if (gltfOcculsionTexture != null && aoMap != null) {
+      occlusionTexture = aoMap;
+    } else {
+      gltfOcculsionTexture = {index: -1};
+    }
+
+    if (gltfEmissiveTexture != null && emissiveMap != null) {
+      emissiveTexture = emissiveMap;
+    } else {
+      gltfEmissiveTexture = {index: -1};
+    }
+
+    const message = (textureType: string) => {
+      console.info(`A group of three.js materials are represented as a
+        single material but share different ${textureType} textures.`);
     };
+    for (const gltfMaterial of correlatedMaterials) {
+      const {
+        normalMap: verifyNormalMap,
+        aoMap: verifyAoMap,
+        emissiveMap: verifyEmissiveMap
+      } = gltfMaterial;
+      if (verifyNormalMap !== normalMap) {
+        message('normal');
+      }
+      if (verifyAoMap !== aoMap) {
+        message('occlusion');
+      }
+      if (verifyEmissiveMap !== emissiveMap) {
+        message('emissive');
+      }
+    }
 
     this[$normalTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        this[$backingThreeMaterial],
-        firstValue(normalTextures),
+        correlatedMaterials,
+        normalTexture,
         TextureUsage.Normal,
-        normalTexture!);
+        gltfNormalTexture!);
 
     this[$occlusionTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        this[$backingThreeMaterial],
-        firstValue(occlusionTextures),
+        correlatedMaterials,
+        occlusionTexture,
         TextureUsage.Occlusion,
-        occlusionTexture!);
+        gltfOcculsionTexture!);
 
     this[$emissiveTexture] = new TextureInfo(
         onUpdate,
         gltf,
-        this[$backingThreeMaterial],
-        firstValue(emissiveTextures),
+        correlatedMaterials,
+        emissiveTexture,
         TextureUsage.Emissive,
-        emissiveTexture!);
+        gltfEmissiveTexture!);
   }
 
   get name(): string {
