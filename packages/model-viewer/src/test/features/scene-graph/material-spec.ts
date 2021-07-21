@@ -15,7 +15,7 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {$sourceTexture} from '../../../features/scene-graph/image.js';
+import {$threeTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
 import {waitForEvent} from '../../../utilities.js';
@@ -53,12 +53,12 @@ suite('scene-graph/material', () => {
           .pbrMetallicRoughness.baseColorTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
-      const newUUID: string|undefined = texture?.source[$sourceTexture].uuid;
+      const newUUID: string|undefined = texture?.source[$threeTexture].uuid;
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
               .pbrMetallicRoughness.baseColorTexture?.texture
-              ?.source[$sourceTexture]!;
+              ?.source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
@@ -68,12 +68,12 @@ suite('scene-graph/material', () => {
           .pbrMetallicRoughness.metallicRoughnessTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
-      const newUUID: string|undefined = texture?.source[$sourceTexture]?.uuid;
+      const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
               .pbrMetallicRoughness.metallicRoughnessTexture?.texture
-              ?.source[$sourceTexture]!;
+              ?.source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
@@ -82,11 +82,11 @@ suite('scene-graph/material', () => {
       element.model!.materials[0].normalTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
-      const newUUID: string|undefined = texture?.source[$sourceTexture]?.uuid;
+      const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .normalTexture?.texture?.source[$sourceTexture]!;
+              .normalTexture?.texture?.source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
@@ -95,11 +95,11 @@ suite('scene-graph/material', () => {
       element.model!.materials[0].occlusionTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
-      const newUUID: string|undefined = texture?.source[$sourceTexture]?.uuid;
+      const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .occlusionTexture?.texture?.source[$sourceTexture]!;
+              .occlusionTexture?.texture?.source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
@@ -108,11 +108,11 @@ suite('scene-graph/material', () => {
       element.model!.materials[0].emissiveTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
-      const newUUID: string|undefined = texture?.source[$sourceTexture]?.uuid;
+      const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .emissiveTexture?.texture?.source[$sourceTexture]!;
+              .emissiveTexture?.texture?.source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
