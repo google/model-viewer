@@ -28,8 +28,7 @@ import {Constructor} from '../utilities.js';
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
 import {Material} from './scene-graph/material.js';
 import {Model} from './scene-graph/model.js';
-import {Texture as ModelViewerTexture} from './scene-graph/texture';
-import {$createTexture, TextureFactory} from './scene-graph/texture-factory.js';
+import {$createTexture, Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
 
@@ -125,7 +124,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       texture.wrapT = RepeatWrapping;
       texture.flipY = false;
 
-      return TextureFactory[$createTexture](texture);
+      return ModelViewerTexture[$createTexture](
+          texture, this[$getOnUpdateMethod]());
     }
 
 

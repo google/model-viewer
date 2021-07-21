@@ -15,7 +15,7 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {Image as GLTFImage, Sampler as GLTFSampler, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Texture as TextureInterface} from './api.js';
 import {Image} from './image.js';
@@ -26,6 +26,7 @@ import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const $image = Symbol('image');
 const $sampler = Symbol('sampler');
+export const $createTexture = Symbol('createTexture');
 
 /**
  * Material facade implementation for Three.js materials
@@ -36,15 +37,25 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
 
   constructor(
       onUpdate: () => void,
-      sampler: Sampler,
-      image: Image,
-      texture: ThreeTexture|null,
+      threeTexture: ThreeTexture|null,
       gltfTexture: GLTFTexture|null,
+      gltfSampler: GLTFSampler|null,
+      gltfImage: GLTFImage|null,
   ) {
     super(
-        onUpdate, gltfTexture, new Set<ThreeTexture>(texture ? [texture] : []));
-    this[$sampler] = sampler;
-    this[$image] = image;
+        onUpdate,
+        gltfTexture,
+        new Set<ThreeTexture>(threeTexture ? [threeTexture] : []));
+
+    this[$sampler] = new Sampler(onUpdate, threeTexture, gltfSampler);
+    this[$image] = new Image(onUpdate, threeTexture, gltfImage);
+  }
+
+  // Helpter method creates a Texture from a ThreeTexture that is not bound to
+  // any material.
+  static[$createTexture](threeTexture: ThreeTexture, onUpdate: () => void):
+      Texture {
+    return new Texture(onUpdate, threeTexture, null, null, null);
   }
 
   get name(): string {

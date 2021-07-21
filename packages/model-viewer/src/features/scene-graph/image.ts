@@ -38,7 +38,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   get[$sourceTexture]() {
     console.assert(
         this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
-        'Sampler correlated object is undefined');
+        'Image correlated object is undefined');
     return this[$correlatedObjects]?.values().next().value as ThreeTexture;
   }
 

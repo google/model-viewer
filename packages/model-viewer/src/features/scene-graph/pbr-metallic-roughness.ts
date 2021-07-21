@@ -18,7 +18,6 @@ import {MeshStandardMaterial} from 'three';
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface, RGBA} from './api.js';
-import {$createTextureInfo, TextureFactory} from './texture-factory.js';
 import {TextureInfo, TextureUsage} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
@@ -64,21 +63,21 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
     const {map, metalnessMap} = correlatedMaterials.values().next().value;
 
-    this[$baseColorTexture] = TextureFactory[$createTextureInfo](
+    this[$baseColorTexture] = new TextureInfo(
         onUpdate,
         TextureUsage.Base,
-        gltf,
         map,
-        gltfBaseColorTexture ? gltfBaseColorTexture : null,
-        correlatedMaterials);
+        correlatedMaterials,
+        gltf,
+        gltfBaseColorTexture ? gltfBaseColorTexture : null);
 
-    this[$metallicRoughnessTexture] = TextureFactory[$createTextureInfo](
+    this[$metallicRoughnessTexture] = new TextureInfo(
         onUpdate,
         TextureUsage.Metallic,
-        gltf,
         metalnessMap,
-        gltfMetallicRoughnessTexture ? gltfMetallicRoughnessTexture : null,
-        correlatedMaterials);
+        correlatedMaterials,
+        gltf,
+        gltfMetallicRoughnessTexture ? gltfMetallicRoughnessTexture : null);
 
     const message = (textureType: string) => {
       console.info(`A group of three.js materials are represented as a

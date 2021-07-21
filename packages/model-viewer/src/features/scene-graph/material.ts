@@ -19,7 +19,6 @@ import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instan
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
-import {$createTextureInfo, TextureFactory} from './texture-factory.js';
 import {TextureInfo, TextureUsage} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
@@ -74,29 +73,32 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     const {normalMap, aoMap, emissiveMap} =
         correlatedMaterials.values().next().value;
 
-    this[$normalTexture] = TextureFactory[$createTextureInfo](
+    this[$normalTexture] = new TextureInfo(
         onUpdate,
         TextureUsage.Normal,
-        gltf,
         normalMap,
+        correlatedMaterials,
+        gltf,
         gltfNormalTexture ? gltfNormalTexture : null,
-        correlatedMaterials);
+    );
 
-    this[$occlusionTexture] = TextureFactory[$createTextureInfo](
+    this[$occlusionTexture] = new TextureInfo(
         onUpdate,
         TextureUsage.Occlusion,
-        gltf,
         aoMap,
+        correlatedMaterials,
+        gltf,
         gltfOcculsionTexture ? gltfOcculsionTexture : null,
-        correlatedMaterials);
+    );
 
-    this[$emissiveTexture] = TextureFactory[$createTextureInfo](
+    this[$emissiveTexture] = new TextureInfo(
         onUpdate,
         TextureUsage.Emissive,
-        gltf,
         emissiveMap,
+        correlatedMaterials,
+        gltf,
         gltfEmissiveTexture ? gltfEmissiveTexture : null,
-        correlatedMaterials);
+    );
 
     const message = (textureType: string) => {
       console.info(`A group of three.js materials are represented as a

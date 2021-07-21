@@ -15,12 +15,11 @@
 
 import {LinearEncoding, MeshStandardMaterial, sRGBEncoding, Texture as ThreeTexture, TextureEncoding} from 'three';
 
-import {TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {TextureInfo as TextureInfoInterface} from './api.js';
 import {$sourceTexture} from './image.js';
 import {Texture} from './texture.js';
-import {ThreeDOMElement} from './three-dom-element.js';
 
 
 
@@ -40,8 +39,7 @@ export enum TextureUsage {
 /**
  * TextureInfo facade implementation for Three.js materials
  */
-export class TextureInfo extends ThreeDOMElement implements
-    TextureInfoInterface {
+export class TextureInfo implements TextureInfoInterface {
   private[$texture]: Texture|null;
 
   // Holds a reference to the Three data that backs the material object.
@@ -53,14 +51,28 @@ export class TextureInfo extends ThreeDOMElement implements
   onUpdate: () => void;
 
   constructor(
-      onUpdate: () => void, textureUsage: TextureUsage = TextureUsage.Base,
-      texture: Texture|null, material: Set<MeshStandardMaterial>|null,
-      gltfTextureInfo: GLTFTextureInfo|null) {
-    super(onUpdate, gltfTextureInfo, new Set<ThreeTexture>([]));
+      onUpdate: () => void, usage: TextureUsage,
+      threeTexture: ThreeTexture|null, material: Set<MeshStandardMaterial>,
+      gltf: GLTF, gltfTextureInfo: GLTFTextureInfo|null) {
+    let texture: Texture|null = null;
+    // Creates image, sampler, and texture if valid texture info is provided.
+    if (gltfTextureInfo) {
+      const gltfTexture =
+          gltf.textures ? gltf.textures[gltfTextureInfo.index] : null;
+      const sampler = gltfTexture ?
+          (gltf.samplers ? gltf.samplers[gltfTexture.sampler!] : null) :
+          null;
+      const image = gltfTexture ?
+          (gltf.images ? gltf.images[gltfTexture.source!] : null) :
+          null;
+
+      texture =
+          new Texture(onUpdate, threeTexture, gltfTexture, sampler, image);
+    }
 
     this.onUpdate = onUpdate;
     this[$materials] = material;
-    this[$usage] = textureUsage;
+    this[$usage] = usage;
     this[$texture] = texture;
   }
 
