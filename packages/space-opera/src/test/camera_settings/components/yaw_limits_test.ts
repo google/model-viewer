@@ -22,7 +22,6 @@ import {DEFAULT_MAX_YAW, YawLimits} from '../../../components/camera_settings/co
 import {dispatchYawLimits, getCamera} from '../../../components/camera_settings/reducer.js';
 import {ModelViewerPreview} from '../../../components/model_viewer_preview/model_viewer_preview.js';
 import {getModelViewer} from '../../../components/model_viewer_preview/reducer.js';
-import {dispatchReset} from '../../../reducers.js';
 import {reduxStore} from '../../../space_opera_base.js';
 
 xdescribe('yaw limits editor test', () => {
@@ -30,7 +29,6 @@ xdescribe('yaw limits editor test', () => {
   let preview: ModelViewerPreview;
 
   beforeEach(async () => {
-    reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
     await preview.updateComplete;

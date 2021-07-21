@@ -21,14 +21,12 @@ import '../../components/ibl_selector/ibl_selector.js';
 import {dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../../components/config/reducer.js';
 import {IblSelector} from '../../components/ibl_selector/ibl_selector.js';
 import {dispatchAddEnvironmentImage} from '../../components/ibl_selector/reducer.js';
-import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 describe('ibl selector test', () => {
   let iblSelector: IblSelector;
 
   beforeEach(async () => {
-    reduxStore.dispatch(dispatchReset());
     iblSelector = new IblSelector();
     document.body.appendChild(iblSelector);
 

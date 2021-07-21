@@ -20,7 +20,8 @@ import resolve from '@rollup/plugin-node-resolve';
 
 const watchFiles = [
   'lib/**',
-  '../model-viewer/lib/**'
+  '../model-viewer/lib/**',
+  '../editing-adapter/lib/**'
 ];
 
 const plugins = [
@@ -32,7 +33,7 @@ const plugins = [
       return null;
     },
   },
-  resolve(),
+  resolve({dedupe: ['three']}),
   commonjs()
 ];
 

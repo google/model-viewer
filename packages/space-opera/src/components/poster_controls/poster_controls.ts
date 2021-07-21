@@ -19,10 +19,13 @@
 import '../shared/expandable_content/expandable_tab.js';
 import '@material/mwc-button';
 
+import {createSafeObjectURL} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
+import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js';
 import {customElement, html, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
-import {posterControlsStyles, toastStyles} from '../../styles.css.js';
+import {posterControlsStyles} from '../../styles.css.js';
+import {toastStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
 import {Camera, getOrbitString} from '../camera_settings/camera_state.js';
 import {dispatchSaveCameraOrbit, getCamera} from '../camera_settings/reducer.js';
@@ -30,7 +33,6 @@ import {dispatchSetPoster, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {dispatchSetPosterName} from '../relative_file_paths/reducer.js';
-import {createSafeObjectURL, safeDownloadCallback} from '../utils/create_object_url.js';
 
 /** Allow users to create / display a poster. */
 @customElement('me-poster-controls')
@@ -130,7 +132,7 @@ export class PosterControlsElement extends ConnectedLitElement {
     if (!modelViewer || !this.poster)
       return;
     safeDownloadCallback(
-        await (await fetch(this.poster)).blob(), 'poster.png')();
+        await (await fetch(this.poster)).blob(), 'poster.png', '')();
   }
 }
 

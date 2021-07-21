@@ -15,9 +15,8 @@
  *
  */
 
+import {checkFinite} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {customElement, html, LitElement, property} from 'lit-element';
-
-import {checkFinite} from '../../utils/reducer_utils.js';
 
 import {styles} from './draggable_input.css.js';
 

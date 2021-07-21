@@ -53,6 +53,12 @@ export class Tabs extends LitElement {
     this.requestUpdate();
   }
 
+  selectPanel(target: TabbedPanel) {
+    for (const panel of this.panels) {
+      (panel as TabbedPanel).selected = panel === target;
+    }
+  }
+
   render() {
     return html`
       <div class="TabHeader">

@@ -15,23 +15,25 @@
  *
  */
 
+import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
+import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url';
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {openMobileViewStyles} from '../../styles.css.js';
-import {ArConfigState, ModelViewerSnippetState, State} from '../../types.js';
+import {ArConfigState, State} from '../../types.js';
 import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../file_modal/file_modal.js';
-import {dispatchModelDirty, getGltfUrl, getModel, getModelViewer} from '../model_viewer_preview/reducer.js';
+import {getEdits} from '../materials_panel/reducer.js';
+import {getGltfModel, getGltfUrl} from '../model_viewer_preview/reducer.js';
 import {getModelViewerSnippet} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
-import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
 
 import {MobileModal} from './components/mobile_modal.js';
 import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetForcePost, dispatchSetRefreshable, getArConfig, getForcePost, getRefreshable} from './reducer.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
-import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareUSDZ, usdzToSession} from './utils.js';
+import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, prepareUSDZ, usdzToSession} from './utils.js';
 
 const REFRESH_DELAY = 20000;  // 20s
 
@@ -57,9 +59,9 @@ export class OpenMobileView extends ConnectedLitElement {
 
   @internalProperty() urls: URLs = {gltf: '', env: '', usdz: ''};
   @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', usdz: ''};
-  @internalProperty() snippet!: ModelViewerSnippetState;
-  @internalProperty() lastSnippetSent!: ModelViewerSnippetState;
-  @internalProperty() modelIsDirty = false;
+  @internalProperty() gltfModel?: GltfModel;
+  @internalProperty() snippet: any = {};
+  @internalProperty() lastSnippetSent: any = {};
 
   @query('mobile-modal') mobileModal!: MobileModal;
   @internalProperty() haveReceivedResponse: boolean = false;
@@ -71,14 +73,18 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
 
   get canRefresh(): boolean {
-    return this.isDeployed && this.haveReceivedResponse &&
-        !this.isSendingData && this.contentHasChanged;
+    return this.isDeployed &&
+        (this.haveReceivedResponse &&
+         (!this.isSendingData && this.contentHasChanged));
   }
 
   stateChanged(state: State) {
     this.arConfig = getArConfig(state);
+    this.gltfModel = getGltfModel(state);
     const gltfURL = getGltfUrl(state);
-    this.isDeployable = gltfURL !== undefined;
+    if (gltfURL !== undefined) {
+      this.isDeployable = true;
+    }
 
     // Update urls with most recent from redux state.
     // If the values are different from this.lastUrlsSent, values are sent when
@@ -89,8 +95,10 @@ export class OpenMobileView extends ConnectedLitElement {
       usdz: this.arConfig.iosSrc
     };
 
-    this.snippet = getModelViewerSnippet(state);
-    this.modelIsDirty = !!getModel(state)?.isDirty;
+    this.snippet = {
+      ...getModelViewerSnippet(state),
+      edits: getEdits(state),
+    };
 
     this.contentHasChanged = this.getContentHasChanged();
     // only update if different, need conditional because it would infinitely
@@ -110,14 +118,25 @@ export class OpenMobileView extends ConnectedLitElement {
 
   // True if any content we'd send to the mobile view has changed.
   getContentHasChanged(): boolean {
-    return this.stateHasChanged() || this.isNewModel() ||
-        this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz) ||
-        this.isNewSource(this.urls.env, this.lastUrlsSent.env);
+    return (
+        (this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz) &&
+         this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf)) ||
+        this.stateHasChanged() ||
+        this.isNewSource(this.urls.env, this.lastUrlsSent.env));
   }
 
   envIsHdr(): boolean {
     return typeof this.urls.env === 'string' &&
         this.urls.env.substr(this.urls.env.length - 4) === '.hdr';
+  }
+
+  editsHaveChanged() {
+    if (this.snippet.edits !== undefined &&
+        this.lastSnippetSent.edits !== undefined) {
+      return JSON.stringify(this.snippet.edits) !==
+          JSON.stringify(this.lastSnippetSent.edits);
+    }
+    return false;
   }
 
   stateHasChanged() {
@@ -131,7 +150,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
   isNewModel() {
     return this.isNewSource(this.urls.gltf, this.lastUrlsSent.gltf) ||
-        this.modelIsDirty;
+        this.editsHaveChanged();
   }
 
   // Used for non-stale sessions, to only send updated content.
@@ -252,7 +271,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
     const gltfBlob = (updatedContent.gltfChanged ||
                       (haveStale && staleContent.gltfChanged)) ?
-        await getModelViewer()!.exportScene() :
+        await prepareGlbBlob(this.gltfModel!) :
         undefined;
 
     let envBlob;
@@ -276,7 +295,6 @@ export class OpenMobileView extends ConnectedLitElement {
     this.lastUrlsSent['usdz'] = this.urls['usdz'];
     this.lastUrlsSent['gltf'] = this.urls['gltf'];
 
-    reduxStore.dispatch(dispatchModelDirty(false));
     this.contentHasChanged = this.getContentHasChanged();
     reduxStore.dispatch(dispatchSetRefreshable(this.canRefresh));
   }

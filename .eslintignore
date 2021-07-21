@@ -9,4 +9,5 @@ packages/model-viewer/**/*
 packages/modelviewer.dev/**/*
 packages/render-fidelity-tools/**/*
 packages/shared-assets/**/*
+packages/editing-adapter/**/*
 packages/space-opera/**/*

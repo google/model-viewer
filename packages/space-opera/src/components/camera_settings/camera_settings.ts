@@ -25,18 +25,18 @@ import '../shared/section_row/section_row.js';
 import '../shared/draggable_input/draggable_input.js';
 import '../shared/checkbox/checkbox.js';
 
+import {checkFinite, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
 import {customElement, html, internalProperty, property, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {cameraSettingsStyles} from '../../styles.css.js';
-import {ModelViewerConfig, State} from '../../types.js';
+import {State} from '../../types.js';
 import {dispatchAutoRotate, dispatchCameraControlsEnabled, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
-import {checkFinite} from '../utils/reducer_utils.js';
 
 import {Camera, INITIAL_CAMERA} from './camera_state.js';
 import {dispatchCameraTarget, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera} from './reducer.js';

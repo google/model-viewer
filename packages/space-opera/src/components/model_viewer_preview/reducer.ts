@@ -15,18 +15,16 @@
  *
  */
 
-import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/api';
+import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {radToDeg} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 
 import {Action, BestPracticesState, State} from '../../types.js';
 import {renderARButton, renderARPrompt, renderProgressBar} from '../best_practices/render_best_practices.js';
 import {Camera} from '../camera_settings/camera_state.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
-import {ModelState} from '../model_viewer_preview/types.js';
+import {GltfState} from '../model_viewer_preview/types.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
-import {radToDeg} from '../utils/reducer_utils.js';
-
-const THUMBNAIL_SIZE = 256;
 
 export function getModelViewer() {
   return document.querySelector('model-viewer-preview')?.modelViewer;
@@ -77,78 +75,45 @@ export async function downloadContents(url: string): Promise<ArrayBuffer> {
   return blob.arrayBuffer();
 }
 
-export function getTextureId(gltfImage: {uri?: string, bufferView?: number}):
-    string {
-  return gltfImage.uri ?? gltfImage.bufferView!.toString();
+/** The user has requested a new GLTF/GLB for editing. */
+const SET_GLTF = 'SET_GLTF'
+export function dispatchSetGltf(gltf: GltfModel|undefined) {
+  return {type: SET_GLTF, payload: gltf};
 }
 
-async function pushThumbnail(
-    thumbnailsById: Map<string, string>, textureInfo: TextureInfo|null) {
-  if (textureInfo == null) {
-    return;
-  }
-  const {source} = textureInfo.texture;
-  const id = getTextureId(source);
-  if (!thumbnailsById.has(id)) {
-    thumbnailsById.set(
-        id, await source.createThumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE));
-  }
-}
-
-async function createThumbnails(): Promise<Map<string, string>> {
-  const thumbnailsById = new Map<string, string>();
-  for (const material of getModelViewer()!.model?.materials!) {
-    console.log(material);
-    const {
-      pbrMetallicRoughness,
-      normalTexture,
-      emissiveTexture,
-      occlusionTexture
-    } = material;
-    const {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;
-    await pushThumbnail(thumbnailsById, normalTexture);
-    await pushThumbnail(thumbnailsById, emissiveTexture);
-    await pushThumbnail(thumbnailsById, occlusionTexture);
-    await pushThumbnail(thumbnailsById, baseColorTexture);
-    await pushThumbnail(thumbnailsById, metallicRoughnessTexture);
-  };
-  return thumbnailsById;
-}
-
-const SET_GLTF_URL = 'SET_GLTF_URL';
+const SET_GLTF_URL = 'SET_GLTF_URL'
 export function dispatchGltfUrl(gltfUrl?: string|undefined) {
   return {type: SET_GLTF_URL, payload: gltfUrl};
 }
 
-const SET_MODEL = 'SET_MODEL';
-export async function dispatchModel() {
-  const thumbnailsById = await createThumbnails();
-  const originalGltfJson = JSON.stringify(getModelViewer()?.gltfJson, null, 2);
-  // Make a deep copy of the JSON so changes are not reflected.
-  const originalGltf = JSON.parse(originalGltfJson);
-  return {
-    type: SET_MODEL,
-    payload: {thumbnailsById, originalGltf, originalGltfJson}
-  };
+const SET_GLTF_JSON_STRING = 'SET_GLTF_JSON_STRING'
+export function dispatchGltfJsonString(gltfJsonString?: string) {
+  return {type: SET_GLTF_JSON_STRING, payload: gltfJsonString};
 }
 
-const SET_MODEL_DIRTY = 'SET_MODEL_DIRTY';
-export function dispatchModelDirty(isDirty: boolean = true) {
-  return {type: SET_MODEL_DIRTY, payload: {isDirty}};
-}
+export const getGltfUrl = (state: State) => state.entities.gltf.gltfUrl;
+export const getGltfJsonString = (state: State) =>
+    state.entities.gltf.gltfJsonString;
+export const getGltfModel = (state: State) => state.entities.gltf.gltf;
 
-export const getGltfUrl = (state: State) => state.entities.model?.gltfUrl;
-export const getModel = (state: State) => state.entities.model;
-
-export function modelReducer(
-    state: ModelState|null = null, action: Action): ModelState|null {
+export function gltfReducer(
+    state: GltfState = {
+      gltfJsonString: ''
+    },
+    action: Action): GltfState {
   switch (action.type) {
+    case SET_GLTF:
+      return {
+        ...state, gltf: action.payload
+      }
     case SET_GLTF_URL:
-      return {...state, gltfUrl: action.payload};
-    case SET_MODEL:
-      return {...state, ...action.payload};
-    case SET_MODEL_DIRTY:
-      return {...state, ...action.payload};
+      return {
+        ...state, gltfUrl: action.payload
+      }
+    case SET_GLTF_JSON_STRING:
+      return {
+        ...state, gltfJsonString: action.payload
+      }
     default:
       return state;
   }

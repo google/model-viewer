@@ -18,10 +18,9 @@
 import '@polymer/paper-slider';
 import '@material/mwc-textfield';
 
+import {clamp} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {PaperSliderElement} from '@polymer/paper-slider';
 import {customElement, html, LitElement, property, query} from 'lit-element';
-
-import {clamp} from '../../utils/reducer_utils.js';
 
 import {styles} from './slider_with_input.css.js';
 

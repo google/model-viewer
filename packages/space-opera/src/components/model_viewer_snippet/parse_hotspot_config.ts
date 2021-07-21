@@ -15,8 +15,8 @@
  *
  */
 
+import {checkFinite} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {HotspotConfig, toVector3D} from '../hotspot_panel/types.js';
-import {checkFinite} from '../utils/reducer_utils.js';
 
 /**
  * Parses a paragraph of model-viewer tag snippet and extracts the hotspot

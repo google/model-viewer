@@ -126,7 +126,13 @@ export declare interface TextureInfo {
   /**
    * The Texture being referenced by this TextureInfo
    */
-  readonly texture: Texture;
+  readonly texture: Texture|null;
+
+  /**
+   * Sets a texture on the texture info, or removes the texture if argument is
+   * null.
+   */
+  setTexture(texture: Texture|null): void;
 }
 
 /**

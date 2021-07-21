@@ -15,9 +15,9 @@
  *
  */
 
-import {Action, EnvironmentState, State} from '../../types.js';
-import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
+import {createSafeObjectUrlFromArrayBuffer} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 
+import {Action, EnvironmentState, State} from '../../types.js';
 import {EnvironmentImage, INITIAL_ENVIRONMENT_IMAGES} from './types.js';
 
 /**

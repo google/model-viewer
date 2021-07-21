@@ -15,12 +15,14 @@
  *
  */
 
+import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js';
+import {isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js';
+
 import {reduxStore} from '../../space_opera_base.js';
-import {Action, ModelViewerConfig, ModelViewerSnippetState, RelativeFilePathsState, State} from '../../types.js';
+import {Action, ModelViewerSnippetState, RelativeFilePathsState, State} from '../../types.js';
 import {INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchSetCamera} from '../camera_settings/reducer.js';
 import {dispatchSetConfig} from '../config/reducer.js';
-import {isObjectUrl} from '../utils/create_object_url.js';
 
 export const getModelViewerSnippet = (state: State): ModelViewerSnippetState =>
     state.entities.modelViewerSnippet;

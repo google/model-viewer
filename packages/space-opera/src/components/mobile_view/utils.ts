@@ -15,6 +15,8 @@
  *
  */
 
+import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
+
 export const DOMAIN = 'https://piping.glitch.me/';
 
 export function getRandomInt(max: number): number {
@@ -53,6 +55,11 @@ export function usdzToSession(
     iosSrcIsReality: boolean): string {
   const fileType = iosSrcIsReality ? 'reality' : 'usdz';
   return `${DOMAIN}${pipeId}-${sessionID}-${modelId}.${fileType}`;
+}
+
+export async function prepareGlbBlob(gltf: GltfModel) {
+  const glbBuffer = await gltf.packGlb();
+  return new Blob([glbBuffer], {type: 'model/gltf-binary'});
 }
 
 export async function prepareUSDZ(url: string): Promise<Blob> {

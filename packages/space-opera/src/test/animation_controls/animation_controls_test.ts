@@ -18,38 +18,64 @@
 
 import '../../components/animation_controls/animation_controls.js';
 
-import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
-import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../../components/config/reducer.js';
-import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
-import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
-import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
-import {dispatchReset} from '../../reducers.js';
-import {reduxStore} from '../../space_opera_base.js';
-import {waitForEvent} from '../utils/test_utils.js';
+import {createBufferFromString, GltfModel} from '@google/model-viewer-editing-adapter/lib/main.js'
 
-const ANIMATED_GLB_PATH = '../base/shared-assets/models/RobotExpressive.glb';
+import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
+import {dispatchAnimationName, dispatchAutoplayEnabled} from '../../components/config/reducer.js';
+import {getConfig} from '../../components/config/reducer.js';
+import {dispatchGltfAndEdits} from '../../components/model_viewer_preview/gltf_edits.js';
+import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
+import {reduxStore} from '../../space_opera_base.js';
+
+const EXAMPLE_BIN_AS_STRING = 'example of some bin data';
+const EXAMPLE_BIN_AS_ARRAY_BUFFER =
+    createBufferFromString(EXAMPLE_BIN_AS_STRING);
+const BIN_LENGTH_IN_BYTES = EXAMPLE_BIN_AS_ARRAY_BUFFER.byteLength;
+
+const TEST_GLTF_JSON = {
+  'asset': {'generator': 'FBX2glTF', 'version': '2.0'},
+  'buffers': [{
+    'byteLength': BIN_LENGTH_IN_BYTES,
+  }],
+  'bufferViews':
+      [{'buffer': 0, 'byteLength': BIN_LENGTH_IN_BYTES, 'name': 'image1'}],
+  'materials': [
+    {
+      'name': 'yellow',
+      'pbrMetallicRoughness': {'baseColorFactor': [0.8, 0.8, 0.2]},
+    },
+    {
+      'name': 'purple',
+      'pbrMetallicRoughness': {'baseColorFactor': [0.8, 0.2, 0.8]},
+    },
+  ],
+  'animations': [
+    {
+      'name': 'Dance',
+      'channels': [{'sampler': 0, 'target': {'node': 13, 'path': 'weights'}}],
+      'samplers': [{'input': 0, 'interpolation': 'LINEAR', 'output': 1}]
+    },
+    {
+      'name': 'Idle',
+      'channels': [{'sampler': 0, 'target': {'node': 13, 'path': 'weights'}}],
+      'samplers': [{'input': 0, 'interpolation': 'LINEAR', 'output': 1}]
+    }
+  ],
+  'nodes': [{'rotation': [0, 0, 0, 1]}],
+};
 
 describe('animation controls test', () => {
-  let preview: ModelViewerPreview;
   let animationControls: AnimationControls;
 
   beforeEach(async () => {
-    reduxStore.dispatch(dispatchReset());
-    preview = new ModelViewerPreview();
-    document.body.appendChild(preview);
-    await preview.updateComplete;
-
     animationControls = new AnimationControls();
     document.body.appendChild(animationControls);
 
-    reduxStore.dispatch(dispatchGltfUrl(ANIMATED_GLB_PATH));
-    await waitForEvent(getModelViewer()!, 'load');
-
+    await dispatchGltfAndEdits(new GltfModel(TEST_GLTF_JSON, null));
     await animationControls.updateComplete;
   });
 
   afterEach(() => {
-    document.body.removeChild(preview);
     document.body.removeChild(animationControls);
   })
 
@@ -59,9 +85,9 @@ describe('animation controls test', () => {
     const paperItems =
         animationNameSelector!.getElementsByTagName('paper-item');
 
-    expect(paperItems.length).toBe(14);
+    expect(paperItems.length).toBe(2);
     expect(paperItems[0].getAttribute('value')).toBe('Dance');
-    expect(paperItems[1].getAttribute('value')).toBe('Death');
+    expect(paperItems[1].getAttribute('value')).toBe('Idle');
   });
 
   it('dispatches an event when an animation is selected', async () => {

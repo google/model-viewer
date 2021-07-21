@@ -19,12 +19,11 @@ import '@material/mwc-icon-button';
 import '../popup/popup.js';
 import '../../file_modal/file_modal.js';
 
+import {checkFinite, IMAGE_MIME_TYPES} from '@google/model-viewer-editing-adapter/lib/main.js'
+import {createSafeObjectURL, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, LitElement, property, query} from 'lit-element';
 
 import {FileModalElement} from '../../file_modal/file_modal.js';
-import {createSafeObjectURL, SafeObjectUrl} from '../../utils/create_object_url.js';
-import {IMAGE_MIME_TYPES} from '../../utils/gltf_constants.js';
-import {checkFinite} from '../../utils/reducer_utils.js';
 
 import {styles} from './texture_picker.css.js';
 
@@ -60,7 +59,7 @@ export class TexturePicker extends LitElement {
                 type="radio"
                 name="textureSelect"
                 @click="${this.onTextureChange}">
-              <img class="TextureImage" src="${imageUrl}">
+              <img class="TextureImage" src="${imageUrl.url}">
             </label>
             `)}
           <div slot="label" id="nullTextureSquare" class="NullTextureSquareInList" @click=${
@@ -87,7 +86,7 @@ export class TexturePicker extends LitElement {
       return html`
           <div slot="label" class="TextureSquare">
           <img class="TextureImage" src="${
-          this.images[this.selectedIndex]}"></div>`;
+          this.images[this.selectedIndex].url}"></div>`;
     }
   }
 

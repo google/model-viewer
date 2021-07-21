@@ -18,7 +18,6 @@ import {Texture as ThreeTexture} from 'three';
 import {MagFilter, MinFilter, Sampler as GLTFSampler, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Sampler as SamplerInterface} from './api.js';
-import {$gltfSampler, $threeTexture, TextureInfo} from './texture-info';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
@@ -59,39 +58,49 @@ const isValidSamplerValue = <P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
 
 const $threeTextures = Symbol('threeTextures');
 const $setProperty = Symbol('setProperty');
+const $sourceSampler = Symbol('sourceSampler');
 
 /**
  * Sampler facade implementation for Three.js textures
  */
 export class Sampler extends ThreeDOMElement implements SamplerInterface {
   private get[$threeTextures]() {
+    console.assert(
+        this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
+        'Sampler correlated object is undefined');
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
-  constructor(textureInfo: TextureInfo) {
-    const sampler = textureInfo[$gltfSampler];
+  private get[$sourceSampler]() {
+    console.assert(this[$sourceObject] != null, 'Sampler source is undefined');
+    return (this[$sourceObject] as GLTFSampler);
+  }
+
+  constructor(
+      onUpdate: () => void, texture: ThreeTexture|null,
+      gltfSampler: GLTFSampler|null) {
+    gltfSampler = gltfSampler ?? {} as GLTFSampler;
     // These defaults represent a convergence of glTF defaults for wrap mode and
     // Three.js defaults for filters. Per glTF 2.0 spec, a renderer may choose
     // its own defaults for filters.
     // @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-sampler
     // @see https://threejs.org/docs/#api/en/textures/Texture
-    if (sampler.minFilter == null) {
-      sampler.minFilter = 9987;
+    if (gltfSampler.minFilter == null) {
+      gltfSampler.minFilter = 9987;
     }
-    if (sampler.magFilter == null) {
-      sampler.magFilter = 9729;
+    if (gltfSampler.magFilter == null) {
+      gltfSampler.magFilter = 9729;
     }
-    if (sampler.wrapS == null) {
-      sampler.wrapS = 10497;
+    if (gltfSampler.wrapS == null) {
+      gltfSampler.wrapS = 10497;
     }
-    if (sampler.wrapT == null) {
-      sampler.wrapT = 10497;
+    if (gltfSampler.wrapT == null) {
+      gltfSampler.wrapT = 10497;
     }
 
+
     super(
-        textureInfo.onUpdate,
-        sampler,
-        new Set<ThreeTexture>([textureInfo[$threeTexture]!]));
+        onUpdate, gltfSampler, new Set<ThreeTexture>(texture ? [texture] : []));
   }
 
   get name(): string {
@@ -99,19 +108,19 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   get minFilter(): MinFilter {
-    return (this[$sourceObject] as GLTFSampler).minFilter!;
+    return this[$sourceSampler].minFilter!;
   }
 
   get magFilter(): MagFilter {
-    return (this[$sourceObject] as GLTFSampler).magFilter!;
+    return this[$sourceSampler].magFilter!;
   }
 
   get wrapS(): WrapMode {
-    return (this[$sourceObject] as GLTFSampler).wrapS!;
+    return this[$sourceSampler].wrapS!;
   }
 
   get wrapT(): WrapMode {
-    return (this[$sourceObject] as GLTFSampler).wrapT!;
+    return this[$sourceSampler].wrapT!;
   }
 
   setMinFilter(filter: MinFilter) {
@@ -132,16 +141,17 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
 
   private[$setProperty]<P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
       property: P, value: MinFilter|MagFilter|WrapMode) {
-    const sampler = this[$sourceObject] as GLTFSampler;
+    const sampler = this[$sourceSampler];
+    if (sampler != null) {
+      if (isValidSamplerValue(property, value)) {
+        sampler[property] = value;
 
-    if (isValidSamplerValue(property, value)) {
-      sampler[property] = value;
-
-      for (const texture of this[$threeTextures]) {
-        texture[property] = value;
-        texture.needsUpdate = true;
+        for (const texture of this[$threeTextures]) {
+          texture[property] = value;
+          texture.needsUpdate = true;
+        }
       }
+      this[$onUpdate]();
     }
-    this[$onUpdate]();
   }
 }
