@@ -18,7 +18,7 @@ import {LinearEncoding, MeshStandardMaterial, sRGBEncoding, Texture as ThreeText
 import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {TextureInfo as TextureInfoInterface} from './api.js';
-import {$sourceTexture} from './image.js';
+import {$threeTexture} from './image.js';
 import {Texture} from './texture.js';
 
 
@@ -82,7 +82,7 @@ export class TextureInfo implements TextureInfoInterface {
 
   setTexture(texture: Texture|null): void {
     const threeTexture: ThreeTexture|null =
-        texture != null ? texture.source[$sourceTexture] : null;
+        texture != null ? texture.source[$threeTexture] : null;
     let encoding: TextureEncoding = sRGBEncoding;
     this[$texture] = texture;
 

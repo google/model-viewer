@@ -98,6 +98,12 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
       gltfSampler.wrapT = 10497;
     }
 
+    if (texture) {
+      texture.wrapS = gltfSampler.wrapS;
+      texture.wrapT = gltfSampler.wrapT;
+      texture.minFilter = gltfSampler.minFilter;
+      texture.magFilter = gltfSampler.magFilter;
+    }
 
     super(
         onUpdate, gltfSampler, new Set<ThreeTexture>(texture ? [texture] : []));

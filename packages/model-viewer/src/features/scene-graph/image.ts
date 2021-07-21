@@ -28,14 +28,14 @@ const loader = new ImageLoader();
 const quadMaterial = new MeshBasicMaterial();
 const quad = new PlaneGeometry(2, 2);
 
-export const $sourceTexture = Symbol('sourceTexture');
+export const $threeTexture = Symbol('threeTexture');
 export const $applyTexture = Symbol('applyTexture');
 
 /**
  * Image facade implementation for Three.js textures
  */
 export class Image extends ThreeDOMElement implements ImageInterface {
-  get[$sourceTexture]() {
+  get[$threeTexture]() {
     console.assert(
         this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
         'Image correlated object is undefined');
@@ -45,8 +45,10 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   constructor(
       onUpdate: () => void, texture: ThreeTexture|null,
       gltfImage: GLTFImage|null) {
-    gltfImage =
-        gltfImage ?? {name: 'adhoc_image', uri: 'adhoc_image'} as GLTFImage;
+    gltfImage = gltfImage ?? {
+      name: 'adhoc_image',
+      uri: (texture && texture.image) ? texture.image.uri : 'adhoc_image'
+    } as GLTFImage;
     super(onUpdate, gltfImage, new Set<ThreeTexture>(texture ? [texture] : []));
   }
 
@@ -73,7 +75,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       loader.load(uri, resolve, undefined, reject);
     });
 
-    const texture = this[$sourceTexture]!;
+    const texture = this[$threeTexture]!;
     texture.image = image;
     texture.needsUpdate = true;
     this[$onUpdate]();
@@ -81,7 +83,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
   async createThumbnail(width: number, height: number): Promise<string> {
     const scene = new Scene();
-    quadMaterial.map = this[$sourceTexture];
+    quadMaterial.map = this[$threeTexture];
     const mesh = new Mesh(quad, quadMaterial);
     scene.add(mesh);
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
