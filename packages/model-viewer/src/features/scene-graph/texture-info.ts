@@ -40,7 +40,7 @@ export enum TextureUsage {
  * TextureInfo facade implementation for Three.js materials
  */
 export class TextureInfo implements TextureInfoInterface {
-  private[$texture]: Texture|null;
+  private[$texture]: Texture|null = null;
 
   // Holds a reference to the Three data that backs the material object.
   [$materials]: Set<MeshStandardMaterial>|null;
@@ -54,7 +54,6 @@ export class TextureInfo implements TextureInfoInterface {
       onUpdate: () => void, usage: TextureUsage,
       threeTexture: ThreeTexture|null, material: Set<MeshStandardMaterial>,
       gltf: GLTF, gltfTextureInfo: GLTFTextureInfo|null) {
-    let texture: Texture|null = null;
     // Creates image, sampler, and texture if valid texture info is provided.
     if (gltfTextureInfo) {
       const gltfTexture =
@@ -66,14 +65,13 @@ export class TextureInfo implements TextureInfoInterface {
           (gltf.images ? gltf.images[gltfTexture.source!] : null) :
           null;
 
-      texture =
+      this[$texture] =
           new Texture(onUpdate, threeTexture, gltfTexture, sampler, image);
     }
 
     this.onUpdate = onUpdate;
     this[$materials] = material;
     this[$usage] = usage;
-    this[$texture] = texture;
   }
 
   get texture(): Texture|null {

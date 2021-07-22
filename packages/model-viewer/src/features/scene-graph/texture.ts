@@ -26,7 +26,6 @@ import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 const $image = Symbol('image');
 const $sampler = Symbol('sampler');
-export const $createTexture = Symbol('createTexture');
 
 /**
  * Material facade implementation for Three.js materials
@@ -38,9 +37,9 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   constructor(
       onUpdate: () => void,
       threeTexture: ThreeTexture|null,
-      gltfTexture: GLTFTexture|null,
-      gltfSampler: GLTFSampler|null,
-      gltfImage: GLTFImage|null,
+      gltfTexture: GLTFTexture|null = null,
+      gltfSampler: GLTFSampler|null = null,
+      gltfImage: GLTFImage|null = null,
   ) {
     super(
         onUpdate,
@@ -49,13 +48,6 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
 
     this[$sampler] = new Sampler(onUpdate, threeTexture, gltfSampler);
     this[$image] = new Image(onUpdate, threeTexture, gltfImage);
-  }
-
-  // Helpter method creates a Texture from a ThreeTexture that is not bound to
-  // any material.
-  static[$createTexture](threeTexture: ThreeTexture, onUpdate: () => void):
-      Texture {
-    return new Texture(onUpdate, threeTexture, null, null, null);
   }
 
   get name(): string {
