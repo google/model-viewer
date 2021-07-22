@@ -15,7 +15,10 @@
  *
  */
 
+//@ts-ignore
+import {$CombinedState} from '@reduxjs/toolkit';
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
+
 import {rootReducer} from './reducers.js';
 
 /** Setup devtools */

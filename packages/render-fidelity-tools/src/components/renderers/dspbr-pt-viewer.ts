@@ -83,7 +83,7 @@ export class PathtracingViewer extends LitElement {
     renderer.setPixelRatio(1.0);
     renderer.setMaxBounceDepth(4);
 
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       console.log('Loading resources for', scenario.model);
       renderer.loadScene(scenario.model, () => {
         renderer.loadIBL(scenario.lighting, () => {
