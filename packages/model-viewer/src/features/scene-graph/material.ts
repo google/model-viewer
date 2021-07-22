@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
+import {MeshStandardMaterial} from 'three';
 
 import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -64,36 +64,41 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       gltfMaterial.emissiveFactor = [0, 0, 0];
     }
 
-    let {
+    const {
       normalTexture: gltfNormalTexture,
       occlusionTexture: gltfOcculsionTexture,
       emissiveTexture: gltfEmissiveTexture
     } = gltfMaterial;
 
-    let normalTexture: ThreeTexture|null = null;
-    let occlusionTexture: ThreeTexture|null = null;
-    let emissiveTexture: ThreeTexture|null = null;
-
     const {normalMap, aoMap, emissiveMap} =
         correlatedMaterials.values().next().value;
 
-    if (gltfNormalTexture != null && normalMap != null) {
-      normalTexture = normalMap;
-    } else {
-      gltfNormalTexture = {index: -1};
-    }
+    this[$normalTexture] = new TextureInfo(
+        onUpdate,
+        TextureUsage.Normal,
+        normalMap,
+        correlatedMaterials,
+        gltf,
+        gltfNormalTexture ? gltfNormalTexture : null,
+    );
 
-    if (gltfOcculsionTexture != null && aoMap != null) {
-      occlusionTexture = aoMap;
-    } else {
-      gltfOcculsionTexture = {index: -1};
-    }
+    this[$occlusionTexture] = new TextureInfo(
+        onUpdate,
+        TextureUsage.Occlusion,
+        aoMap,
+        correlatedMaterials,
+        gltf,
+        gltfOcculsionTexture ? gltfOcculsionTexture : null,
+    );
 
-    if (gltfEmissiveTexture != null && emissiveMap != null) {
-      emissiveTexture = emissiveMap;
-    } else {
-      gltfEmissiveTexture = {index: -1};
-    }
+    this[$emissiveTexture] = new TextureInfo(
+        onUpdate,
+        TextureUsage.Emissive,
+        emissiveMap,
+        correlatedMaterials,
+        gltf,
+        gltfEmissiveTexture ? gltfEmissiveTexture : null,
+    );
 
     const message = (textureType: string) => {
       console.info(`A group of three.js materials are represented as a
@@ -115,30 +120,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         message('emissive');
       }
     }
-
-    this[$normalTexture] = new TextureInfo(
-        onUpdate,
-        gltf,
-        correlatedMaterials,
-        normalTexture,
-        TextureUsage.Normal,
-        gltfNormalTexture!);
-
-    this[$occlusionTexture] = new TextureInfo(
-        onUpdate,
-        gltf,
-        correlatedMaterials,
-        occlusionTexture,
-        TextureUsage.Occlusion,
-        gltfOcculsionTexture!);
-
-    this[$emissiveTexture] = new TextureInfo(
-        onUpdate,
-        gltf,
-        correlatedMaterials,
-        emissiveTexture,
-        TextureUsage.Emissive,
-        gltfEmissiveTexture!);
   }
 
   get name(): string {

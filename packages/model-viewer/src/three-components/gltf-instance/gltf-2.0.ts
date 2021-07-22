@@ -1,3 +1,5 @@
+import {TextureFilter, Wrapping} from 'three';
+
 export type RGB = [number, number, number];
 
 export type RGBA = [number, number, number, number];
@@ -78,23 +80,38 @@ export interface OrthographicCamera {
 
 export type Camera = PerspectiveCamera|OrthographicCamera;
 
-export type NearestFilter = 9728;
-export type LinearFilter = 9729;
-export type NearestMipmapNearestFilter = 9984;
-export type LinearMipmapNearestFilter = 9985;
-export type NearestMipmapLinearFilter = 9986;
-export type LinearMipmapLinearFilter = 9987;
+export enum Filter {
+  Nearest = 9728,
+  Linear = 9729,
+  NearestMipmapNearest = 9984,
+  LinearMipmapNearest = 9985,
+  NearestMipmapLinear = 9986,
+  LinearMipmapLinear = 9987,
+}
 
-export type MagFilter = NearestFilter|LinearFilter;
+export type NearestFilter = Filter.Nearest;
+export type LinearFilter = Filter.Linear;
+export type NearestMipmapNearestFilter = Filter.NearestMipmapNearest;
+export type LinearMipmapNearestFilter = Filter.LinearMipmapNearest;
+export type NearestMipmapLinearFilter = Filter.NearestMipmapLinear;
+export type LinearMipmapLinearFilter = Filter.LinearMipmapLinear;
+
+export type MagFilter = NearestFilter|LinearFilter|TextureFilter;
 export type MinFilter = NearestFilter|LinearFilter|NearestMipmapNearestFilter|
     LinearMipmapNearestFilter|NearestMipmapLinearFilter|
-    LinearMipmapLinearFilter;
+    LinearMipmapLinearFilter|TextureFilter;
 
-export type ClampToEdgeWrap = 33071;
-export type MirroredRepeatWrap = 33648;
-export type RepeatWrap = 10497;
+export enum Wrap {
+  ClampToEdge = 33071,
+  MirroredRepeat = 33648,
+  Repeat = 10497,
+}
 
-export type WrapMode = RepeatWrap|ClampToEdgeWrap|MirroredRepeatWrap;
+export type ClampToEdgeWrap = Wrap.ClampToEdge;
+export type MirroredRepeatWrap = Wrap.MirroredRepeat;
+export type RepeatWrap = Wrap.Repeat;
+
+export type WrapMode = RepeatWrap|ClampToEdgeWrap|MirroredRepeatWrap|Wrapping;
 
 export interface Sampler {
   name?: string;
