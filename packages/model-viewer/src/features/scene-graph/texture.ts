@@ -43,7 +43,7 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   ) {
     super(
         onUpdate,
-        gltfTexture,
+        gltfTexture ? gltfTexture : {} as GLTFTexture,
         new Set<ThreeTexture>(threeTexture ? [threeTexture] : []));
 
     this[$sampler] = new Sampler(onUpdate, threeTexture, gltfSampler);

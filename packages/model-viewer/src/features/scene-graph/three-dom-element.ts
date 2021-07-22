@@ -34,12 +34,12 @@ type CorrelatedObjects = Set<Object3D>|Set<Material>|Set<Texture>;
 export class ThreeDOMElement {
   readonly[$onUpdate]: () => void;
   // The canonical GLTF or GLTFElement represented by this facade.
-  readonly[$sourceObject]: GLTFElement|null;
+  readonly[$sourceObject]: GLTFElement;
   // The backing Three.js scene graph construct for this element.
   readonly[$correlatedObjects]: CorrelatedObjects|null;
 
   constructor(
-      onUpdate: () => void, element: GLTFElement|null,
+      onUpdate: () => void, element: GLTFElement,
       correlatedObjects: CorrelatedObjects|null = null) {
     this[$onUpdate] = onUpdate;
     this[$sourceObject] = element;
