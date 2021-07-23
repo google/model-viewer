@@ -127,6 +127,16 @@
       }
     },
     {
+      "name": "khronos-DragonAttenuation",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DragonAttenuation/glTF/DragonAttenuation.gltf",
+      "orbit": {
+        "radius": 5
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-CesiumMan",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/CesiumMan/glTF/CesiumMan.gltf",
       "target": {
