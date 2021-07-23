@@ -103,6 +103,7 @@ export class ARRenderer extends EventDispatcher {
   private frames = 0;
   private initialized = false;
   private oldTarget = new Vector3();
+  private oldFramedFieldOfView = 45;
   private placementComplete = false;
   private isTranslating = false;
   private isRotating = false;
@@ -238,6 +239,7 @@ export class ARRenderer extends EventDispatcher {
     scene.setShadowIntensity(0);
 
     this.oldTarget.copy(scene.getTarget());
+    this.oldFramedFieldOfView = scene.framedFieldOfView;
 
     scene.addEventListener('model-load', this.onUpdateScene);
 
@@ -357,6 +359,7 @@ export class ARRenderer extends EventDispatcher {
       }
       const point = this.oldTarget;
       scene.setTarget(point.x, point.y, point.z);
+      scene.framedFieldOfView = this.oldFramedFieldOfView;
       scene.xrCamera = null;
 
       scene.removeEventListener('model-load', this.onUpdateScene);
@@ -412,17 +415,11 @@ export class ARRenderer extends EventDispatcher {
 
   private updateView(view: XRView) {
     const scene = this.presentedScene!;
+    const xr = this.threeRenderer.xr as any;
 
-    (this.threeRenderer.xr as any).updateCamera(camera);
-    //@ts-ignore
-    const xrCamera = this.threeRenderer.xr.getCamera();
-    scene.xrCamera = xrCamera;
-
-    xrCamera.position.copy(camera.position);
-    xrCamera.quaternion.copy(camera.quaternion);
-    xrCamera.scale.copy(camera.scale);
-
-    const {elements} = xrCamera.matrixWorld;
+    xr.updateCamera(camera);
+    scene.xrCamera = xr.getCamera();
+    const {elements} = scene.getCamera().matrixWorld;
     scene.orientHotspots(Math.atan2(elements[1], elements[5]));
 
     if (!this.initialized) {
