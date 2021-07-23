@@ -370,10 +370,10 @@ export class SmoothControls extends EventDispatcher {
 
     const deltaRatio = deltaZoom === 0 ?
         0 :
-        deltaZoom > 0 ? (maximumRadius! - radius) /
-                (Math.log(maximumFieldOfView!) - this.goalLogFov) :
-                        (radius - minimumRadius!) /
-                (this.goalLogFov - Math.log(minimumFieldOfView!));
+        ((deltaZoom > 0 ? maximumRadius! : minimumRadius!) - radius) /
+            (Math.log(
+                 deltaZoom > 0 ? maximumFieldOfView! : minimumFieldOfView!) -
+             this.goalLogFov);
 
     const goalRadius = radius +
         deltaZoom *
