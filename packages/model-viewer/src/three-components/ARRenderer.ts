@@ -22,7 +22,7 @@ import {ControlsInterface} from '../features/controls.js';
 import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
-import {Damper, DECAY_MILLISECONDS} from './Damper.js';
+import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
@@ -39,9 +39,7 @@ const ROTATION_RATE = 1.5;
 // assumption for the start of the session and UI will lack landscape mode to
 // encourage upright use.
 const HIT_ANGLE_DEG = 20;
-// Slow down the dampers for initial placement.
-const INTRO_DECAY = 120;
-const SCALE_SNAP_HIGH = 1.2;
+const SCALE_SNAP_HIGH = 1.3;
 const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
 // For automatic dynamic viewport scaling, don't let the scale drop below this
 // limit.
@@ -258,9 +256,6 @@ export class ARRenderer extends EventDispatcher {
     this.placementBox =
         new PlacementBox(scene, this.placeOnWall ? 'back' : 'bottom');
     this.placementComplete = false;
-    this.xDamper.setDecayTime(INTRO_DECAY);
-    this.yDamper.setDecayTime(INTRO_DECAY);
-    this.zDamper.setDecayTime(INTRO_DECAY);
 
     this.lastTick = performance.now();
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
@@ -485,29 +480,6 @@ export class ARRenderer extends EventDispatcher {
         });
   }
 
-  // private placeInitially(frame: XRFrame) {
-  //   const hitSource = this.initialHitSource;
-  //   if (hitSource == null) {
-  //     return;
-  //   }
-
-  //   const hitTestResults = frame.getHitTestResults(hitSource);
-  //   if (hitTestResults.length == 0) {
-  //     return;
-  //   }
-
-  //   const hit = hitTestResults[0];
-  //   const hitPoint = this.getHitPoint(hit);
-  //   if (hitPoint == null) {
-  //     return;
-  //   }
-
-  //   this.placeModel(hitPoint);
-
-  //   hitSource.cancel();
-  //   this.initialHitSource = null;
-  // }
-
   private getTouchLocation(): Vector3|null {
     const {axes} = this.inputSource!.gamepad;
     let location = this.placementBox!.getExpandedHit(
@@ -540,7 +512,7 @@ export class ARRenderer extends EventDispatcher {
         null;
   }
 
-  public placeModel(frame: XRFrame) {
+  public moveToFloor(frame: XRFrame) {
     const hitSource = this.initialHitSource;
     if (hitSource == null) {
       return;
@@ -559,6 +531,8 @@ export class ARRenderer extends EventDispatcher {
 
     this.placementBox!.show = true;
 
+    // If the user is translating, let the finger hit-ray take precedence and
+    // ignore this hit result.
     if (!this.isTranslating) {
       if (this.placeOnWall) {
         this.goalPosition.copy(hitPoint);
@@ -747,9 +721,6 @@ export class ARRenderer extends EventDispatcher {
           this.placementComplete = true;
           box.show = false;
           scene.setShadowIntensity(AR_SHADOW_INTENSITY);
-          this.xDamper.setDecayTime(DECAY_MILLISECONDS);
-          this.yDamper.setDecayTime(DECAY_MILLISECONDS);
-          this.zDamper.setDecayTime(DECAY_MILLISECONDS);
         }
       }
     }
@@ -793,7 +764,7 @@ export class ARRenderer extends EventDispatcher {
       this.updateView(view);
 
       if (isFirstView) {
-        this.placeModel(frame);
+        this.moveToFloor(frame);
 
         this.processInput(frame);
 
