@@ -10,7 +10,6 @@
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/lib/shader test/renderers/dspbr-pt/",
-    "update:package-lock": "rm -f ./package-lock.json && npm i --only=production",
     "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/dspbr-pt/shader ./test/renderers/filament/{cmgen,ktx}"
   },
   "contributors": [
@@ -37,7 +36,7 @@
     "@types/puppeteer": "^3.0.1",
     "@types/rimraf": "^3.0.1",
     "dspbr-pt": "^0.2.1",
-    "filament": "^1.9.2",
+    "filament": "1.9.2",
     "focus-visible": "^5.2.0",
     "http-server": "^0.12.3",
     "lit-element": "^2.5.1",
