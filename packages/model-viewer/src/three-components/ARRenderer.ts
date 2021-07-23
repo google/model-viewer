@@ -43,10 +43,11 @@ const HIT_ANGLE_DEG = 20;
 const INTRO_DECAY = 120;
 const SCALE_SNAP_HIGH = 1.2;
 const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
-
 // For automatic dynamic viewport scaling, don't let the scale drop below this
 // limit.
 const MIN_VIEWPORT_SCALE = 0.25;
+// Furthest away you can move an object (meters).
+const MAX_DISTANCE = 10;
 
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
@@ -307,11 +308,12 @@ export class ARRenderer extends EventDispatcher {
       if (this.placeOnWall) {
         // Move the scene's target to the center of the back of the model's
         // bounding box.
-        scene.setTarget(target.x, target.y, scene.boundingBox.min.z);
+        target.z = scene.boundingBox.min.z;
       } else {
         // Move the scene's target to the model's floor height.
-        scene.setTarget(target.x, scene.boundingBox.min.y, target.z);
+        target.y = scene.boundingBox.min.y;
       }
+      scene.setTarget(target.x, target.y, target.z);
     }
   }
 
@@ -419,6 +421,7 @@ export class ARRenderer extends EventDispatcher {
     (this.threeRenderer.xr as any).updateCamera(camera);
     //@ts-ignore
     const xrCamera = this.threeRenderer.xr.getCamera();
+    scene.xrCamera = xrCamera;
 
     xrCamera.position.copy(camera.position);
     xrCamera.quaternion.copy(camera.quaternion);
@@ -428,27 +431,7 @@ export class ARRenderer extends EventDispatcher {
     scene.orientHotspots(Math.atan2(elements[1], elements[5]));
 
     if (!this.initialized) {
-      const {position, element} = scene;
-
-      const {width, height} = this.overlay!.getBoundingClientRect();
-      scene.setSize(width, height);
-
-      scene.xrCamera = xrCamera;
-      xrCamera.projectionMatrixInverse.copy(xrCamera.projectionMatrix).invert();
-
-      const {theta, radius} =
-          (element as ModelViewerElementBase & ControlsInterface)
-              .getCameraOrbit();
-      // Orient model to match the 3D camera view
-      const cameraDirection = scene.xrCamera.getWorldDirection(vector3);
-      scene.yaw = Math.atan2(-cameraDirection.x, -cameraDirection.z) - theta;
-      this.goalYaw = scene.yaw;
-
-      position.copy(scene.xrCamera.position)
-          .add(cameraDirection.multiplyScalar(radius));
-      this.goalPosition.copy(position);
-
-      scene.setHotspotsVisibility(true);
+      this.placeInitially();
       this.initialized = true;
     }
 
@@ -463,29 +446,36 @@ export class ARRenderer extends EventDispatcher {
         viewport.x, viewport.y, viewport.width, viewport.height);
   }
 
-  private placeInitially(frame: XRFrame) {
-    const hitSource = this.initialHitSource;
-    if (hitSource == null) {
-      return;
-    }
+  private placeInitially() {
+    const scene = this.presentedScene!;
+    const {position, element} = scene;
+    const xrCamera = scene.getCamera();
 
-    const hitTestResults = frame.getHitTestResults(hitSource);
-    if (hitTestResults.length == 0) {
-      return;
-    }
+    const {width, height} = this.overlay!.getBoundingClientRect();
+    scene.setSize(width, height);
 
-    const hit = hitTestResults[0];
-    const hitPoint = this.getHitPoint(hit);
-    if (hitPoint == null) {
-      return;
-    }
+    xrCamera.projectionMatrixInverse.copy(xrCamera.projectionMatrix).invert();
 
-    this.placeModel(hitPoint);
+    const {theta, radius} =
+        (element as ModelViewerElementBase & ControlsInterface)
+            .getCameraOrbit();
+    // Orient model to match the 3D camera view
+    const cameraDirection = xrCamera.getWorldDirection(vector3);
+    scene.yaw = Math.atan2(-cameraDirection.x, -cameraDirection.z) - theta;
+    this.goalYaw = scene.yaw;
 
-    hitSource.cancel();
-    this.initialHitSource = null;
+    position.copy(xrCamera.position)
+        .add(cameraDirection.multiplyScalar(radius));
 
-    const {session} = frame;
+    this.updateTarget();
+    const target = scene.getTarget();
+    position.add(target).sub(this.oldTarget);
+
+    this.goalPosition.copy(position);
+
+    scene.setHotspotsVisibility(true);
+
+    const {session} = this.frame!;
     session.addEventListener('selectstart', this.onSelectStart);
     session.addEventListener('selectend', this.onSelectEnd);
     session
@@ -493,6 +483,41 @@ export class ARRenderer extends EventDispatcher {
         .then(hitTestSource => {
           this.transientHitTestSource = hitTestSource;
         });
+  }
+
+  // private placeInitially(frame: XRFrame) {
+  //   const hitSource = this.initialHitSource;
+  //   if (hitSource == null) {
+  //     return;
+  //   }
+
+  //   const hitTestResults = frame.getHitTestResults(hitSource);
+  //   if (hitTestResults.length == 0) {
+  //     return;
+  //   }
+
+  //   const hit = hitTestResults[0];
+  //   const hitPoint = this.getHitPoint(hit);
+  //   if (hitPoint == null) {
+  //     return;
+  //   }
+
+  //   this.placeModel(hitPoint);
+
+  //   hitSource.cancel();
+  //   this.initialHitSource = null;
+  // }
+
+  private getTouchLocation(): Vector3|null {
+    const {axes} = this.inputSource!.gamepad;
+    let location = this.placementBox!.getExpandedHit(
+        this.presentedScene!, axes[0], axes[1]);
+    if (location != null) {
+      vector3.copy(location).sub(this.presentedScene!.getCamera().position);
+      if (vector3.length() > MAX_DISTANCE)
+        location = null;
+    }
+    return location;
   }
 
   private getHitPoint(hitResult: XRHitTestResult): Vector3|null {
@@ -515,17 +540,35 @@ export class ARRenderer extends EventDispatcher {
         null;
   }
 
-  public placeModel(hit: Vector3) {
-    this.placementBox!.show = true;
-
-    if (this.placeOnWall) {
-      this.goalPosition.copy(hit);
-    } else {
-      this.goalPosition.y = hit.y;
+  public placeModel(frame: XRFrame) {
+    const hitSource = this.initialHitSource;
+    if (hitSource == null) {
+      return;
     }
 
-    this.updateTarget();
+    const hitTestResults = frame.getHitTestResults(hitSource);
+    if (hitTestResults.length == 0) {
+      return;
+    }
 
+    const hit = hitTestResults[0];
+    const hitPoint = this.getHitPoint(hit);
+    if (hitPoint == null) {
+      return;
+    }
+
+    this.placementBox!.show = true;
+
+    if (!this.isTranslating) {
+      if (this.placeOnWall) {
+        this.goalPosition.copy(hitPoint);
+      } else {
+        this.goalPosition.y = hitPoint.y;
+      }
+    }
+
+    hitSource.cancel();
+    this.initialHitSource = null;
     this.dispatchEvent({type: 'status', status: ARStatus.OBJECT_PLACED});
   }
 
@@ -638,14 +681,20 @@ export class ARRenderer extends EventDispatcher {
       this.lastAngle = angle;
     } else if (this.isTranslating) {
       fingers.forEach(finger => {
-        if (finger.inputSource !== this.inputSource ||
-            finger.results.length < 1) {
+        if (finger.inputSource !== this.inputSource) {
           return;
         }
 
-        const hit = this.getHitPoint(finger.results[0]);
+        let hit = null;
+        if (finger.results.length >= 1) {
+          hit = this.getHitPoint(finger.results[0]);
+        }
+
         if (hit == null) {
-          return;
+          hit = this.getTouchLocation();
+          if (hit == null) {
+            return;
+          }
         }
 
         this.goalPosition.sub(this.lastDragPosition);
@@ -678,8 +727,7 @@ export class ARRenderer extends EventDispatcher {
     const oldScale = scene.scale.x;
     const box = this.placementBox!;
 
-    if (this.initialHitSource == null &&
-        (!goal.equals(position) || this.goalScale !== oldScale)) {
+    if (!goal.equals(position) || this.goalScale !== oldScale) {
       let {x, y, z} = position;
       x = this.xDamper.update(x, goal.x, delta, radius);
       y = this.yDamper.update(y, goal.y, delta, radius);
@@ -745,7 +793,7 @@ export class ARRenderer extends EventDispatcher {
       this.updateView(view);
 
       if (isFirstView) {
-        this.placeInitially(frame);
+        this.placeModel(frame);
 
         this.processInput(frame);
 
