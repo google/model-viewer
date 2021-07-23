@@ -15,29 +15,35 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {MagFilter, MinFilter, Sampler as GLTFSampler, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {Filter, MagFilter, MinFilter, Sampler as GLTFSampler, Wrap, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Sampler as SamplerInterface} from './api.js';
-import {$gltfSampler, $threeTexture, TextureInfo} from './texture-info';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 
 const isMinFilter = (() => {
-  const minFilterValues: Array<MinFilter> =
-      [9728, 9729, 9984, 9985, 9986, 9987];
+  const minFilterValues: Array<MinFilter> = [
+    Filter.Nearest,
+    Filter.Linear,
+    Filter.NearestMipmapNearest,
+    Filter.LinearMipmapLinear,
+    Filter.NearestMipmapLinear,
+    Filter.LinearMipmapLinear
+  ];
   return (value: unknown): value is MinFilter =>
              minFilterValues.indexOf(value as MinFilter) > -1;
 })();
 
 const isMagFilter = (() => {
-  const magFilterValues: Array<MagFilter> = [9728, 9729];
+  const magFilterValues: Array<MagFilter> = [Filter.Nearest, Filter.Linear];
   return (value: unknown): value is MagFilter =>
              magFilterValues.indexOf(value as MagFilter) > -1;
 })();
 
 const isWrapMode = (() => {
-  const wrapModes: Array<WrapMode> = [33071, 33648, 10497];
+  const wrapModes: Array<WrapMode> =
+      [Wrap.ClampToEdge, Wrap.MirroredRepeat, Wrap.Repeat];
   return (value: unknown): value is WrapMode =>
              wrapModes.indexOf(value as WrapMode) > -1;
 })();
@@ -59,39 +65,50 @@ const isValidSamplerValue = <P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
 
 const $threeTextures = Symbol('threeTextures');
 const $setProperty = Symbol('setProperty');
+const $sourceSampler = Symbol('sourceSampler');
 
 /**
  * Sampler facade implementation for Three.js textures
  */
 export class Sampler extends ThreeDOMElement implements SamplerInterface {
   private get[$threeTextures]() {
+    console.assert(
+        this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
+        'Sampler correlated object is undefined');
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
-  constructor(textureInfo: TextureInfo) {
-    const sampler = textureInfo[$gltfSampler];
+  private get[$sourceSampler]() {
+    console.assert(this[$sourceObject] != null, 'Sampler source is undefined');
+    return (this[$sourceObject] as GLTFSampler);
+  }
+
+  constructor(
+      onUpdate: () => void, texture: ThreeTexture|null,
+      gltfSampler: GLTFSampler|null) {
+    gltfSampler = gltfSampler ?? {} as GLTFSampler;
     // These defaults represent a convergence of glTF defaults for wrap mode and
     // Three.js defaults for filters. Per glTF 2.0 spec, a renderer may choose
     // its own defaults for filters.
     // @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-sampler
     // @see https://threejs.org/docs/#api/en/textures/Texture
-    if (sampler.minFilter == null) {
-      sampler.minFilter = 9987;
+    if (gltfSampler.minFilter == null) {
+      gltfSampler.minFilter =
+          texture ? texture.minFilter as MinFilter : Filter.LinearMipmapLinear;
     }
-    if (sampler.magFilter == null) {
-      sampler.magFilter = 9729;
+    if (gltfSampler.magFilter == null) {
+      gltfSampler.magFilter =
+          texture ? texture.magFilter as MagFilter : Filter.Linear;
     }
-    if (sampler.wrapS == null) {
-      sampler.wrapS = 10497;
+    if (gltfSampler.wrapS == null) {
+      gltfSampler.wrapS = texture ? texture.wrapS as WrapMode : Wrap.Repeat;
     }
-    if (sampler.wrapT == null) {
-      sampler.wrapT = 10497;
+    if (gltfSampler.wrapT == null) {
+      gltfSampler.wrapT = texture ? texture.wrapT as WrapMode : Wrap.Repeat;
     }
 
     super(
-        textureInfo.onUpdate,
-        sampler,
-        new Set<ThreeTexture>([textureInfo[$threeTexture]!]));
+        onUpdate, gltfSampler, new Set<ThreeTexture>(texture ? [texture] : []));
   }
 
   get name(): string {
@@ -99,19 +116,19 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   get minFilter(): MinFilter {
-    return (this[$sourceObject] as GLTFSampler).minFilter!;
+    return this[$sourceSampler].minFilter!;
   }
 
   get magFilter(): MagFilter {
-    return (this[$sourceObject] as GLTFSampler).magFilter!;
+    return this[$sourceSampler].magFilter!;
   }
 
   get wrapS(): WrapMode {
-    return (this[$sourceObject] as GLTFSampler).wrapS!;
+    return this[$sourceSampler].wrapS!;
   }
 
   get wrapT(): WrapMode {
-    return (this[$sourceObject] as GLTFSampler).wrapT!;
+    return this[$sourceSampler].wrapT!;
   }
 
   setMinFilter(filter: MinFilter) {
@@ -132,16 +149,17 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
 
   private[$setProperty]<P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
       property: P, value: MinFilter|MagFilter|WrapMode) {
-    const sampler = this[$sourceObject] as GLTFSampler;
+    const sampler = this[$sourceSampler];
+    if (sampler != null) {
+      if (isValidSamplerValue(property, value)) {
+        sampler[property] = value;
 
-    if (isValidSamplerValue(property, value)) {
-      sampler[property] = value;
-
-      for (const texture of this[$threeTextures]) {
-        texture[property] = value;
-        texture.needsUpdate = true;
+        for (const texture of this[$threeTextures]) {
+          (texture[property] as MinFilter | MagFilter | WrapMode) = value;
+          texture.needsUpdate = true;
+        }
       }
+      this[$onUpdate]();
     }
-    this[$onUpdate]();
   }
 }

@@ -15,7 +15,7 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {$underlyingTexture} from '../../../features/scene-graph/image.js';
+import {$threeTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
@@ -58,29 +58,18 @@ suite('scene-graph/texture', () => {
     test('Set a texture', async () => {
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
-      const newUUID: string|undefined =
-          texture?.source[$underlyingTexture]?.uuid;
+      const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
               .pbrMetallicRoughness.baseColorTexture?.texture
-              ?.source[$underlyingTexture]!;
+              ?.source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
 
     test('Verify legacy correlatedObjects are updated.', async () => {
-      const newUUID: string|undefined =
-          texture?.source[$underlyingTexture]?.uuid;
-
-      const uuidFromTextureInfoObject: string =
-          (element.model!.materials[0]
-               .pbrMetallicRoughness.baseColorTexture?.[$correlatedObjects]
-               ?.values()
-               .next()
-               .value as ThreeTexture)
-              .uuid;
-      expect(uuidFromTextureInfoObject).to.be.equal(newUUID);
+      const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const uuidFromTextureObject: string =
           (element.model!.materials[0]
@@ -114,7 +103,7 @@ suite('scene-graph/texture', () => {
     });
 
     test('Set a texture and then setURI', async () => {
-      const imageFromSetTexture = texture?.source[$underlyingTexture]?.image;
+      const imageFromSetTexture = texture?.source[$threeTexture]?.image;
       expect(imageFromSetTexture).to.not.be.null;
 
       await element.model!.materials[0]
@@ -125,7 +114,7 @@ suite('scene-graph/texture', () => {
       const imageFromSetURI =
           element.model!.materials[0]
               .pbrMetallicRoughness.baseColorTexture?.texture
-              ?.source[$underlyingTexture]
+              ?.source[$threeTexture]
               ?.image;
 
       expect(imageFromSetURI).to.not.be.equal(imageFromSetTexture);
