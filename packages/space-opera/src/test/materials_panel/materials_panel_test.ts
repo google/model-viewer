@@ -24,8 +24,8 @@ import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {waitForEvent} from '../utils/test_utils.js';
 
-const CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
-const TEXTURE_PATH = '../base/shared-assets/models/ORM.png';
+const CUBE_GLTF_PATH = 'base/shared-assets/models/textureCubes.gltf';
+const TEXTURE_PATH = 'base/shared-assets/models/ORM.png';
 
 describe('material panel test', () => {
   let preview: ModelViewerPreview;
@@ -246,7 +246,7 @@ describe('material panel test', () => {
        // texture.
        const {baseColorTexture} = panel.getMaterial().pbrMetallicRoughness;
        expect(getTextureId(baseColorTexture.texture!.source))
-           .toEqual(TEXTURE_PATH);
+           .toContain(TEXTURE_PATH);
      });
 
   it('adds a normal texture to model textures on normal texture upload',
@@ -264,7 +264,7 @@ describe('material panel test', () => {
        // texture.
        const {normalTexture} = panel.getMaterial();
        expect(getTextureId(normalTexture.texture!.source))
-           .toEqual(TEXTURE_PATH);
+           .toContain(TEXTURE_PATH);
      });
 
   it('adds a metallic-roughness texture to model textures on MR texture upload',
@@ -283,7 +283,7 @@ describe('material panel test', () => {
        const {metallicRoughnessTexture} =
            panel.getMaterial().pbrMetallicRoughness;
        expect(getTextureId(metallicRoughnessTexture.texture!.source))
-           .toEqual(TEXTURE_PATH);
+           .toContain(TEXTURE_PATH);
      });
 
   it('adds a emissive texture to model textures on emissive texture upload',
@@ -301,7 +301,7 @@ describe('material panel test', () => {
        // texture.
        const {emissiveTexture} = panel.getMaterial();
        expect(getTextureId(emissiveTexture.texture!.source))
-           .toEqual(TEXTURE_PATH);
+           .toContain(TEXTURE_PATH);
      });
 
   it('adds a occlusion texture to model textures on occlusion texture upload',
@@ -319,7 +319,7 @@ describe('material panel test', () => {
        // texture.
        const {occlusionTexture} = panel.getMaterial();
        expect(getTextureId(occlusionTexture.texture!.source))
-           .toEqual(TEXTURE_PATH);
+           .toContain(TEXTURE_PATH);
      });
 
   it('applies changes to model textures on emissiveFactor change', async () => {

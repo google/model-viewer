@@ -17,6 +17,7 @@
 
 import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/api';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
+import {Image} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 
 import {Action, BestPracticesState, State} from '../../types.js';
 import {renderARButton, renderARPrompt, renderProgressBar} from '../best_practices/render_best_practices.js';
@@ -77,8 +78,7 @@ export async function downloadContents(url: string): Promise<ArrayBuffer> {
   return blob.arrayBuffer();
 }
 
-export function getTextureId(gltfImage: {uri?: string, bufferView?: number}):
-    string {
+export function getTextureId(gltfImage: Image): string {
   return gltfImage.uri ?? gltfImage.bufferView!.toString();
 }
 
