@@ -15,17 +15,40 @@
  *
  */
 
+import {TextureInfo} from '../../../../model-viewer/lib/features/scene-graph/api.js';
 import {MaterialPanel} from '../../components/materials_panel/materials_panel.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getTextureId} from '../../components/model_viewer_preview/reducer.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../../components/shared/slider_with_input/slider_with_input.js';
+import {TexturePicker} from '../../components/shared/texture_picker/texture_picker.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {waitForEvent} from '../utils/test_utils.js';
 
 const CUBE_GLTF_PATH = 'base/shared-assets/models/textureCubes.gltf';
 const TEXTURE_PATH = 'base/shared-assets/models/ORM.png';
+
+async function checkUpload(
+    panel: MaterialPanel,
+    texturePicker: TexturePicker,
+    textureInfo: TextureInfo) {
+  const imageList = texturePicker.shadowRoot!.querySelector('.TextureList')!;
+  const listLength = texturePicker.images.length;
+
+  expect(imageList.children.length).toEqual(listLength + 1);
+
+  texturePicker.dispatchEvent(
+      new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
+  await waitForEvent(panel, 'texture-upload-complete');
+  await panel.updateComplete;
+
+  // Check that the uri of the texture at material 0 is the newly uploaded
+  // texture.
+  expect(getTextureId(textureInfo.texture!.source)).toContain(TEXTURE_PATH);
+  expect(texturePicker.images.length).toEqual(listLength + 1);
+  expect(imageList.children.length).toEqual(listLength + 2);
+}
 
 describe('material panel test', () => {
   let preview: ModelViewerPreview;
@@ -234,92 +257,51 @@ describe('material panel test', () => {
   it('adds a base color texture to model textures on base color texture upload',
      async () => {
        panel.selectedMaterialIndex = 0;
-
        await panel.updateComplete;
-       const texturePicker = panel.baseColorTexturePicker!;
-       texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
-       await waitForEvent(panel, 'texture-upload-complete');
-       await panel.updateComplete;
-
-       // Check that the uri of the texture at material 0 is the newly uploaded
-       // texture.
-       const {baseColorTexture} = panel.getMaterial().pbrMetallicRoughness;
-       expect(getTextureId(baseColorTexture.texture!.source))
-           .toContain(TEXTURE_PATH);
+       await checkUpload(
+           panel,
+           panel.baseColorTexturePicker!,
+           panel.getMaterial().pbrMetallicRoughness.baseColorTexture);
      });
 
   it('adds a normal texture to model textures on normal texture upload',
      async () => {
        panel.selectedMaterialIndex = 0;
-
        await panel.updateComplete;
-       const texturePicker = panel.normalTexturePicker!;
-       texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
-       await waitForEvent(panel, 'texture-upload-complete');
-       await panel.updateComplete;
-
-       // Check that the uri of the texture at material 0 is the newly uploaded
-       // texture.
-       const {normalTexture} = panel.getMaterial();
-       expect(getTextureId(normalTexture.texture!.source))
-           .toContain(TEXTURE_PATH);
+       await checkUpload(
+           panel,
+           panel.normalTexturePicker!,
+           panel.getMaterial().normalTexture);
      });
 
   it('adds a metallic-roughness texture to model textures on MR texture upload',
      async () => {
        panel.selectedMaterialIndex = 0;
-
        await panel.updateComplete;
-       const texturePicker = panel.metallicRoughnessTexturePicker!;
-       texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
-       await waitForEvent(panel, 'texture-upload-complete');
-       await panel.updateComplete;
-
-       // Check that the uri of the texture at material 0 is the newly uploaded
-       // texture.
-       const {metallicRoughnessTexture} =
-           panel.getMaterial().pbrMetallicRoughness;
-       expect(getTextureId(metallicRoughnessTexture.texture!.source))
-           .toContain(TEXTURE_PATH);
+       await checkUpload(
+           panel,
+           panel.metallicRoughnessTexturePicker!,
+           panel.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
      });
 
   it('adds a emissive texture to model textures on emissive texture upload',
      async () => {
        panel.selectedMaterialIndex = 0;
-
        await panel.updateComplete;
-       const texturePicker = panel.emissiveTexturePicker!;
-       texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
-       await waitForEvent(panel, 'texture-upload-complete');
-       await panel.updateComplete;
-
-       // Check that the uri of the texture at material 0 is the newly uploaded
-       // texture.
-       const {emissiveTexture} = panel.getMaterial();
-       expect(getTextureId(emissiveTexture.texture!.source))
-           .toContain(TEXTURE_PATH);
+       await checkUpload(
+           panel,
+           panel.emissiveTexturePicker!,
+           panel.getMaterial().emissiveTexture);
      });
 
   it('adds a occlusion texture to model textures on occlusion texture upload',
      async () => {
        panel.selectedMaterialIndex = 0;
-
        await panel.updateComplete;
-       const texturePicker = panel.occlusionTexturePicker!;
-       texturePicker.dispatchEvent(
-           new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
-       await waitForEvent(panel, 'texture-upload-complete');
-       await panel.updateComplete;
-
-       // Check that the uri of the texture at material 0 is the newly uploaded
-       // texture.
-       const {occlusionTexture} = panel.getMaterial();
-       expect(getTextureId(occlusionTexture.texture!.source))
-           .toContain(TEXTURE_PATH);
+       await checkUpload(
+           panel,
+           panel.occlusionTexturePicker!,
+           panel.getMaterial().occlusionTexture);
      });
 
   it('applies changes to model textures on emissiveFactor change', async () => {

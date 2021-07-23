@@ -416,6 +416,8 @@ export class MaterialPanel extends ConnectedLitElement {
     this.thumbnailsById = new Map(this.thumbnailsById);
     if (id != null) {
       this.thumbnailIds.push(id);
+      // Trigger async texture_picker update / render
+      this.thumbnailUrls = [...this.thumbnailUrls];
       this.thumbnailUrls.push(this.thumbnailsById.get(id)!.objectUrl);
     }
     reduxStore.dispatch(dispatchModelDirty());
