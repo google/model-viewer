@@ -26,16 +26,6 @@
   ],
   "scenarios": [
     {
-      "name": "khronos-DragonAttenuation",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DragonAttenuation/glTF/DragonAttenuation.gltf",
-      "orbit": {
-        "radius": 5
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
       "name": "khronos-BoomBox",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF/BoomBox.gltf",
       "orbit": {
@@ -135,6 +125,16 @@
         "theta": -90,
         "radius": 0.4
       }
+    },
+    {
+      "name": "khronos-DragonAttenuation",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DragonAttenuation/glTF/DragonAttenuation.gltf",
+      "orbit": {
+        "radius": 5
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
     },
     {
       "name": "khronos-CesiumMan",
