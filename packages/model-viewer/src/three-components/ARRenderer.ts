@@ -484,7 +484,7 @@ export class ARRenderer extends EventDispatcher {
     if (location != null) {
       vector3.copy(location).sub(this.presentedScene!.getCamera().position);
       if (vector3.length() > MAX_DISTANCE)
-        location = null;
+        return null;
     }
     return location;
   }
@@ -656,16 +656,11 @@ export class ARRenderer extends EventDispatcher {
           return;
         }
 
-        let hit = null;
-        if (finger.results.length >= 1) {
-          hit = this.getHitPoint(finger.results[0]);
-        }
-
+        const hit = finger.results.length > 0 ?
+            this.getHitPoint(finger.results[0]) :
+            this.getTouchLocation();
         if (hit == null) {
-          hit = this.getTouchLocation();
-          if (hit == null) {
-            return;
-          }
+          return;
         }
 
         this.goalPosition.sub(this.lastDragPosition);
