@@ -12,7 +12,6 @@
     "test": "karma start --single-run",
     "test:ci": "npm run test",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
-    "update:package-lock": "rm -f ./package-lock.json && npm i --only=production",
     "watch:test": "karma start",
     "watch:tsc": "tsc -w",
     "watch:rollup": "rollup -c -w",

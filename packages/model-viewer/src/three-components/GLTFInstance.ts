@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Group, Mesh, Object3D} from 'three';
+import {Group, Mesh, Object3D, Texture} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {Constructor} from '../utilities.js';
@@ -136,6 +136,13 @@ export class GLTFInstance implements GLTF {
         const materials =
             Array.isArray(mesh.material) ? mesh.material : [mesh.material];
         materials.forEach(material => {
+          // Explicitly dispose any textures assigned to this material
+          for (const propertyName in material) {
+            const propertyValue = (material as any)[propertyName];
+            if (propertyValue instanceof Texture) {
+              propertyValue.dispose();
+            }
+          }
           material.dispose();
         });
         mesh.geometry.dispose();

@@ -20,8 +20,7 @@ import {Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.
 import {Renderer} from '../../three-components/Renderer.js';
 
 import {Image as ImageInterface} from './api.js';
-import {$gltfImage, $threeTexture, TextureInfo} from './texture-info.js';
-import {$onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 
@@ -29,25 +28,28 @@ const loader = new ImageLoader();
 const quadMaterial = new MeshBasicMaterial();
 const quad = new PlaneGeometry(2, 2);
 
-export const $underlyingTexture = Symbol('threeTextures');
-const $textureInfo = Symbol('textureInfo');
+export const $threeTexture = Symbol('threeTexture');
 export const $applyTexture = Symbol('applyTexture');
 
 /**
  * Image facade implementation for Three.js textures
  */
 export class Image extends ThreeDOMElement implements ImageInterface {
-  get[$underlyingTexture]() {
-    return this[$textureInfo][$threeTexture];
+  get[$threeTexture]() {
+    console.assert(
+        this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
+        'Image correlated object is undefined');
+    return this[$correlatedObjects]?.values().next().value as ThreeTexture;
   }
 
-  private[$textureInfo]: TextureInfo;
-  constructor(textureInfo: TextureInfo) {
-    super(
-        textureInfo.onUpdate,
-        textureInfo[$gltfImage],
-        new Set<ThreeTexture>([textureInfo[$threeTexture]!]));
-    this[$textureInfo] = textureInfo;
+  constructor(
+      onUpdate: () => void, texture: ThreeTexture|null,
+      gltfImage: GLTFImage|null) {
+    gltfImage = gltfImage ?? {
+      name: 'adhoc_image',
+      uri: (texture && texture.image) ? texture.image.uri : 'adhoc_image'
+    } as GLTFImage;
+    super(onUpdate, gltfImage, new Set<ThreeTexture>(texture ? [texture] : []));
   }
 
   get name(): string {
@@ -73,7 +75,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       loader.load(uri, resolve, undefined, reject);
     });
 
-    const texture = this[$textureInfo][$threeTexture]!;
+    const texture = this[$threeTexture]!;
     texture.image = image;
     texture.needsUpdate = true;
     this[$onUpdate]();
@@ -81,7 +83,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
   async createThumbnail(width: number, height: number): Promise<string> {
     const scene = new Scene();
-    quadMaterial.map = this[$textureInfo][$threeTexture];
+    quadMaterial.map = this[$threeTexture];
     const mesh = new Mesh(quad, quadMaterial);
     scene.add(mesh);
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -103,12 +105,13 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     imageData.data.set(buffer);
     blobContext.putImageData(imageData, 0, 0);
 
-    return new Promise<string>(
-        async (resolve, reject) => {blobCanvas.toBlob(blob => {
-          if (!blob) {
-            return reject('Failed to capture thumbnail.');
-          }
-          resolve(URL.createObjectURL(blob));
-        }, 'image/png')});
+    return new Promise<string>(async (resolve, reject) => {
+      blobCanvas.toBlob(blob => {
+        if (!blob) {
+          return reject('Failed to capture thumbnail.');
+        }
+        resolve(URL.createObjectURL(blob));
+      }, 'image/png');
+    });
   }
 }
