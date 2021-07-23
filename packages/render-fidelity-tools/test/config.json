@@ -402,6 +402,22 @@
       ]
     },
     {
+      "name": "khronos-Fox",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf",
+      "target": {
+        "y": 37,
+        "x": -35,
+        "z": 25
+      },
+      "orbit": {
+        "theta": -60,
+        "radius": 124
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-GearboxAssy",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/GearboxAssy/glTF/GearboxAssy.gltf",
       "dimensions": {

@@ -18,7 +18,6 @@ import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 import {ControlsInterface, ControlsMixin} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
-import {SETTLING_TIME} from '../../three-components/Damper.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
@@ -266,22 +265,7 @@ suite('ARRenderer', () => {
         expect(forward.y).to.be.equal(0);
         expect(cameraToHit.cross(forwardProjection)).to.be.closeTo(0, epsilon);
         expect(cameraToHit.dot(forwardProjection)).to.be.lessThan(0);
-      });
-
-      suite('after hit placement', () => {
-        let hitPosition: Vector3;
-
-        setup(async () => {
-          hitPosition = new Vector3(5, -1, 1);
-          await arRenderer.placeModel(hitPosition);
-          // Long enough time to settle at new position.
-          arRenderer.onWebXRFrame(
-              SETTLING_TIME, new MockXRFrame(arRenderer.currentSession!));
-        });
-
-        test('scene has the same orientation', () => {
-          expect(modelScene.yaw).to.be.equal(yaw);
-        });
+        expect(modelScene.yaw).to.be.equal(yaw);
       });
     });
   });

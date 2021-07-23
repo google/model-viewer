@@ -15,42 +15,39 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {Image as GLTFImage, Sampler as GLTFSampler, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Texture as TextureInterface} from './api.js';
 import {Image} from './image.js';
 import {Sampler} from './sampler.js';
-import {$gltfTexture, $threeTexture, TextureInfo} from './texture-info.js';
-import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 
-const $source = Symbol('source');
+const $image = Symbol('image');
 const $sampler = Symbol('sampler');
 
 /**
  * Material facade implementation for Three.js materials
  */
 export class Texture extends ThreeDOMElement implements TextureInterface {
-  private[$source]: Image;
+  private[$image]: Image;
   private[$sampler]: Sampler;
 
-  constructor(textureInfo: TextureInfo) {
+  constructor(
+      onUpdate: () => void,
+      threeTexture: ThreeTexture|null,
+      gltfTexture: GLTFTexture|null = null,
+      gltfSampler: GLTFSampler|null = null,
+      gltfImage: GLTFImage|null = null,
+  ) {
     super(
-        textureInfo.onUpdate,
-        textureInfo[$gltfTexture],
-        new Set<ThreeTexture>([textureInfo[$threeTexture]!]));
-    this[$sampler] = new Sampler(textureInfo);
-    this[$source] = new Image(textureInfo);
-  }
+        onUpdate,
+        gltfTexture ? gltfTexture : {} as GLTFTexture,
+        new Set<ThreeTexture>(threeTexture ? [threeTexture] : []));
 
-  applyNewTextureInfo(textureInfo: TextureInfo): void {
-    (this[$onUpdate] as () => void) = textureInfo.onUpdate;
-    (this[$sourceObject] as GLTFElement) = textureInfo[$gltfTexture];
-    (this[$correlatedObjects] as Set<ThreeTexture>) =
-        new Set<ThreeTexture>([textureInfo[$threeTexture]!]);
-    this[$sampler] = new Sampler(textureInfo);
-    this[$source] = new Image(textureInfo);
+    this[$sampler] = new Sampler(onUpdate, threeTexture, gltfSampler);
+    this[$image] = new Image(onUpdate, threeTexture, gltfImage);
   }
 
   get name(): string {
@@ -62,6 +59,6 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   }
 
   get source(): Image {
-    return this[$source];
+    return this[$image];
   }
 }
