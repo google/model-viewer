@@ -389,12 +389,13 @@
       "name": "khronos-Fox",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf",
       "target": {
-        "y": 30
+        "y": 37,
+        "x": -35,
+        "z": 25
       },
       "orbit": {
         "theta": -60,
-        "phi": 80,
-        "radius": 286
+        "radius": 124
       },
       "exclude": [
         "dspbr-pt"
