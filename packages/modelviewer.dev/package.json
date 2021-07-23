@@ -7,8 +7,7 @@
     "test": "echo \"No tests specified\" && exit 0",
     "clean": "rm -rf ./examples/built ./lib ./dist",
     "build": "tsc && rollup -c",
-    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
-    "update:package-lock": "rm -f ./package-lock.json && npm i --only=production"
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi"
   },
   "contributors": [
     "Jordan Santell <jsantell@google.com>",

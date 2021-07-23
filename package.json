@@ -12,8 +12,7 @@
     "clean": "./node_modules/.bin/lerna run clean --stream",
     "build": "./node_modules/.bin/lerna run build --stream",
     "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /packages/modelviewer.dev -c-1",
-    "update:package-lock": "rm -f ./package-lock.json && npm i && ./node_modules/.bin/lerna run update:package-lock --stream",
-    "upgrade": "rm -rf node_modules package-lock.json && npm install && lerna exec 'rm -rf node_modules package-lock.json' && lerna bootstrap && npm run clean"
+    "update:package-lock": "rm -rf node_modules package-lock.json && npm install && lerna exec 'rm -rf node_modules package-lock.json' && lerna bootstrap && npm run clean"
   },
   "husky": {
     "hooks": {
