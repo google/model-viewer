@@ -28,12 +28,8 @@
     {
       "name": "khronos-DragonAttenuation",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DragonAttenuation/glTF/DragonAttenuation.gltf",
-      "dimensions": {
-        "height": 120,
-        "width": 130
-      },
       "orbit": {
-        "radius": 12.0
+        "radius": 5
       },
       "exclude": [
         "dspbr-pt"
