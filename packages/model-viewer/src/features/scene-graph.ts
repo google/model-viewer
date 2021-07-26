@@ -20,6 +20,7 @@ import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GL
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
+import {GLTF} from '../three-components/gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
 import {Constructor} from '../utilities.js';
@@ -28,14 +29,13 @@ import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/a
 import {Material} from './scene-graph/material.js';
 import {Model} from './scene-graph/model.js';
 import {Texture as ModelViewerTexture} from './scene-graph/texture';
-import {$createFromTexture, TextureInfo as SceneGraphTextureInfo} from './scene-graph/texture-info.js';
 
 
 
 const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
 const $variants = Symbol('variants');
-const $onUpdate = Symbol('onUpdate');
+const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
 const $textureLoader = Symbol('textureLoader');
 
 interface SceneExportOptions {
@@ -50,6 +50,7 @@ export interface SceneGraphInterface {
   readonly availableVariants: Array<string>;
   orientation: string;
   scale: string;
+  readonly originalGltfJson: GLTF|undefined;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
   createTexture(uri: string): Promise<ModelViewerTexture|null>;
 }
@@ -85,6 +86,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     /**
+     * Returns a deep copy of the gltf JSON as loaded. It will not reflect
+     * changes to the scene-graph, nor will editing it have any effect.
+     */
+    get originalGltfJson() {
+      return JSON.parse(JSON.stringify(this[$currentGLTF]?.parser.json));
+    }
+
+    /**
      * References to each element constructor. Supports instanceof checks; these
      * classes are not directly constructable.
      */
@@ -96,8 +105,10 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     static Texture: Constructor<Texture>;
     static Image: Constructor<Image>;
 
-    private[$onUpdate]() {
-      this[$needsRender]();
+    private[$getOnUpdateMethod]() {
+      return () => {
+        this[$needsRender]();
+      };
     }
 
     async createTexture(uri: string): Promise<ModelViewerTexture|null> {
@@ -113,8 +124,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       texture.wrapT = RepeatWrapping;
       texture.flipY = false;
 
-      return new ModelViewerTexture(
-          SceneGraphTextureInfo[$createFromTexture](texture));
+      return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);
     }
 
 
@@ -131,14 +141,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         const updatedMaterialsPromise =
             threeGLTF.correlatedSceneGraph.loadVariant(
-                variantName!, this[$onUpdate]);
+                variantName!, this[$getOnUpdateMethod]);
         const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
         updatedMaterialsPromise.then(updatedMaterials => {
           for (const index of updatedMaterials) {
             const material = gltf.materials![index];
             this[$model]!.materials[index] = new Material(
-                this[$onUpdate],
+                this[$getOnUpdateMethod],
                 gltf,
                 material,
                 gltfElementMap.get(material) as Set<MeshStandardMaterial>);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
+import {MeshStandardMaterial} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -50,52 +50,49 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       pbrMetallicRoughness.baseColorFactor = [1, 1, 1, 1];
     }
     if (pbrMetallicRoughness.roughnessFactor == null) {
-      pbrMetallicRoughness.roughnessFactor = 0;
+      pbrMetallicRoughness.roughnessFactor = 1;
     }
     if (pbrMetallicRoughness.metallicFactor == null) {
-      pbrMetallicRoughness.metallicFactor = 0;
+      pbrMetallicRoughness.metallicFactor = 1;
     }
 
-    let {baseColorTexture, metallicRoughnessTexture} = pbrMetallicRoughness;
-    const baseColorTextures = new Set<ThreeTexture>();
-    const metallicRoughnessTextures = new Set<ThreeTexture>();
+    const {
+      baseColorTexture: gltfBaseColorTexture,
+      metallicRoughnessTexture: gltfMetallicRoughnessTexture
+    } = pbrMetallicRoughness;
 
-    for (const material of correlatedMaterials) {
-      if (baseColorTexture != null && material.map != null) {
-        baseColorTextures.add(material.map);
-      } else {
-        baseColorTexture = {index: -1};
-      }
-
-      // NOTE: GLTFLoader users the same texture for metalnessMap and
-      // roughnessMap in this case
-      // @see https://github.com/mrdoob/three.js/blob/b4473c25816df4a09405c7d887d5c418ef47ee76/examples/js/loaders/GLTFLoader.js#L2173-L2174
-      if (metallicRoughnessTexture != null && material.metalnessMap != null) {
-        metallicRoughnessTextures.add(material.metalnessMap);
-      } else {
-        metallicRoughnessTexture = {index: -1};
-      }
-    }
-
-    const firstValue = <Type>(set: Set<Type>): Type => {
-      return set.values().next().value;
-    };
+    const {map, metalnessMap} = correlatedMaterials.values().next().value;
 
     this[$baseColorTexture] = new TextureInfo(
         onUpdate,
-        gltf,
-        firstValue(correlatedMaterials),
-        firstValue(baseColorTextures),
         TextureUsage.Base,
-        baseColorTexture!);
+        map,
+        correlatedMaterials,
+        gltf,
+        gltfBaseColorTexture ? gltfBaseColorTexture : null);
 
     this[$metallicRoughnessTexture] = new TextureInfo(
         onUpdate,
-        gltf,
-        firstValue(correlatedMaterials),
-        firstValue(metallicRoughnessTextures),
         TextureUsage.Metallic,
-        metallicRoughnessTexture!);
+        metalnessMap,
+        correlatedMaterials,
+        gltf,
+        gltfMetallicRoughnessTexture ? gltfMetallicRoughnessTexture : null);
+
+    const message = (textureType: string) => {
+      console.info(`A group of three.js materials are represented as a
+        single material but share different ${textureType} textures.`);
+    };
+    for (const material of correlatedMaterials) {
+      const verifyMap = material.map ?? null;
+      const verifyMetalnessMap = material.metalnessMap ?? null;
+      if (map !== verifyMap) {
+        message('base');
+      }
+      if (metalnessMap !== verifyMetalnessMap) {
+        message('metalness');
+      }
+    }
   }
 
 
