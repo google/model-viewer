@@ -24,6 +24,8 @@ import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
 
 
+export const ALPHA_TEST_DEFAULT = -0.5;
+
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 
@@ -207,7 +209,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     // This little hack ignores alpha for opaque materials, in order to comply
     // with the glTF spec.
     if (!clone.alphaTest && !clone.transparent) {
-      clone.alphaTest = -0.5;
+      clone.alphaTest = ALPHA_TEST_DEFAULT;
     }
 
     sourceUUIDToClonedMaterial.set(material.uuid, clone);

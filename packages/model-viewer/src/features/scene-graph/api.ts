@@ -60,7 +60,10 @@ export declare interface Material {
 
   readonly emissiveFactor: Readonly<RGB>;
   setEmissiveFactor(rgb: RGB): void;
-
+  setAlphaCutoff(cutoff: number): void;
+  getAlphaCutoff(): number;
+  setDoubleSided(doubleSided: boolean): void;
+  getDoubleSided(): boolean;
   /**
    * The PBRMetallicRoughness configuration of the material.
    */

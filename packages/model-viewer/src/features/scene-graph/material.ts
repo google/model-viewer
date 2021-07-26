@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial} from 'three';
+import {DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
 
 import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {ALPHA_TEST_DEFAULT} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
@@ -153,5 +154,38 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     }
     (this[$sourceObject] as GLTFMaterial).emissiveFactor = rgb;
     this[$onUpdate]();
+  }
+
+  setAlphaCutoff(cutoff: number): void {
+    cutoff = cutoff <= 0 ? ALPHA_TEST_DEFAULT : Math.min(1.0, cutoff);
+    for (const material of this[$correlatedObjects] as
+         Set<MeshStandardMaterial>) {
+      material.alphaTest = cutoff;
+    }
+    (this[$sourceObject] as GLTFMaterial).alphaCutoff = cutoff;
+    this[$onUpdate]();
+  }
+
+  getAlphaCutoff(): number {
+    return (this[$sourceObject] as GLTFMaterial).alphaCutoff ??
+        this[$correlatedObjects]!.values().next().value.alphaTest;
+  }
+
+  setDoubleSided(doubleSided: boolean): void {
+    for (const material of this[$correlatedObjects] as
+         Set<MeshStandardMaterial>) {
+      // When double-sided is disabled gltf spec dictates that Back-Face culling
+      // must be disabled, in three.js parlance that would mean FrontSide
+      // rendering only.
+      // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#double-sided
+      material.side = doubleSided ? DoubleSide : FrontSide;
+    }
+    (this[$sourceObject] as GLTFMaterial).doubleSided = doubleSided;
+    this[$onUpdate]();
+  }
+
+  getDoubleSided(): boolean {
+    return (this[$sourceObject] as GLTFMaterial).doubleSided ??
+        this[$correlatedObjects]!.values().next().value.side === DoubleSide;
   }
 }

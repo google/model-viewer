@@ -18,6 +18,7 @@ import {Texture as ThreeTexture} from 'three';
 import {$threeTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
+import {ALPHA_TEST_DEFAULT} from '../../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
@@ -27,6 +28,8 @@ const expect = chai.expect;
 
 const HELMET_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+const ALPHA_BLEND_MODE_TEST = assetPath(
+    'models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb');
 const REPLACEMENT_TEXTURE_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png');
 suite('scene-graph/material', () => {
@@ -115,6 +118,60 @@ suite('scene-graph/material', () => {
               .emissiveTexture?.texture?.source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
+    });
+  });
+
+  suite('Material properties', () => {
+    let element: ModelViewerElement;
+
+    setup(async () => {
+      element = new ModelViewerElement();
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
+    });
+
+    const loadModel = async (path: string) => {
+      element.src = path;
+      document.body.insertBefore(element, document.body.firstChild);
+      await waitForEvent(element, 'load');
+    };
+
+    test('test alpha cutoff expect default', async () => {
+      await loadModel(HELMET_GLB_PATH);
+      // Default value hack see:
+      // https://github.com/google/model-viewer/blob/e3a000111980f5cf018c61dec8695463e0d843a0/packages/model-viewer/src/three-components/gltf-instance/ModelViewerGLTFInstance.ts#L210
+      expect(element.model!.materials[0].getAlphaCutoff())
+          .to.be.equal(ALPHA_TEST_DEFAULT);
+      element.model!.materials[0].setAlphaCutoff(0.25);
+      expect(element.model!.materials[0].getAlphaCutoff()).to.be.equal(0.25);
+    });
+
+    test('test alpha cutoff expect non-default', async () => {
+      await loadModel(ALPHA_BLEND_MODE_TEST);
+
+      expect(element.model!.materials[2].getAlphaCutoff()).to.be.equal(0.25);
+      element.model!.materials[2].setAlphaCutoff(0.0);
+      // Setting Zero-Alpha should revent to default settings.
+      expect(element.model!.materials[0].getAlphaCutoff())
+          .to.be.equal(ALPHA_TEST_DEFAULT);
+    });
+
+    test('test double sided expect default', async () => {
+      await loadModel(HELMET_GLB_PATH);
+
+      expect(element.model!.materials[0].getDoubleSided()).to.be.equal(false);
+      element.model!.materials[0].setDoubleSided(true);
+      expect(element.model!.materials[0].getDoubleSided()).to.be.equal(true);
+    });
+
+    test('test double sided expect non-default', async () => {
+      await loadModel(ALPHA_BLEND_MODE_TEST);
+
+      expect(element.model!.materials[1].getDoubleSided()).to.be.equal(true);
+      element.model!.materials[1].setDoubleSided(false);
+      expect(element.model!.materials[1].getDoubleSided()).to.be.equal(false);
     });
   });
 });
