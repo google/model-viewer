@@ -223,8 +223,15 @@
     {
       "name": "khronos-MorphStressTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MorphStressTest/glTF/MorphStressTest.gltf",
+      "dimensions": {
+        "height": 420
+      },
+      "target": 
+      {
+        "z":4
+      },
       "orbit": {
-        "radius": 8
+        "radius": -1
       },
       "exclude": [
         "dspbr-pt",
