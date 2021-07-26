@@ -110,13 +110,13 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         aoMap: verifyAoMap,
         emissiveMap: verifyEmissiveMap
       } = gltfMaterial;
-      if (verifyNormalMap !== normalMap) {
+      if (verifyNormalMap != normalMap) {
         message('normal');
       }
-      if (verifyAoMap !== aoMap) {
+      if (verifyAoMap != aoMap) {
         message('occlusion');
       }
-      if (verifyEmissiveMap !== emissiveMap) {
+      if (verifyEmissiveMap != emissiveMap) {
         message('emissive');
       }
     }

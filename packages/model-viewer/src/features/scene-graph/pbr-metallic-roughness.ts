@@ -86,10 +86,10 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     for (const material of correlatedMaterials) {
       const verifyMap = material.map ?? null;
       const verifyMetalnessMap = material.metalnessMap ?? null;
-      if (map !== verifyMap) {
+      if (map != verifyMap) {
         message('base');
       }
-      if (metalnessMap !== verifyMetalnessMap) {
+      if (metalnessMap != verifyMetalnessMap) {
         message('metalness');
       }
     }
