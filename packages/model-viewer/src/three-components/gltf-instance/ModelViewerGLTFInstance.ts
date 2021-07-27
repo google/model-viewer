@@ -24,8 +24,10 @@ import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
 
 
-// Provides value assigned to alpha-cutoff when mask blending is disabled.
-export const ALPHA_CUTOFF_DISABLED = -0.5;
+// Provides value assigned to alpha-cutoff when opaque rendering is desired.
+export const ALPHA_CUTOFF_OPAQUE = -0.5;
+// Provides value assigned to alpha-cutoff when alpha-blending is desired.
+export const ALPHA_CUTOFF_BLEND = 0;
 // Provides the glTF default alpha-cutoff value.
 export const ALPHA_CUTOFF_GLTF_DEFAULT = 0.5;
 
@@ -212,7 +214,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     // This little hack ignores alpha for opaque materials, in order to comply
     // with the glTF spec.
     if (!clone.alphaTest && !clone.transparent) {
-      clone.alphaTest = ALPHA_CUTOFF_DISABLED;
+      clone.alphaTest = ALPHA_CUTOFF_OPAQUE;
     }
 
     sourceUUIDToClonedMaterial.set(material.uuid, clone);

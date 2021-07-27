@@ -16,7 +16,7 @@
 import {DoubleSide, FrontSide, MeshStandardMaterial, NoBlending, NormalBlending} from 'three';
 
 import {AlphaMode, GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
-import {ALPHA_CUTOFF_DISABLED, ALPHA_CUTOFF_GLTF_DEFAULT} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+import {ALPHA_CUTOFF_BLEND, ALPHA_CUTOFF_GLTF_DEFAULT, ALPHA_CUTOFF_OPAQUE} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
@@ -194,15 +194,13 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   setAlphaMode(alphaMode: AlphaMode): void {
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
+      material.blending = NormalBlending;
       if (alphaMode === 'OPAQUE') {
-        material.blending = NoBlending;
-        this.setAlphaCutoff(ALPHA_CUTOFF_DISABLED);
+        this.setAlphaCutoff(ALPHA_CUTOFF_OPAQUE);
       } else if (alphaMode === `BLEND`) {
-        material.blending = NormalBlending;
-        this.setAlphaCutoff(ALPHA_CUTOFF_DISABLED);
+        this.setAlphaCutoff(ALPHA_CUTOFF_BLEND);
       } else {
         // MASK mode.
-        material.blending = NormalBlending;
         if (this.getAlphaCutoff() < 0) {
           this.setAlphaCutoff(ALPHA_CUTOFF_GLTF_DEFAULT);
         }
@@ -221,7 +219,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
     const blendMode = this[$correlatedObjects]!.values().next().value.blending;
 
-    if (blendMode === NormalBlending) {
+    if (blendMode === NormalBlending && this.getAlphaCutoff() >= 0) {
       return 'BLEND';
     } else if (blendMode === NoBlending && this.getAlphaCutoff() > 0) {
       // Checks if masking is in use, given that three.js implements masking in
