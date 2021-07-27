@@ -18,7 +18,7 @@ import {Texture as ThreeTexture} from 'three';
 import {$threeTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
-import {ALPHA_TEST_DEFAULT} from '../../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+import {ALPHA_CUTOFF_DISABLED} from '../../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
@@ -143,7 +143,7 @@ suite('scene-graph/material', () => {
       // Default value hack see:
       // https://github.com/google/model-viewer/blob/e3a000111980f5cf018c61dec8695463e0d843a0/packages/model-viewer/src/three-components/gltf-instance/ModelViewerGLTFInstance.ts#L210
       expect(element.model!.materials[0].getAlphaCutoff())
-          .to.be.equal(ALPHA_TEST_DEFAULT);
+          .to.be.equal(ALPHA_CUTOFF_DISABLED);
       element.model!.materials[0].setAlphaCutoff(0.25);
       expect(element.model!.materials[0].getAlphaCutoff()).to.be.equal(0.25);
     });
@@ -154,8 +154,7 @@ suite('scene-graph/material', () => {
       expect(element.model!.materials[2].getAlphaCutoff()).to.be.equal(0.25);
       element.model!.materials[2].setAlphaCutoff(0.0);
       // Setting Zero-Alpha should revent to default settings.
-      expect(element.model!.materials[0].getAlphaCutoff())
-          .to.be.equal(ALPHA_TEST_DEFAULT);
+      expect(element.model!.materials[0].getAlphaCutoff()).to.be.equal(0.0);
     });
 
     test('test double sided expect default', async () => {
@@ -172,6 +171,26 @@ suite('scene-graph/material', () => {
       expect(element.model!.materials[1].getDoubleSided()).to.be.equal(true);
       element.model!.materials[1].setDoubleSided(false);
       expect(element.model!.materials[1].getDoubleSided()).to.be.equal(false);
+    });
+
+    test('test alpha-mode, set value', async () => {
+      await loadModel(ALPHA_BLEND_MODE_TEST);
+
+      expect(element.model!.materials[0].getAlphaMode()).to.be.equal('OPAQUE');
+      element.model!.materials[0].setAlphaMode('BLEND');
+      expect(element.model!.materials[0].getAlphaMode()).to.be.equal('BLEND');
+      element.model!.materials[0].setAlphaMode('MASK');
+      expect(element.model!.materials[0].getAlphaMode()).to.be.equal('MASK');
+      element.model!.materials[0].setAlphaMode('OPAQUE');
+      expect(element.model!.materials[0].getAlphaMode()).to.be.equal('OPAQUE');
+    });
+
+    test('test alpha-mode, expect correct mode', async () => {
+      await loadModel(ALPHA_BLEND_MODE_TEST);
+
+      expect(element.model!.materials[0].getAlphaMode()).to.be.equal('OPAQUE');
+      expect(element.model!.materials[1].getAlphaMode()).to.be.equal('BLEND');
+      expect(element.model!.materials[2].getAlphaMode()).to.be.equal('MASK');
     });
   });
 });

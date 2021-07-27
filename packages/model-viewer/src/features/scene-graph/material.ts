@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import {DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
+import {DoubleSide, FrontSide, MeshStandardMaterial, NoBlending, NormalBlending} from 'three';
 
-import {GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
-import {ALPHA_TEST_DEFAULT} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+import {AlphaMode, GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {ALPHA_CUTOFF_DISABLED, ALPHA_CUTOFF_GLTF_DEFAULT} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
@@ -157,10 +157,11 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   setAlphaCutoff(cutoff: number): void {
-    cutoff = cutoff <= 0 ? ALPHA_TEST_DEFAULT : Math.min(1.0, cutoff);
+    cutoff = Math.min(1.0, cutoff);
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       material.alphaTest = cutoff;
+      material.needsUpdate = true;
     }
     (this[$sourceObject] as GLTFMaterial).alphaCutoff = cutoff;
     this[$onUpdate]();
@@ -179,6 +180,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       // rendering only.
       // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#double-sided
       material.side = doubleSided ? DoubleSide : FrontSide;
+      material.needsUpdate = true;
     }
     (this[$sourceObject] as GLTFMaterial).doubleSided = doubleSided;
     this[$onUpdate]();
@@ -187,5 +189,46 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   getDoubleSided(): boolean {
     return (this[$sourceObject] as GLTFMaterial).doubleSided ??
         this[$correlatedObjects]!.values().next().value.side === DoubleSide;
+  }
+
+  setAlphaMode(alphaMode: AlphaMode): void {
+    for (const material of this[$correlatedObjects] as
+         Set<MeshStandardMaterial>) {
+      if (alphaMode === 'OPAQUE') {
+        material.blending = NoBlending;
+        this.setAlphaCutoff(ALPHA_CUTOFF_DISABLED);
+      } else if (alphaMode === `BLEND`) {
+        material.blending = NormalBlending;
+        this.setAlphaCutoff(ALPHA_CUTOFF_DISABLED);
+      } else {
+        // MASK mode.
+        material.blending = NormalBlending;
+        if (this.getAlphaCutoff() < 0) {
+          this.setAlphaCutoff(ALPHA_CUTOFF_GLTF_DEFAULT);
+        }
+      }
+      material.needsUpdate = true;
+    }
+
+    (this[$sourceObject] as GLTFMaterial).alphaMode = alphaMode;
+    this[$onUpdate]();
+  }
+
+  getAlphaMode(): AlphaMode {
+    if ((this[$sourceObject] as GLTFMaterial).alphaMode !== undefined) {
+      return (this[$sourceObject] as GLTFMaterial).alphaMode!;
+    }
+
+    const blendMode = this[$correlatedObjects]!.values().next().value.blending;
+
+    if (blendMode === NormalBlending) {
+      return 'BLEND';
+    } else if (blendMode === NoBlending && this.getAlphaCutoff() > 0) {
+      // Checks if masking is in use, given that three.js implements masking in
+      // the shader and is thus always 'enabled'.
+      return 'MASK';
+    }
+
+    return 'OPAQUE';
   }
 }
