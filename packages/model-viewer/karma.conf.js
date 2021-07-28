@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-const {applyKarmaHacks} = require('./shared-assets/scripts/karma-hacks.js');
-
-applyKarmaHacks();
-
 module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
   config.set({
@@ -159,10 +155,7 @@ module.exports = function(config) {
         os_version: '14',
         device: 'iPhone 11',
         browser: 'iPhone',
-        real_mobile: 'true',
-        // BrowserStack seems to drop the port when redirecting to this special
-        // domain so we go there directly instead:
-        url: 'http://bs-local.com:9876'
+        real_mobile: 'true'
       },
     };
 
