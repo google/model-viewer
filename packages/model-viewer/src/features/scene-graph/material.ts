@@ -194,12 +194,14 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   setAlphaMode(alphaMode: AlphaMode): void {
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
-      material.blending = NormalBlending;
       if (alphaMode === 'OPAQUE') {
+        material.blending = NoBlending;
         this.setAlphaCutoff(ALPHA_CUTOFF_OPAQUE);
       } else if (alphaMode === `BLEND`) {
+        material.blending = NormalBlending;
         this.setAlphaCutoff(ALPHA_CUTOFF_BLEND);
       } else {
+        material.blending = NormalBlending;
         // MASK mode.
         if (this.getAlphaCutoff() < 0) {
           this.setAlphaCutoff(ALPHA_CUTOFF_GLTF_DEFAULT);
@@ -215,16 +217,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   getAlphaMode(): AlphaMode {
     if ((this[$sourceObject] as GLTFMaterial).alphaMode !== undefined) {
       return (this[$sourceObject] as GLTFMaterial).alphaMode!;
-    }
-
-    const blendMode = this[$correlatedObjects]!.values().next().value.blending;
-
-    if (blendMode === NormalBlending && this.getAlphaCutoff() >= 0) {
-      return 'BLEND';
-    } else if (blendMode === NoBlending && this.getAlphaCutoff() > 0) {
-      // Checks if masking is in use, given that three.js implements masking in
-      // the shader and is thus always 'enabled'.
-      return 'MASK';
     }
 
     return 'OPAQUE';

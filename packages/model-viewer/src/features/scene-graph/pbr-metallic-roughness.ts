@@ -61,7 +61,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       metallicRoughnessTexture: gltfMetallicRoughnessTexture
     } = pbrMetallicRoughness;
 
-    let {map, metalnessMap} = correlatedMaterials.values().next().value;
+    const {map, metalnessMap} = correlatedMaterials.values().next().value;
 
     this[$baseColorTexture] = new TextureInfo(
         onUpdate,

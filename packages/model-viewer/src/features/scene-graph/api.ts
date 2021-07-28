@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 /**
  * All constructs in a 3DOM scene graph have a corresponding string name.
@@ -64,6 +64,9 @@ export declare interface Material {
   getAlphaCutoff(): number;
   setDoubleSided(doubleSided: boolean): void;
   getDoubleSided(): boolean;
+  setAlphaMode(alphaMode: AlphaMode): void;
+  getAlphaMode(): AlphaMode;
+
   /**
    * The PBRMetallicRoughness configuration of the material.
    */

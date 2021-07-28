@@ -153,9 +153,8 @@ suite('scene-graph/material', () => {
 
     test('test alpha cutoff test setting and getting', async () => {
       await loadModel(ALPHA_BLEND_MODE_TEST);
-      element.model!.materials[2].setAlphaCutoff(0.0);
-      // Setting Zero-Alpha should revent to default settings.
-      expect(element.model!.materials[2].getAlphaCutoff()).to.be.equal(0.0);
+      element.model!.materials[2].setAlphaCutoff(0.5);
+      expect(element.model!.materials[2].getAlphaCutoff()).to.be.equal(0.5);
     });
 
     test('test double sided expect default is false', async () => {
