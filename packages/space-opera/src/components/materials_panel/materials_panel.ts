@@ -262,7 +262,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   get selectedBaseColor(): RGBA {
     const alphaFactor =
-        this.getMaterial()!.pbrMetallicRoughness.baseColorFactor[3];
+        this.getMaterial().pbrMetallicRoughness.baseColorFactor[3];
     const selectedColor = color.hexToRgb(this.baseColorPicker.selectedColorHex);
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
@@ -275,10 +275,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedEmissiveFactor(): RGB {
-    const id = this.selectedMaterialIndex;
-    if (id === undefined) {
-      throw new Error('No material selected');
-    }
     const selectedColor =
         color.hexToRgb(this.emissiveFactorPicker.selectedColorHex);
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
@@ -299,16 +295,10 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedAlphaCutoff(): number {
-    if (!this.alphaCutoffSlider) {
-      throw new Error('Alpha cutoff slider doesn\'t exist.');
-    }
     return checkFinite(Number(this.alphaCutoffSlider.value));
   }
 
   get selectedBaseColorTextureId(): string|undefined {
-    if (!this.baseColorTexturePicker) {
-      throw new Error('Texture picker is not defined');
-    }
     if (this.baseColorTexturePicker.selectedIndex === undefined) {
       return undefined;
     }
@@ -316,9 +306,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedMetallicRoughnessTextureId(): string|undefined {
-    if (!this.metallicRoughnessTexturePicker) {
-      throw new Error('Texture picker is not defined');
-    }
     if (this.metallicRoughnessTexturePicker.selectedIndex == null) {
       return undefined;
     }
@@ -326,9 +313,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedNormalTextureId(): string|undefined {
-    if (!this.normalTexturePicker) {
-      throw new Error('Texture picker is not defined');
-    }
     if (this.normalTexturePicker.selectedIndex === undefined) {
       return undefined;
     }
@@ -336,9 +320,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedEmissiveTextureId(): string|undefined {
-    if (!this.emissiveTexturePicker) {
-      throw new Error('Texture picker is not defined');
-    }
     if (this.emissiveTexturePicker.selectedIndex === undefined) {
       return undefined;
     }
@@ -346,9 +327,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedOcclusionTextureId(): string|undefined {
-    if (!this.occlusionTexturePicker) {
-      throw new Error('Texture picker is not defined');
-    }
     if (this.occlusionTexturePicker.selectedIndex === undefined) {
       return undefined;
     }
@@ -356,28 +334,26 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onBaseColorChange() {
-    this.getMaterial()!.pbrMetallicRoughness.setBaseColorFactor(
+    this.getMaterial().pbrMetallicRoughness.setBaseColorFactor(
         this.selectedBaseColor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onRoughnessChange() {
-    this.getMaterial()!.pbrMetallicRoughness.setRoughnessFactor(
+    this.getMaterial().pbrMetallicRoughness.setRoughnessFactor(
         this.selectedRoughnessFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onMetallicChange() {
-    if (this.selectedMaterialIndex == null) {
-      throw new Error('No material selected');
-    }
-    this.getMaterial()!.pbrMetallicRoughness.setMetallicFactor(
+    this.getMaterial().pbrMetallicRoughness.setMetallicFactor(
         this.selectedMetallicFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
-  onDoubleSidedChange(_event: Event) {
-    // const doubleSided = (event.target as HTMLInputElement).checked;
+  onDoubleSidedChange(event: Event) {
+    const doubleSided = (event.target as HTMLInputElement).checked;
+    this.getMaterial().setDoubleSided(doubleSided);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -454,7 +430,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onEmissiveFactorChanged() {
-    this.getMaterial()!.setEmissiveFactor(this.selectedEmissiveFactor);
+    this.getMaterial().setEmissiveFactor(this.selectedEmissiveFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -471,13 +447,12 @@ export class MaterialPanel extends ConnectedLitElement {
     const selectedMode =
         this.alphaModePicker?.selectedItem?.getAttribute('value');
 
-    if (!selectedMode) {
-      return;
-    }
+    this.getMaterial().setAlphaMode(selectedMode);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onAlphaCutoffChange() {
+    this.getMaterial().setAlphaCutoff(this.selectedAlphaCutoff);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
