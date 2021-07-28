@@ -83,6 +83,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       console.info(`A group of three.js materials are represented as a
         single material but share different ${textureType} textures.`);
     };
+
     for (const material of correlatedMaterials) {
       const verifyMap = material.map ?? null;
       const verifyMetalnessMap = material.metalnessMap ?? null;
