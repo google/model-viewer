@@ -261,9 +261,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedBaseColor(): RGBA {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
     const alphaFactor =
         this.getMaterial()!.pbrMetallicRoughness.baseColorFactor[3];
     const selectedColor = color.hexToRgb(this.baseColorPicker.selectedColorHex);
@@ -359,18 +356,12 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onBaseColorChange() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
     this.getMaterial()!.pbrMetallicRoughness.setBaseColorFactor(
         this.selectedBaseColor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onRoughnessChange() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
     this.getMaterial()!.pbrMetallicRoughness.setRoughnessFactor(
         this.selectedRoughnessFactor);
     reduxStore.dispatch(dispatchModelDirty());
@@ -386,9 +377,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onDoubleSidedChange(_event: Event) {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
     // const doubleSided = (event.target as HTMLInputElement).checked;
     reduxStore.dispatch(dispatchModelDirty());
   }
@@ -466,9 +454,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onEmissiveFactorChanged() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
     this.getMaterial()!.setEmissiveFactor(this.selectedEmissiveFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
@@ -483,10 +468,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onAlphaModeSelect() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
-
     const selectedMode =
         this.alphaModePicker?.selectedItem?.getAttribute('value');
 
@@ -497,9 +478,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onAlphaCutoffChange() {
-    if (this.selectedMaterialIndex === undefined) {
-      throw new Error('No material selected');
-    }
     reduxStore.dispatch(dispatchModelDirty());
   }
 
