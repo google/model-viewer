@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {DoubleSide, FrontSide, MeshStandardMaterial, NoBlending, NormalBlending} from 'three';
+import {DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
 
 import {AlphaMode, GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {ALPHA_CUTOFF_BLEND, ALPHA_CUTOFF_GLTF_DEFAULT, ALPHA_CUTOFF_OPAQUE} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
@@ -192,16 +192,21 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   setAlphaMode(alphaMode: AlphaMode): void {
+    const enableTransparency =
+        (material: MeshStandardMaterial, enabled: boolean): void => {
+          material.transparent = enabled;
+          material.depthWrite = !enabled;
+        };
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       if (alphaMode === 'OPAQUE') {
-        material.blending = NoBlending;
+        enableTransparency(material, false);
         this.setAlphaCutoff(ALPHA_CUTOFF_OPAQUE);
       } else if (alphaMode === `BLEND`) {
-        material.blending = NormalBlending;
+        enableTransparency(material, true);
         this.setAlphaCutoff(ALPHA_CUTOFF_BLEND);
       } else {
-        material.blending = NormalBlending;
+        enableTransparency(material, true);
         // MASK mode.
         if (this.getAlphaCutoff() < 0) {
           this.setAlphaCutoff(ALPHA_CUTOFF_GLTF_DEFAULT);
