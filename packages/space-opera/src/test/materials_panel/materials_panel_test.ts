@@ -19,8 +19,6 @@ import {TextureInfo} from '../../../../model-viewer/lib/features/scene-graph/api
 import {MaterialPanel} from '../../components/materials_panel/materials_panel.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getTextureId} from '../../components/model_viewer_preview/reducer.js';
-import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
-import {SliderWithInputElement} from '../../components/shared/slider_with_input/slider_with_input.js';
 import {TexturePicker} from '../../components/shared/texture_picker/texture_picker.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
@@ -242,15 +240,13 @@ describe('material panel test', () => {
   it('applies changes to model textures on double sided change', async () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
-    const doubleSidedCheckbox =
-        panel.shadowRoot!.querySelector('me-checkbox#doubleSidedCheckbox') as
-        HTMLInputElement;
+    const {doubleSidedCheckbox} = panel;
     expect(doubleSidedCheckbox.checked).toBeFalse();
 
     doubleSidedCheckbox.checked = true;
     doubleSidedCheckbox.dispatchEvent(new Event('change'));
 
-    expect(false).toEqual(true);
+    expect(panel.getMaterial().getDoubleSided()).toBeTrue();
   });
 
   // Upload
@@ -319,47 +315,45 @@ describe('material panel test', () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
 
-    const dropdown = panel.shadowRoot!.querySelector(
-                         'me-dropdown#alpha-mode-picker') as Dropdown;
-    expect(dropdown.selectedItem.getAttribute('value')).toBe('OPAQUE');
-    const maskItem =
-        dropdown.querySelector('paper-item[value="MASK"]') as HTMLElement;
+    const {alphaModePicker} = panel;
+    expect(alphaModePicker.selectedItem.getAttribute('value')).toBe('OPAQUE');
+    const maskItem = alphaModePicker.querySelector(
+                         'paper-item[value="MASK"]') as HTMLElement;
     maskItem.click();
-    expect(false).toEqual(true);
+
+    expect(panel.getMaterial().getAlphaMode()).toEqual('MASK');
   });
 
   it('applies changes to model textures on alpha cutoff change', async () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
 
-    const dropdown = panel.shadowRoot!.querySelector(
-                         'me-dropdown#alpha-mode-picker') as Dropdown;
+    const {alphaModePicker, alphaCutoffSlider} = panel;
 
-    const opaqueItem =
-        dropdown.querySelector('paper-item[value="OPAQUE"]') as HTMLElement;
+    const opaqueItem = alphaModePicker.querySelector(
+                           'paper-item[value="OPAQUE"]') as HTMLElement;
     opaqueItem.click();
 
     await panel.updateComplete;
 
     // Alpha cutoff should not be present on 'OPAQUE' alpha mode
-    expect(panel.shadowRoot!.querySelector('me-slider-with-input#alpha-cutoff'))
-        .toBe(null);
+    expect(alphaCutoffSlider.parentElement?.parentElement?.style.display)
+        .toBe('none');
 
-    const maskItem =
-        dropdown.querySelector('paper-item[value="MASK"]') as HTMLElement;
+    const maskItem = alphaModePicker.querySelector(
+                         'paper-item[value="MASK"]') as HTMLElement;
     maskItem.click();
 
     await panel.updateComplete;
 
-    const alphaCutoffSlider =
-        panel.shadowRoot!.querySelector('me-slider-with-input#alpha-cutoff') as
-        SliderWithInputElement;
-    expect(alphaCutoffSlider).toBeDefined();
+    expect(alphaCutoffSlider.parentElement?.parentElement?.style.display)
+        .toBe('');
     expect(alphaCutoffSlider.value).toBe(0.5);
+    expect(panel.getMaterial().getAlphaCutoff()).toEqual(0.5);
 
     alphaCutoffSlider.value = 1;
     alphaCutoffSlider.dispatchEvent(new Event('change'));
 
-    expect(0).toEqual(1);
+    expect(panel.getMaterial().getAlphaCutoff()).toEqual(1);
   });
 });

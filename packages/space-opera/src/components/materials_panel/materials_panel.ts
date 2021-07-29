@@ -32,12 +32,13 @@ import {customElement, html, internalProperty, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
 import {TextureInfo} from '../../../../model-viewer/lib/features/scene-graph/texture-info.js';
-import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
+import {AlphaMode, GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchModelDirty, getModel, getModelViewer, getTextureId, pushThumbnail} from '../model_viewer_preview/reducer.js';
 import {Thumbnail} from '../model_viewer_preview/types.js';
+import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
@@ -83,6 +84,9 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('me-dropdown#alpha-mode-picker') alphaModePicker!: Dropdown;
   @query('me-slider-with-input#alpha-cutoff')
   alphaCutoffSlider!: SliderWithInputElement;
+  @query('#alpha-cutoff-container') alphaCutoffContainer!: HTMLDivElement;
+  @query('me-checkbox#doubleSidedCheckbox')
+  doubleSidedCheckbox!: CheckboxElement;
 
   stateChanged(state: State) {
     const model = getModel(state);
@@ -227,6 +231,16 @@ export class MaterialPanel extends ConnectedLitElement {
     this.emissiveTexturePicker.selectedIndex =
         this.getTextureIndex(emissiveTexture);
 
+    const cutoff = material.getAlphaCutoff();
+    this.alphaCutoffSlider.value = cutoff < 0 ? 0.5 : cutoff;
+    this.doubleSidedCheckbox.checked = material.getDoubleSided();
+
+    const alphaMode = material.getAlphaMode();
+    this.alphaCutoffContainer.style.display =
+        alphaMode === 'MASK' ? '' : 'none';
+    this.alphaModePicker.selectedIndex =
+        ALPHA_BLEND_MODES.findIndex((name) => name === alphaMode);
+
     // Don't interpolate on the initial model load.
     if (!this.isNewModel && !this.isTesting && !this.isInterpolating) {
       this.interpolateMaterial();
@@ -253,11 +267,12 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedMaterialIndex(): number {
-    return this.materialSelector.selectedIndex;
+    return this.materialSelector.selectedIndex!;
   }
 
   set selectedMaterialIndex(index: number) {
     this.materialSelector.selectedIndex = index;
+    this.onSelectMaterial();
   }
 
   get selectedBaseColor(): RGBA {
@@ -351,9 +366,9 @@ export class MaterialPanel extends ConnectedLitElement {
     reduxStore.dispatch(dispatchModelDirty());
   }
 
-  onDoubleSidedChange(_event: Event) {
-    // const doubleSided = (event.target as HTMLInputElement).checked;
-    // this.getMaterial().setDoubleSided(doubleSided);
+  onDoubleSidedChange(event: Event) {
+    const doubleSided = (event.target as HTMLInputElement).checked;
+    this.getMaterial().setDoubleSided(doubleSided);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -444,15 +459,16 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onAlphaModeSelect() {
-    // const selectedMode =
-    //     this.alphaModePicker?.selectedItem?.getAttribute('value')!;
-
-    // this.getMaterial().setAlphaMode(selectedMode as AlphaMode);
+    const selectedMode =
+        this.alphaModePicker.selectedItem.getAttribute('value') as AlphaMode;
+    this.alphaCutoffContainer.style.display =
+        selectedMode === 'MASK' ? '' : 'none';
+    this.getMaterial().setAlphaMode(selectedMode);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onAlphaCutoffChange() {
-    // this.getMaterial().setAlphaCutoff(this.selectedAlphaCutoff);
+    this.getMaterial().setAlphaCutoff(this.selectedAlphaCutoff);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -667,7 +683,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   renderAlphaBlendModeSection() {
-    // TODO: hide Alpha Cutoff unless material.alphaMode === 'MASK'
     return html`
     <div class="SectionLabel">Alpha Blend Mode:</div>
     <div class="DropdownContainer">
@@ -681,13 +696,15 @@ export class MaterialPanel extends ConnectedLitElement {
             mode => html`<paper-item value=${mode}>${mode}</paper-item>`)}
       </me-dropdown>
     </div>
-    <div class="SectionLabel" id="alpha-cutoff-label">Alpha Cutoff:</div>
-    <div class="MRSliderContainer">
-      <mwc-icon-button class="RevertButton" id="revert-alpha-mode" icon="undo"
-        title="Revert to original alpha cutoff"
-        @click=${this.revertAlphaCutoff}></mwc-icon-button>
-      <me-slider-with-input class="MRSlider" id="alpha-cutoff" min="0.0" max="1.0"
-      step="0.01" @change=${this.onAlphaCutoffChange}></me-slider-with-input>
+    <div id="alpha-cutoff-container"}>
+      <div class="SectionLabel" id="alpha-cutoff-label">Alpha Cutoff:</div>
+      <div class="MRSliderContainer">
+        <mwc-icon-button class="RevertButton" id="revert-alpha-mode" icon="undo"
+          title="Revert to original alpha cutoff"
+          @click=${this.revertAlphaCutoff}></mwc-icon-button>
+        <me-slider-with-input class="MRSlider" id="alpha-cutoff" min="0.0" max="1.0"
+        step="0.01" @change=${this.onAlphaCutoffChange}></me-slider-with-input>
+      </div>
     </div>
       `;
   }

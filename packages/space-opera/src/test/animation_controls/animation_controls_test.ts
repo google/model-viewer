@@ -69,10 +69,10 @@ describe('animation controls test', () => {
         animationControls.shadowRoot!.querySelector(
             'me-dropdown#animation-name-selector') as Dropdown;
     const danceAnimationItem = animationNameSelector.querySelector(
-                                   'paper-item[value="Dance"]') as HTMLElement;
+                                   'paper-item[value="Death"]') as HTMLElement;
     danceAnimationItem.click();
 
-    expect(getConfig(reduxStore.getState()).animationName).toBe('Dance');
+    expect(getConfig(reduxStore.getState()).animationName).toBe('Death');
   });
 
   it('dispatches an event on UI click', async () => {
