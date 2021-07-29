@@ -127,6 +127,16 @@
       }
     },
     {
+      "name": "khronos-DragonAttenuation",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DragonAttenuation/glTF/DragonAttenuation.gltf",
+      "orbit": {
+        "radius": 5
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-CesiumMan",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/CesiumMan/glTF/CesiumMan.gltf",
       "target": {
@@ -209,6 +219,20 @@
         "gltf-sample-viewer"
       ],
       "renderSkybox": true
+    },
+    {
+      "name": "khronos-MorphStressTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MorphStressTest/glTF/MorphStressTest.gltf",
+      "dimensions": {
+        "height": 300
+      },
+      "orbit": {
+        "radius": 2.5
+      },
+      "exclude": [
+        "dspbr-pt",
+        "gltf-sample-viewer"
+      ]
     },
     {
       "name": "khronos-EnvironmentTest",
@@ -380,6 +404,40 @@
       "orbit": {
         "phi": 60,
         "radius": 3.5
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-GlamVelvetSofa",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/GlamVelvetSofa/glTF/GlamVelvetSofa.gltf",
+      "dimensions": {
+        "height": 250
+      },
+      "target": {
+        "z": -1
+      },
+      "orbit": {
+        "theta": 2,
+        "phi": 70.0,
+        "radius":2.45
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-Fox",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf",
+      "target": {
+        "y": 37,
+        "x": -35,
+        "z": 25
+      },
+      "orbit": {
+        "theta": -60,
+        "radius": 124
       },
       "exclude": [
         "dspbr-pt"

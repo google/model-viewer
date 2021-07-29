@@ -44,7 +44,6 @@
     "test:ci": "npm run test",
     "check-fidelity": "node ./test/fidelity/index.js ./test/fidelity/config.json",
     "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
-    "update:package-lock": "rm -f ./package-lock.json && npm i --only=production",
     "serve": "node_modules/.bin/http-server -c-1",
     "dev": "npm run build:dev && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:test' 'serve -- -s'",
     "watch:tsc": "tsc -w --incremental",

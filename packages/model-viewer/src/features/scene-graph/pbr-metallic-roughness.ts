@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
+import {MeshStandardMaterial} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -56,58 +56,44 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       pbrMetallicRoughness.metallicFactor = 1;
     }
 
-    let {
+    const {
       baseColorTexture: gltfBaseColorTexture,
       metallicRoughnessTexture: gltfMetallicRoughnessTexture
     } = pbrMetallicRoughness;
 
-    let baseColorTexture: ThreeTexture|null = null;
-    let metallicRoughnessTexture: ThreeTexture|null = null;
-
     const {map, metalnessMap} = correlatedMaterials.values().next().value;
 
-    if (map != null && gltfBaseColorTexture != null) {
-      baseColorTexture = map;
-    } else {
-      gltfBaseColorTexture = {index: -1};
-    }
+    this[$baseColorTexture] = new TextureInfo(
+        onUpdate,
+        TextureUsage.Base,
+        map,
+        correlatedMaterials,
+        gltf,
+        gltfBaseColorTexture ? gltfBaseColorTexture : null);
 
-    if (metalnessMap != null && gltfMetallicRoughnessTexture != null) {
-      metallicRoughnessTexture = metalnessMap;
-    } else {
-      gltfMetallicRoughnessTexture = {index: -1};
-    }
+    this[$metallicRoughnessTexture] = new TextureInfo(
+        onUpdate,
+        TextureUsage.Metallic,
+        metalnessMap,
+        correlatedMaterials,
+        gltf,
+        gltfMetallicRoughnessTexture ? gltfMetallicRoughnessTexture : null);
 
     const message = (textureType: string) => {
       console.info(`A group of three.js materials are represented as a
         single material but share different ${textureType} textures.`);
     };
+
     for (const material of correlatedMaterials) {
       const verifyMap = material.map ?? null;
       const verifyMetalnessMap = material.metalnessMap ?? null;
-      if (baseColorTexture !== verifyMap) {
+      if (map != verifyMap) {
         message('base');
       }
-      if (metallicRoughnessTexture !== verifyMetalnessMap) {
+      if (metalnessMap != verifyMetalnessMap) {
         message('metalness');
       }
     }
-
-    this[$baseColorTexture] = new TextureInfo(
-        onUpdate,
-        gltf,
-        correlatedMaterials,
-        baseColorTexture,
-        TextureUsage.Base,
-        gltfBaseColorTexture!);
-
-    this[$metallicRoughnessTexture] = new TextureInfo(
-        onUpdate,
-        gltf,
-        correlatedMaterials,
-        metallicRoughnessTexture,
-        TextureUsage.Metallic,
-        gltfMetallicRoughnessTexture!);
   }
 
 
