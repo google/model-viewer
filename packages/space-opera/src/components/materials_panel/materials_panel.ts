@@ -231,8 +231,7 @@ export class MaterialPanel extends ConnectedLitElement {
     this.emissiveTexturePicker.selectedIndex =
         this.getTextureIndex(emissiveTexture);
 
-    const cutoff = material.getAlphaCutoff();
-    this.alphaCutoffSlider.value = cutoff < 0 ? 0.5 : cutoff;
+    this.alphaCutoffSlider.value = material.getAlphaCutoff();
     this.doubleSidedCheckbox.checked = material.getDoubleSided();
 
     const alphaMode = material.getAlphaMode();
@@ -463,7 +462,9 @@ export class MaterialPanel extends ConnectedLitElement {
         this.alphaModePicker.selectedItem.getAttribute('value') as AlphaMode;
     this.alphaCutoffContainer.style.display =
         selectedMode === 'MASK' ? '' : 'none';
-    this.getMaterial().setAlphaMode(selectedMode);
+    const material = this.getMaterial()
+    material.setAlphaMode(selectedMode);
+    this.alphaCutoffSlider.value = material.getAlphaCutoff();
     reduxStore.dispatch(dispatchModelDirty());
   }
 
