@@ -17,7 +17,7 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftSha
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
-import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
+import {clamp, isDebugMode, getPowerPreference, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
@@ -28,6 +28,7 @@ import TextureUtils from './TextureUtils.js';
 
 export interface RendererOptions {
   debug?: boolean;
+  powerPreference:string;
 }
 
 export interface ContextLostEvent extends Event {
@@ -55,7 +56,12 @@ const DEFAULT_LAST_STEP = 3;
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  static _singleton = new Renderer({debug: isDebugMode()});
+  static _singleton = new Renderer(
+    {
+      debug: isDebugMode(),
+      powerPreference: getPowerPreference(),
+    }
+    );
 
   static get singleton() {
     return this._singleton;
@@ -63,7 +69,11 @@ export class Renderer extends EventDispatcher {
 
   static resetSingleton() {
     this._singleton.dispose();
-    this._singleton = new Renderer({debug: isDebugMode()});
+    this._singleton = new Renderer(
+      {
+        debug: isDebugMode(),
+        powerPreference: getPowerPreference(),
+      });
   }
 
   public threeRenderer!: WebGLRenderer;
@@ -112,13 +122,14 @@ export class Renderer extends EventDispatcher {
     this.canvas3D = document.createElement('canvas');
     this.canvas3D.id = 'webgl-canvas';
     this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
-
+    let powerPreference :string = options != null ? options.powerPreference: "high-performance"
+    console.warn("this msg is from Samaneh" + powerPreference)
     try {
       this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
         alpha: true,
         antialias: true,
-        powerPreference: 'high-performance' as WebGLPowerPreference,
+        powerPreference: powerPreference as WebGLPowerPreference,
         preserveDrawingBuffer: true
       });
       this.threeRenderer.autoClear = true;

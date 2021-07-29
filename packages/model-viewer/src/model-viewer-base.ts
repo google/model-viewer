@@ -154,6 +154,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
   @property({type: String}) alt: string|null = null;
 
   @property({type: String}) src: string|null = null;
+  
+  @property({type: String}) powerPreference: string = "high-power";
 
   protected[$isElementInViewport] = false;
   protected[$loaded] = false;

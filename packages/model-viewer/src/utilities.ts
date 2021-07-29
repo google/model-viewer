@@ -198,6 +198,18 @@ export const isDebugMode = (() => {
        self.location.search.match(debugQueryParameter));
 })();
 
+/**
+ * getPowerPreference returns the powerPrefrence property if it is set for a global
+ * ModelViewerelement, otherwise it defaults to high-performance
+ *  
+ * @returns string
+ */
+export const getPowerPreference: () => string = (() => {
+  let powerPreference = (self as any).ModelViewerElementBase != null && (self as any).ModelViewerElementBase.powerPreference != null ? 
+  (self as any).ModelViewerElementBase.powerPreference : "high-performancer"
+  console.log("getPowerPreference is called with " + powerPreference)
+  return () => powerPreference
+})();
 
 /**
  * Returns the first key in a Map in iteration order.
