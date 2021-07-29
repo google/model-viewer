@@ -32,7 +32,7 @@ import {customElement, html, internalProperty, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
 import {TextureInfo} from '../../../../model-viewer/lib/features/scene-graph/texture-info.js';
-import {AlphaMode, GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
+import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -351,9 +351,9 @@ export class MaterialPanel extends ConnectedLitElement {
     reduxStore.dispatch(dispatchModelDirty());
   }
 
-  onDoubleSidedChange(event: Event) {
-    const doubleSided = (event.target as HTMLInputElement).checked;
-    this.getMaterial().setDoubleSided(doubleSided);
+  onDoubleSidedChange(_event: Event) {
+    // const doubleSided = (event.target as HTMLInputElement).checked;
+    // this.getMaterial().setDoubleSided(doubleSided);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -444,15 +444,15 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onAlphaModeSelect() {
-    const selectedMode =
-        this.alphaModePicker?.selectedItem?.getAttribute('value')!;
+    // const selectedMode =
+    //     this.alphaModePicker?.selectedItem?.getAttribute('value')!;
 
-    this.getMaterial().setAlphaMode(selectedMode as AlphaMode);
+    // this.getMaterial().setAlphaMode(selectedMode as AlphaMode);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onAlphaCutoffChange() {
-    this.getMaterial().setAlphaCutoff(this.selectedAlphaCutoff);
+    // this.getMaterial().setAlphaCutoff(this.selectedAlphaCutoff);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
