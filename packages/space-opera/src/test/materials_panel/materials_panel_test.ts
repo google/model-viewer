@@ -24,7 +24,7 @@ import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {waitForEvent} from '../utils/test_utils.js';
 
-const CUBE_GLTF_PATH = 'base/shared-assets/models/textureCubes.gltf';
+const CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
 const TEXTURE_PATH = 'base/shared-assets/models/ORM.png';
 
 async function checkUpload(
