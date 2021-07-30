@@ -21,7 +21,7 @@ import '../../shared/section_row/section_row.js';
 import '../../shared/slider_with_input/slider_with_input.js';
 import '../../shared/checkbox/checkbox.js';
 
-import {html, query} from 'lit-element';
+import {html, internalProperty, query} from 'lit-element';
 
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {SliderWithInputElement} from '../../shared/slider_with_input/slider_with_input.js';
@@ -34,13 +34,14 @@ import {styles} from './limits_base.css.js';
 export abstract class LimitsBase extends ConnectedLitElement {
   static styles = [styles];
 
+  @internalProperty() limitsProperty?: Limits;
+
   abstract get label(): string;
   abstract get minimumLabel(): string;
   abstract get maximumLabel(): string;
   abstract get absoluteMinimum(): number;
   abstract get absoluteMaximum(): number;
   abstract get currentPreviewValue(): number;
-  abstract get limitsProperty(): Limits|undefined;
   abstract dispatchLimits(limits?: Limits): void;
 
   get decimalPlaces(): number {
@@ -86,16 +87,8 @@ export abstract class LimitsBase extends ConnectedLitElement {
     this.dispatchLimits({...this.inputLimits, min: this.currentPreviewValue});
   }
 
-  onClearMin() {
-    this.dispatchLimits({...this.inputLimits, min: this.absoluteMinimum});
-  }
-
   onSetMax() {
     this.dispatchLimits({...this.inputLimits, max: this.currentPreviewValue});
-  }
-
-  onClearMax() {
-    this.dispatchLimits({...this.inputLimits, max: this.absoluteMaximum});
   }
 
   onMinimumInputChange() {

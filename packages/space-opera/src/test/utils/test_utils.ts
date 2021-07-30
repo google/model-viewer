@@ -20,6 +20,9 @@ export type PredicateFunction<T = void> = (value: T) => boolean;
 export const timePasses = (ms: number = 0): Promise<void> =>
     new Promise(resolve => setTimeout(resolve, ms));
 
+export const rafPasses = (): Promise<void> =>
+    new Promise(resolve => requestAnimationFrame(() => resolve()));
+
 export const until =
     async (predicate: PredicateFunction) => {
   while (!predicate()) {
