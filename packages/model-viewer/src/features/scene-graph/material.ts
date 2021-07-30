@@ -55,6 +55,14 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       return;
     }
 
+    if (gltfMaterial.extensions &&
+        gltfMaterial.extensions['KHR_materials_pbrSpecularGlossiness']) {
+      console.warn(`Material ${gltfMaterial.name} uses a deprecated extension
+          "KHR_materials_pbrSpecularGlossiness", please use
+          "pbrMetallicRoughness" instead.`);
+    }
+
+
     if (gltfMaterial.pbrMetallicRoughness == null) {
       gltfMaterial.pbrMetallicRoughness = {};
     }
