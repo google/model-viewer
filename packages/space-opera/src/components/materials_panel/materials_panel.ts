@@ -266,7 +266,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedMaterialIndex(): number {
-    return this.materialSelector.selectedIndex!;
+    return this.materialSelector.selectedIndex;
   }
 
   set selectedMaterialIndex(index: number) {
@@ -508,21 +508,21 @@ export class MaterialPanel extends ConnectedLitElement {
 
   revertBaseColorTexture() {
     const texture =
-        this.getOriginalMaterial()?.pbrMetallicRoughness!.baseColorTexture;
+        this.getOriginalMaterial().pbrMetallicRoughness!.baseColorTexture;
     const id = this.getOriginalTextureId(texture!.index);
     this.baseColorTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onBaseColorTextureChange();
   }
 
   revertNormalTexture() {
-    const texture = this.getOriginalMaterial()?.normalTexture;
+    const texture = this.getOriginalMaterial().normalTexture;
     const id = this.getOriginalTextureId(texture!.index);
     this.normalTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onNormalTextureChange();
   }
 
   revertEmissiveTexture() {
-    const texture = this.getOriginalMaterial()?.emissiveTexture;
+    const texture = this.getOriginalMaterial().emissiveTexture;
     const id = this.getOriginalTextureId(texture!.index);
     this.emissiveTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onEmissiveTextureChange();
@@ -535,7 +535,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   revertOcclusionTexture() {
-    const texture = this.getOriginalMaterial()?.occlusionTexture;
+    const texture = this.getOriginalMaterial().occlusionTexture;
     const id = this.getOriginalTextureId(texture!.index);
     this.occlusionTexturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     this.onOcclusionTextureChange();
