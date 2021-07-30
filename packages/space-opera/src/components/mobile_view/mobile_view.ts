@@ -15,23 +15,22 @@
  *
  */
 
-import {GltfModel, ModelViewerConfig, unpackGlb} from '@google/model-viewer-editing-adapter/lib/main';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {spread} from '@open-wc/lit-helpers';
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {toastStyles} from '../../styles.css.js';
-import {ArConfigState, BestPracticesState, ModelViewerSnippetState} from '../../types.js';
+import {ArConfigState, BestPracticesState, ModelViewerConfig, ModelViewerSnippetState} from '../../types.js';
 import {arButtonCSS, arPromptCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {HotspotConfig, toVector3D} from '../hotspot_panel/types.js';
-import {downloadContents, renderCommonChildElements} from '../model_viewer_preview/reducer.js';
+import {renderCommonChildElements} from '../model_viewer_preview/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 
 import {styles as mobileStyles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
-import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareGlbBlob, usdzToSession} from './utils.js';
+import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, usdzToSession} from './utils.js';
 
 const TOAST_TIME = 7000;  // 7s
 
@@ -200,15 +199,7 @@ export class MobileView extends LitElement {
   // scene-viewer. Subsequently, everytime scene-viewer is opened, we send the
   // POST again.
   async modelIsLoaded() {
-    const glTF = await this.modelViewer!.exportScene();
-    const file = new File([glTF], 'model.glb');
-    const url = URL.createObjectURL(file);
-
-    const glbContents = await downloadContents(url);
-    const {gltfJson, gltfBuffer} = unpackGlb(glbContents);
-    const gltf = new GltfModel(gltfJson, gltfBuffer, this.modelViewer);
-    this.currentBlob = await prepareGlbBlob(gltf);
-
+    this.currentBlob = await this.modelViewer!.exportScene();
     try {
       await post(this.currentBlob, this.modelViewerUrl);
     } catch (error) {

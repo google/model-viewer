@@ -17,12 +17,11 @@
 
 import '@google/model-viewer/lib/model-viewer';
 
-import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {spread} from '@open-wc/lit-helpers';
 import {html, TemplateResult} from 'lit-html';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
-import {ArConfigState} from '../../types';
+import {ArConfigState, ModelViewerConfig} from '../../types';
 
 /** Optional handlers for model-viewer events */
 export interface ModelViewerEventHandlers {

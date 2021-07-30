@@ -17,13 +17,11 @@
 
 import '@material/mwc-button';
 
-import {GltfModel, ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-import {safeDownloadCallback} from '@google/model-viewer-editing-adapter/lib/util/safe_download_callback.js'
 // tslint:disable-next-line:enforce-name-casing JSZip is a class.
 import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
-import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '../../../types.js';
+import {ArConfigState, BestPracticesState, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {modelViewerTemplate, progressBar, scriptTemplate} from '../../best_practices/constants.js';
 import {getBestPractices} from '../../best_practices/reducer.js';
 import {arButtonCSS, arPromptCSS, modelViewerStyles, progressBarCSS} from '../../best_practices/styles.css.js';
@@ -31,14 +29,14 @@ import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getHotspots} from '../../hotspot_panel/reducer.js';
 import {getArConfig} from '../../mobile_view/reducer.js';
-import {getGltfModel} from '../../model_viewer_preview/reducer.js';
+import {getModelViewer} from '../../model_viewer_preview/reducer.js';
 import {getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
+import {safeDownloadCallback} from '../../utils/create_object_url.js';
 import {styles as hotspotStyles} from '../../utils/hotspot/hotspot.css.js';
 
 interface Payload {
   blob: Blob;
   filename: string;
-  contentType?: string;
 }
 
 /**
@@ -61,8 +59,7 @@ class GenericDownloadButton extends ConnectedLitElement {
     const payload = await this.preparePayload!();
     if (!payload)
       return;
-    await safeDownloadCallback(
-        payload.blob, payload.filename, payload.contentType ?? '')();
+    await safeDownloadCallback(payload.blob, payload.filename)();
   }
 
   render() {
@@ -74,14 +71,8 @@ class GenericDownloadButton extends ConnectedLitElement {
   }
 }
 
-export async function prepareGlbPayload(
-    gltf: GltfModel, modelName: string): Promise<Payload> {
-  const glbBuffer = await gltf.packGlb();
-  return {
-    blob: new Blob([glbBuffer], {type: 'model/gltf-binary'}),
-    filename: modelName,
-    contentType: ''
-  };
+export async function prepareGlbPayload(modelName: string): Promise<Payload> {
+  return {blob: await getModelViewer()!.exportScene(), filename: modelName};
 }
 
 // Fixes some formatting issues with the snippet as it is being placed into the
@@ -106,7 +97,6 @@ function beautify_snippet(snippetList: string[]): string {
  * Add elements to ZIP as necessary.
  */
 async function prepareZipArchive(
-    gltf: GltfModel,
     config: ModelViewerConfig,
     arConfig: ArConfigState,
     data: {snippetText: string},
@@ -115,7 +105,7 @@ async function prepareZipArchive(
     hasHotspots: boolean): Promise<Payload> {
   const zip = new JSZip();
 
-  const glb = await prepareGlbPayload(gltf, relativeFilePaths.modelName!);
+  const glb = await prepareGlbPayload(relativeFilePaths.modelName!);
   zip.file(glb.filename, glb.blob);
 
   // check if legal envrionment url
@@ -220,10 +210,10 @@ export class DownloadButton extends GenericDownloadButton {
   }
 
   stateChanged(state: State) {
-    const gltf = getGltfModel(state);
+    const loaded = getModelViewer()?.loaded;
     const modelName = getRelativeFilePaths(state).modelName!;
     this.preparePayload =
-        gltf ? () => prepareGlbPayload(gltf, modelName) : undefined;
+        loaded ? () => prepareGlbPayload(modelName) : undefined;
   }
 }
 
@@ -241,13 +231,13 @@ export class ExportZipButton extends GenericDownloadButton {
 
   stateChanged(state: State) {
     const config = getConfig(state);
-    const gltf = getGltfModel(state);
+    const loaded = getModelViewer()?.loaded;
     const relativeFilePaths = getRelativeFilePaths(state);
     const arConfig = getArConfig(state);
     const bestPractices = getBestPractices(state);
     const hasHotspots = getHotspots(state).length > 0;
 
-    if (!gltf) {
+    if (!loaded) {
       this.preparePayload = undefined;
       return;
     }
@@ -256,13 +246,7 @@ export class ExportZipButton extends GenericDownloadButton {
     // and therefore we must pass a containing object (in our case, this) by
     // reference.
     this.preparePayload = () => prepareZipArchive(
-        gltf,
-        config,
-        arConfig,
-        this,
-        relativeFilePaths,
-        bestPractices,
-        hasHotspots);
+        config, arConfig, this, relativeFilePaths, bestPractices, hasHotspots);
   }
 }
 

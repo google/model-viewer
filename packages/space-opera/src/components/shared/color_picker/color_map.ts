@@ -15,10 +15,11 @@
  *
  */
 
-import {clamp} from '@google/model-viewer-editing-adapter/lib/util/math.js'
 import {customElement, html, LitElement, property} from 'lit-element';
 import {styleMap} from 'lit-html/directives/style-map';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
+
+import {clamp} from '../../utils/reducer_utils.js';
 
 import {styles} from './color_map.css.js';
 

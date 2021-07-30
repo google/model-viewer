@@ -35,7 +35,6 @@
   ],
   "devDependencies": {
     "@google/model-viewer": "^1.7.2",
-    "@google/model-viewer-editing-adapter": "^0.0.1",
     "@google/model-viewer-shared-assets": "^0.0.1",
     "@material/mwc-button": "^0.21.0",
     "@material/mwc-checkbox": "^0.21.0",
@@ -70,7 +69,6 @@
     "remote-redux-devtools": "^0.5.16",
     "@types/remote-redux-devtools": "^0.5.5",
     "rollup": "^2.53.1",
-    "three": "^0.130.1",
     "ts-closure-library": "^2019.11.1-1.21",
     "typescript": "4.3.5",
     "qrious": "^4.0.2",
