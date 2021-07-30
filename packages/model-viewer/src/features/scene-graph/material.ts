@@ -59,7 +59,9 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         gltfMaterial.extensions['KHR_materials_pbrSpecularGlossiness']) {
       console.warn(`Material ${gltfMaterial.name} uses a deprecated extension
           "KHR_materials_pbrSpecularGlossiness", please use
-          "pbrMetallicRoughness" instead.`);
+          "pbrMetallicRoughness" instead. Specular Glossiness materials are
+          currently supported for rendering, but not for our scene-graph API,
+          nor for auto-generation of USDZ for Quick Look.`);
     }
 
 
