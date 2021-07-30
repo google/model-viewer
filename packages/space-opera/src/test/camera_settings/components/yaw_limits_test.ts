@@ -43,8 +43,8 @@ describe('yaw limits editor test', () => {
   });
 
   afterEach(() => {
-    document.body.removeChild(preview);
     document.body.removeChild(yawLimitsDeg);
+    document.body.removeChild(preview);
   });
 
   it('correctly loads yaw limits', async () => {
