@@ -366,8 +366,11 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onDoubleSidedChange(event: Event) {
-    const doubleSided = (event.target as HTMLInputElement).checked;
-    this.getMaterial().setDoubleSided(doubleSided);
+    this.updateDoubleSided((event.target as HTMLInputElement).checked);
+  }
+
+  updateDoubleSided(value: boolean) {
+    this.getMaterial().setDoubleSided(value);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -459,7 +462,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   onAlphaModeSelect() {
     const selectedMode =
-        this.alphaModePicker.selectedItem.getAttribute('value') as AlphaMode;
+        ALPHA_BLEND_MODES[this.alphaModePicker.selectedIndex] as AlphaMode;
     this.alphaCutoffContainer.style.display =
         selectedMode === 'MASK' ? '' : 'none';
     const material = this.getMaterial()
@@ -539,12 +542,21 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   revertAlphaCutoff() {
+    this.alphaCutoffSlider.value = this.getOriginalMaterial().alphaCutoff!;
+    this.onAlphaCutoffChange();
   }
 
   revertAlphaMode() {
+    const alphaMode = this.getOriginalMaterial().alphaMode;
+    this.alphaModePicker.selectedIndex =
+        ALPHA_BLEND_MODES.findIndex((name) => name === alphaMode);
+    this.onAlphaModeSelect();
   }
 
   revertDoubleSided() {
+    const doubleSided = this.getOriginalMaterial().doubleSided!;
+    this.doubleSidedCheckbox.checked = doubleSided;
+    this.updateDoubleSided(doubleSided);
   }
 
   renderMetallicRoughnessTab() {
