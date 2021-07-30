@@ -23,6 +23,7 @@ import {dispatchCameraTarget, dispatchSaveCameraOrbit} from '../../components/ca
 import {Vector3D} from '../../components/camera_settings/types.js';
 import {dispatchAutoRotate, getConfig} from '../../components/config/reducer.js';
 import {getModelViewer} from '../../components/model_viewer_preview/reducer.js';
+import {DraggableInput} from '../../components/shared/draggable_input/draggable_input.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
@@ -67,9 +68,9 @@ describe('camera constraints test', () => {
     cameraTargetInput.target = {x: 0, y: 0, z: 0} as Vector3D;
     await cameraTargetInput.updateComplete;
 
-    const xInput =
-        cameraTargetInput.shadowRoot!.querySelector(
-            'me-draggable-input#camera-target-x') as HTMLInputElement;
+    const x = cameraTargetInput.shadowRoot!.querySelector(
+                  'me-draggable-input#camera-target-x') as DraggableInput;
+    const xInput = x.shadowRoot!.querySelector('input') as HTMLInputElement;
     xInput.value = '6';
     xInput.dispatchEvent(new Event('change'));
 
