@@ -18,6 +18,8 @@
 import {applyCameraEdits, Camera} from '../components/camera_settings/camera_state.js';
 import {ModelViewerConfig} from '../types.js';
 
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+
 describe('space opera base test', () => {
   it('applies camera edits correctly to a model viewer config', () => {
     const camera = {
