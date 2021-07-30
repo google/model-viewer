@@ -42,8 +42,8 @@ describe('loader inspector pane test', () => {
   });
 
   afterEach(() => {
-    document.body.removeChild(preview);
     document.body.removeChild(inspectorPane);
+    document.body.removeChild(preview);
   })
 
   it('outputs valid JSON to the inspector pane', async () => {

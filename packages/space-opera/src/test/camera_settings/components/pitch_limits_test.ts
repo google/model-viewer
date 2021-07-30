@@ -43,8 +43,8 @@ describe('pitch limits editor test', () => {
   });
 
   afterEach(() => {
-    document.body.removeChild(preview);
     document.body.removeChild(pitchLimitsDeg);
+    document.body.removeChild(preview);
   });
 
   it('correctly loads pitch limits', async () => {

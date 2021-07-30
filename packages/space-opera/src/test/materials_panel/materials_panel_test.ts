@@ -68,8 +68,8 @@ describe('material panel test', () => {
   });
 
   afterEach(() => {
-    document.body.removeChild(preview);
     document.body.removeChild(panel);
+    document.body.removeChild(preview);
   });
 
   it('selector reflects materials in GLTF, including defaults where undefined',

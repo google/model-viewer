@@ -49,8 +49,8 @@ describe('animation controls test', () => {
   });
 
   afterEach(() => {
-    document.body.removeChild(preview);
     document.body.removeChild(animationControls);
+    document.body.removeChild(preview);
   })
 
   it('updates the animation names when a gltf is uploaded', async () => {
