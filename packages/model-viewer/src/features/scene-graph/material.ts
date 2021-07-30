@@ -171,10 +171,14 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   [$applyAlphaCutoff]() {
     const gltfMaterial = this[$sourceObject] as GLTFMaterial;
+    // 0.0001 is the minimum in order to keep from using zero, which disables
+    // masking in three.js. It's also small enough to be less than the smallest
+    // normalized 8-bit value.
     const cutoff = gltfMaterial.alphaMode === 'OPAQUE' ?
         ALPHA_CUTOFF_OPAQUE :
-        (gltfMaterial.alphaMode === 'BLEND' ? ALPHA_CUTOFF_BLEND :
-                                              gltfMaterial.alphaCutoff!);
+        (gltfMaterial.alphaMode === 'BLEND' ?
+             ALPHA_CUTOFF_BLEND :
+             Math.max(0.0001, Math.min(1.0, gltfMaterial.alphaCutoff!)));
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       material.alphaTest = cutoff;
@@ -183,7 +187,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   setAlphaCutoff(cutoff: number): void {
-    cutoff = Math.max(0.0, Math.min(1.0, cutoff));
     (this[$sourceObject] as GLTFMaterial).alphaCutoff = cutoff;
     this[$applyAlphaCutoff]();
     this[$onUpdate]();
@@ -217,6 +220,9 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
           material.transparent = enabled;
           material.depthWrite = !enabled;
         };
+
+    (this[$sourceObject] as GLTFMaterial).alphaMode = alphaMode;
+
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       enableTransparency(material, alphaMode !== 'OPAQUE');
@@ -224,7 +230,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       material.needsUpdate = true;
     }
 
-    (this[$sourceObject] as GLTFMaterial).alphaMode = alphaMode;
     this[$onUpdate]();
   }
 
