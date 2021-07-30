@@ -19,7 +19,6 @@
 // https://github.com/donmccurdy/three-gltf-viewer/
 
 import {validateBytes} from 'gltf-validator';
-import {LoaderUtils} from 'three';
 
 const SEVERITY_MAP = ['Errors', 'Warnings', 'Infos', 'Hints'];
 
@@ -44,14 +43,10 @@ export type Report = {
   warnings?: Message;
   hints?: Message;
   infos?: Message;
-  [k: string]: any;
 };
 
 export type Message = {
-  code: string;
-  message: string;
-  pointer: string;
-  [k: string]: any;
+  code: string; message: string; pointer: string;
 }[];
 
 /**
@@ -76,7 +71,8 @@ function setReportException(e) {
  * Loads a resource (either locally or from the network) and returns it.
  */
 function resolveExternalResource(uri: string, url: string) {
-  const baseURL = LoaderUtils.extractUrlBase(url);
+  const index = url.lastIndexOf('/');
+  const baseURL = index === -1 ? './' : url.substr(0, index + 1);
   return fetch(baseURL + uri)
       .then((response) => response.arrayBuffer())
       .then((buffer) => {

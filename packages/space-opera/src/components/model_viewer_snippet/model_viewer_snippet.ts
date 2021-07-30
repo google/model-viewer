@@ -22,10 +22,9 @@ import '../mobile_view/open_mobile_view.js';
 import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
-import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
 import {customElement, html, internalProperty, property, query} from 'lit-element';
 
-import {ArConfigState, BestPracticesState, RelativeFilePathsState, State} from '../../types.js';
+import {ArConfigState, BestPracticesState, ModelViewerConfig, RelativeFilePathsState, State} from '../../types.js';
 import {getBestPractices} from '../best_practices/reducer.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {getCamera} from '../camera_settings/reducer.js';

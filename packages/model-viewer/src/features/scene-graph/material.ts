@@ -16,7 +16,7 @@
 import {DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
 
 import {AlphaMode, GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
-import {ALPHA_CUTOFF_BLEND, ALPHA_CUTOFF_GLTF_DEFAULT, ALPHA_CUTOFF_OPAQUE} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+import {ALPHA_CUTOFF_BLEND, ALPHA_CUTOFF_OPAQUE} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
@@ -30,6 +30,7 @@ const $normalTexture = Symbol('normalTexture');
 const $occlusionTexture = Symbol('occlusionTexture');
 const $emissiveTexture = Symbol('emissiveTexture');
 const $backingThreeMaterial = Symbol('backingThreeMaterial');
+const $applyAlphaCutoff = Symbol('applyAlphaCutoff');
 
 /**
  * Material facade implementation for Three.js materials
@@ -73,6 +74,18 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
     if (gltfMaterial.emissiveFactor == null) {
       gltfMaterial.emissiveFactor = [0, 0, 0];
+    }
+
+    if (gltfMaterial.doubleSided == null) {
+      gltfMaterial.doubleSided = false;
+    }
+
+    if (gltfMaterial.alphaMode == null) {
+      gltfMaterial.alphaMode = 'OPAQUE';
+    }
+
+    if (gltfMaterial.alphaCutoff == null) {
+      gltfMaterial.alphaCutoff = 0.5;
     }
 
     const {
@@ -166,20 +179,31 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     this[$onUpdate]();
   }
 
-  setAlphaCutoff(cutoff: number): void {
-    cutoff = Math.min(1.0, cutoff);
+  [$applyAlphaCutoff]() {
+    const gltfMaterial = this[$sourceObject] as GLTFMaterial;
+    // 0.0001 is the minimum in order to keep from using zero, which disables
+    // masking in three.js. It's also small enough to be less than the smallest
+    // normalized 8-bit value.
+    const cutoff = gltfMaterial.alphaMode === 'OPAQUE' ?
+        ALPHA_CUTOFF_OPAQUE :
+        (gltfMaterial.alphaMode === 'BLEND' ?
+             ALPHA_CUTOFF_BLEND :
+             Math.max(0.0001, Math.min(1.0, gltfMaterial.alphaCutoff!)));
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       material.alphaTest = cutoff;
       material.needsUpdate = true;
     }
+  }
+
+  setAlphaCutoff(cutoff: number): void {
     (this[$sourceObject] as GLTFMaterial).alphaCutoff = cutoff;
+    this[$applyAlphaCutoff]();
     this[$onUpdate]();
   }
 
   getAlphaCutoff(): number {
-    return (this[$sourceObject] as GLTFMaterial).alphaCutoff ??
-        this[$correlatedObjects]!.values().next().value.alphaTest;
+    return (this[$sourceObject] as GLTFMaterial).alphaCutoff!;
   }
 
   setDoubleSided(doubleSided: boolean): void {
@@ -197,8 +221,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   getDoubleSided(): boolean {
-    return (this[$sourceObject] as GLTFMaterial).doubleSided ??
-        this[$correlatedObjects]!.values().next().value.side === DoubleSide;
+    return (this[$sourceObject] as GLTFMaterial).doubleSided!;
   }
 
   setAlphaMode(alphaMode: AlphaMode): void {
@@ -207,33 +230,20 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
           material.transparent = enabled;
           material.depthWrite = !enabled;
         };
+
+    (this[$sourceObject] as GLTFMaterial).alphaMode = alphaMode;
+
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
-      if (alphaMode === 'OPAQUE') {
-        enableTransparency(material, false);
-        this.setAlphaCutoff(ALPHA_CUTOFF_OPAQUE);
-      } else if (alphaMode === `BLEND`) {
-        enableTransparency(material, true);
-        this.setAlphaCutoff(ALPHA_CUTOFF_BLEND);
-      } else {
-        enableTransparency(material, true);
-        // MASK mode.
-        if (this.getAlphaCutoff() < 0) {
-          this.setAlphaCutoff(ALPHA_CUTOFF_GLTF_DEFAULT);
-        }
-      }
+      enableTransparency(material, alphaMode !== 'OPAQUE');
+      this[$applyAlphaCutoff]();
       material.needsUpdate = true;
     }
 
-    (this[$sourceObject] as GLTFMaterial).alphaMode = alphaMode;
     this[$onUpdate]();
   }
 
   getAlphaMode(): AlphaMode {
-    if ((this[$sourceObject] as GLTFMaterial).alphaMode !== undefined) {
-      return (this[$sourceObject] as GLTFMaterial).alphaMode!;
-    }
-
-    return 'OPAQUE';
+    return (this[$sourceObject] as GLTFMaterial).alphaMode!;
   }
 }
