@@ -66,6 +66,7 @@ describe('yaw limits editor test', () => {
     (yawLimitsDeg.shadowRoot!.querySelector('#set-max-button')! as
      HTMLInputElement)
         .click();
+    await yawLimitsDeg.updateComplete;
     expect(getCamera(reduxStore.getState()).yawLimitsDeg!.max).toEqual(33);
   });
 });

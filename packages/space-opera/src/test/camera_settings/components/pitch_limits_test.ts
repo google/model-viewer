@@ -66,6 +66,7 @@ describe('pitch limits editor test', () => {
     (pitchLimitsDeg.shadowRoot!.querySelector('#set-max-button')! as
      HTMLInputElement)
         .click();
+    await pitchLimitsDeg.updateComplete;
     expect(getCamera(reduxStore.getState()).pitchLimitsDeg!.max).toEqual(33);
   });
 });
