@@ -72,25 +72,20 @@ describe('material panel test', () => {
     document.body.removeChild(panel);
   });
 
-  it('selector reflects materials in GLTF', async () => {
-    panel.selectedMaterialIndex = 0;
-    await panel.updateComplete;
-    expect(panel.selectedBaseColor).toEqual([1, 0, 1, 1]);
-    expect(panel.selectedRoughnessFactor).toEqual(0.2);
-    expect(panel.selectedMetallicFactor).toEqual(1);
+  it('selector reflects materials in GLTF, including defaults where undefined',
+     async () => {
+       panel.selectedMaterialIndex = 0;
+       await panel.updateComplete;
+       expect(panel.selectedBaseColor).toEqual([1, 0, 1, 1]);
+       expect(panel.selectedRoughnessFactor).toEqual(0.2);
+       expect(panel.selectedMetallicFactor).toEqual(1);
 
-    panel.selectedMaterialIndex = 1;
-    await panel.updateComplete;
-    expect(panel.selectedBaseColor).toEqual([1, 1, 0, 1]);
-    expect(panel.selectedRoughnessFactor).toEqual(1);
-    expect(panel.selectedMetallicFactor).toEqual(1);
-  });
-
-  it('material edits where roughness and metallic factors are initially undefined works',
-     async () => {});
-
-  it('should reuse textures when applying edits to the same model',
-     async () => {});
+       panel.selectedMaterialIndex = 1;
+       await panel.updateComplete;
+       expect(panel.selectedBaseColor).toEqual([1, 1, 0, 1]);
+       expect(panel.selectedRoughnessFactor).toEqual(1);
+       expect(panel.selectedMetallicFactor).toEqual(1);
+     });
 
   it('reflects textures in GLTF', async () => {
     panel.selectedMaterialIndex = 0;
