@@ -15,29 +15,18 @@
  *
  */
 
-import {GltfModel} from '@google/model-viewer-editing-adapter/lib/main';
-import {Material, Texture, TexturesById} from '../materials_panel/material_state.js';
+import {Texture} from '../../../../model-viewer/lib/features/scene-graph/api.js';
+import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 
-/**
- * All the state that the user can edit. It's important to capture all that in a
- * single object so components can easily subscribe to changes on a single
- * object.
- */
-export interface GltfEdits {
-  texturesById: TexturesById;
-  materials: Material[];
+export interface Thumbnail {
+  objectUrl: string;
+  texture: Texture;
 }
 
-/**
- * Use this to initialize references in components.
- */
-export const INITIAL_GLTF_EDITS: GltfEdits = {
-  texturesById: new Map<string, Texture>(),
-  materials: [],
-};
-
-export interface GltfState {
+export interface ModelState {
   gltfUrl?: string;
-  gltf?: GltfModel;
-  gltfJsonString: string;
+  thumbnailsById?: Map<string, Thumbnail>;
+  originalGltfJson?: string;
+  originalGltf?: GLTF;
+  isDirty?: boolean;
 }

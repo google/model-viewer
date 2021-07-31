@@ -19,71 +19,44 @@
  * @fileoverview Inspector panel for GLTF/GLB files.
  */
 
-import {createSafeObjectUrlFromUnsafe, SafeObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
-import {customElement, html, internalProperty, PropertyValues} from 'lit-element';
+import {customElement, html, internalProperty} from 'lit-element';
 
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {TexturesById} from '../materials_panel/material_state.js';
-import {getEdits} from '../materials_panel/reducer.js';
-import {getGltfJsonString} from '../model_viewer_preview/reducer.js';
-
-const $texturesById = Symbol('texturesById');
+import {getModel} from '../model_viewer_preview/reducer.js';
+import {Thumbnail} from '../model_viewer_preview/types.js';
 
 /**
  * The inspector.
  */
 @customElement('me-inspector-panel')
 export class InspectorPanel extends ConnectedLitElement {
-  @internalProperty() gltfJsonstring: string = '';
-  @internalProperty()[$texturesById]?: TexturesById;
-
-  private safeTextureUrls: SafeObjectUrl[] = [];
-
-  // A promise that resolves once the last texture update is done and rendered.
-  // Mainly for tests. Await on this AFTER awaiting updateComplete.
-  updateTexturesComplete?: Promise<void>;
+  @internalProperty() gltfJsonstring?: string = '';
+  @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
 
   stateChanged(state: State) {
-    this[$texturesById] = getEdits(state).texturesById;
-    this.gltfJsonstring = getGltfJsonString(state);
-  }
-
-  private async updateTextures(texturesById: TexturesById|undefined) {
-    // NOTE: There is a potential race here. If another update is running, we
-    // may finish before it, and it would overwrite our correct results. We'll
-    // live with this for now. If it becomes an issue, the proper solution is
-    // probably to do async operations only at the data level, not affecting the
-    // UI until data is ready.
-
-    // Work with local variables to avoid possible race conditions.
-    const newUrls: SafeObjectUrl[] = [];
-    const textures = (texturesById?.values()) ?? [];
-    for (const texture of textures) {
-      newUrls.push(await createSafeObjectUrlFromUnsafe(texture.uri));
+    const model = getModel(state);
+    if (model == null) {
+      return;
     }
-    this.safeTextureUrls = newUrls;
-    await this.requestUpdate();
-  }
-
-  protected updated(changedProperties: PropertyValues) {
-    if (changedProperties.has($texturesById)) {
-      // Only call on change. Otherwise we could infinite-async-loop.
-      this.updateTexturesComplete = this.updateTextures(this[$texturesById]);
+    if (model.thumbnailsById != null) {
+      this.thumbnailsById = model.thumbnailsById;
     }
+    this.gltfJsonstring = model.originalGltfJson;
   }
 
   render() {
+    const thumbnails = [...this.thumbnailsById.values()];
     return html`
         <div>
+          <div class="texture-images">
+            ${
+        thumbnails.map(
+            thumbnail => html`<img width="100" src="${thumbnail.objectUrl}">`)}
+          </div>
           <pre class="inspector-content">${
         this.gltfJsonstring || 'No model loaded'}
           </pre>
-          <div class="texture-images">
-            ${
-        this.safeTextureUrls.map(
-            url => html`<img width="100" src="${url.url}">`)}
-          </div>
         </div>
     `;
   }

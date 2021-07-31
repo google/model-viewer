@@ -15,8 +15,7 @@
  *
  */
 
-import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
-import {ArConfigState} from '../../../types';
+import {ArConfigState, ModelViewerConfig} from '../../../types';
 
 // A list of accepted attributes in render_model_viewer. Used when parsing for
 // extra attributes.

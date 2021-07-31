@@ -38,11 +38,10 @@ export const DEFAULT_MAX_PITCH = 180;
 /** The Camera Settings panel. */
 @customElement('me-camera-pitch-limits')
 export class PitchLimits extends LimitsBase {
-  @internalProperty() pitchLimitsDeg?: Limits;
   @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
-    this.pitchLimitsDeg = getCamera(state).pitchLimitsDeg;
+    this.limitsProperty = getCamera(state).pitchLimitsDeg;
     this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
@@ -75,10 +74,6 @@ export class PitchLimits extends LimitsBase {
     if (!currentCamera || !currentCamera.orbit)
       return 0;
     return Math.round(currentCamera.orbit.phiDeg);
-  }
-
-  get limitsProperty() {
-    return this.pitchLimitsDeg;
   }
 }
 

@@ -17,24 +17,19 @@
 
 import {combineReducers} from 'redux';
 
-import {animationNamesReducer} from './components/animation_controls/reducer.js';
 import {bestPracticesReducer} from './components/best_practices/reducer.js';
 import {cameraReducer, isDirtyCameraReducer} from './components/camera_settings/reducer.js'
 import {configReducer} from './components/config/reducer.js';
 import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
 import {environmentReducer} from './components/ibl_selector/reducer.js'
-import {editsReducer, origEditsReducer} from './components/materials_panel/reducer.js';
 import {arReducer, mobileReducer} from './components/mobile_view/reducer.js';
-import {gltfReducer} from './components/model_viewer_preview/reducer.js';
+import {modelReducer} from './components/model_viewer_preview/reducer.js';
 import {extraAttributesReducer} from './components/model_viewer_snippet/reducer.js';
 import {relativeFilePathsReducer} from './components/relative_file_paths/reducer.js';
-
-const gltfEditsReducer =
-    combineReducers({edits: editsReducer, origEdits: origEditsReducer});
+import {INITIAL_STATE} from './types.js';
 
 const modelViewerSnippetReducer = combineReducers({
   arConfig: arReducer,
-  animationNames: animationNamesReducer,
   bestPractices: bestPracticesReducer,
   camera: cameraReducer,
   config: configReducer,
@@ -47,14 +42,25 @@ const entitiesReducer = combineReducers({
   isDirtyCamera: isDirtyCameraReducer,
   mobile: mobileReducer,
   environment: environmentReducer,
-  gltf: gltfReducer,
-  gltfEdits: gltfEditsReducer,
+  model: modelReducer,
   modelViewerSnippet: modelViewerSnippetReducer
 });
 
 const uiReducer = combineReducers({hotspots: hotspotsUiReducer});
 
-export const rootReducer =
+const combinedReducer =
     combineReducers({entities: entitiesReducer, ui: uiReducer});
+
+export const RESET_STORE = 'RESET_STORE';
+export function dispatchReset() {
+  return {type: RESET_STORE};
+};
+
+export const rootReducer = (state, action) => {
+  if (action.type === RESET_STORE) {
+    state = INITIAL_STATE;
+  }
+  return combinedReducer(state, action);
+};
 
 export type RootState = ReturnType<typeof rootReducer>
