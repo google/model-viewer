@@ -96,6 +96,7 @@ export declare interface LoadingStaticInterface {
 interface ModelViewerGlobalConfig {
   dracoDecoderLocation?: string;
   ktx2TranscoderLocation?: string;
+  powerPreference?:string;
 }
 
 /**
@@ -309,6 +310,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const ModelViewerElement: ModelViewerGlobalConfig =
           (self as any).ModelViewerElement || {};
+
+      Renderer.powerPreference = ModelViewerElement.powerPreference || Renderer.getDefaultPowerPreference();
 
       const dracoDecoderLocation = ModelViewerElement.dracoDecoderLocation ||
           DEFAULT_DRACO_DECODER_LOCATION;

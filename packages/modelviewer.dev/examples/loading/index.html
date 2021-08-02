@@ -330,7 +330,37 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
         </div>
       </div>
     </div>
-  
+    <div class="sample">
+      <div id="powerPrefSupport" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Power Preference support</h2>
+            <h4>
+              &lt;model-viewer&gt; defaults to specifying powerPreference:
+              'high-performance' for its Three.js WebGLRenderer. However, 
+              The developer has the choice setting this to 'low-power' or
+              'default'.
+            </h4>
+            <h4>
+              You have the option of choosing what GPU power to be used by chrome for loading
+              the models.
+            </h4>
+          </div>
+          <example-snippet stamp-to="powerPrefSupport" highlight-as="html">
+            <template>
+<model-viewer camera-controls alt="A 3D model of a fish" src="../../shared-assets/models/BarramundiFish.mixed.glb">
+</model-viewer>
+<script>
+ModelViewerElement = self.ModelViewerElement || {};
+ModelViewerElement.powerPreference = "low-power";
+ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/decoder/files/';
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div> 
     <div class="sample">
       <div id="usdzModel" class="demo"></div>
       <div class="content">

@@ -116,6 +116,14 @@
         ]
       },
       {
+        "name": "powerPreference",
+        "htmlName": "powerPreference",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s KTX2 power preference. By default, this is set to high-performance for dual GPUs.",
+        "links": [
+          "<a href=\"../examples/loading/#powerPrefSupport\"><span class='attribute'>powerPreference</span> example</a>"
+        ]
+      },
+      {
         "name": "minimumRenderScale",
         "htmlName": "minimumRenderScale",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1.",

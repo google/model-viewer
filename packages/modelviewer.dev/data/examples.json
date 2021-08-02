@@ -40,6 +40,10 @@
         "name": "KTX2 Support"
       },
       {
+        "htmlId": "powerPrefSupport",
+        "name": "Power Preference"
+      },
+      {
         "htmlId": "usdzModel",
         "name": "USDZ Model"
       },

@@ -28,6 +28,7 @@ import TextureUtils from './TextureUtils.js';
 
 export interface RendererOptions {
   debug?: boolean;
+  powerPreference?:string;
 }
 
 export interface ContextLostEvent extends Event {
@@ -43,6 +44,8 @@ const MAX_AVG_CHANGE_MS = 2;
 const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
 const DEFAULT_LAST_STEP = 3;
 
+const DEFAULT_POWER_PREFERENCE = "high-performance";
+
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
  * all in the same WebGLRenderingContext, spitting out textures to apply
@@ -55,15 +58,31 @@ const DEFAULT_LAST_STEP = 3;
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _singleton = new Renderer({debug: isDebugMode()});
+  private static _powerPreference : string;
+  private static _singleton : Renderer;
+
+  static set powerPreference(powerPreferenceOption:string) {
+    this._powerPreference = powerPreferenceOption || DEFAULT_POWER_PREFERENCE;
+  }
+  
+  static get powerPreference() {
+    return this._powerPreference;
+  }
+
+  static getDefaultPowerPreference() : string {
+    return DEFAULT_POWER_PREFERENCE;
+  }
 
   static get singleton() {
+    if (this._singleton == null) {
+      this._singleton=  new Renderer({debug: isDebugMode(), powerPreference: this.powerPreference});
+    }
     return this._singleton;
   }
 
   static resetSingleton() {
     this._singleton.dispose();
-    this._singleton = new Renderer({debug: isDebugMode()});
+    this._singleton = new Renderer({debug: isDebugMode(), powerPreference:this.powerPreference});
   }
 
   public threeRenderer!: WebGLRenderer;
@@ -113,12 +132,13 @@ export class Renderer extends EventDispatcher {
     this.canvas3D.id = 'webgl-canvas';
     this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
 
+    Renderer.powerPreference = options!=null && options.powerPreference ? options.powerPreference: "high-performance" ;
     try {
       this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
         alpha: true,
         antialias: true,
-        powerPreference: 'high-performance' as WebGLPowerPreference,
+        powerPreference: Renderer.powerPreference as WebGLPowerPreference,
         preserveDrawingBuffer: true
       });
       this.threeRenderer.autoClear = true;
@@ -145,7 +165,7 @@ export class Renderer extends EventDispatcher {
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
     this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
     CachingGLTFLoader.initializeKTX2Loader(this.threeRenderer);
-
+    
     this.updateRendererSize();
     this.lastTick = performance.now();
     this.avgFrameDuration = 0;
