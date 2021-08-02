@@ -7,7 +7,6 @@ import {BasicSpecTemplate} from './templates.js';
 
 const expect = chai.expect;
 
-const LIGHTROOM_PATH = 'environments/lightroom_14b.hdr';
 const SUNRISE_HDR_PATH = 'environments/spruit_sunrise_1k_HDR.hdr';
 const SUNRISE_LDR_PATH = 'environments/spruit_sunrise_1k_LDR.jpg';
 
@@ -16,8 +15,6 @@ const COMPONENTS_PER_PIXEL = 4;
 const setupModelViewer = async (modelViewer: ModelViewerElement) => {
   modelViewer.style.width = '100px';
   modelViewer.style.height = '100px';
-
-  modelViewer.style.backgroundColor = 'rgba(255,255,255,0)';
 
   const modelLoaded = waitForEvent(modelViewer, 'load');
 
@@ -38,7 +35,6 @@ const setupLighting =
 
   const lightingPath = assetPath(lighting);
   modelViewer.environmentImage = lightingPath;
-  modelViewer.skyboxImage = lightingPath;
 
   await posterDismissed;
 }
@@ -109,7 +105,7 @@ suite('ModelViewerElement', () => {
 
   BasicSpecTemplate(() => ModelViewer, () => tagName);
 
-  suite('Fidelity Test', () => {
+  suite('Render Functionality Test', () => {
     let element: ModelViewerElement;
 
     setup(async () => {
@@ -124,19 +120,19 @@ suite('ModelViewerElement', () => {
       }
     });
 
-    test('Metal roughness sphere', async () => {
-      await setupLighting(element, LIGHTROOM_PATH);
+    test('Metal roughness sphere with generated lighting', async () => {
+      await waitForEvent(element, 'poster-dismissed');
       const screenshotContext = element[$renderer].threeRenderer.getContext();
       testFidelity(screenshotContext);
     });
 
-    test('Metal roughness sphere HDR', async () => {
+    test('Metal roughness sphere with HDR lighting', async () => {
       await setupLighting(element, SUNRISE_HDR_PATH);
       const screenshotContext = element[$renderer].threeRenderer.getContext();
       testFidelity(screenshotContext);
     });
 
-    test('Metal roughness sphere LDR', async () => {
+    test('Metal roughness sphere with LDR lighting', async () => {
       await setupLighting(element, SUNRISE_LDR_PATH);
       const screenshotContext = element[$renderer].threeRenderer.getContext();
       testFidelity(screenshotContext);
