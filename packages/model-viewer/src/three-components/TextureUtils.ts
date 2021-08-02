@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import {EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {EquirectangularReflectionMapping, EventDispatcher, FloatType, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
-import {deserializeUrl} from '../utilities.js';
 
+import {deserializeUrl} from '../utilities.js';
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentScene from './EnvironmentScene.js';
 import EnvironmentSceneAlt from './EnvironmentSceneAlt.js';
 
 export interface EnvironmentMapAndSkybox {
-  environmentMap: WebGLRenderTarget;
+  environmentMap: Texture;
   skybox: Texture|null;
 }
 
@@ -36,6 +36,7 @@ const GENERATED_SIGMA = 0.04;
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
+hdrLoader.setDataType(FloatType);
 
 // Attach a `userData` object for arbitrary data on textures that
 // originate from TextureUtils, similar to Object3D's userData,
@@ -46,12 +47,12 @@ const userData = {
 };
 
 export default class TextureUtils extends EventDispatcher {
-  private generatedEnvironmentMap: WebGLRenderTarget|null = null;
-  private generatedEnvironmentMapAlt: WebGLRenderTarget|null = null;
+  private generatedEnvironmentMap: Texture|null = null;
+  private generatedEnvironmentMapAlt: Texture|null = null;
   private PMREMGenerator: PMREMGenerator;
 
   private skyboxCache = new Map<string, Promise<Texture>>();
-  private environmentMapCache = new Map<string, Promise<WebGLRenderTarget>>();
+  private environmentMapCache = new Map<string, Promise<Texture>>();
 
   constructor(threeRenderer: WebGLRenderer) {
     super();
@@ -114,7 +115,7 @@ export default class TextureUtils extends EventDispatcher {
 
     try {
       let skyboxLoads: Promise<Texture|null> = Promise.resolve(null);
-      let environmentMapLoads: Promise<WebGLRenderTarget>;
+      let environmentMapLoads: Promise<Texture>;
 
       // If we have a skybox URL, attempt to load it as a cubemap
       if (!!skyboxUrl) {
@@ -182,16 +183,9 @@ export default class TextureUtils extends EventDispatcher {
    * case will be assumed to be used as an environment map.
    */
   private loadEnvironmentMapFromUrl(
-      url: string,
-      progressTracker?: ProgressTracker): Promise<WebGLRenderTarget> {
+      url: string, progressTracker?: ProgressTracker): Promise<Texture> {
     if (!this.environmentMapCache.has(url)) {
-      const environmentMapLoads =
-          this.loadSkyboxFromUrl(url, progressTracker).then((equirect) => {
-            const cubeUV = this.PMREMGenerator.fromEquirectangular(equirect);
-            this.addMetadata(cubeUV.texture, url);
-            return cubeUV;
-          });
-      this.PMREMGenerator.compileEquirectangularShader();
+      const environmentMapLoads = this.loadSkyboxFromUrl(url, progressTracker);
 
       this.environmentMapCache.set(url, environmentMapLoads);
     }
@@ -202,12 +196,12 @@ export default class TextureUtils extends EventDispatcher {
   /**
    * Loads a dynamically generated environment map.
    */
-  private loadGeneratedEnvironmentMap(): Promise<WebGLRenderTarget> {
+  private loadGeneratedEnvironmentMap(): Promise<Texture> {
     if (this.generatedEnvironmentMap == null) {
       const defaultScene = new EnvironmentScene;
       this.generatedEnvironmentMap =
-          this.PMREMGenerator.fromScene(defaultScene, GENERATED_SIGMA);
-      this.addMetadata(this.generatedEnvironmentMap.texture, null);
+          this.PMREMGenerator.fromScene(defaultScene, GENERATED_SIGMA).texture;
+      this.addMetadata(this.generatedEnvironmentMap, null);
     }
 
     return Promise.resolve(this.generatedEnvironmentMap!);
@@ -218,38 +212,28 @@ export default class TextureUtils extends EventDispatcher {
    * color-preserving. Shows less contrast around the different sides of the
    * object.
    */
-  private loadGeneratedEnvironmentMapAlt(): Promise<WebGLRenderTarget> {
+  private loadGeneratedEnvironmentMapAlt(): Promise<Texture> {
     if (this.generatedEnvironmentMapAlt == null) {
       const defaultScene = new EnvironmentSceneAlt;
       this.generatedEnvironmentMapAlt =
-          this.PMREMGenerator.fromScene(defaultScene, GENERATED_SIGMA);
-      this.addMetadata(this.generatedEnvironmentMapAlt.texture, null);
+          this.PMREMGenerator.fromScene(defaultScene, GENERATED_SIGMA).texture;
+      this.addMetadata(this.generatedEnvironmentMapAlt, null);
     }
 
     return Promise.resolve(this.generatedEnvironmentMapAlt!);
   }
 
   async dispose() {
-    const allTargetsLoad: Array<Promise<WebGLRenderTarget>> = [];
-
-    // NOTE(cdata): We would use for-of iteration on the maps here, but
-    // IE11 doesn't have the necessary iterator-returning methods. So,
-    // disposal of these render targets is kind of convoluted as a result.
-
-    this.environmentMapCache.forEach((targetLoads) => {
-      allTargetsLoad.push(targetLoads);
-    });
-
-    this.environmentMapCache.clear();
-
-    for (const targetLoads of allTargetsLoad) {
+    for (const [, textureLoads] of this.environmentMapCache) {
       try {
-        const target = await targetLoads;
-        target.dispose();
+        const texture = await textureLoads;
+        texture.dispose();
       } catch (e) {
         // Suppress errors, so that all render targets will be disposed
       }
     }
+
+    this.environmentMapCache.clear();
 
     if (this.generatedEnvironmentMap != null) {
       this.generatedEnvironmentMap!.dispose();
