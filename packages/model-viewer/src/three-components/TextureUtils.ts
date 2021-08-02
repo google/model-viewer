@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EquirectangularReflectionMapping, EventDispatcher, FloatType, GammaEncoding, NearestFilter, PMREMGenerator, RGBEEncoding, Texture, TextureLoader, WebGLRenderer} from 'three';
+import {EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, PMREMGenerator, Texture, TextureLoader, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl} from '../utilities.js';
@@ -36,7 +36,6 @@ const GENERATED_SIGMA = 0.04;
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
-hdrLoader.setDataType(FloatType);
 
 // Attach a `userData` object for arbitrary data on textures that
 // originate from TextureUtils, similar to Object3D's userData,
@@ -76,12 +75,7 @@ export default class TextureUtils extends EventDispatcher {
       this.addMetadata(texture, url);
       texture.mapping = EquirectangularReflectionMapping;
 
-      if (isHDR) {
-        texture.encoding = RGBEEncoding;
-        texture.minFilter = NearestFilter;
-        texture.magFilter = NearestFilter;
-        texture.flipY = true;
-      } else {
+      if (!isHDR) {
         texture.encoding = GammaEncoding;
       }
 
