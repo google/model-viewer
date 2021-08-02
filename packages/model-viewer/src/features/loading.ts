@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 
 import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
-import {Renderer} from '../three-components/Renderer.js';
+import {DEFAULT_POWER_PREFERENCE, Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
 
 import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
@@ -311,7 +311,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       const ModelViewerElement: ModelViewerGlobalConfig =
           (self as any).ModelViewerElement || {};
 
-      Renderer.powerPreference = ModelViewerElement.powerPreference || Renderer.getDefaultPowerPreference();
+      Renderer.powerPreference = ModelViewerElement.powerPreference || DEFAULT_POWER_PREFERENCE;
 
       const dracoDecoderLocation = ModelViewerElement.dracoDecoderLocation ||
           DEFAULT_DRACO_DECODER_LOCATION;

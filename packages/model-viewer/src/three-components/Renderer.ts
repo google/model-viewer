@@ -44,7 +44,7 @@ const MAX_AVG_CHANGE_MS = 2;
 const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
 const DEFAULT_LAST_STEP = 3;
 
-const DEFAULT_POWER_PREFERENCE = "high-performance";
+export const DEFAULT_POWER_PREFERENCE = "high-performance";
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -58,20 +58,9 @@ const DEFAULT_POWER_PREFERENCE = "high-performance";
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _powerPreference = DEFAULT_POWER_PREFERENCE;
+  public static powerPreference = DEFAULT_POWER_PREFERENCE;
   private static _singleton : Renderer;
 
-  static set powerPreference(powerPreferenceOption:string) {
-    this._powerPreference = powerPreferenceOption || DEFAULT_POWER_PREFERENCE;
-  }
-  
-  static get powerPreference() {
-    return this._powerPreference;
-  }
-
-  static getDefaultPowerPreference() : string {
-    return DEFAULT_POWER_PREFERENCE;
-  }
 
   static get singleton() {
     if (this._singleton == null) {
@@ -132,7 +121,7 @@ export class Renderer extends EventDispatcher {
     this.canvas3D.id = 'webgl-canvas';
     this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
 
-    Renderer.powerPreference = options!=null && options.powerPreference ? options.powerPreference: "high-performance" ;
+    Renderer.powerPreference = options!=null && options.powerPreference ? options.powerPreference: DEFAULT_POWER_PREFERENCE;
     try {
       this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
