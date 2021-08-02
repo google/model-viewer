@@ -18,17 +18,20 @@
 
 import '../../../components/camera_settings/components/yaw_limits.js';
 
-import {DEFAULT_MAX_YAW, YawLimits} from '../../../components/camera_settings/components/yaw_limits.js';
+import {YawLimits} from '../../../components/camera_settings/components/yaw_limits.js';
 import {dispatchYawLimits, getCamera} from '../../../components/camera_settings/reducer.js';
 import {ModelViewerPreview} from '../../../components/model_viewer_preview/model_viewer_preview.js';
 import {getModelViewer} from '../../../components/model_viewer_preview/reducer.js';
+import {dispatchReset} from '../../../reducers.js';
 import {reduxStore} from '../../../space_opera_base.js';
+import {rafPasses} from '../../utils/test_utils.js';
 
-xdescribe('yaw limits editor test', () => {
+describe('yaw limits editor test', () => {
   let yawLimitsDeg: YawLimits;
   let preview: ModelViewerPreview;
 
   beforeEach(async () => {
+    reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
     await preview.updateComplete;
@@ -40,33 +43,30 @@ xdescribe('yaw limits editor test', () => {
   });
 
   afterEach(() => {
-    document.body.removeChild(preview);
     document.body.removeChild(yawLimitsDeg);
+    document.body.removeChild(preview);
   });
 
   it('correctly loads yaw limits', async () => {
-    dispatchYawLimits({enabled: true, min: 12, max: 34});
+    reduxStore.dispatch(dispatchYawLimits({enabled: true, min: 12, max: 34}));
     await yawLimitsDeg.updateComplete;
     expect(yawLimitsDeg.inputLimits.enabled).toEqual(true);
     expect(yawLimitsDeg.inputLimits.min).toEqual(12);
     expect(yawLimitsDeg.inputLimits.max).toEqual(34);
   });
 
-  it('correctly dispatches when I click set and clear', async () => {
-    dispatchYawLimits({enabled: true, min: 0, max: 99});
+  it('correctly dispatches when I click set', async () => {
+    reduxStore.dispatch(dispatchYawLimits({enabled: true, min: 0, max: 99}));
     const modelViewer = getModelViewer()!;
-    modelViewer.cameraOrbit = '33deg 0deg 10m';
+    modelViewer.cameraOrbit = '33deg auto auto';
+    modelViewer.jumpCameraToGoal();
+    await rafPasses();
     await yawLimitsDeg.updateComplete;
 
     (yawLimitsDeg.shadowRoot!.querySelector('#set-max-button')! as
      HTMLInputElement)
         .click();
+    await yawLimitsDeg.updateComplete;
     expect(getCamera(reduxStore.getState()).yawLimitsDeg!.max).toEqual(33);
-
-    (yawLimitsDeg.shadowRoot!.querySelector('#clear-max-button')! as
-     HTMLInputElement)
-        .click();
-    expect(getCamera(reduxStore.getState()).yawLimitsDeg!.max)
-        .toEqual(DEFAULT_MAX_YAW);
   });
 });

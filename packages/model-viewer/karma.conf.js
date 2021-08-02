@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-const {applyKarmaHacks} = require('./shared-assets/scripts/karma-hacks.js');
-
-applyKarmaHacks();
-
 module.exports = function(config) {
   // @see http://karma-runner.github.io/4.0/config/configuration-file.html
   config.set({
@@ -96,6 +92,9 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Chrome',
         browser_version: 'latest',
+        browserstack: {
+          localIdentifier: 'chrome'
+        }
       },
       'Chrome (latest-1)': {
         base: 'BrowserStack',
@@ -103,6 +102,9 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Chrome',
         browser_version: 'latest-1',
+        browserstack: {
+          localIdentifier: 'chromeOld'
+        }
       },
       'Edge (latest)': {
         base: 'BrowserStack',
@@ -110,6 +112,9 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Edge',
         browser_version: 'latest',
+        browserstack: {
+          localIdentifier: 'edge'
+        }
       },
       'Edge (latest-1)': {
         base: 'BrowserStack',
@@ -117,6 +122,9 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Edge',
         browser_version: 'latest-1',
+        browserstack: {
+          localIdentifier: 'edgeOld'
+        }
       },
       'Firefox (latest)': {
         base: 'BrowserStack',
@@ -124,6 +132,9 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Firefox',
         browser_version: 'latest',
+        browserstack: {
+          localIdentifier: 'Firefox'
+        }
       },
       'Firefox (latest-1)': {
         base: 'BrowserStack',
@@ -131,6 +142,9 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Firefox',
         browser_version: 'latest-1',
+        browserstack: {
+          localIdentifier: 'FirefoxOld'
+        }
       },
       'Safari (latest)': {
         base: 'BrowserStack',
@@ -138,21 +152,21 @@ module.exports = function(config) {
         os_version: 'Catalina',
         browser: 'safari',
         browser_version: 'latest',
-        // BrowserStack occassionally fails to tunnel localhost for Safari
-        // instances, causing them to time out:
-        url: 'http://127.0.0.1:9876'
+        browserstack: {
+          localIdentifier: 'Safari'
+        }
       },
-      // 'iOS Safari (iOS 13)': {
-      //   base: 'BrowserStack',
-      //   os: 'iOS',
-      //   os_version: '13',
-      //   device: 'iPhone 8',
-      //   browser: 'iPhone',
-      //   real_mobile: 'true',
-      //   // BrowserStack seems to drop the port when redirecting to this special
-      //   // domain so we go there directly instead:
-      //   url: 'http://bs-local.com:9876'
-      // },
+      'iOS Safari (iOS 13)': {
+        base: 'BrowserStack',
+        os: 'iOS',
+        os_version: '13',
+        device: 'iPhone 8',
+        browser: 'iPhone',
+        real_mobile: 'true',
+        browserstack: {
+          localIdentifier: 'iOS13'
+        }
+      },
       'iOS Safari (iOS 14)': {
         base: 'BrowserStack',
         os: 'iOS',
@@ -160,9 +174,9 @@ module.exports = function(config) {
         device: 'iPhone 11',
         browser: 'iPhone',
         real_mobile: 'true',
-        // BrowserStack seems to drop the port when redirecting to this special
-        // domain so we go there directly instead:
-        url: 'http://bs-local.com:9876'
+        browserstack: {
+          localIdentifier: 'iOS14'
+        }
       },
     };
 

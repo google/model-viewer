@@ -18,14 +18,12 @@
 import '@material/mwc-button';
 import '../../file_modal/file_modal.js';
 
-import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main';
-import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '@google/model-viewer-editing-adapter/lib/util/create_object_url.js'
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
 import {dispatchCameraControlsEnabled, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {openModalStyles} from '../../../styles.css.js';
-import {ArConfigState, extractStagingConfig, RelativeFilePathsState, State} from '../../../types.js';
+import {ArConfigState, extractStagingConfig, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../camera_settings/camera_state.js';
 import {getCamera} from '../../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
@@ -36,6 +34,7 @@ import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js
 import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
+import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '../../utils/create_object_url.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
 import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';

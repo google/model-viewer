@@ -15,9 +15,7 @@
  *
  */
 
-import {ModelViewerConfig} from '@google/model-viewer-editing-adapter/lib/main.js'
-
-import {Action, State} from '../../types.js';
+import {Action, ModelViewerConfig, State} from '../../types.js';
 
 const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
 export function dispatchCameraControlsEnabled(enabled?: boolean) {

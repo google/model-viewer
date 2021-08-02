@@ -37,11 +37,10 @@ export const DEFAULT_MAX_YAW = 180;
 /** The Camera Settings panel. */
 @customElement('me-camera-yaw-limits')
 export class YawLimits extends LimitsBase {
-  @internalProperty() yawLimitsDeg?: Limits;
   @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
-    this.yawLimitsDeg = getCamera(state).yawLimitsDeg;
+    this.limitsProperty = getCamera(state).yawLimitsDeg;
     this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
@@ -72,10 +71,6 @@ export class YawLimits extends LimitsBase {
   get currentPreviewValue() {
     const currentCamera = getCameraState(getModelViewer()!);
     return Math.round(currentCamera.orbit?.thetaDeg ?? 0);
-  }
-
-  get limitsProperty() {
-    return this.yawLimitsDeg;
   }
 }
 
