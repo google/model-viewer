@@ -140,18 +140,19 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
                   resolve(await texturesLoad);
                 });
 
+        const environment = environmentMap.texture;
         if (skybox != null) {
           // When using the same environment and skybox, use the environment as
           // it gives HDR filtering.
           this[$scene].background = (skybox as any).userData.url ===
-                  (environmentMap as any).userData.url ?
-              environmentMap :
+                  (environment as any).userData.url ?
+              environment :
               skybox;
         } else {
           this[$scene].background = null;
         }
 
-        this[$applyEnvironmentMap](environmentMap);
+        this[$applyEnvironmentMap](environmentMap.texture);
         this[$scene].dispatchEvent({type: 'envmap-update'});
       } catch (errorOrPromise) {
         if (errorOrPromise instanceof Error) {
