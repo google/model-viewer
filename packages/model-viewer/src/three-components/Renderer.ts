@@ -58,7 +58,7 @@ const DEFAULT_POWER_PREFERENCE = "high-performance";
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _powerPreference : string;
+  private static _powerPreference = DEFAULT_POWER_PREFERENCE;
   private static _singleton : Renderer;
 
   static set powerPreference(powerPreferenceOption:string) {
