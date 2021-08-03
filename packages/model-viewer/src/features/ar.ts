@@ -223,12 +223,13 @@ configuration or device capabilities');
                 await this[$renderer].arRenderer.supportsPresentation()) {
               this[$arMode] = ARMode.WEBXR;
               break;
-            } else if (
-                value === 'scene-viewer' && IS_SCENEVIEWER_CANDIDATE &&
+            }
+            if (value === 'scene-viewer' && IS_SCENEVIEWER_CANDIDATE &&
                 !isSceneViewerBlocked) {
               this[$arMode] = ARMode.SCENE_VIEWER;
               break;
-            } else if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE) {
+            }
+            if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE) {
               this[$arMode] = ARMode.QUICK_LOOK;
               break;
             }
