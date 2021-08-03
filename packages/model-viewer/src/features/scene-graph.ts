@@ -20,7 +20,7 @@ import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GL
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
-import {GLTF} from '../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
 import {Constructor} from '../utilities.js';
@@ -37,6 +37,7 @@ const $model = Symbol('model');
 const $variants = Symbol('variants');
 const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
 const $textureLoader = Symbol('textureLoader');
+const $originalGltfJson = Symbol('originalGltfJson');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
@@ -50,7 +51,7 @@ export interface SceneGraphInterface {
   readonly availableVariants: Array<string>;
   orientation: string;
   scale: string;
-  readonly originalGltfJson: GLTF|undefined;
+  readonly originalGltfJson: GLTF|null;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
   createTexture(uri: string): Promise<ModelViewerTexture|null>;
 }
@@ -66,6 +67,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
     protected[$variants]: Array<string> = [];
     private[$textureLoader] = new TextureLoader();
+    private[$originalGltfJson]: GLTF|null = null;
 
     @property({type: String, attribute: 'variant-name'})
     variantName: string|undefined = undefined;
@@ -90,7 +92,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
      * changes to the scene-graph, nor will editing it have any effect.
      */
     get originalGltfJson() {
-      return JSON.parse(JSON.stringify(this[$currentGLTF]?.parser.json));
+      return this[$originalGltfJson];
     }
 
     /**
@@ -198,6 +200,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$model] = new Model(correlatedSceneGraph, () => {
             this[$needsRender]();
           });
+          this[$originalGltfJson] = JSON.parse(
+              JSON.stringify(this[$currentGLTF]?.correlatedSceneGraph.gltf));
         }
 
         // KHR_materials_variants extension spec:
