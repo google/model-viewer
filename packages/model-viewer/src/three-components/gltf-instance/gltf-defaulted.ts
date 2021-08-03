@@ -1,4 +1,4 @@
-import {Accessor, AlphaMode, Asset, Camera, ExtensionDictionary, Extras, MagFilter, Mesh, MinFilter, RGB, RGBA, Scene, WrapMode} from './gltf-2.0';
+import {Accessor, AlphaMode, AnimationSampler, Asset, Camera, ExtensionDictionary, Extras, MagFilter, Mesh, MinFilter, RGB, RGBA, Scene, WrapMode} from './gltf-2.0';
 
 
 export interface Sampler {
@@ -66,6 +66,9 @@ export interface Image {
   extensions?: ExtensionDictionary;
   extras?: Extras;
 }
+
+export type GLTFElement = Scene|Node|Mesh|Material|Image|Texture|TextureInfo|
+    Sampler|PBRMetallicRoughness|Accessor|Camera|Animation|AnimationSampler;
 
 export interface GLTF {
   asset: Asset;

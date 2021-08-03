@@ -200,8 +200,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$model] = new Model(correlatedSceneGraph, () => {
             this[$needsRender]();
           });
-          this[$originalGltfJson] = JSON.parse(
-              JSON.stringify(this[$currentGLTF]?.correlatedSceneGraph.gltf));
+          this[$originalGltfJson] =
+              JSON.parse(JSON.stringify(correlatedSceneGraph.gltf));
         }
 
         // KHR_materials_variants extension spec:

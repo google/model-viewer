@@ -16,6 +16,7 @@
 import {Texture as ThreeTexture} from 'three';
 
 import {Filter, MagFilter, MinFilter, Sampler as GLTFSampler, Wrap, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {Sampler as DefaultedSampler} from '../../three-components/gltf-instance/gltf-defaulted.js';
 
 import {Sampler as SamplerInterface} from './api.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
@@ -49,7 +50,7 @@ const isWrapMode = (() => {
 })();
 
 const isValidSamplerValue = <P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
-    property: P, value: unknown): value is GLTFSampler[P] => {
+    property: P, value: unknown): value is DefaultedSampler[P] => {
   switch (property) {
     case 'minFilter':
       return isMinFilter(value);
@@ -80,7 +81,7 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
 
   private get[$sourceSampler]() {
     console.assert(this[$sourceObject] != null, 'Sampler source is undefined');
-    return (this[$sourceObject] as GLTFSampler);
+    return (this[$sourceObject] as DefaultedSampler);
   }
 
   constructor(
@@ -116,19 +117,19 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   get minFilter(): MinFilter {
-    return this[$sourceSampler].minFilter!;
+    return this[$sourceSampler].minFilter;
   }
 
   get magFilter(): MagFilter {
-    return this[$sourceSampler].magFilter!;
+    return this[$sourceSampler].magFilter;
   }
 
   get wrapS(): WrapMode {
-    return this[$sourceSampler].wrapS!;
+    return this[$sourceSampler].wrapS;
   }
 
   get wrapT(): WrapMode {
-    return this[$sourceSampler].wrapT!;
+    return this[$sourceSampler].wrapT;
   }
 
   setMinFilter(filter: MinFilter) {
