@@ -16,8 +16,8 @@
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
-import {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
-import {clamp, isDebugMode, resolveDpr, getPowerPreference} from '../utilities.js';
+import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
+import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
@@ -57,7 +57,7 @@ const DEFAULT_LAST_STEP = 3;
  */
 export class Renderer extends EventDispatcher {
   private static _singleton = new Renderer({
-    powerPreference: getPowerPreference(),
+    powerPreference: 'high-performance',
     debug: isDebugMode()
   });
 
@@ -68,7 +68,7 @@ export class Renderer extends EventDispatcher {
   static resetSingleton() {
     this._singleton.dispose();
     this._singleton = new Renderer({
-      powerPreference: getPowerPreference(),
+      powerPreference: ModelViewerElementBase.powerPreference,
       debug: isDebugMode()
     });
   }

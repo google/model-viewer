@@ -110,7 +110,7 @@ export interface RendererInterface {
 export default class ModelViewerElementBase extends UpdatingElement {
   protected static[$template]: HTMLTemplateElement|void;
 
-  public static powerPreference:string = 'high-perfromance';
+  private static _powerPreference:string = 'high-perfromance';
 
   static get is() {
     return 'model-viewer';
@@ -135,6 +135,17 @@ export default class ModelViewerElementBase extends UpdatingElement {
     return CachingGLTFLoader[$evictionPolicy].evictionThreshold
   }
 
+  /** @export */
+  static set powerPreference(value: string) {
+    this._powerPreference = value || this._powerPreference;
+    Renderer.resetSingleton();
+  }
+
+    /** @export */
+    static get powerPreference(): string {
+      return this._powerPreference;
+    }
+  
   /** @export */
   static set minimumRenderScale(value: number) {
     if (value > 1) {

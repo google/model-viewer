@@ -311,7 +311,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       const ModelViewerElement: ModelViewerGlobalConfig =
           (self as any).ModelViewerElement || {};
 
-      ModelViewerElementBase.powerPreference = ModelViewerElement.powerPreference || 'high-performance'
+      if (ModelViewerElement.powerPreference != null && ModelViewerElement.powerPreference != ModelViewerElementBase.powerPreference) {
+        ModelViewerElementBase.powerPreference = ModelViewerElement.powerPreference;
+      }
 
       const dracoDecoderLocation = ModelViewerElement.dracoDecoderLocation ||
           DEFAULT_DRACO_DECODER_LOCATION;
