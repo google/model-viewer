@@ -97,19 +97,19 @@ export class MaterialPanel extends ConnectedLitElement {
     const gltf = model.originalGltf;
     if (this.originalGltf !== gltf) {
       this.originalGltf = gltf;
-    }
-    if (model.thumbnailsById != null) {
-      this.thumbnailsById = new Map(model.thumbnailsById);
-      this.thumbnailIds = [];
-      this.thumbnailUrls = [];
-      for (const [id, thumbnail] of this.thumbnailsById) {
-        this.thumbnailIds.push(id);
-        this.thumbnailUrls.push(thumbnail.objectUrl);
+      if (model.thumbnailsById != null) {
+        this.thumbnailsById = new Map(model.thumbnailsById);
+        this.thumbnailIds = [];
+        this.thumbnailUrls = [];
+        for (const [id, thumbnail] of this.thumbnailsById) {
+          this.thumbnailIds.push(id);
+          this.thumbnailUrls.push(thumbnail.objectUrl);
+        }
+        // If a new model is loaded, don't interpolate material
+        this.isNewModel = true;
+        this.selectedMaterialIndex = 0;
+        this.isNewModel = false;
       }
-      // If a new model is loaded, don't interpolate material
-      this.isNewModel = true;
-      this.selectedMaterialIndex = 0;
-      this.isNewModel = false;
     }
   }
 
