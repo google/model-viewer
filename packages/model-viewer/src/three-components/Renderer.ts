@@ -17,7 +17,7 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftSha
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
-import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
+import {clamp, isDebugMode, resolveDpr, getPowerPreference} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
@@ -27,6 +27,7 @@ import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 
 export interface RendererOptions {
+  powerPreference:string;
   debug?: boolean;
 }
 
@@ -55,7 +56,10 @@ const DEFAULT_LAST_STEP = 3;
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _singleton = new Renderer({debug: isDebugMode()});
+  private static _singleton = new Renderer({
+    powerPreference: getPowerPreference(),
+    debug: isDebugMode()
+  });
 
   static get singleton() {
     return this._singleton;
@@ -63,7 +67,10 @@ export class Renderer extends EventDispatcher {
 
   static resetSingleton() {
     this._singleton.dispose();
-    this._singleton = new Renderer({debug: isDebugMode()});
+    this._singleton = new Renderer({
+      powerPreference: getPowerPreference(),
+      debug: isDebugMode()
+    });
   }
 
   public threeRenderer!: WebGLRenderer;
@@ -104,7 +111,7 @@ export class Renderer extends EventDispatcher {
     this.lastStep = i - 1;
   }
 
-  constructor(options?: RendererOptions) {
+  constructor(options: RendererOptions) {
     super();
 
     this.dpr = resolveDpr();
@@ -118,7 +125,7 @@ export class Renderer extends EventDispatcher {
         canvas: this.canvas3D,
         alpha: true,
         antialias: true,
-        powerPreference: 'high-performance' as WebGLPowerPreference,
+        powerPreference: options.powerPreference as WebGLPowerPreference,
         preserveDrawingBuffer: true
       });
       this.threeRenderer.autoClear = true;
@@ -129,8 +136,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.shadowMap.type = PCFSoftShadowMap;
       this.threeRenderer.shadowMap.autoUpdate = false;
 
-      this.debugger =
-          options != null && !!options.debug ? new Debugger(this) : null;
+      this.debugger = !!options.debug ? new Debugger(this) : null;
       this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
 
       // ACESFilmicToneMapping appears to be the most "saturated",

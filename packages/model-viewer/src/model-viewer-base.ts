@@ -110,6 +110,8 @@ export interface RendererInterface {
 export default class ModelViewerElementBase extends UpdatingElement {
   protected static[$template]: HTMLTemplateElement|void;
 
+  public static powerPreference:string = 'high-perfromance';
+
   static get is() {
     return 'model-viewer';
   }

@@ -198,6 +198,15 @@ export const isDebugMode = (() => {
        self.location.search.match(debugQueryParameter));
 })();
 
+/**
+ * @returns high-perofmance by default. However, developer has the option to set this.
+ * In that case we return developer's choice
+ */
+export const getPowerPreference = ():string => {
+  return (self as any).ModelViewerElementBase ? 
+  (self as any).ModelViewerElementBase.powerPreference : 'high-performance'
+}
+
 
 /**
  * Returns the first key in a Map in iteration order.
