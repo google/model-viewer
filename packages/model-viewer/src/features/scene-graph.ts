@@ -127,8 +127,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);
     }
 
-
-    updated(changedProperties: Map<string, any>) {
+    async updated(changedProperties: Map<string, any>) {
       super.updated(changedProperties);
 
       if (changedProperties.has('variantName')) {
@@ -139,21 +138,19 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           return;
         }
 
-        const updatedMaterialsPromise =
-            threeGLTF.correlatedSceneGraph.loadVariant(
-                variantName!, this[$getOnUpdateMethod]);
+        const updatedMaterials =
+            await threeGLTF.correlatedSceneGraph.loadVariant(variantName!);
         const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
-        updatedMaterialsPromise.then(updatedMaterials => {
-          for (const index of updatedMaterials) {
-            const material = gltf.materials![index];
-            this[$model]!.materials[index] = new Material(
-                this[$getOnUpdateMethod],
-                gltf,
-                material,
-                gltfElementMap.get(material) as Set<MeshStandardMaterial>);
-          }
-        });
+        for (const index of updatedMaterials) {
+          const material = gltf.materials![index];
+          this[$model]!.materials[index] = new Material(
+              this[$getOnUpdateMethod](),
+              gltf,
+              material,
+              gltfElementMap.get(material) as Set<MeshStandardMaterial>);
+        }
+        this[$needsRender]();
       }
 
       if (changedProperties.has('orientation') ||
@@ -195,9 +192,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (correlatedSceneGraph != null &&
             currentGLTF !== this[$currentGLTF]) {
-          this[$model] = new Model(correlatedSceneGraph, () => {
-            this[$needsRender]();
-          });
+          this[$model] =
+              new Model(correlatedSceneGraph, this[$getOnUpdateMethod]());
         }
 
         // KHR_materials_variants extension spec:
