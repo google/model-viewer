@@ -94,12 +94,9 @@ export class MaterialPanel extends ConnectedLitElement {
       return;
     }
 
-    // If a new model is loaded, don't interpolate material
     const gltf = model.originalGltf;
     if (this.originalGltf !== gltf) {
-      this.isNewModel = true;
       this.originalGltf = gltf;
-      this.selectedMaterialIndex = 0;
       if (model.thumbnailsById != null) {
         this.thumbnailsById = new Map(model.thumbnailsById);
         this.thumbnailIds = [];
@@ -108,6 +105,10 @@ export class MaterialPanel extends ConnectedLitElement {
           this.thumbnailIds.push(id);
           this.thumbnailUrls.push(thumbnail.objectUrl);
         }
+        // If a new model is loaded, don't interpolate material
+        this.isNewModel = true;
+        this.selectedMaterialIndex = 0;
+        this.isNewModel = false;
       }
     }
   }
@@ -244,7 +245,6 @@ export class MaterialPanel extends ConnectedLitElement {
     if (!this.isNewModel && !this.isTesting && !this.isInterpolating) {
       this.interpolateMaterial();
     }
-    this.isNewModel = false;
   }
 
   renderSelectMaterialTab() {
