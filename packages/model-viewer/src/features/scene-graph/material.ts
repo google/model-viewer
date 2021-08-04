@@ -124,27 +124,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         gltf,
         gltfEmissiveTexture ? gltfEmissiveTexture : null,
     );
-
-    const message = (textureType: string) => {
-      console.info(`A group of three.js materials are represented as a
-        single material but share different ${textureType} textures.`);
-    };
-    for (const gltfMaterial of correlatedMaterials) {
-      const {
-        normalMap: verifyNormalMap,
-        aoMap: verifyAoMap,
-        emissiveMap: verifyEmissiveMap
-      } = gltfMaterial;
-      if (verifyNormalMap != normalMap) {
-        message('normal');
-      }
-      if (verifyAoMap != aoMap) {
-        message('occlusion');
-      }
-      if (verifyEmissiveMap != emissiveMap) {
-        message('emissive');
-      }
-    }
   }
 
   get name(): string {
