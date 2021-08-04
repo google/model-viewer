@@ -16,6 +16,7 @@
 import {MeshStandardMaterial} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {PBRMetallicRoughness as DefaultedPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-defaulted.js';
 
 import {PBRMetallicRoughness as PBRMetallicRoughnessInterface, RGBA} from './api.js';
 import {TextureInfo, TextureUsage} from './texture-info.js';
@@ -82,15 +83,18 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
 
   get baseColorFactor(): RGBA {
-    return (this[$sourceObject] as GLTFPBRMetallicRoughness).baseColorFactor!;
+    return (this[$sourceObject] as DefaultedPBRMetallicRoughness)
+        .baseColorFactor;
   }
 
   get metallicFactor(): number {
-    return (this[$sourceObject] as GLTFPBRMetallicRoughness).metallicFactor!;
+    return (this[$sourceObject] as DefaultedPBRMetallicRoughness)
+        .metallicFactor;
   }
 
   get roughnessFactor(): number {
-    return (this[$sourceObject] as GLTFPBRMetallicRoughness).roughnessFactor!;
+    return (this[$sourceObject] as DefaultedPBRMetallicRoughness)
+        .roughnessFactor;
   }
 
   get baseColorTexture(): TextureInfo {
@@ -107,7 +111,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       material.opacity = (rgba)[3];
     }
     const pbrMetallicRoughness =
-        this[$sourceObject] as GLTFPBRMetallicRoughness;
+        this[$sourceObject] as DefaultedPBRMetallicRoughness;
     pbrMetallicRoughness.baseColorFactor = rgba;
     this[$onUpdate]();
   }
@@ -117,7 +121,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       material.metalness = value;
     }
     const pbrMetallicRoughness =
-        this[$sourceObject] as GLTFPBRMetallicRoughness;
+        this[$sourceObject] as DefaultedPBRMetallicRoughness;
     pbrMetallicRoughness.metallicFactor = value;
     this[$onUpdate]();
   }
@@ -127,7 +131,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       material.roughness = value;
     }
     const pbrMetallicRoughness =
-        this[$sourceObject] as GLTFPBRMetallicRoughness;
+        this[$sourceObject] as DefaultedPBRMetallicRoughness;
     pbrMetallicRoughness.roughnessFactor = value;
     this[$onUpdate]();
   }

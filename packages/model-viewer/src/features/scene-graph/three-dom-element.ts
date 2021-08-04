@@ -15,7 +15,7 @@
 
 import {Material, Object3D, Texture} from 'three';
 
-import {GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTFElement} from '../../three-components/gltf-instance/gltf-defaulted.js';
 
 
 

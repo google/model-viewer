@@ -15,7 +15,7 @@
  *
  */
 
-import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/api';
+import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/texture-info';
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {Image} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 

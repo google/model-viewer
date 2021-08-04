@@ -16,6 +16,7 @@
 import {DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
 
 import {AlphaMode, GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {Material as DefaultedMaterial} from '../../three-components/gltf-instance/gltf-defaulted.js';
 import {ALPHA_CUTOFF_BLEND, ALPHA_CUTOFF_OPAQUE} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
@@ -146,7 +147,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   get emissiveFactor(): RGB {
-    return (this[$sourceObject] as GLTFMaterial).emissiveFactor!;
+    return (this[$sourceObject] as DefaultedMaterial).emissiveFactor;
   }
 
   setEmissiveFactor(rgb: RGB) {
@@ -154,12 +155,12 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
          Set<MeshStandardMaterial>) {
       material.emissive.fromArray(rgb);
     }
-    (this[$sourceObject] as GLTFMaterial).emissiveFactor = rgb;
+    (this[$sourceObject] as DefaultedMaterial).emissiveFactor = rgb;
     this[$onUpdate]();
   }
 
   [$applyAlphaCutoff]() {
-    const gltfMaterial = this[$sourceObject] as GLTFMaterial;
+    const gltfMaterial = this[$sourceObject] as DefaultedMaterial;
     // 0.0001 is the minimum in order to keep from using zero, which disables
     // masking in three.js. It's also small enough to be less than the smallest
     // normalized 8-bit value.
@@ -167,7 +168,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         ALPHA_CUTOFF_OPAQUE :
         (gltfMaterial.alphaMode === 'BLEND' ?
              ALPHA_CUTOFF_BLEND :
-             Math.max(0.0001, Math.min(1.0, gltfMaterial.alphaCutoff!)));
+             Math.max(0.0001, Math.min(1.0, gltfMaterial.alphaCutoff)));
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       material.alphaTest = cutoff;
@@ -176,13 +177,13 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   setAlphaCutoff(cutoff: number): void {
-    (this[$sourceObject] as GLTFMaterial).alphaCutoff = cutoff;
+    (this[$sourceObject] as DefaultedMaterial).alphaCutoff = cutoff;
     this[$applyAlphaCutoff]();
     this[$onUpdate]();
   }
 
   getAlphaCutoff(): number {
-    return (this[$sourceObject] as GLTFMaterial).alphaCutoff!;
+    return (this[$sourceObject] as DefaultedMaterial).alphaCutoff;
   }
 
   setDoubleSided(doubleSided: boolean): void {
@@ -195,12 +196,12 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       material.side = doubleSided ? DoubleSide : FrontSide;
       material.needsUpdate = true;
     }
-    (this[$sourceObject] as GLTFMaterial).doubleSided = doubleSided;
+    (this[$sourceObject] as DefaultedMaterial).doubleSided = doubleSided;
     this[$onUpdate]();
   }
 
   getDoubleSided(): boolean {
-    return (this[$sourceObject] as GLTFMaterial).doubleSided!;
+    return (this[$sourceObject] as DefaultedMaterial).doubleSided;
   }
 
   setAlphaMode(alphaMode: AlphaMode): void {
@@ -210,7 +211,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
           material.depthWrite = !enabled;
         };
 
-    (this[$sourceObject] as GLTFMaterial).alphaMode = alphaMode;
+    (this[$sourceObject] as DefaultedMaterial).alphaMode = alphaMode;
 
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
@@ -223,6 +224,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   getAlphaMode(): AlphaMode {
-    return (this[$sourceObject] as GLTFMaterial).alphaMode!;
+    return (this[$sourceObject] as DefaultedMaterial).alphaMode;
   }
 }
