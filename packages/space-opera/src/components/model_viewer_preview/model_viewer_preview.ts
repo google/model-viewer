@@ -58,7 +58,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() addHotspotMode = false;
-  @internalProperty() autoplay?: boolean;
   @internalProperty() gltfUrl?: string;
   @internalProperty() gltfError: string = '';
   @internalProperty() extraAttributes: any = {};
@@ -76,7 +75,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.camera = getCamera(state);
     this.config = getConfig(state);
     this.hotspots = getHotspots(state);
-    this.autoplay = getConfig(state).autoplay;
     this.extraAttributes = getExtraAttributes(state);
     this.refreshButtonIsReady = getRefreshable(state);
     this.bestPractices = getBestPractices(state);
@@ -163,15 +161,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
               modelVisibility: () => {
                 this.onModelVisible();
               },
-              // Other things can cause the animation to play/pause, like
-              // setting autoplay to true, so make sure we enforce what WE want
-              // after that.
-              play: () => {
-                this.enforcePlayAnimation();
-              },
-              pause: () => {
-                this.enforcePlayAnimation();
-              },
               click: (event: MouseEvent) => {
                 if (this.addHotspotMode) {
                   this.addHotspot(event);
@@ -191,7 +180,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (this.modelViewer && this.modelViewer.reveal === 'interaction') {
       await this.onGltfUrlChanged();
     }
-    this.enforcePlayAnimation();
     this.resolveLoad();
   }
 
@@ -203,18 +191,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
   private onCameraChange() {
     reduxStore.dispatch(dispatchCameraIsDirty());
-  }
-
-  private enforcePlayAnimation() {
-    if (this.modelViewer && this.modelViewer.loaded) {
-      // Calling play with no animation name will result in the first animation
-      // getting played. Don't want that.
-      if (this.autoplay && this.config.animationName) {
-        this.modelViewer.play();
-      } else {
-        this.modelViewer.pause();
-      }
-    }
   }
 
   private addHotspot(event: MouseEvent) {

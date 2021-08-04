@@ -259,8 +259,7 @@ export class CorrelatedSceneGraph {
     this[$threeObjectMap] = threeObjectMap;
   }
 
-  async loadVariant(variantName: string, onUpdate: () => void = () => {}):
-      Promise<Set<number>> {
+  async loadVariant(variantName: string): Promise<Set<number>> {
     const updatedMaterials = new Set<number>();
 
     if (!('variants' in this.threeGLTF.userData) ||
@@ -284,7 +283,6 @@ export class CorrelatedSceneGraph {
             this.gltfElementMap.set(gltfElement, threeObjects);
           }
           threeObjects.add((object as Mesh).material as Material);
-          onUpdate();
         });
 
     return updatedMaterials;

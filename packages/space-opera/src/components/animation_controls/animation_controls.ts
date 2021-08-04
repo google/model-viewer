@@ -47,13 +47,6 @@ export class AnimationControls extends ConnectedLitElement {
     this.autoplay = !!config.autoplay;
   }
 
-  // Specifically overriding a super class method.
-  // tslint:disable-next-line:enforce-name-casing
-  async _getUpdateComplete() {
-    await super._getUpdateComplete();
-    await this.autoplayCheckbox!.updateComplete;
-  }
-
   render() {
     let selectedAnimationIndex = this.selectedAnimation ?
         this.animationNames.findIndex(
@@ -88,8 +81,11 @@ export class AnimationControls extends ConnectedLitElement {
   }
 
   onAutoplayChange() {
-    reduxStore.dispatch(
-        dispatchAutoplayEnabled(this.autoplayCheckbox!.checked));
+    const {checked} = this.autoplayCheckbox!;
+    reduxStore.dispatch(dispatchAutoplayEnabled(checked));
+    if (checked === false) {
+      getModelViewer()?.pause();
+    }
   }
 
   onAnimationNameChange(event: CustomEvent) {
@@ -99,13 +95,6 @@ export class AnimationControls extends ConnectedLitElement {
     const value = dropdown.selectedItem?.getAttribute('value') || undefined;
     if (value !== undefined && this.animationNames.indexOf(value) !== -1) {
       reduxStore.dispatch(dispatchAnimationName(value));
-    }
-
-    // Set the bool options values to something sensible
-    if (value) {
-      reduxStore.dispatch(dispatchAutoplayEnabled(true));
-    } else {
-      reduxStore.dispatch(dispatchAutoplayEnabled(false));
     }
   }
 }

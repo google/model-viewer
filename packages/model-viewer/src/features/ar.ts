@@ -217,28 +217,27 @@ configuration or device capabilities');
     async[$selectARMode]() {
       this[$arMode] = ARMode.NONE;
       if (this.ar) {
-        const arModes: ARMode[] = [];
-        this[$arModes].forEach((value) => {
-          arModes.push(value);
-        });
-
-        for (const value of arModes) {
-          if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE && !isWebXRBlocked &&
-              await this[$renderer].arRenderer.supportsPresentation()) {
-            this[$arMode] = ARMode.WEBXR;
-            break;
-          } else if (
-              value === 'scene-viewer' && IS_SCENEVIEWER_CANDIDATE &&
-              !isSceneViewerBlocked) {
-            this[$arMode] = ARMode.SCENE_VIEWER;
-            break;
-          } else if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE) {
-            this[$arMode] = ARMode.QUICK_LOOK;
-            break;
+        if (this.src != null) {
+          for (const value of this[$arModes]) {
+            if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE && !isWebXRBlocked &&
+                await this[$renderer].arRenderer.supportsPresentation()) {
+              this[$arMode] = ARMode.WEBXR;
+              break;
+            }
+            if (value === 'scene-viewer' && IS_SCENEVIEWER_CANDIDATE &&
+                !isSceneViewerBlocked) {
+              this[$arMode] = ARMode.SCENE_VIEWER;
+              break;
+            }
+            if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE) {
+              this[$arMode] = ARMode.QUICK_LOOK;
+              break;
+            }
           }
         }
 
-        // The presence of ios-src overrides the absence of quick-look ar-mode.
+        // The presence of ios-src overrides the absence of quick-look
+        // ar-mode.
         if (!this.canActivateAR && this.iosSrc != null &&
             IS_AR_QUICKLOOK_CANDIDATE) {
           this[$arMode] = ARMode.QUICK_LOOK;
@@ -363,8 +362,8 @@ configuration or device capabilities');
     }
 
     /**
-     * Takes a URL to a USDZ file and sets the appropriate fields so that Safari
-     * iOS can intent to their AR Quick Look.
+     * Takes a URL to a USDZ file and sets the appropriate fields so that
+     * Safari iOS can intent to their AR Quick Look.
      */
     async[$openIOSARQuickLook]() {
       const generateUsdz = !this.iosSrc;
