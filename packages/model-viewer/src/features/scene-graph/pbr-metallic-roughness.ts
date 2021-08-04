@@ -78,22 +78,6 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
         correlatedMaterials,
         gltf,
         gltfMetallicRoughnessTexture ? gltfMetallicRoughnessTexture : null);
-
-    const message = (textureType: string) => {
-      console.info(`A group of three.js materials are represented as a
-        single material but share different ${textureType} textures.`);
-    };
-
-    for (const material of correlatedMaterials) {
-      const verifyMap = material.map ?? null;
-      const verifyMetalnessMap = material.metalnessMap ?? null;
-      if (map != verifyMap) {
-        message('base');
-      }
-      if (metalnessMap != verifyMetalnessMap) {
-        message('metalness');
-      }
-    }
   }
 
 
