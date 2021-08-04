@@ -266,6 +266,11 @@
                 <model-viewer camera-controls alt="A 3D model of an astronaut"
                   src="../../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Draco/2CylinderEngine.gltf">
                 </model-viewer>
+                <script>
+                  ModelViewerElement = self.ModelViewerElement || {};
+                  ModelViewerElement.powerPreference = 'high-performance';
+                  ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/decoder/files/';
+                </script>
               </template>
             </example-snippet>
             <div>
@@ -282,7 +287,6 @@
                 <template>
                   <script>
                     ModelViewerElement = self.ModelViewerElement || {};
-                    ModelViewerElement.powerPreference = 'lower-power'
                     ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/decoder/files/';
                   </script>
                 </template>
