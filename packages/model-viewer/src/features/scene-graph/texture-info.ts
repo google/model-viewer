@@ -30,7 +30,7 @@ export const $usage = Symbol('usage');
 // Defines what a texture will be used for.
 export enum TextureUsage {
   Base,
-  Metallic,
+  MetallicRoughness,
   Normal,
   Occlusion,
   Emissive,
@@ -90,9 +90,10 @@ export class TextureInfo implements TextureInfoInterface {
           case TextureUsage.Base:
             material.map = threeTexture;
             break;
-          case TextureUsage.Metallic:
+          case TextureUsage.MetallicRoughness:
             encoding = LinearEncoding;
             material.metalnessMap = threeTexture;
+            material.roughnessMap = threeTexture;
             break;
           case TextureUsage.Normal:
             encoding = LinearEncoding;

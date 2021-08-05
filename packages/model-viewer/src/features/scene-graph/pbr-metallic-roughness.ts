@@ -74,7 +74,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
 
     this[$metallicRoughnessTexture] = new TextureInfo(
         onUpdate,
-        TextureUsage.Metallic,
+        TextureUsage.MetallicRoughness,
         metalnessMap,
         correlatedMaterials,
         gltf,
