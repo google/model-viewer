@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Texture as ThreeTexture} from 'three';
+import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
 import {$threeTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
@@ -37,6 +37,7 @@ suite('scene-graph/material', () => {
   suite('Test Texture Slots', () => {
     let element: ModelViewerElement;
     let texture: Texture|null;
+    let threeMaterials: Set<MeshStandardMaterial>;
 
     setup(async () => {
       element = new ModelViewerElement();
@@ -45,6 +46,8 @@ suite('scene-graph/material', () => {
       await waitForEvent(element, 'load');
 
       texture = await element.createTexture(REPLACEMENT_TEXTURE_PATH);
+      threeMaterials = element.model!.materials[0][$correlatedObjects] as
+          Set<MeshStandardMaterial>;
     });
 
     teardown(() => {
@@ -64,6 +67,10 @@ suite('scene-graph/material', () => {
               .pbrMetallicRoughness.baseColorTexture?.texture
               ?.source[$threeTexture]!;
 
+      for (const material of threeMaterials as Set<MeshStandardMaterial>) {
+        expect(material.map).to.be.eq(threeTexture);
+      }
+
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
 
@@ -79,6 +86,11 @@ suite('scene-graph/material', () => {
               .pbrMetallicRoughness.metallicRoughnessTexture?.texture
               ?.source[$threeTexture]!;
 
+      for (const material of threeMaterials as Set<MeshStandardMaterial>) {
+        expect(material.metalnessMap).to.be.eq(threeTexture);
+        expect(material.roughnessMap).to.be.eq(threeTexture);
+      }
+
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
 
@@ -91,6 +103,10 @@ suite('scene-graph/material', () => {
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
               .normalTexture?.texture?.source[$threeTexture]!;
+
+      for (const material of threeMaterials as Set<MeshStandardMaterial>) {
+        expect(material.normalMap).to.be.eq(threeTexture);
+      }
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
@@ -105,6 +121,10 @@ suite('scene-graph/material', () => {
           element.model!.materials[0]
               .occlusionTexture?.texture?.source[$threeTexture]!;
 
+      for (const material of threeMaterials as Set<MeshStandardMaterial>) {
+        expect(material.aoMap).to.be.eq(threeTexture);
+      }
+
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
 
@@ -117,6 +137,10 @@ suite('scene-graph/material', () => {
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
               .emissiveTexture?.texture?.source[$threeTexture]!;
+
+      for (const material of threeMaterials as Set<MeshStandardMaterial>) {
+        expect(material.emissiveMap).to.be.eq(threeTexture);
+      }
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
