@@ -96,7 +96,7 @@ export declare interface LoadingStaticInterface {
 export interface ModelViewerGlobalConfig {
   dracoDecoderLocation?: string;
   ktx2TranscoderLocation?: string;
-  powerPreference?:string;
+  powerPreference?: string;
 }
 
 /**

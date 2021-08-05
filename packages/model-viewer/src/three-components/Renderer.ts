@@ -27,7 +27,7 @@ import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 
 export interface RendererOptions {
-  powerPreference:string;
+  powerPreference: string;
   debug?: boolean;
 }
 
@@ -56,10 +56,8 @@ const DEFAULT_LAST_STEP = 3;
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _singleton = new Renderer({
-    powerPreference: 'high-performance',
-    debug: isDebugMode()
-  });
+  private static _singleton =
+      new Renderer({powerPreference: 'high-performance', debug: isDebugMode()});
 
   static get singleton() {
     return this._singleton;

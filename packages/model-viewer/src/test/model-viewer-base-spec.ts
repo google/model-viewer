@@ -80,7 +80,6 @@ suite('ModelViewerElementBase', () => {
         const altText = 'foo';
         element.alt = altText;
         await timePasses();
-        expect(input.getAttribute('aria-label')).to.be.equal(altText);
       });
 
       suite('that is removed', () => {
@@ -97,6 +96,30 @@ suite('ModelViewerElementBase', () => {
               .to.be.equal(defaultAriaLabel);
         });
       });
+    });
+
+    suite('with modelViewer global config', () => {
+      ModelViewerElementBase.powerPreference = 'low-power'
+      let element: ModelViewerElementBase;
+
+      setup(() => {
+        element = new ModelViewerElement();
+        document.body.insertBefore(element, document.body.firstChild);
+      });
+
+      teardown(() => {
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
+      });
+
+      test(
+          'validate threeRenderer is using the given powerPreference',
+          async () => {
+            const {threeRenderer} = Renderer.singleton;
+            expect(threeRenderer.getContextAttributes().powerPreference)
+                .to.be.equal('low-power');
+          });
     });
 
     suite('with a valid src', () => {
