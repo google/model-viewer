@@ -255,6 +255,7 @@ export class ImportCard extends LitElement {
     };
     const fileName = `${key}.glb`;
     if (key !== undefined) {
+      const defaultAttributes = 'shadow-intensity="1" camera-controls ar';
       if (key === 'none') {
         this.selectedDefaultOption = 0;
         return;
@@ -262,14 +263,14 @@ export class ImportCard extends LitElement {
         this.selectedDefaultOption = simpleMap[key];
         snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/${fileName}'
-  shadow-intensity="1" camera-controls>
+  ${defaultAttributes}>
 </model-viewer>`;
       } else if (key in advancedMap) {
         this.selectedDefaultOption = advancedMap[key];
         snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/${
             key}/glTF-Binary/${fileName}'
-  shadow-intensity="1" camera-controls>
+  ${defaultAttributes}>
 </model-viewer>`;
       }
       reduxStore.dispatch(dispatchSetModelName(fileName));
