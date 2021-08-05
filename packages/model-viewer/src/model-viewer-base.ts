@@ -138,13 +138,17 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   /** @export */
   static set powerPreference(value: string) {
-    this._powerPreference = value || this._powerPreference;
+    if (ModelViewerElementBase._powerPreference == value) {
+      return;
+    }
+    ModelViewerElementBase._powerPreference =
+        value || ModelViewerElementBase._powerPreference;
     Renderer.resetSingleton();
   }
 
   /** @export */
   static get powerPreference(): string {
-    return this._powerPreference;
+    return ModelViewerElementBase._powerPreference;
   }
 
   /** @export */
@@ -324,9 +328,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
     const ModelViewerGlobalConfig: ModelViewerGlobalConfig =
         (self as any).ModelViewerElement || {};
-    if (ModelViewerGlobalConfig.powerPreference != null &&
-        ModelViewerGlobalConfig.powerPreference !=
-            ModelViewerElementBase.powerPreference) {
+    if (ModelViewerGlobalConfig.powerPreference != null) {
       ModelViewerElementBase.powerPreference =
           ModelViewerGlobalConfig.powerPreference;
     }

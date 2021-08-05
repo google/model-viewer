@@ -198,6 +198,7 @@ export const isDebugMode = (() => {
        self.location.search.match(debugQueryParameter));
 })();
 
+
 /**
  * Returns the first key in a Map in iteration order.
  *

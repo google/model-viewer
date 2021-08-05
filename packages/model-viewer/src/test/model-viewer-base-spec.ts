@@ -80,6 +80,7 @@ suite('ModelViewerElementBase', () => {
         const altText = 'foo';
         element.alt = altText;
         await timePasses();
+        expect(input.getAttribute('aria-label')).to.be.equal(altText);
       });
 
       suite('that is removed', () => {
