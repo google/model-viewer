@@ -142,7 +142,6 @@ export class MobileExpanadableSection extends LitElement {
       ${!this.isDeployed ? this.renderDeployButton() : html``}
       ${this.isDeployed ? this.renderMobileInfo() : html``}
       ${this.renderAR()}
-      ${this.renderIos()}
     `
   }
 }
