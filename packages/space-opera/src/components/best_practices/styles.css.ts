@@ -75,7 +75,7 @@ export const arButtonCSS: CSSResult = css`
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  bottom: 132px;
+  bottom: 16px;
   padding: 0px 16px 0px 40px;
   font-family: Roboto Regular, Helvetica Neue, sans-serif;
   font-size: 14px;
@@ -112,7 +112,7 @@ export const arPromptCSS: CSSResult = css`
 model-viewer > #ar-prompt {
   position: absolute;
   left: 50%;
-  bottom: 175px;
+  bottom: 60px;
   animation: elongate 2s infinite ease-in-out alternate;
   display: none;
 }
