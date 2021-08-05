@@ -41,6 +41,9 @@ import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes, getExtr
 
 import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 
+const DEFAULT_ATTRIBUTES =
+    'shadow-intensity="1" camera-controls ar ar-modes="webxr scene-viewer quick-look"';
+
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
   static styles = openModalStyles;
@@ -262,14 +265,14 @@ export class ImportCard extends LitElement {
         this.selectedDefaultOption = simpleMap[key];
         snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/${fileName}'
-  shadow-intensity="1" camera-controls>
+  ${DEFAULT_ATTRIBUTES}>
 </model-viewer>`;
       } else if (key in advancedMap) {
         this.selectedDefaultOption = advancedMap[key];
         snippet = `<model-viewer
   src='https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/${
             key}/glTF-Binary/${fileName}'
-  shadow-intensity="1" camera-controls>
+  ${DEFAULT_ATTRIBUTES}>
 </model-viewer>`;
       }
       reduxStore.dispatch(dispatchSetModelName(fileName));
