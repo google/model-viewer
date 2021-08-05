@@ -18,6 +18,7 @@ import {UpdatingElement} from 'lit-element/lib/updating-element';
 import {Event as ThreeEvent, Vector3} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
+import { ModelViewerGlobalConfig } from './features/loading.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
@@ -109,6 +110,21 @@ export interface RendererInterface {
  */
 export default class ModelViewerElementBase extends UpdatingElement {
   protected static[$template]: HTMLTemplateElement|void;
+  private static _powerPreference: string = 'high-performance';
+
+  /** @export */
+  static set powerPreference(value: string) {
+    if (ModelViewerElementBase._powerPreference == value) {
+      return;
+    }
+    ModelViewerElementBase._powerPreference = value;
+    Renderer.resetSingleton();
+  }
+
+  /** @export */
+  static get powerPreference(): string {
+    return ModelViewerElementBase._powerPreference;
+  }
 
   static get is() {
     return 'model-viewer';
@@ -307,6 +323,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
       // If there is no intersection obsever, then all models should be visible
       // at all times:
       this[$isElementInViewport] = true;
+    }
+    const ModelViewerGlobalConfig: ModelViewerGlobalConfig = (self as any).ModelViewerElement || {};
+    if (ModelViewerGlobalConfig.powerPreference != null) {
+    ModelViewerElementBase.powerPreference = ModelViewerGlobalConfig.powerPreference;
     }
   }
 

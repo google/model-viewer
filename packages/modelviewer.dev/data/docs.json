@@ -138,6 +138,15 @@
         "links": [
           "<a href=\"../examples/loading/#dracoSupport\">Static property usage example</a>"
         ]
+      },
+      {
+        "name": "powerPreference",
+        "htmlName": "powerPreference",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s power preference value. Model-viewer sets this property to high-performance if no value is provided.",
+        "default": {
+          "default": "high-performance",
+          "options": "high-performance, low-power, default"
+        }
       }
     ],
     "Methods": [
