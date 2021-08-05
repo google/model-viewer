@@ -18,7 +18,7 @@ import {UpdatingElement} from 'lit-element/lib/updating-element';
 import {Event as ThreeEvent, Vector3} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
-import { ModelViewerGlobalConfig } from './features/loading.js';
+import {ModelViewerGlobalConfig} from './features/loading.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
@@ -324,9 +324,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
       // at all times:
       this[$isElementInViewport] = true;
     }
-    const ModelViewerGlobalConfig: ModelViewerGlobalConfig = (self as any).ModelViewerElement || {};
+    const ModelViewerGlobalConfig: ModelViewerGlobalConfig =
+        (self as any).ModelViewerElement || {};
     if (ModelViewerGlobalConfig.powerPreference != null) {
-    ModelViewerElementBase.powerPreference = ModelViewerGlobalConfig.powerPreference;
+      ModelViewerElementBase.powerPreference =
+          ModelViewerGlobalConfig.powerPreference;
     }
   }
 

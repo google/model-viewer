@@ -56,8 +56,8 @@ const DEFAULT_LAST_STEP = 3;
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _singleton = new Renderer(
-    {powerPreference: 'high-performance', debug: isDebugMode()});
+  private static _singleton =
+      new Renderer({powerPreference: 'high-performance', debug: isDebugMode()});
 
   static get singleton() {
     return this._singleton;
@@ -66,7 +66,9 @@ export class Renderer extends EventDispatcher {
   static resetSingleton() {
     this._singleton.dispose();
     this._singleton = new Renderer({
-      powerPreference: ModelViewerElementBase.powerPreference ,debug: isDebugMode()});
+      powerPreference: ModelViewerElementBase.powerPreference,
+      debug: isDebugMode()
+    });
   }
 
   public threeRenderer!: WebGLRenderer;
@@ -132,8 +134,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.shadowMap.type = PCFSoftShadowMap;
       this.threeRenderer.shadowMap.autoUpdate = false;
 
-      this.debugger =
-          !!options.debug ? new Debugger(this) : null;
+      this.debugger = !!options.debug ? new Debugger(this) : null;
       this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
 
       // ACESFilmicToneMapping appears to be the most "saturated",
