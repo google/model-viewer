@@ -16,6 +16,7 @@
  */
 
 import {customElement, html, LitElement, property, query, TemplateResult} from 'lit-element';
+
 import {ArConfigState} from '../../../types';
 import {CheckboxElement} from '../../shared/checkbox/checkbox';
 
@@ -38,8 +39,6 @@ export class MobileExpanadableSection extends LitElement {
   @property({type: Boolean}) defaultToSceneViewer?: boolean;
   @property({type: Function}) onSelectArMode?: Function;
   @property() arConfig?: ArConfigState;
-
-  @property({type: Function}) onEnableARChange?: Function;
 
   @property({type: Boolean}) iosAndNoUsdz?: boolean;
   @property({type: Function}) onUploadUSDZ?: Function;
@@ -83,10 +82,6 @@ export class MobileExpanadableSection extends LitElement {
     this.onSelectArMode!(this.arModesCheckbox.checked);
   }
 
-  enableARChange() {
-    this.onEnableARChange!(this.arCheckbox.checked);
-  }
-
   renderMobileInfo() {
     const isOutOfSync = this.haveReceivedResponse &&
         (!this.isSendingData && this.contentHasChanged);
@@ -113,13 +108,6 @@ export class MobileExpanadableSection extends LitElement {
     <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
       AR Settings:
     </div> 
-    <me-checkbox
-      id="ar"
-      label="Enable AR"
-      ?checked="${!!this.arConfig!.ar}"
-      @change=${this.enableARChange}
-      >
-    </me-checkbox>
     <me-checkbox
       id="ar-modes"
       label="Default AR Mode to Scene Viewer"
@@ -154,7 +142,6 @@ export class MobileExpanadableSection extends LitElement {
       ${!this.isDeployed ? this.renderDeployButton() : html``}
       ${this.isDeployed ? this.renderMobileInfo() : html``}
       ${this.renderAR()}
-      ${this.renderIos()}
     `
   }
 }

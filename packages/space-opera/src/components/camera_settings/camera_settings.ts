@@ -30,7 +30,7 @@ import {customElement, html, internalProperty, property, query} from 'lit-elemen
 import {reduxStore} from '../../space_opera_base.js';
 import {cameraSettingsStyles} from '../../styles.css.js';
 import {ModelViewerConfig, State} from '../../types.js';
-import {dispatchAutoRotate, dispatchCameraControlsEnabled, getConfig} from '../config/reducer.js';
+import {dispatchAutoRotate, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
@@ -200,11 +200,6 @@ export class CameraSettings extends ConnectedLitElement {
     return false;
   }
 
-  onCamControlsCheckboxChange(event: Event) {
-    reduxStore.dispatch(dispatchCameraControlsEnabled(
-        (event.target as HTMLInputElement).checked));
-  }
-
   onSaveCameraOrbit() {
     const modelViewer = getModelViewer()!;
     const cameraState = getCameraState(modelViewer);
@@ -246,14 +241,6 @@ export class CameraSettings extends ConnectedLitElement {
     return html`
     <me-expandable-tab tabName="Camera Setup" .open=${true}>
       <div slot="content">
-        <me-checkbox id="cam-controls-checkbox" label="Interactive camera"
-          ?checked="${!!this.config.cameraControls}"
-          @change=${this.onCamControlsCheckboxChange}>
-        </me-checkbox>
-        ${
-    !this.config.cameraControls ?
-        html`<div class="note"><small>Note: Camera interaction is always enabled in the preview, but will not be on your page.</small></div>` :
-        ``}
         <me-checkbox id="auto-rotate" label="Auto-rotate"
           ?checked="${!!this.config.autoRotate}"
           @change=${this.onAutoRotateChange}>
@@ -262,9 +249,7 @@ export class CameraSettings extends ConnectedLitElement {
           <div style="font-size: 14px; font-weight: 500; margin-top: 10px">Initial Camera Position:</div>
           <me-camera-orbit-editor
             @change=${this.onCameraOrbitEditorChange}
-            .orbit=${
-        this.camera.orbit ??
-        this.initialCamera.orbit}>
+            .orbit=${this.camera.orbit ?? this.initialCamera.orbit}>
           </me-camera-orbit-editor>
           <div style="justify-content: space-between; width: 100%; display: flex;">
             <mwc-button
@@ -282,8 +267,8 @@ export class CameraSettings extends ConnectedLitElement {
           </div>
           ${
         this.cameraOutOfBounds ?
-        html`<div class="error">Your initial camera is outside the bounds of your limits. Set your initial camera again.</div>` :
-        html``}
+            html`<div class="error">Your initial camera is outside the bounds of your limits. Set your initial camera again.</div>` :
+            html``}
         </div>
         <div style="font-size: 14px; font-weight: 500; margin-top: 20px">Target Point:</div>
         <me-camera-target-input .change=${this.onCameraTargetChange}>

@@ -32,7 +32,7 @@ import {getBestPractices} from '../best_practices/reducer.js';
 import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
-import {dispatchCameraControlsEnabled, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
+import {dispatchAutoplayEnabled, dispatchCameraControlsEnabled, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
@@ -53,7 +53,7 @@ import {dispatchGltfUrl, dispatchModel, getGltfUrl, renderCommonChildElements} f
 export class ModelViewerPreview extends ConnectedLitElement {
   static styles =
       [modelViewerPreviewStyles, hotspotStyles, arButtonCSS, progressBarCSS];
-  @query('model-viewer') readonly modelViewer?: ModelViewerElement;
+  @query('model-viewer') readonly modelViewer!: ModelViewerElement;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() camera: Camera = INITIAL_CAMERA;
@@ -94,10 +94,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private async onGltfUrlChanged() {
-    if (!this.modelViewer) {
-      throw new Error(`model-viewer element was not ready`);
-    }
-
     // Clear potential poster settings.
     if (this.modelViewer.reveal === 'interaction' ||
         this.modelViewer.reveal === 'manual') {
@@ -177,14 +173,17 @@ export class ModelViewerPreview extends ConnectedLitElement {
   private async onModelLoaded() {
     reduxStore.dispatch(await dispatchModel());
     // only update on poster reveal
-    if (this.modelViewer && this.modelViewer.reveal === 'interaction') {
+    if (this.modelViewer.reveal === 'interaction') {
       await this.onGltfUrlChanged();
+    }
+    if (this.modelViewer.availableAnimations.length > 0) {
+      reduxStore.dispatch(dispatchAutoplayEnabled(true));
     }
     this.resolveLoad();
   }
 
   private onModelVisible() {
-    if (!this.modelViewer || !this.modelViewer.loaded) {
+    if (!this.modelViewer.loaded) {
       throw new Error('onModelVisible called before mv was loaded');
     }
   }
@@ -194,9 +193,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private addHotspot(event: MouseEvent) {
-    if (!this.modelViewer) {
-      throw new Error('Model Viewer doesn\'t exist');
-    }
     const rect = this.modelViewer.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;

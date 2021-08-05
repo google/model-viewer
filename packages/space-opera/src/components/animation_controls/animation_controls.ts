@@ -95,6 +95,7 @@ export class AnimationControls extends ConnectedLitElement {
     const value = dropdown.selectedItem?.getAttribute('value') || undefined;
     if (value !== undefined && this.animationNames.indexOf(value) !== -1) {
       reduxStore.dispatch(dispatchAnimationName(value));
+      reduxStore.dispatch(dispatchAutoplayEnabled(true));
     }
   }
 }
