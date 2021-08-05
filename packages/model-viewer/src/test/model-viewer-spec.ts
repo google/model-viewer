@@ -115,9 +115,7 @@ suite('ModelViewerElement', () => {
     });
 
     teardown(() => {
-      if (element.parentNode != null) {
-        element.parentNode.removeChild(element);
-      }
+      element.parentNode!.removeChild(element);
     });
 
     test('Metal roughness sphere with generated lighting', async () => {

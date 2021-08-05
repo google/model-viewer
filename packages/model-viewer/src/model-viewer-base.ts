@@ -141,8 +141,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     if (ModelViewerElementBase._powerPreference == value) {
       return;
     }
-    ModelViewerElementBase._powerPreference =
-        value || ModelViewerElementBase._powerPreference;
+    ModelViewerElementBase._powerPreference = value;
     Renderer.resetSingleton();
   }
 
