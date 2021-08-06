@@ -28,7 +28,7 @@ const DEFAULT_EXPOSURE = 1.0;
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
-const $updateEnvironment = Symbol('updateEnvironment');
+export const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 const $onPreload = Symbol('onPreload');
 
