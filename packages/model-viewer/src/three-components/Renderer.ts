@@ -66,11 +66,19 @@ export class Renderer extends EventDispatcher {
   }
 
   static resetSingleton() {
-    this._singleton.dispose();
+    const elements = this._singleton.dispose();
+    for (const element of elements) {
+      element.disconnectedCallback();
+    }
+
     this._singleton = new Renderer({
       powerPreference: ModelViewerElementBase.powerPreference,
       debug: isDebugMode()
     });
+
+    for (const element of elements) {
+      element.connectedCallback();
+    }
   }
 
   public threeRenderer!: WebGLRenderer;
@@ -468,7 +476,7 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  dispose() {
+  dispose(): Array<ModelViewerElementBase> {
     if (this.textureUtils != null) {
       this.textureUtils.dispose();
     }
@@ -480,10 +488,15 @@ export class Renderer extends EventDispatcher {
     this.textureUtils = null;
     (this as any).threeRenderer = null;
 
-    this.scenes.clear();
+    const elements = [];
+    for (const scene of this.scenes) {
+      elements.push(scene.element);
+    }
 
     this.canvas3D.removeEventListener(
         'webglcontextlost', this.onWebGLContextLost);
+
+    return elements;
   }
 
   onWebGLContextLost = (event: Event) => {
