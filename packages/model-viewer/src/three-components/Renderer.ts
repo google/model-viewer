@@ -16,6 +16,7 @@
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
+import {$updateEnvironment} from '../features/environment.js';
 import {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -111,7 +112,6 @@ export class Renderer extends EventDispatcher {
 
     this.canvas3D = document.createElement('canvas');
     this.canvas3D.id = 'webgl-canvas';
-    this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
 
     try {
       this.threeRenderer = new WebGLRenderer({
@@ -145,6 +145,10 @@ export class Renderer extends EventDispatcher {
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
     this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
     CachingGLTFLoader.initializeKTX2Loader(this.threeRenderer);
+
+    this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
+    this.canvas3D.addEventListener(
+        'webglcontextrestored', this.onWebGLContextRestored);
 
     this.updateRendererSize();
     this.lastTick = performance.now();
@@ -467,6 +471,10 @@ export class Renderer extends EventDispatcher {
       this.textureUtils.dispose();
     }
 
+    if (this.roughnessMipmapper != null) {
+      this.roughnessMipmapper.dispose();
+    }
+
     if (this.threeRenderer != null) {
       this.threeRenderer.dispose();
     }
@@ -478,10 +486,22 @@ export class Renderer extends EventDispatcher {
 
     this.canvas3D.removeEventListener(
         'webglcontextlost', this.onWebGLContextLost);
+    this.canvas3D.removeEventListener(
+        'webglcontextrestored', this.onWebGLContextRestored);
   }
 
   onWebGLContextLost = (event: Event) => {
     this.dispatchEvent(
         {type: 'contextlost', sourceEvent: event} as ContextLostEvent);
+  };
+
+  onWebGLContextRestored = () => {
+    this.textureUtils?.dispose();
+    this.textureUtils = new TextureUtils(this.threeRenderer);
+    this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
+    for (const scene of this.scenes) {
+      (scene.element as any)[$updateEnvironment]();
+    }
+    this.threeRenderer.shadowMap.needsUpdate = true;
   };
 }
