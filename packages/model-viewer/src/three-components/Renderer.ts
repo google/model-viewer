@@ -471,6 +471,10 @@ export class Renderer extends EventDispatcher {
       this.textureUtils.dispose();
     }
 
+    if (this.roughnessMipmapper != null) {
+      this.roughnessMipmapper.dispose();
+    }
+
     if (this.threeRenderer != null) {
       this.threeRenderer.dispose();
     }
@@ -494,8 +498,10 @@ export class Renderer extends EventDispatcher {
   onWebGLContextRestored = () => {
     this.textureUtils?.dispose();
     this.textureUtils = new TextureUtils(this.threeRenderer);
+    this.roughnessMipmapper = new RoughnessMipmapper(this.threeRenderer);
     for (const scene of this.scenes) {
       (scene.element as any)[$updateEnvironment]();
     }
+    this.threeRenderer.shadowMap.needsUpdate = true;
   };
 }

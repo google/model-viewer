@@ -59,7 +59,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() addHotspotMode = false;
   @internalProperty() gltfUrl?: string;
-  @internalProperty() gltfError: string = '';
   @internalProperty() extraAttributes: any = {};
   @internalProperty() refreshButtonIsReady: boolean = false;
   @internalProperty() bestPractices?: BestPracticesState;
@@ -131,10 +130,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
     // Add additional elements, editor specific.
     childElements.push(refreshMobileButton);
-    if (this.gltfError) {
-      childElements.push(html`<div class="ErrorText">Error loading glTF:<br/>${
-          this.gltfError}</div>`);
-    } else if (!hasModel) {
+    if (!hasModel) {
       childElements.push(
           html
           `<div class="HelpText">Drag a glTF or GLB here!<br/><small>And HDRs for lighting</small></div>`);
@@ -154,16 +150,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
               cameraChange: () => {
                 this.onCameraChange();
               },
-              modelVisibility: () => {
-                this.onModelVisible();
-              },
               click: (event: MouseEvent) => {
                 if (this.addHotspotMode) {
                   this.addHotspot(event);
                 }
-              },
-              error: (error: CustomEvent) => {
-                this.gltfError = error.detail;
               }
             },
             childElements)}`;
@@ -182,12 +172,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
     this.resolveLoad();
   }
 
-  private onModelVisible() {
-    if (!this.modelViewer.loaded) {
-      throw new Error('onModelVisible called before mv was loaded');
-    }
-  }
-
   private onCameraChange() {
     reduxStore.dispatch(dispatchCameraIsDirty());
   }
@@ -198,7 +182,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
     const y = event.clientY - rect.top;
     const positionAndNormal = this.modelViewer.positionAndNormalFromPoint(x, y);
     if (!positionAndNormal) {
-      throw new Error('invalid click position');
+      console.log('Click was not on model, no hotspot added.');
+      return;
     }
     reduxStore.dispatch(dispatchAddHotspot({
       name: generateUniqueHotspotName(),
