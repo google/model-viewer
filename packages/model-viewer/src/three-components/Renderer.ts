@@ -56,8 +56,10 @@ const DEFAULT_LAST_STEP = 3;
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _singleton =
-      new Renderer({powerPreference: 'high-performance', debug: isDebugMode()});
+  private static _singleton = new Renderer({
+    powerPreference: ModelViewerElementBase.powerPreference,
+    debug: isDebugMode()
+  });
 
   static get singleton() {
     return this._singleton;

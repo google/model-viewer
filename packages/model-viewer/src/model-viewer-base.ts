@@ -30,6 +30,7 @@ import {ProgressTracker} from './utilities/progress-tracker.js';
 const CLEAR_MODEL_TIMEOUT_MS = 1000;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
+const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
 const UNSIZED_MEDIA_WIDTH = 300;
 const UNSIZED_MEDIA_HEIGHT = 150;
 
@@ -110,7 +111,7 @@ export interface RendererInterface {
  */
 export default class ModelViewerElementBase extends UpdatingElement {
   protected static[$template]: HTMLTemplateElement|void;
-  private static _powerPreference: string = 'high-performance';
+  private static _powerPreference: string = DEFAULT_POWER_PREFERENCE;
 
   /** @export */
   static set powerPreference(value: string) {
