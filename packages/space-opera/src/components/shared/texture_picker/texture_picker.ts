@@ -130,7 +130,8 @@ export class TexturePicker extends LitElement {
     }
 
     const url = createSafeObjectURL(files[0]).unsafeUrl;
-    this.dispatchEvent(new CustomEvent('texture-uploaded', {detail: url}));
+    this.dispatchEvent(new CustomEvent(
+        'texture-uploaded', {detail: {url, type: files[0].type}}));
   }
 }
 
