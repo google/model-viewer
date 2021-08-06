@@ -359,6 +359,13 @@
       ]
     },
     {
+      "name": "khronos-TransmissionTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureTransformTest/glTF-Binary/TextureTransmissionTest.glb",
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-Buggy",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF/Buggy.gltf",
       "target": {
@@ -421,7 +428,7 @@
       "orbit": {
         "theta": 2,
         "phi": 70.0,
-        "radius":2.45
+        "radius": 2.45
       },
       "exclude": [
         "dspbr-pt"

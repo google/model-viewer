@@ -44,6 +44,8 @@ const MAX_AVG_CHANGE_MS = 2;
 const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
 const DEFAULT_LAST_STEP = 3;
 
+export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
+
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
  * all in the same WebGLRenderingContext, spitting out textures to apply
@@ -56,10 +58,8 @@ const DEFAULT_LAST_STEP = 3;
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _singleton = new Renderer({
-    powerPreference: ModelViewerElementBase.powerPreference,
-    debug: isDebugMode()
-  });
+  private static _singleton = new Renderer(
+      {powerPreference: DEFAULT_POWER_PREFERENCE, debug: isDebugMode()});
 
   static get singleton() {
     return this._singleton;

@@ -22,7 +22,7 @@ import {ModelViewerGlobalConfig} from './features/loading.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
-import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
+import {ContextLostEvent, DEFAULT_POWER_PREFERENCE, Renderer} from './three-components/Renderer.js';
 import {debounce, timePasses} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
@@ -30,7 +30,6 @@ import {ProgressTracker} from './utilities/progress-tracker.js';
 const CLEAR_MODEL_TIMEOUT_MS = 1000;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
-const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
 const UNSIZED_MEDIA_WIDTH = 300;
 const UNSIZED_MEDIA_HEIGHT = 150;
 
