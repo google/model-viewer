@@ -15,9 +15,11 @@
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
+
 import {$updateEnvironment} from '../features/environment.js';
 import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
+
 import {ARRenderer} from './ARRenderer.js';
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {Debugger} from './Debugger.js';
@@ -503,6 +505,8 @@ export class Renderer extends EventDispatcher {
         'webglcontextlost', this.onWebGLContextLost);
     this.canvas3D.removeEventListener(
         'webglcontextrestored', this.onWebGLContextRestored);
+
+    return elements;
   }
 
   onWebGLContextLost = (event: Event) => {
