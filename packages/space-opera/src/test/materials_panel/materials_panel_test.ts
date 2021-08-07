@@ -36,8 +36,8 @@ async function checkUpload(
 
   expect(imageList.children.length).toEqual(listLength + 1);
 
-  texturePicker.dispatchEvent(
-      new CustomEvent('texture-uploaded', {detail: TEXTURE_PATH}));
+  texturePicker.dispatchEvent(new CustomEvent(
+      'texture-uploaded', {detail: {url: TEXTURE_PATH, type: 'image/png'}}));
   await waitForEvent(panel, 'texture-upload-complete');
   await panel.updateComplete;
 

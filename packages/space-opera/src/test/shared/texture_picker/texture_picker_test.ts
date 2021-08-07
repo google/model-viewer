@@ -81,7 +81,9 @@ describe('texture picker test', () => {
     expect(eventListenerSpy).toHaveBeenCalledTimes(1);
     const eventListenerArguments = eventListenerSpy.calls.first().args;
     expect(eventListenerArguments.length).toBe(1);
-    expect(eventListenerArguments[0].detail).toBeInstanceOf(String);
+    const {url, type} = eventListenerArguments[0].detail;
+    expect(url).toBeInstanceOf(String);
+    expect(type).toEqual('image/jpeg');
   });
 
   it('dispatches an event with undefined selectedIndex on null texture click',

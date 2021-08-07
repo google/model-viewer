@@ -31,7 +31,6 @@ import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
-import {$threeTexture} from '../../../../model-viewer/lib/features/scene-graph/image.js';
 import {TextureInfo} from '../../../../model-viewer/lib/features/scene-graph/texture-info.js';
 import {AlphaMode} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 import {GLTF, TextureInfo as GLTFTextureInfo} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
@@ -401,18 +400,9 @@ export class MaterialPanel extends ConnectedLitElement {
       console.log('URL collision! Texture not updated.');
       return;
     }
-    const texture = await getModelViewer()?.createTexture(url);
+    const texture = await getModelViewer()?.createTexture(url, type);
     if (texture == null) {
       return;
-    }
-    // This hack is because GLTFExporter checks if format is RGB vs RGBA to
-    // decide if it should save as JPEG vs PNG. However, TextureLoader sets
-    // format based on if the url ends in .jpg, which does not work for an
-    // ObjectURL like we're passing here. So, to keep from inflating all JPEGs
-    // to PNGs, we do this hack, and since I don't have a separate three.js dep
-    // in here, I'm setting RGBFormat by number instead of name.
-    if (type === 'image/jpeg') {
-      texture.source[$threeTexture].format = 1022;  // RGBFormat
     }
 
     textureInfo.setTexture(texture);
