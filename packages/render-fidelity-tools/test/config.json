@@ -376,6 +376,22 @@
       ]
     },
     {
+      "name": "khronos-TransmissionRoughnessTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TransmissionRoughnessTest/glTF-Binary/TransmissionRoughnessTest.glb",
+      "orbit": {
+        "radius": 1.1
+      },
+      "dimensions": {
+        "height": 300
+      },
+      "target": {
+        "y": -0.09
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-Buggy",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF/Buggy.gltf",
       "target": {
