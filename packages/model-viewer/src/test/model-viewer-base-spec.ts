@@ -99,28 +99,6 @@ suite('ModelViewerElementBase', () => {
       });
     });
 
-    suite('with modelViewer global config', () => {
-      ModelViewerElementBase.powerPreference = 'low-power'
-      let element: ModelViewerElementBase;
-
-      setup(() => {
-        element = new ModelViewerElement();
-        document.body.insertBefore(element, document.body.firstChild);
-      });
-
-      teardown(() => {
-        element.parentNode!.removeChild(element);
-      });
-
-      test(
-          'validate threeRenderer is using the given powerPreference',
-          async () => {
-            const {threeRenderer} = Renderer.singleton;
-            expect(threeRenderer.getContextAttributes().powerPreference)
-                .to.be.equal('low-power');
-          });
-    });
-
     suite('with a valid src', () => {
       let element: ModelViewerElementBase;
       setup(() => {

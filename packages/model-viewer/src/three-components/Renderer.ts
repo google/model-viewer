@@ -17,6 +17,7 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftSha
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {$updateEnvironment} from '../features/environment.js';
+import {ModelViewerGlobalConfig} from '../features/loading.js';
 import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
@@ -59,8 +60,13 @@ export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _singleton = new Renderer(
-      {powerPreference: DEFAULT_POWER_PREFERENCE, debug: isDebugMode()});
+  private static _singleton = new Renderer({
+    powerPreference:
+        (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
+            .powerPreference ||
+        DEFAULT_POWER_PREFERENCE,
+    debug: isDebugMode()
+  });
 
   static get singleton() {
     return this._singleton;
@@ -73,7 +79,10 @@ export class Renderer extends EventDispatcher {
     }
 
     this._singleton = new Renderer({
-      powerPreference: ModelViewerElementBase.powerPreference,
+      powerPreference:
+          (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
+              .powerPreference ||
+          DEFAULT_POWER_PREFERENCE,
       debug: isDebugMode()
     });
 
