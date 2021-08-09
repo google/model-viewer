@@ -25,7 +25,8 @@ const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
-const CUBES_GLB_PATH = assetPath('models/cubes.gltf');
+const CUBES_GLB_PATH = assetPath('models/cubes.gltf');  // has variants
+const CUBE_GLB_PATH = assetPath('models/cube.gltf');    // has UV coords
 const SUNRISE_IMG_PATH = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 
 suite('ModelViewerElementBase with SceneGraphMixin', () => {
@@ -101,6 +102,30 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
         expect(glTFroot.children[1].userData.variantMaterials.size).to.be.eq(3);
       });
     });
+
+    test(
+        'When loading a new JPEG texture from an ObjectURL, the GLB does not export PNG',
+        async () => {
+          element.src = CUBE_GLB_PATH;
+          await waitForEvent(element, 'load');
+          await rafPasses();
+
+          const url = assetPath(
+              'models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_albedo.jpg');
+          const blob = await fetch(url).then(r => r.blob());
+          const objectUrl = URL.createObjectURL(blob);
+          const texture = await element.createTexture(objectUrl, 'image/jpeg');
+
+          element.model!.materials[0]
+              .pbrMetallicRoughness.baseColorTexture.setTexture(texture);
+
+          const exported = await element.exportScene({binary: true});
+          expect(exported).to.be.not.undefined;
+          // The JPEG is ~1 Mb and the equivalent PNG is about ~6 Mb, so this
+          // just checks we saved an image and it wasn't too big.
+          expect(exported.size).to.be.greaterThan(0.5e6);
+          expect(exported.size).to.be.lessThan(1.5e6);
+        });
   });
 
   suite('with a loaded scene graph', () => {
