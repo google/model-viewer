@@ -17,7 +17,8 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftSha
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {$updateEnvironment} from '../features/environment.js';
-import {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
+import {ModelViewerGlobalConfig} from '../features/loading.js';
+import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
 import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
@@ -28,6 +29,7 @@ import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 
 export interface RendererOptions {
+  powerPreference: string;
   debug?: boolean;
 }
 
@@ -44,6 +46,8 @@ const MAX_AVG_CHANGE_MS = 2;
 const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
 const DEFAULT_LAST_STEP = 3;
 
+export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
+
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
  * all in the same WebGLRenderingContext, spitting out textures to apply
@@ -56,15 +60,35 @@ const DEFAULT_LAST_STEP = 3;
  * the texture.
  */
 export class Renderer extends EventDispatcher {
-  private static _singleton = new Renderer({debug: isDebugMode()});
+  private static _singleton = new Renderer({
+    powerPreference:
+        (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
+            .powerPreference ||
+        DEFAULT_POWER_PREFERENCE,
+    debug: isDebugMode()
+  });
 
   static get singleton() {
     return this._singleton;
   }
 
   static resetSingleton() {
-    this._singleton.dispose();
-    this._singleton = new Renderer({debug: isDebugMode()});
+    const elements = this._singleton.dispose();
+    for (const element of elements) {
+      element.disconnectedCallback();
+    }
+
+    this._singleton = new Renderer({
+      powerPreference:
+          (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
+              .powerPreference ||
+          DEFAULT_POWER_PREFERENCE,
+      debug: isDebugMode()
+    });
+
+    for (const element of elements) {
+      element.connectedCallback();
+    }
   }
 
   public threeRenderer!: WebGLRenderer;
@@ -105,7 +129,7 @@ export class Renderer extends EventDispatcher {
     this.lastStep = i - 1;
   }
 
-  constructor(options?: RendererOptions) {
+  constructor(options: RendererOptions) {
     super();
 
     this.dpr = resolveDpr();
@@ -118,7 +142,7 @@ export class Renderer extends EventDispatcher {
         canvas: this.canvas3D,
         alpha: true,
         antialias: true,
-        powerPreference: 'high-performance' as WebGLPowerPreference,
+        powerPreference: options.powerPreference as WebGLPowerPreference,
         preserveDrawingBuffer: true
       });
       this.threeRenderer.autoClear = true;
@@ -129,8 +153,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.shadowMap.type = PCFSoftShadowMap;
       this.threeRenderer.shadowMap.autoUpdate = false;
 
-      this.debugger =
-          options != null && !!options.debug ? new Debugger(this) : null;
+      this.debugger = !!options.debug ? new Debugger(this) : null;
       this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
 
       // ACESFilmicToneMapping appears to be the most "saturated",
@@ -466,7 +489,7 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  dispose() {
+  dispose(): Array<ModelViewerElementBase> {
     if (this.textureUtils != null) {
       this.textureUtils.dispose();
     }
@@ -482,12 +505,17 @@ export class Renderer extends EventDispatcher {
     this.textureUtils = null;
     (this as any).threeRenderer = null;
 
-    this.scenes.clear();
+    const elements = [];
+    for (const scene of this.scenes) {
+      elements.push(scene.element);
+    }
 
     this.canvas3D.removeEventListener(
         'webglcontextlost', this.onWebGLContextLost);
     this.canvas3D.removeEventListener(
         'webglcontextrestored', this.onWebGLContextRestored);
+
+    return elements;
   }
 
   onWebGLContextLost = (event: Event) => {
