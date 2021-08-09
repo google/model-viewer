@@ -359,6 +359,122 @@
       ]
     },
     {
+      "name": "khronos-ToyCar",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-IridescentDishWithOlives",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescentDishWithOlives/glTF-Binary/IridescentDishWithOlives.glb",
+      "orbit": {
+        "radius": 0.47
+      },
+      "dimensions": {
+        "height": 570
+      },
+      "target": {
+        "y": 0.11
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-TextureTransformMultiTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureTransformMultiTest/glTF-Binary/TextureTransformMultiTest.glb",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-SheenChair",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-SheenCloth",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SheenCloth/glTF/SheenCloth.gltf",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-MaterialsVariantsShoe",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-MetalRoughSpheresNoTextures",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0//glTF-Binary/.glb",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-SimpleSkin",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SimpleSkin/glTF/SimpleSkin.gltf",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-TextureEncodingTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureEncodingTest/glTF-Binary/TextureEncodingTest.glb",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-RecursiveSkeletons",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/RecursiveSkeletons/glTF-Binary/RecursiveSkeletons.glb",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-TextureLinearInterpolationTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureLinearInterpolationTest/glTF-Binary/TextureLinearInterpolationTest.glb",
+      "orbit": {
+        "radius": 1.0
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-TransmissionTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TransmissionTest/glTF-Binary/TransmissionTest.glb",
       "orbit": {
