@@ -130,8 +130,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       // decide if it should save as JPEG vs PNG. However, TextureLoader sets
       // format based on if the url ends in .jpg, which does not work for an
       // ObjectURL like we're passing here. So, to keep from inflating all JPEGs
-      // to PNGs, we do this hack, and since I don't have a separate three.js
-      // dep in here, I'm setting RGBFormat by number instead of name.
+      // to PNGs, we allow the user of the API to specify the type.
       if (type === 'image/jpeg') {
         texture.format = RGBFormat;
       }
