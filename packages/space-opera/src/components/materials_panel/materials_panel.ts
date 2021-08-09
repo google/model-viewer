@@ -43,7 +43,7 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
-import {TexturePicker} from '../shared/texture_picker/texture_picker.js';
+import {FileDetails, TexturePicker} from '../shared/texture_picker/texture_picker.js';
 import {ALPHA_BLEND_MODES} from '../utils/gltf_constants.js';
 import {checkFinite} from '../utils/reducer_utils.js';
 
@@ -393,15 +393,19 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
-  async onTextureUpload(uri: string, textureInfo: TextureInfo) {
-    if (this.thumbnailsById.has(uri)) {
+  async onTextureUpload(
+      detail: FileDetails, texturePicker: TexturePicker,
+      textureInfo: TextureInfo) {
+    const {url, type} = detail;
+    if (this.thumbnailsById.has(url)) {
       console.log('URL collision! Texture not updated.');
       return;
     }
-    const texture = await getModelViewer()?.createTexture(uri);
+    const texture = await getModelViewer()?.createTexture(url, type);
     if (texture == null) {
       return;
     }
+
     textureInfo.setTexture(texture);
     const id = await pushThumbnail(this.thumbnailsById, textureInfo);
     // Trigger async panel update / render
@@ -411,6 +415,7 @@ export class MaterialPanel extends ConnectedLitElement {
       // Trigger async texture_picker update / render
       this.thumbnailUrls = [...this.thumbnailUrls];
       this.thumbnailUrls.push(this.thumbnailsById.get(id)!.objectUrl);
+      texturePicker.selectedIndex = this.thumbnailIds.indexOf(id);
     }
     reduxStore.dispatch(dispatchModelDirty());
     this.dispatchEvent(new CustomEvent('texture-upload-complete'));
@@ -422,9 +427,11 @@ export class MaterialPanel extends ConnectedLitElement {
         this.getMaterial().pbrMetallicRoughness.baseColorTexture);
   }
 
-  onBaseColorTextureUpload(event: CustomEvent) {
+  onBaseColorTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
-        event.detail, this.getMaterial().pbrMetallicRoughness.baseColorTexture);
+        event.detail,
+        this.baseColorTexturePicker,
+        this.getMaterial().pbrMetallicRoughness.baseColorTexture);
   }
 
   onMetallicRoughnessTextureChange() {
@@ -433,9 +440,10 @@ export class MaterialPanel extends ConnectedLitElement {
         this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
-  onMetallicRoughnessTextureUpload(event: CustomEvent) {
+  onMetallicRoughnessTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
+        this.metallicRoughnessTexturePicker,
         this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
@@ -444,8 +452,11 @@ export class MaterialPanel extends ConnectedLitElement {
         this.selectedNormalTextureId, this.getMaterial().normalTexture);
   }
 
-  onNormalTextureUpload(event: CustomEvent) {
-    this.onTextureUpload(event.detail, this.getMaterial().normalTexture);
+  onNormalTextureUpload(event: CustomEvent<FileDetails>) {
+    this.onTextureUpload(
+        event.detail,
+        this.normalTexturePicker,
+        this.getMaterial().normalTexture);
   }
 
   onEmissiveTextureChange() {
@@ -453,8 +464,11 @@ export class MaterialPanel extends ConnectedLitElement {
         this.selectedEmissiveTextureId, this.getMaterial().emissiveTexture);
   }
 
-  onEmissiveTextureUpload(event: CustomEvent) {
-    this.onTextureUpload(event.detail, this.getMaterial().emissiveTexture);
+  onEmissiveTextureUpload(event: CustomEvent<FileDetails>) {
+    this.onTextureUpload(
+        event.detail,
+        this.emissiveTexturePicker,
+        this.getMaterial().emissiveTexture);
   }
 
   onEmissiveFactorChanged() {
@@ -467,8 +481,11 @@ export class MaterialPanel extends ConnectedLitElement {
         this.selectedOcclusionTextureId, this.getMaterial().occlusionTexture);
   }
 
-  onOcclusionTextureUpload(event: CustomEvent) {
-    this.onTextureUpload(event.detail, this.getMaterial().occlusionTexture);
+  onOcclusionTextureUpload(event: CustomEvent<FileDetails>) {
+    this.onTextureUpload(
+        event.detail,
+        this.occlusionTexturePicker,
+        this.getMaterial().occlusionTexture);
   }
 
   onAlphaModeSelect() {

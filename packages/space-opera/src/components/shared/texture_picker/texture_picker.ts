@@ -30,6 +30,11 @@ import {styles} from './texture_picker.css.js';
 
 const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',');
 
+export interface FileDetails {
+  url: string;
+  type: string;
+}
+
 /**
  * LitElement for a texture picker which allows user to select one of the
  * texture images presented
@@ -130,7 +135,8 @@ export class TexturePicker extends LitElement {
     }
 
     const url = createSafeObjectURL(files[0]).unsafeUrl;
-    this.dispatchEvent(new CustomEvent('texture-uploaded', {detail: url}));
+    this.dispatchEvent(new CustomEvent<FileDetails>(
+        'texture-uploaded', {detail: {url, type: files[0].type}}));
   }
 }
 
