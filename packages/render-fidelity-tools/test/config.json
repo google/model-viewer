@@ -359,6 +359,55 @@
       ]
     },
     {
+      "name": "khronos-TransmissionTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TransmissionTest/glTF-Binary/TransmissionTest.glb",
+      "orbit": {
+        "radius": 1.59
+      },
+      "target": {
+        "x": -0.15,
+        "y": -0.15
+      },
+      "dimensions": {
+        "height": 700
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-TransmissionRoughnessTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TransmissionRoughnessTest/glTF-Binary/TransmissionRoughnessTest.glb",
+      "orbit": {
+        "radius": 1.1
+      },
+      "dimensions": {
+        "height": 300
+      },
+      "target": {
+        "y": -0.09
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-SpecularTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SpecularTest/glTF-Binary/SpecularTest.glb",
+      "orbit": {
+        "radius": 1.1
+      },
+      "dimensions": {
+        "height": 600
+      },
+      "target": {
+        "x": -0.18
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
       "name": "khronos-Buggy",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF/Buggy.gltf",
       "target": {
@@ -421,7 +470,7 @@
       "orbit": {
         "theta": 2,
         "phi": 70.0,
-        "radius":2.45
+        "radius": 2.45
       },
       "exclude": [
         "dspbr-pt"
