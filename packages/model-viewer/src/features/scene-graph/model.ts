@@ -20,6 +20,8 @@ import {CorrelatedSceneGraph} from '../../three-components/gltf-instance/correla
 import {Model as ModelInterface} from './api.js';
 import {Material} from './material.js';
 
+
+
 const $materials = Symbol('materials');
 
 /**
@@ -36,11 +38,16 @@ export class Model implements ModelInterface {
     const {gltf, gltfElementMap} = correlatedSceneGraph;
 
     gltf.materials!.forEach(material => {
-      this[$materials].push(new Material(
-          onUpdate,
-          gltf,
-          material,
-          gltfElementMap.get(material) as Set<MeshStandardMaterial>));
+      const correlatedMaterial =
+          gltfElementMap.get(material) as Set<MeshStandardMaterial>;
+
+      if (correlatedMaterial) {
+        this[$materials].push(
+            new Material(onUpdate, gltf, material, correlatedMaterial));
+      } else {
+        console.warn(
+            `Unsupported material "${material.name}" removed from model.`);
+      }
     });
   }
 

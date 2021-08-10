@@ -53,10 +53,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       correlatedMaterials: Set<MeshStandardMaterial>|undefined) {
     super(onUpdate, gltfMaterial, correlatedMaterials);
 
-    if (correlatedMaterials == null) {
-      return;
-    }
-
     if (gltfMaterial.extensions &&
         gltfMaterial.extensions['KHR_materials_pbrSpecularGlossiness']) {
       console.warn(`Material ${gltfMaterial.name} uses a deprecated extension
