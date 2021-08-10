@@ -435,12 +435,16 @@
     },
     {
       "name": "khronos-MetalRoughSpheresNoTextures",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0//glTF-Binary/.glb",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheresNoTextures/glTF/MetalRoughSpheresNoTextures.gltf",
       "orbit": {
-        "radius": 1.0
+        "radius": 120.0
       },
+      "renderSkybox": true,
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "babylon",
+        "gltf-sample-viewer",
+        "filament"
       ]
     },
     {
