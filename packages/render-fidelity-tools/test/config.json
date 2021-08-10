@@ -418,7 +418,16 @@
       "name": "khronos-MaterialsVariantsShoe",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb",
       "orbit": {
-        "radius": 1.0
+        "radius": 0.275,
+        "theta": 35,
+        "phi": 49
+      },
+      "target": {
+        "y": 0.06,
+        "x": 0.03
+      },
+      "dimensions": {
+        "height": 500
       },
       "exclude": [
         "dspbr-pt"
