@@ -221,6 +221,20 @@
       "renderSkybox": true
     },
     {
+      "name": "khronos-MetalRoughSpheresNoTextures",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheresNoTextures/glTF/MetalRoughSpheresNoTextures.gltf",
+      "orbit": {
+        "radius": 12.0
+      },
+      "renderSkybox": true,
+      "exclude": [
+        "dspbr-pt",
+        "babylon",
+        "gltf-sample-viewer",
+        "filament"
+      ]
+    },
+    {
       "name": "khronos-MorphStressTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MorphStressTest/glTF/MorphStressTest.gltf",
       "dimensions": {
@@ -381,7 +395,8 @@
       "name": "khronos-IridescentDishWithOlives",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescentDishWithOlives/glTF-Binary/IridescentDishWithOlives.glb",
       "orbit": {
-        "radius": 0.47
+        "radius": 0.47,
+        "theta": -70
       },
       "dimensions": {
         "height": 570
@@ -456,20 +471,6 @@
       },
       "exclude": [
         "dspbr-pt"
-      ]
-    },
-    {
-      "name": "khronos-MetalRoughSpheresNoTextures",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheresNoTextures/glTF/MetalRoughSpheresNoTextures.gltf",
-      "orbit": {
-        "radius": 120.0
-      },
-      "renderSkybox": true,
-      "exclude": [
-        "dspbr-pt",
-        "babylon",
-        "gltf-sample-viewer",
-        "filament"
       ]
     },
     {
@@ -879,7 +880,7 @@
         "y": 1
       },
       "dimensions": {
-        "height": 1400
+        "width": 400
       },
       "exclude": [
         "dspbr-pt"
