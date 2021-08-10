@@ -362,7 +362,16 @@
       "name": "khronos-ToyCar",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb",
       "orbit": {
-        "radius": 1.0
+        "radius": 0.037,
+        "theta": -35,
+        "phi": 75
+      },
+      "dimensions": {
+        "width": 1200,
+        "height": 500
+      },
+      "target": {
+        "y": 0.001
       },
       "exclude": [
         "dspbr-pt"
