@@ -471,7 +471,14 @@
       "name": "khronos-RecursiveSkeletons",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/RecursiveSkeletons/glTF-Binary/RecursiveSkeletons.glb",
       "orbit": {
-        "radius": 1.0
+        "radius": 120.0,
+        "phi": 5
+      },
+      "target": {
+        "y": 95
+      },
+      "dimensions": {
+        "width": 680
       },
       "exclude": [
         "dspbr-pt"
