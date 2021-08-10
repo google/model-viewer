@@ -224,14 +224,16 @@
       "name": "khronos-MetalRoughSpheresNoTextures",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheresNoTextures/glTF/MetalRoughSpheresNoTextures.gltf",
       "orbit": {
-        "radius": 12.0
+        "radius": 0.0000000005
+      },
+      "target": {
+        "y": 0.003,
+        "x": 0.003,
+        "z": 0.01
       },
       "renderSkybox": true,
       "exclude": [
-        "dspbr-pt",
-        "babylon",
-        "gltf-sample-viewer",
-        "filament"
+        "dspbr-pt"
       ]
     },
     {
@@ -394,6 +396,7 @@
     {
       "name": "khronos-IridescentDishWithOlives",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescentDishWithOlives/glTF-Binary/IridescentDishWithOlives.glb",
+      "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
       "orbit": {
         "radius": 0.47,
         "theta": -70
@@ -405,7 +408,8 @@
         "y": 0.11
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "babylon"
       ]
     },
     {
