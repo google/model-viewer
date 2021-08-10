@@ -463,7 +463,13 @@
       "name": "khronos-TextureEncodingTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureEncodingTest/glTF-Binary/TextureEncodingTest.glb",
       "orbit": {
-        "radius": 1.0
+        "radius": 13.0
+      },
+      "dimensions": {
+        "width": 1100
+      },
+      "target": {
+        "y": 0.3
       },
       "exclude": [
         "dspbr-pt"
