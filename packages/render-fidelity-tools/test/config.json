@@ -496,7 +496,10 @@
       "name": "khronos-TextureLinearInterpolationTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureLinearInterpolationTest/glTF-Binary/TextureLinearInterpolationTest.glb",
       "orbit": {
-        "radius": 1.0
+        "radius": 6.6
+      },
+      "target": {
+        "y": 0.5
       },
       "exclude": [
         "dspbr-pt"
