@@ -414,7 +414,13 @@
       "name": "khronos-SheenCloth",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SheenCloth/glTF/SheenCloth.gltf",
       "orbit": {
-        "radius": 1.0
+        "radius": 0.059
+      },
+      "target": {
+        "y": 0.015
+      },
+      "dimensions": {
+        "width": 1200
       },
       "exclude": [
         "dspbr-pt"
