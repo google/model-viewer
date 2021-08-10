@@ -388,7 +388,11 @@
       "name": "khronos-TextureTransformMultiTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/TextureTransformMultiTest/glTF-Binary/TextureTransformMultiTest.glb",
       "orbit": {
-        "radius": 1.0
+        "radius": 2.9,
+        "phi": 98
+      },
+      "target": {
+        "y": -0.28
       },
       "exclude": [
         "dspbr-pt"
