@@ -400,6 +400,12 @@
       "orbit": {
         "radius": 1.0
       },
+      "target": {
+        "y": 0.3
+      },
+      "dimensions": {
+        "height": 450
+      },
       "exclude": [
         "dspbr-pt"
       ]
