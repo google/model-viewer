@@ -41,7 +41,7 @@ export class Model implements ModelInterface {
       const correlatedMaterial =
           gltfElementMap.get(material) as Set<MeshStandardMaterial>;
 
-      if (correlatedMaterial !== null && correlatedMaterial !== undefined) {
+      if (correlatedMaterial != null) {
         this[$materials].push(
             new Material(onUpdate, gltf, material, correlatedMaterial));
       } else {
