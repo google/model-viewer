@@ -41,12 +41,12 @@ export class Model implements ModelInterface {
       const correlatedMaterial =
           gltfElementMap.get(material) as Set<MeshStandardMaterial>;
 
-      if (correlatedMaterial) {
+      if (correlatedMaterial !== null && correlatedMaterial !== undefined) {
         this[$materials].push(
             new Material(onUpdate, gltf, material, correlatedMaterial));
       } else {
-        console.warn(
-            `Unsupported material "${material.name}" removed from model.`);
+        console.warn(`Unreferenced material "${
+            material.name}" was automatically removed from the model.`);
       }
     });
   }
