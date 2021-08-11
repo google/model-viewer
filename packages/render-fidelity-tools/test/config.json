@@ -224,12 +224,12 @@
       "name": "khronos-MetalRoughSpheresNoTextures",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheresNoTextures/glTF/MetalRoughSpheresNoTextures.gltf",
       "orbit": {
-        "radius": 1.0
+        "radius": 0
       },
       "target": {
         "y": 0.003,
         "x": 0.003,
-        "z": -1
+        "z": 0.01
       },
       "renderSkybox": true,
       "exclude": [
