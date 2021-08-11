@@ -36,7 +36,7 @@
     "@types/puppeteer": "^5.4.4",
     "@types/rimraf": "^3.0.1",
     "dspbr-pt": "^0.2.1",
-    "filament": "1.9.2",
+    "filament": "1.11.0",
     "focus-visible": "^5.2.0",
     "http-server": "^0.12.3",
     "lit-element": "^2.5.1",
