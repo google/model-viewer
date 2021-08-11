@@ -397,6 +397,7 @@
       "name": "khronos-IridescentDishWithOlives",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescentDishWithOlives/glTF-Binary/IridescentDishWithOlives.glb",
       "lighting": "../../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
+      "renderSkybox": true,
       "orbit": {
         "radius": 0.47,
         "theta": -70
