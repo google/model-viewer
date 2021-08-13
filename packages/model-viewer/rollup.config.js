@@ -102,6 +102,23 @@ if (NODE_ENV !== 'development') {
         onwarn,
       },
   );
+
+  outputOptions.push(
+    {
+      input: './dist/model-viewer-umd.js',
+      output: {
+        file: './dist/model-viewer-umd.min.js',
+        sourcemap: true,
+        format: 'umd',
+        name: 'ModelViewerElement'
+      },
+      watch: {
+        include: watchFiles,
+      },
+      plugins,
+      onwarn,
+    },
+);
 }
 
 export default outputOptions;

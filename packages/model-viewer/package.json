@@ -29,7 +29,9 @@
     "dist/model-viewer.min.js",
     "dist/model-viewer.min.js.map",
     "dist/model-viewer-umd.js",
-    "dist/model-viewer-umd.js.map"
+    "dist/model-viewer-umd.js.map",
+    "dist/model-viewer-umd.min.js",
+    "dist/model-viewer-umd.min.js.map"
   ],
   "scripts": {
     "clean": "rm -rf ./lib ./dist",
