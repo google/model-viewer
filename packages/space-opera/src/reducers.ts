@@ -18,7 +18,7 @@
 import {combineReducers} from 'redux';
 
 import {bestPracticesReducer} from './components/best_practices/reducer.js';
-import {cameraReducer, isDirtyCameraReducer} from './components/camera_settings/reducer.js'
+import {isDirtyCameraReducer} from './components/camera_settings/reducer.js'
 import {configReducer} from './components/config/reducer.js';
 import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/reducer.js';
 import {environmentReducer} from './components/ibl_selector/reducer.js'
@@ -31,7 +31,6 @@ import {INITIAL_STATE} from './types.js';
 const modelViewerSnippetReducer = combineReducers({
   arConfig: arReducer,
   bestPractices: bestPracticesReducer,
-  camera: cameraReducer,
   config: configReducer,
   hotspots: hotspotsReducer,
   relativeFilePaths: relativeFilePathsReducer,

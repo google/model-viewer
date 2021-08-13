@@ -30,15 +30,14 @@ import {modelViewerPreviewStyles} from '../../styles.css.js';
 import {BestPracticesState, extractStagingConfig, ModelViewerConfig, State} from '../../types.js';
 import {getBestPractices} from '../best_practices/reducer.js';
 import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
-import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {dispatchCameraIsDirty, getCamera} from '../camera_settings/reducer.js';
-import {dispatchAutoplayEnabled, dispatchCameraControlsEnabled, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
+import {dispatchCameraIsDirty} from '../camera_settings/reducer.js';
+import {dispatchAutoplayEnabled, dispatchCameraControlsEnabled, dispatchConfig, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
 import {dispatchSetForcePost, getRefreshable} from '../mobile_view/reducer.js';
-import {dispatchConfig, getExtraAttributes} from '../model_viewer_snippet/reducer.js';
+import {getExtraAttributes} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
 import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
@@ -56,7 +55,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
   @query('model-viewer') readonly modelViewer!: ModelViewerElement;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
-  @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() addHotspotMode = false;
   @internalProperty() gltfUrl?: string;
   @internalProperty() extraAttributes: any = {};
@@ -71,7 +69,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;
-    this.camera = getCamera(state);
     this.config = getConfig(state);
     this.hotspots = getHotspots(state);
     this.extraAttributes = getExtraAttributes(state);
@@ -114,7 +111,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
       // Always enable camera controls for preview
       cameraControls: true
     };
-    applyCameraEdits(editedConfig, this.camera);
 
     const hasModel = !!editedConfig.src;
 

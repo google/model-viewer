@@ -20,10 +20,10 @@ import {customElement, html, internalProperty} from 'lit-element';
 import {reduxStore} from '../../../space_opera_base.js';
 import {zoomStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
+import {dispatchFovLimits, dispatchRadiusLimits, dispatchSetMinZoom, dispatchZoomEnabled} from '../../config/reducer.js';
+import {Limits} from '../../config/types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getCameraState, getModelViewer} from '../../model_viewer_preview/reducer.js';
-import {dispatchFovLimits, dispatchRadiusLimits, dispatchSetMinZoom, dispatchZoomEnabled, getCamera} from '../reducer.js';
-import {Limits} from '../types.js';
 
 /** The Camera Settings panel. */
 @customElement('me-camera-zoom-limits')

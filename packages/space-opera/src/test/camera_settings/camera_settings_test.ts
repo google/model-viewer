@@ -19,9 +19,8 @@
 import '../../components/camera_settings/camera_settings.js';
 
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
-import {dispatchCameraTarget, dispatchSaveCameraOrbit} from '../../components/camera_settings/reducer.js';
-import {Vector3D} from '../../components/camera_settings/types.js';
-import {dispatchAutoRotate, getConfig} from '../../components/config/reducer.js';
+import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../../components/config/reducer.js';
+import {Vector3D} from '../../components/config/types.js';
 import {getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {DraggableInput} from '../../components/shared/draggable_input/draggable_input.js';
 import {dispatchReset} from '../../reducers.js';

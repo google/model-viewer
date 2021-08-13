@@ -26,8 +26,6 @@ import {customElement, html, internalProperty, property, query} from 'lit-elemen
 
 import {ArConfigState, BestPracticesState, ModelViewerConfig, RelativeFilePathsState, State} from '../../types.js';
 import {getBestPractices} from '../best_practices/reducer.js';
-import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {getCamera} from '../camera_settings/reducer.js';
 import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getHotspots} from '../hotspot_panel/reducer.js';
@@ -52,7 +50,6 @@ export class ExportPanel extends ConnectedLitElement {
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
-  @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() relativeFilePaths?: RelativeFilePathsState;
   @internalProperty() gltfUrl?: string;
   @internalProperty() extraAttributes: any = {};
@@ -65,7 +62,6 @@ export class ExportPanel extends ConnectedLitElement {
   stateChanged(state: State) {
     this.config = getConfig(state);
     this.arConfig = getArConfig(state);
-    this.camera = getCamera(state);
     this.hotspots = getHotspots(state);
     this.gltfUrl = getGltfUrl(state);
     this.relativeFilePaths = getRelativeFilePaths(state);
@@ -84,7 +80,6 @@ export class ExportPanel extends ConnectedLitElement {
   render() {
     const editedConfig = {...this.config};
     const editedArConfig = {...this.arConfig};
-    applyCameraEdits(editedConfig, this.camera);
     applyRelativeFilePaths(
         editedConfig, this.gltfUrl, this.relativeFilePaths!, false);
     if (editedArConfig.iosSrc) {

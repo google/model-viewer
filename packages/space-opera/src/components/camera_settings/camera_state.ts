@@ -16,9 +16,8 @@
  */
 
 import {ModelViewerConfig} from '../../types.js';
+import {Limits, SphericalPositionDeg, Vector3D} from '../config/types.js';
 import {roundToDigits} from '../utils/reducer_utils.js';
-
-import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
 
 const DIGITS = 4;
 

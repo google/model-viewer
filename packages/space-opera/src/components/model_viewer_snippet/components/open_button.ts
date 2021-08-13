@@ -20,12 +20,10 @@ import '../../file_modal/file_modal.js';
 
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 
-import {dispatchCameraControlsEnabled, getConfig} from '../../../components/config/reducer.js';
+import {dispatchCameraControlsEnabled, dispatchConfig, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {openModalStyles} from '../../../styles.css.js';
 import {ArConfigState, extractStagingConfig, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
-import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../../camera_settings/camera_state.js';
-import {getCamera} from '../../camera_settings/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
@@ -37,7 +35,7 @@ import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '../../utils/create_object_url.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
-import {applyRelativeFilePaths, dispatchConfig, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
+import {applyRelativeFilePaths, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
 
 import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 
@@ -51,7 +49,6 @@ export class OpenModal extends ConnectedLitElement {
   @internalProperty() isOpen: boolean = false;
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
-  @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() errors: string[] = [];
   @internalProperty() gltfUrl?: string;
   @internalProperty() relativeFilePaths?: RelativeFilePathsState;
@@ -62,7 +59,6 @@ export class OpenModal extends ConnectedLitElement {
   stateChanged(state: State) {
     this.config = getConfig(state);
     this.arConfig = getArConfig(state);
-    this.camera = getCamera(state);
     this.gltfUrl = getGltfUrl(state);
     this.relativeFilePaths = getRelativeFilePaths(state);
     this.extraAttributes = getExtraAttributes(state);
@@ -176,7 +172,6 @@ export class OpenModal extends ConnectedLitElement {
     // Get the model-viewer snippet for the edit snippet modal
     const editedConfig = {...this.config};
     const editedArConfig = {...this.arConfig};
-    applyCameraEdits(editedConfig, this.camera);
     applyRelativeFilePaths(
         editedConfig, this.gltfUrl, this.relativeFilePaths!, true);
     if (editedArConfig.iosSrc) {
