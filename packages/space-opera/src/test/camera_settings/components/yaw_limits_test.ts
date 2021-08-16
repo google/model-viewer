@@ -19,7 +19,7 @@
 import '../../../components/camera_settings/components/yaw_limits.js';
 
 import {YawLimits} from '../../../components/camera_settings/components/yaw_limits.js';
-import {dispatchYawLimits, getCamera} from '../../../components/camera_settings/reducer.js';
+import {dispatchYawLimits, getConfig} from '../../../components/config/reducer.js';
 import {ModelViewerPreview} from '../../../components/model_viewer_preview/model_viewer_preview.js';
 import {getModelViewer} from '../../../components/model_viewer_preview/reducer.js';
 import {dispatchReset} from '../../../reducers.js';
@@ -67,6 +67,7 @@ describe('yaw limits editor test', () => {
      HTMLInputElement)
         .click();
     await yawLimitsDeg.updateComplete;
-    expect(getCamera(reduxStore.getState()).yawLimitsDeg!.max).toEqual(33);
+    expect(getConfig(reduxStore.getState()).maxCameraOrbit)
+        .toEqual('33deg auto auto');
   });
 });

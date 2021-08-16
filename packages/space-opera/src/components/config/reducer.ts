@@ -16,8 +16,38 @@
  */
 
 import {Action, ModelViewerConfig, State} from '../../types.js';
+import {roundToDigits} from '../utils/reducer_utils.js';
 
 import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
+
+const DIGITS = 4;
+
+function getMinString(limits: Limits|undefined, suffix: string) {
+  if (!limits || !limits.enabled) {
+    return 'auto';
+  }
+  return `${roundToDigits(limits.min, DIGITS)}${suffix}`;
+}
+
+function getMaxString(limits: Limits|undefined, suffix: string) {
+  if (!limits || !limits.enabled) {
+    return 'auto';
+  }
+  return `${roundToDigits(limits.max, DIGITS)}${suffix}`;
+}
+
+function getUpdatedLimits(
+    state: ModelViewerConfig, limits: Limits, position: number) {
+  const suffix = position === 2 ? 'm' : 'deg';
+  const {minCameraOrbit, maxCameraOrbit} = state;
+  const min = minCameraOrbit == null ? ['auto', 'auto', 'auto'] :
+                                       minCameraOrbit.split(' ');
+  min[position] = getMinString(limits, suffix);
+  const max = maxCameraOrbit == null ? ['auto', 'auto', 'auto'] :
+                                       maxCameraOrbit.split(' ');
+  max[position] = getMaxString(limits, suffix);
+  return {minCameraOrbit: min.join(' '), maxCameraOrbit: max.join(' ')};
+}
 
 const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
 export function dispatchCameraControlsEnabled(enabled?: boolean) {
@@ -101,17 +131,9 @@ export function dispatchFovLimits(fovLimitsDeg?: Limits) {
 }
 
 const SET_MIN_ZOOM = 'SET_MIN_ZOOM';
-export function dispatchSetMinZoom(
-    fovDeg: number|string, radius: number|string) {
+export function dispatchSetMinZoom(fovDeg?: number, radius?: number) {
   return {
     type: SET_MIN_ZOOM, payload: {radius: radius, fov: fovDeg}
-  }
-}
-
-const SET_ZOOM_ENABLED = 'SET_ZOOM_ENABLED';
-export function dispatchZoomEnabled(isEnabled: boolean) {
-  return {
-    type: SET_ZOOM_ENABLED, payload: isEnabled
   }
 }
 
@@ -187,31 +209,39 @@ export function configReducer(
       return {...state, cameraOrbit: action.payload};
     case SET_CAMERA_FOV_LIMITS:
       return {
-        ...state, fovLimitsDeg: action.payload
+        ...state, minFov: getMinString(action.payload, 'deg'),
+            maxFov: getMaxString(action.payload, 'deg')
       }
     case SET_CAMERA_PITCH_LIMITS:
       return {
-        ...state, pitchLimitsDeg: action.payload
+        ...state, ...getUpdatedLimits(state, action.payload, 1)
       }
     case SET_CAMERA_RADIUS_LIMITS:
       return {
-        ...state, radiusLimits: action.payload
+        ...state, ...getUpdatedLimits(state, action.payload, 2)
       }
     case SET_CAMERA_YAW_LIMITS:
       return {
-        ...state, yawLimitsDeg: action.payload
+        ...state, ...getUpdatedLimits(state, action.payload, 0)
       }
     case SET_MIN_ZOOM:
+      const limits = getUpdatedLimits(
+          state,
+          {
+            enabled: action.payload.fov != null,
+            min: action.payload.radius,
+            max: -1
+          },
+          2);
       return {
-        ...state,
-            radiusLimits: {...state.radiusLimits!, min: action.payload.radius},
-            fovLimitsDeg: {...state.fovLimitsDeg!, min: action.payload.fov}
-      }
-    case SET_ZOOM_ENABLED:
-      return {
-        ...state,
-            radiusLimits: {...state.radiusLimits!, enabled: action.payload},
-            fovLimitsDeg: {...state.fovLimitsDeg!, enabled: action.payload}
+        ...state, minCameraOrbit: limits.minCameraOrbit,
+            minFov: getMinString(
+                {
+                  enabled: action.payload.fov != null,
+                  min: action.payload.fov,
+                  max: -1
+                },
+                'deg')
       }
     default:
       return state;

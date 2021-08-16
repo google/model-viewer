@@ -19,9 +19,7 @@ import {customElement, html, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../../space_opera_base.js';
 import {zoomStyles} from '../../../styles.css.js';
-import {State} from '../../../types.js';
-import {dispatchFovLimits, dispatchRadiusLimits, dispatchSetMinZoom, dispatchZoomEnabled} from '../../config/reducer.js';
-import {Limits} from '../../config/types.js';
+import {dispatchSetMinZoom} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getCameraState, getModelViewer} from '../../model_viewer_preview/reducer.js';
 
@@ -30,41 +28,25 @@ import {getCameraState, getModelViewer} from '../../model_viewer_preview/reducer
 export class ZooomLimits extends ConnectedLitElement {
   static styles = zoomStyles;
 
-  @internalProperty() hasZoom: boolean|undefined = false;
-  @internalProperty() fovLimitsDeg: Limits|undefined = undefined;
-  @internalProperty() snackClassName: string = '';
-  @internalProperty() snackBody: string = '';
-
-  stateChanged(state: State) {
-    this.hasZoom = getCamera(state).fovLimitsDeg?.enabled;
-    this.fovLimitsDeg = getCamera(state).fovLimitsDeg;
-  }
+  @internalProperty() enabled = false;
+  @internalProperty() minRadius = 0;
+  @internalProperty() minFov = 0;
 
   onToggle(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
+    this.enabled = (event.target as HTMLInputElement).checked;
 
-    if (checked && this.fovLimitsDeg === undefined) {
-      const newLimits = {
-        enabled: checked,
-        min: 'auto',
-        max: 'auto',
-      };
-      reduxStore.dispatch(dispatchFovLimits(newLimits));
-      reduxStore.dispatch(dispatchRadiusLimits(newLimits));
+    if (this.enabled) {
+      reduxStore.dispatch(dispatchSetMinZoom(this.minFov, this.minRadius));
     } else {
-      reduxStore.dispatch(dispatchZoomEnabled(checked));
+      reduxStore.dispatch(dispatchSetMinZoom());
     }
   }
 
   dispatchMin() {
     const currentCamera = getCameraState(getModelViewer()!);
-    const currFieldOfView = currentCamera.fieldOfViewDeg;
-    const currRadius = currentCamera.orbit?.radius;
-    reduxStore.dispatch(dispatchSetMinZoom(currFieldOfView!, currRadius!));
-  }
-
-  dispatchResetMin() {
-    reduxStore.dispatch(dispatchSetMinZoom('auto', 'auto'));
+    this.minFov = currentCamera.fieldOfViewDeg;
+    this.minRadius = currentCamera.orbit.radius;
+    reduxStore.dispatch(dispatchSetMinZoom(this.minFov, this.minRadius));
   }
 
   render() {
@@ -72,18 +54,15 @@ export class ZooomLimits extends ConnectedLitElement {
     <me-checkbox
       id="limit-enabled"
       label="Apply Minimum Zoom"
-      ?checked="${!!this.hasZoom}"
+      ?checked="${this.enabled}"
       @change=${this.onToggle}>
     </me-checkbox>
     ${
-        this.hasZoom ? html`
+        this.enabled ? html`
       <mwc-button id="set-min-button" class="SetButton" unelevated 
       @click="${this.dispatchMin}">Set Min</mwc-button>
-      <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
-      @click="${this.dispatchResetMin}">Reset Min</mwc-button>
     ` :
                        html``}
-    <div class="${this.snackClassName}" id="snackbar">${this.snackBody}</div>
 `;
   }
 }

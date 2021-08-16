@@ -54,9 +54,7 @@ describe('camera constraints test', () => {
 
   it('updates the camera target on camera target change', () => {
     reduxStore.dispatch(dispatchCameraTarget({x: 1, y: 2, z: 3}));
-    expect(cameraSettings.camera.target!.x).toEqual(1);
-    expect(cameraSettings.camera.target!.y).toEqual(2);
-    expect(cameraSettings.camera.target!.z).toEqual(3);
+    expect(getConfig(reduxStore.getState()).cameraTarget).toEqual('1m 2m 3m');
   });
 
   it('updates camera target on UI change', async () => {
@@ -73,7 +71,7 @@ describe('camera constraints test', () => {
     xInput.value = '6';
     xInput.dispatchEvent(new Event('change'));
 
-    expect(cameraSettings.camera.target!.x).toEqual(6);
+    expect(getConfig(reduxStore.getState()).cameraTarget).toEqual('6m 0m 0m');
   });
 
   it('reflects the correct camera orbit in its editor UI', async () => {

@@ -19,9 +19,9 @@ import {customElement, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
-import {Limits} from '../../config/types.js';
+import {dispatchYawLimits} from '../../config/reducer.js';
 import {getCameraState, getModelViewer} from '../../model_viewer_preview/reducer.js';
-import {dispatchYawLimits, getIsDirtyCamera} from '../reducer.js';
+import {getIsDirtyCamera} from '../reducer.js';
 
 import {LimitsBase} from './limits_base.js';
 
@@ -40,12 +40,11 @@ export class YawLimits extends LimitsBase {
   @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
-    this.limitsProperty = getCamera(state).yawLimitsDeg;
     this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
-  dispatchLimits(limits?: Limits) {
-    reduxStore.dispatch(dispatchYawLimits(limits));
+  dispatchLimits() {
+    reduxStore.dispatch(dispatchYawLimits(this.limitsProperty));
   }
 
   get label() {
@@ -70,7 +69,7 @@ export class YawLimits extends LimitsBase {
 
   get currentPreviewValue() {
     const currentCamera = getCameraState(getModelViewer()!);
-    return Math.round(currentCamera.orbit?.thetaDeg ?? 0);
+    return Math.round(currentCamera.orbit.thetaDeg);
   }
 }
 

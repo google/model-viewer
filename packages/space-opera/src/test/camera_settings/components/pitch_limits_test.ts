@@ -19,7 +19,7 @@
 import '../../../components/camera_settings/components/pitch_limits.js';
 
 import {PitchLimits} from '../../../components/camera_settings/components/pitch_limits.js';
-import {dispatchPitchLimits, getCamera} from '../../../components/camera_settings/reducer.js';
+import {dispatchPitchLimits, getConfig} from '../../../components/config/reducer.js';
 import {ModelViewerPreview} from '../../../components/model_viewer_preview/model_viewer_preview.js';
 import {getModelViewer} from '../../../components/model_viewer_preview/reducer.js';
 import {dispatchReset} from '../../../reducers.js';
@@ -67,6 +67,7 @@ describe('pitch limits editor test', () => {
      HTMLInputElement)
         .click();
     await pitchLimitsDeg.updateComplete;
-    expect(getCamera(reduxStore.getState()).pitchLimitsDeg!.max).toEqual(33);
+    expect(getConfig(reduxStore.getState()).maxCameraOrbit)
+        .toEqual('auto 33deg auto');
   });
 });

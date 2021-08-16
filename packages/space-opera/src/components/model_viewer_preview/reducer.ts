@@ -21,7 +21,6 @@ import {Image} from '@google/model-viewer/lib/three-components/gltf-instance/glt
 
 import {Action, BestPracticesState, State} from '../../types.js';
 import {renderARButton, renderARPrompt, renderProgressBar} from '../best_practices/render_best_practices.js';
-import {Camera} from '../camera_settings/camera_state.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {ModelState, Thumbnail} from '../model_viewer_preview/types.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
@@ -62,7 +61,7 @@ export function getCameraState(viewer: ModelViewerElement) {
     },
     target: viewer.getCameraTarget(),
     fieldOfViewDeg: viewer.getFieldOfView(),
-  } as Camera;
+  };
 }
 
 export async function downloadContents(url: string): Promise<ArrayBuffer> {

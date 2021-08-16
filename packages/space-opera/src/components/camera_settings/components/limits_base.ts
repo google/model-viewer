@@ -53,9 +53,9 @@ export abstract class LimitsBase extends ConnectedLitElement {
     return 1;
   }
 
-  @query('#minimum') minimumInput?: SliderWithInputElement;
-  @query('#maximum') maximumInput?: SliderWithInputElement;
-  @query('#limit-enabled') enabledInput?: HTMLInputElement;
+  @query('#minimum') minimumInput!: SliderWithInputElement;
+  @query('#maximum') maximumInput!: SliderWithInputElement;
+  @query('#limit-enabled') enabledInput!: HTMLInputElement;
 
   get inputLimits() {
     if (!this.maximumInput || !this.minimumInput || !this.enabledInput) {
@@ -73,37 +73,47 @@ export abstract class LimitsBase extends ConnectedLitElement {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (!this.limitsProperty) {
-      const newLimits = {
+      this.limitsProperty = {
         enabled: checked,
         min: this.absoluteMinimum,
         max: this.absoluteMaximum,
       };
-      this.dispatchLimits(newLimits);
     } else {
-      this.dispatchLimits({...this.limitsProperty, enabled: checked});
+      this.limitsProperty.enabled = checked;
     }
+    this.dispatchLimits();
   }
 
   onSetMin() {
-    this.dispatchLimits({...this.inputLimits, min: this.currentPreviewValue});
+    this.limitsProperty!.min = this.currentPreviewValue;
+    this.dispatchLimits();
   }
 
   onSetMax() {
-    this.dispatchLimits({...this.inputLimits, max: this.currentPreviewValue});
+    this.limitsProperty!.max = this.currentPreviewValue;
+    this.dispatchLimits();
   }
 
   onMinimumInputChange() {
-    const limits = this.inputLimits;
+    if (this.limitsProperty == null) {
+      return;
+    }
+    this.limitsProperty.min = this.minimumInput.value;
     // Push max if needed
-    limits.max = Math.max(limits.max, limits.min);
-    this.dispatchLimits(limits);
+    this.limitsProperty.max =
+        Math.max(this.limitsProperty.max, this.limitsProperty.min);
+    this.dispatchLimits();
   }
 
   onMaximumInputChange() {
-    const limits = this.inputLimits;
+    if (this.limitsProperty == null) {
+      return;
+    }
+    this.limitsProperty.max = this.maximumInput.value;
     // Push min if needed
-    limits.min = Math.min(limits.max, limits.min);
-    this.dispatchLimits(limits);
+    this.limitsProperty.min =
+        Math.min(this.limitsProperty.max, this.limitsProperty.min);
+    this.dispatchLimits();
   }
 
   render() {
