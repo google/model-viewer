@@ -497,7 +497,7 @@ export class SmoothControls extends EventDispatcher {
     return (event: E) => {
       fn(event);
 
-      if (event.cancelable) {
+      if (this.touchMode !== null && event.cancelable) {
         event.preventDefault();
       }
     };
