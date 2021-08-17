@@ -15,6 +15,9 @@
  *
  */
 
+import '@material/mwc-icon-button';
+import '@polymer/paper-item';
+import '@polymer/paper-slider';
 import '../shared/checkbox/checkbox.js';
 import '../shared/color_picker/color_picker.js';
 import '../shared/dropdown/dropdown.js';
@@ -23,9 +26,6 @@ import '../shared/expandable_content/expandable_tab.js';
 import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
-import '@polymer/paper-item';
-import '@polymer/paper-slider';
-import '@material/mwc-icon-button';
 
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, query} from 'lit-element';
@@ -48,6 +48,7 @@ import {ALPHA_BLEND_MODES} from '../utils/gltf_constants.js';
 import {checkFinite} from '../utils/reducer_utils.js';
 
 import {styles} from './materials_panel.css.js';
+
 
 
 /** Material panel. */
@@ -184,11 +185,11 @@ export class MaterialPanel extends ConnectedLitElement {
 
       const baseColorFactor = this.getInterpolatedColor(
           originalBaseColor, timestamp - start, DURATION);
-      this.getMaterial().pbrMetallicRoughness.setBaseColorFactor(
+      this.getMaterial()!.pbrMetallicRoughness.setBaseColorFactor(
           baseColorFactor);
       const emissiveFactor = this.getInterpolatedEmissive(
           originalEmissiveFactor, timestamp - start, DURATION);
-      this.getMaterial().setEmissiveFactor(emissiveFactor);
+      this.getMaterial()!.setEmissiveFactor(emissiveFactor);
 
       if (timestamp - start <= DURATION) {
         requestAnimationFrame(interpolateStep);
@@ -259,8 +260,8 @@ export class MaterialPanel extends ConnectedLitElement {
         >${
         getModelViewer()?.model?.materials.map(
             (material, id) => html`<paper-item value="${id}">(${id}) ${
-                material.name ? material.name :
-                                'Unnamed Material'}</paper-item>`)}
+                material!.name ? material!.name :
+                                 'Unnamed Material'}</paper-item>`)}
       </me-dropdown>
     </me-expandable-tab>
     `;
@@ -277,7 +278,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   get selectedBaseColor(): RGBA {
     const alphaFactor =
-        this.getMaterial().pbrMetallicRoughness.baseColorFactor[3];
+        this.getMaterial()!.pbrMetallicRoughness.baseColorFactor[3];
     const selectedColor = color.hexToRgb(this.baseColorPicker.selectedColorHex);
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
@@ -349,19 +350,19 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onBaseColorChange() {
-    this.getMaterial().pbrMetallicRoughness.setBaseColorFactor(
+    this.getMaterial()!.pbrMetallicRoughness.setBaseColorFactor(
         this.selectedBaseColor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onRoughnessChange() {
-    this.getMaterial().pbrMetallicRoughness.setRoughnessFactor(
+    this.getMaterial()!.pbrMetallicRoughness.setRoughnessFactor(
         this.selectedRoughnessFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onMetallicChange() {
-    this.getMaterial().pbrMetallicRoughness.setMetallicFactor(
+    this.getMaterial()!.pbrMetallicRoughness.setMetallicFactor(
         this.selectedMetallicFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
@@ -371,7 +372,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   updateDoubleSided(value: boolean) {
-    this.getMaterial().setDoubleSided(value);
+    this.getMaterial()!.setDoubleSided(value);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -424,68 +425,68 @@ export class MaterialPanel extends ConnectedLitElement {
   onBaseColorTextureChange() {
     this.onTextureChange(
         this.selectedBaseColorTextureId,
-        this.getMaterial().pbrMetallicRoughness.baseColorTexture);
+        this.getMaterial()!.pbrMetallicRoughness.baseColorTexture);
   }
 
   onBaseColorTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.baseColorTexturePicker,
-        this.getMaterial().pbrMetallicRoughness.baseColorTexture);
+        this.getMaterial()!.pbrMetallicRoughness.baseColorTexture);
   }
 
   onMetallicRoughnessTextureChange() {
     this.onTextureChange(
         this.selectedMetallicRoughnessTextureId,
-        this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
+        this.getMaterial()!.pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
   onMetallicRoughnessTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.metallicRoughnessTexturePicker,
-        this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
+        this.getMaterial()!.pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
   onNormalTextureChange() {
     this.onTextureChange(
-        this.selectedNormalTextureId, this.getMaterial().normalTexture);
+        this.selectedNormalTextureId, this.getMaterial()!.normalTexture);
   }
 
   onNormalTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.normalTexturePicker,
-        this.getMaterial().normalTexture);
+        this.getMaterial()!.normalTexture);
   }
 
   onEmissiveTextureChange() {
     this.onTextureChange(
-        this.selectedEmissiveTextureId, this.getMaterial().emissiveTexture);
+        this.selectedEmissiveTextureId, this.getMaterial()!.emissiveTexture);
   }
 
   onEmissiveTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.emissiveTexturePicker,
-        this.getMaterial().emissiveTexture);
+        this.getMaterial()!.emissiveTexture);
   }
 
   onEmissiveFactorChanged() {
-    this.getMaterial().setEmissiveFactor(this.selectedEmissiveFactor);
+    this.getMaterial()!.setEmissiveFactor(this.selectedEmissiveFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onOcclusionTextureChange() {
     this.onTextureChange(
-        this.selectedOcclusionTextureId, this.getMaterial().occlusionTexture);
+        this.selectedOcclusionTextureId, this.getMaterial()!.occlusionTexture);
   }
 
   onOcclusionTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.occlusionTexturePicker,
-        this.getMaterial().occlusionTexture);
+        this.getMaterial()!.occlusionTexture);
   }
 
   onAlphaModeSelect() {
@@ -493,14 +494,14 @@ export class MaterialPanel extends ConnectedLitElement {
         ALPHA_BLEND_MODES[this.alphaModePicker.selectedIndex] as AlphaMode;
     this.alphaCutoffContainer.style.display =
         selectedMode === 'MASK' ? '' : 'none';
-    const material = this.getMaterial()
+    const material = this.getMaterial()!;
     material.setAlphaMode(selectedMode);
     this.alphaCutoffSlider.value = material.getAlphaCutoff();
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onAlphaCutoffChange() {
-    this.getMaterial().setAlphaCutoff(this.selectedAlphaCutoff);
+    this.getMaterial()!.setAlphaCutoff(this.selectedAlphaCutoff);
     reduxStore.dispatch(dispatchModelDirty());
   }
 

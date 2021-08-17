@@ -110,7 +110,7 @@ describe('material panel test', () => {
        textureOptionInput.dispatchEvent(new Event('click'));
        const expectedTextureId = panel.selectedBaseColorTextureId!;
 
-       const {baseColorTexture} = panel.getMaterial().pbrMetallicRoughness;
+       const {baseColorTexture} = panel.getMaterial()!.pbrMetallicRoughness;
        expect(getTextureId(baseColorTexture.texture!.source))
            .toEqual(expectedTextureId);
      });
@@ -125,7 +125,7 @@ describe('material panel test', () => {
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     textureOptionInput.dispatchEvent(new Event('click'));
 
-    const {baseColorTexture} = panel.getMaterial().pbrMetallicRoughness;
+    const {baseColorTexture} = panel.getMaterial()!.pbrMetallicRoughness;
     expect(baseColorTexture.texture).toEqual(null);
   });
 
@@ -143,7 +143,7 @@ describe('material panel test', () => {
        const expectedTextureId = panel.selectedMetallicRoughnessTextureId!;
 
        const {metallicRoughnessTexture} =
-           panel.getMaterial().pbrMetallicRoughness;
+           panel.getMaterial()!.pbrMetallicRoughness;
        expect(getTextureId(metallicRoughnessTexture.texture!.source))
            .toEqual(expectedTextureId);
      });
@@ -158,7 +158,8 @@ describe('material panel test', () => {
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     clearTextureOption.dispatchEvent(new Event('click'));
 
-    const {metallicRoughnessTexture} = panel.getMaterial().pbrMetallicRoughness;
+    const {metallicRoughnessTexture} =
+        panel.getMaterial()!.pbrMetallicRoughness;
     expect(metallicRoughnessTexture.texture).toEqual(null);
   });
 
@@ -174,7 +175,7 @@ describe('material panel test', () => {
     textureOptionInput.dispatchEvent(new Event('click'));
     const expectedTextureId = panel.selectedNormalTextureId!;
 
-    const {normalTexture} = panel.getMaterial();
+    const {normalTexture} = panel.getMaterial()!;
     expect(getTextureId(normalTexture.texture!.source))
         .toEqual(expectedTextureId);
 
@@ -197,7 +198,7 @@ describe('material panel test', () => {
     textureOptionInput.dispatchEvent(new Event('click'));
     const expectedTextureId = panel.selectedEmissiveTextureId!;
 
-    const {emissiveTexture} = panel.getMaterial();
+    const {emissiveTexture} = panel.getMaterial()!;
     expect(getTextureId(emissiveTexture.texture!.source))
         .toEqual(expectedTextureId);
 
@@ -221,7 +222,7 @@ describe('material panel test', () => {
        textureOptionInput.dispatchEvent(new Event('click'));
        const expectedTextureId = panel.selectedOcclusionTextureId!;
 
-       const {occlusionTexture} = panel.getMaterial();
+       const {occlusionTexture} = panel.getMaterial()!;
        expect(getTextureId(occlusionTexture.texture!.source))
            .toEqual(expectedTextureId);
 
@@ -241,7 +242,7 @@ describe('material panel test', () => {
     doubleSidedCheckbox.checked = true;
     doubleSidedCheckbox.dispatchEvent(new Event('change'));
 
-    expect(panel.getMaterial().getDoubleSided()).toBeTrue();
+    expect(panel.getMaterial()!.getDoubleSided()).toBeTrue();
   });
 
   // Upload
@@ -252,7 +253,7 @@ describe('material panel test', () => {
        await checkUpload(
            panel,
            panel.baseColorTexturePicker!,
-           panel.getMaterial().pbrMetallicRoughness.baseColorTexture);
+           panel.getMaterial()!.pbrMetallicRoughness.baseColorTexture);
      });
 
   it('adds a normal texture to model textures on normal texture upload',
@@ -262,7 +263,7 @@ describe('material panel test', () => {
        await checkUpload(
            panel,
            panel.normalTexturePicker!,
-           panel.getMaterial().normalTexture);
+           panel.getMaterial()!.normalTexture);
      });
 
   it('adds a metallic-roughness texture to model textures on MR texture upload',
@@ -272,7 +273,7 @@ describe('material panel test', () => {
        await checkUpload(
            panel,
            panel.metallicRoughnessTexturePicker!,
-           panel.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
+           panel.getMaterial()!.pbrMetallicRoughness.metallicRoughnessTexture);
      });
 
   it('adds a emissive texture to model textures on emissive texture upload',
@@ -282,7 +283,7 @@ describe('material panel test', () => {
        await checkUpload(
            panel,
            panel.emissiveTexturePicker!,
-           panel.getMaterial().emissiveTexture);
+           panel.getMaterial()!.emissiveTexture);
      });
 
   it('adds a occlusion texture to model textures on occlusion texture upload',
@@ -292,7 +293,7 @@ describe('material panel test', () => {
        await checkUpload(
            panel,
            panel.occlusionTexturePicker!,
-           panel.getMaterial().occlusionTexture);
+           panel.getMaterial()!.occlusionTexture);
      });
 
   it('applies changes to model textures on emissiveFactor change', async () => {
@@ -302,7 +303,7 @@ describe('material panel test', () => {
     panel.emissiveFactorPicker.selectedColorHex = '#ff0000';
     panel.emissiveFactorPicker.dispatchEvent(new Event('change'));
 
-    const {emissiveFactor} = panel.getMaterial();
+    const {emissiveFactor} = panel.getMaterial()!;
     expect(emissiveFactor).toEqual([1, 0, 0]);
   });
 
@@ -316,7 +317,7 @@ describe('material panel test', () => {
                          'paper-item[value="MASK"]') as HTMLElement;
     maskItem.click();
 
-    expect(panel.getMaterial().getAlphaMode()).toEqual('MASK');
+    expect(panel.getMaterial()!.getAlphaMode()).toEqual('MASK');
   });
 
   it('applies changes to model textures on alpha cutoff change', async () => {
@@ -344,11 +345,11 @@ describe('material panel test', () => {
     expect(alphaCutoffSlider.parentElement?.parentElement?.style.display)
         .toBe('');
     expect(alphaCutoffSlider.value).toBe(0.5);
-    expect(panel.getMaterial().getAlphaCutoff()).toEqual(0.5);
+    expect(panel.getMaterial()!.getAlphaCutoff()).toEqual(0.5);
 
     alphaCutoffSlider.value = 1;
     alphaCutoffSlider.dispatchEvent(new Event('change'));
 
-    expect(panel.getMaterial().getAlphaCutoff()).toEqual(1);
+    expect(panel.getMaterial()!.getAlphaCutoff()).toEqual(1);
   });
 });
