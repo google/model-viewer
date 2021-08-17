@@ -492,19 +492,14 @@ export class SmoothControls extends EventDispatcher {
     return Math.sqrt(xDelta * xDelta + yDelta * yDelta);
   }
 
-  private onPointerMoveFactory<E extends MouseEvent|TouchEvent>(
-      fn: (event: E) => void) {
-    return (event: E) => {
-      fn(event);
+  private onMouseMove =
+      (event: MouseEvent) => {
+        this.handleSinglePointerMove(event);
 
-      if (this.touchMode !== null && event.cancelable) {
-        event.preventDefault();
+        if (event.cancelable) {
+          event.preventDefault();
+        }
       }
-    };
-  }
-
-  private onMouseMove = this.onPointerMoveFactory(
-      (event: MouseEvent) => this.handleSinglePointerMove(event));
 
   private touchModeZoom: TouchMode = (event) => {
     const {touches} = event;
@@ -549,7 +544,13 @@ export class SmoothControls extends EventDispatcher {
     const {element} = this;
     element.removeEventListener('touchmove', this.onTouchMove);
     if (touchMode) {
-      this._onTouchMove = this.onPointerMoveFactory(touchMode);
+      this._onTouchMove = (event) => {
+        touchMode(event);
+
+        if (this.touchMode !== null && event.cancelable) {
+          event.preventDefault();
+        }
+      };
       element.addEventListener('touchmove', this.onTouchMove, {passive: false});
     } else {
       self.removeEventListener('touchend', this.onTouchEnd);
@@ -578,33 +579,35 @@ export class SmoothControls extends EventDispatcher {
     this.userAdjustOrbit(deltaTheta, deltaPhi, 0);
   }
 
-  private onPointerDownFactory<E extends MouseEvent|TouchEvent>(
-      fn: (event: E) => void) {
-    return (event: E) => {
-      if (!this.canInteract) {
-        return;
-      }
+  private onPointerDown(fn: () => void) {
+    if (!this.canInteract) {
+      return;
+    }
 
-      this.isUserPointing = false;
+    this.isUserPointing = false;
 
-      fn(event);
-    };
+    fn();
   }
 
-  private onMouseDown = this.onPointerDownFactory((event: MouseEvent) => {
-    const {element} = this;
-    element.addEventListener('mousemove', this.onMouseMove);
-    self.addEventListener('mouseup', this.onMouseUp, {once: true});
-    this.handleSinglePointerDown(event);
-  });
+  private onMouseDown = (event: MouseEvent) => {
+    this.onPointerDown(() => {
+      const {element} = this;
+      element.addEventListener('mousemove', this.onMouseMove);
+      self.addEventListener('mouseup', this.onMouseUp, {once: true});
+      this.handleSinglePointerDown(event);
+    });
+  };
 
-  private onTouchStart = this.onPointerDownFactory((e: TouchEvent) => {
-    if (e.touches.length === 1) {
-      self.addEventListener('touchend', this.onTouchEnd);
-      this.touchDecided = false;
-    }
-    this.onTouchChange(e);
-  });
+  private onTouchStart =
+      (event: TouchEvent) => {
+        this.onPointerDown(() => {
+          if (event.touches.length === 1) {
+            self.addEventListener('touchend', this.onTouchEnd);
+            this.touchDecided = false;
+          }
+          this.onTouchChange(event);
+        });
+      }
 
   private onTouchChange(event: TouchEvent) {
     const {touches} = event;
@@ -631,36 +634,35 @@ export class SmoothControls extends EventDispatcher {
     this.element.style.cursor = 'grabbing';
   }
 
-  private onPointerUpFactory<E extends MouseEvent|TouchEvent>(
-      fn: (event: E) => void) {
-    return (event: E) => {
-      fn(event);
+  private onPointerUp() {
+    this.element.style.cursor = 'grab';
 
-      this.element.style.cursor = 'grab';
+    if (this.isUserPointing) {
+      this.dispatchEvent(
+          {type: 'pointer-change-end', pointer: {...this.lastPointerPosition}});
+    }
+  }
 
-      if (this.isUserPointing) {
-        this.dispatchEvent({
-          type: 'pointer-change-end',
-          pointer: {...this.lastPointerPosition}
-        });
+  private onMouseUp =
+      (_event: MouseEvent) => {
+        this.element.removeEventListener('mousemove', this.onMouseMove);
+
+        this.onPointerUp();
       }
-    }
-  };
 
-  private onMouseUp = this.onPointerUpFactory((_event: MouseEvent) => {
-    this.element.removeEventListener('mousemove', this.onMouseMove);
-  });
+  private onTouchEnd =
+      (event: TouchEvent) => {
+        const {touches} = event;
+        if (touches.length === 0) {
+          const {element} = this;
+          element.removeEventListener('touchmove', this.onTouchMove);
+          self.removeEventListener('touchend', this.onTouchEnd);
+        } else {
+          this.onTouchChange(event);
+        }
 
-  private onTouchEnd = this.onPointerUpFactory((event: TouchEvent) => {
-    const {touches} = event;
-    if (touches.length === 0) {
-      const {element} = this;
-      element.removeEventListener('touchmove', this.onTouchMove);
-      self.removeEventListener('touchend', this.onTouchEnd);
-    } else {
-      this.onTouchChange(event);
-    }
-  });
+        this.onPointerUp();
+      }
 
   private onWheel = (event: Event) => {
     if (!this.canInteract) {
