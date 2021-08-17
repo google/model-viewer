@@ -23,7 +23,6 @@ import {Material} from './material.js';
 
 
 const $materials = Symbol('materials');
-const $variants = Symbol('variants');
 
 /**
  * A Model facades the top-level GLTF object returned by Three.js' GLTFLoader.
@@ -31,15 +30,14 @@ const $variants = Symbol('variants');
  * scene graph.
  */
 export class Model implements ModelInterface {
-  private[$materials]: Material[] = [];
-  private[$variants]: Map<number, Material> = new Map<number, Material>();
+  private[$materials]: Array<Material|null> = new Array<Material|null>();
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
       onUpdate: () => void = () => {}) {
     const {gltf, gltfElementMap} = correlatedSceneGraph;
 
-    gltf.materials!.forEach(material => {
+    for (const material of gltf.materials!) {
       const correlatedMaterial =
           gltfElementMap.get(material) as Set<MeshStandardMaterial>;
 
@@ -47,10 +45,13 @@ export class Model implements ModelInterface {
         this[$materials].push(
             new Material(onUpdate, gltf, material, correlatedMaterial));
       } else {
+        // Carve out an empty slot for non-correlated materials.
+        this[$materials].push(null);
+
         console.warn(`Unreferenced material "${
-            material.name}" was automatically removed from the model.`);
+            material.name}" instantiation was skipped.`);
       }
-    });
+    }
   }
 
   /**
@@ -59,11 +60,7 @@ export class Model implements ModelInterface {
    *
    * TODO(#1003): How do we handle non-active scenes?
    */
-  get materials(): Material[] {
+  get materials(): Array<Material|null> {
     return this[$materials];
-  }
-
-  get variants(): Map<number, Material> {
-    return this[$variants];
   }
 }

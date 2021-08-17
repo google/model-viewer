@@ -41,8 +41,8 @@ suite('scene-graph/texture', () => {
       texture = await element.createTexture(assetPath(
           'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png'));
 
-      element.model!.materials[0]
-          .pbrMetallicRoughness.baseColorTexture!.setTexture(texture);
+      element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture!
+          .setTexture(texture);
     });
 
     teardown(() => {
@@ -61,9 +61,8 @@ suite('scene-graph/texture', () => {
       const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
-          element.model!.materials[0]
-              .pbrMetallicRoughness.baseColorTexture?.texture
-              ?.source[$threeTexture]!;
+          element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture
+              ?.texture?.source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });
@@ -72,9 +71,8 @@ suite('scene-graph/texture', () => {
       const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const uuidFromTextureObject: string =
-          (element.model!.materials[0]
-               .pbrMetallicRoughness.baseColorTexture?.texture
-               ?.[$correlatedObjects]
+          (element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture
+               ?.texture?.[$correlatedObjects]
                ?.values()
                .next()
                .value as ThreeTexture)
@@ -82,9 +80,8 @@ suite('scene-graph/texture', () => {
       expect(uuidFromTextureObject).to.be.equal(newUUID);
 
       const uuidFromSamplerObject: string =
-          (element.model!.materials[0]
-               .pbrMetallicRoughness.baseColorTexture?.texture
-               ?.sampler[$correlatedObjects]
+          (element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture
+               ?.texture?.sampler[$correlatedObjects]
                ?.values()
                .next()
                .value as ThreeTexture)
@@ -92,9 +89,8 @@ suite('scene-graph/texture', () => {
       expect(uuidFromSamplerObject).to.be.equal(newUUID);
 
       const uuidFromImageObject: string =
-          (element.model!.materials[0]
-               .pbrMetallicRoughness.baseColorTexture?.texture
-               ?.source[$correlatedObjects]
+          (element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture
+               ?.texture?.source[$correlatedObjects]
                ?.values()
                .next()
                .value as ThreeTexture)
@@ -106,15 +102,13 @@ suite('scene-graph/texture', () => {
       const imageFromSetTexture = texture?.source[$threeTexture]?.image;
       expect(imageFromSetTexture).to.not.be.null;
 
-      await element.model!.materials[0]
-          .pbrMetallicRoughness.baseColorTexture?.texture?.source
-          .setURI(assetPath(
+      await element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture
+          ?.texture?.source.setURI(assetPath(
               'models/glTF-Sample-Models/2.0/CesiumMan/glTF/CesiumMan_img0.jpg'));
 
       const imageFromSetURI =
-          element.model!.materials[0]
-              .pbrMetallicRoughness.baseColorTexture?.texture
-              ?.source[$threeTexture]
+          element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture
+              ?.texture?.source[$threeTexture]
               ?.image;
 
       expect(imageFromSetURI).to.not.be.equal(imageFromSetTexture);

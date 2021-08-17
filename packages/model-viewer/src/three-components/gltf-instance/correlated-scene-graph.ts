@@ -110,7 +110,7 @@ export class CorrelatedSceneGraph {
   /**
    * Transfers the association between a raw glTF and a Three.js scene graph
    * to a clone of the Three.js scene graph, resolved as a new
-   * CorrelatedsceneGraph instance.
+   * Correlated SceneGraph instance.
    */
   private static[$correlateCloneThreeGLTF](
       cloneThreeGLTF: ThreeGLTF,
@@ -120,7 +120,7 @@ export class CorrelatedSceneGraph {
     const originalGLTF = upstreamCorrelatedSceneGraph.gltf;
     const cloneGLTF: GLTF = JSON.parse(JSON.stringify(originalGLTF));
     const cloneThreeObjectMap: ThreeObjectToGLTFElementHandleMap = new Map();
-    const cloneGLTFELementMap: GLTFElementToThreeObjectMap = new Map();
+    const cloneGLTFElementMap: GLTFElementToThreeObjectMap = new Map();
 
     const defaultMaterial = {name: 'Default'} as Material;
     const defaultReference = {type: 'materials', index: -1} as GLTFReference;
@@ -167,15 +167,15 @@ export class CorrelatedSceneGraph {
             cloneThreeObjectMap.set(cloneObject, {type, index});
 
             const cloneObjects: Set<typeof cloneObject> =
-                cloneGLTFELementMap.get(cloneElement) || new Set();
+                cloneGLTFElementMap.get(cloneElement) || new Set();
             cloneObjects.add(cloneObject);
 
-            cloneGLTFELementMap.set(cloneElement, cloneObjects);
+            cloneGLTFElementMap.set(cloneElement, cloneObjects);
           });
     }
 
     return new CorrelatedSceneGraph(
-        cloneThreeGLTF, cloneGLTF, cloneThreeObjectMap, cloneGLTFELementMap);
+        cloneThreeGLTF, cloneGLTF, cloneThreeObjectMap, cloneGLTFElementMap);
   }
 
   /**

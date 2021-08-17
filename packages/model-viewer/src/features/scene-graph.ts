@@ -155,18 +155,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (gltfVariantMap !== null) {
           for (const index of updatedMaterials) {
-            let variant = this[$model]!.variants.get(index);
-            if (variant === null || variant === undefined) {
+            if (this[$model]!.materials[index] == null) {
               const material = gltf.materials![index];
-              // Instantiates the variant material.
-              variant = new Material(
+              this[$model]!.materials[index] = new Material(
                   this[$getOnUpdateMethod](),
                   gltf,
                   material,
                   gltfVariantMap.get(material) as Set<MeshStandardMaterial>);
-              this[$model]!.variants.set(index, variant);
             }
-            this[$model]!.materials[index] = variant;
           }
         }
         this[$needsRender]();
