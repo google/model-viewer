@@ -33,7 +33,7 @@ import {ModelViewerConfig, State} from '../../types.js';
 import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../config/reducer.js';
 import {Vector3D} from '../config/types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
+import {getCameraState, getModel} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
@@ -145,6 +145,10 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   stateChanged(state: State) {
+    if (getModel(state) == null) {
+      return;
+    }
+
     const config = getConfig(state);
     if (config !== this.config) {
       this.config = config;
@@ -153,9 +157,7 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   async updateInitialCamera() {
-    const modelViewer = getModelViewer()!;
-    await modelViewer.updateComplete;
-    const cameraState = getCameraState(modelViewer);
+    const cameraState = await getCameraState();
     this.cameraTargetInput.target = cameraState.target;
     if (this.config.cameraOrbit == null) {
       this.cameraOrbitEditor.style.display = 'none';
@@ -167,9 +169,9 @@ export class CameraSettings extends ConnectedLitElement {
     }
   }
 
-  onSaveCameraOrbit() {
-    const currentOrbit = getCameraState(getModelViewer()!).orbit;
-    reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
+  async onSaveCameraOrbit() {
+    const currentCamera = await getCameraState();
+    reduxStore.dispatch(dispatchSaveCameraOrbit(currentCamera.orbit));
   }
 
   resetInitialCamera() {
@@ -177,11 +179,11 @@ export class CameraSettings extends ConnectedLitElement {
     reduxStore.dispatch(dispatchSaveCameraOrbit(undefined));
   }
 
-  onCameraOrbitEditorChange() {
-    const currentOrbit = getCameraState(getModelViewer()!).orbit;
+  async onCameraOrbitEditorChange() {
+    const currentCamera = await getCameraState();
     const orb = {
       ...this.cameraOrbitEditor.currentOrbit,
-      radius: currentOrbit.radius,
+      radius: currentCamera.orbit.radius,
     };
     reduxStore.dispatch(dispatchSaveCameraOrbit(orb));
   }

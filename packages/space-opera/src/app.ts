@@ -21,7 +21,12 @@
 
 import '@material/mwc-button';
 import '@polymer/paper-dialog/paper-dialog';
-
+// The order of imports is important, as this is the order in which their
+// stateChanged() methods will be called. We put the preview first to apply
+// changes to the <model-viewer> element in case they need to be queried by
+// subsequent components. Keep in mind that those will still have to await
+// updateComplete since rendering is async in Lit Element.
+import './components/model_viewer_preview/model_viewer_preview.js';
 import './components/animation_controls/animation_controls.js';
 import './components/camera_settings/camera_settings.js';
 import './components/model_viewer_snippet/components/download_button.js';
@@ -33,7 +38,6 @@ import './components/materials_panel/materials_panel.js';
 import './components/model_viewer_snippet/components/open_button.js';
 import './components/model_viewer_snippet/components/validation.js';
 import './components/model_editor/model_editor.js';
-import './components/model_viewer_preview/model_viewer_preview.js';
 import './components/model_viewer_snippet/model_viewer_snippet.js';
 import './components/inspector/inspector.js';
 import './components/shared/tabs/tabs.js';

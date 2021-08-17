@@ -16,7 +16,6 @@
  */
 
 import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/texture-info';
-import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {Image} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 
 import {Action, BestPracticesState, State} from '../../types.js';
@@ -29,7 +28,7 @@ import {radToDeg} from '../utils/reducer_utils.js';
 const THUMBNAIL_SIZE = 256;
 
 export function getModelViewer() {
-  return document.querySelector('model-viewer-preview')?.modelViewer;
+  return document.querySelector('model-viewer-preview')!.modelViewer;
 }
 
 export function renderCommonChildElements(
@@ -51,7 +50,11 @@ export function renderCommonChildElements(
   return childElements;
 }
 
-export function getCameraState(viewer: ModelViewerElement) {
+export async function getCameraState() {
+  const preview = document.querySelector('model-viewer-preview')!;
+  const viewer = preview.modelViewer;
+  await preview.updateComplete;
+  await viewer.updateComplete;
   const orbitRad = viewer.getCameraOrbit();
   return {
     orbit: {

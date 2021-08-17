@@ -21,7 +21,7 @@ import {reduxStore} from '../../../space_opera_base.js';
 import {zoomStyles} from '../../../styles.css.js';
 import {dispatchSetMinZoom} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
-import {getCameraState, getModelViewer} from '../../model_viewer_preview/reducer.js';
+import {getModelViewer} from '../../model_viewer_preview/reducer.js';
 
 /** The Camera Settings panel. */
 @customElement('me-camera-zoom-limits')
@@ -43,9 +43,10 @@ export class ZooomLimits extends ConnectedLitElement {
   }
 
   dispatchMin() {
-    const currentCamera = getCameraState(getModelViewer()!);
-    this.minFov = currentCamera.fieldOfViewDeg;
-    this.minRadius = currentCamera.orbit.radius;
+    const modelViewer = getModelViewer()!;
+    this.minFov = modelViewer.getFieldOfView();
+    const currentOrbit = modelViewer.getCameraOrbit();
+    this.minRadius = currentOrbit.radius;
     reduxStore.dispatch(dispatchSetMinZoom(this.minFov, this.minRadius));
   }
 

@@ -75,8 +75,8 @@ export class PosterControlsElement extends ConnectedLitElement {
       return;
 
     // otherwise, take the current model-viewer state
-    const currentOrbit = getCameraState(modelViewer).orbit;
-    reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
+    const currentCamera = await getCameraState();
+    reduxStore.dispatch(dispatchSaveCameraOrbit(currentCamera.orbit));
     this.toastBody =
         'Initial camera undefined, setting initial camera to current camera.';
     this.toastClassName = 'show';
