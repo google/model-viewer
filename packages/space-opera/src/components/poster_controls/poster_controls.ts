@@ -96,7 +96,7 @@ export class PosterControlsElement extends ConnectedLitElement {
     modelViewer.jumpCameraToGoal();
     requestAnimationFrame(async () => {
       modelViewer.reveal = 'interaction';
-      modelViewer.showPoster()
+      modelViewer.showPoster();
     });
   }
 

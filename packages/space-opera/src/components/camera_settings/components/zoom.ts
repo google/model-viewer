@@ -29,8 +29,8 @@ export class ZooomLimits extends ConnectedLitElement {
   static styles = zoomStyles;
 
   @internalProperty() enabled = false;
-  @internalProperty() minRadius = 0;
-  @internalProperty() minFov = 0;
+  @internalProperty() minRadius?: number = undefined;
+  @internalProperty() minFov?: number = undefined;
 
   onToggle(event: Event) {
     this.enabled = (event.target as HTMLInputElement).checked;

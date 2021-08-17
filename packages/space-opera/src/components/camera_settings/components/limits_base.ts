@@ -79,7 +79,7 @@ export abstract class LimitsBase extends ConnectedLitElement {
         max: this.absoluteMaximum,
       };
     } else {
-      this.limitsProperty.enabled = checked;
+      this.limitsProperty = {...this.limitsProperty, enabled: checked};
     }
     this.dispatchLimits();
   }
