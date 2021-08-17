@@ -23,6 +23,7 @@ import {Material} from './material.js';
 
 
 const $materials = Symbol('materials');
+const $variants = Symbol('variants');
 
 /**
  * A Model facades the top-level GLTF object returned by Three.js' GLTFLoader.
@@ -30,7 +31,8 @@ const $materials = Symbol('materials');
  * scene graph.
  */
 export class Model implements ModelInterface {
-  private[$materials]: Array<Material> = [];
+  private[$materials]: Material[] = [];
+  private[$variants]: Map<number, Material> = new Map<number, Material>();
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
@@ -57,7 +59,11 @@ export class Model implements ModelInterface {
    *
    * TODO(#1003): How do we handle non-active scenes?
    */
-  get materials(): Array<Material> {
+  get materials(): Material[] {
     return this[$materials];
+  }
+
+  get variants(): Map<number, Material> {
+    return this[$variants];
   }
 }

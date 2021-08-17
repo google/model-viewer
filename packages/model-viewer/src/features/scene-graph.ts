@@ -151,15 +151,23 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         const updatedMaterials =
             await threeGLTF.correlatedSceneGraph.loadVariant(variantName!);
-        const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
+        const {gltf, gltfVariantMap} = threeGLTF.correlatedSceneGraph;
 
-        for (const index of updatedMaterials) {
-          const material = gltf.materials![index];
-          this[$model]!.materials[index] = new Material(
-              this[$getOnUpdateMethod](),
-              gltf,
-              material,
-              gltfElementMap.get(material) as Set<MeshStandardMaterial>);
+        if (gltfVariantMap !== null) {
+          for (const index of updatedMaterials) {
+            let variant = this[$model]!.variants.get(index);
+            if (variant === null || variant === undefined) {
+              const material = gltf.materials![index];
+              // Instantiates the variant material.
+              variant = new Material(
+                  this[$getOnUpdateMethod](),
+                  gltf,
+                  material,
+                  gltfVariantMap.get(material) as Set<MeshStandardMaterial>);
+              this[$model]!.variants.set(index, variant);
+            }
+            this[$model]!.materials[index] = variant;
+          }
         }
         this[$needsRender]();
       }

@@ -18,6 +18,7 @@ export type ThreeObjectToGLTFElementHandleMap =
 const $threeGLTF = Symbol('threeGLTF');
 const $gltf = Symbol('gltf');
 const $gltfElementMap = Symbol('gltfElementMap');
+const $gltfVariantMap = Symbol('gltfVariantMap');
 const $threeObjectMap = Symbol('threeObjectMap');
 const $parallelTraverseThreeScene = Symbol('parallelTraverseThreeScene');
 
@@ -216,6 +217,7 @@ export class CorrelatedSceneGraph {
   private[$gltf]: GLTF;
   private[$gltfElementMap]: GLTFElementToThreeObjectMap;
   private[$threeObjectMap]: ThreeObjectToGLTFElementHandleMap;
+  private[$gltfVariantMap]: GLTFElementToThreeObjectMap|null = null;
 
   /**
    * The source Three.js GLTF result given to us by a Three.js GLTFLoader.
@@ -239,6 +241,10 @@ export class CorrelatedSceneGraph {
    */
   get gltfElementMap(): GLTFElementToThreeObjectMap {
     return this[$gltfElementMap];
+  }
+
+  get gltfVariantMap(): GLTFElementToThreeObjectMap|null {
+    return this[$gltfVariantMap];
   }
 
   /**
@@ -277,10 +283,14 @@ export class CorrelatedSceneGraph {
          gltfMaterialIndex: number) => {
           updatedMaterials.add(gltfMaterialIndex);
           const gltfElement = this.gltf.materials![gltfMaterialIndex];
-          let threeObjects = this.gltfElementMap.get(gltfElement);
+          if (this[$gltfVariantMap] === null) {
+            this[$gltfVariantMap] = new Map<GLTFElement, ThreeObjectSet>();
+          }
+          let threeObjects = this[$gltfVariantMap]!.get(gltfElement);
           if (threeObjects == null) {
             threeObjects = new Set();
-            this.gltfElementMap.set(gltfElement, threeObjects);
+            // Maps the original gltfElement to a set of possible variants.
+            this[$gltfVariantMap]!.set(gltfElement, threeObjects);
           }
           threeObjects.add((object as Mesh).material as Material);
         });
