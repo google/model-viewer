@@ -134,7 +134,7 @@ export class OpenModal extends ConnectedLitElement {
       // config.animationName is cleared too (animation UI tries to find the
       // anim by name, can't find it because the model is empty, thus
       // triggering a change event selecting none).
-      dispatchConfig(config);
+      reduxStore.dispatch(dispatchConfig(config));
       reduxStore.dispatch(dispatchSetHotspots(hotspotConfigs));
       reduxStore.dispatch(dispatchArConfig(arConfig));
 

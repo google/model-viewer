@@ -93,15 +93,6 @@ export class CameraTargetInput extends ConnectedLitElement {
   @property({attribute: false}) change?: (newValue: Vector3D) => void;
   @internalProperty() target?: Vector3D;
 
-  stateChanged(_state: State) {
-    const modelViewer = getModelViewer();
-    if (modelViewer != null) {
-      this.target = getCameraState(modelViewer).target;
-    } else {
-      this.target = undefined;
-    }
-  }
-
   protected onInputChange(event: Event) {
     event.preventDefault();
     if (!this.change) {
@@ -142,6 +133,7 @@ export class CameraSettings extends ConnectedLitElement {
   @internalProperty() config: ModelViewerConfig = {};
 
   @query('me-camera-orbit-editor') cameraOrbitEditor!: CameraOrbitEditor;
+  @query('me-camera-target-input') cameraTargetInput!: CameraTargetInput;
   @query('me-checkbox#auto-rotate') autoRotateCheckbox!: CheckboxElement;
 
   // Specifically overriding a super class method.
@@ -156,19 +148,27 @@ export class CameraSettings extends ConnectedLitElement {
     const config = getConfig(state);
     if (config !== this.config) {
       this.config = config;
-      if (config.cameraOrbit != null) {
-        this.onSaveCameraOrbit();
-      }
+      this.updateInitialCamera();
+    }
+  }
+
+  async updateInitialCamera() {
+    const modelViewer = getModelViewer()!;
+    await modelViewer.updateComplete;
+    const cameraState = getCameraState(modelViewer);
+    this.cameraTargetInput.target = cameraState.target;
+    if (this.config.cameraOrbit == null) {
+      this.cameraOrbitEditor.style.display = 'none';
+    } else {
+      const currentOrbit = cameraState.orbit;
+      this.cameraOrbitEditor.yawInput.value = currentOrbit.thetaDeg;
+      this.cameraOrbitEditor.pitchInput.value = currentOrbit.phiDeg;
+      this.cameraOrbitEditor.style.display = '';
     }
   }
 
   onSaveCameraOrbit() {
-    const modelViewer = getModelViewer()!;
-    const cameraState = getCameraState(modelViewer);
-    const currentOrbit = cameraState.orbit;
-    this.cameraOrbitEditor.yawInput.value = currentOrbit.thetaDeg;
-    this.cameraOrbitEditor.pitchInput.value = currentOrbit.phiDeg;
-    this.cameraOrbitEditor.style.display = '';
+    const currentOrbit = getCameraState(getModelViewer()!).orbit;
     reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
   }
 

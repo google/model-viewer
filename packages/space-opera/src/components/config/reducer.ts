@@ -158,72 +158,57 @@ export const getConfig = (state: State) =>
 export function configReducer(
     state: ModelViewerConfig = {}, action: Action): ModelViewerConfig {
   switch (action.type) {
-    case SET_CONFIG: {
+    case SET_CONFIG:
       return action.payload;
-    }
     case SET_REVEAL:
       return {...state, reveal: action.payload};
     case SET_POSTER:
-      return {
-        ...state, poster: action.payload
-      }
+      return {...state, poster: action.payload};
     case UPDATE_SHADOW_SOFTNESS:
-      return {
-        ...state, shadowSoftness: action.payload
-      }
+      return {...state, shadowSoftness: action.payload};
     case UPDATE_SHADOW_INTENSITY:
-      return {
-        ...state, shadowIntensity: action.payload
-      }
+      return {...state, shadowIntensity: action.payload};
     case SET_USE_ENV_AS_SKYBOX:
-      return {
-        ...state, useEnvAsSkybox: action.payload
-      }
+      return {...state, useEnvAsSkybox: action.payload};
     case UPDATE_EXPOSURE:
-      return {
-        ...state, exposure: action.payload
-      }
+      return {...state, exposure: action.payload};
     case UPDATE_IBL:
-      return {
-        ...state, environmentImage: action.payload
-      }
+      return {...state, environmentImage: action.payload};
     case SET_AUTOPLAY_ENABLED:
-      return {
-        ...state, autoplay: action.payload
-      }
+      return {...state, autoplay: action.payload};
     case SET_ANIMATION_NAME:
       return {...state, animationName: action.payload};
     case SET_CAMERA_CONTROLS_ENABLED:
-      return {
-        ...state, cameraControls: action.payload
-      }
+      return {...state, cameraControls: action.payload};
     case SET_AUTO_ROTATE:
-      return {
-        ...state, autoRotate: action.payload
-      }
+      return {...state, autoRotate: action.payload};
     case SET_CAMERA_TARGET:
-      return {
-        ...state, cameraTarget: action.payload
-      }
+      const target = action.payload;
+      const cameraTarget = `${roundToDigits(target.x, DIGITS)}m ${
+          roundToDigits(
+              target.y, DIGITS)}m ${roundToDigits(target.z, DIGITS)}m`;
+      return {...state, cameraTarget};
     case SAVE_CAMERA_ORBIT:
-      return {...state, cameraOrbit: action.payload};
+      const orbit = action.payload;
+      const cameraOrbit = orbit == null ?
+          undefined :
+          `${roundToDigits(orbit.thetaDeg, DIGITS)}deg ${
+              roundToDigits(
+                  orbit.phiDeg,
+                  DIGITS)}deg ${roundToDigits(orbit.radius, DIGITS)}m`
+      return {...state, cameraOrbit};
     case SET_CAMERA_FOV_LIMITS:
       return {
-        ...state, minFov: getMinString(action.payload, 'deg'),
-            maxFov: getMaxString(action.payload, 'deg')
-      }
+        ...state,
+        minFov: getMinString(action.payload, 'deg'),
+        maxFov: getMaxString(action.payload, 'deg')
+      };
     case SET_CAMERA_PITCH_LIMITS:
-      return {
-        ...state, ...getUpdatedLimits(state, action.payload, 1)
-      }
+      return {...state, ...getUpdatedLimits(state, action.payload, 1)};
     case SET_CAMERA_RADIUS_LIMITS:
-      return {
-        ...state, ...getUpdatedLimits(state, action.payload, 2)
-      }
+      return {...state, ...getUpdatedLimits(state, action.payload, 2)};
     case SET_CAMERA_YAW_LIMITS:
-      return {
-        ...state, ...getUpdatedLimits(state, action.payload, 0)
-      }
+      return {...state, ...getUpdatedLimits(state, action.payload, 0)};
     case SET_MIN_ZOOM:
       const limits = getUpdatedLimits(
           state,
@@ -234,15 +219,16 @@ export function configReducer(
           },
           2);
       return {
-        ...state, minCameraOrbit: limits.minCameraOrbit,
-            minFov: getMinString(
-                {
-                  enabled: action.payload.fov != null,
-                  min: action.payload.fov,
-                  max: -1
-                },
-                'deg')
-      }
+        ...state,
+        minCameraOrbit: limits.minCameraOrbit,
+        minFov: getMinString(
+            {
+              enabled: action.payload.fov != null,
+              min: action.payload.fov,
+              max: -1
+            },
+            'deg')
+      };
     default:
       return state;
   }

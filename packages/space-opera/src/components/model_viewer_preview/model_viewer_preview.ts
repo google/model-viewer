@@ -165,6 +165,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
     if (this.modelViewer.availableAnimations.length > 0) {
       reduxStore.dispatch(dispatchAutoplayEnabled(true));
     }
+    const config = getConfig(reduxStore.getState());
+    reduxStore.dispatch(dispatchConfig({...config}));
     this.resolveLoad();
   }
 
