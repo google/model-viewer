@@ -151,9 +151,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         const updatedMaterials =
             await threeGLTF.correlatedSceneGraph.loadVariant(variantName!);
-        const {gltf, gltfVariantMap} = threeGLTF.correlatedSceneGraph;
+        const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
-        if (gltfVariantMap !== null) {
+        if (gltfElementMap !== null) {
           for (const index of updatedMaterials) {
             if (this[$model]!.materials[index] == null) {
               const material = gltf.materials![index];
@@ -161,7 +161,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                   this[$getOnUpdateMethod](),
                   gltf,
                   material,
-                  gltfVariantMap.get(material) as Set<MeshStandardMaterial>);
+                  gltfElementMap.get(material) as Set<MeshStandardMaterial>);
             }
           }
         }
