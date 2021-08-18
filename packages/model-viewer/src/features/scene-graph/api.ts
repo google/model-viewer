@@ -39,7 +39,7 @@ export declare interface Model {
    * correspond to the listing of materials in the glTF, with the possible
    * addition of a default material at the end.
    */
-  readonly materials: Readonly<Array<Material|null>>;
+  readonly materials: Readonly<Array<Material>>;
 }
 
 /**

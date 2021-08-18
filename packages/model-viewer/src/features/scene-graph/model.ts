@@ -18,7 +18,7 @@ import {MeshStandardMaterial} from 'three';
 import {CorrelatedSceneGraph} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 
 import {Model as ModelInterface} from './api.js';
-import {Material} from './material.js';
+import {Material, MaterialLoadMethod} from './material.js';
 
 
 
@@ -30,7 +30,7 @@ const $materials = Symbol('materials');
  * scene graph.
  */
 export class Model implements ModelInterface {
-  private[$materials]: Array<Material|null> = new Array<Material|null>();
+  private[$materials]: Array<Material> = new Array<Material>();
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
@@ -45,11 +45,13 @@ export class Model implements ModelInterface {
         this[$materials].push(
             new Material(onUpdate, gltf, material, correlatedMaterial));
       } else {
-        // Carve out an empty slot for non-correlated materials.
-        this[$materials].push(null);
-
-        console.warn(`Unreferenced material "${
-            material.name}" instantiation was skipped.`);
+        // Configures the material for lazy loading.
+        this[$materials].push(new Material(
+            onUpdate,
+            gltf,
+            material,
+            correlatedMaterial,
+            MaterialLoadMethod.Lazy));
       }
     }
   }
@@ -60,7 +62,7 @@ export class Model implements ModelInterface {
    *
    * TODO(#1003): How do we handle non-active scenes?
    */
-  get materials(): Array<Material|null> {
+  get materials(): Array<Material> {
     return this[$materials];
   }
 }

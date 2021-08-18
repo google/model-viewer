@@ -15,11 +15,11 @@
 
 import {DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
 
-import {AlphaMode, GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {AlphaMode, GLTF, Material as GLTFMaterial, RGB} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Material as DefaultedMaterial} from '../../three-components/gltf-instance/gltf-defaulted.js';
 import {ALPHA_CUTOFF_BLEND, ALPHA_CUTOFF_OPAQUE} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
-import {Material as MaterialInterface, RGB} from './api.js';
+import {Material as MaterialInterface} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 import {TextureInfo, TextureUsage} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
@@ -32,26 +32,49 @@ const $occlusionTexture = Symbol('occlusionTexture');
 const $emissiveTexture = Symbol('emissiveTexture');
 const $backingThreeMaterial = Symbol('backingThreeMaterial');
 const $applyAlphaCutoff = Symbol('applyAlphaCutoff');
+const $lazyLoadGLTFInfo = Symbol('lazyLoadGLTFInfo');
+const $initialize = Symbol('initialize');
+export const $ensureLoaded = Symbol('ensureLoaded');
+
+export enum MaterialLoadMethod {
+  Immediate,
+  Lazy
+}
 
 /**
  * Material facade implementation for Three.js materials
  */
 export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$pbrMetallicRoughness]: PBRMetallicRoughness;
-
   private[$normalTexture]: TextureInfo;
   private[$occlusionTexture]: TextureInfo;
   private[$emissiveTexture]: TextureInfo;
+  private[$lazyLoadGLTFInfo]: GLTF|undefined;
+
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
         .values()
         .next()
         .value;
   }
+
   constructor(
       onUpdate: () => void, gltf: GLTF, gltfMaterial: GLTFMaterial,
-      correlatedMaterials: Set<MeshStandardMaterial>) {
+      correlatedMaterials: Set<MeshStandardMaterial>,
+      loadMethod: MaterialLoadMethod = MaterialLoadMethod.Immediate) {
     super(onUpdate, gltfMaterial, correlatedMaterials);
+    if (loadMethod === MaterialLoadMethod.Immediate) {
+      this[$initialize](gltf);
+    } else {
+      this[$lazyLoadGLTFInfo] = gltf;
+    }
+  }
+
+  private[$initialize](gltf: GLTF): void {
+    const onUpdate = this[$onUpdate] as () => void;
+    const gltfMaterial = this[$sourceObject] as GLTFMaterial;
+    const correlatedMaterials =
+        this[$correlatedObjects] as Set<MeshStandardMaterial>;
 
     if (gltfMaterial.extensions &&
         gltfMaterial.extensions['KHR_materials_pbrSpecularGlossiness']) {
@@ -61,7 +84,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
           currently supported for rendering, but not for our scene-graph API,
           nor for auto-generation of USDZ for Quick Look.`);
     }
-
 
     if (gltfMaterial.pbrMetallicRoughness == null) {
       gltfMaterial.pbrMetallicRoughness = {};
@@ -120,33 +142,49 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         gltf,
         gltfEmissiveTexture ? gltfEmissiveTexture : null,
     );
+
+    // Releases the gltf info.
+    this[$lazyLoadGLTFInfo] = undefined;
+  }
+
+  private[$ensureLoaded]() {
+    if (this[$lazyLoadGLTFInfo] !== undefined) {
+      this[$initialize](this[$lazyLoadGLTFInfo]!);
+    }
   }
 
   get name(): string {
+    this[$ensureLoaded]();
     return (this[$sourceObject] as any).name || '';
   }
 
   get pbrMetallicRoughness(): PBRMetallicRoughness {
+    this[$ensureLoaded]();
     return this[$pbrMetallicRoughness];
   }
 
   get normalTexture(): TextureInfo {
+    this[$ensureLoaded]();
     return this[$normalTexture];
   }
 
   get occlusionTexture(): TextureInfo {
+    this[$ensureLoaded]();
     return this[$occlusionTexture];
   }
 
   get emissiveTexture(): TextureInfo {
+    this[$ensureLoaded]();
     return this[$emissiveTexture];
   }
 
   get emissiveFactor(): RGB {
+    this[$ensureLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).emissiveFactor;
   }
 
   setEmissiveFactor(rgb: RGB) {
+    this[$ensureLoaded]();
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       material.emissive.fromArray(rgb);
@@ -156,6 +194,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   [$applyAlphaCutoff]() {
+    this[$ensureLoaded]();
     const gltfMaterial = this[$sourceObject] as DefaultedMaterial;
     // 0.0001 is the minimum in order to keep from using zero, which disables
     // masking in three.js. It's also small enough to be less than the smallest
@@ -173,16 +212,19 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   setAlphaCutoff(cutoff: number): void {
+    this[$ensureLoaded]();
     (this[$sourceObject] as DefaultedMaterial).alphaCutoff = cutoff;
     this[$applyAlphaCutoff]();
     this[$onUpdate]();
   }
 
   getAlphaCutoff(): number {
+    this[$ensureLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).alphaCutoff;
   }
 
   setDoubleSided(doubleSided: boolean): void {
+    this[$ensureLoaded]();
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       // When double-sided is disabled gltf spec dictates that Back-Face culling
@@ -197,10 +239,12 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   getDoubleSided(): boolean {
+    this[$ensureLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).doubleSided;
   }
 
   setAlphaMode(alphaMode: AlphaMode): void {
+    this[$ensureLoaded]();
     const enableTransparency =
         (material: MeshStandardMaterial, enabled: boolean): void => {
           material.transparent = enabled;
@@ -220,6 +264,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   getAlphaMode(): AlphaMode {
+    this[$ensureLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).alphaMode;
   }
 }

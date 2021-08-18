@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, MeshStandardMaterial, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
+import {Euler, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
@@ -26,7 +26,7 @@ import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-ins
 import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
-import {Material} from './scene-graph/material.js';
+import {$ensureLoaded, Material} from './scene-graph/material.js';
 import {Model} from './scene-graph/model.js';
 import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
@@ -151,18 +151,11 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         const updatedMaterials =
             await threeGLTF.correlatedSceneGraph.loadVariant(variantName!);
-        const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
+        const {gltfElementMap} = threeGLTF.correlatedSceneGraph;
 
         if (gltfElementMap !== null) {
           for (const index of updatedMaterials) {
-            if (this[$model]!.materials[index] == null) {
-              const material = gltf.materials![index];
-              this[$model]!.materials[index] = new Material(
-                  this[$getOnUpdateMethod](),
-                  gltf,
-                  material,
-                  gltfElementMap.get(material) as Set<MeshStandardMaterial>);
-            }
+            this[$model]!.materials[index][$ensureLoaded]();
           }
         }
         this[$needsRender]();
