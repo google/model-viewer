@@ -21,24 +21,20 @@ import '../../components/camera_settings/camera_settings.js';
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
 import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../../components/config/reducer.js';
 import {Vector3D} from '../../components/config/types.js';
-import {getModelViewer} from '../../components/model_viewer_preview/reducer.js';
+import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {DraggableInput} from '../../components/shared/draggable_input/draggable_input.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-describe('camera constraints test', () => {
+fdescribe('camera constraints test', () => {
   let cameraSettings: CameraSettings;
+  let preview: ModelViewerPreview;
 
   beforeEach(async () => {
     reduxStore.dispatch(dispatchReset());
-    expect(getModelViewer()).toBeUndefined();
-    // Mock for the ModelViewerPreview component
-    document.body.innerHTML += `
-    <model-viewer-preview>
-      <model-viewer>
-      </model-viewer>
-    </model-viewer-preview>
-    `;
+    preview = new ModelViewerPreview();
+    document.body.appendChild(preview);
+    await preview.updateComplete;
 
     cameraSettings = new CameraSettings();
     document.body.appendChild(cameraSettings);
@@ -48,7 +44,6 @@ describe('camera constraints test', () => {
   afterEach(() => {
     cameraSettings.config = {};
     document.body.removeChild(cameraSettings);
-    const preview = document.querySelector('model-viewer-preview')!;
     document.body.removeChild(preview);
   });
 

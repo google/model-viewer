@@ -19,7 +19,7 @@
 import '../../../components/camera_settings/components/pitch_limits.js';
 
 import {PitchLimits} from '../../../components/camera_settings/components/pitch_limits.js';
-import {dispatchPitchLimits, getConfig} from '../../../components/config/reducer.js';
+import {getConfig} from '../../../components/config/reducer.js';
 import {ModelViewerPreview} from '../../../components/model_viewer_preview/model_viewer_preview.js';
 import {getModelViewer} from '../../../components/model_viewer_preview/reducer.js';
 import {dispatchReset} from '../../../reducers.js';
@@ -38,7 +38,6 @@ describe('pitch limits editor test', () => {
 
     pitchLimitsDeg = new PitchLimits();
     document.body.appendChild(pitchLimitsDeg);
-    dispatchPitchLimits({enabled: false, min: 0, max: 0});
     await pitchLimitsDeg.updateComplete;
   });
 
@@ -47,16 +46,8 @@ describe('pitch limits editor test', () => {
     document.body.removeChild(preview);
   });
 
-  it('correctly loads pitch limits', async () => {
-    reduxStore.dispatch(dispatchPitchLimits({enabled: true, min: 12, max: 34}));
-    await pitchLimitsDeg.updateComplete;
-    expect(pitchLimitsDeg.inputLimits.enabled).toEqual(true);
-    expect(pitchLimitsDeg.inputLimits.min).toEqual(12);
-    expect(pitchLimitsDeg.inputLimits.max).toEqual(34);
-  });
-
   it('correctly dispatches when I click set', async () => {
-    reduxStore.dispatch(dispatchPitchLimits({enabled: true, min: 0, max: 99}));
+    (pitchLimitsDeg.shadowRoot!.querySelector('#limit-enabled') as any).click();
     const modelViewer = getModelViewer()!;
     modelViewer.cameraOrbit = 'auto 33deg auto';
     modelViewer.jumpCameraToGoal();
