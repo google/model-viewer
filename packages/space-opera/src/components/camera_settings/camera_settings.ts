@@ -33,7 +33,7 @@ import {ModelViewerConfig, State} from '../../types.js';
 import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../config/reducer.js';
 import {Vector3D} from '../config/types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getCameraState, getModel} from '../model_viewer_preview/reducer.js';
+import {getCameraState} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
@@ -145,10 +145,6 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   stateChanged(state: State) {
-    if (getModel(state) == null) {
-      return;
-    }
-
     const config = getConfig(state);
     if (config !== this.config) {
       this.config = config;

@@ -26,7 +26,7 @@ import {DraggableInput} from '../../components/shared/draggable_input/draggable_
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-fdescribe('camera constraints test', () => {
+describe('camera constraints test', () => {
   let cameraSettings: CameraSettings;
   let preview: ModelViewerPreview;
 
@@ -41,8 +41,8 @@ fdescribe('camera constraints test', () => {
     await cameraSettings.updateComplete;
   });
 
-  afterEach(() => {
-    cameraSettings.config = {};
+  afterEach(async () => {
+    await cameraSettings.updateComplete;
     document.body.removeChild(cameraSettings);
     document.body.removeChild(preview);
   });
@@ -69,15 +69,6 @@ fdescribe('camera constraints test', () => {
     expect(getConfig(reduxStore.getState()).cameraTarget).toEqual('6m 0m 0m');
   });
 
-  it('reflects the correct camera orbit in its editor UI', async () => {
-    const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
-    reduxStore.dispatch(dispatchSaveCameraOrbit(orbit));
-    await cameraSettings.updateComplete;
-    const actualOrbit = cameraSettings.cameraOrbitEditor!.currentOrbit;
-    expect(actualOrbit.phiDeg).toBeCloseTo(orbit.phiDeg);
-    expect(actualOrbit.thetaDeg).toBeCloseTo(orbit.thetaDeg);
-  });
-
   it('dispatches the correct camera orbit if its UI is changed', async () => {
     const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
     reduxStore.dispatch(dispatchSaveCameraOrbit(orbit));
@@ -86,7 +77,6 @@ fdescribe('camera constraints test', () => {
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;
     expect(yawInput).toBeDefined();
     expect(yawInput).not.toBeNull();
-    // Now has a dependency on model-viewer via onCameraOrbitEditorChange()
   });
 
   it('dispatches auto-rotate change when checkbox clicked', async () => {
