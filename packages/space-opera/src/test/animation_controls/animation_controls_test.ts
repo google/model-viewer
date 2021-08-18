@@ -76,13 +76,15 @@ describe('animation controls test', () => {
 
   it('dispatches an event on UI click', async () => {
     expect(getConfig(reduxStore.getState()).autoplay).toBe(true);
-    const autoplayCheckbox = animationControls.autoplayCheckbox!;
+    const autoplayCheckbox =
+        animationControls.autoplayCheckbox!.shadowRoot!.querySelector(
+            'mwc-checkbox')!;
 
-    autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
+    autoplayCheckbox.click();
     await animationControls.updateComplete;
     expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
 
-    autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
+    autoplayCheckbox.click();
     await animationControls.updateComplete;
     expect(getConfig(reduxStore.getState()).autoplay).toBe(true);
   });
