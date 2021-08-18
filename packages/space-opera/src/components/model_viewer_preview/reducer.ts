@@ -27,8 +27,6 @@ import {ModelState, Thumbnail} from '../model_viewer_preview/types.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 import {radToDeg} from '../utils/reducer_utils.js';
 
-
-
 const THUMBNAIL_SIZE = 256;
 
 export function getModelViewer() {
@@ -105,9 +103,6 @@ export async function pushThumbnail(
 async function createThumbnails(): Promise<Map<string, Thumbnail>> {
   const thumbnailsById = new Map<string, Thumbnail>();
   for (const material of getModelViewer()!.model?.materials!) {
-    if (material == null) {
-      continue;
-    }
     const {
       pbrMetallicRoughness,
       normalTexture,
