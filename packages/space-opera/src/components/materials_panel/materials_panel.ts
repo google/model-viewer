@@ -203,7 +203,6 @@ export class MaterialPanel extends ConnectedLitElement {
   onSelectMaterial() {
     const material = this.getMaterial();
     if (material == null) {
-      this.panel.style.display = 'none';
       return;
     }
     this.panel.style.display = '';
@@ -774,7 +773,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   render() {
     return html`
-    <div id="material-container">
+    <div id="material-container" style="display: none">
     ${this.renderSelectMaterialTab()}
     ${this.renderBaseColorTab()}
     ${this.renderMetallicRoughnessTab()}
