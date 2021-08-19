@@ -146,6 +146,7 @@ export class SmoothControls extends EventDispatcher {
   };
   private lastTouches!: TouchList;
   private touchDecided = false;
+  private touchMoveFixed = false;
 
   constructor(
       readonly camera: PerspectiveCamera, readonly element: HTMLElement) {
@@ -164,6 +165,12 @@ export class SmoothControls extends EventDispatcher {
 
   enableInteraction() {
     if (this._interactionEnabled === false) {
+      // https://github.com/metafizzy/flickity/issues/457#issuecomment-254501356
+      if (!this.touchMoveFixed) {
+        this.touchMoveFixed = true;
+        self.addEventListener('touchmove', function() {}, {passive: false});
+      }
+
       const {element} = this;
       element.addEventListener('mousedown', this.onMouseDown);
       if (!this._disableZoom) {
