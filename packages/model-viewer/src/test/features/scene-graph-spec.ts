@@ -21,8 +21,6 @@ import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
-
-
 const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
@@ -118,8 +116,8 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
           const objectUrl = URL.createObjectURL(blob);
           const texture = await element.createTexture(objectUrl, 'image/jpeg');
 
-          element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture
-              .setTexture(texture);
+          element.model!.materials[0]
+              .pbrMetallicRoughness.baseColorTexture.setTexture(texture);
 
           const exported = await element.exportScene({binary: true});
           expect(exported).to.be.not.undefined;
@@ -145,23 +143,25 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     });
 
     test('allows the scene graph to be manipulated', async () => {
-      await element.model!.materials[0]!.pbrMetallicRoughness
-          .setBaseColorFactor([1, 0, 0, 1]);
+      await element.model!.materials[0].pbrMetallicRoughness.setBaseColorFactor(
+          [1, 0, 0, 1]);
 
       expect(material.color).to.include({r: 1, g: 0, b: 0});
 
       const color =
-          element.model!.materials[0]!.pbrMetallicRoughness.baseColorFactor;
+          element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
 
       expect(color).to.be.eql([1, 0, 0, 1]);
     });
 
     test('image.setURI sets the appropriate texture', async () => {
-      await element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture!
-          .texture!.source!.setURI(SUNRISE_IMG_PATH);
+      await element.model!.materials[0]
+          .pbrMetallicRoughness.baseColorTexture!.texture!.source!.setURI(
+              SUNRISE_IMG_PATH);
 
-      const uri = element.model!.materials[0]!.pbrMetallicRoughness
-                      .baseColorTexture!.texture!.source!.uri;
+      const uri =
+          element.model!.materials[0]
+              .pbrMetallicRoughness.baseColorTexture!.texture!.source!.uri;
 
       expect(uri).to.be.eql(SUNRISE_IMG_PATH);
     });
@@ -169,7 +169,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     suite('when the model changes', () => {
       test('updates when the model changes', async () => {
         const color =
-            element.model!.materials[0]!.pbrMetallicRoughness.baseColorFactor;
+            element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
 
         expect(color).to.be.eql([0.5, 0.5, 0.5, 1]);
 
@@ -178,7 +178,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
         await waitForEvent(element, 'scene-graph-ready');
 
         const nextColor =
-            element.model!.materials[0]!.pbrMetallicRoughness.baseColorFactor;
+            element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
 
         expect(nextColor).to.be.eql([1, 1, 1, 1]);
       });
@@ -188,11 +188,11 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
         await waitForEvent(element, 'scene-graph-ready');
 
-        await element.model!.materials[0]!.pbrMetallicRoughness
-            .setBaseColorFactor([1, 0, 0, 1]);
+        await element.model!.materials[0]
+            .pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]);
 
         const color =
-            element.model!.materials[0]!.pbrMetallicRoughness.baseColorFactor;
+            element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
 
         expect(color).to.be.eql([1, 0, 0, 1]);
 

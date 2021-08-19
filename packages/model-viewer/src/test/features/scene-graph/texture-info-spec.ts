@@ -33,9 +33,9 @@ suite('scene-graph/texture-info', () => {
       document.body.insertBefore(element, document.body.firstChild);
       await waitForEvent(element, 'load');
 
-      emptyTextureInfo = element.model!.materials[0]!.normalTexture;
+      emptyTextureInfo = element.model!.materials[0].normalTexture;
       baseTextureInfo =
-          element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture;
+          element.model!.materials[0].pbrMetallicRoughness.baseColorTexture;
     });
 
     teardown(() => {

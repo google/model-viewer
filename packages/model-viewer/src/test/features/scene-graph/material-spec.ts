@@ -46,7 +46,7 @@ suite('scene-graph/material', () => {
       await waitForEvent(element, 'load');
 
       texture = await element.createTexture(REPLACEMENT_TEXTURE_PATH);
-      threeMaterials = element.model!.materials[0]![$correlatedObjects] as
+      threeMaterials = element.model!.materials[0][$correlatedObjects] as
           Set<MeshStandardMaterial>;
     });
 
@@ -56,15 +56,16 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new base map', async () => {
-      element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture
-          .setTexture(texture);
+      element.model!.materials[0]
+          .pbrMetallicRoughness.baseColorTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined = texture?.source[$threeTexture].uuid;
 
       const threeTexture: ThreeTexture =
-          element.model!.materials[0]!.pbrMetallicRoughness.baseColorTexture
-              ?.texture?.source[$threeTexture]!;
+          element.model!.materials[0]
+              .pbrMetallicRoughness.baseColorTexture?.texture
+              ?.source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.map).to.be.eq(threeTexture);
@@ -74,15 +75,16 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new metallicRoughness map', async () => {
-      element.model!.materials[0]!.pbrMetallicRoughness.metallicRoughnessTexture
-          .setTexture(texture);
+      element.model!.materials[0]
+          .pbrMetallicRoughness.metallicRoughnessTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
-          element.model!.materials[0]!.pbrMetallicRoughness
-              .metallicRoughnessTexture?.texture?.source[$threeTexture]!;
+          element.model!.materials[0]
+              .pbrMetallicRoughness.metallicRoughnessTexture?.texture
+              ?.source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.metalnessMap).to.be.eq(threeTexture);
@@ -93,14 +95,14 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new normal map', async () => {
-      element.model!.materials[0]!.normalTexture.setTexture(texture);
+      element.model!.materials[0].normalTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
-          element.model!.materials[0]!.normalTexture?.texture
-              ?.source[$threeTexture]!;
+          element.model!.materials[0]
+              .normalTexture?.texture?.source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.normalMap).to.be.eq(threeTexture);
@@ -110,14 +112,14 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new occlusion map', async () => {
-      element.model!.materials[0]!.occlusionTexture.setTexture(texture);
+      element.model!.materials[0].occlusionTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
-          element.model!.materials[0]!.occlusionTexture?.texture
-              ?.source[$threeTexture]!;
+          element.model!.materials[0]
+              .occlusionTexture?.texture?.source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.aoMap).to.be.eq(threeTexture);
@@ -127,14 +129,14 @@ suite('scene-graph/material', () => {
     });
 
     test('Set a new emissive map', async () => {
-      element.model!.materials[0]!.emissiveTexture.setTexture(texture);
+      element.model!.materials[0].emissiveTexture.setTexture(texture);
       // Gets new UUID to compare with UUID of texture accessible through the
       // material.
       const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
       const threeTexture: ThreeTexture =
-          element.model!.materials[0]!.emissiveTexture?.texture
-              ?.source[$threeTexture]!;
+          element.model!.materials[0]
+              .emissiveTexture?.texture?.source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.emissiveMap).to.be.eq(threeTexture);
@@ -174,63 +176,63 @@ suite('scene-graph/material', () => {
 
     test('test alpha cutoff expect valid value as default', async () => {
       await loadModel(ALPHA_BLEND_MODE_TEST);
-      expect(element.model!.materials[2]!.getAlphaCutoff()).to.be.equal(0.25);
+      expect(element.model!.materials[2].getAlphaCutoff()).to.be.equal(0.25);
     });
 
     test('test alpha cutoff test setting and getting', async () => {
       await loadModel(ALPHA_BLEND_MODE_TEST);
-      element.model!.materials[2]!.setAlphaCutoff(0.5);
-      expect(element.model!.materials[2]!.getAlphaCutoff()).to.be.equal(0.5);
+      element.model!.materials[2].setAlphaCutoff(0.5);
+      expect(element.model!.materials[2].getAlphaCutoff()).to.be.equal(0.5);
     });
 
     test('test double sided expect default is false', async () => {
       await loadModel(HELMET_GLB_PATH);
-      expect(element.model!.materials[0]!.getDoubleSided()).to.be.equal(false);
+      expect(element.model!.materials[0].getDoubleSided()).to.be.equal(false);
     });
 
     test('test double sided expect default is true', async () => {
       await loadModel(ALPHA_BLEND_MODE_TEST);
-      expect(element.model!.materials[1]!.getDoubleSided()).to.be.equal(true);
+      expect(element.model!.materials[1].getDoubleSided()).to.be.equal(true);
     });
 
     test('test double sided setting and getting', async () => {
       await loadModel(ALPHA_BLEND_MODE_TEST);
-      expect(element.model!.materials[1]!.getDoubleSided()).to.be.equal(true);
+      expect(element.model!.materials[1].getDoubleSided()).to.be.equal(true);
 
-      element.model!.materials[1]!.setDoubleSided(false);
-      expect(element.model!.materials[1]!.getDoubleSided()).to.be.equal(false);
+      element.model!.materials[1].setDoubleSided(false);
+      expect(element.model!.materials[1].getDoubleSided()).to.be.equal(false);
 
-      element.model!.materials[1]!.setDoubleSided(true);
-      expect(element.model!.materials[1]!.getDoubleSided()).to.be.equal(true);
+      element.model!.materials[1].setDoubleSided(true);
+      expect(element.model!.materials[1].getDoubleSided()).to.be.equal(true);
     });
 
     test('test alpha-mode, setting and getting', async () => {
       await loadModel(ALPHA_BLEND_MODE_TEST);
 
-      element.model!.materials[0]!.setAlphaMode('BLEND');
-      expect(element.model!.materials[0]!.getAlphaMode()).to.be.equal('BLEND');
-      element.model!.materials[0]!.setAlphaMode('MASK');
-      expect(element.model!.materials[0]!.getAlphaMode()).to.be.equal('MASK');
-      element.model!.materials[0]!.setAlphaMode('OPAQUE');
-      expect(element.model!.materials[0]!.getAlphaMode()).to.be.equal('OPAQUE');
+      element.model!.materials[0].setAlphaMode('BLEND');
+      expect(element.model!.materials[0].getAlphaMode()).to.be.equal('BLEND');
+      element.model!.materials[0].setAlphaMode('MASK');
+      expect(element.model!.materials[0].getAlphaMode()).to.be.equal('MASK');
+      element.model!.materials[0].setAlphaMode('OPAQUE');
+      expect(element.model!.materials[0].getAlphaMode()).to.be.equal('OPAQUE');
     });
 
     test('test alpha-mode, expect default of opaque', async () => {
       await loadModel(ALPHA_BLEND_MODE_TEST);
 
-      expect(element.model!.materials[0]!.getAlphaMode()).to.be.equal('OPAQUE');
+      expect(element.model!.materials[0].getAlphaMode()).to.be.equal('OPAQUE');
     });
 
     test('test alpha-mode, expect default of blend', async () => {
       await loadModel(ALPHA_BLEND_MODE_TEST);
 
-      expect(element.model!.materials[1]!.getAlphaMode()).to.be.equal('BLEND');
+      expect(element.model!.materials[1].getAlphaMode()).to.be.equal('BLEND');
     });
 
     test('test alpha-mode, expect default of mask', async () => {
       await loadModel(ALPHA_BLEND_MODE_TEST);
 
-      expect(element.model!.materials[2]!.getAlphaMode()).to.be.equal('MASK');
+      expect(element.model!.materials[2].getAlphaMode()).to.be.equal('MASK');
     });
   });
 });

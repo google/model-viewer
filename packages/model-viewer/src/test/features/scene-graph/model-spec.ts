@@ -21,8 +21,6 @@ import {$correlatedObjects} from '../../../features/scene-graph/three-dom-elemen
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {assetPath, loadThreeGLTF} from '../../helpers.js';
 
-
-
 const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
@@ -36,7 +34,7 @@ suite('scene-graph/model', () => {
       const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
 
       expect(model.materials.length).to.be.eq(1);
-      expect(model.materials[0]!.name).to.be.eq('Default');
+      expect(model.materials[0].name).to.be.eq('Default');
     });
 
     test.skip('exposes a list of materials in the scene', async () => {
@@ -67,7 +65,7 @@ suite('scene-graph/model', () => {
       const collectedMaterials = new Set<MeshStandardMaterial>();
 
       model.materials.forEach((material) => {
-        for (const threeMaterial of material![$correlatedObjects] as
+        for (const threeMaterial of material[$correlatedObjects] as
              Set<MeshStandardMaterial>) {
           collectedMaterials.add(threeMaterial);
           expect(materials.has(threeMaterial)).to.be.true;
