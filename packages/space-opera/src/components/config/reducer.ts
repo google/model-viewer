@@ -49,6 +49,12 @@ function getUpdatedLimits(
   return {minCameraOrbit: min.join(' '), maxCameraOrbit: max.join(' ')};
 }
 
+export function getOrbitString(orbit: SphericalPositionDeg) {
+  return `${roundToDigits(orbit.thetaDeg, DIGITS)}deg ${
+      roundToDigits(
+          orbit.phiDeg, DIGITS)}deg ${roundToDigits(orbit.radius, DIGITS)}m`;
+}
+
 const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
 export function dispatchCameraControlsEnabled(enabled?: boolean) {
   return {type: SET_CAMERA_CONTROLS_ENABLED, payload: !!enabled};
@@ -190,12 +196,8 @@ export function configReducer(
       return {...state, cameraTarget};
     case SAVE_CAMERA_ORBIT:
       const orbit = action.payload;
-      const cameraOrbit = orbit == null ?
-          undefined :
-          `${roundToDigits(orbit.thetaDeg, DIGITS)}deg ${
-              roundToDigits(
-                  orbit.phiDeg,
-                  DIGITS)}deg ${roundToDigits(orbit.radius, DIGITS)}m`
+      const cameraOrbit =
+          orbit == null ? undefined : getOrbitString(action.payload);
       return {...state, cameraOrbit};
     case SET_CAMERA_FOV_LIMITS:
       return {

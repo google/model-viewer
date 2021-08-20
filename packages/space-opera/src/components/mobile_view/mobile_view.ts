@@ -29,7 +29,7 @@ import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 
 import {styles as mobileStyles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
-import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, usdzToSession} from './utils.js';
+import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, posterToSession, usdzToSession} from './utils.js';
 
 const TOAST_TIME = 7000;  // 7s
 
@@ -50,6 +50,7 @@ export class MobileView extends LitElement {
 
   @query('model-viewer') readonly modelViewer?: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
+  @internalProperty() posterUrl: string = '';
   @internalProperty() iosUrl: string = '';
   @internalProperty() currentBlob?: Blob;
   @internalProperty() usdzBlob?: Blob;
@@ -135,6 +136,9 @@ export class MobileView extends LitElement {
   async waitForData(json: MobilePacket) {
     const updatedContent: EditorUpdates = json.updatedContent;
     this.overlay!.style.display = 'block';
+
+    this.posterUrl =
+        posterToSession(this.pipeId, this.sessionId, updatedContent.posterId);
 
     if (updatedContent.stateChanged) {
       this.updateState(json.snippet, json.urls);
@@ -237,7 +241,7 @@ export class MobileView extends LitElement {
           environment-image=${ifDefined(this.envImageUrl)}
           skybox-image=${ifDefined(skyboxImage)}
           exposure=${ifDefined(config.exposure)}
-          poster=${ifDefined(config.poster)}
+          poster=${this.posterUrl}
           reveal=${ifDefined(config.reveal)}
           shadow-intensity=${ifDefined(config.shadowIntensity)}
           shadow-softness=${ifDefined(config.shadowSoftness)}

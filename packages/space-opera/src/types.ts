@@ -119,7 +119,7 @@ export const INITIAL_STATE: State = {
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},
       config: {},
       hotspots: [],
-      relativeFilePaths: {},
+      relativeFilePaths: {posterName: 'poster.png'},
       extraAttributes: {},
     },
   },

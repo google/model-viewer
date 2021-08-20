@@ -32,7 +32,6 @@ import './components/camera_settings/camera_settings.js';
 import './components/model_viewer_snippet/components/download_button.js';
 import './components/file_modal/file_modal.js';
 import './components/hotspot_panel/hotspot_panel.js';
-import './components/poster_controls/poster_controls.js';
 import './components/ibl_selector/ibl_selector.js';
 import './components/materials_panel/materials_panel.js';
 import './components/model_viewer_snippet/components/open_button.js';

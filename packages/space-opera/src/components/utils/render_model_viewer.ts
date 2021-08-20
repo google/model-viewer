@@ -21,7 +21,13 @@ import {spread} from '@open-wc/lit-helpers';
 import {html, TemplateResult} from 'lit-html';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
+import {reduxStore} from '../../space_opera_base';
+import {rafPasses} from '../../test/utils/test_utils';
 import {ArConfigState, ModelViewerConfig} from '../../types';
+import {getConfig, getOrbitString} from '../config/reducer';
+import {getModelViewer} from '../model_viewer_preview/reducer';
+
+import {radToDeg} from './reducer_utils';
 
 /** Optional handlers for model-viewer events */
 export interface ModelViewerEventHandlers {
@@ -32,6 +38,46 @@ export interface ModelViewerEventHandlers {
   readonly pause?: () => void;
   readonly click?: (event: MouseEvent) => void;
   readonly error?: (details: CustomEvent) => void;
+}
+
+export async function createPoster(height: number) {
+  const modelViewer = getModelViewer();
+
+  height /= window.devicePixelRatio;
+  modelViewer.style.width = `${height}px`;
+  modelViewer.style.height = `${height}px`;
+
+  // Set to beginning of animation
+  const oldTime = modelViewer.currentTime;
+  modelViewer.autoplay = false;
+  modelViewer.currentTime = 0;
+
+  // Set to initial camera orbit
+  const oldOrbit = modelViewer.getCameraOrbit();
+  const config = getConfig(reduxStore.getState());
+  modelViewer.cameraOrbit = config.cameraOrbit!;
+  modelViewer.jumpCameraToGoal();
+
+  // Wait for model-viewer to resize and render.
+  await rafPasses();
+  await rafPasses();
+  const posterBlob = await modelViewer.toBlob({idealAspect: true});
+
+  // Reset to original state
+  modelViewer.autoplay = !!config.autoplay;
+  modelViewer.currentTime = oldTime;
+
+  modelViewer.cameraOrbit = getOrbitString({
+    thetaDeg: radToDeg(oldOrbit.theta),
+    phiDeg: radToDeg(oldOrbit.phi),
+    radius: oldOrbit.radius
+  });
+  modelViewer.jumpCameraToGoal();
+
+  modelViewer.style.width = '';
+  modelViewer.style.height = '';
+
+  return posterBlob;
 }
 
 /**

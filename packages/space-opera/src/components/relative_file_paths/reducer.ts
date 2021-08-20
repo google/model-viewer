@@ -32,11 +32,6 @@ export function dispatchSetEnvironmentName(name: string|undefined) {
   return {type: SET_ENVIRONMENT_NAME, payload: name};
 }
 
-const SET_POSTER_NAME = 'SET_POSTER_NAME';
-export function dispatchSetPosterName(name: string|undefined) {
-  return {type: SET_POSTER_NAME, payload: name};
-}
-
 export const getRelativeFilePaths = (state: State) =>
     state.entities.modelViewerSnippet.relativeFilePaths;
 
@@ -51,10 +46,6 @@ export function relativeFilePathsReducer(
     case SET_ENVIRONMENT_NAME:
       return {
         ...state, environmentName: action.payload
-      }
-    case SET_POSTER_NAME:
-      return {
-        ...state, posterName: action.payload
       }
     case SET_IOS_NAME:
       return {

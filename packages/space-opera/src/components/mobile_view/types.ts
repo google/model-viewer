@@ -36,6 +36,7 @@ export interface EditorUpdates {
   iosSrcIsReality: boolean;
   usdzId: number;
   stateChanged: boolean;
+  posterId: number;
   envChanged: boolean;
   envIsHdr: boolean;
 }

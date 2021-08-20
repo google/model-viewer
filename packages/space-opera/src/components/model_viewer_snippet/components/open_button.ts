@@ -29,7 +29,7 @@ import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
 import {dispatchArConfig, getArConfig} from '../../mobile_view/reducer.js';
 import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
-import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
+import {dispatchSetEnvironmentName, dispatchSetModelName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '../../utils/create_object_url.js';
@@ -110,10 +110,6 @@ export class OpenModal extends ConnectedLitElement {
             `Could not download 'src' attribute - OK, ignoring it. Error: ${
                 e.message}`);
       }
-
-      // reset poster
-      config.poster = undefined;
-      reduxStore.dispatch(dispatchSetPosterName(undefined));
 
       if (config.environmentImage && isObjectUrl(config.environmentImage)) {
         // If new env image is legal, use it

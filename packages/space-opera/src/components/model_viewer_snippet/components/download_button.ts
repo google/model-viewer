@@ -33,6 +33,7 @@ import {getModelViewer} from '../../model_viewer_preview/reducer.js';
 import {getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {safeDownloadCallback} from '../../utils/create_object_url.js';
 import {styles as hotspotStyles} from '../../utils/hotspot/hotspot.css.js';
+import {createPoster} from '../../utils/render_model_viewer.js';
 
 interface Payload {
   blob: Blob;
@@ -117,14 +118,9 @@ async function prepareZipArchive(
     zip.file(relativeFilePaths.environmentName!, response.blob());
   }
 
-  // check if legal poster url
-  if (config.poster) {
-    const response = await fetch(config.poster);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch url ${config.poster}`);
-    }
-    zip.file(relativeFilePaths.posterName!, response.blob());
-  }
+  // always generate a poster image
+  const posterBlob = await createPoster(300);
+  zip.file('poster.png', posterBlob);
 
   // check if legal ios src
   if (arConfig.iosSrc) {
