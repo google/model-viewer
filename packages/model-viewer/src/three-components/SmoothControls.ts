@@ -196,7 +196,7 @@ export class SmoothControls extends EventDispatcher {
       }
       element.removeEventListener('keydown', this.onKeyDown);
       element.removeEventListener('touchstart', this.onTouchStart);
-      element.removeEventListener('touchmove', this.onTouchMove);
+      element.removeEventListener('touchmove', this._onTouchMove);
 
       self.removeEventListener('mouseup', this.onMouseUp);
       self.removeEventListener('touchend', this.onTouchEnd);
@@ -549,8 +549,8 @@ export class SmoothControls extends EventDispatcher {
   private set touchMode(touchMode: TouchMode) {
     this._touchMode = touchMode;
     const {element} = this;
-    element.removeEventListener('touchmove', this.onTouchMove);
-    if (touchMode) {
+    element.removeEventListener('touchmove', this._onTouchMove);
+    if (touchMode !== null) {
       this._onTouchMove = (event) => {
         touchMode(event);
 
@@ -558,14 +558,11 @@ export class SmoothControls extends EventDispatcher {
           event.preventDefault();
         }
       };
-      element.addEventListener('touchmove', this.onTouchMove, {passive: false});
+      element.addEventListener(
+          'touchmove', this._onTouchMove, {passive: false});
     } else {
       self.removeEventListener('touchend', this.onTouchEnd);
     }
-  }
-
-  private get onTouchMove() {
-    return this._onTouchMove;
   }
 
   private handleSinglePointerMove(pointer: Pointer) {
@@ -662,7 +659,7 @@ export class SmoothControls extends EventDispatcher {
         const {touches} = event;
         if (touches.length === 0) {
           const {element} = this;
-          element.removeEventListener('touchmove', this.onTouchMove);
+          element.removeEventListener('touchmove', this._onTouchMove);
           self.removeEventListener('touchend', this.onTouchEnd);
         } else {
           this.onTouchChange(event);
