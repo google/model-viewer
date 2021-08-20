@@ -48,7 +48,7 @@ export class MobileView extends LitElement {
     arPromptCSS
   ];
 
-  @query('model-viewer') readonly modelViewer?: ModelViewerElement;
+  @query('model-viewer') readonly modelViewer!: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
   @internalProperty() posterUrl: string = '';
   @internalProperty() iosUrl: string = '';
@@ -100,7 +100,7 @@ export class MobileView extends LitElement {
     // Send a new POST out for each scene-viewer button press
     if (snippet.arConfig.ar) {
       const arButton =
-          this.modelViewer?.shadowRoot!.getElementById('default-ar-button')!;
+          this.modelViewer.shadowRoot!.getElementById('default-ar-button')!;
       arButton.addEventListener('click', () => {
         try {
           if (this.sessionOs === 'iOS') {
@@ -176,6 +176,7 @@ export class MobileView extends LitElement {
   async fetchLoop() {
     const response = await getWithTimeout(this.sessionUrl);
     if (response.ok) {
+      this.modelViewer.showPoster();
       const json: MobilePacket = await response.json();
       this.initializeToast(json.updatedContent);
       setTimeout(() => {
@@ -200,7 +201,7 @@ export class MobileView extends LitElement {
   // scene-viewer. Subsequently, everytime scene-viewer is opened, we send the
   // POST again.
   async modelIsLoaded() {
-    this.currentBlob = await this.modelViewer!.exportScene();
+    this.currentBlob = await this.modelViewer.exportScene();
     try {
       await post(this.currentBlob, this.modelViewerUrl);
     } catch (error) {
@@ -263,6 +264,11 @@ export class MobileView extends LitElement {
     </div>
     ${this.needIosSrc ? this.renderIosMessage() : html``}
     `;
+  }
+
+  updated() {
+    this.modelViewer.jumpCameraToGoal();
+    this.modelViewer.dismissPoster();
   }
 
   // Ping the editor

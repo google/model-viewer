@@ -455,6 +455,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
             this.dispatchEvent(new CustomEvent('poster-dismissed'));
           });
         }, {once: true});
+      } else {
+        this[$transitioned] = true;
       }
     }
 
