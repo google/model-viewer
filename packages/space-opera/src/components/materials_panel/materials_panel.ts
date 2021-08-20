@@ -64,6 +64,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() isTesting: boolean = false;
   @internalProperty() isInterpolating: boolean = false;
 
+  @query('#material-container') panel!: HTMLDivElement;
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
   @query('me-slider-with-input#roughness-factor')
   roughnessFactorSlider!: SliderWithInputElement;
@@ -204,6 +205,7 @@ export class MaterialPanel extends ConnectedLitElement {
     if (material == null) {
       return;
     }
+    this.panel.style.display = '';
     const {
       pbrMetallicRoughness,
       emissiveFactor,
@@ -771,6 +773,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   render() {
     return html`
+    <div id="material-container" style="display: none">
     ${this.renderSelectMaterialTab()}
     ${this.renderBaseColorTab()}
     ${this.renderMetallicRoughnessTab()}
@@ -778,6 +781,7 @@ export class MaterialPanel extends ConnectedLitElement {
     ${this.renderEmissiveTextureTab()}
     ${this.renderOcclusionTextureTab()}
     ${this.renderOtherTab()}
+    </div>
     `;
   }
 }

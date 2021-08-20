@@ -15,11 +15,7 @@
  *
  */
 
-import {reduxStore} from '../../space_opera_base.js';
 import {Action, ModelViewerConfig, ModelViewerSnippetState, RelativeFilePathsState, State} from '../../types.js';
-import {INITIAL_CAMERA} from '../camera_settings/camera_state.js';
-import {dispatchSetCamera} from '../camera_settings/reducer.js';
-import {dispatchSetConfig} from '../config/reducer.js';
 import {isObjectUrl} from '../utils/create_object_url.js';
 
 export const getModelViewerSnippet = (state: State): ModelViewerSnippetState =>
@@ -50,18 +46,6 @@ export function applyRelativeFilePaths(
   } else if (editedConfig.poster && isObjectUrl(editedConfig.poster)) {
     editedConfig.poster = relativeFilePaths.posterName;
   }
-}
-
-/** Use when the user wants to load a new config (probably from a snippet). */
-export function dispatchConfig(config?: ModelViewerConfig) {
-  if (!config) {
-    throw new Error('No config given!');
-  }
-
-  reduxStore.dispatch(dispatchSetConfig(config));
-
-  // Clear camera settings. This is optional!
-  reduxStore.dispatch(dispatchSetCamera(INITIAL_CAMERA));
 }
 
 const SET_EXTRA_ATTRIBUTES = 'SET_EXTRA_ATTRIBUTES'

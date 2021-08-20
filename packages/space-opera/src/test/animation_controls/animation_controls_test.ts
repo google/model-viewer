@@ -21,11 +21,10 @@ import '../../components/animation_controls/animation_controls.js';
 import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../../components/config/reducer.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
-import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
+import {dispatchGltfUrl} from '../../components/model_viewer_preview/reducer.js';
 import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
-import {waitForEvent} from '../utils/test_utils.js';
 
 const ANIMATED_GLB_PATH = '../base/shared-assets/models/RobotExpressive.glb';
 
@@ -43,12 +42,12 @@ describe('animation controls test', () => {
     document.body.appendChild(animationControls);
 
     reduxStore.dispatch(dispatchGltfUrl(ANIMATED_GLB_PATH));
-    await waitForEvent(getModelViewer()!, 'load');
-
+    await preview.loadComplete;
     await animationControls.updateComplete;
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await animationControls.updateComplete;
     document.body.removeChild(animationControls);
     document.body.removeChild(preview);
   })
@@ -76,17 +75,27 @@ describe('animation controls test', () => {
   });
 
   it('dispatches an event on UI click', async () => {
+    expect(getConfig(reduxStore.getState()).autoplay).toBe(true);
+    const autoplayCheckbox =
+        animationControls.autoplayCheckbox!.shadowRoot!.querySelector(
+            'mwc-checkbox')!;
+
+    autoplayCheckbox.click();
+    await animationControls.updateComplete;
+    expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
+
+    autoplayCheckbox.click();
+    await animationControls.updateComplete;
+    expect(getConfig(reduxStore.getState()).autoplay).toBe(true);
+  });
+
+  it('updates checkbox state when receiving autoplay change', async () => {
     reduxStore.dispatch(dispatchAutoplayEnabled(false));
     expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
     const autoplayCheckbox = animationControls.autoplayCheckbox!;
 
     await animationControls.updateComplete;
-    autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
-    expect(getConfig(reduxStore.getState()).autoplay).toBe(true);
-
-    await animationControls.updateComplete;
-    autoplayCheckbox.shadowRoot!.querySelector('mwc-checkbox')!.click();
-    expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
+    expect(autoplayCheckbox.checked).toBe(false);
   });
 
   it('updates selected value on animationName change', async () => {

@@ -7,7 +7,7 @@
     {
       "name": "Scene",
       "nodes": [
-        2
+        3
       ]
     }
   ],
@@ -16,6 +16,7 @@
     {
       "name": "Box",
       "extras": {
+        "name": "Box",
         "gltfExtensions": {
           "KHR_materials_variants": {
             "mappings": [
@@ -34,8 +35,7 @@
               }
             ]
           }
-        },
-        "name": "Box"
+        }
       },
       "mesh": 0
     },
@@ -60,6 +60,7 @@
       ],
       "name": "Box_1",
       "extras": {
+        "name": "Box",
         "gltfExtensions": {
           "KHR_materials_variants": {
             "mappings": [
@@ -78,16 +79,24 @@
               }
             ]
           }
-        },
-        "name": "Box"
+        }
       },
       "mesh": 1
     },
     {
-      "name": "cubes.gltf",
+      "name": "cubesgltf",
+      "extras": {
+        "name": "cubes.gltf"
+      },
       "children": [
         0,
         1
+      ]
+    },
+    {
+      "name": "textureCubes.gltf",
+      "children": [
+        2
       ]
     }
   ],
@@ -280,13 +289,15 @@
           1,
           1
         ],
+        "metallicFactor": 1,
         "roughnessFactor": 0.2,
         "metallicRoughnessTexture": {
           "index": 0
         }
       },
       "occlusionTexture": {
-        "index": 0
+        "index": 0,
+        "texCoord": 1
       },
       "name": "purple"
     },
@@ -298,6 +309,8 @@
           0,
           1
         ],
+        "metallicFactor": 1,
+        "roughnessFactor": 1,
         "baseColorTexture": {
           "index": 1
         }
@@ -332,11 +345,11 @@
   "images": [
     {
       "mimeType": "image/png",
-      "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAE0lEQVQYV2O8EvbvPwMSYCRdAAD3CwyhnvaIYgAAAABJRU5ErkJggg=="
+      "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAAXNSR0IArs4c6QAAABNJREFUGFdjvBL27z8DEmAkXQAA9wsMoZ72iGIAAAAASUVORK5CYII="
     },
     {
       "mimeType": "image/png",
-      "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAM0lEQVQYV2NcPWnZ/9/MPxkY/zEyMDIxMjC27Ar7/5X5LQMIsDCzMDA27QhBCLCwYKoAAATmE2aJQSHmAAAAAElFTkSuQmCC"
+      "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAAXNSR0IArs4c6QAAADNJREFUGFdjXD1p2f/fzD8ZGP8xMjAyMTIwtuwK+/+V+S0DCLAwszAwNu0IQQiwsGCqAAAE5hNmiUEh5gAAAABJRU5ErkJggg=="
     }
   ],
   "meshes": [
@@ -347,7 +360,8 @@
           "attributes": {
             "POSITION": 0,
             "NORMAL": 1,
-            "TEXCOORD_0": 2
+            "TEXCOORD_0": 2,
+            "TEXCOORD_1": 2
           },
           "indices": 3,
           "material": 0

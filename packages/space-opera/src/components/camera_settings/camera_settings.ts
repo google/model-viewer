@@ -30,31 +30,23 @@ import {customElement, html, internalProperty, property, query} from 'lit-elemen
 import {reduxStore} from '../../space_opera_base.js';
 import {cameraSettingsStyles} from '../../styles.css.js';
 import {ModelViewerConfig, State} from '../../types.js';
-import {dispatchAutoRotate, getConfig} from '../config/reducer.js';
+import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../config/reducer.js';
+import {Vector3D} from '../config/types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
+import {getCameraState, getModel} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
 import {checkFinite} from '../utils/reducer_utils.js';
 
-import {Camera, INITIAL_CAMERA} from './camera_state.js';
-import {dispatchCameraTarget, dispatchRadiusLimits, dispatchSaveCameraOrbit, getCamera} from './reducer.js';
-import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
-
 @customElement('me-camera-orbit-editor')
 class CameraOrbitEditor extends ConnectedLitElement {
   static styles = [cameraSettingsStyles, draggableInputRowStyles];
 
-  @query('me-draggable-input#yaw') yawInput?: DraggableInput;
-  @query('me-draggable-input#pitch') pitchInput?: DraggableInput;
-
-  @property({type: Object}) orbit?: SphericalPositionDeg;
+  @query('me-draggable-input#yaw') yawInput!: DraggableInput;
+  @query('me-draggable-input#pitch') pitchInput!: DraggableInput;
 
   get currentOrbit() {
-    if (!this.yawInput || !this.pitchInput) {
-      throw new Error('Rendering not complete');
-    }
     return {
       phiDeg: this.pitchInput.value,
       thetaDeg: this.yawInput.value,
@@ -66,15 +58,12 @@ class CameraOrbitEditor extends ConnectedLitElement {
   }
 
   render() {
-    if (!this.orbit)
-      return html``;
     return html`
       <div style="justify-content: space-between; width: 100%; display: flex;">
         <div>
           <me-draggable-input
             id="yaw"
             innerLabel="yaw"
-            value=${this.orbit.thetaDeg}
             min=-9999 max=9999
             style="min-width: 90px; max-width: 90px;"
             @change=${this.onChange}>
@@ -82,7 +71,6 @@ class CameraOrbitEditor extends ConnectedLitElement {
           <me-draggable-input
             id="pitch"
             innerLabel="pitch"
-            value=${this.orbit.phiDeg}
             min=-9999 max=9999
             style="min-width: 90px; max-width: 90px;"
             @change=${this.onChange}>
@@ -104,16 +92,6 @@ export class CameraTargetInput extends ConnectedLitElement {
 
   @property({attribute: false}) change?: (newValue: Vector3D) => void;
   @internalProperty() target?: Vector3D;
-
-  // @ts-ignore
-  stateChanged(state: State) {
-    const modelViewer = getModelViewer();
-    if (modelViewer != null) {
-      this.target = getCameraState(modelViewer).target;
-    } else {
-      this.target = undefined;
-    }
-  }
 
   protected onInputChange(event: Event) {
     event.preventDefault();
@@ -153,79 +131,59 @@ export class CameraSettings extends ConnectedLitElement {
   static styles = cameraSettingsStyles;
 
   @internalProperty() config: ModelViewerConfig = {};
-  @internalProperty() camera: Camera = INITIAL_CAMERA;
-  @internalProperty() initialCamera: Camera = INITIAL_CAMERA;
-  @internalProperty() cameraOutOfBounds: boolean = false;
 
-  @query('me-camera-orbit-editor') cameraOrbitEditor?: CameraOrbitEditor;
+  @query('me-camera-orbit-editor') cameraOrbitEditor!: CameraOrbitEditor;
+  @query('me-camera-target-input') cameraTargetInput!: CameraTargetInput;
   @query('me-checkbox#auto-rotate') autoRotateCheckbox!: CheckboxElement;
 
   // Specifically overriding a super class method.
   // tslint:disable-next-line:enforce-name-casing
   async _getUpdateComplete() {
     await super._getUpdateComplete();
-    await this.cameraOrbitEditor!.updateComplete;
+    await this.cameraOrbitEditor.updateComplete;
     await this.autoRotateCheckbox.updateComplete;
   }
 
   stateChanged(state: State) {
-    this.config = getConfig(state);
-    this.camera = getCamera(state);
-    this.cameraOutOfBounds = this.outOfBounds();
+    const config = getConfig(state);
+    if (config !== this.config) {
+      this.config = config;
+      if (getModel(state) != null) {
+        this.updateInitialCamera();
+      }
+    }
   }
 
-  orbitValueBound(limits: Limits|undefined, val: string|number) {
-    if ((limits !== undefined) &&
-        ((limits.max !== 'auto' && val > limits.max) ||
-         (limits.min !== 'auto' && val < limits.min))) {
-      return true;
+  async updateInitialCamera() {
+    const cameraState = await getCameraState();
+    this.cameraTargetInput.target = cameraState.target;
+    if (this.config.cameraOrbit == null) {
+      this.cameraOrbitEditor.style.display = 'none';
+    } else {
+      const currentOrbit = cameraState.orbit;
+      this.cameraOrbitEditor.yawInput.value = currentOrbit.thetaDeg;
+      this.cameraOrbitEditor.pitchInput.value = currentOrbit.phiDeg;
+      this.cameraOrbitEditor.style.display = '';
     }
-    return false;
   }
 
-  outOfBounds() {
-    const snippet = this.camera;
-    if (snippet.orbit === undefined) {
-      return false;
-    }
-    if (this.orbitValueBound(snippet.pitchLimitsDeg, snippet.orbit?.phiDeg)) {
-      return true;
-    } else if (this.orbitValueBound(
-                   snippet.yawLimitsDeg, snippet.orbit?.thetaDeg)) {
-      return true;
-    } else if (this.orbitValueBound(
-                   snippet.radiusLimits, snippet.orbit?.radius)) {
-      return true;
-    }
-    return false;
-  }
-
-  onSaveCameraOrbit() {
-    const modelViewer = getModelViewer()!;
-    const cameraState = getCameraState(modelViewer);
-    const currentOrbit = cameraState.orbit;
-    reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
-
-    // set max radius to current value
-    const radiusLimits: Limits = {
-      enabled: true,
-      min: cameraState.radiusLimits?.min ?? 'auto',
-      max: currentOrbit?.radius ?? 'auto'
-    };
-    reduxStore.dispatch(dispatchRadiusLimits(radiusLimits));
+  async onSaveCameraOrbit() {
+    const currentCamera = await getCameraState();
+    reduxStore.dispatch(dispatchSaveCameraOrbit(currentCamera.orbit));
   }
 
   resetInitialCamera() {
+    this.cameraOrbitEditor.style.display = 'none';
     reduxStore.dispatch(dispatchSaveCameraOrbit(undefined));
-    const modelViewer = getModelViewer()!;
-    const cameraState = getCameraState(modelViewer);
-    // set max radius to current value
-    const radiusLimits: Limits = {
-      enabled: true,
-      min: cameraState.radiusLimits?.min ?? 'auto',
-      max: 'auto'
+  }
+
+  async onCameraOrbitEditorChange() {
+    const currentCamera = await getCameraState();
+    const orb = {
+      ...this.cameraOrbitEditor.currentOrbit,
+      radius: currentCamera.orbit.radius,
     };
-    reduxStore.dispatch(dispatchRadiusLimits(radiusLimits));
+    reduxStore.dispatch(dispatchSaveCameraOrbit(orb));
   }
 
   onCameraTargetChange(newValue: Vector3D) {
@@ -237,7 +195,6 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   render() {
-    const initalError = this.cameraOutOfBounds ? 'initialError' : ''
     return html`
     <me-expandable-tab tabName="Camera Setup" .open=${true}>
       <div slot="content">
@@ -245,11 +202,10 @@ export class CameraSettings extends ConnectedLitElement {
           ?checked="${!!this.config.autoRotate}"
           @change=${this.onAutoRotateChange}>
         </me-checkbox>
-        <div class="${initalError}">
+        <div>
           <div style="font-size: 14px; font-weight: 500; margin-top: 10px">Initial Camera Position:</div>
           <me-camera-orbit-editor
-            @change=${this.onCameraOrbitEditorChange}
-            .orbit=${this.camera.orbit ?? this.initialCamera.orbit}>
+            @change=${this.onCameraOrbitEditorChange}>
           </me-camera-orbit-editor>
           <div style="justify-content: space-between; width: 100%; display: flex;">
             <mwc-button
@@ -265,10 +221,6 @@ export class CameraSettings extends ConnectedLitElement {
             title="Reset initial camera" @click=${this.resetInitialCamera}>
             </mwc-icon-button>
           </div>
-          ${
-        this.cameraOutOfBounds ?
-            html`<div class="error">Your initial camera is outside the bounds of your limits. Set your initial camera again.</div>` :
-            html``}
         </div>
         <div style="font-size: 14px; font-weight: 500; margin-top: 20px">Target Point:</div>
         <me-camera-target-input .change=${this.onCameraTargetChange}>
@@ -284,30 +236,6 @@ export class CameraSettings extends ConnectedLitElement {
   </div>
 </me-expandable-tab>
 `;
-  }
-
-  get currentCameraOrbit() {
-    return this.cameraOrbitEditor?.currentOrbit;
-  }
-
-  onCameraOrbitEditorChange() {
-    if (!this.cameraOrbitEditor)
-      return;
-    // Set min/max radius limits before setting radius such that we don't clip.
-    const modelViewer = getModelViewer()!;
-    if (!modelViewer)
-      return;
-
-    const currentOrbit = getCameraState(modelViewer).orbit;
-    const radiusLimits:
-        Limits = {enabled: true, min: 'auto', max: currentOrbit!.radius};
-    reduxStore.dispatch(dispatchRadiusLimits(radiusLimits));
-
-    const orb = {
-      ...this.cameraOrbitEditor.currentOrbit,
-      radius: currentOrbit?.radius!,
-    };
-    reduxStore.dispatch(dispatchSaveCameraOrbit(orb));
   }
 }
 

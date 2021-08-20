@@ -16,76 +16,139 @@
  */
 
 import {Action, ModelViewerConfig, State} from '../../types.js';
+import {roundToDigits} from '../utils/reducer_utils.js';
+
+import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
+
+const DIGITS = 4;
+
+function getMinString(limits: Limits|undefined, suffix: string) {
+  if (!limits || !limits.enabled) {
+    return 'auto';
+  }
+  return `${roundToDigits(limits.min, DIGITS)}${suffix}`;
+}
+
+function getMaxString(limits: Limits|undefined, suffix: string) {
+  if (!limits || !limits.enabled) {
+    return 'auto';
+  }
+  return `${roundToDigits(limits.max, DIGITS)}${suffix}`;
+}
+
+function getUpdatedLimits(
+    state: ModelViewerConfig, limits: Limits, position: number) {
+  const suffix = position === 2 ? 'm' : 'deg';
+  const {minCameraOrbit, maxCameraOrbit} = state;
+  const min = minCameraOrbit == null ? ['auto', 'auto', 'auto'] :
+                                       minCameraOrbit.split(' ');
+  min[position] = getMinString(limits, suffix);
+  const max = maxCameraOrbit == null ? ['auto', 'auto', 'auto'] :
+                                       maxCameraOrbit.split(' ');
+  max[position] = getMaxString(limits, suffix);
+  return {minCameraOrbit: min.join(' '), maxCameraOrbit: max.join(' ')};
+}
 
 const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
 export function dispatchCameraControlsEnabled(enabled?: boolean) {
   return {type: SET_CAMERA_CONTROLS_ENABLED, payload: !!enabled};
 }
 
-/** Dispatch changes to auto rotate */
 const SET_AUTO_ROTATE = 'SET_AUTO_ROTATE';
 export function dispatchAutoRotate(autoRotate?: boolean) {
   return {type: SET_AUTO_ROTATE, payload: autoRotate};
 }
 
-/** Set auto play enabled or not */
 const SET_AUTOPLAY_ENABLED = 'SET_AUTOPLAY_ENABLED';
 export function dispatchAutoplayEnabled(enabled?: boolean) {
   return {type: SET_AUTOPLAY_ENABLED, payload: !!enabled};
 }
 
-/** Set animation name */
 const SET_ANIMATION_NAME = 'SET_ANIMATION_NAME';
 export function dispatchAnimationName(animationName?: string) {
   return {type: SET_ANIMATION_NAME, payload: animationName};
 }
 
-/** Dispatch an edit to model viewer environmentImage attribute. */
 const UPDATE_IBL = 'UPDATE_IBL';
 export function dispatchEnvrionmentImage(ibl?: string) {
   return {type: UPDATE_IBL, payload: ibl};
 }
 
-/** Dispatch an edit to model viewer exposure attribute. */
 const UPDATE_EXPOSURE = 'UPDATE_EXPOSURE';
 export function dispatchExposure(exposure?: number) {
   return {type: UPDATE_EXPOSURE, payload: exposure};
 }
 
-/** Dispatch an edit to model viewer exposure attribute. */
 const SET_USE_ENV_AS_SKYBOX = 'SET_USE_ENV_AS_SKYBOX';
 export function dispatchUseEnvAsSkybox(useEnvAsSkybox?: boolean) {
   return {type: SET_USE_ENV_AS_SKYBOX, payload: useEnvAsSkybox};
 }
 
-/** Dispatch an edit to model viewer shadow intensity. */
 const UPDATE_SHADOW_INTENSITY = 'UPDATE_SHADOW_INTENSITY';
 export function dispatchShadowIntensity(shadowIntensity?: number) {
   return {type: UPDATE_SHADOW_INTENSITY, payload: shadowIntensity};
 }
 
-
-/** Dispatch an edit to model viewer shadow softness. */
 const UPDATE_SHADOW_SOFTNESS = 'UPDATE_SHADOW_SOFTNESS';
 export function dispatchShadowSoftness(shadowSoftness?: number) {
   return {type: UPDATE_SHADOW_SOFTNESS, payload: shadowSoftness};
 }
 
-/** Dispatch a state mutator to set model-viewer poster. */
 const SET_POSTER = 'SET_POSTER';
 export function dispatchSetPoster(poster?: string) {
   return {type: SET_POSTER, payload: poster};
 }
 
-/** Dispatch a state mutator to set setPosterTrigger. */
 // CURRENTLY UNUSED
 const SET_REVEAL = 'SET_REVEAL';
 export function dispatchSetReveal(reveal?: string) {
   return {type: SET_REVEAL, payload: reveal};
 }
 
+// CAMERA //////////////
+
+const SET_CAMERA_YAW_LIMITS = 'SET_CAMERA_YAW_LIMITS';
+export function dispatchYawLimits(yawLimitsDeg?: Limits) {
+  if (!yawLimitsDeg) {
+    throw new Error('No limits given');
+  }
+  return {type: SET_CAMERA_YAW_LIMITS, payload: yawLimitsDeg};
+}
+
+const SET_CAMERA_RADIUS_LIMITS = 'SET_CAMERA_RADIUS_LIMITS';
+export function dispatchRadiusLimits(radiusLimits?: Limits) {
+  return {type: SET_CAMERA_RADIUS_LIMITS, payload: radiusLimits};
+}
+
+const SET_CAMERA_PITCH_LIMITS = 'SET_CAMERA_PITCH_LIMITS';
+export function dispatchPitchLimits(pitchLimitsDeg?: Limits) {
+  return {type: SET_CAMERA_PITCH_LIMITS, payload: pitchLimitsDeg};
+}
+
+const SET_CAMERA_FOV_LIMITS = 'SET_CAMERA_FOV_LIMITS';
+export function dispatchFovLimits(fovLimitsDeg?: Limits) {
+  return {type: SET_CAMERA_FOV_LIMITS, payload: fovLimitsDeg};
+}
+
+const SET_MIN_ZOOM = 'SET_MIN_ZOOM';
+export function dispatchSetMinZoom(fovDeg?: number, radius?: number) {
+  return {
+    type: SET_MIN_ZOOM, payload: {radius: radius, fov: fovDeg}
+  }
+}
+
+const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
+export function dispatchSaveCameraOrbit(orbit: SphericalPositionDeg|undefined) {
+  return {type: SAVE_CAMERA_ORBIT, payload: orbit};
+}
+
+const SET_CAMERA_TARGET = 'SET_CAMERA_TARGET';
+export function dispatchCameraTarget(target?: Vector3D) {
+  return {type: SET_CAMERA_TARGET, payload: target};
+}
+
 const SET_CONFIG = 'SET_CONFIG';
-export function dispatchSetConfig(config: ModelViewerConfig) {
+export function dispatchConfig(config: ModelViewerConfig) {
   return {type: SET_CONFIG, payload: config};
 }
 
@@ -95,49 +158,77 @@ export const getConfig = (state: State) =>
 export function configReducer(
     state: ModelViewerConfig = {}, action: Action): ModelViewerConfig {
   switch (action.type) {
-    case SET_CONFIG: {
+    case SET_CONFIG:
       return action.payload;
-    }
     case SET_REVEAL:
       return {...state, reveal: action.payload};
     case SET_POSTER:
-      return {
-        ...state, poster: action.payload
-      }
+      return {...state, poster: action.payload};
     case UPDATE_SHADOW_SOFTNESS:
-      return {
-        ...state, shadowSoftness: action.payload
-      }
+      return {...state, shadowSoftness: action.payload};
     case UPDATE_SHADOW_INTENSITY:
-      return {
-        ...state, shadowIntensity: action.payload
-      }
+      return {...state, shadowIntensity: action.payload};
     case SET_USE_ENV_AS_SKYBOX:
-      return {
-        ...state, useEnvAsSkybox: action.payload
-      }
+      return {...state, useEnvAsSkybox: action.payload};
     case UPDATE_EXPOSURE:
-      return {
-        ...state, exposure: action.payload
-      }
+      return {...state, exposure: action.payload};
     case UPDATE_IBL:
-      return {
-        ...state, environmentImage: action.payload
-      }
+      return {...state, environmentImage: action.payload};
     case SET_AUTOPLAY_ENABLED:
-      return {
-        ...state, autoplay: action.payload
-      }
+      return {...state, autoplay: action.payload};
     case SET_ANIMATION_NAME:
       return {...state, animationName: action.payload};
     case SET_CAMERA_CONTROLS_ENABLED:
-      return {
-        ...state, cameraControls: action.payload
-      }
+      return {...state, cameraControls: action.payload};
     case SET_AUTO_ROTATE:
+      return {...state, autoRotate: action.payload};
+    case SET_CAMERA_TARGET:
+      const target = action.payload;
+      const cameraTarget = `${roundToDigits(target.x, DIGITS)}m ${
+          roundToDigits(
+              target.y, DIGITS)}m ${roundToDigits(target.z, DIGITS)}m`;
+      return {...state, cameraTarget};
+    case SAVE_CAMERA_ORBIT:
+      const orbit = action.payload;
+      const cameraOrbit = orbit == null ?
+          undefined :
+          `${roundToDigits(orbit.thetaDeg, DIGITS)}deg ${
+              roundToDigits(
+                  orbit.phiDeg,
+                  DIGITS)}deg ${roundToDigits(orbit.radius, DIGITS)}m`
+      return {...state, cameraOrbit};
+    case SET_CAMERA_FOV_LIMITS:
       return {
-        ...state, autoRotate: action.payload
-      }
+        ...state,
+        minFov: getMinString(action.payload, 'deg'),
+        maxFov: getMaxString(action.payload, 'deg')
+      };
+    case SET_CAMERA_PITCH_LIMITS:
+      return {...state, ...getUpdatedLimits(state, action.payload, 1)};
+    case SET_CAMERA_RADIUS_LIMITS:
+      return {...state, ...getUpdatedLimits(state, action.payload, 2)};
+    case SET_CAMERA_YAW_LIMITS:
+      return {...state, ...getUpdatedLimits(state, action.payload, 0)};
+    case SET_MIN_ZOOM:
+      const limits = getUpdatedLimits(
+          state,
+          {
+            enabled: action.payload.fov != null,
+            min: action.payload.radius,
+            max: -1
+          },
+          2);
+      return {
+        ...state,
+        minCameraOrbit: limits.minCameraOrbit,
+        minFov: getMinString(
+            {
+              enabled: action.payload.fov != null,
+              min: action.payload.fov,
+              max: -1
+            },
+            'deg')
+      };
     default:
       return state;
   }

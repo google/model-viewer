@@ -17,7 +17,6 @@
 
 import * as Redux from 'redux';  // from //third_party/javascript/redux:redux_closurized
 
-import {Camera, INITIAL_CAMERA} from './components/camera_settings/camera_state.js';
 import {HotspotConfig} from './components/hotspot_panel/types.js';
 import {EnvironmentImage, INITIAL_ENVIRONMENT_IMAGES} from './components/ibl_selector/types.js';
 import {MobileState} from './components/mobile_view/types.js';
@@ -83,7 +82,6 @@ export interface BestPracticesState {
 export interface ModelViewerSnippetState {
   arConfig: ArConfigState;
   bestPractices: BestPracticesState;
-  camera: Camera;
   config: ModelViewerConfig;
   hotspots: HotspotConfig[];
   relativeFilePaths: RelativeFilePathsState;
@@ -121,7 +119,6 @@ export const INITIAL_STATE: State = {
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},
       config: {},
       hotspots: [],
-      camera: INITIAL_CAMERA,
       relativeFilePaths: {},
       extraAttributes: {},
     },

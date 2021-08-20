@@ -23,7 +23,6 @@ import {ifDefined} from 'lit-html/directives/if-defined';
 import {toastStyles} from '../../styles.css.js';
 import {ArConfigState, BestPracticesState, ModelViewerConfig, ModelViewerSnippetState} from '../../types.js';
 import {arButtonCSS, arPromptCSS, progressBarCSS} from '../best_practices/styles.css.js';
-import {applyCameraEdits, Camera, INITIAL_CAMERA} from '../camera_settings/camera_state.js';
 import {HotspotConfig, toVector3D} from '../hotspot_panel/types.js';
 import {renderCommonChildElements} from '../model_viewer_preview/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
@@ -60,7 +59,6 @@ export class MobileView extends LitElement {
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
   @internalProperty() extraAttributes: any = {};
-  @internalProperty() camera: Camera = INITIAL_CAMERA;
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() bestPractices?: BestPracticesState;
   @internalProperty() envImageUrl: string = '';
@@ -95,7 +93,6 @@ export class MobileView extends LitElement {
     // Set all of the other relevant snippet information
     this.arConfig = snippet.arConfig;
     this.config = snippet.config;
-    this.camera = snippet.camera;
     this.extraAttributes = snippet.extraAttributes;
     this.bestPractices = snippet.bestPractices;
 
@@ -217,7 +214,6 @@ export class MobileView extends LitElement {
 
   render() {
     const config = {...this.config};
-    applyCameraEdits(config, this.camera);
     const skyboxImage = (config.useEnvAsSkybox && this.editorUrls?.env) ?
         this.envImageUrl :
         undefined;

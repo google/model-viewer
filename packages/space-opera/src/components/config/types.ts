@@ -21,16 +21,16 @@
 
 /** Spherical coordinate. Follow model-viewer's convention of theta/phi. */
 export interface SphericalPositionDeg {
-  readonly thetaDeg: number;
-  readonly phiDeg: number;
-  readonly radius: number;
+  thetaDeg: number;
+  phiDeg: number;
+  radius: number;
 }
 
 /** A 3D Cartesian coordinate */
 export interface Vector3D {
-  readonly x: number;
-  readonly y: number;
-  readonly z: number;
+  x: number;
+  y: number;
+  z: number;
 }
 
 /**
@@ -39,7 +39,7 @@ export interface Vector3D {
  * limits with 2 booleans, but there's no use case right now.
  */
 export interface Limits {
-  readonly enabled: boolean;
-  readonly min: number|string;
-  readonly max: number|string;
+  enabled: boolean;
+  min: number;
+  max: number;
 }

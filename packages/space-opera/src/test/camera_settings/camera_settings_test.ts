@@ -19,45 +19,37 @@
 import '../../components/camera_settings/camera_settings.js';
 
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
-import {dispatchCameraTarget, dispatchSaveCameraOrbit} from '../../components/camera_settings/reducer.js';
-import {Vector3D} from '../../components/camera_settings/types.js';
-import {dispatchAutoRotate, getConfig} from '../../components/config/reducer.js';
-import {getModelViewer} from '../../components/model_viewer_preview/reducer.js';
+import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../../components/config/reducer.js';
+import {Vector3D} from '../../components/config/types.js';
+import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {DraggableInput} from '../../components/shared/draggable_input/draggable_input.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 describe('camera constraints test', () => {
   let cameraSettings: CameraSettings;
+  let preview: ModelViewerPreview;
 
   beforeEach(async () => {
     reduxStore.dispatch(dispatchReset());
-    expect(getModelViewer()).toBeUndefined();
-    // Mock for the ModelViewerPreview component
-    document.body.innerHTML += `
-    <model-viewer-preview>
-      <model-viewer>
-      </model-viewer>
-    </model-viewer-preview>
-    `;
+    preview = new ModelViewerPreview();
+    document.body.appendChild(preview);
+    await preview.updateComplete;
 
     cameraSettings = new CameraSettings();
     document.body.appendChild(cameraSettings);
     await cameraSettings.updateComplete;
   });
 
-  afterEach(() => {
-    cameraSettings.config = {};
+  afterEach(async () => {
+    await cameraSettings.updateComplete;
     document.body.removeChild(cameraSettings);
-    const preview = document.querySelector('model-viewer-preview')!;
     document.body.removeChild(preview);
   });
 
   it('updates the camera target on camera target change', () => {
     reduxStore.dispatch(dispatchCameraTarget({x: 1, y: 2, z: 3}));
-    expect(cameraSettings.camera.target!.x).toEqual(1);
-    expect(cameraSettings.camera.target!.y).toEqual(2);
-    expect(cameraSettings.camera.target!.z).toEqual(3);
+    expect(getConfig(reduxStore.getState()).cameraTarget).toEqual('1m 2m 3m');
   });
 
   it('updates camera target on UI change', async () => {
@@ -74,16 +66,7 @@ describe('camera constraints test', () => {
     xInput.value = '6';
     xInput.dispatchEvent(new Event('change'));
 
-    expect(cameraSettings.camera.target!.x).toEqual(6);
-  });
-
-  it('reflects the correct camera orbit in its editor UI', async () => {
-    const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
-    reduxStore.dispatch(dispatchSaveCameraOrbit(orbit));
-    await cameraSettings.updateComplete;
-    const actualOrbit = cameraSettings.cameraOrbitEditor!.currentOrbit;
-    expect(actualOrbit.phiDeg).toBeCloseTo(orbit.phiDeg);
-    expect(actualOrbit.thetaDeg).toBeCloseTo(orbit.thetaDeg);
+    expect(getConfig(reduxStore.getState()).cameraTarget).toEqual('6m 0m 0m');
   });
 
   it('dispatches the correct camera orbit if its UI is changed', async () => {
@@ -94,7 +77,6 @@ describe('camera constraints test', () => {
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;
     expect(yawInput).toBeDefined();
     expect(yawInput).not.toBeNull();
-    // Now has a dependency on model-viewer via onCameraOrbitEditorChange()
   });
 
   it('dispatches auto-rotate change when checkbox clicked', async () => {

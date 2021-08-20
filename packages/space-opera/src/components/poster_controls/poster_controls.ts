@@ -24,9 +24,7 @@ import {customElement, html, internalProperty} from 'lit-element';
 import {reduxStore} from '../../space_opera_base.js';
 import {posterControlsStyles, toastStyles} from '../../styles.css.js';
 import {State} from '../../types.js';
-import {Camera, getOrbitString} from '../camera_settings/camera_state.js';
-import {dispatchSaveCameraOrbit, getCamera} from '../camera_settings/reducer.js';
-import {dispatchSetPoster, getConfig} from '../config/reducer.js';
+import {dispatchSaveCameraOrbit, dispatchSetPoster, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getCameraState, getModelViewer} from '../model_viewer_preview/reducer.js';
 import {dispatchSetPosterName} from '../relative_file_paths/reducer.js';
@@ -40,11 +38,12 @@ export class PosterControlsElement extends ConnectedLitElement {
   @internalProperty() poster?: string;
   @internalProperty() toastClassName: string = '';
   @internalProperty() toastBody: string = '';
-  @internalProperty() cameraSnippet: Camera = {};
+  @internalProperty() initialCamera: string = 'auto auto auto';
 
   stateChanged(state: State) {
-    this.poster = getConfig(state).poster;
-    this.cameraSnippet = getCamera(state);
+    const config = getConfig(state);
+    this.poster = config.poster;
+    this.initialCamera = config.cameraOrbit ?? 'auto auto auto';
   }
 
   render() {
@@ -75,46 +74,30 @@ export class PosterControlsElement extends ConnectedLitElement {
     if (!modelViewer)
       return;
 
-    // if we've already set the initial camera, use it
-    if (this.cameraSnippet.orbit !== undefined) {
-      const initialOrbit = this.cameraSnippet.orbit;
-      modelViewer.cameraOrbit = getOrbitString(initialOrbit);
-      modelViewer.jumpCameraToGoal();
-      requestAnimationFrame(async () => {
-        let posterUrl =
-            createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
-        reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
-      });
-    } else {
-      // otherwise, take the current model-viewer state
-      const currentOrbit = getCameraState(modelViewer).orbit;
-      reduxStore.dispatch(dispatchSaveCameraOrbit(currentOrbit));
-      this.toastBody =
-          'Initial camera undefined, setting initial camera to current camera.';
-      this.toastClassName = 'show';
-      setTimeout(() => {
-        this.toastClassName = '';
-      }, 4000);
-      let posterUrl =
-          createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
-      reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
-    }
+    // otherwise, take the current model-viewer state
+    const currentCamera = await getCameraState();
+    reduxStore.dispatch(dispatchSaveCameraOrbit(currentCamera.orbit));
+    this.toastBody =
+        'Initial camera undefined, setting initial camera to current camera.';
+    this.toastClassName = 'show';
+    setTimeout(() => {
+      this.toastClassName = '';
+    }, 4000);
+    let posterUrl =
+        createSafeObjectURL(await modelViewer.toBlob({idealAspect: true}));
+    reduxStore.dispatch(dispatchSetPoster(posterUrl.unsafeUrl));
+
     reduxStore.dispatch(dispatchSetPosterName('poster.png'));
   }
 
   onDisplayPoster() {
     const modelViewer = getModelViewer()!;
-    if (!modelViewer)
-      return;
-    if (this.cameraSnippet.orbit !== undefined) {
-      const initialOrbit = this.cameraSnippet.orbit;
-      modelViewer.cameraOrbit = getOrbitString(initialOrbit);
-      modelViewer.jumpCameraToGoal();
-      requestAnimationFrame(async () => {
-        modelViewer.reveal = 'interaction';
-        modelViewer.showPoster()
-      });
-    }
+    modelViewer.cameraOrbit = this.initialCamera;
+    modelViewer.jumpCameraToGoal();
+    requestAnimationFrame(async () => {
+      modelViewer.reveal = 'interaction';
+      modelViewer.showPoster();
+    });
   }
 
   onDeletePoster() {

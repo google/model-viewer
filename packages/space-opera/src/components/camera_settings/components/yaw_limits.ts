@@ -19,9 +19,10 @@ import {customElement, internalProperty} from 'lit-element';
 
 import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
-import {getCameraState, getModelViewer} from '../../model_viewer_preview/reducer.js';
-import {dispatchYawLimits, getCamera, getIsDirtyCamera} from '../reducer.js';
-import {Limits} from '../types.js';
+import {dispatchYawLimits} from '../../config/reducer.js';
+import {getModelViewer} from '../../model_viewer_preview/reducer.js';
+import {radToDeg} from '../../utils/reducer_utils.js';
+import {getIsDirtyCamera} from '../reducer.js';
 
 import {LimitsBase} from './limits_base.js';
 
@@ -40,12 +41,11 @@ export class YawLimits extends LimitsBase {
   @internalProperty() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
-    this.limitsProperty = getCamera(state).yawLimitsDeg;
     this.isDirtyCamera = getIsDirtyCamera(state);
   }
 
-  dispatchLimits(limits?: Limits) {
-    reduxStore.dispatch(dispatchYawLimits(limits));
+  dispatchLimits() {
+    reduxStore.dispatch(dispatchYawLimits(this.limitsProperty));
   }
 
   get label() {
@@ -69,8 +69,8 @@ export class YawLimits extends LimitsBase {
   }
 
   get currentPreviewValue() {
-    const currentCamera = getCameraState(getModelViewer()!);
-    return Math.round(currentCamera.orbit?.thetaDeg ?? 0);
+    const currentOrbit = getModelViewer()!.getCameraOrbit();
+    return Math.round(radToDeg(currentOrbit.theta));
   }
 }
 
