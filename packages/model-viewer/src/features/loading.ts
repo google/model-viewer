@@ -31,7 +31,7 @@ export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 const PROGRESS_MASK_BASE_OPACITY = 0.2;
 
 const DEFAULT_DRACO_DECODER_LOCATION =
-    'https://www.gstatic.com/draco/versioned/decoders/1.3.6/';
+    'https://www.gstatic.com/draco/versioned/decoders/1.4.1/';
 
 const DEFAULT_KTX2_TRANSCODER_LOCATION =
     'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/';
