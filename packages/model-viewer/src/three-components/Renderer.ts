@@ -237,13 +237,13 @@ export class Renderer extends EventDispatcher {
 
   private updateRendererScale() {
     const scaleStep = this.scaleStep;
-    if (this.avgFrameDuration > HIGH_FRAME_DURATION_MS &&
-        this.scaleStep < this.lastStep) {
+    if (this.avgFrameDuration > HIGH_FRAME_DURATION_MS) {
       ++this.scaleStep;
     } else if (
         this.avgFrameDuration < LOW_FRAME_DURATION_MS && this.scaleStep > 0) {
       --this.scaleStep;
     }
+    this.scaleStep = Math.min(this.scaleStep, this.lastStep);
 
     if (scaleStep == this.scaleStep) {
       return;

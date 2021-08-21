@@ -40,6 +40,9 @@ export interface ModelViewerEventHandlers {
 
 export async function createPoster(height: number) {
   const modelViewer = getModelViewer();
+  const ModelViewerElement = customElements.get('model-viewer');
+  const oldMinScale = ModelViewerElement.minimumRenderScale;
+  ModelViewerElement.minimumRenderScale = 1;
 
   height /= window.devicePixelRatio;
   modelViewer.style.width = `${height}px`;
@@ -70,6 +73,8 @@ export async function createPoster(height: number) {
 
   modelViewer.style.width = '';
   modelViewer.style.height = '';
+
+  ModelViewerElement.minimumRenderScale = oldMinScale;
 
   return posterBlob;
 }
