@@ -33,11 +33,11 @@ import {ModelViewerConfig, State} from '../../types.js';
 import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../config/reducer.js';
 import {Vector3D} from '../config/types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getCameraState, getModel} from '../model_viewer_preview/reducer.js';
+import {getModel, getUpdatedModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
-import {checkFinite} from '../utils/reducer_utils.js';
+import {checkFinite, degToRad, radToDeg} from '../utils/reducer_utils.js';
 
 @customElement('me-camera-orbit-editor')
 class CameraOrbitEditor extends ConnectedLitElement {
@@ -48,8 +48,8 @@ class CameraOrbitEditor extends ConnectedLitElement {
 
   get currentOrbit() {
     return {
-      phiDeg: this.pitchInput.value,
-      thetaDeg: this.yawInput.value,
+      phi: degToRad(this.pitchInput.value),
+      theta: degToRad(this.yawInput.value),
     };
   }
 
@@ -155,21 +155,21 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   async updateInitialCamera() {
-    const cameraState = await getCameraState();
-    this.cameraTargetInput.target = cameraState.target;
+    const modelViewer = await getUpdatedModelViewer();
+    this.cameraTargetInput.target = modelViewer.getCameraTarget();
     if (this.config.cameraOrbit == null) {
       this.cameraOrbitEditor.style.display = 'none';
     } else {
-      const currentOrbit = cameraState.orbit;
-      this.cameraOrbitEditor.yawInput.value = currentOrbit.thetaDeg;
-      this.cameraOrbitEditor.pitchInput.value = currentOrbit.phiDeg;
+      const currentOrbit = modelViewer.getCameraOrbit();
+      this.cameraOrbitEditor.yawInput.value = radToDeg(currentOrbit.theta);
+      this.cameraOrbitEditor.pitchInput.value = radToDeg(currentOrbit.phi);
       this.cameraOrbitEditor.style.display = '';
     }
   }
 
   async onSaveCameraOrbit() {
-    const currentCamera = await getCameraState();
-    reduxStore.dispatch(dispatchSaveCameraOrbit(currentCamera.orbit));
+    const modelViewer = await getUpdatedModelViewer();
+    reduxStore.dispatch(dispatchSaveCameraOrbit(modelViewer.getCameraOrbit()));
   }
 
   resetInitialCamera() {
@@ -178,12 +178,8 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   async onCameraOrbitEditorChange() {
-    const currentCamera = await getCameraState();
-    const orb = {
-      ...this.cameraOrbitEditor.currentOrbit,
-      radius: currentCamera.orbit.radius,
-    };
-    reduxStore.dispatch(dispatchSaveCameraOrbit(orb));
+    reduxStore.dispatch(
+        dispatchSaveCameraOrbit(this.cameraOrbitEditor.currentOrbit));
   }
 
   onCameraTargetChange(newValue: Vector3D) {

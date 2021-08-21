@@ -16,9 +16,9 @@
  */
 
 import {Action, ModelViewerConfig, State} from '../../types.js';
-import {roundToDigits} from '../utils/reducer_utils.js';
+import {radToDeg, roundToDigits} from '../utils/reducer_utils.js';
 
-import {Limits, SphericalPositionDeg, Vector3D} from './types.js';
+import {Limits, Vector3D} from './types.js';
 
 const DIGITS = 4;
 
@@ -49,10 +49,9 @@ function getUpdatedLimits(
   return {minCameraOrbit: min.join(' '), maxCameraOrbit: max.join(' ')};
 }
 
-export function getOrbitString(orbit: SphericalPositionDeg) {
-  return `${roundToDigits(orbit.thetaDeg, DIGITS)}deg ${
-      roundToDigits(
-          orbit.phiDeg, DIGITS)}deg ${roundToDigits(orbit.radius, DIGITS)}m`;
+export function getOrbitString(orbit: {theta: number, phi: number}) {
+  return `${roundToDigits(radToDeg(orbit.theta), DIGITS)}deg ${
+      roundToDigits(radToDeg(orbit.phi), DIGITS)}deg auto`;
 }
 
 const SET_CAMERA_CONTROLS_ENABLED = 'SET_CAMERA_CONTROLS_ENABLED';
@@ -144,7 +143,8 @@ export function dispatchSetMinZoom(fovDeg?: number, radius?: number) {
 }
 
 const SAVE_CAMERA_ORBIT = 'SAVE_CAMERA_ORBIT';
-export function dispatchSaveCameraOrbit(orbit: SphericalPositionDeg|undefined) {
+export function dispatchSaveCameraOrbit(orbit: {theta: number, phi: number}|
+                                        undefined) {
   return {type: SAVE_CAMERA_ORBIT, payload: orbit};
 }
 

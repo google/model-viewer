@@ -70,7 +70,7 @@ describe('camera constraints test', () => {
   });
 
   it('dispatches the correct camera orbit if its UI is changed', async () => {
-    const orbit = {phiDeg: 12, thetaDeg: 34, radius: 56};
+    const orbit = {phi: 0.5, theta: 1, radius: 56};
     reduxStore.dispatch(dispatchSaveCameraOrbit(orbit));
     await cameraSettings.updateComplete;
     expect(cameraSettings.cameraOrbitEditor).toBeDefined();

@@ -27,8 +27,6 @@ import {ArConfigState, ModelViewerConfig} from '../../types';
 import {getConfig, getOrbitString} from '../config/reducer';
 import {getModelViewer} from '../model_viewer_preview/reducer';
 
-import {radToDeg} from './reducer_utils';
-
 /** Optional handlers for model-viewer events */
 export interface ModelViewerEventHandlers {
   readonly load?: () => void;
@@ -67,11 +65,7 @@ export async function createPoster(height: number) {
   modelViewer.autoplay = !!config.autoplay;
   modelViewer.currentTime = oldTime;
 
-  modelViewer.cameraOrbit = getOrbitString({
-    thetaDeg: radToDeg(oldOrbit.theta),
-    phiDeg: radToDeg(oldOrbit.phi),
-    radius: oldOrbit.radius
-  });
+  modelViewer.cameraOrbit = getOrbitString(oldOrbit);
   modelViewer.jumpCameraToGoal();
 
   modelViewer.style.width = '';
