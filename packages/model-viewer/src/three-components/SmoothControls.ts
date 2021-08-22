@@ -658,9 +658,7 @@ export class SmoothControls extends EventDispatcher {
       (event: TouchEvent) => {
         const {touches} = event;
         if (touches.length === 0) {
-          const {element} = this;
-          element.removeEventListener('touchmove', this._onTouchMove);
-          self.removeEventListener('touchend', this.onTouchEnd);
+          this.touchMode = null;
         } else {
           this.onTouchChange(event);
         }
