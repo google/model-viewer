@@ -90,12 +90,14 @@ export declare interface LoadingInterface {
 export declare interface LoadingStaticInterface {
   dracoDecoderLocation: string;
   ktx2TranscoderLocation: string;
+  meshoptDecoderLocation: string;
   mapURLs(callback: (url: string) => string): void;
 }
 
 export interface ModelViewerGlobalConfig {
   dracoDecoderLocation?: string;
   ktx2TranscoderLocation?: string;
+  meshoptDecoderLocation?: string;
   powerPreference?: string;
 }
 
@@ -166,6 +168,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     static get ktx2TranscoderLocation() {
       return CachingGLTFLoader.getKTX2TranscoderLocation();
+    }
+
+    static set meshoptDecoderLocation(value: string) {
+      CachingGLTFLoader.setMeshoptDecoderLocation(value);
+    }
+
+    static get meshoptDecoderLocation() {
+      return CachingGLTFLoader.getMeshoptDecoderLocation();
     }
 
     /**
@@ -319,6 +329,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           ModelViewerElement.ktx2TranscoderLocation ||
           DEFAULT_KTX2_TRANSCODER_LOCATION;
       CachingGLTFLoader.setKTX2TranscoderLocation(ktx2TranscoderLocation);
+
+      if (ModelViewerElement.meshoptDecoderLocation) {
+        CachingGLTFLoader.setMeshoptDecoderLocation(ModelViewerElement.meshoptDecoderLocation);
+      }
     }
 
     connectedCallback() {

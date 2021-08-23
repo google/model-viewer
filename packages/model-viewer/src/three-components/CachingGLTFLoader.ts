@@ -20,6 +20,7 @@ import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
+import {fetchScript} from '../utilities/fetch-script.js';
 
 import GLTFMaterialsVariantsExtension from './gltf-instance/VariantMaterialLoaderPlugin';
 import {GLTFInstance, GLTFInstanceConstructor} from './GLTFInstance.js';
@@ -58,6 +59,9 @@ const dracoLoader = new DRACOLoader();
 let ktx2TranscoderLocation: string;
 const ktx2Loader = new KTX2Loader();
 
+let meshoptDecoderLocation: string;
+let meshoptDecoder: Promise<typeof MeshoptDecoder> | undefined;
+
 export const $loader = Symbol('loader');
 export const $evictionPolicy = Symbol('evictionPolicy');
 const $GLTFInstance = Symbol('GLTFInstance');
@@ -81,6 +85,19 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
 
   static getKTX2TranscoderLocation() {
     return ktx2TranscoderLocation;
+  }
+
+  static setMeshoptDecoderLocation(url: string) {
+    if (meshoptDecoderLocation !== url) {
+      meshoptDecoderLocation = url;
+      meshoptDecoder = fetchScript(url)
+        .then(() => MeshoptDecoder.ready)
+        .then(() => MeshoptDecoder);
+    }
+  }
+
+  static getMeshoptDecoderLocation() {
+    return meshoptDecoderLocation;
   }
 
   static initializeKTX2Loader(renderer: WebGLRenderer) {
@@ -155,6 +172,10 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     this.dispatchEvent(
         {type: 'preload', element: element, src: url} as PreloadEvent);
     if (!cache.has(url)) {
+      if (meshoptDecoder) {
+        this[$loader].setMeshoptDecoder(await meshoptDecoder);
+      }
+
       const rawGLTFLoads =
           loadWithLoader(url, this[$loader], (progress: number) => {
             progressCallback(progress * 0.8);

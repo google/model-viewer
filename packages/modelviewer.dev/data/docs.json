@@ -112,7 +112,15 @@
         "htmlName": "ktx2TranscoderLocation",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s KTX2 transcoder location URL. By default, the KTX2 transcoder will be loaded from a Google CDN.",
         "links": [
-          "<a href=\"../examples/loading/#dracoSupport\"><span class='attribute'>dracoDecoderLocation</span> example</a>"
+          "<a href=\"../examples/loading/#ktx2Support\"><span class='attribute'>ktx2TranscoderLocation</span> example</a>"
+        ]
+      },
+      {
+        "name": "meshoptDecoderLocation",
+        "htmlName": "meshoptDecoderLocation",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s Meshopt decoder location URL. By default, the Meshopt decoder is not enabled.",
+        "links": [
+          "<a href=\"../examples/loading/#meshoptSupport\"><span class='attribute'>meshoptDecoderLocation</span> example</a>"
         ]
       },
       {
