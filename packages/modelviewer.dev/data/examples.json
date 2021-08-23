@@ -40,6 +40,10 @@
         "name": "KTX2 Support"
       },
       {
+        "htmlId": "meshoptSupport",
+        "name": "Meshopt Support"
+      },
+      {
         "htmlId": "usdzModel",
         "name": "USDZ Model"
       },

@@ -49,6 +49,18 @@ export const loadWithLoader =
       });
     };
 
+/** Helper to load a script tag. */
+const fetchScript = (src: string): Promise<Event> => {
+  return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      document.body.appendChild(script);
+      script.onload = resolve;
+      script.onerror = reject;
+      script.async = true;
+      script.src = src;
+  });
+};
+
 const cache = new Map<string, Promise<GLTFInstance>>();
 const preloaded = new Map<string, boolean>();
 
@@ -57,6 +69,18 @@ const dracoLoader = new DRACOLoader();
 
 let ktx2TranscoderLocation: string;
 const ktx2Loader = new KTX2Loader();
+
+let meshoptDecoderLocation: string;
+let meshoptDecoder: Promise<typeof MeshoptDecoder> | undefined;
+
+interface MeshoptDecoder {
+  ready: Promise<void>;
+  supported: boolean;
+}
+
+declare global {
+  const MeshoptDecoder: MeshoptDecoder;
+}
 
 export const $loader = Symbol('loader');
 export const $evictionPolicy = Symbol('evictionPolicy');
@@ -81,6 +105,19 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
 
   static getKTX2TranscoderLocation() {
     return ktx2TranscoderLocation;
+  }
+
+  static setMeshoptDecoderLocation(url: string) {
+    if (meshoptDecoderLocation !== url) {
+      meshoptDecoderLocation = url;
+      meshoptDecoder = fetchScript(url)
+        .then(() => MeshoptDecoder.ready)
+        .then(() => MeshoptDecoder);
+    }
+  }
+
+  static getMeshoptDecoderLocation() {
+    return meshoptDecoderLocation;
   }
 
   static initializeKTX2Loader(renderer: WebGLRenderer) {
@@ -155,6 +192,10 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     this.dispatchEvent(
         {type: 'preload', element: element, src: url} as PreloadEvent);
     if (!cache.has(url)) {
+      if (meshoptDecoder != null) {
+        this[$loader].setMeshoptDecoder(await meshoptDecoder);
+      }
+
       const rawGLTFLoads =
           loadWithLoader(url, this[$loader], (progress: number) => {
             progressCallback(progress * 0.8);
