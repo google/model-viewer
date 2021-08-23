@@ -301,6 +301,7 @@ export class ImportCard extends LitElement {
       </mwc-button>
     </div>
     <me-validation></me-validation>
+    <me-export-zip-button id="export-zip" style="display: block; margin-top: 10px;"></me-export-zip-button>
     `;
   }
 }

@@ -335,7 +335,6 @@ export class OpenMobileView extends ConnectedLitElement {
 
   // The editor is waiting for at least one mobile session to ping back.
   async onDeploy() {
-    this.openModal();
     let wasPinged = false;
     try {
       wasPinged = await this.waitForPing();
@@ -351,6 +350,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
   // Initialize AR values and start deploy loop
   async onInitialDeploy() {
+    this.openModal();
     this.isDeployed = true;
     if (this.arConfig?.arModes === undefined) {
       reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));

@@ -222,7 +222,7 @@ export class ExportZipButton extends GenericDownloadButton {
 
   constructor() {
     super();
-    this.buttonLabel = 'ZIP';
+    this.buttonLabel = 'DOWNLOAD SCENE';
   }
 
   stateChanged(state: State) {

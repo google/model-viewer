@@ -105,9 +105,6 @@ export class MobileExpanadableSection extends LitElement {
 
   renderAR() {
     return html`
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
-      AR Settings:
-    </div> 
     <me-checkbox
       id="ar-modes"
       label="Default AR Mode to Scene Viewer"
