@@ -264,8 +264,8 @@
             <example-snippet inert-script highlight-as="html">
               <template>
 <script>
-ModelViewerElement = self.ModelViewerElement || {};
-ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/decoder/files/';
+self.ModelViewerElement = self.ModelViewerElement || {};
+self.ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/decoder/files/';
 </script>
             </template>
           </example-snippet>
@@ -360,8 +360,8 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
           <example-snippet inert-script highlight-as="html">
             <template>
 <script>
-ModelViewerElement = self.ModelViewerElement || {};
-ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer@0.16.0/meshopt_decoder.js';
+self.ModelViewerElement = self.ModelViewerElement || {};
+self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer@0.16.0/meshopt_decoder.js';
 </script>
             </template>
           </example-snippet>
@@ -449,6 +449,11 @@ ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer@0.1
           <a href="https://poly.google.com/view/6uTsH2jqgVn">Shish kebab</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
           licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
         </li>
+
+        <li class="attribution">
+          <a href="https://sketchfab.com/3d-models/coffeemat-7fb196a40a6e4697aad9ca2f75c8b33d">Coffeemat</a> by <a href="https://sketchfab.com/OFFcours1">Roman Red</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution</a>.
+        </li>
       </ul>
 
       <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
@@ -472,8 +477,8 @@ ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer@0.1
 
   <!-- Enables Meshopt decoder. -->
   <script>
-    ModelViewerElement = self.ModelViewerElement || {};
-    ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer@0.16.0/meshopt_decoder.js';
+    self.ModelViewerElement = self.ModelViewerElement || {};
+    self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer@0.16.0/meshopt_decoder.js';
   </script>
 
   <!-- Loads <model-viewer> on modern browsers: -->

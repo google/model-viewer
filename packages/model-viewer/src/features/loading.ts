@@ -116,8 +116,8 @@ export interface ModelViewerGlobalConfig {
  *
  * ```html
  * <script>
- * ModelViewerElement = self.ModelViewerElement || {};
- * ModelViewerElement.dracoDecoderLocation =
+ * self.ModelViewerElement = self.ModelViewerElement || {};
+ * self.ModelViewerElement.dracoDecoderLocation =
  *     'http://example.com/location/of/draco/decoder/files/';
  * </script>
  * ```

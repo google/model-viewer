@@ -20,7 +20,6 @@ import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
-import {fetchScript} from '../utilities/fetch-script.js';
 
 import GLTFMaterialsVariantsExtension from './gltf-instance/VariantMaterialLoaderPlugin';
 import {GLTFInstance, GLTFInstanceConstructor} from './GLTFInstance.js';
@@ -50,6 +49,18 @@ export const loadWithLoader =
       });
     };
 
+/** Helper to load a script tag. */
+const fetchScript = (src: string): Promise<Event> => {
+  return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      document.body.appendChild(script);
+      script.onload = resolve;
+      script.onerror = reject;
+      script.async = true;
+      script.src = src;
+  });
+};
+
 const cache = new Map<string, Promise<GLTFInstance>>();
 const preloaded = new Map<string, boolean>();
 
@@ -61,6 +72,15 @@ const ktx2Loader = new KTX2Loader();
 
 let meshoptDecoderLocation: string;
 let meshoptDecoder: Promise<typeof MeshoptDecoder> | undefined;
+
+interface MeshoptDecoder {
+  ready: Promise<void>;
+  supported: boolean;
+}
+
+declare global {
+  const MeshoptDecoder: MeshoptDecoder;
+}
 
 export const $loader = Symbol('loader');
 export const $evictionPolicy = Symbol('evictionPolicy');
@@ -172,7 +192,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     this.dispatchEvent(
         {type: 'preload', element: element, src: url} as PreloadEvent);
     if (!cache.has(url)) {
-      if (meshoptDecoder) {
+      if (meshoptDecoder != null) {
         this[$loader].setMeshoptDecoder(await meshoptDecoder);
       }
 
