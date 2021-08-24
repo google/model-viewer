@@ -23,7 +23,7 @@ import {customElement, html, internalProperty, LitElement, query} from 'lit-elem
 import {dispatchCameraControlsEnabled, dispatchConfig, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {openModalStyles} from '../../../styles.css.js';
-import {ArConfigState, extractStagingConfig, ImageType, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
+import {ArConfigState, extractStagingConfig, ImageType, INITIAL_STATE, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
@@ -43,7 +43,8 @@ import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 const DEFAULT_ATTRIBUTES =
     'shadow-intensity="1" camera-controls ar ar-modes="webxr scene-viewer quick-look"';
 
-const DEFAULT_POSTER_HEIGHT = 300;
+const DEFAULT_POSTER_HEIGHT =
+    INITIAL_STATE.entities.modelViewerSnippet.poster.height;
 
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
@@ -316,13 +317,13 @@ export class ImportCard extends LitElement {
       </mwc-button>
     </div>
     <me-validation></me-validation>
-    <div style="font-size: 14px; font-weight: 500; margin-bottom: 10px;">Poster:</div>
-    <div style="display: flex; justify-content: space-between">
-      <me-slider-with-input min="100" max="1000" step="1" id="height"
+    <div style="font-size: 14px; font-weight: 500; margin-top: 10px;">Poster:</div>
+    <me-section-row class="Row" label="Height">
+      <me-slider-with-input min="256" max="2048" step="8" id="height"
         @change="${this.onHeightChange}"
         value="${DEFAULT_POSTER_HEIGHT}">
       </me-slider-with-input>
-    </div>
+    </me-section-row>
     <me-export-zip-button id="export-zip" style="display: block; margin-top: 10px;"></me-export-zip-button>
     `;
   }

@@ -31,7 +31,7 @@ import {styles as mobileStyles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
 import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, posterToSession, usdzToSession} from './utils.js';
 
-const TOAST_TIME = 7000;  // 7s
+const TOAST_TIME = 3000;  // 3s
 
 /**
  * The view loaded at /editor/view/?id=xyz
@@ -267,6 +267,11 @@ export class MobileView extends LitElement {
   }
 
   updated() {
+    this.modelViewer.cameraOrbit = 'auto auto auto';
+    const {cameraOrbit} = this.config;
+    if (cameraOrbit) {
+      this.modelViewer.cameraOrbit = cameraOrbit.toString();
+    }
     this.modelViewer.jumpCameraToGoal();
     this.modelViewer.dismissPoster();
   }

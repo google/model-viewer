@@ -35,11 +35,11 @@ model-viewer {
   cursor: -moz-grab;
   display: flex;
   height: 100%;
-  width: 90%;
+  width: 100%;
   overflow: hidden;
   position: relative;
   user-select: none;
-  width: 100%;
+  background-color: #eee;
 }
 
 .ios-message {

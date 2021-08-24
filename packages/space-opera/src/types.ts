@@ -126,7 +126,7 @@ export const INITIAL_STATE: State = {
       arConfig: {},
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},
       config: {},
-      poster: {height: 300, mimeType: 'image/webp'},
+      poster: {height: 512, mimeType: 'image/webp'},
       hotspots: [],
       relativeFilePaths: {posterName: 'poster.webp'},
       extraAttributes: {},
