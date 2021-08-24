@@ -108,6 +108,7 @@ export function renderModelViewer(
         exposure=${ifDefined(config.exposure)}
         poster=${ifDefined(config.poster)}
         reveal=${ifDefined(config.reveal)}
+        interaction-prompt="none"
         shadow-intensity=${ifDefined(config.shadowIntensity)}
         shadow-softness=${ifDefined(config.shadowSoftness)}
         camera-target=${ifDefined(config.cameraTarget)}
