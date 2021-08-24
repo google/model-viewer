@@ -322,14 +322,6 @@ export class ImportCard extends LitElement {
         @change="${this.onHeightChange}"
         value="${DEFAULT_POSTER_HEIGHT}">
       </me-slider-with-input>
-      <me-dropdown
-        .selectedIndex=0
-        slot="content" style="align-self: center; width: 71%;"
-        @select=${this.onPosterSelect}
-      >
-        <paper-item value='image/png'>PNG</paper-item>
-        <paper-item value='image/webp'>WEBP</paper-item>
-      </me-dropdown>
     </div>
     <me-export-zip-button id="export-zip" style="display: block; margin-top: 10px;"></me-export-zip-button>
     `;

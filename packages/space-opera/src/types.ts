@@ -48,7 +48,7 @@ export interface ModelViewerConfig {
   useEnvAsSkybox?: boolean;
 }
 
-export type ImageType = 'image/png'|'image/webp';
+export type ImageType = 'image/png'|'image/jpeg'|'image/webp';
 
 export interface PosterConfig {
   height: number;
@@ -126,9 +126,9 @@ export const INITIAL_STATE: State = {
       arConfig: {},
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},
       config: {},
-      poster: {height: 300, mimeType: 'image/png'},
+      poster: {height: 300, mimeType: 'image/webp'},
       hotspots: [],
-      relativeFilePaths: {posterName: 'poster.png'},
+      relativeFilePaths: {posterName: 'poster.webp'},
       extraAttributes: {},
     },
   },
