@@ -23,24 +23,27 @@ import {customElement, html, internalProperty, LitElement, query} from 'lit-elem
 import {dispatchCameraControlsEnabled, dispatchConfig, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {openModalStyles} from '../../../styles.css.js';
-import {ArConfigState, extractStagingConfig, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
+import {ArConfigState, extractStagingConfig, ImageType, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
 import {dispatchArConfig, getArConfig} from '../../mobile_view/reducer.js';
 import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
-import {dispatchSetEnvironmentName, dispatchSetModelName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
+import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
+import {SliderWithInputElement} from '../../shared/slider_with_input/slider_with_input.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '../../utils/create_object_url.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
-import {applyRelativeFilePaths, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
+import {applyRelativeFilePaths, dispatchExtraAttributes, dispatchHeight, dispatchMimeType, getExtraAttributes} from '../reducer.js';
 
 import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 
 const DEFAULT_ATTRIBUTES =
     'shadow-intensity="1" camera-controls ar ar-modes="webxr scene-viewer quick-look"';
+
+const DEFAULT_POSTER_HEIGHT = 300;
 
 @customElement('me-open-modal')
 export class OpenModal extends ConnectedLitElement {
@@ -168,8 +171,7 @@ export class OpenModal extends ConnectedLitElement {
     // Get the model-viewer snippet for the edit snippet modal
     const editedConfig = {...this.config};
     const editedArConfig = {...this.arConfig};
-    applyRelativeFilePaths(
-        editedConfig, this.gltfUrl, this.relativeFilePaths!, true);
+    applyRelativeFilePaths(editedConfig, this.gltfUrl, this.relativeFilePaths!);
     if (editedArConfig.iosSrc) {
       editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
     }
@@ -207,6 +209,7 @@ export class OpenModal extends ConnectedLitElement {
 export class ImportCard extends LitElement {
   @query('me-open-modal#open-modal') openModal!: OpenModal;
   @query('me-file-modal') fileModal!: FileModalElement;
+  @query('me-slider-with-input#height') heightSlider!: SliderWithInputElement;
   @internalProperty() selectedDefaultOption: number = 0;
 
   async onUploadGLB() {
@@ -271,6 +274,18 @@ export class ImportCard extends LitElement {
     }
   }
 
+  onHeightChange() {
+    reduxStore.dispatch(dispatchHeight(this.heightSlider.value));
+  }
+
+  onPosterSelect(event: CustomEvent) {
+    const dropdown = event.target as Dropdown;
+    const type = dropdown.selectedItem.getAttribute('value') as ImageType;
+    reduxStore.dispatch(dispatchMimeType(type));
+    const name = 'poster.' + type.substring(6);
+    reduxStore.dispatch(dispatchSetPosterName(name));
+  }
+
   render() {
     return html`
     <me-open-modal id="open-modal"></me-open-modal>
@@ -301,6 +316,21 @@ export class ImportCard extends LitElement {
       </mwc-button>
     </div>
     <me-validation></me-validation>
+    <div style="font-size: 14px; font-weight: 500; margin-bottom: 10px;">Poster:</div>
+    <div style="display: flex; justify-content: space-between">
+      <me-slider-with-input min="100" max="1000" step="1" id="height"
+        @change="${this.onHeightChange}"
+        value="${DEFAULT_POSTER_HEIGHT}">
+      </me-slider-with-input>
+      <me-dropdown
+        .selectedIndex=0
+        slot="content" style="align-self: center; width: 71%;"
+        @select=${this.onPosterSelect}
+      >
+        <paper-item value='image/png'>PNG</paper-item>
+        <paper-item value='image/webp'>WEBP</paper-item>
+      </me-dropdown>
+    </div>
     <me-export-zip-button id="export-zip" style="display: block; margin-top: 10px;"></me-export-zip-button>
     `;
   }

@@ -15,8 +15,7 @@
  *
  */
 
-import {Action, ModelViewerConfig, ModelViewerSnippetState, RelativeFilePathsState, State} from '../../types.js';
-import {isObjectUrl} from '../utils/create_object_url.js';
+import {Action, ImageType, INITIAL_STATE, ModelViewerConfig, ModelViewerSnippetState, PosterConfig, RelativeFilePathsState, State} from '../../types.js';
 
 export const getModelViewerSnippet = (state: State): ModelViewerSnippetState =>
     state.entities.modelViewerSnippet;
@@ -29,8 +28,7 @@ export const getModelViewerSnippet = (state: State): ModelViewerSnippetState =>
 export function applyRelativeFilePaths(
     editedConfig: ModelViewerConfig,
     gltfUrl: string|undefined,
-    relativeFilePaths: RelativeFilePathsState,
-    isEditSnippet: boolean) {
+    relativeFilePaths: RelativeFilePathsState) {
   if (gltfUrl) {
     editedConfig.src = relativeFilePaths.modelName
   } else {
@@ -41,14 +39,10 @@ export function applyRelativeFilePaths(
     editedConfig.environmentImage = relativeFilePaths.environmentName;
   }
 
-  if (isEditSnippet) {
-    editedConfig.poster = undefined;
-  } else if (editedConfig.poster && isObjectUrl(editedConfig.poster)) {
-    editedConfig.poster = relativeFilePaths.posterName;
-  }
+  editedConfig.poster = relativeFilePaths.posterName;
 }
 
-const SET_EXTRA_ATTRIBUTES = 'SET_EXTRA_ATTRIBUTES'
+const SET_EXTRA_ATTRIBUTES = 'SET_EXTRA_ATTRIBUTES';
 export function dispatchExtraAttributes(attributes: any) {
   return {type: SET_EXTRA_ATTRIBUTES, payload: attributes};
 }
@@ -60,6 +54,33 @@ export function extraAttributesReducer(state: any = {}, action: Action): any {
   switch (action.type) {
     case SET_EXTRA_ATTRIBUTES:
       return action.payload;
+    default:
+      return state;
+  }
+}
+
+const SET_HEIGHT = 'SET_HEIGHT';
+export function dispatchHeight(height: number) {
+  return {type: SET_HEIGHT, payload: height};
+}
+
+const SET_MIMETYPE = 'SET_MIMETYPE';
+export function dispatchMimeType(type: ImageType) {
+  return {type: SET_MIMETYPE, payload: type};
+}
+
+export function getPosterConfig(state: State) {
+  return state.entities.modelViewerSnippet.poster;
+}
+
+export function posterReducer(
+    state: PosterConfig = INITIAL_STATE.entities.modelViewerSnippet.poster,
+    action: Action): PosterConfig {
+  switch (action.type) {
+    case SET_HEIGHT:
+      return {...state, height: action.payload};
+    case SET_MIMETYPE:
+      return {...state, mimeType: action.payload};
     default:
       return state;
   }

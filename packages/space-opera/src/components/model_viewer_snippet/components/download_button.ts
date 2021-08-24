@@ -119,8 +119,8 @@ async function prepareZipArchive(
   }
 
   // always generate a poster image
-  const posterBlob = await createPoster(300);
-  zip.file('poster.png', posterBlob);
+  const posterBlob = await createPoster();
+  zip.file(relativeFilePaths.posterName!, posterBlob);
 
   // check if legal ios src
   if (arConfig.iosSrc) {

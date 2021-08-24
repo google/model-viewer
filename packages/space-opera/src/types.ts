@@ -48,6 +48,13 @@ export interface ModelViewerConfig {
   useEnvAsSkybox?: boolean;
 }
 
+export type ImageType = 'image/png'|'image/webp';
+
+export interface PosterConfig {
+  height: number;
+  mimeType: ImageType;
+}
+
 interface HotspotsUIState {
   addHotspot: boolean;
 }
@@ -60,7 +67,7 @@ export interface RelativeFilePathsState {
   iosName?: string|undefined;
   modelName?: string|undefined;
   environmentName?: string|undefined;
-  posterName?: string|undefined;
+  posterName: string|undefined;
 }
 
 export interface EnvironmentState {
@@ -83,6 +90,7 @@ export interface ModelViewerSnippetState {
   arConfig: ArConfigState;
   bestPractices: BestPracticesState;
   config: ModelViewerConfig;
+  poster: PosterConfig;
   hotspots: HotspotConfig[];
   relativeFilePaths: RelativeFilePathsState;
   extraAttributes: any;
@@ -118,6 +126,7 @@ export const INITIAL_STATE: State = {
       arConfig: {},
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},
       config: {},
+      poster: {height: 300, mimeType: 'image/png'},
       hotspots: [],
       relativeFilePaths: {posterName: 'poster.png'},
       extraAttributes: {},

@@ -26,6 +26,7 @@ import {rafPasses} from '../../test/utils/test_utils';
 import {ArConfigState, ModelViewerConfig} from '../../types';
 import {getConfig, getOrbitString} from '../config/reducer';
 import {getModelViewer} from '../model_viewer_preview/reducer';
+import {getPosterConfig} from '../model_viewer_snippet/reducer';
 
 /** Optional handlers for model-viewer events */
 export interface ModelViewerEventHandlers {
@@ -38,13 +39,16 @@ export interface ModelViewerEventHandlers {
   readonly error?: (details: CustomEvent) => void;
 }
 
-export async function createPoster(height: number) {
+export async function createPoster() {
   const modelViewer = getModelViewer();
   const ModelViewerElement = customElements.get('model-viewer');
   const oldMinScale = ModelViewerElement.minimumRenderScale;
   ModelViewerElement.minimumRenderScale = 1;
 
-  height /= window.devicePixelRatio;
+  const state = reduxStore.getState();
+  const poster = getPosterConfig(state);
+
+  const height = poster.height / window.devicePixelRatio;
   modelViewer.style.width = `${height}px`;
   modelViewer.style.height = `${height}px`;
 
@@ -55,14 +59,15 @@ export async function createPoster(height: number) {
 
   // Set to initial camera orbit
   const oldOrbit = modelViewer.getCameraOrbit();
-  const config = getConfig(reduxStore.getState());
+  const config = getConfig(state);
   modelViewer.cameraOrbit = config.cameraOrbit!;
   modelViewer.jumpCameraToGoal();
 
   // Wait for model-viewer to resize and render.
   await rafPasses();
   await rafPasses();
-  const posterBlob = await modelViewer.toBlob({idealAspect: true});
+  const posterBlob = await modelViewer.toBlob(
+      {idealAspect: true, mimeType: poster.mimeType, qualityArgument: 0.85});
 
   // Reset to original state
   modelViewer.autoplay = !!config.autoplay;

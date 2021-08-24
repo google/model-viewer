@@ -80,8 +80,7 @@ export class ExportPanel extends ConnectedLitElement {
   render() {
     const editedConfig = {...this.config};
     const editedArConfig = {...this.arConfig};
-    applyRelativeFilePaths(
-        editedConfig, this.gltfUrl, this.relativeFilePaths!, false);
+    applyRelativeFilePaths(editedConfig, this.gltfUrl, this.relativeFilePaths!);
     if (editedArConfig.iosSrc) {
       editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
     }

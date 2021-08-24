@@ -275,7 +275,7 @@ export class OpenMobileView extends ConnectedLitElement {
       envBlob = await response.blob();
     }
 
-    const posterBlob = await createPoster(300);
+    const posterBlob = await createPoster();
 
     // Iterate through the list of active mobile sessions, and allow them to
     // post their information asynchronously.
