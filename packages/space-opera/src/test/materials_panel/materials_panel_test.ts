@@ -51,8 +51,12 @@ async function checkUpload(
 describe('material panel test', () => {
   let preview: ModelViewerPreview;
   let panel: MaterialPanel;
+  let originalTimeout;
 
   beforeEach(async () => {
+    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+
     reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
@@ -70,6 +74,7 @@ describe('material panel test', () => {
   afterEach(() => {
     document.body.removeChild(panel);
     document.body.removeChild(preview);
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   it('selector reflects materials in GLTF, including defaults where undefined',
