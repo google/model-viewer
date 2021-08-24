@@ -37,6 +37,7 @@ module.exports = function(config) {
       'karma-spec-reporter'
     ],
     frameworks: ['esm', 'jasmine'],
+    client: {jasmine: {timeoutInterval: 10000}},
     files: [
       './define_process_env.js',
       {pattern: 'lib/**/*_test.js', watched: true, type: 'module'},
