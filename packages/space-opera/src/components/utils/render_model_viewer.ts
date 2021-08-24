@@ -21,7 +21,12 @@ import {spread} from '@open-wc/lit-helpers';
 import {html, TemplateResult} from 'lit-html';
 import {ifDefined} from 'lit-html/directives/if-defined';
 
+import {reduxStore} from '../../space_opera_base';
+import {rafPasses} from '../../test/utils/test_utils';
 import {ArConfigState, ModelViewerConfig} from '../../types';
+import {getConfig, getOrbitString} from '../config/reducer';
+import {getModelViewer} from '../model_viewer_preview/reducer';
+import {getPosterConfig} from '../model_viewer_snippet/reducer';
 
 /** Optional handlers for model-viewer events */
 export interface ModelViewerEventHandlers {
@@ -32,6 +37,51 @@ export interface ModelViewerEventHandlers {
   readonly pause?: () => void;
   readonly click?: (event: MouseEvent) => void;
   readonly error?: (details: CustomEvent) => void;
+}
+
+export async function createPoster() {
+  const modelViewer = getModelViewer();
+  const ModelViewerElement = customElements.get('model-viewer');
+  const oldMinScale = ModelViewerElement.minimumRenderScale;
+  ModelViewerElement.minimumRenderScale = 1;
+
+  const state = reduxStore.getState();
+  const poster = getPosterConfig(state);
+
+  const height = poster.height / window.devicePixelRatio;
+  modelViewer.style.width = `${height}px`;
+  modelViewer.style.height = `${height}px`;
+
+  // Set to beginning of animation
+  const oldTime = modelViewer.currentTime;
+  modelViewer.autoplay = false;
+  modelViewer.currentTime = 0;
+
+  // Set to initial camera orbit
+  const oldOrbit = modelViewer.getCameraOrbit();
+  const config = getConfig(state);
+  modelViewer.cameraOrbit = config.cameraOrbit!;
+  modelViewer.jumpCameraToGoal();
+
+  // Wait for model-viewer to resize and render.
+  await rafPasses();
+  await rafPasses();
+  const posterBlob = await modelViewer.toBlob(
+      {idealAspect: true, mimeType: poster.mimeType, qualityArgument: 0.85});
+
+  // Reset to original state
+  modelViewer.autoplay = !!config.autoplay;
+  modelViewer.currentTime = oldTime;
+
+  modelViewer.cameraOrbit = getOrbitString(oldOrbit);
+  modelViewer.jumpCameraToGoal();
+
+  modelViewer.style.width = '';
+  modelViewer.style.height = '';
+
+  ModelViewerElement.minimumRenderScale = oldMinScale;
+
+  return posterBlob;
 }
 
 /**

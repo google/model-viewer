@@ -48,6 +48,7 @@ export const progressBarCSS: CSSResult = css`
   border-radius: 25px;
   box-shadow: 0px 3px 10px 3px rgba(0, 0, 0, 0.5), 0px 0px 5px 1px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.9);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .progress-bar.hide {
@@ -56,7 +57,7 @@ export const progressBarCSS: CSSResult = css`
 }
 
 .update-bar {
-  background-color: rgba(20, 20, 20, 0.9);
+  background-color: rgba(255, 255, 255, 0.9);
   width: 0%;
   height: 100%;
   border-radius: 25px;

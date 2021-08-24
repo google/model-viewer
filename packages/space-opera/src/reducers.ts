@@ -24,7 +24,7 @@ import {hotspotsReducer, hotspotsUiReducer} from './components/hotspot_panel/red
 import {environmentReducer} from './components/ibl_selector/reducer.js'
 import {arReducer, mobileReducer} from './components/mobile_view/reducer.js';
 import {modelReducer} from './components/model_viewer_preview/reducer.js';
-import {extraAttributesReducer} from './components/model_viewer_snippet/reducer.js';
+import {extraAttributesReducer, posterReducer} from './components/model_viewer_snippet/reducer.js';
 import {relativeFilePathsReducer} from './components/relative_file_paths/reducer.js';
 import {INITIAL_STATE} from './types.js';
 
@@ -32,6 +32,7 @@ const modelViewerSnippetReducer = combineReducers({
   arConfig: arReducer,
   bestPractices: bestPracticesReducer,
   config: configReducer,
+  poster: posterReducer,
   hotspots: hotspotsReducer,
   relativeFilePaths: relativeFilePathsReducer,
   extraAttributes: extraAttributesReducer,

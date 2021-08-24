@@ -15,7 +15,7 @@
  *
  */
 
-import {Action, BestPracticesState, State} from '../../types';
+import {Action, BestPracticesState, INITIAL_STATE, State} from '../../types';
 
 
 const SET_PROGRESS_BAR = 'SET_PROGRESS_BAR';
@@ -37,11 +37,8 @@ export const getBestPractices = (state: State) =>
     state.entities.modelViewerSnippet.bestPractices;
 
 export function bestPracticesReducer(
-    state: BestPracticesState = {
-      progressBar: true,
-      arButton: true,
-      arPrompt: true
-    },
+    state: BestPracticesState =
+        INITIAL_STATE.entities.modelViewerSnippet.bestPractices,
     action: Action): BestPracticesState {
   switch (action.type) {
     case SET_PROGRESS_BAR:

@@ -19,13 +19,6 @@
 // that's not necessary. They technically aren't even the same, because here we
 // want them to be read-only.
 
-/** Spherical coordinate. Follow model-viewer's convention of theta/phi. */
-export interface SphericalPositionDeg {
-  thetaDeg: number;
-  phiDeg: number;
-  radius: number;
-}
-
 /** A 3D Cartesian coordinate */
 export interface Vector3D {
   x: number;

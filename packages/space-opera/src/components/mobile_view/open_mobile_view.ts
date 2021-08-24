@@ -27,11 +27,12 @@ import {dispatchModelDirty, getGltfUrl, getModel, getModelViewer} from '../model
 import {getModelViewerSnippet} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetIosName} from '../relative_file_paths/reducer.js';
 import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
+import {createPoster} from '../utils/render_model_viewer.js';
 
 import {MobileModal} from './components/mobile_modal.js';
 import {dispatchAr, dispatchArModes, dispatchIosSrc, dispatchSetForcePost, dispatchSetRefreshable, getArConfig, getForcePost, getRefreshable} from './reducer.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
-import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, prepareUSDZ, usdzToSession} from './utils.js';
+import {envToSession, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, posterToSession, prepareUSDZ, usdzToSession} from './utils.js';
 
 const REFRESH_DELAY = 20000;  // 20s
 
@@ -138,6 +139,7 @@ export class OpenMobileView extends ConnectedLitElement {
   getUpdatedContent(): EditorUpdates {
     return {
       gltfChanged: this.isNewModel(), stateChanged: this.stateHasChanged(),
+          posterId: getRandomInt(1e+20),
           envChanged: this.isNewSource(this.urls.env, this.lastUrlsSent.env),
           envIsHdr: this.envIsHdr(), gltfId: getRandomInt(1e+20),
           usdzId: getRandomInt(1e+20),
@@ -150,7 +152,7 @@ export class OpenMobileView extends ConnectedLitElement {
   // everything to update.
   getStaleContent(): EditorUpdates {
     return {
-      gltfChanged: true, stateChanged: true,
+      gltfChanged: true, stateChanged: true, posterId: getRandomInt(1e+20),
           envChanged: this.urls.env !== undefined, envIsHdr: this.envIsHdr(),
           gltfId: getRandomInt(1e+20), usdzId: getRandomInt(1e+20),
           iosChanged: this.urls.usdz !== undefined,
@@ -164,7 +166,7 @@ export class OpenMobileView extends ConnectedLitElement {
   // be forced to send all of the content the next time the refresh button is
   // clicked.
   async sendSessionContent(
-      session: MobileSession, updatedContent: EditorUpdates,
+      session: MobileSession, updatedContent: EditorUpdates, posterBlob: Blob,
       usdzBlob: Blob|undefined, gltfBlob: Blob|undefined,
       envBlob: Blob|undefined) {
     if (session.isStale) {
@@ -179,6 +181,10 @@ export class OpenMobileView extends ConnectedLitElement {
     };
 
     await post(JSON.stringify(packet), getSessionUrl(this.pipeId, session.id));
+
+    await post(
+        posterBlob,
+        posterToSession(this.pipeId, session.id, updatedContent.posterId));
 
     if (updatedContent.iosChanged && usdzBlob) {
       await post(
@@ -207,12 +213,17 @@ export class OpenMobileView extends ConnectedLitElement {
   }
 
   async sendSessionContentHolder(
-      session: MobileSession, updatedContent: EditorUpdates,
+      session: MobileSession, updatedContent: EditorUpdates, posterBlob: Blob,
       usdzBlob: Blob|undefined, gltfBlob: Blob|undefined,
       envBlob: Blob|undefined) {
     try {
       await this.sendSessionContent(
-          session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
+          session,
+          {...updatedContent},
+          posterBlob,
+          usdzBlob,
+          gltfBlob,
+          envBlob);
     } catch (e) {
       console.log('error posting...');
     }
@@ -264,11 +275,18 @@ export class OpenMobileView extends ConnectedLitElement {
       envBlob = await response.blob();
     }
 
+    const posterBlob = await createPoster();
+
     // Iterate through the list of active mobile sessions, and allow them to
     // post their information asynchronously.
     for (let session of sessionList) {
       this.sendSessionContentHolder(
-          session, {...updatedContent}, usdzBlob, gltfBlob, envBlob);
+          session,
+          {...updatedContent},
+          posterBlob,
+          usdzBlob,
+          gltfBlob,
+          envBlob);
     }
 
     this.lastSnippetSent = {...this.snippet};
@@ -317,7 +335,6 @@ export class OpenMobileView extends ConnectedLitElement {
 
   // The editor is waiting for at least one mobile session to ping back.
   async onDeploy() {
-    this.openModal();
     let wasPinged = false;
     try {
       wasPinged = await this.waitForPing();
@@ -333,6 +350,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
   // Initialize AR values and start deploy loop
   async onInitialDeploy() {
+    this.openModal();
     this.isDeployed = true;
     if (this.arConfig?.arModes === undefined) {
       reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));

@@ -15,7 +15,7 @@
  *
  */
 
-import {Action, RelativeFilePathsState, State} from '../../types';
+import {Action, INITIAL_STATE, RelativeFilePathsState, State} from '../../types';
 
 const SET_MODEL_NAME = 'SET_MODEL_NAME';
 export function dispatchSetModelName(name: string|undefined) {
@@ -41,25 +41,18 @@ export const getRelativeFilePaths = (state: State) =>
     state.entities.modelViewerSnippet.relativeFilePaths;
 
 export function relativeFilePathsReducer(
-    state: RelativeFilePathsState = {},
+    state: RelativeFilePathsState =
+        INITIAL_STATE.entities.modelViewerSnippet.relativeFilePaths,
     action: Action): RelativeFilePathsState {
   switch (action.type) {
     case SET_MODEL_NAME:
-      return {
-        ...state, modelName: action.payload
-      }
+      return {...state, modelName: action.payload};
     case SET_ENVIRONMENT_NAME:
-      return {
-        ...state, environmentName: action.payload
-      }
-    case SET_POSTER_NAME:
-      return {
-        ...state, posterName: action.payload
-      }
+      return {...state, environmentName: action.payload};
     case SET_IOS_NAME:
-      return {
-        ...state, iosName: action.payload
-      }
+      return {...state, iosName: action.payload};
+    case SET_POSTER_NAME:
+      return {...state, posterName: action.payload};
     default:
       return state;
   }

@@ -80,8 +80,7 @@ export class ExportPanel extends ConnectedLitElement {
   render() {
     const editedConfig = {...this.config};
     const editedArConfig = {...this.arConfig};
-    applyRelativeFilePaths(
-        editedConfig, this.gltfUrl, this.relativeFilePaths!, false);
+    applyRelativeFilePaths(editedConfig, this.gltfUrl, this.relativeFilePaths!);
     if (editedArConfig.iosSrc) {
       editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
     }
@@ -120,11 +119,6 @@ export class ExportPanel extends ConnectedLitElement {
 <me-expandable-tab tabName="File Manager" .open=${true}>
   <div slot="content">
     <me-import-card></me-import-card>
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
-      Export Content:
-    </div>
-    <me-download-button id="download-gltf"></me-download-button>
-    <me-export-zip-button id="export-zip"></me-export-zip-button>
   </div>
 </me-expandable-tab>
 <me-expandable-tab tabName="Mobile View" .open=${true}>
