@@ -194,9 +194,11 @@ export function configReducer(
       return {...state, autoRotate: action.payload};
     case SET_CAMERA_TARGET:
       const target = action.payload;
-      const cameraTarget = `${roundToDigits(target.x, DIGITS)}m ${
-          roundToDigits(
-              target.y, DIGITS)}m ${roundToDigits(target.z, DIGITS)}m`;
+      const cameraTarget = target == null ?
+          undefined :
+          `${roundToDigits(target.x, DIGITS)}m ${
+              roundToDigits(
+                  target.y, DIGITS)}m ${roundToDigits(target.z, DIGITS)}m`;
       return {...state, cameraTarget};
     case SAVE_CAMERA_ORBIT:
       const orbit = action.payload;
