@@ -50,6 +50,12 @@ export class ZooomLimits extends ConnectedLitElement {
     reduxStore.dispatch(dispatchSetMinZoom(this.minFov, this.minRadius));
   }
 
+  dispatchResetMin() {
+    this.minRadius = undefined;
+    this.minFov = undefined;
+    reduxStore.dispatch(dispatchSetMinZoom());
+  }
+
   render() {
     return html`
     <me-checkbox
@@ -62,6 +68,8 @@ export class ZooomLimits extends ConnectedLitElement {
         this.enabled ? html`
       <mwc-button id="set-min-button" class="SetButton" unelevated 
       @click="${this.dispatchMin}">Set Min</mwc-button>
+      <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
+      @click="${this.dispatchResetMin}">Reset Min</mwc-button>
     ` :
                        html``}
 `;
