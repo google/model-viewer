@@ -31,7 +31,7 @@ export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 const PROGRESS_MASK_BASE_OPACITY = 0.2;
 
 const DEFAULT_DRACO_DECODER_LOCATION =
-    'https://www.gstatic.com/draco/versioned/decoders/1.3.6/';
+    'https://www.gstatic.com/draco/versioned/decoders/1.4.1/';
 
 const DEFAULT_KTX2_TRANSCODER_LOCATION =
     'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/';
@@ -90,12 +90,14 @@ export declare interface LoadingInterface {
 export declare interface LoadingStaticInterface {
   dracoDecoderLocation: string;
   ktx2TranscoderLocation: string;
+  meshoptDecoderLocation: string;
   mapURLs(callback: (url: string) => string): void;
 }
 
 export interface ModelViewerGlobalConfig {
   dracoDecoderLocation?: string;
   ktx2TranscoderLocation?: string;
+  meshoptDecoderLocation?: string;
   powerPreference?: string;
 }
 
@@ -114,8 +116,8 @@ export interface ModelViewerGlobalConfig {
  *
  * ```html
  * <script>
- * ModelViewerElement = self.ModelViewerElement || {};
- * ModelViewerElement.dracoDecoderLocation =
+ * self.ModelViewerElement = self.ModelViewerElement || {};
+ * self.ModelViewerElement.dracoDecoderLocation =
  *     'http://example.com/location/of/draco/decoder/files/';
  * </script>
  * ```
@@ -166,6 +168,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     static get ktx2TranscoderLocation() {
       return CachingGLTFLoader.getKTX2TranscoderLocation();
+    }
+
+    static set meshoptDecoderLocation(value: string) {
+      CachingGLTFLoader.setMeshoptDecoderLocation(value);
+    }
+
+    static get meshoptDecoderLocation() {
+      return CachingGLTFLoader.getMeshoptDecoderLocation();
     }
 
     /**
@@ -319,6 +329,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           ModelViewerElement.ktx2TranscoderLocation ||
           DEFAULT_KTX2_TRANSCODER_LOCATION;
       CachingGLTFLoader.setKTX2TranscoderLocation(ktx2TranscoderLocation);
+
+      if (ModelViewerElement.meshoptDecoderLocation) {
+        CachingGLTFLoader.setMeshoptDecoderLocation(ModelViewerElement.meshoptDecoderLocation);
+      }
     }
 
     connectedCallback() {

@@ -41,7 +41,7 @@
 
 <body>
 
-<div class="examples-page">  
+<div class="examples-page">
   <div class="sidebar" id="sidenav"></div>
   <div id="toggle"></div>
 
@@ -57,7 +57,7 @@
             <h4></h4>
           </div>
           <example-snippet stamp-to="displayPoster" highlight-as="html">
-            
+
             <template>
 <style>
   model-viewer#reveal {
@@ -208,7 +208,7 @@
         </div>
       </div>
     </div>
-  
+
     <div class="sample">
       <div id="glbModel" class="demo"></div>
       <div class="content">
@@ -227,7 +227,7 @@
         </div>
       </div>
     </div>
-  
+
     <div class="sample">
       <div id="dracoSupport" class="demo"></div>
       <div class="content">
@@ -241,7 +241,7 @@
             <h4>
               In order to load such models, an auxilliary decoder is
               required and will be loaded on-demand from a Google CDN when
-              a DRACO-compressed model is detected. See below to learn 
+              a DRACO-compressed model is detected. See below to learn
               how to customize this behavior.
             </h4>
           </div>
@@ -264,8 +264,8 @@
             <example-snippet inert-script highlight-as="html">
               <template>
 <script>
-ModelViewerElement = self.ModelViewerElement || {};
-ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/decoder/files/';
+self.ModelViewerElement = self.ModelViewerElement || {};
+self.ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/decoder/files/';
 </script>
             </template>
           </example-snippet>
@@ -330,7 +330,50 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
         </div>
       </div>
     </div>
-  
+
+    <div class="sample">
+      <div id="meshoptSupport" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Meshopt support</h2>
+            <h4>
+              &lt;model-viewer&gt; supports loading glTF models that
+
+              use <a href="https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Vendor/EXT_meshopt_compression/README.md" target="_blank" rel="noopener">the Meshopt compression extension</a>.
+            </h4>
+            <h4>
+              In order to load such models, an auxiliary decoder is
+              required, and is not enabled by default.
+            </h4>
+          </div>
+          <example-snippet stamp-to="meshoptSupport" highlight-as="html">
+            <template>
+<model-viewer camera-controls alt="A 3D model of a mechanical coffee mug contraption" src="../../shared-assets/models/coffeemat.glb">
+</model-viewer>
+            </template>
+          </example-snippet>
+          <p>
+            Enable support for Meshopt compression by providing
+            <code>meshoptDecoderLocation</code>:
+          </p>
+          <example-snippet inert-script highlight-as="html">
+            <template>
+<script>
+self.ModelViewerElement = self.ModelViewerElement || {};
+self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer@0.16.0/meshopt_decoder.js';
+</script>
+            </template>
+          </example-snippet>
+          <p>
+            When customizing the decoder location, you must make sure that
+            the configuration is set <strong>before</strong> the first &lt;model-viewer&gt;
+            element is created on the page.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <div class="sample">
       <div id="usdzModel" class="demo"></div>
       <div class="content">
@@ -348,7 +391,7 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
         </div>
       </div>
     </div>
-  
+
     <div class="sample">
       <div id="noModel" class="demo"></div>
       <div class="content">
@@ -366,7 +409,7 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
         </div>
       </div>
     </div>
-  
+
     <div class="sample">
       <div id="cyclingModels" class="demo"></div>
       <div class="content">
@@ -406,12 +449,17 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
           <a href="https://poly.google.com/view/6uTsH2jqgVn">Shish kebab</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
           licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
         </li>
+
+        <li class="attribution">
+          <a href="https://sketchfab.com/3d-models/coffeemat-7fb196a40a6e4697aad9ca2f75c8b33d">Coffeemat</a> by <a href="https://sketchfab.com/OFFcours1">Roman Red</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution</a>.
+        </li>
       </ul>
 
       <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
       <div id='footer-links'></div>
   </div>
-      
+
 </div>
 
 </div>
@@ -425,6 +473,12 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
 
   <!-- Documentation-specific dependencies: -->
   <script type="module" src="../built/dependencies.js">
+  </script>
+
+  <!-- Enables Meshopt decoder. -->
+  <script>
+    self.ModelViewerElement = self.ModelViewerElement || {};
+    self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer@0.16.0/meshopt_decoder.js';
   </script>
 
   <!-- Loads <model-viewer> on modern browsers: -->
