@@ -20,6 +20,7 @@ import {Material as DefaultedMaterial} from '../../three-components/gltf-instanc
 import {ALPHA_CUTOFF_BLEND, ALPHA_CUTOFF_OPAQUE} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Material as MaterialInterface} from './api.js';
+import {LazyLoader} from './model.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 import {TextureInfo, TextureUsage} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
@@ -49,7 +50,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$normalTexture]: TextureInfo;
   private[$occlusionTexture]: TextureInfo;
   private[$emissiveTexture]: TextureInfo;
-  private[$lazyLoadGLTFInfo]: GLTF|undefined;
+  private[$lazyLoadGLTFInfo]: LazyLoader|undefined;
 
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
@@ -61,12 +62,12 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   constructor(
       onUpdate: () => void, gltf: GLTF, gltfMaterial: GLTFMaterial,
       correlatedMaterials: Set<MeshStandardMaterial>,
-      loadMethod: MaterialLoadMethod = MaterialLoadMethod.Immediate) {
+      lazyLoadInfo: LazyLoader|undefined = undefined) {
     super(onUpdate, gltfMaterial, correlatedMaterials);
-    if (loadMethod === MaterialLoadMethod.Immediate) {
+    if (lazyLoadInfo === undefined) {
       this[$initialize](gltf);
     } else {
-      this[$lazyLoadGLTFInfo] = gltf;
+      this[$lazyLoadGLTFInfo] = lazyLoadInfo;
     }
   }
 
@@ -142,15 +143,20 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         gltf,
         gltfEmissiveTexture ? gltfEmissiveTexture : null,
     );
-
-    // Releases the gltf info.
-    this[$lazyLoadGLTFInfo] = undefined;
   }
 
-  private[$ensureLoaded]() {
+  async[$ensureLoaded](): Promise<MeshStandardMaterial> {
     if (this[$lazyLoadGLTFInfo] !== undefined) {
-      this[$initialize](this[$lazyLoadGLTFInfo]!);
+      const {set} = await this[$lazyLoadGLTFInfo]!.doLazyLoad();
+
+      // Fills in the missing data.
+      this[$correlatedObjects] = set as Set<MeshStandardMaterial>;
+
+      this[$initialize](this[$lazyLoadGLTFInfo]!.gltf);
+      // Releases lazy load info.
+      this[$lazyLoadGLTFInfo] = undefined;
     }
+    return this[$correlatedObjects]!.values().next().value;
   }
 
   get name(): string {

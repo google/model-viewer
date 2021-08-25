@@ -26,8 +26,8 @@ import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-ins
 import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
-import {$ensureLoaded, Material} from './scene-graph/material.js';
-import {Model} from './scene-graph/model.js';
+import {Material} from './scene-graph/material.js';
+import {$ensureAllMaterialsLoaded, Model} from './scene-graph/model.js';
 import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
@@ -149,15 +149,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           return;
         }
 
-        const updatedMaterials =
-            await threeGLTF.correlatedSceneGraph.loadVariant(variantName!);
-        const {gltfElementMap} = threeGLTF.correlatedSceneGraph;
-
-        if (gltfElementMap !== null) {
-          for (const index of updatedMaterials) {
-            this[$model]!.materials[index][$ensureLoaded]();
-          }
-        }
+        await this[$model]!.switchVariant(variantName!);
         this[$needsRender]();
       }
 
@@ -247,14 +239,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           shadow.visible = false;
         }
 
-        const currentGLTF = this[$currentGLTF];
-
-        if (currentGLTF != null && 'functions' in currentGLTF.userData &&
-            'ensureLoadVariants' in currentGLTF.userData.functions) {
-          // Ensure all variant materials are loaded because some of them may
-          // not be loaded yet.
-          await currentGLTF.userData.functions.ensureLoadVariants(scene);
-        }
+        await this[$model]![$ensureAllMaterialsLoaded]();
 
         const exporter =
             (new GLTFExporter() as any)

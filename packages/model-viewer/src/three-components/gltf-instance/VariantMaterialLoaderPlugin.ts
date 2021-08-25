@@ -25,7 +25,7 @@
  * https://github.com/takahirox/three-gltf-extensions/tree/main/loaders/KHR_materials_variants
  */
 
-import {Material, Mesh, Object3D} from 'three';
+import {Material} from 'three';
 import {GLTF, GLTFLoaderPlugin, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 /**
@@ -77,17 +77,6 @@ const mappingsArrayToTable = (extensionDef: any, variantNames: string[]) => {
     }
   }
   return table;
-};
-
-/**
- * @param object {THREE.Object3D}
- * @return {boolean}
- */
-const compatibleObject = (object: Object3D) => {
-  return 'material' in object &&  // easier than (!object.isMesh &&
-                                  // !object.isLine && !object.isPoints)
-      object!.userData &&         // just in case
-      object!.userData.variantMaterials;
 };
 
 export default class GLTFMaterialsVariantsExtension implements
@@ -162,132 +151,6 @@ export default class GLTFMaterialsVariantsExtension implements
     }
 
     gltf.userData.variants = variants;
-
-    // @TODO: Adding functions to userData might be problematic
-    //        for example when serializing?
-    gltf.userData.functions = gltf.userData.functions || {};
-
-    /**
-     * @param object {THREE.Mesh}
-     * @param variantName {string|null}
-     * @return {Promise}
-     * @TODO: Support multi materials?
-     */
-    const switchMaterial = async (
-        object: Mesh,
-        variantName: string|null,
-        onUpdate:
-            ((object: Mesh,
-              oldMaterial: Material,
-              gltfMaterialIndex: number|null) => void)|null) => {
-      if (!object.userData.originalMaterial) {
-        object.userData.originalMaterial = object.material;
-      }
-
-      const oldMaterial = object.material;
-      let gltfMaterialIndex = null;
-
-      if (variantName === null ||
-          !object.userData.variantMaterials.has(variantName)) {
-        object.material = object.userData.originalMaterial;
-        if (parser.associations.has(object.material as Material)) {
-          gltfMaterialIndex =
-              parser.associations.get(object.material as Material)!.index;
-        }
-      } else {
-        const variantMaterialParam =
-            object.userData.variantMaterials.get(variantName);
-
-        if (variantMaterialParam.material) {
-          object.material = variantMaterialParam.material;
-          if ('gltfMaterialIndex' in variantMaterialParam) {
-            gltfMaterialIndex = variantMaterialParam.gltfMaterialIndex;
-          }
-        } else {
-          gltfMaterialIndex = variantMaterialParam.gltfMaterialIndex;
-          object.material =
-              await parser.getDependency('material', gltfMaterialIndex);
-          parser.assignFinalMaterial(object);
-          variantMaterialParam.material = object.material;
-        }
-      }
-
-      if (onUpdate !== null) {
-        onUpdate(object, oldMaterial as Material, gltfMaterialIndex);
-      }
-    };
-
-    /**
-     * @param object {THREE.Mesh}
-     * @return {Promise}
-     */
-    const ensureLoadVariants = (object: Mesh) => {
-      const currentMaterial = object.material;
-      const variantMaterials = object.userData.variantMaterials;
-      const pending = [];
-      for (const variantName of variantMaterials.keys()) {
-        const variantMaterial = variantMaterials.get(variantName);
-        if (variantMaterial.material) {
-          continue;
-        }
-        const materialIndex = variantMaterial.gltfMaterialIndex;
-        pending.push(parser.getDependency('material', materialIndex)
-                         .then((material: Material) => {
-                           object.material = material;
-                           parser.assignFinalMaterial(object);
-                           variantMaterials.get(variantName).material =
-                               object.material;
-                         }));
-      }
-      return Promise.all(pending).then(() => {
-        object.material = currentMaterial;
-      });
-    };
-
-    /**
-     * @param object {THREE.Object3D}
-     * @param variantName {string|null}
-     * @param doTraverse {boolean} Default is true
-     * @param onUpdate {function}
-     * @return {Promise}
-     */
-    gltf.userData.functions.selectVariant =
-        (object: Object3D,
-         variantName: string|null,
-         doTraverse = true,
-         onUpdate = null) => {
-          const pending = [];
-          if (doTraverse) {
-            object.traverse(
-                (o: Object3D) => compatibleObject(o) &&
-                    pending.push(
-                        switchMaterial(o as Mesh, variantName, onUpdate)));
-          } else {
-            compatibleObject(object) &&
-                pending.push(
-                    switchMaterial(object as Mesh, variantName, onUpdate));
-          }
-          return Promise.all(pending);
-        };
-
-    /**
-     * @param object {THREE.Object3D}
-     * @param doTraverse {boolean} Default is true
-     * @return {Promise}
-     */
-    gltf.userData.functions.ensureLoadVariants =
-        (object: Object3D, doTraverse = true) => {
-          const pending = [];
-          if (doTraverse) {
-            object.traverse(
-                (o: Object3D) => compatibleObject(o) &&
-                    pending.push(ensureLoadVariants(o as Mesh)));
-          } else {
-            compatibleObject(object) &&
-                pending.push(ensureLoadVariants(object as Mesh));
-          }
-          return Promise.all(pending);
-        };
 
     return Promise.resolve();
   }

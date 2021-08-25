@@ -258,34 +258,4 @@ export class CorrelatedSceneGraph {
     this[$gltfElementMap] = gltfElementMap;
     this[$threeObjectMap] = threeObjectMap;
   }
-
-  async loadVariant(variantName: string): Promise<Set<number>> {
-    const updatedMaterials = new Set<number>();
-
-    if (!('variants' in this.threeGLTF.userData) ||
-        !('functions' in this.threeGLTF.userData) ||
-        !('selectVariant' in this.threeGLTF.userData.functions)) {
-      return updatedMaterials;
-    }
-
-    await this.threeGLTF.userData.functions.selectVariant(
-        this.threeGLTF.scene,
-        variantName,
-        true,
-        (object: Object3D,
-         _oldMaterial: Material,
-         gltfMaterialIndex: number) => {
-          updatedMaterials.add(gltfMaterialIndex);
-          const gltfElement = this.gltf.materials![gltfMaterialIndex];
-
-          let threeObjects = this[$gltfElementMap]!.get(gltfElement);
-          if (threeObjects == null) {
-            threeObjects = new Set();
-            this[$gltfElementMap]!.set(gltfElement, threeObjects);
-            threeObjects.add((object as Mesh).material as Material);
-          }
-        });
-
-    return updatedMaterials;
-  }
 }

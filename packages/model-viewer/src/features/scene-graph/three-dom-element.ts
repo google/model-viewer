@@ -36,7 +36,7 @@ export class ThreeDOMElement {
   // The canonical GLTF or GLTFElement represented by this facade.
   readonly[$sourceObject]: GLTFElement;
   // The backing Three.js scene graph construct for this element.
-  readonly[$correlatedObjects]: CorrelatedObjects|null;
+  [$correlatedObjects]: CorrelatedObjects|null;
 
   constructor(
       onUpdate: () => void, element: GLTFElement,

@@ -40,6 +40,7 @@ export declare interface Model {
    * addition of a default material at the end.
    */
   readonly materials: Readonly<Array<Material>>;
+  switchVariant(name: string): Promise<void>;
 }
 
 /**
