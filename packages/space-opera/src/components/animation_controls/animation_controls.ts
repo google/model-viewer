@@ -26,25 +26,36 @@ import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../config/reducer';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getModelViewer} from '../model_viewer_preview/reducer.js';
+import {getModel, getModelViewer, getUpdatedModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
+import {SectionRow} from '../shared/section_row/section_row.js';
+import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 
 /**
  * Animation controls for gltf and model-viewer.
  */
 @customElement('me-animation-controls')
 export class AnimationControls extends ConnectedLitElement {
-  @query('me-checkbox#animation-autoplay') autoplayCheckbox?: CheckboxElement;
+  @query('me-checkbox#animation-autoplay') autoplayCheckbox!: CheckboxElement;
+  @query('me-slider-with-input#scrubber') scrubber!: SliderWithInputElement;
+  @query('me-section-row#time') timeElement!: SectionRow;
   @internalProperty() animationNames: string[] = [];
   @internalProperty() selectedAnimation: string|undefined = undefined;
-  @internalProperty() autoplay: boolean = false;
+  @internalProperty() autoplay = false;
+  @internalProperty() clipLength = 0;
+  @internalProperty() currentTime = 0;
 
   stateChanged(state: State) {
-    this.animationNames = getModelViewer()?.availableAnimations ?? [];
     const config = getConfig(state);
     this.selectedAnimation = config.animationName;
     this.autoplay = !!config.autoplay;
+
+    const model = getModel(state);
+    if (model != null) {
+      this.animationNames = getModelViewer().availableAnimations ?? [];
+      this.updateScrubber();
+    }
   }
 
   render() {
@@ -72,9 +83,17 @@ export class AnimationControls extends ConnectedLitElement {
               </paper-item>`;
     })}
           </me-dropdown>
-          <me-checkbox id="animation-autoplay" label="Autoplay"
+          <me-checkbox id="animation-autoplay" label="Play"
             ?checked="${!!this.autoplay}"
             @change=${this.onAutoplayChange}></me-checkbox>
+          <me-section-row class="Row" label="Time" id="time">
+            <me-slider-with-input
+              id="scrubber"
+              min=0 max=${this.clipLength} step=0.01
+              value=${this.currentTime}
+              @change=${this.onScrub}>
+            </me-slider-with-input>
+          </me-section-row>
         </div>
       </me-expandable-tab>
         `;
@@ -95,8 +114,19 @@ export class AnimationControls extends ConnectedLitElement {
     const value = dropdown.selectedItem?.getAttribute('value') || undefined;
     if (value !== undefined && this.animationNames.indexOf(value) !== -1) {
       reduxStore.dispatch(dispatchAnimationName(value));
-      reduxStore.dispatch(dispatchAutoplayEnabled(true));
     }
+  }
+
+  onScrub() {
+    const time = this.scrubber.value;
+    getModelViewer().currentTime = time;
+  }
+
+  async updateScrubber() {
+    const modelViewer = await getUpdatedModelViewer();
+    this.clipLength = modelViewer.duration;
+    this.currentTime = modelViewer.currentTime;
+    this.timeElement.style.display = this.autoplay ? 'none' : '';
   }
 }
 
