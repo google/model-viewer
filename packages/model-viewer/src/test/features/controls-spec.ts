@@ -33,7 +33,7 @@ const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
   dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
-  dispatchSyntheticEvent(element, 'mousemove', {clientX: 0, clientY: 0});
+  dispatchSyntheticEvent(window, 'mousemove', {clientX: 0, clientY: 0});
 };
 
 const expectSphericalsToBeEqual =
