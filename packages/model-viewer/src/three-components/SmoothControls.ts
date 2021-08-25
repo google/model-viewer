@@ -196,10 +196,10 @@ export class SmoothControls extends EventDispatcher {
       }
       element.removeEventListener('keydown', this.onKeyDown);
       element.removeEventListener('touchstart', this.onTouchStart);
-      element.removeEventListener('touchmove', this._onTouchMove);
 
       self.removeEventListener('mouseup', this.onMouseUp);
-      self.removeEventListener('touchend', this.onTouchEnd);
+
+      this.touchMode = null;
 
       element.style.cursor = '';
       this._interactionEnabled = false;
