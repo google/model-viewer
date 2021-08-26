@@ -109,7 +109,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
       ...this.config,
       src: this.gltfUrl,
       // Always enable camera controls for preview
-      cameraControls: true
+      cameraControls: true,
+      interactionPrompt: 'none'
     };
 
     const hasModel = !!editedConfig.src;
