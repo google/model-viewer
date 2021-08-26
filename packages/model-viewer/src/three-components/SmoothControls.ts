@@ -138,15 +138,13 @@ export class SmoothControls extends EventDispatcher {
   private fovDamper = new Damper();
 
   // Pointer state
-  private _touchMode: TouchMode = null;
-  private _onTouchMove: (event: TouchEvent) => void = () => {};
+  private touchMode: TouchMode = null;
   private lastPointerPosition: Pointer = {
     clientX: 0,
     clientY: 0,
   };
   private lastTouches!: TouchList;
   private touchDecided = false;
-  private touchMoveFixed = false;
 
   constructor(
       readonly camera: PerspectiveCamera, readonly element: HTMLElement) {
@@ -165,12 +163,6 @@ export class SmoothControls extends EventDispatcher {
 
   enableInteraction() {
     if (this._interactionEnabled === false) {
-      // https://github.com/metafizzy/flickity/issues/457#issuecomment-254501356
-      if (!this.touchMoveFixed) {
-        this.touchMoveFixed = true;
-        self.addEventListener('touchmove', function() {}, {passive: false});
-      }
-
       const {element} = this;
       element.addEventListener('mousedown', this.onMouseDown);
       if (!this._disableZoom) {
@@ -178,7 +170,8 @@ export class SmoothControls extends EventDispatcher {
       }
       element.addEventListener('keydown', this.onKeyDown);
       element.addEventListener(
-          'touchstart', this.onTouchStart, {passive: false});
+          'touchstart', this.onTouchStart, {passive: true});
+      element.addEventListener('touchmove', this.onTouchMove, {passive: false});
 
       this.element.style.cursor = 'grab';
       this._interactionEnabled = true;
@@ -196,12 +189,13 @@ export class SmoothControls extends EventDispatcher {
       }
       element.removeEventListener('keydown', this.onKeyDown);
       element.removeEventListener('touchstart', this.onTouchStart);
-      element.removeEventListener('touchmove', this._onTouchMove);
+      element.removeEventListener('touchmove', this.onTouchMove);
 
       self.removeEventListener('mouseup', this.onMouseUp);
       self.removeEventListener('touchend', this.onTouchEnd);
 
       element.style.cursor = '';
+      this.touchMode = null;
       this._interactionEnabled = false;
     }
   }
@@ -499,14 +493,23 @@ export class SmoothControls extends EventDispatcher {
     return Math.sqrt(xDelta * xDelta + yDelta * yDelta);
   }
 
-  private onMouseMove =
-      (event: MouseEvent) => {
-        this.handleSinglePointerMove(event);
+  private onMouseMove = (event: MouseEvent) => {
+    this.handleSinglePointerMove(event);
 
-        if (event.cancelable) {
-          event.preventDefault();
-        }
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+  };
+
+  private onTouchMove = (event: TouchEvent) => {
+    if (this.touchMode !== null) {
+      this.touchMode(event);
+
+      if (this.touchMode !== null && event.cancelable) {
+        event.preventDefault();
       }
+    }
+  };
 
   private touchModeZoom: TouchMode = (event) => {
     const {touches} = event;
@@ -541,29 +544,6 @@ export class SmoothControls extends EventDispatcher {
 
     this.lastTouches = touches;
   };
-
-  private get touchMode() {
-    return this._touchMode;
-  }
-
-  private set touchMode(touchMode: TouchMode) {
-    this._touchMode = touchMode;
-    const {element} = this;
-    element.removeEventListener('touchmove', this._onTouchMove);
-    if (touchMode !== null) {
-      this._onTouchMove = (event) => {
-        touchMode(event);
-
-        if (this.touchMode !== null && event.cancelable) {
-          event.preventDefault();
-        }
-      };
-      element.addEventListener(
-          'touchmove', this._onTouchMove, {passive: false});
-    } else {
-      self.removeEventListener('touchend', this.onTouchEnd);
-    }
-  }
 
   private handleSinglePointerMove(pointer: Pointer) {
     const {clientX, clientY} = pointer;
@@ -602,16 +582,15 @@ export class SmoothControls extends EventDispatcher {
     });
   };
 
-  private onTouchStart =
-      (event: TouchEvent) => {
-        this.onPointerDown(() => {
-          if (event.touches.length === 1) {
-            self.addEventListener('touchend', this.onTouchEnd);
-            this.touchDecided = false;
-          }
-          this.onTouchChange(event);
-        });
+  private onTouchStart = (event: TouchEvent) => {
+    this.onPointerDown(() => {
+      if (event.touches.length === 1) {
+        self.addEventListener('touchend', this.onTouchEnd);
+        this.touchDecided = false;
       }
+      this.onTouchChange(event);
+    });
+  };
 
   private onTouchChange(event: TouchEvent) {
     const {touches} = event;
@@ -647,24 +626,23 @@ export class SmoothControls extends EventDispatcher {
     }
   }
 
-  private onMouseUp =
-      (_event: MouseEvent) => {
-        this.element.removeEventListener('mousemove', this.onMouseMove);
+  private onMouseUp = (_event: MouseEvent) => {
+    this.element.removeEventListener('mousemove', this.onMouseMove);
 
-        this.onPointerUp();
-      }
+    this.onPointerUp();
+  };
 
-  private onTouchEnd =
-      (event: TouchEvent) => {
-        const {touches} = event;
-        if (touches.length === 0) {
-          this.touchMode = null;
-        } else {
-          this.onTouchChange(event);
-        }
+  private onTouchEnd = (event: TouchEvent) => {
+    if (event.touches.length === 0) {
+      self.removeEventListener('touchend', this.onTouchEnd);
+      this.touchMode = null;
 
-        this.onPointerUp();
-      }
+    } else if (this.touchMode !== null) {
+      this.onTouchChange(event);
+    }
+
+    this.onPointerUp();
+  };
 
   private onWheel = (event: Event) => {
     if (!this.canInteract) {
