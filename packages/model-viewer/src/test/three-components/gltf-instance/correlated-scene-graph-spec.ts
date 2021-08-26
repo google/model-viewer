@@ -15,7 +15,7 @@
 
 import {Group, Mesh, MeshStandardMaterial, Object3D} from 'three';
 import {GLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {Material, PBRMetallicRoughness, Texture, TextureInfo} from '../../../three-components/gltf-instance/gltf-2.0.js';
@@ -99,7 +99,7 @@ suite('correlated-scene-graph', () => {
         const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
         const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
-        const scene = SkeletonUtils.clone(threeGLTF.scene) as Group;
+        const scene = (SkeletonUtils as any).clone(threeGLTF.scene) as Group;
         const scenes: Group[] = [scene];
 
         const cloneThreeGLTF: GLTF = {...threeGLTF, scene, scenes};
@@ -123,7 +123,7 @@ suite('correlated-scene-graph', () => {
         const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
         const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
-        const scene = SkeletonUtils.clone(threeGLTF.scene) as Group;
+        const scene = (SkeletonUtils as any).clone(threeGLTF.scene) as Group;
         const scenes: Group[] = [scene];
 
         const cloneThreeGLTF: GLTF = {...threeGLTF, scene, scenes};
