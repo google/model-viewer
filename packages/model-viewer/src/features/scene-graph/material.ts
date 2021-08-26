@@ -160,7 +160,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   get name(): string {
-    this[$ensureLoaded]();
     return (this[$sourceObject] as any).name || '';
   }
 

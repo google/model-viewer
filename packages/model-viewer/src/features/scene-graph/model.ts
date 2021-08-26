@@ -82,6 +82,9 @@ class PrimitiveNode extends Node {
     const gltfMeshReference =
         correlatedSceneGraph.threeObjectMap.get(mesh) as GLTFReference;
     const {type: nodes, index: nodeIndex} = gltfMeshReference;
+    if (nodes !== 'nodes') {
+      console.error('Expected type \'nodes\' but got ' + nodes);
+    }
     // Gets the mesh index from the node.
     const meshIndex = ((gltf[nodes] || []) as GLTFNode[])[nodeIndex].mesh!;
     // The gltf mesh array to sample from.
@@ -164,7 +167,23 @@ export class Model implements ModelInterface {
       } else {
         const elementArray = gltf['materials'] || [];
         const gltfMaterialDef = elementArray[i];
+
+        // Loads the three.js material.
         const capturedMatIndex = i;
+        const materialLoadCallback = async () => {
+          const threeMaterial =
+              await threeGLTF.parser.getDependency(
+                  'material', capturedMatIndex) as MeshStandardMaterial;
+
+          // Adds correlation, maps the variant gltf-def to the
+          // three material set containing the variant material.
+          const threeMaterialSet = new Set<MeshStandardMaterial>();
+          gltfElementMap.set(gltfMaterialDef, threeMaterialSet);
+          threeMaterialSet.add(threeMaterial);
+
+          return {set: threeMaterialSet, material: threeMaterial};
+        };
+
         // Configures the material for lazy loading.
         this[$materials].push(new Material(
             onUpdate,
@@ -172,25 +191,7 @@ export class Model implements ModelInterface {
             gltfMaterialDef,
             correlatedMaterial,
             new LazyLoader(
-                gltf,
-                gltfElementMap,
-                gltfMaterialDef,
-                async () => {  // Loads the three.js material.
-                  const threeMaterial =
-                      await threeGLTF.parser.getDependency(
-                          'material', capturedMatIndex) as MeshStandardMaterial;
-                  let threeMaterialSet = gltfElementMap.get(gltfMaterialDef) as
-                      Set<MeshStandardMaterial>;
-
-                  if (threeMaterialSet == null) {
-                    // Adds correlation, maps the variant gltf-def to the
-                    // three material set containing the variant material.
-                    threeMaterialSet = new Set<MeshStandardMaterial>();
-                    gltfElementMap.set(gltfMaterialDef, threeMaterialSet);
-                    threeMaterialSet.add(threeMaterial);
-                  }
-                  return {set: threeMaterialSet, material: threeMaterial};
-                })));
+                gltf, gltfElementMap, gltfMaterialDef, materialLoadCallback)));
       }
       i++;
     }
