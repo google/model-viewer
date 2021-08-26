@@ -44,7 +44,6 @@ export class AnimationControls extends ConnectedLitElement {
   @internalProperty() selectedAnimation: string|undefined = undefined;
   @internalProperty() autoplay = false;
   @internalProperty() clipLength = 0;
-  @internalProperty() currentTime = 0;
 
   stateChanged(state: State) {
     const config = getConfig(state);
@@ -71,7 +70,8 @@ export class AnimationControls extends ConnectedLitElement {
     const hasAnims = this.animationNames.length > 0;
     const tabHeader = hasAnims ? 'Animations' : 'Animations (Model has none)';
     return html`
-      <me-expandable-tab tabName=${tabHeader} .enabled=${hasAnims}>
+      <me-expandable-tab tabName=${tabHeader} .enabled=${hasAnims} .open=${
+        true}>
         <div slot="content">
           <me-dropdown id="animation-name-selector"
             selectedIndex=${selectedAnimationIndex}
@@ -90,7 +90,6 @@ export class AnimationControls extends ConnectedLitElement {
             <me-slider-with-input
               id="scrubber"
               min=0 max=${this.clipLength} step=0.01
-              value=${this.currentTime}
               @change=${this.onScrub}>
             </me-slider-with-input>
           </me-section-row>
@@ -124,8 +123,8 @@ export class AnimationControls extends ConnectedLitElement {
 
   async updateScrubber() {
     const modelViewer = await getUpdatedModelViewer();
-    this.clipLength = modelViewer.duration;
-    this.currentTime = modelViewer.currentTime;
+    this.clipLength = Math.floor(modelViewer.duration * 100) / 100;
+    this.scrubber.value = modelViewer.currentTime;
     this.timeElement.style.display = this.autoplay ? 'none' : '';
   }
 }
