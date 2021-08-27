@@ -70,7 +70,7 @@ class PrimitiveNode extends Node {
   // Maps glTF material index number to a material that this primitive supports.
   private[$materials] = new Map<number, Material>();
   // Maps variant name to material index.
-  private[$variantInfo]: Map<string, number>;
+  private[$variantInfo]: Map<string, Material>;
   // List of child nodes.
   constructor(
       mesh: Mesh, mvMaterials: Material[],
@@ -106,13 +106,13 @@ class PrimitiveNode extends Node {
         const extensions = threeGLTF.parser.json.extensions;
         const variantNames = extensions['KHR_materials_variants'].variants;
         // Provides definition now that we know there are variants to support.
-        this[$variantInfo] = new Map<string, number>();
+        this[$variantInfo] = new Map<string, Material>();
         for (const mapping of variantsExtension.mappings!) {
           // Maps variant indices to Materials.
           this[$materials].set(mapping.material, mvMaterials[mapping.material]);
           for (const variant of mapping.variants) {
             const {name} = variantNames[variant];
-            this[$variantInfo].set(name, mapping.material);
+            this[$variantInfo].set(name, mvMaterials[mapping.material]);
           }
         }
       }
@@ -123,18 +123,22 @@ class PrimitiveNode extends Node {
     return this[$mesh];
   }
 
-  async setActiveMaterial(index: number) {
-    const mvMaterial = this[$materials].get(index);
-    if (mvMaterial != null) {
-      this.mesh.material = await mvMaterial[$ensureLoaded]();
+  async setActiveMaterial(material: number|Material) {
+    if (material instanceof Material) {
+      this.mesh.material = await material[$ensureLoaded]();
+    } else {
+      const mvMaterial = this[$materials].get(material);
+      if (mvMaterial != null) {
+        this.mesh.material = await mvMaterial[$ensureLoaded]();
+      }
     }
   }
 
   async enableVariant(name: string) {
     if (this[$variantInfo] != null) {
-      const index = this[$variantInfo].get(name);
-      if (index != null) {
-        this.setActiveMaterial(index);
+      const material = this[$variantInfo].get(name);
+      if (material != null) {
+        this.setActiveMaterial(material);
       }
     }
   }
