@@ -175,6 +175,8 @@ export class SmoothControls extends EventDispatcher {
 
       this.element.style.cursor = 'grab';
       this._interactionEnabled = true;
+
+      this.setTouchActionStyle();
     }
   }
 
@@ -197,6 +199,8 @@ export class SmoothControls extends EventDispatcher {
       element.style.cursor = '';
       this.touchMode = null;
       this._interactionEnabled = false;
+
+      this.setTouchActionStyle();
     }
   }
 
@@ -215,6 +219,8 @@ export class SmoothControls extends EventDispatcher {
       } else {
         this.element.addEventListener('wheel', this.onWheel);
       }
+
+      this.setTouchActionStyle();
     }
   }
 
@@ -424,6 +430,21 @@ export class SmoothControls extends EventDispatcher {
     this.logFov = this.fovDamper.update(this.logFov, this.goalLogFov, delta, 1);
 
     this.moveCamera();
+  }
+
+  setTouchActionStyle() {
+    const {style} = this.element;
+
+    if (this._interactionEnabled) {
+      const {touchAction} = this._options;
+      if (this._disableZoom && touchAction !== 'none') {
+        style.touchAction = `${touchAction} pinch-zoom`;
+      } else {
+        style.touchAction = touchAction!;
+      }
+    } else {
+      style.touchAction = '';
+    }
   }
 
   private isStationary(): boolean {
