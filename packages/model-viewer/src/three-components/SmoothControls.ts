@@ -176,7 +176,7 @@ export class SmoothControls extends EventDispatcher {
       this.element.style.cursor = 'grab';
       this._interactionEnabled = true;
 
-      this.setTouchActionStyle();
+      this.updateTouchActionStyle();
     }
   }
 
@@ -200,7 +200,7 @@ export class SmoothControls extends EventDispatcher {
       this.touchMode = null;
       this._interactionEnabled = false;
 
-      this.setTouchActionStyle();
+      this.updateTouchActionStyle();
     }
   }
 
@@ -220,7 +220,7 @@ export class SmoothControls extends EventDispatcher {
         this.element.addEventListener('wheel', this.onWheel);
       }
 
-      this.setTouchActionStyle();
+      this.updateTouchActionStyle();
     }
   }
 
@@ -432,7 +432,7 @@ export class SmoothControls extends EventDispatcher {
     this.moveCamera();
   }
 
-  setTouchActionStyle() {
+  updateTouchActionStyle() {
     const {style} = this.element;
 
     if (this._interactionEnabled) {
