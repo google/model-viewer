@@ -17,7 +17,6 @@ import {DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
 
 import {AlphaMode, GLTF, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Material as DefaultedMaterial} from '../../three-components/gltf-instance/gltf-defaulted.js';
-import {ALPHA_CUTOFF_BLEND, ALPHA_CUTOFF_OPAQUE} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Material as MaterialInterface, RGB} from './api.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
@@ -157,17 +156,9 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   [$applyAlphaCutoff]() {
     const gltfMaterial = this[$sourceObject] as DefaultedMaterial;
-    // 0.0001 is the minimum in order to keep from using zero, which disables
-    // masking in three.js. It's also small enough to be less than the smallest
-    // normalized 8-bit value.
-    const cutoff = gltfMaterial.alphaMode === 'OPAQUE' ?
-        ALPHA_CUTOFF_OPAQUE :
-        (gltfMaterial.alphaMode === 'BLEND' ?
-             ALPHA_CUTOFF_BLEND :
-             Math.max(0.0001, Math.min(1.0, gltfMaterial.alphaCutoff)));
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
-      material.alphaTest = cutoff;
+      material.alphaTest = gltfMaterial.alphaCutoff;
       material.needsUpdate = true;
     }
   }

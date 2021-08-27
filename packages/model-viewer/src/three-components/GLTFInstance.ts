@@ -15,7 +15,8 @@
 
 import {Group, Mesh, Object3D, Texture} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {SkeletonUtils} from 'three/examples/jsm/utils/SkeletonUtils.js';
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
+
 import {Constructor} from '../utilities.js';
 
 export const $prepared = Symbol('prepared');
@@ -157,7 +158,7 @@ export class GLTFInstance implements GLTF {
     const source = this[$preparedGLTF];
     // TODO(#195,#1003): We don't currently support multiple scenes, so we don't
     // bother cloning extra scenes for now:
-    const scene = SkeletonUtils.clone(this.scene) as Group;
+    const scene = (SkeletonUtils as any).clone(this.scene) as Group;
     cloneVariantMaterials(scene, this.scene);
     const scenes = [scene];
     const userData = source.userData ? {...source.userData} : {};
