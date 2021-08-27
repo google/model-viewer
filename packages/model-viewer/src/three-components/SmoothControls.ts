@@ -433,17 +433,18 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private setTouchActionStyle() {
-    let touchActionStyle = '';
+    const {style} = this.element;
 
     if (this._interactionEnabled) {
       const {touchAction} = this._options;
-      touchActionStyle += touchAction!;
       if (this._disableZoom && touchAction !== 'none') {
-        touchActionStyle += ' pinch-zoom';
+        style.touchAction = `${touchAction} pinch-zoom`;
+      } else {
+        style.touchAction = touchAction!;
       }
+    } else {
+      style.touchAction = '';
     }
-
-    this.element.style.touchAction = touchActionStyle;
   }
 
   private isStationary(): boolean {
