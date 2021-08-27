@@ -432,7 +432,7 @@ export class SmoothControls extends EventDispatcher {
     this.moveCamera();
   }
 
-  private setTouchActionStyle() {
+  setTouchActionStyle() {
     const {style} = this.element;
 
     if (this._interactionEnabled) {
