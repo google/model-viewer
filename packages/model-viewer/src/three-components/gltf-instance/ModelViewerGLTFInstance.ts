@@ -13,21 +13,13 @@
  * limitations under the License.
  */
 
-import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Shader, Texture} from 'three';
+import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Texture} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
 import {Renderer} from '../Renderer.js';
-import {alphaChunk} from '../shader-chunk/alphatest_fragment.glsl.js';
 
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
-
-
-
-// Provides value assigned to alpha-cutoff when opaque rendering is desired.
-export const ALPHA_CUTOFF_OPAQUE = -0.5;
-// Provides value assigned to alpha-cutoff when alpha-blending is desired.
-export const ALPHA_CUTOFF_BLEND = 0;
 
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
@@ -185,35 +177,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       clone.aoMap.needsUpdate = true;
     }
 
-    // This allows us to patch three's materials, on top of patches already
-    // made, for instance GLTFLoader patches SpecularGlossiness materials.
-    // Unfortunately, three's program cache differentiates SpecGloss materials
-    // via onBeforeCompile.toString(), so these two functions do the same
-    // thing but look different in order to force a proper recompile.
-    const oldOnBeforeCompile = material.onBeforeCompile;
-    clone.onBeforeCompile = (material as any).isGLTFSpecularGlossinessMaterial ?
-        (shader: Shader) => {
-          oldOnBeforeCompile(shader, undefined as any);
-          shader.fragmentShader = shader.fragmentShader.replace(
-              '#include <alphatest_fragment>', alphaChunk);
-        } :
-        (shader: Shader) => {
-          shader.fragmentShader = shader.fragmentShader.replace(
-              '#include <alphatest_fragment>', alphaChunk);
-          oldOnBeforeCompile(shader, undefined as any);
-        };
     // This makes shadows better for non-manifold meshes
     clone.shadowSide = FrontSide;
-    // This improves transparent rendering and can be removed whenever
-    // https://github.com/mrdoob/three.js/pull/18235 finally lands.
-    if (clone.transparent) {
-      clone.depthWrite = false;
-    }
-    // This little hack ignores alpha for opaque materials, in order to comply
-    // with the glTF spec.
-    if (!clone.alphaTest && !clone.transparent) {
-      clone.alphaTest = ALPHA_CUTOFF_OPAQUE;
-    }
 
     sourceUUIDToClonedMaterial.set(material.uuid, clone);
 
