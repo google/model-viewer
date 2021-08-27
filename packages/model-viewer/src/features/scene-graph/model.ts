@@ -150,7 +150,7 @@ class PrimitiveNode extends Node {
  * scene graph.
  */
 export class Model implements ModelInterface {
-  private[$materials]: Material[] = new Array<Material>();
+  private[$materials] = new Array<Material>();
   private[$hierarchy] = new Array<Node>();
   private[$roots] = new Array<Node>();
   private[$primitives] = new Array<PrimitiveNode>();
