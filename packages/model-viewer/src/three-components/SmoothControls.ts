@@ -440,7 +440,7 @@ export class SmoothControls extends EventDispatcher {
     if (this._interactionEnabled) {
       const {touchAction} = this._options;
       if (this._disableZoom && touchAction !== 'none') {
-        style.touchAction = `${touchAction} pinch-zoom`;
+        style.touchAction = 'manipulation';
       } else {
         style.touchAction = touchAction!;
       }
