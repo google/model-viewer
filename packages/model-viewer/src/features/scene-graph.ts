@@ -27,7 +27,7 @@ import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
 import {Material} from './scene-graph/material.js';
-import {$ensureAllMaterialsLoaded, Model} from './scene-graph/model.js';
+import {$prepareVariantsForExport, Model} from './scene-graph/model.js';
 import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
@@ -239,7 +239,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           shadow.visible = false;
         }
 
-        await this[$model]![$ensureAllMaterialsLoaded]();
+        await this[$model]![$prepareVariantsForExport]();
 
         const exporter =
             (new GLTFExporter() as any)

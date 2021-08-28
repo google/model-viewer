@@ -33,7 +33,7 @@ const $roots = Symbol('roots');
 const $primitives = Symbol('primitives');
 export const $loadVariant = Symbol('loadVariant');
 export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
-export const $ensureAllMaterialsLoaded = Symbol('ensureAllMaterialsLoaded');
+export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 
 
 // Holds onto temporary scene context information needed to perform lazy loading
@@ -123,7 +123,8 @@ class PrimitiveNode extends Node {
     return this[$mesh];
   }
 
-  async setActiveMaterial(material: number|Material) {
+  async setActiveMaterial(material: number|Material):
+      Promise<ThreeMaterial|ThreeMaterial[]|null> {
     if (material instanceof Material) {
       this.mesh.material = await material[$ensureLoaded]();
     } else {
@@ -132,13 +133,28 @@ class PrimitiveNode extends Node {
         this.mesh.material = await mvMaterial[$ensureLoaded]();
       }
     }
+    return this.mesh.material;
   }
 
-  async enableVariant(name: string) {
+  async enableVariant(name: string):
+      Promise<ThreeMaterial|ThreeMaterial[]|null> {
     if (this[$variantInfo] != null) {
       const material = this[$variantInfo].get(name);
       if (material != null) {
-        this.setActiveMaterial(material);
+        return this.setActiveMaterial(material);
+      }
+    }
+    return null;
+  }
+
+  async instantiateVariants() {
+    for (const name of this[$variantInfo].keys()) {
+      if (this.mesh.userData.variantMaterials.get(name).material != null) {
+        continue;
+      }
+      const threeMaterial = await this.enableVariant(name);
+      if (threeMaterial != null) {
+        this.mesh.userData.variantMaterials.get(name).material = threeMaterial;
       }
     }
   }
@@ -160,8 +176,9 @@ export class Model implements ModelInterface {
       onUpdate: () => void = () => {}) {
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
 
-    let i = 0;
-    for (const material of gltf.materials!) {
+    for (let i = 0, size = gltf.materials!.length; i < size; ++i) {
+      const material = gltf.materials![i];
+
       const correlatedMaterial =
           gltfElementMap.get(material) as Set<MeshStandardMaterial>;
 
@@ -197,7 +214,6 @@ export class Model implements ModelInterface {
             new LazyLoader(
                 gltf, gltfElementMap, gltfMaterialDef, materialLoadCallback)));
       }
-      i++;
     }
 
     // Creates a hierarchy of Nodes. Allows not just for switching which
@@ -250,18 +266,18 @@ export class Model implements ModelInterface {
     return this[$materials];
   }
 
-  async switchVariant(variantName: string): Promise<void> {
-    const promises = new Array<Promise<void>>();
+  async switchVariant(variantName: string) {
+    const promises = new Array<Promise<ThreeMaterial|ThreeMaterial[]|null>>();
     for (const primitive of this[$primitives]) {
       promises.push(primitive.enableVariant(variantName));
     }
     await Promise.all(promises);
   }
 
-  async[$ensureAllMaterialsLoaded]() {
-    const promises = new Array<Promise<MeshStandardMaterial>>();
-    for (const material of this.materials) {
-      promises.push(material[$ensureLoaded]());
+  async[$prepareVariantsForExport]() {
+    const promises = new Array<Promise<void>>();
+    for (const primitive of this[$primitives]) {
+      promises.push(primitive.instantiateVariants());
     }
     await Promise.all(promises);
   }

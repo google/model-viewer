@@ -147,7 +147,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   async[$ensureLoaded](): Promise<MeshStandardMaterial> {
     if (this[$lazyLoadGLTFInfo] !== undefined) {
-      const {set} = await this[$lazyLoadGLTFInfo]!.doLazyLoad();
+      const {set, material} = await this[$lazyLoadGLTFInfo]!.doLazyLoad();
 
       // Fills in the missing data.
       this[$correlatedObjects] = set as Set<MeshStandardMaterial>;
@@ -155,6 +155,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       this[$initialize](this[$lazyLoadGLTFInfo]!.gltf);
       // Releases lazy load info.
       this[$lazyLoadGLTFInfo] = undefined;
+      return material as MeshStandardMaterial;
     }
     return this[$correlatedObjects]!.values().next().value;
   }
