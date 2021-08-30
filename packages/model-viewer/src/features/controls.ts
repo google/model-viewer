@@ -494,7 +494,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('touchAction')) {
         const touchAction = this.touchAction;
         controls.applyOptions({touchAction});
-        controls.setTouchActionStyle();
+        controls.updateTouchActionStyle();
       }
 
       if (changedProperties.has('orbitSensitivity')) {
