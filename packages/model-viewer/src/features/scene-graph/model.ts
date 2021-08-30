@@ -148,6 +148,9 @@ class PrimitiveNode extends Node {
   }
 
   async instantiateVariants() {
+    if (this[$variantInfo] == null) {
+      return;
+    }
     for (const name of this[$variantInfo].keys()) {
       if (this.mesh.userData.variantMaterials.get(name).material != null) {
         continue;
