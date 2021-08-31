@@ -33,7 +33,7 @@ const $occlusionTexture = Symbol('occlusionTexture');
 const $emissiveTexture = Symbol('emissiveTexture');
 const $backingThreeMaterial = Symbol('backingThreeMaterial');
 const $applyAlphaCutoff = Symbol('applyAlphaCutoff');
-const $lazyLoadGLTFInfo = Symbol('lazyLoadGLTFInfo');
+export const $lazyLoadGLTFInfo = Symbol('lazyLoadGLTFInfo');
 const $initialize = Symbol('initialize');
 export const $ensureLoaded = Symbol('ensureLoaded');
 

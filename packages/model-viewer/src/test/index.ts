@@ -52,6 +52,7 @@ import './features/ar-spec.js';
 import './features/scene-graph/texture-spec.js';
 import './features/scene-graph/material-spec.js';
 import './features/scene-graph/texture-info-spec.js';
+import './features/scene-graph/mesh-primitive-spec.js';
 
 
 try {

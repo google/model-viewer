@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D} from 'three';
+import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, SkinnedMesh} from 'three';
 import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
@@ -30,7 +30,7 @@ const $mesh = Symbol('mesh');
 const $children = Symbol('children');
 const $hierarchy = Symbol('hierarchy');
 const $roots = Symbol('roots');
-const $primitives = Symbol('primitives');
+export const $primitives = Symbol('primitives');
 export const $loadVariant = Symbol('loadVariant');
 export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
@@ -79,9 +79,29 @@ class PrimitiveNode extends Node {
     this[$mesh] = mesh;
     const {gltf, threeGLTF} = correlatedSceneGraph;
 
-    const gltfMeshReference =
-        correlatedSceneGraph.threeObjectMap.get(mesh) as GLTFReference;
+    // TODO: Remove the associationKey 'work arounds' after fixing Three.js
+    // associations. This is needed for now because Three.js does not create
+    // associations with SkinnedMeshes (glTF primitives of an animated object)
+    // and incorrect associations are formed when a mesh has multiple
+    // primitives.
+    let associationKey: Object3D = mesh;
+    // Work around 1, skinned meshes (glTF primitives) have no association but
+    // the parent (mesh) does, which maps to a 'node'.
+    if (mesh instanceof SkinnedMesh && mesh.parent != null) {
+      associationKey = mesh.parent;
+    }
+    let gltfMeshReference = correlatedSceneGraph.threeObjectMap.get(
+                                associationKey) as GLTFReference;
+    // Work around 2, the association value is a material not a node.
+    if (gltfMeshReference.type === 'materials') {
+      associationKey = mesh.parent!;
+      gltfMeshReference = correlatedSceneGraph.threeObjectMap.get(
+                              associationKey) as GLTFReference;
+    }
+
     const {type: nodes, index: nodeIndex} = gltfMeshReference;
+
+    // Should have the correct reference type now.
     if (nodes !== 'nodes') {
       console.error('Expected type \'nodes\' but got ' + nodes);
     }
@@ -160,6 +180,10 @@ class PrimitiveNode extends Node {
         this.mesh.userData.variantMaterials.get(name).material = threeMaterial;
       }
     }
+  }
+
+  get variantInfo() {
+    return this[$variantInfo];
   }
 }
 
