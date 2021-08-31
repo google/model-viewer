@@ -19,7 +19,6 @@ import {$threeTexture} from '../../../features/scene-graph/image.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
-import {ALPHA_CUTOFF_OPAQUE} from '../../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
@@ -165,13 +164,11 @@ suite('scene-graph/material', () => {
 
     test('test alpha cutoff expect disabled by default', async () => {
       await loadModel(HELMET_GLB_PATH);
-      // Disabled cutoff value hack see:
-      // https://github.com/google/model-viewer/blob/e3a000111980f5cf018c61dec8695463e0d843a0/packages/model-viewer/src/three-components/gltf-instance/ModelViewerGLTFInstance.ts#L210
       expect(element.model!.materials[0]![$correlatedObjects]
                  ?.values()
                  .next()
                  .value.alphaTest)
-          .to.be.equal(ALPHA_CUTOFF_OPAQUE);
+          .to.be.equal(0);
     });
 
     test('test alpha cutoff expect valid value as default', async () => {

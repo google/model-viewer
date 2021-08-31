@@ -38,15 +38,19 @@ function getMaxString(limits: Limits|undefined, suffix: string) {
 
 function getUpdatedLimits(
     state: ModelViewerConfig, limits: Limits, position: number) {
+  const DEFAULT = 'auto auto auto';
   const suffix = position === 2 ? 'm' : 'deg';
   const {minCameraOrbit, maxCameraOrbit} = state;
-  const min = minCameraOrbit == null ? ['auto', 'auto', 'auto'] :
-                                       minCameraOrbit.split(' ');
+  const min = (minCameraOrbit == null ? DEFAULT : minCameraOrbit).split(' ');
   min[position] = getMinString(limits, suffix);
-  const max = maxCameraOrbit == null ? ['auto', 'auto', 'auto'] :
-                                       maxCameraOrbit.split(' ');
+  const minString = min.join(' ');
+  const max = (maxCameraOrbit == null ? DEFAULT : maxCameraOrbit).split(' ');
   max[position] = getMaxString(limits, suffix);
-  return {minCameraOrbit: min.join(' '), maxCameraOrbit: max.join(' ')};
+  const maxString = max.join(' ');
+  return {
+    minCameraOrbit: minString === DEFAULT ? undefined : minString,
+    maxCameraOrbit: maxString === DEFAULT ? undefined : maxString
+  };
 }
 
 export function getOrbitString(orbit: {theta: number, phi: number}) {
@@ -190,9 +194,11 @@ export function configReducer(
       return {...state, autoRotate: action.payload};
     case SET_CAMERA_TARGET:
       const target = action.payload;
-      const cameraTarget = `${roundToDigits(target.x, DIGITS)}m ${
-          roundToDigits(
-              target.y, DIGITS)}m ${roundToDigits(target.z, DIGITS)}m`;
+      const cameraTarget = target == null ?
+          undefined :
+          `${roundToDigits(target.x, DIGITS)}m ${
+              roundToDigits(
+                  target.y, DIGITS)}m ${roundToDigits(target.z, DIGITS)}m`;
       return {...state, cameraTarget};
     case SAVE_CAMERA_ORBIT:
       const orbit = action.payload;
@@ -212,7 +218,7 @@ export function configReducer(
     case SET_CAMERA_YAW_LIMITS:
       return {...state, ...getUpdatedLimits(state, action.payload, 0)};
     case SET_MIN_ZOOM:
-      const limits = getUpdatedLimits(
+      const orbitLimits = getUpdatedLimits(
           state,
           {
             enabled: action.payload.fov != null,
@@ -220,16 +226,19 @@ export function configReducer(
             max: -1
           },
           2);
+
+      const minFov = getMinString(
+          {
+            enabled: action.payload.fov != null,
+            min: action.payload.fov,
+            max: -1
+          },
+          'deg');
+
       return {
         ...state,
-        minCameraOrbit: limits.minCameraOrbit,
-        minFov: getMinString(
-            {
-              enabled: action.payload.fov != null,
-              min: action.payload.fov,
-              max: -1
-            },
-            'deg')
+        minCameraOrbit: orbitLimits.minCameraOrbit,
+        minFov: minFov === 'auto' ? undefined : minFov
       };
     default:
       return state;

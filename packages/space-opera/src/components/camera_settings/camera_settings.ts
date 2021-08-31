@@ -33,7 +33,7 @@ import {ModelViewerConfig, State} from '../../types.js';
 import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../config/reducer.js';
 import {Vector3D} from '../config/types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getModel, getUpdatedModelViewer} from '../model_viewer_preview/reducer.js';
+import {getModel, getModelViewer, getUpdatedModelViewer} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
 import {styles as draggableInputRowStyles} from '../shared/draggable_input/draggable_input_row.css.js';
@@ -107,6 +107,10 @@ export class CameraTargetInput extends ConnectedLitElement {
     this.change(target);
   }
 
+  resetTarget() {
+    reduxStore.dispatch(dispatchCameraTarget());
+  }
+
   render() {
     if (!this.target) {
       return html`<div class="note">Waiting for camera target...</div>`;
@@ -121,6 +125,9 @@ export class CameraTargetInput extends ConnectedLitElement {
         <me-draggable-input id="camera-target-z" value=${
         this.target.z} min=-9999 max=9999 dragStepSize=0.01 @change=${
         this.onInputChange} innerLabel="Z"></me-draggable-input>
+        <mwc-icon-button class="RevertButton" style="align-self: center; margin-top: -10px;" id="revert" icon="undo"
+        title="Reset target" @click=${this.resetTarget}>
+        </mwc-icon-button>
         `;
   }
 }
@@ -177,9 +184,10 @@ export class CameraSettings extends ConnectedLitElement {
     reduxStore.dispatch(dispatchSaveCameraOrbit(undefined));
   }
 
-  async onCameraOrbitEditorChange() {
+  onCameraOrbitEditorChange() {
     reduxStore.dispatch(
         dispatchSaveCameraOrbit(this.cameraOrbitEditor.currentOrbit));
+    getModelViewer().jumpCameraToGoal();
   }
 
   onCameraTargetChange(newValue: Vector3D) {
@@ -213,7 +221,7 @@ export class CameraSettings extends ConnectedLitElement {
               @click=${this.onSaveCameraOrbit}>
               Save current as initial
             </mwc-button>
-            <mwc-icon-button class="RevertButton" style="align-self: center; margin-top: 10px;" id="revert-metallic-roughness-texture" icon="undo"
+            <mwc-icon-button class="RevertButton" style="align-self: center; margin-top: 10px;" id="revert" icon="undo"
             title="Reset initial camera" @click=${this.resetInitialCamera}>
             </mwc-icon-button>
           </div>

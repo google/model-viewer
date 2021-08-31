@@ -506,27 +506,25 @@ export class ModelScene extends Scene {
     try {
       const {currentAnimationAction: lastAnimationAction} = this;
 
-      this.currentAnimationAction =
-          this.mixer.clipAction(animationClip, this).play();
-      this.currentAnimationAction.enabled = true;
+      const action = this.mixer.clipAction(animationClip, this);
+      this.currentAnimationAction = action;
 
-      if (lastAnimationAction != null &&
-          this.currentAnimationAction !== lastAnimationAction) {
-        this.currentAnimationAction.crossFadeFrom(
-            lastAnimationAction, crossfadeTime, false);
+      if ((this.element as any).paused) {
+        this.mixer.stopAllAction();
+      } else if (
+          lastAnimationAction != null && action !== lastAnimationAction) {
+        action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
       }
+
+      action.enabled = true;
+      action.play();
     } catch (error) {
       console.error(error);
     }
   }
 
   stopAnimation() {
-    if (this.currentAnimationAction != null) {
-      this.currentAnimationAction.stop();
-      this.currentAnimationAction.reset();
-      this.currentAnimationAction = null;
-    }
-
+    this.currentAnimationAction = null;
     this.mixer.stopAllAction();
   }
 

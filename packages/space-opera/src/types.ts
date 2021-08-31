@@ -36,6 +36,7 @@ export interface ModelViewerConfig {
   exposure?: number;  // Environment for hdr environment, used as ibl intensity
   poster?: string;    // Display an image before model finished loading
   reveal?: string;    // Controls when the model should be revealed
+  interactionPrompt?: string;
   shadowIntensity?: number;
   shadowSoftness?: number;
   maxCameraOrbit?: string;
