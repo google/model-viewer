@@ -258,8 +258,10 @@ export class FilamentViewer extends LitElement {
     this[$updateSize]();
 
     requestAnimationFrame(() => {
-      this.dispatchEvent(
-          new CustomEvent('model-visibility', {detail: {visible: true}}));
+      requestAnimationFrame(() => {
+        this.dispatchEvent(
+            new CustomEvent('model-visibility', {detail: {visible: true}}));
+      });
     });
   }
 
