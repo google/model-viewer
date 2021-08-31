@@ -275,7 +275,7 @@ suite('SmoothControls', () => {
             dispatchSyntheticEvent(
                 element, 'mousedown', {clientX: 0, clientY: 10});
             dispatchSyntheticEvent(
-                element, 'mousemove', {clientX: 0, clientY: 0});
+                window, 'mousemove', {clientX: 0, clientY: 0});
 
             expect(controls.getCameraSpherical().phi).to.be.equal(originalPhi);
           });
@@ -307,7 +307,7 @@ suite('SmoothControls', () => {
             dispatchSyntheticEvent(
                 element, 'mousedown', {clientX: 0, clientY: 10});
             dispatchSyntheticEvent(
-                element, 'mousemove', {clientX: 0, clientY: 0});
+                window, 'mousemove', {clientX: 0, clientY: 0});
 
             settleControls(controls);
 

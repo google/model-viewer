@@ -254,15 +254,6 @@
         hit == null ? 'auto auto auto' : hit.position.toString();
   };
 
-  const onPointerUp = (event) => {
-    const pointer = event.clientX ? event : event.changedTouches[0];
-    if (Math.abs(pointer.clientX - startX) < tapDistance &&
-        Math.abs(pointer.clientY - startY) < tapDistance) {
-      recenter(pointer);
-    }
-    panning = false;
-  };
-
   modelViewer.addEventListener('mousedown', (event) => {
     startX = event.clientX;
     startY = event.clientY;
@@ -290,7 +281,7 @@
     startPan();
   }, true);
 
-  modelViewer.addEventListener('mousemove', (event) => {
+  self.addEventListener('mousemove', (event) => {
     if (!panning)
       return;
 
@@ -387,7 +378,7 @@
     startPan();
   }, true);
 
-  modelViewer.addEventListener('mousemove', (event) => {
+  self.addEventListener('mousemove', (event) => {
     if (!panning)
       return;
 

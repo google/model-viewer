@@ -186,7 +186,7 @@ export class SmoothControls extends EventDispatcher {
     if (this._interactionEnabled === true) {
       const {element} = this;
 
-      element.removeEventListener('mousemove', this.onMouseMove);
+      self.removeEventListener('mousemove', this.onMouseMove);
       element.removeEventListener('mousedown', this.onMouseDown);
       if (!this._disableZoom) {
         element.removeEventListener('wheel', this.onWheel);
@@ -599,8 +599,7 @@ export class SmoothControls extends EventDispatcher {
 
   private onMouseDown = (event: MouseEvent) => {
     this.onPointerDown(() => {
-      const {element} = this;
-      element.addEventListener('mousemove', this.onMouseMove);
+      self.addEventListener('mousemove', this.onMouseMove);
       self.addEventListener('mouseup', this.onMouseUp, {once: true});
       this.handleSinglePointerDown(event);
     });
@@ -657,7 +656,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onMouseUp = (_event: MouseEvent) => {
-    this.element.removeEventListener('mousemove', this.onMouseMove);
+    self.removeEventListener('mousemove', this.onMouseMove);
 
     this.onPointerUp();
   };
