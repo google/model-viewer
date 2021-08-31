@@ -24,7 +24,7 @@ import {$ensureLoaded, Material} from './material.js';
 
 
 
-const $materials = Symbol('materials');
+export const $materials = Symbol('materials');
 const $variantInfo = Symbol('variantInfo');
 const $mesh = Symbol('mesh');
 const $children = Symbol('children');
@@ -34,6 +34,7 @@ export const $primitives = Symbol('primitives');
 export const $loadVariant = Symbol('loadVariant');
 export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
+export const $switchVariant = Symbol('switchVariant');
 
 
 // Holds onto temporary scene context information needed to perform lazy loading
@@ -293,7 +294,7 @@ export class Model implements ModelInterface {
     return this[$materials];
   }
 
-  async switchVariant(variantName: string) {
+  async[$switchVariant](variantName: string) {
     const promises = new Array<Promise<ThreeMaterial|ThreeMaterial[]|null>>();
     for (const primitive of this[$primitives]) {
       promises.push(primitive.enableVariant(variantName));

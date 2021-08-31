@@ -27,7 +27,7 @@ import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
 import {Material} from './scene-graph/material.js';
-import {$prepareVariantsForExport, Model} from './scene-graph/model.js';
+import {$prepareVariantsForExport, $switchVariant, Model} from './scene-graph/model.js';
 import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
@@ -149,7 +149,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           return;
         }
 
-        await this[$model]!.switchVariant(variantName!);
+        await this[$model]![$switchVariant](variantName!);
         this[$needsRender]();
       }
 

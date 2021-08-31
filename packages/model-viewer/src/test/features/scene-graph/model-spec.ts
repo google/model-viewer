@@ -17,9 +17,11 @@ import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js'
 import {Mesh} from 'three/src/objects/Mesh.js';
 
 import {$lazyLoadGLTFInfo} from '../../../features/scene-graph/material.js';
-import {Model} from '../../../features/scene-graph/model.js';
+import {$materials, $switchVariant, Model} from '../../../features/scene-graph/model.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
+import {ModelViewerElement} from '../../../model-viewer.js';
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
+import {waitForEvent} from '../../../utilities.js';
 import {assetPath, loadThreeGLTF} from '../../helpers.js';
 
 
@@ -33,6 +35,14 @@ const SHEEN_CHAIR_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/SheenChair/glTF-binary/SheenChair.glb');
 
 suite('scene-graph/model', () => {
+  const loadModel = async (path: string) => {
+    const element = new ModelViewerElement();
+    element.src = path;
+    document.body.insertBefore(element, document.body.firstChild);
+    await waitForEvent(element, 'load');
+    return element.model! as Model;
+  };
+
   suite('Model', () => {
     test('creates a "default" material, when none is specified', async () => {
       const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
@@ -82,53 +92,50 @@ suite('scene-graph/model', () => {
 
     suite('Model Variants', () => {
       test('Switch variant and lazy load', async () => {
-        const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
-        const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+        const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
 
-        expect(model.materials[4][$correlatedObjects]).to.be.null;
-        expect(model.materials[4][$lazyLoadGLTFInfo]).to.not.be.undefined;
+        expect(model[$materials][4][$correlatedObjects]).to.be.null;
+        expect(model[$materials][4][$lazyLoadGLTFInfo]).to.not.be.undefined;
 
-        expect(model.materials[5][$correlatedObjects]).to.be.null;
-        expect(model.materials[4][$lazyLoadGLTFInfo]).to.not.be.undefined;
+        expect(model[$materials][5][$correlatedObjects]).to.be.null;
+        expect(model[$materials][4][$lazyLoadGLTFInfo]).to.not.be.undefined;
 
-        await model.switchVariant('Peacock Velvet');
+        await model[$switchVariant]('Peacock Velvet');
 
-        expect(model.materials[4][$correlatedObjects]).to.not.be.null;
-        expect(model.materials[4][$lazyLoadGLTFInfo]).to.be.undefined;
+        expect(model[$materials][4][$correlatedObjects]).to.not.be.null;
+        expect(model[$materials][4][$lazyLoadGLTFInfo]).to.be.undefined;
 
-        expect(model.materials[5][$correlatedObjects]).to.not.be.null;
-        expect(model.materials[5][$lazyLoadGLTFInfo]).to.be.undefined;
+        expect(model[$materials][5][$correlatedObjects]).to.not.be.null;
+        expect(model[$materials][5][$lazyLoadGLTFInfo]).to.be.undefined;
       });
 
       test(
           'Switch back to default variant does not change correlations',
           async () => {
-            const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
-            const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+            const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
 
             const sizeBeforeSwitch =
-                model.materials[0][$correlatedObjects]!.size;
+                model[$materials][0][$correlatedObjects]!.size;
 
-            await model.switchVariant('Peacock Velvet');
+            await model[$switchVariant]('Peacock Velvet');
             // Switches back to default.
-            await model.switchVariant('Mango Velvet');
+            await model[$switchVariant]('Mango Velvet');
 
-            expect(model.materials[0][$correlatedObjects]!.size)
+            expect(model[$materials][0][$correlatedObjects]!.size)
                 .equals(sizeBeforeSwitch);
           });
 
       test('Switching variant when model has no variants', async () => {
-        const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
-        const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+        const model = await loadModel(KHRONOS_TRIANGLE_GLB_PATH)!;
 
         const threeMaterial =
-            model.materials[0][$correlatedObjects]!.values().next().value;
-        const sizeBeforeSwitch = model.materials[0][$correlatedObjects]!.size;
-        await model.switchVariant('Does not exist');
+            model[$materials][0][$correlatedObjects]!.values().next().value;
+        const sizeBeforeSwitch = model[$materials][0][$correlatedObjects]!.size;
+        await model[$switchVariant]('Does not exist');
 
-        expect(model.materials[0][$correlatedObjects]!.values().next().value)
+        expect(model[$materials][0][$correlatedObjects]!.values().next().value)
             .equals(threeMaterial);
-        expect(model.materials[0][$correlatedObjects]!.size)
+        expect(model[$materials][0][$correlatedObjects]!.size)
             .equals(sizeBeforeSwitch);
       });
     });
