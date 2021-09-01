@@ -48,16 +48,24 @@ suite('scene-graph/model/mesh-primitives', () => {
 
     test('Should have variant info', async () => {
       const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
-      expect(model![$primitives][0].variantInfo!.get('Mango Velvet'))
-          .to.not.be.null;
-      expect(model![$primitives][0].variantInfo!.get('Peacock Velvet'))
-          .to.not.be.null;
+      let hasVariantInfoCount = 0;
+      for (const primitive of model![$primitives]) {
+        if (primitive.variantInfo != null) {
+          hasVariantInfoCount++;
+        }
+      }
+      expect(hasVariantInfoCount).equals(2);
     });
 
     test('Should not have variant info', async () => {
       const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
-      expect(model![$primitives][1].variantInfo).to.be.undefined;
-      expect(model![$primitives][1].variantInfo).to.be.undefined;
+      let hasNoVariantInfoCount = 0;
+      for (const primitive of model![$primitives]) {
+        if (primitive.variantInfo === undefined) {
+          hasNoVariantInfoCount++;
+        }
+      }
+      expect(hasNoVariantInfoCount).equals(2);
     });
 
 
