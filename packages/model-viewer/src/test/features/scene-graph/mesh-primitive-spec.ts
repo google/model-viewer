@@ -25,11 +25,11 @@ import {assetPath} from '../../helpers.js';
 const expect = chai.expect;
 
 const LANTERN_GLB_PATH =
-    assetPath('models/glTF-Sample-Models/2.0/Lantern/glTF-binary/Lantern.glb');
+    assetPath('models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb');
 const BRAIN_STEM_GLB_PATH = assetPath(
-    'models/glTF-Sample-Models/2.0/BrainStem/glTF-binary/BrainStem.glb');
+    'models/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb');
 const SHEEN_CHAIR_GLB_PATH = assetPath(
-    'models/glTF-Sample-Models/2.0/SheenChair/glTF-binary/SheenChair.glb');
+    'models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb');
 
 suite('scene-graph/model/mesh-primitives', () => {
   const loadModel = async (path: string) => {
