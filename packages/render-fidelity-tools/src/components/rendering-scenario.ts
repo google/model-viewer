@@ -14,6 +14,7 @@
  */
 
 import {html, LitElement, property} from 'lit-element';
+
 import {Dimensions, GoldenConfig, ImageComparisonAnalysis, ScenarioRecord, toDecibel} from '../common.js';
 
 
@@ -157,10 +158,9 @@ h1 {
   display: block;
   position: absolute;
   width: 100%;
-  bottom: 3em;
+  bottom: 2em;
   left: 0;
   text-align: center;
-
   pointer-events: none;
 }
 
@@ -182,9 +182,9 @@ h2 {
   display: flex;
   flex-direction: row;
   width: 100%;
+  height: 544px;
   align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .screenshot {
@@ -236,7 +236,7 @@ h2 {
   box-shadow: 0px 6px 12px rgba(100, 100, 100, 0.2);
 }
 </style>
-<h1>${this.name}</h1>
+<h1><a href="#${this.name}">${this.name}</a></h1>
 <div id="screenshots">
   ${images}
 </div>`;
