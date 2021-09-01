@@ -158,6 +158,7 @@ h1 {
   display: block;
   position: absolute;
   width: 100%;
+  bottom: 2em;
   left: 0;
   text-align: center;
   pointer-events: none;
