@@ -378,8 +378,7 @@
         "radius": 2.5
       },
       "exclude": [
-        "dspbr-pt",
-        "gltf-sample-viewer"
+        "dspbr-pt"
       ]
     },
     {
