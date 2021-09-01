@@ -91,7 +91,7 @@ export class GltfSampleViewer extends LitElement {
     this[$state].renderingParameters.blurEnvironmentMap = false;
 
     this[$state].renderingParameters.toneMap =
-        GltfState.ToneMaps.ACES_3D_COMMERCE;
+        GltfState.ToneMaps.ACES_HILL_EXPOSURE_BOOST;
 
     this[$view].renderFrame(
         this[$state], this[$canvas]!.width, this[$canvas]!.height);
