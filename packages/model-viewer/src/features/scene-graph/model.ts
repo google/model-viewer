@@ -162,7 +162,7 @@ class PrimitiveNode extends Node {
     if (this[$variantInfo] != null) {
       const material = this[$variantInfo].get(name);
       if (material != null) {
-        return this.setActiveMaterial(material);
+        return await this.setActiveMaterial(material);
       }
     }
     return null;
@@ -256,6 +256,7 @@ export class Model implements ModelInterface {
     }
 
     // Walks the hierarchy and creates a node tree.
+    let primIdx = 0;
     while (nodeStack.length > 0) {
       const object = nodeStack.pop()!;
 
@@ -264,7 +265,8 @@ export class Model implements ModelInterface {
       if (object instanceof Mesh) {
         node = new PrimitiveNode(
             object as Mesh, this.materials, correlatedSceneGraph);
-        this[$primitives].push(node as PrimitiveNode);
+        console.log('Primitive ' + node.name + ' at index ' + primIdx);
+        this[$primitives][primIdx++] = (node as PrimitiveNode);
       } else {
         node = new Node(object.name);
       }

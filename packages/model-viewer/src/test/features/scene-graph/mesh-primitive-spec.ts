@@ -32,8 +32,16 @@ const SHEEN_CHAIR_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb');
 
 suite('scene-graph/model/mesh-primitives', () => {
+  let element: ModelViewerElement;
+  setup(async () => {
+    element = new ModelViewerElement();
+  });
+
+  teardown(() => {
+    document.body.removeChild(element);
+  });
+
   const loadModel = async (path: string) => {
-    const element = new ModelViewerElement();
     element.src = path;
     document.body.insertBefore(element, document.body.firstChild);
     await waitForEvent(element, 'load');
@@ -41,11 +49,6 @@ suite('scene-graph/model/mesh-primitives', () => {
   };
 
   suite('Static Primitive', () => {
-    test('Primitive count matches glTF file', async () => {
-      const model = await loadModel(LANTERN_GLB_PATH);
-      expect(model![$primitives].length).to.equal(3);
-    });
-
     test('Should have variant info', async () => {
       const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
       expect(model![$primitives][0].variantInfo!.get('Mango Velvet'))
@@ -84,7 +87,7 @@ suite('scene-graph/model/mesh-primitives', () => {
       expect(material!.name).to.equal('fabric Mystere Peacock Velvet');
     });
 
-    test('Switching to back variant name', async () => {
+    test('Switching back variant name', async () => {
       const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
       let material = await model![$primitives][0].enableVariant(
                          'Peacock Velvet') as MeshStandardMaterial;
@@ -93,6 +96,10 @@ suite('scene-graph/model/mesh-primitives', () => {
 
       expect(material).to.not.be.null;
       expect(material!.name).to.equal('fabric Mystere Mango Velvet');
+    });
+    test('Primitive count matches glTF file', async () => {
+      const model = await loadModel(LANTERN_GLB_PATH);
+      expect(model![$primitives].length).to.equal(3);
     });
   });
 
