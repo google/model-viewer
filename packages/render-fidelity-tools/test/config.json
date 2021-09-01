@@ -160,19 +160,6 @@
       }
     },
     {
-      "name": "khronos-AttenuationTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AttenuationTest/glTF/AttenuationTest.gltf",
-      "dimensions": {
-        "width": 1024
-      },
-      "orbit": {
-        "radius": 22.00
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
-    },
-    {
       "name": "khronos-Corset",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Corset/glTF/Corset.gltf",
       "dimensions": {
@@ -369,20 +356,6 @@
       ]
     },
     {
-      "name": "khronos-MorphStressTest",
-      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MorphStressTest/glTF/MorphStressTest.gltf",
-      "dimensions": {
-        "height": 300
-      },
-      "orbit": {
-        "radius": 2.5
-      },
-      "exclude": [
-        "dspbr-pt",
-        "gltf-sample-viewer"
-      ]
-    },
-    {
       "name": "khronos-EnvironmentTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EnvironmentTest/glTF/EnvironmentTest.gltf",
       "dimensions": {
@@ -453,6 +426,19 @@
       },
       "target": {
         "y": -0.09
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-AttenuationTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AttenuationTest/glTF/AttenuationTest.gltf",
+      "dimensions": {
+        "width": 1024
+      },
+      "orbit": {
+        "radius": 22.00
       },
       "exclude": [
         "dspbr-pt"
@@ -887,6 +873,19 @@
       "orbit": {
         "phi": 60,
         "radius": 1.2
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
+    },
+    {
+      "name": "khronos-MorphStressTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MorphStressTest/glTF/MorphStressTest.gltf",
+      "dimensions": {
+        "height": 300
+      },
+      "orbit": {
+        "radius": 2.5
       },
       "exclude": [
         "dspbr-pt"
