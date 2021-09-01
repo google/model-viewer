@@ -181,9 +181,8 @@ h2 {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 500px;
+  height: 544px;
   align-items: center;
-  justify-content: center;
   flex-wrap: nowrap;
 }
 
@@ -236,7 +235,7 @@ h2 {
   box-shadow: 0px 6px 12px rgba(100, 100, 100, 0.2);
 }
 </style>
-<h1>${this.name}</h1>
+<h1><a href="#${this.name}">${this.name}</a></h1>
 <div id="screenshots">
   ${images}
 </div>`;

@@ -81,10 +81,7 @@ export class ImageComparisonApp extends LitElement {
     return html`
 <style>
 #scenarios {
-  display: flex;
   max-width: 100%;
-  flex-direction: column;
-  align-items: center;
   padding-bottom: 5em;
 }
 </style>
