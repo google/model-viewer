@@ -14,6 +14,7 @@
  */
 
 import {html, LitElement, property} from 'lit-element';
+
 import {Dimensions, GoldenConfig, ImageComparisonAnalysis, ScenarioRecord, toDecibel} from '../common.js';
 
 
@@ -157,10 +158,8 @@ h1 {
   display: block;
   position: absolute;
   width: 100%;
-  bottom: 3em;
   left: 0;
   text-align: center;
-
   pointer-events: none;
 }
 
@@ -182,9 +181,10 @@ h2 {
   display: flex;
   flex-direction: row;
   width: 100%;
+  height: 500px;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .screenshot {

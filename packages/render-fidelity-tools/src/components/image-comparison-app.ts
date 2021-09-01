@@ -33,12 +33,31 @@ export class ImageComparisonApp extends LitElement {
     }
   }
 
+  connectedCallback() {
+    super.connectedCallback && super.connectedCallback();
+    window.addEventListener('hashchange', this.onHashChange);
+  }
+
+  disconnectedCallback() {
+    super.connectedCallback && super.connectedCallback();
+    window.removeEventListener('hashchange', this.onHashChange);
+  }
+
+  private onHashChange = () => {
+    const targetElement = this.shadowRoot!.querySelector(`${location.hash}`);
+    if (targetElement) {
+      targetElement.scrollIntoView();
+    }
+  };
+
   private async loadConfig() {
     if (this.src) {
       this.config = await (await fetch(this.src)).json();
     } else {
       this.config = null;
     }
+    await this.updateComplete;
+    this.onHashChange();
   }
 
   render() {
@@ -52,7 +71,7 @@ export class ImageComparisonApp extends LitElement {
         renderer => ({...renderer, file: `${renderer.name}-golden.png`}));
 
     const scenarios = config!.scenarios.map((scenario) => html`
-<rendering-scenario
+<rendering-scenario id="${scenario.name}"
     .name="${scenario.name}"
     .goldens="${goldens}"
     .dimensions="${scenario.dimensions}"
