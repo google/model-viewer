@@ -13,99 +13,121 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial} from 'three';
+import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial';
 
-import {$primitives} from '../../../features/scene-graph/model.js';
-import {ModelViewerElement} from '../../../model-viewer.js';
-import {waitForEvent} from '../../../utilities.js';
-import {assetPath} from '../../helpers.js';
+import {$primitives, Model} from '../../../features/scene-graph/model.js';
+import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
+import {assetPath, loadThreeGLTF} from '../../helpers.js';
 
 
 
 const expect = chai.expect;
 
-const LANTERN_GLB_PATH =
-    assetPath('models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb');
 const BRAIN_STEM_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb');
 const SHEEN_CHAIR_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb');
 
+
+const findPrimitivesWithVariant = (model: Model, variantName: string) => {
+  const result = new Array<any>();
+  for (const primitive of model![$primitives]) {
+    if (primitive.variantInfo != null &&
+        primitive.variantInfo.has(variantName)) {
+      result.push(primitive);
+    }
+  }
+  return result.length > 0 ? result : null;
+};
+
 suite('scene-graph/model/mesh-primitives', () => {
-  let element: ModelViewerElement;
-  setup(async () => {
-    element = new ModelViewerElement();
-  });
-
-  teardown(() => {
-    document.body.removeChild(element);
-  });
-
-  const loadModel = async (path: string) => {
-    element.src = path;
-    document.body.insertBefore(element, document.body.firstChild);
-    await waitForEvent(element, 'load');
-    return element.model;
-  };
-
   suite('Static Primitive', () => {
+    test('Primitive count matches glTF file', async () => {
+      const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+      expect(model![$primitives].length).to.equal(4);
+    });
+
     test('Should have variant info', async () => {
-      const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
-      expect(model![$primitives][0].variantInfo!.get('Mango Velvet'))
-          .to.not.be.null;
-      expect(model![$primitives][0].variantInfo!.get('Peacock Velvet'))
-          .to.not.be.null;
+      const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+      expect(findPrimitivesWithVariant(model, 'Mango Velvet')).to.not.be.null;
+      expect(findPrimitivesWithVariant(model, 'Peacock Velvet')).to.not.be.null;
     });
 
     test('Should not have variant info', async () => {
-      const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
-      expect(model![$primitives][1].variantInfo).to.be.undefined;
-      expect(model![$primitives][1].variantInfo).to.be.undefined;
+      const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+
+      let hasNoVariantInfoCount = 0;
+      for (const primitive of model![$primitives]) {
+        if (primitive.variantInfo === undefined) {
+          hasNoVariantInfoCount++;
+        }
+      }
+      expect(hasNoVariantInfoCount).equals(2);
     });
 
-
     test('Switching to incorrect variant name', async () => {
-      const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
-      const material =
-          await model![$primitives][0].enableVariant('Does not exist');
+      const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+      const primitive = findPrimitivesWithVariant(model, 'Mango Velvet')![0];
+      const material = await primitive.enableVariant('Does not exist');
       expect(material).to.be.null;
     });
 
     test('Switching to current variant', async () => {
-      const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
-      const material = await model![$primitives][0].enableVariant(
-                           'Mango Velvet') as MeshStandardMaterial;
-      expect(material).to.not.be.null;
-      expect(material!.name).to.equal('fabric Mystere Mango Velvet');
+      const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+      const primitives = findPrimitivesWithVariant(model, 'Mango Velvet')!;
+      const materials = new Array<MeshStandardMaterial>();
+      for (const primitive of primitives) {
+        materials.push(
+            primitive.enableVariant('Mango Velvet') as MeshStandardMaterial);
+      }
+      expect(materials).to.not.be.empty;
+      expect(materials.find((material: MeshStandardMaterial) => {
+        return material.name === 'fabric Mystere Mango Velvet';
+      })).to.not.be.null;
     });
 
     test('Switching to other variant name', async () => {
-      const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
-      const material = await model![$primitives][0].enableVariant(
-                           'Peacock Velvet') as MeshStandardMaterial;
-      expect(material).to.not.be.null;
-      expect(material!.name).to.equal('fabric Mystere Peacock Velvet');
+      const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+      const primitives = findPrimitivesWithVariant(model, 'Mango Velvet')!;
+      const materials = new Array<MeshStandardMaterial>();
+      for (const primitive of primitives) {
+        materials.push(
+            primitive.enableVariant('Peacock Velvet') as MeshStandardMaterial);
+      }
+      expect(materials.find((material: MeshStandardMaterial) => {
+        return material.name === 'fabric Mystere Peacock Velvet';
+      })).to.not.be.null;
     });
 
     test('Switching back variant name', async () => {
-      const model = await loadModel(SHEEN_CHAIR_GLB_PATH);
-      let material = await model![$primitives][0].enableVariant(
-                         'Peacock Velvet') as MeshStandardMaterial;
-      material = await model![$primitives][0].enableVariant('Mango Velvet') as
-          MeshStandardMaterial;
+      const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+      const primitives = findPrimitivesWithVariant(model, 'Mango Velvet')!;
+      for (const primitive of primitives) {
+        primitive.enableVariant('Peacock Velvet');
+      }
 
-      expect(material).to.not.be.null;
-      expect(material!.name).to.equal('fabric Mystere Mango Velvet');
-    });
-    test('Primitive count matches glTF file', async () => {
-      const model = await loadModel(LANTERN_GLB_PATH);
-      expect(model![$primitives].length).to.equal(3);
+      const materials = new Array<MeshStandardMaterial>();
+      for (const primitive of primitives) {
+        materials.push(
+            primitive.enableVariant('Mango Velvet') as MeshStandardMaterial);
+      }
+      expect(materials.find((material: MeshStandardMaterial) => {
+        return material.name === 'fabric Mystere Mango Velvet';
+      })).to.not.be.null;
     });
   });
 
   suite('Skinned Primitive', () => {
     test('Primitive count matches glTF file', async () => {
-      const model = await loadModel(BRAIN_STEM_GLB_PATH);
+      const threeGLTF = await loadThreeGLTF(BRAIN_STEM_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
       expect(model![$primitives].length).to.equal(59);
     });
   });

@@ -256,7 +256,6 @@ export class Model implements ModelInterface {
     }
 
     // Walks the hierarchy and creates a node tree.
-    let primIdx = 0;
     while (nodeStack.length > 0) {
       const object = nodeStack.pop()!;
 
@@ -265,8 +264,7 @@ export class Model implements ModelInterface {
       if (object instanceof Mesh) {
         node = new PrimitiveNode(
             object as Mesh, this.materials, correlatedSceneGraph);
-        console.log('Primitive ' + node.name + ' at index ' + primIdx);
-        this[$primitives][primIdx++] = (node as PrimitiveNode);
+        this[$primitives].push(node as PrimitiveNode);
       } else {
         node = new Node(object.name);
       }
