@@ -29,8 +29,7 @@ const expect = chai.expect;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
     assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
-const SHEEN_CHAIR_GLB_PATH = assetPath(
-    'models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb');
+const CUBES_GLTF_PATH = assetPath('models/cubes.gltf');
 
 suite('scene-graph/model', () => {
   suite('Model', () => {
@@ -82,55 +81,52 @@ suite('scene-graph/model', () => {
 
     suite('Model Variants', () => {
       test('Switch variant and lazy load', async () => {
-        const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
+        const threeGLTF = await loadThreeGLTF(CUBES_GLTF_PATH);
         const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+        expect(model[$materials][2][$correlatedObjects]).to.be.null;
+        expect(model[$materials][2][$lazyLoadGLTFInfo]).to.be.ok;
 
-        expect(model[$materials][4][$correlatedObjects]).to.be.null;
-        expect(model[$materials][4][$lazyLoadGLTFInfo]).to.not.be.undefined;
+        await model[$switchVariant]('Yellow Red');
 
-        expect(model[$materials][5][$correlatedObjects]).to.be.null;
-        expect(model[$materials][4][$lazyLoadGLTFInfo]).to.not.be.undefined;
-
-        await model[$switchVariant]('Peacock Velvet');
-
-        expect(model[$materials][4][$correlatedObjects]).to.not.be.null;
-        expect(model[$materials][4][$lazyLoadGLTFInfo]).to.be.undefined;
-
-        expect(model[$materials][5][$correlatedObjects]).to.not.be.null;
-        expect(model[$materials][5][$lazyLoadGLTFInfo]).to.be.undefined;
+        expect(model[$materials][2][$correlatedObjects]).to.not.be.null;
+        expect(model[$materials][2][$lazyLoadGLTFInfo]).to.not.be.ok;
       });
 
       test(
           'Switch back to default variant does not change correlations',
           async () => {
-            const threeGLTF = await loadThreeGLTF(SHEEN_CHAIR_GLB_PATH);
+            const threeGLTF = await loadThreeGLTF(CUBES_GLTF_PATH);
             const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
 
             const sizeBeforeSwitch =
                 model[$materials][0][$correlatedObjects]!.size;
 
-            await model[$switchVariant]('Peacock Velvet');
+            await model[$switchVariant]('Yellow Yellow');
             // Switches back to default.
-            await model[$switchVariant]('Mango Velvet');
+            await model[$switchVariant]('Purple Yellow');
 
             expect(model[$materials][0][$correlatedObjects]!.size)
                 .equals(sizeBeforeSwitch);
           });
 
-      test('Switching variant when model has no variants', async () => {
-        const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
-        const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+      test(
+          'Switching variant when model has no variants has not effect',
+          async () => {
+            const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
+            const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
 
-        const threeMaterial =
-            model[$materials][0][$correlatedObjects]!.values().next().value;
-        const sizeBeforeSwitch = model[$materials][0][$correlatedObjects]!.size;
-        await model[$switchVariant]('Does not exist');
+            const threeMaterial =
+                model[$materials][0][$correlatedObjects]!.values().next().value;
+            const sizeBeforeSwitch =
+                model[$materials][0][$correlatedObjects]!.size;
+            await model[$switchVariant]('Does not exist');
 
-        expect(model[$materials][0][$correlatedObjects]!.values().next().value)
-            .equals(threeMaterial);
-        expect(model[$materials][0][$correlatedObjects]!.size)
-            .equals(sizeBeforeSwitch);
-      });
+            expect(
+                model[$materials][0][$correlatedObjects]!.values().next().value)
+                .equals(threeMaterial);
+            expect(model[$materials][0][$correlatedObjects]!.size)
+                .equals(sizeBeforeSwitch);
+          });
     });
   });
 });

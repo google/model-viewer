@@ -172,7 +172,7 @@ export interface Material {
   extras?: Extras;
 }
 export interface KHRMaterialsVariants {
-  mappings?: VariantMapping[];
+  mappings: VariantMapping[];
 }
 
 export type AttributeDictionary = {

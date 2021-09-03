@@ -35,12 +35,8 @@ const $backingThreeMaterial = Symbol('backingThreeMaterial');
 const $applyAlphaCutoff = Symbol('applyAlphaCutoff');
 export const $lazyLoadGLTFInfo = Symbol('lazyLoadGLTFInfo');
 const $initialize = Symbol('initialize');
-export const $ensureLoaded = Symbol('ensureLoaded');
-
-export enum MaterialLoadMethod {
-  Immediate,
-  Lazy
-}
+export const $getLoadedMaterial = Symbol('getLoadedMaterial');
+export const $ensureMaterialIsValid = Symbol('ensureMaterialIsValid');
 
 /**
  * Material facade implementation for Three.js materials
@@ -50,7 +46,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$normalTexture]: TextureInfo;
   private[$occlusionTexture]: TextureInfo;
   private[$emissiveTexture]: TextureInfo;
-  private[$lazyLoadGLTFInfo]: LazyLoader|undefined;
+  private[$lazyLoadGLTFInfo]?: LazyLoader;
 
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
@@ -64,7 +60,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       correlatedMaterials: Set<MeshStandardMaterial>,
       lazyLoadInfo: LazyLoader|undefined = undefined) {
     super(onUpdate, gltfMaterial, correlatedMaterials);
-    if (lazyLoadInfo === undefined) {
+    if (lazyLoadInfo == null) {
       this[$initialize](gltf);
     } else {
       this[$lazyLoadGLTFInfo] = lazyLoadInfo;
@@ -145,8 +141,8 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     );
   }
 
-  async[$ensureLoaded](): Promise<MeshStandardMaterial> {
-    if (this[$lazyLoadGLTFInfo] !== undefined) {
+  async[$getLoadedMaterial](): Promise<MeshStandardMaterial> {
+    if (this[$lazyLoadGLTFInfo] != null) {
       const {set, material} = await this[$lazyLoadGLTFInfo]!.doLazyLoad();
 
       // Fills in the missing data.
@@ -155,9 +151,27 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       this[$initialize](this[$lazyLoadGLTFInfo]!.gltf);
       // Releases lazy load info.
       this[$lazyLoadGLTFInfo] = undefined;
+      // Redefines the method as a noop method.
+      this.ensureLoaded = async () => {};
       return material as MeshStandardMaterial;
     }
     return this[$correlatedObjects]!.values().next().value;
+  }
+
+  [$ensureMaterialIsValid]() {
+    if (this[$lazyLoadGLTFInfo] == null) {
+      return;
+    }
+    throw new Error(`Material "${this.name}" has not been loaded, call 'await
+    myMaterial.ensureLoaded()' before using an unloaded material.`);
+  }
+
+  async ensureLoaded() {
+    await this[$getLoadedMaterial]();
+  }
+
+  get isValid() {
+    return this[$lazyLoadGLTFInfo] == null;
   }
 
   get name(): string {
@@ -165,32 +179,32 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   get pbrMetallicRoughness(): PBRMetallicRoughness {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     return this[$pbrMetallicRoughness];
   }
 
   get normalTexture(): TextureInfo {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     return this[$normalTexture];
   }
 
   get occlusionTexture(): TextureInfo {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     return this[$occlusionTexture];
   }
 
   get emissiveTexture(): TextureInfo {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     return this[$emissiveTexture];
   }
 
   get emissiveFactor(): RGB {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     return (this[$sourceObject] as DefaultedMaterial).emissiveFactor;
   }
 
   setEmissiveFactor(rgb: RGB) {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       material.emissive.fromArray(rgb);
@@ -200,7 +214,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   [$applyAlphaCutoff]() {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     const gltfMaterial = this[$sourceObject] as DefaultedMaterial;
     // 0.0001 is the minimum in order to keep from using zero, which disables
     // masking in three.js. It's also small enough to be less than the smallest
@@ -218,19 +232,19 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   setAlphaCutoff(cutoff: number): void {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     (this[$sourceObject] as DefaultedMaterial).alphaCutoff = cutoff;
     this[$applyAlphaCutoff]();
     this[$onUpdate]();
   }
 
   getAlphaCutoff(): number {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     return (this[$sourceObject] as DefaultedMaterial).alphaCutoff;
   }
 
   setDoubleSided(doubleSided: boolean): void {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       // When double-sided is disabled gltf spec dictates that Back-Face culling
@@ -245,12 +259,12 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   getDoubleSided(): boolean {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     return (this[$sourceObject] as DefaultedMaterial).doubleSided;
   }
 
   setAlphaMode(alphaMode: AlphaMode): void {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     const enableTransparency =
         (material: MeshStandardMaterial, enabled: boolean): void => {
           material.transparent = enabled;
@@ -270,7 +284,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   getAlphaMode(): AlphaMode {
-    this[$ensureLoaded]();
+    this[$ensureMaterialIsValid]();
     return (this[$sourceObject] as DefaultedMaterial).alphaMode;
   }
 }

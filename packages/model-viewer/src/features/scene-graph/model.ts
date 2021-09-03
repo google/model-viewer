@@ -13,21 +13,19 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, SkinnedMesh} from 'three';
-import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader';
+import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D} from 'three';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
-import {GLTF, GLTFElement, KHRMaterialsVariants, Node as GLTFNode, Primitive} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Model as ModelInterface} from './api.js';
-import {$ensureLoaded, Material} from './material.js';
+import {Material} from './material.js';
+import {$children, Node} from './nodes/node.js';
+import {PrimitiveNode} from './nodes/primitive-node.js';
 
 
 
 export const $materials = Symbol('materials');
-const $variantInfo = Symbol('variantInfo');
-const $mesh = Symbol('mesh');
-const $children = Symbol('children');
 const $hierarchy = Symbol('hierarchy');
 const $roots = Symbol('roots');
 export const $primitives = Symbol('primitives');
@@ -56,138 +54,6 @@ export class LazyLoader {
   }
 }
 
-// Defines the base level node methods and data.
-class Node {
-  name: string = '';
-  [$children] = new Array<Node>();
-  constructor(name: string) {
-    this.name = name;
-  }
-}
-
-// Represents a primitive in a glTF mesh.
-class PrimitiveNode extends Node {
-  private[$mesh]: Mesh;
-  // Maps glTF material index number to a material that this primitive supports.
-  private[$materials] = new Map<number, Material>();
-  // Maps variant name to material index.
-  private[$variantInfo]: Map<string, Material>;
-  // List of child nodes.
-  constructor(
-      mesh: Mesh, mvMaterials: Material[],
-      correlatedSceneGraph: CorrelatedSceneGraph) {
-    super(mesh.name);
-    this[$mesh] = mesh;
-    const {gltf, threeGLTF} = correlatedSceneGraph;
-
-    // TODO: Remove the associationKey 'work arounds' after fixing Three.js
-    // associations. This is needed for now because Three.js does not create
-    // associations with SkinnedMeshes (glTF primitives of an animated object)
-    // and incorrect associations are formed when a mesh has multiple
-    // primitives.
-    let associationKey: Object3D = mesh;
-    // Work around 1, skinned meshes (glTF primitives) have no association but
-    // the parent (mesh) does, which maps to a 'node'.
-    if (mesh instanceof SkinnedMesh && mesh.parent != null) {
-      associationKey = mesh.parent;
-    }
-    let gltfMeshReference = correlatedSceneGraph.threeObjectMap.get(
-                                associationKey) as GLTFReference;
-    // Work around 2, the association value is a material not a node.
-    if (gltfMeshReference.type === 'materials') {
-      associationKey = mesh.parent!;
-      gltfMeshReference = correlatedSceneGraph.threeObjectMap.get(
-                              associationKey) as GLTFReference;
-    }
-
-    const {type: nodes, index: nodeIndex} = gltfMeshReference;
-
-    // Should have the correct reference type now.
-    if (nodes !== 'nodes') {
-      console.error('Expected type \'nodes\' but got ' + nodes);
-    }
-    // Gets the mesh index from the node.
-    const meshIndex = ((gltf[nodes] || []) as GLTFNode[])[nodeIndex].mesh!;
-    // The gltf mesh array to sample from.
-    const meshElementArray = gltf['meshes'] || [];
-    // List of primitives under the mesh.
-    const gltfPrimitives =
-        (meshElementArray[meshIndex].primitives || []) as Primitive[];
-
-    for (const primitive of gltfPrimitives) {
-      // Maps the primitive default to a material.
-      this[$materials].set(
-          primitive.material!, mvMaterials[primitive.material!]);
-
-      if (primitive.extensions &&
-          primitive.extensions['KHR_materials_variants']) {
-        const variantsExtension =
-            primitive.extensions['KHR_materials_variants'] as
-            KHRMaterialsVariants;
-        const extensions = threeGLTF.parser.json.extensions;
-        const variantNames = extensions['KHR_materials_variants'].variants;
-        // Provides definition now that we know there are variants to support.
-        this[$variantInfo] = new Map<string, Material>();
-        for (const mapping of variantsExtension.mappings!) {
-          // Maps variant indices to Materials.
-          this[$materials].set(mapping.material, mvMaterials[mapping.material]);
-          for (const variant of mapping.variants) {
-            const {name} = variantNames[variant];
-            this[$variantInfo].set(name, mvMaterials[mapping.material]);
-          }
-        }
-      }
-    }
-  }
-
-  get mesh() {
-    return this[$mesh];
-  }
-
-  async setActiveMaterial(material: number|Material):
-      Promise<ThreeMaterial|ThreeMaterial[]|null> {
-    if (material instanceof Material) {
-      this.mesh.material = await material[$ensureLoaded]();
-    } else {
-      const mvMaterial = this[$materials].get(material);
-      if (mvMaterial != null) {
-        this.mesh.material = await mvMaterial[$ensureLoaded]();
-      }
-    }
-    return this.mesh.material;
-  }
-
-  async enableVariant(name: string):
-      Promise<ThreeMaterial|ThreeMaterial[]|null> {
-    if (this[$variantInfo] != null) {
-      const material = this[$variantInfo].get(name);
-      if (material != null) {
-        return await this.setActiveMaterial(material);
-      }
-    }
-    return null;
-  }
-
-  async instantiateVariants() {
-    if (this[$variantInfo] == null) {
-      return;
-    }
-    for (const name of this[$variantInfo].keys()) {
-      if (this.mesh.userData.variantMaterials.get(name).material != null) {
-        continue;
-      }
-      const threeMaterial = await this.enableVariant(name);
-      if (threeMaterial != null) {
-        this.mesh.userData.variantMaterials.get(name).material = threeMaterial;
-      }
-    }
-  }
-
-  get variantInfo() {
-    return this[$variantInfo];
-  }
-}
-
 /**
  * A Model facades the top-level GLTF object returned by Three.js' GLTFLoader.
  * Currently, the model only bothers itself with the materials in the Three.js
@@ -204,9 +70,7 @@ export class Model implements ModelInterface {
       onUpdate: () => void = () => {}) {
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
 
-    for (let i = 0, size = gltf.materials!.length; i < size; ++i) {
-      const material = gltf.materials![i];
-
+    for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
           gltfElementMap.get(material) as Set<MeshStandardMaterial>;
 
