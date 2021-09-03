@@ -126,11 +126,6 @@ export interface ImageComparisonConfig {
   scenarios: Array<ScenarioConfig>;
 }
 
-export interface ComparableImage {
-  [index: number]: number;
-  length: number;
-}
-
 export interface AnalysisOptions {
   generateVisuals: boolean;
 }
@@ -139,16 +134,17 @@ export class ImageComparator {
   protected imagePixels: number;
 
   constructor(
-      protected candidateImage: ComparableImage,
-      protected goldenImage: ComparableImage, readonly dimensions: Dimensions) {
+      protected candidateImage: Uint8ClampedArray,
+      protected goldenImage: Uint8ClampedArray,
+      readonly dimensions: Dimensions) {
     const {width, height} = dimensions;
 
     this.imagePixels = width * height;
   }
 
   protected drawPixel(
-      image: ComparableImage, position: number, r: number, g: number, b: number,
-      a: number = 255) {
+      image: Uint8ClampedArray, position: number, r: number, g: number,
+      b: number, a: number = 255) {
     image[position + 0] = r;
     image[position + 1] = g;
     image[position + 2] = b;

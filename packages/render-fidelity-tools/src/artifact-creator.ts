@@ -73,7 +73,8 @@ export class ArtifactCreator {
         join(outputDirectory, scenarioName, goldens[modelViewerIndex].file),
         modelViewerGolden);
 
-    const modelViewerGoldenImage = pngjs.PNG.sync.read(modelViewerGolden).data;
+    const modelViewerGoldenImage =
+        new Uint8ClampedArray(pngjs.PNG.sync.read(modelViewerGolden).data);
 
     for (const golden of goldens) {
       if (golden.name === 'model-viewer' ||
@@ -98,7 +99,8 @@ export class ArtifactCreator {
       await fs.writeFile(
           join(outputDirectory, scenarioName, golden.file), candidateGolden);
 
-      const candidateGoldenImage = pngjs.PNG.sync.read(candidateGolden).data;
+      const candidateGoldenImage =
+          new Uint8ClampedArray(pngjs.PNG.sync.read(candidateGolden).data);
       const analysisResult = await this.analyze(
           modelViewerGoldenImage, candidateGoldenImage, dimensions, false);
       analysisResults.push(analysisResult);
@@ -134,7 +136,8 @@ export class ArtifactCreator {
       throw new Error(`❌ Model-viewer's screenshot of ${
           scenarioName} is not captured correctly (value is null).`);
     }
-    const screenshotImage = pngjs.PNG.sync.read(screenshot as Buffer).data;
+    const screenshotImage =
+        new Uint8ClampedArray(pngjs.PNG.sync.read(screenshot as Buffer).data);
 
     const modelViewerIndex = 0;
     const modelViewerGoldenPath = join(
@@ -146,7 +149,8 @@ export class ArtifactCreator {
       throw new Error(`❌ Failed to read model-viewer's ${
           scenarioName} golden! Error message: ${error.message}`);
     }
-    const modelViewerGoldenImage = pngjs.PNG.sync.read(modelViewerGolden).data;
+    const modelViewerGoldenImage =
+        new Uint8ClampedArray(pngjs.PNG.sync.read(modelViewerGolden).data);
 
     const result =
         await this.analyze(screenshotImage, modelViewerGoldenImage, dimensions);
@@ -232,7 +236,8 @@ export class ArtifactCreator {
   }
 
   protected async analyze(
-      candidateImage: Buffer, goldenImage: Buffer, dimensions: Dimensions,
+      candidateImage: Uint8ClampedArray, goldenImage: Uint8ClampedArray,
+      dimensions: Dimensions,
       semiTransparentCheck: boolean = true): Promise<ImageComparisonAnalysis> {
     const imageDimensions = {
       width: dimensions.width * DEVICE_PIXEL_RATIO,

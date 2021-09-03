@@ -63,17 +63,20 @@ export class RendererConfiguration extends LitElement {
     }
 
     if (changedProperties.has('scenarioName') ||
-        changedProperties.has('config')) {
+        changedProperties.has('configUrl')) {
       if (this.scenarioName == null || this.config == null) {
         this.scenario = null;
       } else {
         this.scenario =
             (new ConfigReader(this.config)).scenarioConfig(this.scenarioName);
-        this.dispatchEvent(new CustomEvent(
-            'scenario-change', {detail: {scenario: this.scenario}}));
       }
 
       const previousScenarioName = changedProperties.get('scenarioName');
+
+      if (previousScenarioName !== this.scenarioName) {
+        this.dispatchEvent(new CustomEvent(
+            'scenario-change', {detail: {scenario: this.scenario}}));
+      }
 
       if (previousScenarioName != null && this.scenarioName != null) {
         const url = new URL(window.location.toString());
