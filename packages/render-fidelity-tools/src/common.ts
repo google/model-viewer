@@ -28,7 +28,7 @@ export const DEVICE_PIXEL_RATIO: number = 2;
 
 // use this threshold to do automatic fidelity test for model-viewer. any
 // scenario whose rms value (in dB) is bigger than the threshold will fail.
-export const FIDELITY_TEST_THRESHOLD: number = -19;
+export const FIDELITY_TEST_THRESHOLD: number = -22;
 
 export interface FidelityRegressionResults {
   results: Array<ImageComparisonAnalysis>;

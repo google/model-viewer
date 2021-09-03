@@ -62,7 +62,7 @@
             })
           })
         });
-      });
+      }, {once: true});
       
       modelViewer.style.width = `${scenario.dimensions.width}px`;
       modelViewer.style.height = `${scenario.dimensions.height}px`;
