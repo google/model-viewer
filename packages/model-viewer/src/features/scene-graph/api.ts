@@ -78,9 +78,9 @@ export declare interface Material {
    */
   ensureLoaded(): void;
   /**
-   * Returns true if the material is loaded and valid.
+   * Returns true if the material is loaded.
    */
-  isValid: boolean;
+  isLoaded: boolean;
 }
 
 /**

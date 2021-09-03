@@ -243,6 +243,7 @@ suite('scene-graph/material', () => {
     let model: Model;
     setup(async () => {
       element = new ModelViewerElement();
+      await loadModel(CUBES_GLTF_PATH);
     });
 
     teardown(() => {
@@ -257,24 +258,21 @@ suite('scene-graph/material', () => {
     };
 
     test('Accessing the name getter does not cause throw error.', async () => {
-      await loadModel(CUBES_GLTF_PATH);
-      // tslint:disable-next-line:no-unused-expression
-      expect(() => {model.materials[2].name}).does.not.throw;
+      expect(model.materials[2].name).to.equal('red');
       expect(model.materials[2][$lazyLoadGLTFInfo]).to.be.ok;
     });
 
     test(
         'Accessing a getter of an unloaded material throws an error.',
         async () => {
-          await loadModel(CUBES_GLTF_PATH);
           expect(() => {model.materials[2].pbrMetallicRoughness}).to.throw;
+          expect(model.materials[2].isLoaded).to.be.false;
         });
 
     test(
         'Accessing a getter of a loaded material has valid data.', async () => {
-          await loadModel(CUBES_GLTF_PATH);
           await model.materials[2].ensureLoaded();
-          expect(model.materials[2].isValid).to.be.true;
+          expect(model.materials[2].isLoaded).to.be.true;
           const pbr = model.materials[2].pbrMetallicRoughness;
           expect(pbr).to.be.ok;
         });

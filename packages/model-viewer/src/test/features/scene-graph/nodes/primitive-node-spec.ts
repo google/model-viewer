@@ -48,14 +48,14 @@ suite('scene-graph/model/mesh-primitives', () => {
       model = new Model(CorrelatedSceneGraph.from(threeGLTF));
     });
 
-    test('Should not have 1 primitive with variant info', async () => {
-      let hasNoVariantInfoCount = 0;
+    test('Should not have any primitives with variant info', async () => {
+      let hasVariantInfoCount = 0;
       for (const primitive of model![$primitives]) {
-        if (primitive.variantInfo === undefined) {
-          hasNoVariantInfoCount++;
+        if (primitive.variantInfo != null) {
+          hasVariantInfoCount++;
         }
       }
-      expect(hasNoVariantInfoCount).equals(1);
+      expect(hasVariantInfoCount).equals(0);
     });
   });
 
@@ -70,20 +70,16 @@ suite('scene-graph/model/mesh-primitives', () => {
       expect(model![$primitives].length).to.equal(2);
     });
 
-    test(
-        'Primitives should have variant info that with expected mappings',
-        async () => {
-          expect(findPrimitivesWithVariant(model, 'Purple Yellow'))
-              .to.not.be.null;
-          expect(findPrimitivesWithVariant(model, 'Yellow Yellow'))
-              .to.not.be.null;
-          expect(findPrimitivesWithVariant(model, 'Yellow Red')).to.not.be.null;
-        });
+    test('Primitives should have expected variant names', async () => {
+      expect(findPrimitivesWithVariant(model, 'Purple Yellow')).to.not.be.null;
+      expect(findPrimitivesWithVariant(model, 'Yellow Yellow')).to.not.be.null;
+      expect(findPrimitivesWithVariant(model, 'Yellow Red')).to.not.be.null;
+    });
 
     test('Should not have any primitives without variant info', async () => {
       let hasNoVariantInfoCount = 0;
       for (const primitive of model![$primitives]) {
-        if (primitive.variantInfo === undefined) {
+        if (primitive.variantInfo == null) {
           hasNoVariantInfoCount++;
         }
       }
@@ -111,11 +107,16 @@ suite('scene-graph/model/mesh-primitives', () => {
 
     test('Switching to variant and then switch back', async () => {
       const primitives = findPrimitivesWithVariant(model, 'Purple Yellow')!;
+      let materials = new Array<MeshStandardMaterial>();
       for (const primitive of primitives) {
-        primitive.enableVariant('Yellow Yellow');
+        materials.push(
+            primitive.enableVariant('Yellow Yellow') as MeshStandardMaterial);
       }
+      expect(materials.find((material: MeshStandardMaterial) => {
+        return material.name === 'yellow';
+      })).to.not.be.null;
 
-      const materials = new Array<MeshStandardMaterial>();
+      materials = new Array<MeshStandardMaterial>();
       for (const primitive of primitives) {
         materials.push(
             primitive.enableVariant('Purple Yellow') as MeshStandardMaterial);

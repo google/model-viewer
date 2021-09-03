@@ -36,7 +36,7 @@ const $applyAlphaCutoff = Symbol('applyAlphaCutoff');
 export const $lazyLoadGLTFInfo = Symbol('lazyLoadGLTFInfo');
 const $initialize = Symbol('initialize');
 export const $getLoadedMaterial = Symbol('getLoadedMaterial');
-export const $ensureMaterialIsValid = Symbol('ensureMaterialIsValid');
+export const $ensureMaterialIsLoaded = Symbol('ensureMaterialIsLoaded');
 
 /**
  * Material facade implementation for Three.js materials
@@ -158,7 +158,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return this[$correlatedObjects]!.values().next().value;
   }
 
-  [$ensureMaterialIsValid]() {
+  [$ensureMaterialIsLoaded]() {
     if (this[$lazyLoadGLTFInfo] == null) {
       return;
     }
@@ -170,7 +170,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     await this[$getLoadedMaterial]();
   }
 
-  get isValid() {
+  get isLoaded() {
     return this[$lazyLoadGLTFInfo] == null;
   }
 
@@ -179,32 +179,32 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   get pbrMetallicRoughness(): PBRMetallicRoughness {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     return this[$pbrMetallicRoughness];
   }
 
   get normalTexture(): TextureInfo {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     return this[$normalTexture];
   }
 
   get occlusionTexture(): TextureInfo {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     return this[$occlusionTexture];
   }
 
   get emissiveTexture(): TextureInfo {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     return this[$emissiveTexture];
   }
 
   get emissiveFactor(): RGB {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).emissiveFactor;
   }
 
   setEmissiveFactor(rgb: RGB) {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       material.emissive.fromArray(rgb);
@@ -214,7 +214,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   [$applyAlphaCutoff]() {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     const gltfMaterial = this[$sourceObject] as DefaultedMaterial;
     // 0.0001 is the minimum in order to keep from using zero, which disables
     // masking in three.js. It's also small enough to be less than the smallest
@@ -232,19 +232,19 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   setAlphaCutoff(cutoff: number): void {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     (this[$sourceObject] as DefaultedMaterial).alphaCutoff = cutoff;
     this[$applyAlphaCutoff]();
     this[$onUpdate]();
   }
 
   getAlphaCutoff(): number {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).alphaCutoff;
   }
 
   setDoubleSided(doubleSided: boolean): void {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
       // When double-sided is disabled gltf spec dictates that Back-Face culling
@@ -259,12 +259,12 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   getDoubleSided(): boolean {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).doubleSided;
   }
 
   setAlphaMode(alphaMode: AlphaMode): void {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     const enableTransparency =
         (material: MeshStandardMaterial, enabled: boolean): void => {
           material.transparent = enabled;
@@ -284,7 +284,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   getAlphaMode(): AlphaMode {
-    this[$ensureMaterialIsValid]();
+    this[$ensureMaterialIsLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).alphaMode;
   }
 }

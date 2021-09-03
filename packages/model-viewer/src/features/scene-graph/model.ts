@@ -20,8 +20,7 @@ import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.j
 
 import {Model as ModelInterface} from './api.js';
 import {Material} from './material.js';
-import {$children, Node} from './nodes/node.js';
-import {PrimitiveNode} from './nodes/primitive-node.js';
+import {$children, Node, PrimitiveNode} from './nodes/primitive-node.js';
 
 
 
