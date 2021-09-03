@@ -19,7 +19,7 @@ import {join, resolve} from 'path';
 import pngjs from 'pngjs';
 import puppeteer from 'puppeteer';
 
-import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, FidelityRegressionResults, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel, WARNING_MESSAGE} from './common.js';
+import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, FidelityRegressionResults, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel} from './common.js';
 import {ConfigReader} from './config-reader.js';
 
 const $configReader = Symbol('configReader');
@@ -102,7 +102,7 @@ export class ArtifactCreator {
       const candidateGoldenImage =
           new Uint8ClampedArray(pngjs.PNG.sync.read(candidateGolden).data);
       const analysisResult = await this.analyze(
-          modelViewerGoldenImage, candidateGoldenImage, dimensions, false);
+          modelViewerGoldenImage, candidateGoldenImage, dimensions);
       analysisResults.push(analysisResult);
     }
     const scenarioRecord = {analysisResults, scenario};
@@ -152,8 +152,8 @@ export class ArtifactCreator {
     const modelViewerGoldenImage =
         new Uint8ClampedArray(pngjs.PNG.sync.read(modelViewerGolden).data);
 
-    const result = await this.analyze(
-        screenshotImage, modelViewerGoldenImage, dimensions, false);
+    const result =
+        await this.analyze(screenshotImage, modelViewerGoldenImage, dimensions);
 
     const rmsInDb = toDecibel(result.rmsDistanceRatio);
 
@@ -210,11 +210,7 @@ export class ArtifactCreator {
         const message = `❌Fail to analyze scenario :${
             scenarioName}! Error message: ${error.message}`;
 
-        if (error.message === WARNING_MESSAGE) {
-          fidelityRegressionResults.warnings.push(message);
-        } else {
-          fidelityRegressionResults.errors.push(message);
-        }
+        fidelityRegressionResults.errors.push(message);
       }
 
       analyzedScenarios.push(scenario);
@@ -237,8 +233,7 @@ export class ArtifactCreator {
 
   protected async analyze(
       candidateImage: Uint8ClampedArray, goldenImage: Uint8ClampedArray,
-      dimensions: Dimensions,
-      semiTransparentCheck: boolean = true): Promise<ImageComparisonAnalysis> {
+      dimensions: Dimensions): Promise<ImageComparisonAnalysis> {
     const imageDimensions = {
       width: dimensions.width * DEVICE_PIXEL_RATIO,
       height: dimensions.height * DEVICE_PIXEL_RATIO
@@ -246,11 +241,10 @@ export class ArtifactCreator {
     const comparator =
         new ImageComparator(candidateImage, goldenImage, imageDimensions);
 
-    const {analysis} = comparator.analyze(semiTransparentCheck);
+    const {analysis} = comparator.analyze();
     const {rmsDistanceRatio} = analysis;
-    console.log(
-        `\n  📊 Decibels of root mean square color distance (without threshold): ${
-            (10 * Math.log10(rmsDistanceRatio)).toFixed(2)}`);
+    console.log(`\n  📊 Decibels of root mean square color distance: ${
+        (10 * Math.log10(rmsDistanceRatio)).toFixed(2)}`);
 
     return analysis;
   }
