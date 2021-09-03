@@ -23,7 +23,7 @@ const require = module.createRequire(import.meta.url);
 const core = require('@actions/core');
 
 import {ArtifactCreator} from '../artifact-creator.js';
-import {FIDELITY_TEST_THRESHOLD} from '../common.js';
+import {FIDELITY_TEST_THRESHOLD, toDecibel} from '../common.js';
 
 const configPath = resolve(process.argv[2]);
 const rootDirectory = resolve(dirname(configPath));
@@ -76,15 +76,24 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
       const scenarioCount = fidelityRegressionPassedCount +
           fidelityRegressionErrorCount + fidelityRegressionWarningCount
 
-      console.log(`Fidelity regression test on ${
-          scenarioCount} scenarios finished. Model-Viewer passed ${
-          fidelityRegressionPassedCount} scenarios ✅, failed ${
-          fidelityRegressionErrorCount} scenarios ❌, ${
-          fidelityRegressionWarningCount} senarios passed with warings❗️. (Uses ${
+      console.log(`\nFidelity regression test on ${
+          scenarioCount} scenarios finished. (Uses ${
           FIDELITY_TEST_THRESHOLD} dB as threshold)`);
+      console.log(`Passed ${fidelityRegressionPassedCount} scenarios ✅`);
+      if (fidelityRegressionErrorCount > 0) {
+        console.log(`Failed ${fidelityRegressionErrorCount} scenarios ❌`);
+      } else {
+        let maxError = -Infinity;
+        for (const result of fidelityRegressionResults) {
+          maxError = Math.max(maxError, toDecibel(result.rmsDistanceRatio));
+        }
+        console.log('Worst scenario RMS:', maxError, 'dB');
+      }
 
       if (fidelityRegressionWarningCount > 0) {
-        console.log('🔍 Logging warning scenarios: ');
+        console.log(
+            `Warnings on ${fidelityRegressionWarningCount} senarios❗️`);
+        console.log('\n🔍 Logging warning scenarios: ');
         for (const warning of fidelityRegressionWarnings) {
           console.log(warning);
         }
@@ -94,7 +103,7 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
       }
 
       if (fidelityRegressionErrorCount > 0) {
-        console.log('🔍 Logging failed scenarios: ');
+        console.log('\n🔍 Logging failed scenarios: ');
         for (const error of fidelityRegressionErrors) {
           console.log(error);
         }
@@ -106,12 +115,12 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
       const compareRendererPassCount = comparedRenderResult.length;
       const compareRendererErrorCount = compareRendererErrors.length;
 
-      console.log(`Compare Renderers on ${scenarioCount} scenarios finished. ${
-          compareRendererPassCount} scenarios passed ✅, ${
-          compareRendererErrorCount} scenarios failed ❌`);
-
       if (compareRendererErrorCount > 0) {
-        console.log('🔍 Logging failed scenarios: ');
+        console.log(
+            `\nCompare Renderers on ${scenarioCount} scenarios finished. ${
+                compareRendererPassCount} scenarios passed ✅, ${
+                compareRendererErrorCount} scenarios failed ❌`);
+        console.log('\n🔍 Logging failed scenarios: ');
         for (const error of compareRendererErrors) {
           console.log(error);
         }

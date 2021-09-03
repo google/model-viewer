@@ -28,10 +28,7 @@ export const DEVICE_PIXEL_RATIO: number = 2;
 
 // use this threshold to do automatic fidelity test for model-viewer. any
 // scenario whose rms value (in dB) is bigger than the threshold will fail.
-export const FIDELITY_TEST_THRESHOLD: number = -19;
-
-export const WARNING_MESSAGE: string =
-    'Candidate image is semi-transparent, probably the screenshot was taken before the poster faded away!';
+export const FIDELITY_TEST_THRESHOLD: number = -22;
 
 export interface FidelityRegressionResults {
   results: Array<ImageComparisonAnalysis>;
@@ -126,11 +123,6 @@ export interface ImageComparisonConfig {
   scenarios: Array<ScenarioConfig>;
 }
 
-export interface ComparableImage {
-  [index: number]: number;
-  length: number;
-}
-
 export interface AnalysisOptions {
   generateVisuals: boolean;
 }
@@ -139,16 +131,17 @@ export class ImageComparator {
   protected imagePixels: number;
 
   constructor(
-      protected candidateImage: ComparableImage,
-      protected goldenImage: ComparableImage, readonly dimensions: Dimensions) {
+      protected candidateImage: Uint8ClampedArray,
+      protected goldenImage: Uint8ClampedArray,
+      readonly dimensions: Dimensions) {
     const {width, height} = dimensions;
 
     this.imagePixels = width * height;
   }
 
   protected drawPixel(
-      image: ComparableImage, position: number, r: number, g: number, b: number,
-      a: number = 255) {
+      image: Uint8ClampedArray, position: number, r: number, g: number,
+      b: number, a: number = 255) {
     image[position + 0] = r;
     image[position + 1] = g;
     image[position + 2] = b;
@@ -226,7 +219,7 @@ export class ImageComparator {
     };
   }
 
-  analyze(checkSemiTransparent: boolean = true): ImageComparisonResults {
+  analyze(): ImageComparisonResults {
     const {candidateImage, goldenImage} = this;
     const {width, height} = this.dimensions;
 
@@ -235,18 +228,6 @@ export class ImageComparator {
     if (candidateImage.length != goldenImage.length) {
       throw new Error(`Image sizes do not match (candidate: ${
           candidateImage.length}, golden: ${goldenImage.length})`);
-    }
-
-    // Sometimes the screenshot is taken when poster has not faded away, and
-    // when the golden image's background (use top left pixel to represent) is
-    // transparent while the candidate(mode-viewer) image is not, it's
-    // definitely that case
-    if (checkSemiTransparent) {
-      const candidateTopLeftAlpha = candidateImage[3];
-      const goldenTopLeftAlpha = goldenImage[3];
-      if (goldenTopLeftAlpha != candidateTopLeftAlpha) {
-        throw new Error(WARNING_MESSAGE);
-      }
     }
 
     let modelPixelCount = 0;

@@ -26,7 +26,10 @@
 
   <style>
     body { margin: 0; }
-    model-viewer { --progress-bar-color: transparent; }
+    model-viewer { 
+      --progress-bar-color: transparent;
+      --poster-color: rgba(255,255,255,0);
+    }
   </style>
 </head>
 <body>
@@ -44,6 +47,8 @@
     customElements.get("model-viewer").minimumRenderScale = 1;
   </script>
   <script>
+    const harness = document.getElementById('harness');
+    const modelViewer = document.getElementById('modelViewer');
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
       modelViewer.addEventListener('poster-dismissed', () => {
@@ -59,7 +64,6 @@
         });
       }, {once: true});
       
-      modelViewer.style = "--poster-color: rgba(255,255,255,0)";
       modelViewer.style.width = `${scenario.dimensions.width}px`;
       modelViewer.style.height = `${scenario.dimensions.height}px`;
 
