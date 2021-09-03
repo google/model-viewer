@@ -152,8 +152,8 @@ export class ArtifactCreator {
     const modelViewerGoldenImage =
         new Uint8ClampedArray(pngjs.PNG.sync.read(modelViewerGolden).data);
 
-    const result =
-        await this.analyze(screenshotImage, modelViewerGoldenImage, dimensions);
+    const result = await this.analyze(
+        screenshotImage, modelViewerGoldenImage, dimensions, false);
 
     const rmsInDb = toDecibel(result.rmsDistanceRatio);
 
