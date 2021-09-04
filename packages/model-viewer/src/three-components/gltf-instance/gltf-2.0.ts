@@ -30,9 +30,9 @@ export type Matrix4 = [
 export type Extras = unknown;
 
 // TODO: Document known extensions and update this type
-export type ExtensionDictionary = {
+export interface ExtensionDictionary {
   [index: string]: unknown;
-};
+}
 
 export type VariantMapping = {
   material: number; variants: Array<number>;
@@ -170,6 +170,9 @@ export interface Material {
   emissiveTexture?: TextureInfo;
   extensions?: ExtensionDictionary;
   extras?: Extras;
+}
+export interface KHRMaterialsVariants {
+  mappings: VariantMapping[];
 }
 
 export type AttributeDictionary = {

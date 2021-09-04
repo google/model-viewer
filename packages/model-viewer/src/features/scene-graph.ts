@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, MeshStandardMaterial, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
+import {Euler, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
@@ -27,7 +27,7 @@ import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
 import {Material} from './scene-graph/material.js';
-import {Model} from './scene-graph/model.js';
+import {$prepareVariantsForExport, $switchVariant, Model} from './scene-graph/model.js';
 import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
@@ -149,18 +149,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           return;
         }
 
-        const updatedMaterials =
-            await threeGLTF.correlatedSceneGraph.loadVariant(variantName!);
-        const {gltf, gltfElementMap} = threeGLTF.correlatedSceneGraph;
-
-        for (const index of updatedMaterials) {
-          const material = gltf.materials![index];
-          this[$model]!.materials[index] = new Material(
-              this[$getOnUpdateMethod](),
-              gltf,
-              material,
-              gltfElementMap.get(material) as Set<MeshStandardMaterial>);
-        }
+        await this[$model]![$switchVariant](variantName!);
         this[$needsRender]();
       }
 
@@ -250,14 +239,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           shadow.visible = false;
         }
 
-        const currentGLTF = this[$currentGLTF];
-
-        if (currentGLTF != null && 'functions' in currentGLTF.userData &&
-            'ensureLoadVariants' in currentGLTF.userData.functions) {
-          // Ensure all variant materials are loaded because some of them may
-          // not be loaded yet.
-          await currentGLTF.userData.functions.ensureLoadVariants(scene);
-        }
+        await this[$model]![$prepareVariantsForExport]();
 
         const exporter =
             (new GLTFExporter() as any)

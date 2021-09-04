@@ -39,7 +39,7 @@ export declare interface Model {
    * correspond to the listing of materials in the glTF, with the possible
    * addition of a default material at the end.
    */
-  readonly materials: Readonly<Material[]>;
+  readonly materials: Readonly<Array<Material>>;
 }
 
 /**
@@ -71,6 +71,16 @@ export declare interface Material {
    * The PBRMetallicRoughness configuration of the material.
    */
   readonly pbrMetallicRoughness: PBRMetallicRoughness;
+
+  /**
+   * Asynchronously loads the underlying material resource if it's currently
+   * unloaded, otherwise the method is a noop.
+   */
+  ensureLoaded(): void;
+  /**
+   * Returns true if the material is loaded.
+   */
+  isLoaded: boolean;
 }
 
 /**

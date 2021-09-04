@@ -13,16 +13,45 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial} from 'three';
+import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D} from 'three';
 
-import {CorrelatedSceneGraph} from '../../three-components/gltf-instance/correlated-scene-graph.js';
+import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
+import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Model as ModelInterface} from './api.js';
 import {Material} from './material.js';
+import {$children, Node, PrimitiveNode} from './nodes/primitive-node.js';
 
 
 
-const $materials = Symbol('materials');
+export const $materials = Symbol('materials');
+const $hierarchy = Symbol('hierarchy');
+const $roots = Symbol('roots');
+export const $primitives = Symbol('primitives');
+export const $loadVariant = Symbol('loadVariant');
+export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
+export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
+export const $switchVariant = Symbol('switchVariant');
+
+
+// Holds onto temporary scene context information needed to perform lazy loading
+// of a resource.
+export class LazyLoader {
+  gltf: GLTF;
+  gltfElementMap: GLTFElementToThreeObjectMap;
+  mapKey: GLTFElement;
+  doLazyLoad: () => Promise<{set: ThreeObjectSet, material: ThreeMaterial}>;
+  constructor(
+      gltf: GLTF, gltfElementMap: GLTFElementToThreeObjectMap,
+      mapKey: GLTFElement,
+      doLazyLoad:
+          () => Promise<{set: ThreeObjectSet, material: ThreeMaterial}>) {
+    this.gltf = gltf;
+    this.gltfElementMap = gltfElementMap;
+    this.mapKey = mapKey;
+    this.doLazyLoad = doLazyLoad;
+  }
+}
 
 /**
  * A Model facades the top-level GLTF object returned by Three.js' GLTFLoader.
@@ -30,14 +59,17 @@ const $materials = Symbol('materials');
  * scene graph.
  */
 export class Model implements ModelInterface {
-  private[$materials]: Array<Material> = [];
+  private[$materials] = new Array<Material>();
+  private[$hierarchy] = new Array<Node>();
+  private[$roots] = new Array<Node>();
+  private[$primitives] = new Array<PrimitiveNode>();
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
       onUpdate: () => void = () => {}) {
-    const {gltf, gltfElementMap} = correlatedSceneGraph;
+    const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
 
-    gltf.materials!.forEach(material => {
+    for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
           gltfElementMap.get(material) as Set<MeshStandardMaterial>;
 
@@ -45,10 +77,74 @@ export class Model implements ModelInterface {
         this[$materials].push(
             new Material(onUpdate, gltf, material, correlatedMaterial));
       } else {
-        console.warn(`Unreferenced material "${
-            material.name}" was automatically removed from the model.`);
+        const elementArray = gltf['materials'] || [];
+        const gltfMaterialDef = elementArray[i];
+
+        // Loads the three.js material.
+        const capturedMatIndex = i;
+        const materialLoadCallback = async () => {
+          const threeMaterial =
+              await threeGLTF.parser.getDependency(
+                  'material', capturedMatIndex) as MeshStandardMaterial;
+
+          // Adds correlation, maps the variant gltf-def to the
+          // three material set containing the variant material.
+          const threeMaterialSet = new Set<MeshStandardMaterial>();
+          gltfElementMap.set(gltfMaterialDef, threeMaterialSet);
+          threeMaterialSet.add(threeMaterial);
+
+          return {set: threeMaterialSet, material: threeMaterial};
+        };
+
+        // Configures the material for lazy loading.
+        this[$materials].push(new Material(
+            onUpdate,
+            gltf,
+            gltfMaterialDef,
+            correlatedMaterial,
+            new LazyLoader(
+                gltf, gltfElementMap, gltfMaterialDef, materialLoadCallback)));
       }
-    });
+    }
+
+    // Creates a hierarchy of Nodes. Allows not just for switching which
+    // material is applied to a mesh but also exposes a way to provide API for
+    // switching materials and general assignment/modification.
+
+    // Prepares for scene iteration.
+    const parentMap = new Map<object, Node>();
+    const nodeStack = new Array<Object3D>();
+    for (const object of threeGLTF.scene.children) {
+      nodeStack.push(object);
+    }
+
+    // Walks the hierarchy and creates a node tree.
+    while (nodeStack.length > 0) {
+      const object = nodeStack.pop()!;
+
+      let node: Node|null = null;
+
+      if (object instanceof Mesh) {
+        node = new PrimitiveNode(
+            object as Mesh, this.materials, correlatedSceneGraph);
+        this[$primitives].push(node as PrimitiveNode);
+      } else {
+        node = new Node(object.name);
+      }
+
+      const parent: Node|undefined = parentMap.get(object);
+      if (parent != null) {
+        parent[$children].push(node);
+      } else {
+        this[$roots].push(node);
+      }
+      this[$hierarchy].push(node);
+
+      for (const child of object.children) {
+        nodeStack.push(child);
+        parentMap.set(object, node);
+      }
+    }
   }
 
   /**
@@ -57,7 +153,23 @@ export class Model implements ModelInterface {
    *
    * TODO(#1003): How do we handle non-active scenes?
    */
-  get materials(): Array<Material> {
+  get materials(): Material[] {
     return this[$materials];
+  }
+
+  async[$switchVariant](variantName: string) {
+    const promises = new Array<Promise<ThreeMaterial|ThreeMaterial[]|null>>();
+    for (const primitive of this[$primitives]) {
+      promises.push(primitive.enableVariant(variantName));
+    }
+    await Promise.all(promises);
+  }
+
+  async[$prepareVariantsForExport]() {
+    const promises = new Array<Promise<void>>();
+    for (const primitive of this[$primitives]) {
+      promises.push(primitive.instantiateVariants());
+    }
+    await Promise.all(promises);
   }
 }

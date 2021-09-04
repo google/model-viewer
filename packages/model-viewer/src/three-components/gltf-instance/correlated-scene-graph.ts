@@ -109,7 +109,7 @@ export class CorrelatedSceneGraph {
   /**
    * Transfers the association between a raw glTF and a Three.js scene graph
    * to a clone of the Three.js scene graph, resolved as a new
-   * CorrelatedsceneGraph instance.
+   * CorrelatedSceneGraph instance.
    */
   private static[$correlateCloneThreeGLTF](
       cloneThreeGLTF: ThreeGLTF,
@@ -119,7 +119,7 @@ export class CorrelatedSceneGraph {
     const originalGLTF = upstreamCorrelatedSceneGraph.gltf;
     const cloneGLTF: GLTF = JSON.parse(JSON.stringify(originalGLTF));
     const cloneThreeObjectMap: ThreeObjectToGLTFElementHandleMap = new Map();
-    const cloneGLTFELementMap: GLTFElementToThreeObjectMap = new Map();
+    const cloneGLTFElementMap: GLTFElementToThreeObjectMap = new Map();
 
     const defaultMaterial = {name: 'Default'} as Material;
     const defaultReference = {type: 'materials', index: -1} as GLTFReference;
@@ -166,15 +166,15 @@ export class CorrelatedSceneGraph {
             cloneThreeObjectMap.set(cloneObject, {type, index});
 
             const cloneObjects: Set<typeof cloneObject> =
-                cloneGLTFELementMap.get(cloneElement) || new Set();
+                cloneGLTFElementMap.get(cloneElement) || new Set();
             cloneObjects.add(cloneObject);
 
-            cloneGLTFELementMap.set(cloneElement, cloneObjects);
+            cloneGLTFElementMap.set(cloneElement, cloneObjects);
           });
     }
 
     return new CorrelatedSceneGraph(
-        cloneThreeGLTF, cloneGLTF, cloneThreeObjectMap, cloneGLTFELementMap);
+        cloneThreeGLTF, cloneGLTF, cloneThreeObjectMap, cloneGLTFElementMap);
   }
 
   /**
@@ -257,34 +257,5 @@ export class CorrelatedSceneGraph {
     this[$gltf] = gltf;
     this[$gltfElementMap] = gltfElementMap;
     this[$threeObjectMap] = threeObjectMap;
-  }
-
-  async loadVariant(variantName: string): Promise<Set<number>> {
-    const updatedMaterials = new Set<number>();
-
-    if (!('variants' in this.threeGLTF.userData) ||
-        !('functions' in this.threeGLTF.userData) ||
-        !('selectVariant' in this.threeGLTF.userData.functions)) {
-      return updatedMaterials;
-    }
-
-    await this.threeGLTF.userData.functions.selectVariant(
-        this.threeGLTF.scene,
-        variantName,
-        true,
-        (object: Object3D,
-         _oldMaterial: Material,
-         gltfMaterialIndex: number) => {
-          updatedMaterials.add(gltfMaterialIndex);
-          const gltfElement = this.gltf.materials![gltfMaterialIndex];
-          let threeObjects = this.gltfElementMap.get(gltfElement);
-          if (threeObjects == null) {
-            threeObjects = new Set();
-            this.gltfElementMap.set(gltfElement, threeObjects);
-          }
-          threeObjects.add((object as Mesh).material as Material);
-        });
-
-    return updatedMaterials;
   }
 }
