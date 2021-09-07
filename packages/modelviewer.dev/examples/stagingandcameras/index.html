@@ -269,15 +269,15 @@
   }, true);
 
   modelViewer.addEventListener('touchstart', (event) => {
-    startX = event.touches[0].clientX;
-    startY = event.touches[0].clientY;
-    panning = event.touches.length === 2;
+    startX = event.targetTouches[0].clientX;
+    startY = event.targetTouches[0].clientY;
+    panning = event.targetTouches.length === 2;
     if (!panning)
       return;
 
-    const {touches} = event;
-    lastX = 0.5 * (touches[0].clientX + touches[1].clientX);
-    lastY = 0.5 * (touches[0].clientY + touches[1].clientY);
+    const {targetTouches} = event;
+    lastX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
+    lastY = 0.5 * (targetTouches[0].clientY + targetTouches[1].clientY);
     startPan();
   }, true);
 
@@ -290,12 +290,12 @@
   }, true);
 
   modelViewer.addEventListener('touchmove', (event) => {
-    if (!panning || event.touches.length !== 2)
+    if (!panning || event.targetTouches.length !== 2)
       return;
 
-    const {touches} = event;
-    const thisX = 0.5 * (touches[0].clientX + touches[1].clientX);
-    const thisY = 0.5 * (touches[0].clientY + touches[1].clientY);
+    const {targetTouches} = event;
+    const thisX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
+    const thisY = 0.5 * (targetTouches[0].clientY + targetTouches[1].clientY);
     movePan(thisX, thisY);
   }, true);
 
@@ -304,7 +304,7 @@
   }, true);
   
   self.addEventListener('touchend', (event) => {
-    if (event.touches.length === 0) {
+    if (event.targetTouches.length === 0) {
       recenter(event.changedTouches[0]);
     }
   }, true);
@@ -369,12 +369,12 @@
   }, true);
 
   modelViewer.addEventListener('touchstart', (event) => {
-    panning = event.touches.length === 2;
+    panning = event.targetTouches.length === 2;
     if (!panning)
       return;
 
-    const {touches} = event;
-    lastX = 0.5 * (touches[0].clientX + touches[1].clientX);
+    const {targetTouches} = event;
+    lastX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
     startPan();
   }, true);
 
@@ -387,11 +387,11 @@
   }, true);
 
   modelViewer.addEventListener('touchmove', (event) => {
-    if (!panning || event.touches.length !== 2)
+    if (!panning || event.targetTouches.length !== 2)
       return;
 
-    const {touches} = event;
-    const thisX = 0.5 * (touches[0].clientX + touches[1].clientX);
+    const {targetTouches} = event;
+    const thisX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
     updatePan(thisX);
   }, true);
 
