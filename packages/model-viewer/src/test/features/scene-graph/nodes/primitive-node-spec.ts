@@ -97,7 +97,8 @@ suite('scene-graph/model/mesh-primitives', () => {
       const materials = new Array<MeshStandardMaterial>();
       for (const primitive of primitives) {
         materials.push(
-            primitive.enableVariant('Yellow Yellow') as MeshStandardMaterial);
+            await primitive.enableVariant('Yellow Yellow') as
+            MeshStandardMaterial);
       }
       expect(materials).to.not.be.empty;
       expect(materials.find((material: MeshStandardMaterial) => {
@@ -110,7 +111,8 @@ suite('scene-graph/model/mesh-primitives', () => {
       let materials = new Array<MeshStandardMaterial>();
       for (const primitive of primitives) {
         materials.push(
-            primitive.enableVariant('Yellow Yellow') as MeshStandardMaterial);
+            await primitive.enableVariant('Yellow Yellow') as
+            MeshStandardMaterial);
       }
       expect(materials.find((material: MeshStandardMaterial) => {
         return material.name === 'yellow';
@@ -119,11 +121,25 @@ suite('scene-graph/model/mesh-primitives', () => {
       materials = new Array<MeshStandardMaterial>();
       for (const primitive of primitives) {
         materials.push(
-            primitive.enableVariant('Purple Yellow') as MeshStandardMaterial);
+            await primitive.enableVariant('Purple Yellow') as
+            MeshStandardMaterial);
       }
       expect(materials.find((material: MeshStandardMaterial) => {
         return material.name === 'purple';
       })).to.not.be.null;
+    });
+
+    test('Primitive switches to default material', async () => {
+      const primitive = findPrimitivesWithVariant(model, 'Purple Yellow')![0];
+
+      // Gets current material.
+      const initialMaterial = await primitive.enableVariant('Purple Yellow');
+      // Switches to variant.
+      const variantMaterial = await primitive.enableVariant('Yellow Red');
+      expect(initialMaterial).to.not.equal(variantMaterial)
+      // Switches to default material.
+      const resetMaterial = await primitive.enableVariant(null);
+      expect(resetMaterial).to.equal(initialMaterial);
     });
   });
 
