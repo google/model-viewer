@@ -269,13 +269,13 @@
   }, true);
 
   modelViewer.addEventListener('touchstart', (event) => {
-    startX = event.targetTouches[0].clientX;
-    startY = event.targetTouches[0].clientY;
-    panning = event.targetTouches.length === 2;
+    const {targetTouches, touches} = event;
+    startX = targetTouches[0].clientX;
+    startY = targetTouches[0].clientY;
+    panning = targetTouches.length === 2 && targetTouches.length === touches.length;
     if (!panning)
       return;
 
-    const {targetTouches} = event;
     lastX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
     lastY = 0.5 * (targetTouches[0].clientY + targetTouches[1].clientY);
     startPan();
@@ -369,11 +369,11 @@
   }, true);
 
   modelViewer.addEventListener('touchstart', (event) => {
-    panning = event.targetTouches.length === 2;
+    const {targetTouches, touches} = event;
+    panning = targetTouches.length === 2 && targetTouches.length === touches.length;
     if (!panning)
       return;
 
-    const {targetTouches} = event;
     lastX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
     startPan();
   }, true);
