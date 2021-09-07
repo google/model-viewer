@@ -247,8 +247,8 @@
         Math.abs(pointer.clientY - startY) > tapDistance)
       return;
     const rect = modelViewer.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const x = pointer.clientX - rect.left;
+    const y = pointer.clientY - rect.top;
     const hit = modelViewer.positionAndNormalFromPoint(x, y);
     modelViewer.cameraTarget =
         hit == null ? 'auto auto auto' : hit.position.toString();
@@ -306,6 +306,10 @@
   modelViewer.addEventListener('touchend', (event) => {
     if (event.targetTouches.length === 0) {
       recenter(event.changedTouches[0]);
+
+      if (event.cancelable) {
+        event.preventDefault();
+      }
     }
   }, true);
 })();
