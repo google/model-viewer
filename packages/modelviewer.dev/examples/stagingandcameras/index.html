@@ -303,7 +303,7 @@
     recenter(event);
   }, true);
   
-  self.addEventListener('touchend', (event) => {
+  modelViewer.addEventListener('touchend', (event) => {
     if (event.targetTouches.length === 0) {
       recenter(event.changedTouches[0]);
     }
@@ -399,7 +399,7 @@
     panning = false;
   }, true);
   
-  self.addEventListener('touchend', (event) => {
+  modelViewer.addEventListener('touchend', (event) => {
     panning = false;
   }, true);
 </script>
