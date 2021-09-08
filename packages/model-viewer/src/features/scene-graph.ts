@@ -47,7 +47,7 @@ interface SceneExportOptions {
 
 export interface SceneGraphInterface {
   readonly model?: Model;
-  variantName: string|undefined;
+  variantName: string|null|undefined;
   readonly availableVariants: Array<string>;
   orientation: string;
   scale: string;
@@ -149,8 +149,10 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           return;
         }
 
-        await this[$model]![$switchVariant](variantName!);
+        await this[$model]![$switchVariant](
+            variantName! == 'null' ? null : variantName!);
         this[$needsRender]();
+        this.dispatchEvent(new CustomEvent('variant-applied'));
       }
 
       if (changedProperties.has('orientation') ||

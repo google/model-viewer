@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-import {Mesh, MeshStandardMaterial} from 'three';
+import {Material as ThreeMaterial, Mesh, MeshStandardMaterial} from 'three';
 
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
+import {$primitives} from '../../features/scene-graph/model.js';
+import {$defaultMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
+
+
 
 const expect = chai.expect;
 
@@ -84,6 +88,41 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
         expect(glTFroot.children[0].userData.variantMaterials.size).to.be.eq(3);
         expect(glTFroot.children[1].userData.variantMaterials.size).to.be.eq(3);
       });
+
+      test(
+          `Setting varianName to null results in primitive
+           reverting to default/initial material`,
+          async () => {
+            let defaultIndex = 0;
+            // Patches the first primitive with variant-info and a default
+            // material index of 0.
+            for (const primitive of element.model![$primitives]) {
+              if (primitive.variantInfo != null &&
+                  primitive[$defaultMaterialIdx] == 0) {
+                // Override enable variant to watch for change.
+                const override: PrimitiveNode&{superSetActiveMaterial: any} =
+                    primitive as PrimitiveNode & {superSetActiveMaterial: any};
+                override.superSetActiveMaterial = primitive.setActiveMaterial;
+
+                override.setActiveMaterial = async(material: number):
+                    Promise<ThreeMaterial|ThreeMaterial[]|null> => {
+                      defaultIndex = material;
+                      return override.superSetActiveMaterial(material);
+                    };
+                break;
+              }
+            }
+
+            // Switches to a new variant.
+            element.variantName = 'Yellow Red';
+            await waitForEvent(element, 'variant-applied');
+            expect(defaultIndex).to.not.equal(0);
+
+            // Switches to null variant.
+            element.variantName = null;
+            await waitForEvent(element, 'variant-applied');
+            expect(defaultIndex).to.equal(0);
+          });
 
       test('exports and reimports the model with variants', async () => {
         const exported = await element.exportScene({binary: true});
