@@ -93,7 +93,6 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
           `Setting varianName to null results in primitive
            reverting to default/initial material`,
           async () => {
-            // let defaultIndex = 0;
             let primitiveNode: PrimitiveNode|null = null
             // Finds the first primitive with material 0 assigned.
             for (const primitive of element.model![$primitives]) {

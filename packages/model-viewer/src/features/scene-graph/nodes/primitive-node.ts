@@ -56,7 +56,7 @@ export class PrimitiveNode extends Node {
     super(mesh.name);
     this[$mesh] = mesh;
     const {gltf, threeGLTF} = correlatedSceneGraph;
-    // Captures the primitive's default material.
+    // Captures the primitive's initial material.
     const materialRef = correlatedSceneGraph.threeObjectMap.get(
         mesh.material as MeshStandardMaterial);
     if (materialRef != null) {
