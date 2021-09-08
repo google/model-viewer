@@ -46,7 +46,7 @@ const ANIMATION_SCALING = 2;
  * softer shadows faster, but less precise.
  */
 export class Shadow extends DirectionalLight {
-  private shadowMaterial = new ShadowMaterial;
+  private shadowMaterial = new ShadowMaterial();
   private floor: Mesh;
   private boundingBox = new Box3;
   private size = new Vector3;
@@ -92,6 +92,9 @@ export class Shadow extends DirectionalLight {
       [this.size.y, this.size.z] = [this.size.z, this.size.y];
       this.rotation.x = Math.PI / 2;
       this.rotation.y = Math.PI;
+    } else {
+      this.rotation.x = 0;
+      this.rotation.y = 0;
     }
     const {boundingBox, size} = this;
 
@@ -108,6 +111,7 @@ export class Shadow extends DirectionalLight {
     const shadowOffset = boundingBox.max.y + size.y * OFFSET;
     if (side === 'bottom') {
       this.position.y = shadowOffset;
+      this.position.z = 0;
       this.shadow.camera.up.set(0, 0, 1);
     } else {
       this.position.y = 0;
@@ -137,6 +141,8 @@ export class Shadow extends DirectionalLight {
     const {camera, mapSize, map} = this.shadow;
     const {size, boundingBox} = this;
 
+    // This feels like a three.js bug; changing the mapSize has no effect unless
+    // the map is manually disposed of.
     if (map != null) {
       (map as any).dispose();
       (this.shadow.map as any) = null;
@@ -165,6 +171,7 @@ export class Shadow extends DirectionalLight {
 
     this.floor.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
     this.needsUpdate = true;
+    this.shadow.needsUpdate = true;
   }
 
   /**

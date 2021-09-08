@@ -553,17 +553,16 @@ export class ModelScene extends Scene {
     if (this._currentGLTF == null) {
       return;
     }
-    let shadow = this.shadow;
-    const side =
-        (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
-    if (shadow != null) {
-      shadow.setIntensity(shadowIntensity);
-      shadow.setScene(this, this.shadowSoftness, side);
-    } else if (shadowIntensity > 0) {
-      shadow = new Shadow(this, this.shadowSoftness, side);
-      shadow.setIntensity(shadowIntensity);
-      this.shadow = shadow;
+    if (shadowIntensity <= 0 && this.shadow == null) {
+      return;
     }
+
+    if (this.shadow == null) {
+      const side =
+          (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
+      this.shadow = new Shadow(this, this.shadowSoftness, side);
+    }
+    this.shadow.setIntensity(shadowIntensity);
   }
 
   /**
