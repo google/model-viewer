@@ -867,8 +867,8 @@
     "Attributes": [
       {
         "name": "variant-name",
-        "htmlName": "variant-name",
-        "description": "Selects a model variant by name. Note selecting for variant name 'null' reverts to the initial material.",
+        "htmlName": "variantName",
+        "description": "Selects a model variant by name, valid variant names include all names defined in the glTF file, plus the name 'null'. Note selecting for variant name 'null' reverts to the initial/default material.",
         "links": [
           "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
         ]
@@ -905,14 +905,6 @@
         "description": "This property reports an array of strings, corresponding to variants in the loaded model that can be selected with <span class='attribute'>variant-name</span>.",
         "links": [
           "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
-        ]
-      },
-      {
-        "name": "variantName",
-        "htmlName": "variantName",
-        "description": "Corresponding property of the attribute <code>variant-name</code>.",
-        "links": [
-          "<a href=\"../docs/index.html#entrydocs-scenegraph-attributes-variant-name\">See <code>variant-name</code></a>"
         ]
       },
       {

@@ -149,8 +149,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           return;
         }
 
-        await this[$model]![$switchVariant](
-            variantName == 'null' ? null : variantName!);
+        await this[$model]![$switchVariant](variantName!);
         this[$needsRender]();
         this.dispatchEvent(new CustomEvent('variant-applied'));
       }
