@@ -95,15 +95,15 @@ modelViewerVariants.addEventListener('load', () => {
     option.textContent = name;
     select.appendChild(option);
   }
-
+  // Adds a default option.
   const option = document.createElement('option');
-    option.value = 'null';
-    option.textContent = 'reset';
+    option.value = 'default';
+    option.textContent = 'Default';
     select.appendChild(option);
 });
 
 select.addEventListener('input', (event) => {
-  modelViewerVariants.variantName = event.target.value;
+  modelViewerVariants.variantName = event.target.value === 'default' ? null : event.target.value;
 });
 </script>
             </template>

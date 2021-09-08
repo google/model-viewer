@@ -154,9 +154,9 @@ export class PrimitiveNode extends Node {
     return this.mesh.material;
   }
 
-  async enableVariant(name: string):
-      Promise<ThreeMaterial|ThreeMaterial[]|null> {
-    if (name === 'null') {
+  async enableVariant(name: string|
+                      null): Promise<ThreeMaterial|ThreeMaterial[]|null> {
+    if (name == null) {
       return await this.setActiveMaterial(this[$defaultMaterialIdx]);
     }
     if (this[$variantInfo] != null) {

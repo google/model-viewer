@@ -161,7 +161,7 @@ export class Model implements ModelInterface {
    * Switches model variant to the variant name provided, or switches to
    * default/initial materials if 'null' is provided.
    */
-  async[$switchVariant](variantName: string) {
+  async[$switchVariant](variantName: string|null) {
     const promises = new Array<Promise<ThreeMaterial|ThreeMaterial[]|null>>();
     for (const primitive of this[$primitives]) {
       promises.push(primitive.enableVariant(variantName));

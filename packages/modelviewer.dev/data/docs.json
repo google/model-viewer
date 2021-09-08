@@ -868,7 +868,7 @@
       {
         "name": "variant-name",
         "htmlName": "variantName",
-        "description": "Selects a model variant by name, valid variant names include all names defined in the glTF file, plus the name 'null'. Note selecting for variant name 'null' reverts to the initial/default material.",
+        "description": "Selects a model variant by name.",
         "links": [
           "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
         ]
