@@ -542,6 +542,7 @@ export class ModelScene extends Scene {
       const side =
           (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
       shadow.setScene(this, this.shadowSoftness, side);
+      shadow.setRotation(this.yaw);
     }
   }
 
@@ -561,6 +562,7 @@ export class ModelScene extends Scene {
       const side =
           (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
       this.shadow = new Shadow(this, this.shadowSoftness, side);
+      this.shadow.setRotation(this.yaw);
     }
     this.shadow.setIntensity(shadowIntensity);
   }

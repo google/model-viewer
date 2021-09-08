@@ -112,11 +112,9 @@ export class Shadow extends DirectionalLight {
     if (side === 'bottom') {
       this.position.y = shadowOffset;
       this.position.z = 0;
-      this.shadow.camera.up.set(0, 0, 1);
     } else {
       this.position.y = 0;
       this.position.z = shadowOffset;
-      this.shadow.camera.up.set(0, 1, 0);
     }
 
     this.setSoftness(softness);
@@ -201,6 +199,7 @@ export class Shadow extends DirectionalLight {
   setRotation(radiansY: number) {
     if (this.side !== 'bottom') {
       // We don't support rotation about a horizontal axis yet.
+      this.shadow.camera.up.set(0, 1, 0);
       this.shadow.updateMatrices(this);
       return;
     }
