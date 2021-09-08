@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial, Mesh, MeshStandardMaterial} from 'three';
+import {Mesh, MeshStandardMaterial} from 'three';
 
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
 import {$primitives} from '../../features/scene-graph/model.js';
@@ -93,35 +93,30 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
           `Setting varianName to null results in primitive
            reverting to default/initial material`,
           async () => {
-            let defaultIndex = 0;
-            // Patches the first primitive with variant-info and a default
-            // material index of 0.
+            // let defaultIndex = 0;
+            let primitiveNode: PrimitiveNode|null = null
+            // Finds the first primitive with material 0 assigned.
             for (const primitive of element.model![$primitives]) {
               if (primitive.variantInfo != null &&
                   primitive[$defaultMaterialIdx] == 0) {
-                // Override enable variant to watch for change.
-                const override: PrimitiveNode&{superSetActiveMaterial: any} =
-                    primitive as PrimitiveNode & {superSetActiveMaterial: any};
-                override.superSetActiveMaterial = primitive.setActiveMaterial;
-
-                override.setActiveMaterial = async(material: number):
-                    Promise<ThreeMaterial|ThreeMaterial[]|null> => {
-                      defaultIndex = material;
-                      return override.superSetActiveMaterial(material);
-                    };
-                break;
+                primitiveNode = primitive;
+                return;
               }
             }
+
+            expect(primitiveNode).to.not.be.null;
 
             // Switches to a new variant.
             element.variantName = 'Yellow Red';
             await waitForEvent(element, 'variant-applied');
-            expect(defaultIndex).to.not.equal(0);
+            expect((primitiveNode!.mesh.material as MeshStandardMaterial).name)
+                .equal('red');
 
             // Switches to null variant.
             element.variantName = null;
             await waitForEvent(element, 'variant-applied');
-            expect(defaultIndex).to.equal(0);
+            expect((primitiveNode!.mesh.material as MeshStandardMaterial).name)
+                .equal('purple');
           });
 
       test('exports and reimports the model with variants', async () => {
