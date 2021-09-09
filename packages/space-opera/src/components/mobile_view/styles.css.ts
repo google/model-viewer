@@ -41,16 +41,4 @@ model-viewer {
   user-select: none;
   background-color: #eee;
 }
-
-.ios-message {
-  padding: 5px 16px;
-  margin: 10px;
-  position: absolute;
-  bottom: 0;
-  font-size: small;
-  color: black;
-  background-color: rgb(255, 204, 203);
-  word-wrap: break-word;
-  width: 100%;
-}
 `;

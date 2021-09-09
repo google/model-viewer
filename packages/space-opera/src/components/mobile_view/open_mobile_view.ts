@@ -48,8 +48,8 @@ export class OpenMobileView extends ConnectedLitElement {
   @internalProperty() isSendingData = false;
   @internalProperty() contentHasChanged = false;
 
-  @internalProperty() urls: URLs = {gltf: '', env: '', usdz: ''};
-  @internalProperty() lastUrlsSent: URLs = {gltf: '', env: '', usdz: ''};
+  @internalProperty() urls: URLs = {gltf: '', env: ''};
+  @internalProperty() lastUrlsSent: URLs = {gltf: '', env: ''};
   @internalProperty() snippet!: ModelViewerSnippetState;
   @internalProperty() lastSnippetSent!: ModelViewerSnippetState;
   @internalProperty() modelIsDirty = false;
@@ -76,11 +76,7 @@ export class OpenMobileView extends ConnectedLitElement {
     // Update urls with most recent from redux state.
     // If the values are different from this.lastUrlsSent, values are sent when
     // the refresh button is pressed.
-    this.urls = {
-      gltf: gltfURL,
-      env: getConfig(state).environmentImage,
-      usdz: this.arConfig.iosSrc
-    };
+    this.urls = {gltf: gltfURL, env: getConfig(state).environmentImage};
 
     this.snippet = getModelViewerSnippet(state);
     this.modelIsDirty = !!getModel(state)?.isDirty;
@@ -103,7 +99,6 @@ export class OpenMobileView extends ConnectedLitElement {
   // True if any content we'd send to the mobile view has changed.
   getContentHasChanged(): boolean {
     return this.stateHasChanged() || this.isNewModel() ||
-        this.isNewSource(this.urls.usdz, this.lastUrlsSent.usdz) ||
         this.isNewSource(this.urls.env, this.lastUrlsSent.env);
   }
 
@@ -247,7 +242,6 @@ export class OpenMobileView extends ConnectedLitElement {
 
     this.lastSnippetSent = {...this.snippet};
     this.lastUrlsSent['env'] = this.urls['env'];
-    this.lastUrlsSent['usdz'] = this.urls['usdz'];
     this.lastUrlsSent['gltf'] = this.urls['gltf'];
 
     reduxStore.dispatch(dispatchModelDirty(false));

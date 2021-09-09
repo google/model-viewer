@@ -51,9 +51,7 @@ export class MobileView extends LitElement {
   @query('model-viewer') readonly modelViewer!: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
   @internalProperty() posterUrl: string = '';
-  @internalProperty() iosUrl: string = '';
   @internalProperty() currentBlob?: Blob;
-  @internalProperty() usdzBlob?: Blob;
 
   @internalProperty() editorUrls?: URLs;
 
@@ -74,10 +72,6 @@ export class MobileView extends LitElement {
   @internalProperty() sessionId = getRandomInt(1e+20);
   @internalProperty() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
   @internalProperty() sessionOs = getMobileOperatingSystem();
-
-  get needIosSrc(): boolean {
-    return this.sessionOs === 'iOS' && this.iosUrl.length <= 1;
-  }
 
   updateState(snippet: ModelViewerSnippetState, urls: URLs) {
     this.editorUrls = urls;
@@ -103,9 +97,7 @@ export class MobileView extends LitElement {
           this.modelViewer.shadowRoot!.getElementById('default-ar-button')!;
       arButton.addEventListener('click', () => {
         try {
-          if (this.sessionOs === 'iOS') {
-            post(this.usdzBlob!, this.iosUrl);
-          } else {
+          if (this.sessionOs === 'Android') {
             post(this.currentBlob!, this.modelViewerUrl);
           }
         } catch (error) {
@@ -190,14 +182,6 @@ export class MobileView extends LitElement {
     }
   }
 
-  renderIosMessage() {
-    return html`
-    <div class="ios-message">
-      Upload a .usdz or .reality file to view your model in AR.
-    </div>
-    `
-  }
-
   render() {
     const config = {...this.config};
     const skyboxImage = (config.useEnvAsSkybox && this.editorUrls?.env) ?
@@ -216,7 +200,6 @@ export class MobileView extends LitElement {
           src=${this.modelViewerUrl}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}
-          ios-src=${ifDefined(this.iosUrl)}
           ?autoplay=${!!config.autoplay}
           ?auto-rotate=${!!config.autoRotate}
           ?camera-controls=${!!config.cameraControls}
@@ -243,7 +226,6 @@ export class MobileView extends LitElement {
     <div class="${this.toastClassName}" id="snackbar-mobile">
       ${this.toastBody}
     </div>
-    ${this.needIosSrc ? this.renderIosMessage() : html``}
     `;
   }
 

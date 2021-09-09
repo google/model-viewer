@@ -65,7 +65,6 @@ interface UIState {
 }
 
 export interface RelativeFilePathsState {
-  iosName?: string|undefined;
   modelName?: string|undefined;
   environmentName?: string|undefined;
   posterName: string|undefined;
@@ -78,7 +77,6 @@ export interface EnvironmentState {
 export interface ArConfigState {
   ar?: boolean;
   arModes?: string;
-  iosSrc?: string;
 }
 
 export interface BestPracticesState {

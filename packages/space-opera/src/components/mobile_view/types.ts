@@ -19,7 +19,6 @@ import {ModelViewerSnippetState} from '../../types';
 
 export interface URLs {
   gltf: string|undefined;
-  usdz: string|undefined;
   env: string|undefined;
 }
 

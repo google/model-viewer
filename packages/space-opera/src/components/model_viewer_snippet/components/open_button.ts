@@ -172,9 +172,6 @@ export class OpenModal extends ConnectedLitElement {
     const editedConfig = {...this.config};
     const editedArConfig = {...this.arConfig};
     applyRelativeFilePaths(editedConfig, this.gltfUrl, this.relativeFilePaths!);
-    if (editedArConfig.iosSrc) {
-      editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
-    }
 
     const exampleLoadableSnippet = renderModelViewer(
         editedConfig, editedArConfig, this.extraAttributes, {}, undefined);

@@ -40,8 +40,7 @@ const ATTRIBUTE_LIST: string[] = [
   'camera-target',
   'field-of-view',
   'ar',
-  'ar-modes',
-  'ios-src'
+  'ar-modes'
 ];
 
 // Creating object in this way such that "spread" works.
@@ -79,7 +78,6 @@ export function parseSnippetAr(snippet: string): ArConfigState {
   const arConfig: ArConfigState = {};
   arConfig.ar = modelViewer.hasAttribute('ar') || undefined;
   arConfig.arModes = modelViewer.getAttribute('ar-modes') || undefined;
-  arConfig.iosSrc = modelViewer.getAttribute('ios-src') || undefined;
   return arConfig
 }
 

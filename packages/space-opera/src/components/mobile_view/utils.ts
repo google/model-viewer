@@ -84,7 +84,8 @@ export async function getWithTimeout(url: string) {
  * 'unknown'.
  * https://stackoverflow.com/questions/21741841/detecting-ios-android-operating-system
  */
-export function getMobileOperatingSystem(): string {
+export function getMobileOperatingSystem(): 'iOS'|'Android'|'Windows Phone'|
+    'unknown' {
   const userAgent =
       navigator.userAgent || navigator.vendor || (window as any).opera;
 
