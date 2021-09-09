@@ -22,10 +22,9 @@ import {customElement, html, internalProperty, LitElement, query} from 'lit-elem
 
 import {dispatchCameraControlsEnabled, dispatchConfig, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
-import {openModalStyles} from '../../../styles.css.js';
+import {fileModalStyles, openModalStyles} from '../../../styles.css.js';
 import {ArConfigState, extractStagingConfig, ImageType, INITIAL_STATE, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
-import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
 import {dispatchArConfig, getArConfig} from '../../mobile_view/reducer.js';
 import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
@@ -209,12 +208,13 @@ export class OpenModal extends ConnectedLitElement {
 @customElement('me-import-card')
 export class ImportCard extends LitElement {
   @query('me-open-modal#open-modal') openModal!: OpenModal;
-  @query('me-file-modal') fileModal!: FileModalElement;
+  @query('input#file-input') fileInput!: HTMLInputElement;
   @query('me-slider-with-input#height') heightSlider!: SliderWithInputElement;
   @internalProperty() selectedDefaultOption: number = 0;
+  static styles = fileModalStyles;
 
   async onUploadGLB() {
-    const files = await this.fileModal.open();
+    const files = this.fileInput.files;
     if (!files) {
       /// The user canceled the previous upload
       return;
@@ -310,11 +310,11 @@ export class ImportCard extends LitElement {
         <paper-item value='Lantern'>Lantern</paper-item>
         <paper-item value='SpecGlossVsMetalRough'>Water Bottles</paper-item>
       </me-dropdown>
-      <mwc-button unelevated
-        icon="file_upload" style="align-self: center;"
-        @click=${this.onUploadGLB}>
-        GLB
+      <mwc-button unelevated label="GLB" icon="file_upload" class="UploadButton">
+        <label for="file-input" class="FileInputLabel"/>
       </mwc-button>
+      <input type="file" id="file-input" @change="${this.onUploadGLB}"/>
+      
     </div>
     <me-validation></me-validation>
     <div style="font-size: 14px; font-weight: 500; margin-top: 10px;">Poster:</div>

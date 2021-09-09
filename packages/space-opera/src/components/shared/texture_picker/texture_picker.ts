@@ -21,7 +21,7 @@ import '../../file_modal/file_modal.js';
 
 import {customElement, html, LitElement, property, query} from 'lit-element';
 
-import {FileModalElement} from '../../file_modal/file_modal.js';
+import {fileModalStyles} from '../../../styles.css.js';
 import {createSafeObjectURL, SafeObjectUrl} from '../../utils/create_object_url.js';
 import {IMAGE_MIME_TYPES} from '../../utils/gltf_constants.js';
 import {checkFinite} from '../../utils/reducer_utils.js';
@@ -44,11 +44,11 @@ export interface FileDetails {
  */
 @customElement('me-texture-picker')
 export class TexturePicker extends LitElement {
-  static styles = styles;
+  static styles = [styles, fileModalStyles];
 
   @property({type: Array}) images: SafeObjectUrl[] = [];
   @property({type: Number}) selectedIndex?: number;
-  @query('me-file-modal#textureUpload') textureFileModal!: FileModalElement;
+  @query('input#texture-input') fileInput!: HTMLInputElement;
 
   render() {
     return html`
@@ -77,7 +77,6 @@ export class TexturePicker extends LitElement {
       </div>
     </div>
   </me-popup>
-  ${this.renderTextureUploadModal()}
   `;
   }
 
@@ -98,23 +97,12 @@ export class TexturePicker extends LitElement {
 
   renderTextureUploadButton() {
     return html`
-        <mwc-icon-button id="uploadButton" class=${
-        this.images.length > 0 ?
-            'UploadButton' :
-            'UploadButtonNoTextures'} icon="file_upload" @click="${
-        this.openFileModal}"></mwc-icon-button>`;
-  }
-
-  renderTextureUploadModal() {
-    return html`<me-file-modal id="textureUpload" accept=${ACCEPT_IMAGE_TYPE}
-      @click="${this.stopPropagation}">
-  </me-file-modal>`;
-  }
-
-  // Mouse events outside closes popup, to prevent this, intercept mouse
-  // event on FileModalElement.
-  stopPropagation(event: Event) {
-    event.stopPropagation();
+      <mwc-button unelevated label="IMAGE" id="uploadButton" icon="file_upload">
+        <label for="texture-input" class="FileInputLabel"/>
+      </mwc-button>
+      <input type="file" accept=${
+        ACCEPT_IMAGE_TYPE} id="texture-input" @change="${
+        this.openFileModal}"/>`;
   }
 
   onTextureChange(event: Event) {
@@ -129,7 +117,7 @@ export class TexturePicker extends LitElement {
   }
 
   async openFileModal() {
-    const files = await this.textureFileModal.open();
+    const files = this.fileInput.files;
     if (!files) {
       return;
     }
