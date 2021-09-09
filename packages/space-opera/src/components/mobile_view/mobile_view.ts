@@ -29,7 +29,7 @@ import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 
 import {styles as mobileStyles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
-import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, posterToSession, usdzToSession} from './utils.js';
+import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, posterToSession} from './utils.js';
 
 const TOAST_TIME = 3000;  // 3s
 
@@ -51,9 +51,7 @@ export class MobileView extends LitElement {
   @query('model-viewer') readonly modelViewer!: ModelViewerElement;
   @internalProperty() modelViewerUrl: string = '';
   @internalProperty() posterUrl: string = '';
-  @internalProperty() iosUrl: string = '';
   @internalProperty() currentBlob?: Blob;
-  @internalProperty() usdzBlob?: Blob;
 
   @internalProperty() editorUrls?: URLs;
 
@@ -74,10 +72,6 @@ export class MobileView extends LitElement {
   @internalProperty() sessionId = getRandomInt(1e+20);
   @internalProperty() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
   @internalProperty() sessionOs = getMobileOperatingSystem();
-
-  get needIosSrc(): boolean {
-    return this.sessionOs === 'iOS' && this.iosUrl.length <= 1;
-  }
 
   updateState(snippet: ModelViewerSnippetState, urls: URLs) {
     this.editorUrls = urls;
@@ -103,29 +97,13 @@ export class MobileView extends LitElement {
           this.modelViewer.shadowRoot!.getElementById('default-ar-button')!;
       arButton.addEventListener('click', () => {
         try {
-          if (this.sessionOs === 'iOS') {
-            post(this.usdzBlob!, this.iosUrl);
-          } else {
+          if (this.sessionOs === 'Android') {
             post(this.currentBlob!, this.modelViewerUrl);
           }
         } catch (error) {
           console.log('Post failed on ar button press...');
         }
       });
-    }
-  }
-
-  // Need to fetch the USDZ first so we can POST the USDZ again if
-  // someone closes quick-look and then chooses to reopen it.
-  async waitForUSDZ(usdzId: number, iosSrcIsReality: boolean) {
-    const usdzUrl =
-        usdzToSession(this.pipeId, this.sessionId, usdzId, iosSrcIsReality);
-    const response = await fetch(usdzUrl);
-    if (response.ok) {
-      this.usdzBlob = await response.blob();
-      this.iosUrl = usdzUrl;
-    } else {
-      console.error('Error:', response);
     }
   }
 
@@ -154,10 +132,6 @@ export class MobileView extends LitElement {
       this.envImageUrl =
           envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
     }
-    if (updatedContent.iosChanged) {
-      await this.waitForUSDZ(
-          updatedContent.usdzId, updatedContent.iosSrcIsReality);
-    }
 
     this.overlay!.style.display = 'none';
   }
@@ -166,7 +140,6 @@ export class MobileView extends LitElement {
     let body = json.gltfChanged ? 'gltf model, ' : '';
     body = json.envChanged ? body.concat('environment image, ') : body;
     body = json.stateChanged ? body.concat('snippet, ') : body;
-    body = json.iosChanged ? body.concat('usdz model, ') : body;
     body = body.slice(0, body.length - 2).concat('.');
     this.toastBody = `Loading ${body}`;
     this.toastClassName = 'show';
@@ -209,14 +182,6 @@ export class MobileView extends LitElement {
     }
   }
 
-  renderIosMessage() {
-    return html`
-    <div class="ios-message">
-      Upload a .usdz or .reality file to view your model in AR.
-    </div>
-    `
-  }
-
   render() {
     const config = {...this.config};
     const skyboxImage = (config.useEnvAsSkybox && this.editorUrls?.env) ?
@@ -235,7 +200,6 @@ export class MobileView extends LitElement {
           src=${this.modelViewerUrl}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}
-          ios-src=${ifDefined(this.iosUrl)}
           ?autoplay=${!!config.autoplay}
           ?auto-rotate=${!!config.autoRotate}
           ?camera-controls=${!!config.cameraControls}
@@ -262,7 +226,6 @@ export class MobileView extends LitElement {
     <div class="${this.toastClassName}" id="snackbar-mobile">
       ${this.toastBody}
     </div>
-    ${this.needIosSrc ? this.renderIosMessage() : html``}
     `;
   }
 

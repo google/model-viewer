@@ -65,6 +65,18 @@ export const fileModalStyles: CSSResult = css`
 input[type="file"] {
   display: none;
 }
+
+.FileInputLabel {
+  width: 100%; 
+  height: 100%; 
+  display: block; 
+  position: absolute; 
+  cursor: pointer;
+}
+
+.UploadButton {
+  align-self: center;
+}
 `;
 
 export const hotspotEditorStyles: CSSResult = css`
@@ -96,7 +108,7 @@ export const iblSelectorStyles: CSSResult = css`
 }
 
 .EnvironmnetImageDropdown,
-.UploadButton,
+.UploadHDRButton,
 .Row {
   margin-top: 10px;
 }

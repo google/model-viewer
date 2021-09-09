@@ -22,16 +22,14 @@ import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/checkbox/checkbox.js';
 import '@polymer/paper-item';
 import '@material/mwc-button';
-import '../file_modal/file_modal.js';
 
 import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
-import {iblSelectorStyles} from '../../styles.css.js';
+import {fileModalStyles, iblSelectorStyles} from '../../styles.css.js';
 import {ModelViewerConfig, State} from '../../types.js';
 import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {FileModalElement} from '../file_modal/file_modal.js';
 import {dispatchSetEnvironmentName} from '../relative_file_paths/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
@@ -48,14 +46,14 @@ const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
  */
 @customElement('me-ibl-selector')
 export class IblSelector extends ConnectedLitElement {
-  static styles = iblSelectorStyles;
+  static styles = [iblSelectorStyles, fileModalStyles];
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() environmentImages: EnvironmentImage[] = [];
 
   @query('me-slider-with-input#exposure')
   exposureSlider!: SliderWithInputElement;
-  @query('me-file-modal#imageUpload') imageFileModal!: FileModalElement;
+  @query('input#imageUpload') fileInput!: HTMLInputElement;
   @query('me-checkbox#skybox') skyboxCheckbox!: CheckboxElement;
 
   @query('me-slider-with-input#shadow-intensity')
@@ -118,8 +116,8 @@ export class IblSelector extends ConnectedLitElement {
   }
 
   // TODO:: Add test to this.
-  async openFileModal() {
-    const files = await this.imageFileModal.open();
+  async onUploadHDR() {
+    const files = this.fileInput.files;
 
     if (!files) {
       return;
@@ -158,11 +156,11 @@ export class IblSelector extends ConnectedLitElement {
             environmentImage => html`<paper-item value=${
                 environmentImage.uri}>${environmentImage.name}</paper-item>`)}
             </me-dropdown>
-            <mwc-button 
-              class="UploadButton"
-              style="align-self: center;"
-              id="uploadButton" unelevated
-              icon="file_upload" @click="${this.openFileModal}">HDR</mwc-button>
+            <mwc-button unelevated label="HDR" icon="file_upload" class="UploadButton UploadHDRButton">
+              <label for="imageUpload" class="FileInputLabel"/>
+            </mwc-button>
+            <input type="file" id="imageUpload" accept=${
+        ACCEPT_IMAGE_TYPE} @change="${this.onUploadHDR}"/>
           </div>
           <me-section-row class="Row" label="Exposure">
             <me-slider-with-input min="0" max="2" step="0.01" id="exposure"
@@ -195,9 +193,6 @@ export class IblSelector extends ConnectedLitElement {
               value="${this.config.shadowSoftness ?? DEFAULT_SHADOW_SOFTNESS}">
             </me-slider-with-input>
           </me-section-row>
-
-          <me-file-modal id="imageUpload" accept=${ACCEPT_IMAGE_TYPE}>
-          </me-file-modal>
         </div>
       </me-expandable-tab>
     `;

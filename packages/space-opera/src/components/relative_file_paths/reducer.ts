@@ -22,11 +22,6 @@ export function dispatchSetModelName(name: string|undefined) {
   return {type: SET_MODEL_NAME, payload: name};
 }
 
-const SET_IOS_NAME = 'SET_IOS_NAME';
-export function dispatchSetIosName(name: string|undefined) {
-  return {type: SET_IOS_NAME, payload: name};
-}
-
 const SET_ENVIRONMENT_NAME = 'SET_ENVIRONMENT_NAME';
 export function dispatchSetEnvironmentName(name: string|undefined) {
   return {type: SET_ENVIRONMENT_NAME, payload: name};
@@ -49,8 +44,6 @@ export function relativeFilePathsReducer(
       return {...state, modelName: action.payload};
     case SET_ENVIRONMENT_NAME:
       return {...state, environmentName: action.payload};
-    case SET_IOS_NAME:
-      return {...state, iosName: action.payload};
     case SET_POSTER_NAME:
       return {...state, posterName: action.payload};
     default:

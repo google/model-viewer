@@ -18,9 +18,6 @@
 
 import '../../../components/shared/texture_picker/texture_picker.js';
 
-import {IconButton} from '@material/mwc-icon-button';
-
-import {FileModalElement} from '../../../components/file_modal/file_modal.js';
 import {FileDetails, TexturePicker} from '../../../components/shared/texture_picker/texture_picker.js';
 import {createSafeObjectURL} from '../../../components/utils/create_object_url.js';
 import {generatePngBlob} from '../../utils/test_utils.js';
@@ -61,22 +58,14 @@ describe('texture picker test', () => {
     const eventListenerSpy = jasmine.createSpy('handler');
     texturePicker.addEventListener('texture-uploaded', eventListenerSpy);
 
-    const textureUploadFileModal =
-        texturePicker.shadowRoot!.querySelector(
-            'me-file-modal#textureUpload')! as FileModalElement;
+    const fileInput = texturePicker.shadowRoot!.querySelector(
+                          'input#texture-input') as HTMLInputElement;
 
-    const openPromise = new Promise<File[]|undefined>(resolve => {
-      resolve([new File(['test'], 'testname', {type: 'image/jpeg'})]);
-    });
+    const fileList = new DataTransfer();
+    fileList.items.add(new File(['test'], 'testname', {type: 'image/jpeg'}));
+    fileInput.files = fileList.files;
 
-    spyOn(textureUploadFileModal, 'open').and.returnValue(openPromise);
-
-    const fileUploadButton = texturePicker.shadowRoot!.querySelector(
-                                 'mwc-icon-button#uploadButton')! as IconButton;
-
-    fileUploadButton.click();
-
-    await expectAsync(openPromise).toBeResolved();
+    fileInput.dispatchEvent(new CustomEvent('change'));
 
     expect(eventListenerSpy).toHaveBeenCalledTimes(1);
     const eventListenerArguments = eventListenerSpy.calls.first().args;
