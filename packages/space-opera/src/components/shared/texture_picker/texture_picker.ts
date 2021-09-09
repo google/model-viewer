@@ -102,7 +102,7 @@ export class TexturePicker extends LitElement {
       </mwc-button>
       <input type="file" accept=${
         ACCEPT_IMAGE_TYPE} id="texture-input" @change="${
-        this.openFileModal}"/>`;
+        this.onUploadImage}"/>`;
   }
 
   onTextureChange(event: Event) {
@@ -116,7 +116,7 @@ export class TexturePicker extends LitElement {
     this.dispatchEvent(new CustomEvent('texture-changed'));
   }
 
-  async openFileModal() {
+  async onUploadImage() {
     const files = this.fileInput.files;
     if (!files) {
       return;
