@@ -91,7 +91,7 @@ export class ExportPanel extends ConnectedLitElement {
     if (this.header === 'true') {
       return html`
 <me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
-  .open=${true} .sticky=${true} 
+  .open=${true} .sticky=${false} 
   .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
   <div slot="content">
     <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}>
@@ -103,7 +103,7 @@ export class ExportPanel extends ConnectedLitElement {
     // on import/export tab
     return html`
 <me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
-  .open=${true} .sticky=${true} 
+  .open=${true} .sticky=${false} 
   .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
   <div slot="content">
     <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}>
