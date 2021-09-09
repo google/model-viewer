@@ -16,7 +16,6 @@
  */
 
 import '@material/mwc-button';
-import '../../file_modal/file_modal.js';
 
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
 

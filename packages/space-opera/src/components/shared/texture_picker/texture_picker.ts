@@ -15,9 +15,8 @@
  *
  */
 
-import '@material/mwc-icon-button';
+import '@material/mwc-button';
 import '../popup/popup.js';
-import '../../file_modal/file_modal.js';
 
 import {customElement, html, LitElement, property, query} from 'lit-element';
 

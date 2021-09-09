@@ -22,7 +22,6 @@ import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/checkbox/checkbox.js';
 import '@polymer/paper-item';
 import '@material/mwc-button';
-import '../file_modal/file_modal.js';
 
 import {customElement, html, internalProperty, query} from 'lit-element';
 
