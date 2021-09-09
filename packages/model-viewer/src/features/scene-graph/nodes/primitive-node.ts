@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Material as ThreeMaterial, Mesh, SkinnedMesh} from 'three';
+import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, SkinnedMesh} from 'three';
 import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
@@ -30,6 +30,7 @@ export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
 export const $children = Symbol('children');
+export const $defaultMaterialIdx = Symbol('defaultMaterialIdx');
 
 // Defines the base level node methods and data.
 export class Node {
@@ -47,13 +48,23 @@ export class PrimitiveNode extends Node {
   private[$materials] = new Map<number, Material>();
   // Maps variant name to material index.
   private[$variantInfo]: Map<string, {material: Material, index: number}>;
-  // List of child nodes.
+  private[$defaultMaterialIdx]: number;
+
   constructor(
       mesh: Mesh, mvMaterials: Material[],
       correlatedSceneGraph: CorrelatedSceneGraph) {
     super(mesh.name);
     this[$mesh] = mesh;
     const {gltf, threeGLTF} = correlatedSceneGraph;
+    // Captures the primitive's initial material.
+    const materialRef = correlatedSceneGraph.threeObjectMap.get(
+        mesh.material as MeshStandardMaterial);
+    if (materialRef != null) {
+      this[$defaultMaterialIdx] = materialRef.index;
+    } else {
+      console.error(
+          `Primitive (${mesh.name}) missing default material reference.`);
+    }
 
     // TODO: Remove the associationKey 'work arounds' after fixing Three.js
     // associations. This is needed for now because Three.js does not create
@@ -143,8 +154,11 @@ export class PrimitiveNode extends Node {
     return this.mesh.material;
   }
 
-  async enableVariant(name: string):
-      Promise<ThreeMaterial|ThreeMaterial[]|null> {
+  async enableVariant(name: string|
+                      null): Promise<ThreeMaterial|ThreeMaterial[]|null> {
+    if (name == null) {
+      return await this.setActiveMaterial(this[$defaultMaterialIdx]);
+    }
     if (this[$variantInfo] != null) {
       const material = this[$variantInfo].get(name);
       if (material != null) {

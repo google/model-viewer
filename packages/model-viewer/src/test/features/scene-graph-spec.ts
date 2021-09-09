@@ -16,10 +16,14 @@
 import {Mesh, MeshStandardMaterial} from 'three';
 
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
+import {$primitives} from '../../features/scene-graph/model.js';
+import {$defaultMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
+
+
 
 const expect = chai.expect;
 
@@ -84,6 +88,35 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
         expect(glTFroot.children[0].userData.variantMaterials.size).to.be.eq(3);
         expect(glTFroot.children[1].userData.variantMaterials.size).to.be.eq(3);
       });
+
+      test(
+          `Setting varianName to null results in primitive
+           reverting to default/initial material`,
+          async () => {
+            let primitiveNode: PrimitiveNode|null = null
+            // Finds the first primitive with material 0 assigned.
+            for (const primitive of element.model![$primitives]) {
+              if (primitive.variantInfo != null &&
+                  primitive[$defaultMaterialIdx] == 0) {
+                primitiveNode = primitive;
+                return;
+              }
+            }
+
+            expect(primitiveNode).to.not.be.null;
+
+            // Switches to a new variant.
+            element.variantName = 'Yellow Red';
+            await waitForEvent(element, 'variant-applied');
+            expect((primitiveNode!.mesh.material as MeshStandardMaterial).name)
+                .equal('red');
+
+            // Switches to null variant.
+            element.variantName = null;
+            await waitForEvent(element, 'variant-applied');
+            expect((primitiveNode!.mesh.material as MeshStandardMaterial).name)
+                .equal('purple');
+          });
 
       test('exports and reimports the model with variants', async () => {
         const exported = await element.exportScene({binary: true});

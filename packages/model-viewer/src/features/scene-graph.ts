@@ -47,7 +47,7 @@ interface SceneExportOptions {
 
 export interface SceneGraphInterface {
   readonly model?: Model;
-  variantName: string|undefined;
+  variantName: string|null;
   readonly availableVariants: Array<string>;
   orientation: string;
   scale: string;
@@ -70,7 +70,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     private[$originalGltfJson]: GLTF|null = null;
 
     @property({type: String, attribute: 'variant-name'})
-    variantName: string|undefined = undefined;
+    variantName: string|null = null;
 
     @property({type: String, attribute: 'orientation'})
     orientation: string = '0 0 0';
@@ -151,6 +151,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         await this[$model]![$switchVariant](variantName!);
         this[$needsRender]();
+        this.dispatchEvent(new CustomEvent('variant-applied'));
       }
 
       if (changedProperties.has('orientation') ||
