@@ -173,7 +173,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('arPlacement')) {
-        this[$scene].setShadowIntensity(this[$scene].shadowIntensity);
+        this[$scene].updateShadow();
         this[$needsRender]();
       }
 
