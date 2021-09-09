@@ -29,7 +29,7 @@ import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 
 import {styles as mobileStyles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
-import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, posterToSession, usdzToSession} from './utils.js';
+import {envToSession, getMobileOperatingSystem, getPingUrl, getRandomInt, getSessionUrl, getWithTimeout, gltfToSession, post, posterToSession} from './utils.js';
 
 const TOAST_TIME = 3000;  // 3s
 
@@ -115,20 +115,6 @@ export class MobileView extends LitElement {
     }
   }
 
-  // Need to fetch the USDZ first so we can POST the USDZ again if
-  // someone closes quick-look and then chooses to reopen it.
-  async waitForUSDZ(usdzId: number, iosSrcIsReality: boolean) {
-    const usdzUrl =
-        usdzToSession(this.pipeId, this.sessionId, usdzId, iosSrcIsReality);
-    const response = await fetch(usdzUrl);
-    if (response.ok) {
-      this.usdzBlob = await response.blob();
-      this.iosUrl = usdzUrl;
-    } else {
-      console.error('Error:', response);
-    }
-  }
-
   // We set modelViewerUrl instead of directly fetching it because
   // scene-viewer requires the same url from the current model-viewer state,
   // and we need to make a POST request to that URL when scene-viewer is
@@ -154,10 +140,6 @@ export class MobileView extends LitElement {
       this.envImageUrl =
           envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
     }
-    if (updatedContent.iosChanged) {
-      await this.waitForUSDZ(
-          updatedContent.usdzId, updatedContent.iosSrcIsReality);
-    }
 
     this.overlay!.style.display = 'none';
   }
@@ -166,7 +148,6 @@ export class MobileView extends LitElement {
     let body = json.gltfChanged ? 'gltf model, ' : '';
     body = json.envChanged ? body.concat('environment image, ') : body;
     body = json.stateChanged ? body.concat('snippet, ') : body;
-    body = json.iosChanged ? body.concat('usdz model, ') : body;
     body = body.slice(0, body.length - 2).concat('.');
     this.toastBody = `Loading ${body}`;
     this.toastClassName = 'show';

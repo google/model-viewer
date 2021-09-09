@@ -40,9 +40,6 @@ export class MobileExpanadableSection extends LitElement {
   @property({type: Function}) onSelectArMode?: Function;
   @property() arConfig?: ArConfigState;
 
-  @property({type: Boolean}) iosAndNoUsdz?: boolean;
-  @property({type: Function}) onUploadUSDZ?: Function;
-
   @query('me-checkbox#ar') arCheckbox!: CheckboxElement;
   @query('me-checkbox#ar-modes') arModesCheckbox!: CheckboxElement;
 
@@ -112,25 +109,6 @@ export class MobileExpanadableSection extends LitElement {
       @change=${this.selectArMode}
       >
     </me-checkbox>
-    `;
-  }
-
-  renderIos() {
-    const needUsdzButton = this.iosAndNoUsdz ? '#DC143C' : '#4285F4';
-    const uploadUsdzText = this.iosAndNoUsdz ? html`
-    <div style="color: #DC143C; margin-top: 5px;">
-      Upload a .usdz to view model in AR on an iOS device.
-    </div>` :
-                                               html``
-    return html`
-    <div style="font-size: 14px; font-weight: 500; margin: 16px 0px 10px 0px;">
-      To enable AR on iOS, upload:
-    </div> 
-    <mwc-button unelevated icon="file_upload" @click=${this.onUploadUSDZ} 
-      style="--mdc-theme-primary: ${needUsdzButton}">
-      USDZ / REALITY
-    </mwc-button>
-    ${uploadUsdzText}
     `;
   }
 

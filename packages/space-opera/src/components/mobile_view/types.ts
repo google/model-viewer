@@ -32,9 +32,6 @@ export interface MobileSession {
 export interface EditorUpdates {
   gltfChanged: boolean;
   gltfId: number;
-  iosChanged: boolean;
-  iosSrcIsReality: boolean;
-  usdzId: number;
   stateChanged: boolean;
   posterId: number;
   envChanged: boolean;
