@@ -45,7 +45,7 @@ import {applyRelativeFilePaths, getExtraAttributes} from './reducer.js';
  */
 @customElement('me-export-panel')
 export class ExportPanel extends ConnectedLitElement {
-  @property({type: String}) header = '';
+  @property({type: Boolean}) header = false;
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
@@ -88,7 +88,7 @@ export class ExportPanel extends ConnectedLitElement {
     const snippet = renderModelViewer(
         editedConfig, editedArConfig, this.extraAttributes, {}, childElements);
 
-    if (this.header === 'true') {
+    if (this.header === true) {
       return html`
 <me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
   .open=${true} .sticky=${false} 
