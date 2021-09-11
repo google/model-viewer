@@ -320,7 +320,6 @@ export class ImportCard extends LitElement {
         value="${DEFAULT_POSTER_HEIGHT}">
       </me-slider-with-input>
     </me-section-row>
-    <me-export-zip-button id="export-zip" style="display: block; margin-top: 10px;"></me-export-zip-button>
     `;
   }
 }
