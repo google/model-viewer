@@ -26,7 +26,7 @@ import {ArConfigState, extractStagingConfig, ImageType, INITIAL_STATE, ModelView
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
 import {dispatchArConfig, getArConfig} from '../../mobile_view/reducer.js';
-import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
+import {dispatchGltfUrl, getGltfUrl, getModelViewer} from '../../model_viewer_preview/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../../shared/slider_with_input/slider_with_input.js';
@@ -37,6 +37,8 @@ import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
 import {applyRelativeFilePaths, dispatchExtraAttributes, dispatchHeight, dispatchMimeType, getExtraAttributes} from '../reducer.js';
 
 import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
+
+declare module 'simple-dropzone';
 
 const DEFAULT_ATTRIBUTES =
     'shadow-intensity="1" camera-controls ar ar-modes="webxr scene-viewer quick-look"';
@@ -209,8 +211,12 @@ export class ImportCard extends LitElement {
   @internalProperty() selectedDefaultOption: number = 0;
   static styles = fileModalStyles;
 
-  async onUploadGLB() {
-    const files = this.fileInput.files;
+  firstUpdated() {
+    const dropControl = new SimpleDropzone(getModelViewer(), this.fileInput);
+    dropControl.on('drop', ({files}: any) => this.onUpload(files));
+  }
+
+  async onUpload(files) {
     if (!files) {
       /// The user canceled the previous upload
       return;
@@ -309,7 +315,7 @@ export class ImportCard extends LitElement {
       <mwc-button unelevated label="GLB" icon="file_upload" class="UploadButton">
         <label for="file-input" class="FileInputLabel"/>
       </mwc-button>
-      <input type="file" id="file-input" @change="${this.onUploadGLB}"/>
+      <input type="file" id="file-input" multiple"/>
       
     </div>
     <me-validation></me-validation>
