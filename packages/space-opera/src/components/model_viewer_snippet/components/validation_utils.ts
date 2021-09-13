@@ -31,6 +31,7 @@ export type Report = {
     materialCount?: number;
     totalVertexCount?: number;
     totalTriangleCount?: number;
+    totalJointCount?: number;
   };
   validatorVersion?: string;
   issues?: {
