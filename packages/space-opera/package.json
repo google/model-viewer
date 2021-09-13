@@ -74,6 +74,7 @@
     "qrious": "^4.0.2",
     "@open-wc/lit-helpers": "0.3.12",
     "js-beautify": "^1.14.0",
-    "web-animations-js": "^2.3.2"
+    "web-animations-js": "^2.3.2",
+    "simple-dropzone": "^0.8.1"
   }
 }
