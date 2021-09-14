@@ -55,15 +55,16 @@ export type Message = {
  */
 export async function validateGltf(
     url: string,
-    externalResourceFunction: (uri: string) =>
-        Promise<Uint8Array>): Promise<Report> {
-  return await fetch(url)
-      .then((response) => response.arrayBuffer())
-      .then(
-          (buffer) =>
-              validateBytes(new Uint8Array(buffer), {externalResourceFunction}))
-      .then((report) => setReport(report))
-      .catch((e) => console.log('Error,', e));
+    externalResourceFunction: (uri: string) => Promise<Uint8Array>) {
+  try {
+    const response = await fetch(url);
+    const buffer = await response.arrayBuffer();
+    const report =
+        await validateBytes(new Uint8Array(buffer), {externalResourceFunction});
+    return setReport(report);
+  } catch (e) {
+    console.log('Error,', e);
+  }
 }
 
 /**

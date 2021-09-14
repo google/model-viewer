@@ -20,7 +20,7 @@ import {customElement, html, internalProperty, LitElement, property, query} from
 import {validationStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
-import {getFileMap, getGltfUrl, getModel} from '../../model_viewer_preview/reducer.js';
+import {getModel} from '../../model_viewer_preview/reducer.js';
 
 import {resolveExternalResource, validateGltf} from './validation_utils.js';
 
@@ -144,38 +144,27 @@ export class Validation extends ConnectedLitElement {
   @internalProperty() severityTitle: string = '';
   @internalProperty() severityColor: string = '';
 
-  stateChanged(state: State) {
-    const {rootPath, originalGltf: gltf} = getModel(state);
+  async stateChanged(state: State) {
+    const {rootPath, originalGltf, gltfUrl, fileMap} = getModel(state);
     if (rootPath != null) {
       this.rootPath = rootPath;
     }
 
-    const newFileMap = getFileMap(state);
-    if (newFileMap !== this.fileMap) {
-      this.fileMap = newFileMap;
-    }
+    if (originalGltf != null && gltfUrl != null &&
+        this.originalGltf !== originalGltf) {
+      this.originalGltf = originalGltf;
+      this.fileMap = fileMap;
+      this.gltfUrl = gltfUrl;
 
-    const newGltfUrl = getGltfUrl(state);
-    if (newGltfUrl !== this.gltfUrl && typeof newGltfUrl === 'string') {
-      this.gltfUrl = newGltfUrl;
-      this.awaitLoad(this.gltfUrl);
-    }
-
-    if (gltf != null && this.originalGltf !== gltf) {
-      this.originalGltf = gltf;
-      this.countJoints(gltf);
+      await this.awaitLoad(gltfUrl);
+      this.countJoints(originalGltf);
     }
   }
 
   async awaitLoad(url: string) {
-    this.report = {
-      ...this.report,
-      ...await validateGltf(
-          url,
-          (uri: string) => {
-            return resolveExternalResource(uri, this.rootPath, this.fileMap);
-          })
-    };
+    this.report = await validateGltf(url, (uri: string) => {
+      return resolveExternalResource(uri, this.rootPath, this.fileMap);
+    });
     this.severityTitle = 'Model Details';
     this.severityColor = '#3c4043';
     if (this.report.issues!.numInfos) {
