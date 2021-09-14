@@ -29,7 +29,7 @@ import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_ele
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
 import {dispatchAddEnvironmentImage} from '../../ibl_selector/reducer.js';
 import {dispatchArConfig, getArConfig} from '../../mobile_view/reducer.js';
-import {dispatchGltfUrl, getGltfUrl, getModelViewer} from '../../model_viewer_preview/reducer.js';
+import {dispatchFileMap, dispatchGltfUrl, dispatchRootPath, getGltfUrl, getModelViewer} from '../../model_viewer_preview/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../../shared/slider_with_input/slider_with_input.js';
@@ -104,13 +104,18 @@ export class OpenModal extends ConnectedLitElement {
           await new Promise(resolve => {
             setTimeout(resolve, 0);
           });
-          reduxStore.dispatch(dispatchGltfUrl(config.src));
-          // dispatch new model name
-          const fileNameList = config.src.split('/');
-          const fileName = fileNameList[fileNameList.length - 1];
+
+          const {src} = config;
+          const index = src.lastIndexOf('/');
+          const rootPath = index === -1 ? './' : src.substr(0, index + 1);
+          const fileName = src.substr(index + 1);
+
           reduxStore.dispatch(dispatchSetModelName(fileName));
+          reduxStore.dispatch(dispatchRootPath(rootPath));
+          reduxStore.dispatch(dispatchFileMap(new Map<string, File>()));
+          reduxStore.dispatch(dispatchGltfUrl(src));
         }
-      } catch (e) {
+      } catch (e: any) {
         console.log(
             `Could not download 'src' attribute - OK, ignoring it. Error: ${
                 e.message}`);
@@ -249,6 +254,8 @@ export class ImportCard extends LitElement {
         const fileURL =
             typeof file === 'string' ? file : URL.createObjectURL(file);
         reduxStore.dispatch(dispatchSetModelName(file.name));
+        reduxStore.dispatch(dispatchRootPath(rootPath));
+        reduxStore.dispatch(dispatchFileMap(fileMap));
         reduxStore.dispatch(dispatchGltfUrl(fileURL));
         dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));
         reduxStore.dispatch(dispatchSetHotspots([]));

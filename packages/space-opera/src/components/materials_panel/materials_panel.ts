@@ -91,16 +91,11 @@ export class MaterialPanel extends ConnectedLitElement {
   doubleSidedCheckbox!: CheckboxElement;
 
   stateChanged(state: State) {
-    const model = getModel(state);
-    if (model == null) {
-      return;
-    }
-
-    const gltf = model.originalGltf;
-    if (this.originalGltf !== gltf) {
-      this.originalGltf = gltf;
-      if (model.thumbnailsById != null) {
-        this.thumbnailsById = new Map(model.thumbnailsById);
+    const {originalGltf, thumbnailsById} = getModel(state);
+    if (this.originalGltf !== originalGltf) {
+      this.originalGltf = originalGltf;
+      if (thumbnailsById != null) {
+        this.thumbnailsById = new Map(thumbnailsById);
         this.thumbnailIds = [];
         this.thumbnailUrls = [];
         for (const [id, thumbnail] of this.thumbnailsById) {

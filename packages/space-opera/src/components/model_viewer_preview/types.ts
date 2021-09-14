@@ -25,6 +25,8 @@ export interface Thumbnail {
 
 export interface ModelState {
   gltfUrl?: string;
+  rootPath?: string;
+  fileMap: Map<string, File>;
   thumbnailsById?: Map<string, Thumbnail>;
   originalGltfJson?: string;
   originalGltf?: GLTF;
