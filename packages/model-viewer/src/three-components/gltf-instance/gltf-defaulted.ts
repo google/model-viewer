@@ -72,7 +72,7 @@ export interface Skin {
   skeleton?: number;
   joints: number[];
   name?: string;
-  extension?: ExtensionDictionary;
+  extensions?: ExtensionDictionary;
   extras?: Extras;
 }
 

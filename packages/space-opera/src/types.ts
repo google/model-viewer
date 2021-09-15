@@ -122,9 +122,9 @@ export const INITIAL_STATE: State = {
     environment: {environmentImages: INITIAL_ENVIRONMENT_IMAGES},
     model: {fileMap: new Map<string, File>()},
     modelViewerSnippet: {
-      arConfig: {},
+      arConfig: {ar: true, arModes: 'webxr scene-viewer quick-look'},
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},
-      config: {},
+      config: {cameraControls: true, shadowIntensity: 1},
       poster: {height: 512, mimeType: 'image/webp'},
       hotspots: [],
       relativeFilePaths: {posterName: 'poster.webp'},

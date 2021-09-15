@@ -15,7 +15,7 @@
  *
  */
 
-import {Action, ModelViewerConfig, State} from '../../types.js';
+import {Action, INITIAL_STATE, ModelViewerConfig, State} from '../../types.js';
 import {radToDeg, roundToDigits} from '../utils/reducer_utils.js';
 
 import {Limits, Vector3D} from './types.js';
@@ -166,7 +166,8 @@ export const getConfig = (state: State) =>
     state.entities.modelViewerSnippet.config;
 
 export function configReducer(
-    state: ModelViewerConfig = {}, action: Action): ModelViewerConfig {
+    state: ModelViewerConfig = INITIAL_STATE.entities.modelViewerSnippet.config,
+    action: Action): ModelViewerConfig {
   switch (action.type) {
     case SET_CONFIG:
       return action.payload;

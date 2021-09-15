@@ -79,14 +79,13 @@ export class ExportPanel extends ConnectedLitElement {
 
   render() {
     const editedConfig = {...this.config};
-    const editedArConfig = {...this.arConfig};
     applyRelativeFilePaths(editedConfig, this.gltfUrl, this.relativeFilePaths!);
 
     const childElements =
         renderCommonChildElements(this.hotspots, this.bestPractices!);
 
     const snippet = renderModelViewer(
-        editedConfig, editedArConfig, this.extraAttributes, {}, childElements);
+        editedConfig, this.arConfig, this.extraAttributes, {}, childElements);
 
     if (this.header === true) {
       return html`
