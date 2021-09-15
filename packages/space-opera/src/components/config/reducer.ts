@@ -118,9 +118,6 @@ export function dispatchSetReveal(reveal?: string) {
 
 const SET_CAMERA_YAW_LIMITS = 'SET_CAMERA_YAW_LIMITS';
 export function dispatchYawLimits(yawLimitsDeg?: Limits) {
-  if (!yawLimitsDeg) {
-    throw new Error('No limits given');
-  }
   return {type: SET_CAMERA_YAW_LIMITS, payload: yawLimitsDeg};
 }
 

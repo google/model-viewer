@@ -250,6 +250,7 @@ export class ImportCard extends LitElement {
         const fileURL =
             typeof file === 'string' ? file : URL.createObjectURL(file);
         const state = reduxStore.getState();
+        this.selectedDefaultOption = 0;
         reduxStore.dispatch(dispatchSetModelName(file.name));
         reduxStore.dispatch(dispatchRootPath(rootPath));
         reduxStore.dispatch(dispatchFileMap(fileMap));
