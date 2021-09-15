@@ -99,7 +99,7 @@ export interface EntitiesState {
   isDirtyCamera: boolean;
   mobile: MobileState;
   environment: EnvironmentState;
-  model: ModelState|null;
+  model: ModelState;
   modelViewerSnippet: ModelViewerSnippetState;
 }
 
@@ -120,7 +120,7 @@ export const INITIAL_STATE: State = {
       forcePost: false,
     },
     environment: {environmentImages: INITIAL_ENVIRONMENT_IMAGES},
-    model: null,
+    model: {fileMap: new Map<string, File>()},
     modelViewerSnippet: {
       arConfig: {},
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},

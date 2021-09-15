@@ -26,7 +26,7 @@ import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../config/reducer';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getModel, getModelViewer, getUpdatedModelViewer} from '../model_viewer_preview/reducer.js';
+import {getModelViewer, getUpdatedModelViewer, isLoaded} from '../model_viewer_preview/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SectionRow} from '../shared/section_row/section_row.js';
@@ -50,8 +50,7 @@ export class AnimationControls extends ConnectedLitElement {
     this.selectedAnimation = config.animationName;
     this.autoplay = !!config.autoplay;
 
-    const model = getModel(state);
-    if (model != null) {
+    if (isLoaded(state)) {
       this.animationNames = getModelViewer().availableAnimations ?? [];
       this.updateScrubber();
     }

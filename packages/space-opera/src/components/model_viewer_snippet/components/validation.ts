@@ -20,9 +20,9 @@ import {customElement, html, internalProperty, LitElement, property, query} from
 import {validationStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
-import {getGltfUrl, getModel} from '../../model_viewer_preview/reducer.js';
+import {getModel} from '../../model_viewer_preview/reducer.js';
 
-import {validateGltf} from './validation_utils.js';
+import {resolveExternalResource, validateGltf} from './validation_utils.js';
 
 import type {Report, Message} from './validation_utils';
 import {GLTF} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
@@ -136,33 +136,35 @@ export class Validation extends ConnectedLitElement {
   @query('me-validation-modal#validation-modal')
   validationModal!: ValidationModal;
   @internalProperty() gltfUrl?: string;
+  @internalProperty() rootPath = '';
+  @internalProperty() fileMap = new Map<string, File>();
   @internalProperty() originalGltf?: GLTF;
   @internalProperty() report: Report = {};
 
   @internalProperty() severityTitle: string = '';
   @internalProperty() severityColor: string = '';
 
-  stateChanged(state: State) {
-    const newGltfUrl = getGltfUrl(state);
-    if (newGltfUrl !== this.gltfUrl && typeof newGltfUrl === 'string') {
-      this.gltfUrl = newGltfUrl;
-      this.awaitLoad(this.gltfUrl);
+  async stateChanged(state: State) {
+    const {rootPath, originalGltf, gltfUrl, fileMap} = getModel(state);
+    if (rootPath != null) {
+      this.rootPath = rootPath;
     }
 
-    const model = getModel(state);
-    if (model == null) {
-      return;
-    }
+    if (originalGltf != null && gltfUrl != null &&
+        this.originalGltf !== originalGltf) {
+      this.originalGltf = originalGltf;
+      this.fileMap = fileMap;
+      this.gltfUrl = gltfUrl;
 
-    const gltf = model.originalGltf;
-    if (gltf != null && this.originalGltf !== gltf) {
-      this.originalGltf = gltf;
-      this.countJoints(gltf);
+      await this.awaitLoad(gltfUrl);
+      this.countJoints(originalGltf);
     }
   }
 
   async awaitLoad(url: string) {
-    this.report = {...this.report, ...await validateGltf(url)};
+    this.report = await validateGltf(url, (uri: string) => {
+      return resolveExternalResource(uri, this.rootPath, this.fileMap);
+    });
     this.severityTitle = 'Model Details';
     this.severityColor = '#3c4043';
     if (this.report.issues!.numInfos) {
