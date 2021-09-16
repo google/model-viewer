@@ -92,7 +92,12 @@ export class PrimitiveNode extends Node {
       console.error('Expected type \'nodes\' but got ' + nodes);
     }
     // Gets the mesh index from the node.
-    const meshIndex = ((gltf[nodes] || []) as GLTFNode[])[nodeIndex].mesh!;
+    let meshIndex = ((gltf[nodes] || []) as GLTFNode[])[nodeIndex].mesh!;
+    if (meshIndex == null) {
+      // TODO: Resolve incorrect associations in Three with associations
+      // updates, issue result in a mesh being mapped as a node.
+      meshIndex = nodeIndex;
+    }
     // The gltf mesh array to sample from.
     const meshElementArray = gltf['meshes'] || [];
     // List of primitives under the mesh.
