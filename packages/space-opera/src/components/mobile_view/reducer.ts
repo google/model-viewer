@@ -15,7 +15,7 @@
  *
  */
 
-import {Action, ArConfigState, State} from '../../types.js';
+import {Action, ArConfigState, INITIAL_STATE, State} from '../../types.js';
 
 import {MobileState} from './types.js';
 
@@ -42,7 +42,8 @@ export const getArConfig = (state: State) =>
     state.entities.modelViewerSnippet.arConfig;
 
 export function arReducer(
-    state: ArConfigState = {}, action: Action): ArConfigState {
+    state: ArConfigState = INITIAL_STATE.entities.modelViewerSnippet.arConfig,
+    action: Action): ArConfigState {
   switch (action.type) {
     case SET_AR_CONFIG:
       return action.payload;

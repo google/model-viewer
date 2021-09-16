@@ -41,9 +41,6 @@ import {applyRelativeFilePaths, dispatchExtraAttributes, dispatchHeight, dispatc
 
 import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 
-const DEFAULT_ATTRIBUTES =
-    'shadow-intensity="1" camera-controls ar ar-modes="webxr scene-viewer quick-look"';
-
 const DEFAULT_POSTER_HEIGHT =
     INITIAL_STATE.entities.modelViewerSnippet.poster.height;
 
@@ -177,11 +174,10 @@ export class OpenModal extends ConnectedLitElement {
   render() {
     // Get the model-viewer snippet for the edit snippet modal
     const editedConfig = {...this.config};
-    const editedArConfig = {...this.arConfig};
     applyRelativeFilePaths(editedConfig, this.gltfUrl, this.relativeFilePaths!);
 
     const exampleLoadableSnippet = renderModelViewer(
-        editedConfig, editedArConfig, this.extraAttributes, {}, undefined);
+        editedConfig, this.arConfig, this.extraAttributes, {}, undefined);
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
@@ -253,12 +249,15 @@ export class ImportCard extends LitElement {
 
         const fileURL =
             typeof file === 'string' ? file : URL.createObjectURL(file);
+        const state = reduxStore.getState();
+        this.selectedDefaultOption = 0;
         reduxStore.dispatch(dispatchSetModelName(file.name));
         reduxStore.dispatch(dispatchRootPath(rootPath));
         reduxStore.dispatch(dispatchFileMap(fileMap));
-        reduxStore.dispatch(dispatchGltfUrl(fileURL));
-        dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));
+        reduxStore.dispatch(
+            dispatchConfig(extractStagingConfig(getConfig(state))));
         reduxStore.dispatch(dispatchSetHotspots([]));
+        reduxStore.dispatch(dispatchGltfUrl(fileURL));
       }
     }
 
@@ -283,8 +282,8 @@ export class ImportCard extends LitElement {
 
   onDefaultSelect(event: CustomEvent) {
     const dropdown = event.target as Dropdown;
-    const key = dropdown.selectedItem?.getAttribute('value') || undefined;
-    let snippet = '';
+    const key = dropdown.selectedItem?.getAttribute('value');
+
     const simpleMap: any = {
       'Astronaut': 1,
       'Horse': 2,
@@ -299,28 +298,31 @@ export class ImportCard extends LitElement {
       'Lantern': 9,
       'SpecGlossVsMetalRough': 10
     };
-    const fileName = `${key}.glb`;
-    if (key !== undefined) {
-      if (key === 'none') {
-        this.selectedDefaultOption = 0;
-        return;
-      } else if (key in simpleMap) {
-        this.selectedDefaultOption = simpleMap[key];
-        snippet = `<model-viewer
-  src='https://modelviewer.dev/shared-assets/models/${fileName}'
-  ${DEFAULT_ATTRIBUTES}>
-</model-viewer>`;
-      } else if (key in advancedMap) {
-        this.selectedDefaultOption = advancedMap[key];
-        snippet = `<model-viewer
-  src='https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/${
-            key}/glTF-Binary/${fileName}'
-  ${DEFAULT_ATTRIBUTES}>
-</model-viewer>`;
-      }
-      reduxStore.dispatch(dispatchSetModelName(fileName));
-      this.openModal.handleSubmitSnippet(snippet);
+
+    if (key == null) {
+      return;
     }
+    if (key === 'none') {
+      this.selectedDefaultOption = 0;
+      return;
+    }
+
+    const rootPath = 'https://modelviewer.dev/shared-assets/models/' +
+        (key in advancedMap ? `glTF-Sample-Models/2.0/${key}/glTF-Binary/` :
+                              '');
+    const fileName = `${key}.glb`;
+
+    this.selectedDefaultOption =
+        key in advancedMap ? advancedMap[key] : simpleMap[key];
+    const src = rootPath + fileName;
+
+    const state = reduxStore.getState();
+    reduxStore.dispatch(dispatchSetModelName(fileName));
+    reduxStore.dispatch(dispatchRootPath(rootPath));
+    reduxStore.dispatch(dispatchFileMap(new Map<string, File>()));
+    reduxStore.dispatch(dispatchConfig(extractStagingConfig(getConfig(state))));
+    reduxStore.dispatch(dispatchSetHotspots([]));
+    reduxStore.dispatch(dispatchGltfUrl(src));
   }
 
   onHeightChange() {

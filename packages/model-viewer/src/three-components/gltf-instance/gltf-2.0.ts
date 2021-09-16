@@ -27,11 +27,11 @@ export type Matrix4 = [
   number,
 ];
 
-export type Extras = unknown;
+export type Extras = any;
 
 // TODO: Document known extensions and update this type
 export interface ExtensionDictionary {
-  [index: string]: unknown;
+  [index: string]: any;
 }
 
 export type VariantMapping = {
@@ -241,7 +241,7 @@ export interface Accessor {
 
   // TODO: What is this?
   // @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#accessorsparse
-  sparse?: unknown;
+  sparse?: any;
 }
 
 export type ChannelTargetPath = 'rotation'|'scale'|'translation'|'weights';
@@ -281,7 +281,7 @@ export interface Skin {
   skeleton?: number;
   joints: number[];
   name?: string;
-  extension?: ExtensionDictionary;
+  extensions?: ExtensionDictionary;
   extras?: Extras;
 }
 
