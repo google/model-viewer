@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, SkinnedMesh} from 'three';
+import {Material as ThreeMaterial, Mesh, MeshStandardMaterial} from 'three';
 import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
@@ -73,9 +73,10 @@ export class PrimitiveNode extends Node {
     // primitives.
     let gltfMeshReference =
         correlatedSceneGraph.threeObjectMap.get(mesh) as GLTFReference;
+
     // Work around 1, skinned meshes (glTF primitives) have no association but
     // the parent (mesh) does, which maps to a 'node'.
-    if (mesh instanceof SkinnedMesh && mesh.parent != null) {
+    if (gltfMeshReference == null && mesh.parent != null) {
       gltfMeshReference =
           correlatedSceneGraph.threeObjectMap.get(mesh.parent) as GLTFReference;
     } else if (gltfMeshReference.type === 'materials' && mesh.parent != null) {
