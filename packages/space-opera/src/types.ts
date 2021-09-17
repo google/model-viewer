@@ -65,9 +65,9 @@ interface UIState {
 }
 
 export interface RelativeFilePathsState {
-  modelName?: string|undefined;
-  environmentName?: string|undefined;
-  posterName: string|undefined;
+  modelName?: string;
+  environmentName?: string;
+  posterName: string;
 }
 
 export interface EnvironmentState {
@@ -124,10 +124,15 @@ export const INITIAL_STATE: State = {
     modelViewerSnippet: {
       arConfig: {ar: true, arModes: 'webxr scene-viewer quick-look'},
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},
-      config: {cameraControls: true, shadowIntensity: 1},
+      config: {
+        cameraControls: true,
+        shadowIntensity: 1,
+        environmentImage: 'neutral'
+      },
       poster: {height: 512, mimeType: 'image/webp'},
       hotspots: [],
-      relativeFilePaths: {posterName: 'poster.webp'},
+      relativeFilePaths:
+          {posterName: 'poster.webp', environmentName: 'neutral'},
       extraAttributes: {},
     },
   },
