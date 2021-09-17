@@ -80,17 +80,14 @@ export class IblSelector extends ConnectedLitElement {
     const dropdownElement = event.target as Dropdown;
     // Polymer dropdown emits an deselect event before selection, we need to
     // filter that out
-    if (dropdownElement.selectedItem &&
-        dropdownElement.selectedItem.getAttribute('value') !==
-            this.config.environmentImage) {
-      reduxStore.dispatch(dispatchEnvrionmentImage(
-          dropdownElement.selectedItem.getAttribute('value') || undefined));
+    const value = dropdownElement.selectedItem.getAttribute('value');
+    if (value !== this.config.environmentImage) {
+      reduxStore.dispatch(dispatchEnvrionmentImage(value || undefined));
       // dropdown value equals null when "Default" is selected
-      if (dropdownElement.selectedItem.getAttribute('value') === null) {
+      if (value === null) {
         reduxStore.dispatch(dispatchSetEnvironmentName(undefined));
       } else {
-        const envImageList =
-            dropdownElement.selectedItem.getAttribute('value')?.split('/');
+        const envImageList = value.split('/');
         const envImageName = envImageList![envImageList!.length - 1];
         reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
       }
@@ -135,11 +132,12 @@ export class IblSelector extends ConnectedLitElement {
   // TODO: On snippet input if IBL is defined, select the
   // correct option from the dropdown.
   render() {
-    const selectedIndex = this.config.environmentImage ?
-        this.environmentImages.findIndex(
-            (image) => image.uri === this.config.environmentImage) +
-            1 :
-        0;  // 0 is the default state
+    const value = this.config.environmentImage;
+    const selectedIndex = value === 'neutral' ?
+        0 :
+        value == null ?
+        1 :
+        2 + this.environmentImages.findIndex((image) => image.uri === value);
     return html`
       <me-expandable-tab tabName="Lighting" .open=${true}>
         <div slot="content">
@@ -150,6 +148,7 @@ export class IblSelector extends ConnectedLitElement {
               selectedIndex=${selectedIndex}
               style="align-self: center; width: 70%;"
               @select=${this.onSelectEnvironmentImage}>
+              <paper-item value="neutral">Neutral</paper-item>
               <paper-item>Default</paper-item>
               ${
         this.environmentImages.map(
