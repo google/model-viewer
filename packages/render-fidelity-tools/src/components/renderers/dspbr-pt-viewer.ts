@@ -89,14 +89,14 @@ export class PathtracingViewer extends LitElement {
     renderer.maxBounces = 8;
 
     await new Promise<void>((resolve) => {
-      console.log('Loading resources for', scenario.model);
+      // console.log('Loading resources for', scenario.model);
 
       Loader.loadScene(scenario.model, false).then((gltf: any) => {
         this[$boundingBox] = new Box3().setFromObject(gltf.scene);
         this[$renderer].setScene(gltf.scene, gltf).then(() => {
           if (scenario.lighting) {
             Loader.loadIBL(scenario.lighting).then((ibl: any) => {
-              console.log("loaded ibl" +  scenario.lighting);
+              // console.log("Loaded ibl", scenario.lighting);
               this[$renderer].setIBL(ibl);
             });
           }
@@ -118,9 +118,6 @@ export class PathtracingViewer extends LitElement {
       numSamples = 2048;
     }
 
-    console.log(this[$camera].position);
-    console.log(this[$camera].matrixWorld);
-
     console.log('Rendering ' + numSamples + ' samples');
     this[$renderer].render(this[$camera]!, numSamples, () => {},
       () => {
@@ -139,7 +136,6 @@ export class PathtracingViewer extends LitElement {
 
     const canvas = this[$canvas]!;
     const {dimensions, target, orbit, verticalFoV} = this.scenario;
-    console.log('Scenario:', dimensions, target, orbit, verticalFoV);
 
     const width = dimensions.width;
     const height = dimensions.height;
@@ -166,7 +162,6 @@ export class PathtracingViewer extends LitElement {
     }
 
     const bbox =  this[$boundingBox];
-    console.log(bbox);
     const modelRadius = Math.max(
         bbox.max.x - bbox.min.x,
         bbox.max.y - bbox.min.y,
@@ -182,7 +177,5 @@ export class PathtracingViewer extends LitElement {
     this[$camera].fov = verticalFoV;
     this[$camera].near = near;
     this[$camera].far = far;
-
-    console.log(eye, center, this[$camera].aspect, near, far);
   }
 }
