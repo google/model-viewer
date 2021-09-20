@@ -108,7 +108,8 @@ async function prepareZipArchive(
   zip.file(glb.filename, glb.blob);
 
   // check if legal envrionment url
-  if (config.environmentImage) {
+  if (config.environmentImage != null &&
+      config.environmentImage !== 'neutral') {
     const response = await fetch(config.environmentImage);
     if (!response.ok) {
       throw new Error(`Failed to fetch url ${config.environmentImage}`);
