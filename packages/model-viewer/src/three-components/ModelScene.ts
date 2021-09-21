@@ -15,6 +15,7 @@
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
+import { Material } from '../features/scene-graph/api.js';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
 import {resolveDpr} from '../utilities.js';
@@ -623,11 +624,11 @@ export class ModelScene extends Scene {
    * on the mesh corresponding to the input pixel coordinates given relative to
    * the model-viewer element. If the mesh is not hit, the result is null.
    * 
-   * The third return value is the entire 3D object intersected at the pixel coordinates.
-   * This is usefull to apply material changes on mouse events (hover/click).
+   * The third return value is the current hit material intersected at the pixel coordinates.
+   * This is usefull to apply materials changes on mouse events (hover/click).
    */
   positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
-    {position: Vector3, normal: Vector3, object?: any }|null {
+    {position: Vector3, normal: Vector3, material?: Material }|null {
     raycaster.setFromCamera(pixelPosition, this.getCamera());
     const hits = raycaster.intersectObject(object, true);
 
@@ -643,7 +644,7 @@ export class ModelScene extends Scene {
     hit.face.normal.applyNormalMatrix(
         new Matrix3().getNormalMatrix(hit.object.matrixWorld));
 
-    return {position: hit.point, normal: hit.face.normal, object: hit.object };
+    return {position: hit.point, normal: hit.face.normal, material: hit.object.material };
   }
 
   /**

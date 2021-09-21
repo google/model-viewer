@@ -19,6 +19,7 @@ import {Matrix3, Matrix4, Vector2} from 'three';
 import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
+import { Material } from './scene-graph/api.js';
 
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
@@ -133,11 +134,11 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * the format suitable for putting in a hotspot's data-position and
      * data-normal attributes. If the mesh is not hit, the result is null.
      * 
-     * The third return value is the entire 3D object intersected at the pixel coordinates.
-     * This is usefull to apply material changes on mouse events (hover/click).
+     * The third return value is the current hit material intersected at the pixel coordinates.
+     * This is usefull to apply materials changes on mouse events (hover/click).
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D, object?: any }|null {
+      {position: Vector3D, normal: Vector3D, material?: Material }|null {
       const scene = this[$scene];
       const {width, height, target} = scene;
       pixelPosition.set(pixelX / width, pixelY / height)
@@ -157,7 +158,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const normal =
           toVector3D(hit.normal.applyNormalMatrix(worldToModelNormal));
 
-      return {position: position, normal: normal, object: hit.object };
+      return {position: position, normal: normal, material: hit.object.material };
     }
 
     private[$addHotspot](node: Node) {
