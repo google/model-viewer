@@ -9,7 +9,7 @@
     "test:ci": "./scripts/ci-check-fidelity.sh",
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
-    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/lib/shader test/renderers/dspbr-pt/",
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/dist/shader test/renderers/dspbr-pt/",
     "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/dspbr-pt/shader ./test/renderers/filament/{cmgen,ktx}"
   },
   "contributors": [
@@ -35,7 +35,7 @@
     "@types/pngjs": "^3.4.0",
     "@types/puppeteer": "^5.4.4",
     "@types/rimraf": "^3.0.1",
-    "dspbr-pt": "^0.2.1",
+    "dspbr-pt": "^0.3.3",
     "filament": "1.12.2",
     "focus-visible": "^5.2.0",
     "http-server": "^0.12.3",
