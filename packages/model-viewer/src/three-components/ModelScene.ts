@@ -622,9 +622,12 @@ export class ModelScene extends Scene {
    * This method returns the world position and model-space normal of the point
    * on the mesh corresponding to the input pixel coordinates given relative to
    * the model-viewer element. If the mesh is not hit, the result is null.
+   * 
+   * The third return value is the entire 3D object intersected at the pixel coordinates.
+   * This is usefull to apply material changes on mouse events (hover/click).
    */
   positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
-      {position: Vector3, normal: Vector3}|null {
+    {position: Vector3, normal: Vector3, object?: any }|null {
     raycaster.setFromCamera(pixelPosition, this.getCamera());
     const hits = raycaster.intersectObject(object, true);
 
@@ -640,7 +643,7 @@ export class ModelScene extends Scene {
     hit.face.normal.applyNormalMatrix(
         new Matrix3().getNormalMatrix(hit.object.matrixWorld));
 
-    return {position: hit.point, normal: hit.face.normal};
+    return {position: hit.point, normal: hit.face.normal, object: hit.object };
   }
 
   /**

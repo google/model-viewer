@@ -34,7 +34,7 @@ const worldToModelNormal = new Matrix3();
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
   positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D}|null
+    {position: Vector3D, normal: Vector3D, object?: any }|null
 }
 
 /**
@@ -132,9 +132,12 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * model-viewer element. The position and normal are returned as strings in
      * the format suitable for putting in a hotspot's data-position and
      * data-normal attributes. If the mesh is not hit, the result is null.
+     * 
+     * The third return value is the entire 3D object intersected at the pixel coordinates.
+     * This is usefull to apply material changes on mouse events (hover/click).
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
-        {position: Vector3D, normal: Vector3D}|null {
+      {position: Vector3D, normal: Vector3D, object?: any }|null {
       const scene = this[$scene];
       const {width, height, target} = scene;
       pixelPosition.set(pixelX / width, pixelY / height)
@@ -154,7 +157,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const normal =
           toVector3D(hit.normal.applyNormalMatrix(worldToModelNormal));
 
-      return {position: position, normal: normal};
+      return {position: position, normal: normal, object: hit.object };
     }
 
     private[$addHotspot](node: Node) {
