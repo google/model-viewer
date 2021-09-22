@@ -110,15 +110,12 @@ export default class GLTFMaterialsVariantsExtension implements
     for (const scene of gltf.scenes) {
       // Save the variants data under associated mesh.userData
       scene.traverse(object => {
-        // The following code can be simplified if parser.associations directly
-        // supports meshes.
-        const association = parser.associations.get(object);
-
-        if (!association || association.type !== 'nodes') {
+        if (object.userData.associations == null ||
+            object.userData.associations.nodes == null) {
           return;
         }
 
-        const nodeDef = json.nodes[association.index];
+        const nodeDef = json.nodes[object.userData.associations.nodes];
         const meshIndex = nodeDef.mesh;
 
         if (meshIndex === undefined) {

@@ -14,7 +14,7 @@
  */
 
 import {Group, Mesh, MeshStandardMaterial, Object3D} from 'three';
-import {GLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
@@ -58,9 +58,10 @@ suite('correlated-scene-graph', () => {
 
       expect(gltfReference).to.be.ok;
 
-      const {type, index} = gltfReference as GLTFReference;
+      const {materials} = gltfReference!;
 
-      const referencedGltfMaterial = threeGLTF.parser.json[type][index];
+      const referencedGltfMaterial =
+          threeGLTF.parser.json['materials'][materials!];
 
       expect(referencedGltfMaterial).to.be.equal(gltfMaterial);
     });
@@ -87,9 +88,10 @@ suite('correlated-scene-graph', () => {
 
       expect(gltfReference).to.be.ok;
 
-      const {type, index} = gltfReference as GLTFReference;
+      const {textures} = gltfReference!;
 
-      const referencedGltfTexture = threeGLTF.parser.json[type][index];
+      const referencedGltfTexture =
+          threeGLTF.parser.json['textures'][textures!];
 
       expect(referencedGltfTexture).to.be.equal(gltfTexture);
     });
@@ -109,11 +111,10 @@ suite('correlated-scene-graph', () => {
 
         let name;
         cloneCorrelatedSceneGraph.threeObjectMap.forEach(
-            (reference, threeObject) => {
+            (mappings, threeObject) => {
               if ((threeObject as MeshStandardMaterial).isMaterial) {
-                name =
-                    cloneCorrelatedSceneGraph.gltf.materials![reference.index]
-                        .name;
+                const index = mappings.materials!;
+                name = cloneCorrelatedSceneGraph.gltf.materials![index].name;
               }
             });
         expect(name).to.be.eq('Default');

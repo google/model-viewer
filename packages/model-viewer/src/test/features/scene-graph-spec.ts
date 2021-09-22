@@ -17,7 +17,7 @@ import {Mesh, MeshStandardMaterial} from 'three';
 
 import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
 import {$primitives} from '../../features/scene-graph/model.js';
-import {$defaultMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
+import {$initialMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
@@ -97,7 +97,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
             // Finds the first primitive with material 0 assigned.
             for (const primitive of element.model![$primitives]) {
               if (primitive.variantInfo != null &&
-                  primitive[$defaultMaterialIdx] == 0) {
+                  primitive[$initialMaterialIdx] == 0) {
                 primitiveNode = primitive;
                 return;
               }
