@@ -20,7 +20,6 @@ import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-vie
 import {resolveDpr} from '../utilities.js';
 
 import {Damper, SETTLING_TIME} from './Damper.js';
-import { Material } from './gltf-instance/gltf-2.0.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';

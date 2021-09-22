@@ -19,7 +19,6 @@ import {Matrix3, Matrix4, MeshStandardMaterial, Vector2} from 'three';
 import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
-import { Material } from './scene-graph/api.js';
 
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
