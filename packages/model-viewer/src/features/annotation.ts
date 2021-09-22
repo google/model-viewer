@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Matrix3, Matrix4, Vector2} from 'three';
+import {Matrix3, Matrix4, MeshStandardMaterial, Vector2} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
@@ -138,7 +138,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * This is usefull to apply materials changes on mouse events (hover/click).
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D, material?: Material }|null {
+      {position: Vector3D, normal: Vector3D, material?: MeshStandardMaterial }|null {
       const scene = this[$scene];
       const {width, height, target} = scene;
       pixelPosition.set(pixelX / width, pixelY / height)
@@ -158,7 +158,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const normal =
           toVector3D(hit.normal.applyNormalMatrix(worldToModelNormal));
 
-      return {position: position, normal: normal, material: hit.object.material };
+      return {position: position, normal: normal, material: hit.material };
     }
 
     private[$addHotspot](node: Node) {
