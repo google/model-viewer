@@ -37,5 +37,6 @@ export const styles: CSSResult = css`
 
 .sticky[open] {
   background-color: #202124;  /* GOOGLE_GREY_900 */
+  padding: 0 20px;
 }
 `;

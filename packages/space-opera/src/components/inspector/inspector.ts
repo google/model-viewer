@@ -23,7 +23,7 @@ import {customElement, html, internalProperty} from 'lit-element';
 
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
-import {getModel} from '../model_viewer_preview/reducer.js';
+import {getModel, isLoaded} from '../model_viewer_preview/reducer.js';
 import {Thumbnail} from '../model_viewer_preview/types.js';
 
 /**
@@ -35,10 +35,10 @@ export class InspectorPanel extends ConnectedLitElement {
   @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
 
   stateChanged(state: State) {
-    const model = getModel(state);
-    if (model == null) {
+    if (!isLoaded(state)) {
       return;
     }
+    const model = getModel(state);
     if (model.thumbnailsById != null) {
       this.thumbnailsById = model.thumbnailsById;
     }

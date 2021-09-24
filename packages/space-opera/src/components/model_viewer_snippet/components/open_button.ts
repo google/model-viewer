@@ -16,32 +16,30 @@
  */
 
 import '@material/mwc-button';
-import '../../file_modal/file_modal.js';
 
+import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
+import {SimpleDropzone} from 'simple-dropzone';
 
-import {dispatchCameraControlsEnabled, dispatchConfig, getConfig} from '../../../components/config/reducer.js';
+import {dispatchConfig, dispatchEnvrionmentImage, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
-import {openModalStyles} from '../../../styles.css.js';
+import {fileModalStyles, openModalStyles} from '../../../styles.css.js';
 import {ArConfigState, extractStagingConfig, ImageType, INITIAL_STATE, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
-import {FileModalElement} from '../../file_modal/file_modal.js';
 import {dispatchSetHotspots} from '../../hotspot_panel/reducer.js';
+import {dispatchAddEnvironmentImage} from '../../ibl_selector/reducer.js';
 import {dispatchArConfig, getArConfig} from '../../mobile_view/reducer.js';
-import {dispatchGltfUrl, getGltfUrl} from '../../model_viewer_preview/reducer.js';
+import {dispatchFileMap, dispatchGltfUrl, dispatchRootPath, getGltfUrl, getModelViewer} from '../../model_viewer_preview/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName, dispatchSetPosterName, getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../../shared/slider_with_input/slider_with_input.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
-import {createSafeObjectUrlFromArrayBuffer, isObjectUrl} from '../../utils/create_object_url.js';
+import {isObjectUrl} from '../../utils/create_object_url.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
 import {applyRelativeFilePaths, dispatchExtraAttributes, dispatchHeight, dispatchMimeType, getExtraAttributes} from '../reducer.js';
 
 import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
-
-const DEFAULT_ATTRIBUTES =
-    'shadow-intensity="1" camera-controls ar ar-modes="webxr scene-viewer quick-look"';
 
 const DEFAULT_POSTER_HEIGHT =
     INITIAL_STATE.entities.modelViewerSnippet.poster.height;
@@ -103,13 +101,18 @@ export class OpenModal extends ConnectedLitElement {
           await new Promise(resolve => {
             setTimeout(resolve, 0);
           });
-          reduxStore.dispatch(dispatchGltfUrl(config.src));
-          // dispatch new model name
-          const fileNameList = config.src.split('/');
-          const fileName = fileNameList[fileNameList.length - 1];
+
+          const {src} = config;
+          const index = src.lastIndexOf('/');
+          const rootPath = index === -1 ? './' : src.substr(0, index + 1);
+          const fileName = src.substr(index + 1);
+
           reduxStore.dispatch(dispatchSetModelName(fileName));
+          reduxStore.dispatch(dispatchRootPath(rootPath));
+          reduxStore.dispatch(dispatchFileMap(new Map<string, File>()));
+          reduxStore.dispatch(dispatchGltfUrl(src));
         }
-      } catch (e) {
+      } catch (e: any) {
         console.log(
             `Could not download 'src' attribute - OK, ignoring it. Error: ${
                 e.message}`);
@@ -171,14 +174,10 @@ export class OpenModal extends ConnectedLitElement {
   render() {
     // Get the model-viewer snippet for the edit snippet modal
     const editedConfig = {...this.config};
-    const editedArConfig = {...this.arConfig};
     applyRelativeFilePaths(editedConfig, this.gltfUrl, this.relativeFilePaths!);
-    if (editedArConfig.iosSrc) {
-      editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
-    }
 
     const exampleLoadableSnippet = renderModelViewer(
-        editedConfig, editedArConfig, this.extraAttributes, {}, undefined);
+        editedConfig, this.arConfig, this.extraAttributes, {}, undefined);
 
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
@@ -209,24 +208,72 @@ export class OpenModal extends ConnectedLitElement {
 @customElement('me-import-card')
 export class ImportCard extends LitElement {
   @query('me-open-modal#open-modal') openModal!: OpenModal;
-  @query('me-file-modal') fileModal!: FileModalElement;
+  @query('input#file-input') fileInput!: HTMLInputElement;
   @query('me-slider-with-input#height') heightSlider!: SliderWithInputElement;
   @internalProperty() selectedDefaultOption: number = 0;
+  static styles = fileModalStyles;
 
-  async onUploadGLB() {
-    const files = await this.fileModal.open();
-    if (!files) {
-      /// The user canceled the previous upload
-      return;
+  firstUpdated() {
+    const dropControl = new SimpleDropzone(getModelViewer(), this.fileInput);
+    dropControl.on('drop', ({files}: any) => this.onUpload(files));
+  }
+
+  async onUpload(fileMap: Map<string, File>) {
+    const modelViewer = getModelViewer();
+    let rootPath: string;
+    for (const [path, file] of fileMap) {
+      const filename = file.name.toLowerCase();
+      if (filename.match(/\.(gltf|glb)$/)) {
+        const blobURLs: Array<string> = [];
+        rootPath = path.replace(file.name, '');
+
+        ModelViewerElement.mapURLs((url: string) => {
+          const index = url.lastIndexOf('/');
+
+          const normalizedURL =
+              rootPath + url.substr(index + 1).replace(/^(\.?\/)/, '');
+
+          if (fileMap.has(normalizedURL)) {
+            const blob = fileMap.get(normalizedURL);
+            const blobURL = URL.createObjectURL(blob);
+            blobURLs.push(blobURL);
+            return blobURL;
+          }
+
+          return url;
+        });
+
+        modelViewer.addEventListener('load', () => {
+          blobURLs.forEach(URL.revokeObjectURL);
+        });
+
+        const fileURL =
+            typeof file === 'string' ? file : URL.createObjectURL(file);
+        const state = reduxStore.getState();
+        this.selectedDefaultOption = 0;
+        reduxStore.dispatch(dispatchSetModelName(file.name));
+        reduxStore.dispatch(dispatchRootPath(rootPath));
+        reduxStore.dispatch(dispatchFileMap(fileMap));
+        reduxStore.dispatch(
+            dispatchConfig(extractStagingConfig(getConfig(state))));
+        reduxStore.dispatch(dispatchSetHotspots([]));
+        reduxStore.dispatch(dispatchGltfUrl(fileURL));
+      }
     }
-    const arrayBuffer = await files[0].arrayBuffer();
-    reduxStore.dispatch(dispatchSetModelName(files[0].name));
-    const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
-    reduxStore.dispatch(dispatchGltfUrl(url));
-    dispatchConfig(extractStagingConfig(getConfig(reduxStore.getState())));
-    // enable camera controls by default
-    reduxStore.dispatch(dispatchCameraControlsEnabled(true));
-    reduxStore.dispatch(dispatchSetHotspots([]));
+
+    if (fileMap.size === 1) {
+      const file = fileMap.values().next().value;
+      const filename = file.name.toLowerCase();
+      let uri = URL.createObjectURL(file);
+      if (filename.match(/\.(hdr)$/)) {
+        uri += '#.hdr';
+      } else if (!filename.match(/\.(png|jpg)$/)) {
+        return;
+      }
+      reduxStore.dispatch(dispatchAddEnvironmentImage({uri, name: file.name}));
+      reduxStore.dispatch(dispatchEnvrionmentImage(uri));
+      reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
+    }
   }
 
   onSnippetOpen() {
@@ -235,8 +282,8 @@ export class ImportCard extends LitElement {
 
   onDefaultSelect(event: CustomEvent) {
     const dropdown = event.target as Dropdown;
-    const key = dropdown.selectedItem?.getAttribute('value') || undefined;
-    let snippet = '';
+    const key = dropdown.selectedItem?.getAttribute('value');
+
     const simpleMap: any = {
       'Astronaut': 1,
       'Horse': 2,
@@ -251,28 +298,31 @@ export class ImportCard extends LitElement {
       'Lantern': 9,
       'SpecGlossVsMetalRough': 10
     };
-    const fileName = `${key}.glb`;
-    if (key !== undefined) {
-      if (key === 'none') {
-        this.selectedDefaultOption = 0;
-        return;
-      } else if (key in simpleMap) {
-        this.selectedDefaultOption = simpleMap[key];
-        snippet = `<model-viewer
-  src='https://modelviewer.dev/shared-assets/models/${fileName}'
-  ${DEFAULT_ATTRIBUTES}>
-</model-viewer>`;
-      } else if (key in advancedMap) {
-        this.selectedDefaultOption = advancedMap[key];
-        snippet = `<model-viewer
-  src='https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/${
-            key}/glTF-Binary/${fileName}'
-  ${DEFAULT_ATTRIBUTES}>
-</model-viewer>`;
-      }
-      reduxStore.dispatch(dispatchSetModelName(fileName));
-      this.openModal.handleSubmitSnippet(snippet);
+
+    if (key == null) {
+      return;
     }
+    if (key === 'none') {
+      this.selectedDefaultOption = 0;
+      return;
+    }
+
+    const rootPath = 'https://modelviewer.dev/shared-assets/models/' +
+        (key in advancedMap ? `glTF-Sample-Models/2.0/${key}/glTF-Binary/` :
+                              '');
+    const fileName = `${key}.glb`;
+
+    this.selectedDefaultOption =
+        key in advancedMap ? advancedMap[key] : simpleMap[key];
+    const src = rootPath + fileName;
+
+    const state = reduxStore.getState();
+    reduxStore.dispatch(dispatchSetModelName(fileName));
+    reduxStore.dispatch(dispatchRootPath(rootPath));
+    reduxStore.dispatch(dispatchFileMap(new Map<string, File>()));
+    reduxStore.dispatch(dispatchConfig(extractStagingConfig(getConfig(state))));
+    reduxStore.dispatch(dispatchSetHotspots([]));
+    reduxStore.dispatch(dispatchGltfUrl(src));
   }
 
   onHeightChange() {
@@ -310,11 +360,11 @@ export class ImportCard extends LitElement {
         <paper-item value='Lantern'>Lantern</paper-item>
         <paper-item value='SpecGlossVsMetalRough'>Water Bottles</paper-item>
       </me-dropdown>
-      <mwc-button unelevated
-        icon="file_upload" style="align-self: center;"
-        @click=${this.onUploadGLB}>
-        GLB
+      <mwc-button unelevated label="GLB" icon="file_upload" class="UploadButton">
+        <label for="file-input" class="FileInputLabel"/>
       </mwc-button>
+      <input type="file" id="file-input" multiple/>
+      
     </div>
     <me-validation></me-validation>
     <div style="font-size: 14px; font-weight: 500; margin-top: 10px;">Poster:</div>
@@ -324,7 +374,6 @@ export class ImportCard extends LitElement {
         value="${DEFAULT_POSTER_HEIGHT}">
       </me-slider-with-input>
     </me-section-row>
-    <me-export-zip-button id="export-zip" style="display: block; margin-top: 10px;"></me-export-zip-button>
     `;
   }
 }

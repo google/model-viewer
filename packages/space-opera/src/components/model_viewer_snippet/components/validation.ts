@@ -20,11 +20,12 @@ import {customElement, html, internalProperty, LitElement, property, query} from
 import {validationStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
-import {getGltfUrl} from '../../model_viewer_preview/reducer.js';
+import {getModel} from '../../model_viewer_preview/reducer.js';
 
-import {validateGltf} from './validation_utils.js';
+import {resolveExternalResource, validateGltf} from './validation_utils.js';
 
 import type {Report, Message} from './validation_utils';
+import {GLTF} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
 
 @customElement('me-validation-modal')
 export class ValidationModal extends LitElement {
@@ -76,6 +77,7 @@ export class ValidationModal extends LitElement {
       <ul>
         <li>${this.report.info!.drawCallCount} draw calls</li>
         <li>${this.report.info!.animationCount} animations</li>
+        <li>${this.report.info!.totalJointCount} joints</li>
         <li>${this.report.info!.materialCount} materials</li>
         <li>${this.report.info!.totalVertexCount} vertices</li>
         <li>${this.report.info!.totalTriangleCount} triangles</li>
@@ -93,6 +95,9 @@ export class ValidationModal extends LitElement {
   }
 
   render() {
+    if (this.report.info == null) {
+      return html``;
+    }
     return html`
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
   <div class="container">
@@ -131,21 +136,35 @@ export class Validation extends ConnectedLitElement {
   @query('me-validation-modal#validation-modal')
   validationModal!: ValidationModal;
   @internalProperty() gltfUrl?: string;
-  @internalProperty() report?: Report;
+  @internalProperty() rootPath = '';
+  @internalProperty() fileMap = new Map<string, File>();
+  @internalProperty() originalGltf?: GLTF;
+  @internalProperty() report: Report = {};
 
   @internalProperty() severityTitle: string = '';
   @internalProperty() severityColor: string = '';
 
-  stateChanged(state: State) {
-    const newGltfUrl = getGltfUrl(state);
-    if (newGltfUrl !== this.gltfUrl && typeof newGltfUrl === 'string') {
-      this.gltfUrl = newGltfUrl;
-      this.awaitLoad(this.gltfUrl);
+  async stateChanged(state: State) {
+    const {rootPath, originalGltf, gltfUrl, fileMap} = getModel(state);
+    if (rootPath != null) {
+      this.rootPath = rootPath;
+    }
+
+    if (originalGltf != null && gltfUrl != null &&
+        this.originalGltf !== originalGltf) {
+      this.originalGltf = originalGltf;
+      this.fileMap = fileMap;
+      this.gltfUrl = gltfUrl;
+
+      await this.awaitLoad(gltfUrl);
+      this.countJoints(originalGltf);
     }
   }
 
   async awaitLoad(url: string) {
-    this.report = await validateGltf(url);
+    this.report = await validateGltf(url, (uri: string) => {
+      return resolveExternalResource(uri, this.rootPath, this.fileMap);
+    });
     this.severityTitle = 'Model Details';
     this.severityColor = '#3c4043';
     if (this.report.issues!.numInfos) {
@@ -164,6 +183,18 @@ export class Validation extends ConnectedLitElement {
       this.severityColor = '#f44336';
       this.severityTitle = 'Error';
     }
+  }
+
+  countJoints(gltf: GLTF) {
+    const jointSet = new Set();
+    if (gltf.skins != null) {
+      for (const skin of gltf.skins) {
+        for (const joint of skin.joints) {
+          jointSet.add(joint);
+        }
+      }
+    }
+    this.report.info = {...this.report?.info, totalJointCount: jointSet.size }
   }
 
   onOpen() {

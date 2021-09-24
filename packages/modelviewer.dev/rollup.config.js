@@ -39,20 +39,6 @@ const outputOptions = [
     onwarn,
   },
   {
-    input: './lib/tester.js',
-    output: {
-      file: './examples/built/tester.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'Tester'
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn
-  },
-  {
     input: './lib/docs-and-examples/docs-and-examples.js',
     output: {
       file: './examples/built/docs-and-examples.js',

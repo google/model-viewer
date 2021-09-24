@@ -19,7 +19,6 @@ import {ModelViewerSnippetState} from '../../types';
 
 export interface URLs {
   gltf: string|undefined;
-  usdz: string|undefined;
   env: string|undefined;
 }
 
@@ -32,9 +31,6 @@ export interface MobileSession {
 export interface EditorUpdates {
   gltfChanged: boolean;
   gltfId: number;
-  iosChanged: boolean;
-  iosSrcIsReality: boolean;
-  usdzId: number;
   stateChanged: boolean;
   posterId: number;
   envChanged: boolean;

@@ -21,14 +21,13 @@ import '@material/mwc-button';
 import JSZip from 'jszip';
 import {css, customElement, html, internalProperty} from 'lit-element';
 
-import {ArConfigState, BestPracticesState, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
+import {BestPracticesState, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {modelViewerTemplate, progressBar, scriptTemplate} from '../../best_practices/constants.js';
 import {getBestPractices} from '../../best_practices/reducer.js';
 import {arButtonCSS, arPromptCSS, modelViewerStyles, progressBarCSS} from '../../best_practices/styles.css.js';
 import {getConfig} from '../../config/reducer.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
 import {getHotspots} from '../../hotspot_panel/reducer.js';
-import {getArConfig} from '../../mobile_view/reducer.js';
 import {getModelViewer} from '../../model_viewer_preview/reducer.js';
 import {getRelativeFilePaths} from '../../relative_file_paths/reducer.js';
 import {safeDownloadCallback} from '../../utils/create_object_url.js';
@@ -99,7 +98,6 @@ function beautify_snippet(snippetList: string[]): string {
  */
 async function prepareZipArchive(
     config: ModelViewerConfig,
-    arConfig: ArConfigState,
     data: {snippetText: string},
     relativeFilePaths: RelativeFilePathsState,
     bestPractices: BestPracticesState,
@@ -110,7 +108,8 @@ async function prepareZipArchive(
   zip.file(glb.filename, glb.blob);
 
   // check if legal envrionment url
-  if (config.environmentImage) {
+  if (config.environmentImage != null &&
+      config.environmentImage !== 'neutral') {
     const response = await fetch(config.environmentImage);
     if (!response.ok) {
       throw new Error(`Failed to fetch url ${config.environmentImage}`);
@@ -121,15 +120,6 @@ async function prepareZipArchive(
   // always generate a poster image
   const posterBlob = await createPoster();
   zip.file(relativeFilePaths.posterName!, posterBlob);
-
-  // check if legal ios src
-  if (arConfig.iosSrc) {
-    const response = await fetch(arConfig.iosSrc);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch url ${arConfig.iosSrc}`);
-    }
-    zip.file(relativeFilePaths.iosName!, response.blob());
-  }
 
   let template = modelViewerTemplate;
   // Conditionally set script if anything requires javascript. Currently, this
@@ -229,7 +219,6 @@ export class ExportZipButton extends GenericDownloadButton {
     const config = getConfig(state);
     const loaded = getModelViewer()?.loaded;
     const relativeFilePaths = getRelativeFilePaths(state);
-    const arConfig = getArConfig(state);
     const bestPractices = getBestPractices(state);
     const hasHotspots = getHotspots(state).length > 0;
 
@@ -242,7 +231,7 @@ export class ExportZipButton extends GenericDownloadButton {
     // and therefore we must pass a containing object (in our case, this) by
     // reference.
     this.preparePayload = () => prepareZipArchive(
-        config, arConfig, this, relativeFilePaths, bestPractices, hasHotspots);
+        config, this, relativeFilePaths, bestPractices, hasHotspots);
   }
 }
 

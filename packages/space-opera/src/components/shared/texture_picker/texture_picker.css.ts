@@ -24,13 +24,6 @@ export const styles: CSSResult = css`:host {
   --material-color-google-grey-900: #202124;
 }
 
-.NoTexturesUploadButton {
-  align-items: center;
-  display: flex;
-  padding-left: 15px;
-  height: 30px;
-}
-
 .NullTextureSquare {
   background:linear-gradient(to top right,
              rgba(0,0,0,0) 0%,
@@ -102,15 +95,5 @@ export const styles: CSSResult = css`:host {
 
 .TextureSquare > .TextureImage {
   mix-blend-mode: multiply;
-}
-
-.UploadButton {
-  --mdc-icon-button-size: 24px;
-  float: right;
-  padding: 5px 0;
-}
-
-.UploadButtonNoTextures {
-  float: right;
 }
 `;

@@ -45,7 +45,7 @@ import {applyRelativeFilePaths, getExtraAttributes} from './reducer.js';
  */
 @customElement('me-export-panel')
 export class ExportPanel extends ConnectedLitElement {
-  @property({type: String}) header = '';
+  @property({type: Boolean}) header = false;
 
   @internalProperty() config: ModelViewerConfig = {};
   @internalProperty() arConfig: ArConfigState = {};
@@ -79,22 +79,18 @@ export class ExportPanel extends ConnectedLitElement {
 
   render() {
     const editedConfig = {...this.config};
-    const editedArConfig = {...this.arConfig};
     applyRelativeFilePaths(editedConfig, this.gltfUrl, this.relativeFilePaths!);
-    if (editedArConfig.iosSrc) {
-      editedArConfig.iosSrc = this.relativeFilePaths?.iosName;
-    }
 
     const childElements =
         renderCommonChildElements(this.hotspots, this.bestPractices!);
 
     const snippet = renderModelViewer(
-        editedConfig, editedArConfig, this.extraAttributes, {}, childElements);
+        editedConfig, this.arConfig, this.extraAttributes, {}, childElements);
 
-    if (this.header === 'true') {
+    if (this.header === true) {
       return html`
 <me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
-  .open=${true} .sticky=${true} 
+  .open=${true} .sticky=${false} 
   .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
   <div slot="content">
     <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}>
@@ -106,7 +102,7 @@ export class ExportPanel extends ConnectedLitElement {
     // on import/export tab
     return html`
 <me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
-  .open=${true} .sticky=${true} 
+  .open=${true} .sticky=${false} 
   .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
   <div slot="content">
     <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}>
@@ -119,6 +115,7 @@ export class ExportPanel extends ConnectedLitElement {
 <me-expandable-tab tabName="File Manager" .open=${true}>
   <div slot="content">
     <me-import-card></me-import-card>
+    <me-export-zip-button id="export-zip" style="display: block; margin-top: 10px;"></me-export-zip-button>
   </div>
 </me-expandable-tab>
 <me-expandable-tab tabName="Mobile View" .open=${true}>

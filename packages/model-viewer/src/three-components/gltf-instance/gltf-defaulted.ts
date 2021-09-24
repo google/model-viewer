@@ -67,8 +67,18 @@ export interface Image {
   extras?: Extras;
 }
 
-export type GLTFElement = Scene|Node|Mesh|Material|Image|Texture|TextureInfo|
-    Sampler|PBRMetallicRoughness|Accessor|Camera|Animation|AnimationSampler;
+export interface Skin {
+  inverseBindMatrices?: number;
+  skeleton?: number;
+  joints: number[];
+  name?: string;
+  extensions?: ExtensionDictionary;
+  extras?: Extras;
+}
+
+export type GLTFElement =
+    Scene|Node|Mesh|Material|Image|Texture|TextureInfo|Sampler|
+    PBRMetallicRoughness|Accessor|Camera|Animation|AnimationSampler|Skin;
 
 export interface GLTF {
   asset: Asset;
@@ -83,4 +93,5 @@ export interface GLTF {
   meshes?: Mesh[];
   cameras?: Camera[];
   animations?: Animation[];
+  skins?: Skin[];
 }

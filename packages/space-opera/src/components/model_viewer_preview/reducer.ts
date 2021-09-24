@@ -18,7 +18,7 @@
 import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/texture-info';
 import {Image} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 
-import {Action, BestPracticesState, State} from '../../types.js';
+import {Action, BestPracticesState, INITIAL_STATE, State} from '../../types.js';
 import {renderARButton, renderARPrompt, renderProgressBar} from '../best_practices/render_best_practices.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {ModelState, Thumbnail} from '../model_viewer_preview/types.js';
@@ -116,6 +116,16 @@ export function dispatchGltfUrl(gltfUrl?: string|undefined) {
   return {type: SET_GLTF_URL, payload: gltfUrl};
 }
 
+const SET_ROOT_PATH = 'SET_ROOT_PATH';
+export function dispatchRootPath(path: string) {
+  return {type: SET_ROOT_PATH, payload: path};
+}
+
+const SET_FILE_MAP = 'SET_FILE_MAP';
+export function dispatchFileMap(fileMap: Map<string, File>) {
+  return {type: SET_FILE_MAP, payload: fileMap};
+}
+
 const SET_MODEL = 'SET_MODEL';
 export async function dispatchModel() {
   const thumbnailsById = await createThumbnails();
@@ -134,14 +144,21 @@ export function dispatchModelDirty(isDirty: boolean = true) {
   return {type: SET_MODEL_DIRTY, payload: {isDirty}};
 }
 
-export const getGltfUrl = (state: State) => state.entities.model?.gltfUrl;
+export const getGltfUrl = (state: State) => state.entities.model.gltfUrl;
+export const getFileMap = (state: State) => state.entities.model.fileMap;
 export const getModel = (state: State) => state.entities.model;
+export const isLoaded = (state: State) => !!state.entities.model.originalGltf;
 
 export function modelReducer(
-    state: ModelState|null = null, action: Action): ModelState|null {
+    state: ModelState = INITIAL_STATE.entities.model,
+    action: Action): ModelState {
   switch (action.type) {
     case SET_GLTF_URL:
       return {...state, gltfUrl: action.payload};
+    case SET_ROOT_PATH:
+      return {...state, rootPath: action.payload};
+    case SET_FILE_MAP:
+      return {...state, fileMap: action.payload};
     case SET_MODEL:
       return {...state, ...action.payload};
     case SET_MODEL_DIRTY:

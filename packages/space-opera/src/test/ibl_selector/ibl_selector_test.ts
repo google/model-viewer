@@ -142,9 +142,16 @@ describe('ibl selector test', () => {
 
        // Click on the Default item in dropdown unsets environment image.
        const noneItem =
-           dropdown.querySelectorAll('paper-item')[0] as HTMLElement;
+           dropdown.querySelectorAll('paper-item')[1] as HTMLElement;
        noneItem.click();
        expect(getConfig(reduxStore.getState()).environmentImage)
            .not.toBeDefined();
+
+       // Click on the Default item in dropdown unsets environment image.
+       const neutralItem =
+           dropdown.querySelectorAll('paper-item')[0] as HTMLElement;
+       neutralItem.click();
+       expect(getConfig(reduxStore.getState()).environmentImage)
+           .toBe('neutral');
      });
 });

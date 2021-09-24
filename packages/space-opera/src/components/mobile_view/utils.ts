@@ -51,24 +51,6 @@ export function envToSession(
   return `${DOMAIN}${pipeId}-${sessionID}-env${addOn}`;
 }
 
-// ex: 'https://piping.nwtgck.repl.co/123-456-789'
-export function usdzToSession(
-    pipeId: number|string,
-    sessionID: number,
-    modelId: number,
-    iosSrcIsReality: boolean): string {
-  const fileType = iosSrcIsReality ? 'reality' : 'usdz';
-  return `${DOMAIN}${pipeId}-${sessionID}-${modelId}.${fileType}`;
-}
-
-export async function prepareUSDZ(url: string): Promise<Blob> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch url ${url}`);
-  }
-  return await response.blob();
-}
-
 export async function post(content: Blob|string, url: string) {
   const response = await fetch(url, {
     method: 'POST',
@@ -102,7 +84,8 @@ export async function getWithTimeout(url: string) {
  * 'unknown'.
  * https://stackoverflow.com/questions/21741841/detecting-ios-android-operating-system
  */
-export function getMobileOperatingSystem(): string {
+export function getMobileOperatingSystem(): 'iOS'|'Android'|'Windows Phone'|
+    'unknown' {
   const userAgent =
       navigator.userAgent || navigator.vendor || (window as any).opera;
 

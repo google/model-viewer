@@ -31,6 +31,7 @@ export type Report = {
     materialCount?: number;
     totalVertexCount?: number;
     totalTriangleCount?: number;
+    totalJointCount?: number;
   };
   validatorVersion?: string;
   issues?: {
@@ -52,32 +53,40 @@ export type Message = {
 /**
  * Passes the gltf url to be validated.
  */
-export async function validateGltf(url: string): Promise<Report> {
-  return await fetch(url)
-      .then((response) => response.arrayBuffer())
-      .then(
-          (buffer) => validateBytes(new Uint8Array(buffer), {
-            externalResourceFunction: (uri) => resolveExternalResource(uri, url)
-          }))
-      .then((report) => setReport(report))
-      .catch((e) => setReportException(e));
-}
-
-function setReportException(e) {
-  console.log('Error,', e);
+export async function validateGltf(
+    url: string,
+    externalResourceFunction: (uri: string) => Promise<Uint8Array>) {
+  try {
+    const response = await fetch(url);
+    const buffer = await response.arrayBuffer();
+    const report =
+        await validateBytes(new Uint8Array(buffer), {externalResourceFunction});
+    return setReport(report);
+  } catch (e) {
+    console.log('Error,', e);
+  }
 }
 
 /**
  * Loads a resource (either locally or from the network) and returns it.
  */
-function resolveExternalResource(uri: string, url: string) {
-  const index = url.lastIndexOf('/');
-  const baseURL = index === -1 ? './' : url.substr(0, index + 1);
-  return fetch(baseURL + uri)
-      .then((response) => response.arrayBuffer())
-      .then((buffer) => {
-        return new Uint8Array(buffer);
-      });
+export async function resolveExternalResource(
+    uri: string, rootPath: string, fileMap: Map<string, File>):
+    Promise<Uint8Array> {
+  const index = uri.lastIndexOf('/');
+
+  const normalizedURL =
+      rootPath + uri.substr(index + 1).replace(/^(\.?\/)/, '');
+
+  if (fileMap.has(normalizedURL)) {
+    const blob = fileMap.get(normalizedURL);
+    const buffer = await blob!.arrayBuffer();
+    return new Uint8Array(buffer);
+  }
+
+  const response = await fetch(rootPath + uri);
+  const buffer = await response.arrayBuffer();
+  return new Uint8Array(buffer);
 }
 
 /**

@@ -27,11 +27,11 @@ export type Matrix4 = [
   number,
 ];
 
-export type Extras = unknown;
+export type Extras = any;
 
 // TODO: Document known extensions and update this type
 export interface ExtensionDictionary {
-  [index: string]: unknown;
+  [index: string]: any;
 }
 
 export type VariantMapping = {
@@ -241,7 +241,7 @@ export interface Accessor {
 
   // TODO: What is this?
   // @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#accessorsparse
-  sparse?: unknown;
+  sparse?: any;
 }
 
 export type ChannelTargetPath = 'rotation'|'scale'|'translation'|'weights';
@@ -276,8 +276,18 @@ export interface Animation {
   extras?: Extras;
 }
 
-export type GLTFElement = Scene|Node|Mesh|Material|Image|Texture|TextureInfo|
-    Sampler|PBRMetallicRoughness|Accessor|Camera|Animation|AnimationSampler;
+export interface Skin {
+  inverseBindMatrices?: number;
+  skeleton?: number;
+  joints: number[];
+  name?: string;
+  extensions?: ExtensionDictionary;
+  extras?: Extras;
+}
+
+export type GLTFElement =
+    Scene|Node|Mesh|Material|Image|Texture|TextureInfo|Sampler|
+    PBRMetallicRoughness|Accessor|Camera|Animation|AnimationSampler|Skin;
 
 export interface GLTFElementMap {
   'scene': Scene;
@@ -292,6 +302,7 @@ export interface GLTFElementMap {
   'camera': Camera;
   'animation': Animation;
   'animation-sampler': AnimationSampler;
+  'skin': Skin;
 }
 
 export interface Asset {
@@ -316,4 +327,5 @@ export interface GLTF {
   meshes?: Mesh[];
   cameras?: Camera[];
   animations?: Animation[];
+  skins?: Skin[];
 }
