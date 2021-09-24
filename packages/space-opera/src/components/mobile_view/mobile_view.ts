@@ -21,6 +21,7 @@ import {customElement, html, internalProperty, LitElement, query} from 'lit-elem
 import {ifDefined} from 'lit-html/directives/if-defined';
 
 import {toastStyles} from '../../styles.css.js';
+import {timePasses} from '../../test/utils/test_utils.js';
 import {ArConfigState, BestPracticesState, ModelViewerConfig, ModelViewerSnippetState} from '../../types.js';
 import {arButtonCSS, arPromptCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {HotspotConfig, toVector3D} from '../hotspot_panel/types.js';
@@ -60,7 +61,7 @@ export class MobileView extends LitElement {
   @internalProperty() extraAttributes: any = {};
   @internalProperty() hotspots: HotspotConfig[] = [];
   @internalProperty() bestPractices?: BestPracticesState;
-  @internalProperty() envImageUrl: string = '';
+  @internalProperty() envImageUrl: string|undefined;
 
   @internalProperty() pipeId = window.location.search.replace('?id=', '');
   @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
@@ -90,47 +91,48 @@ export class MobileView extends LitElement {
     this.config = snippet.config;
     this.extraAttributes = snippet.extraAttributes;
     this.bestPractices = snippet.bestPractices;
-
-    // Send a new POST out for each scene-viewer button press
-    if (snippet.arConfig.ar) {
-      const arButton =
-          this.modelViewer.shadowRoot!.getElementById('default-ar-button')!;
-      arButton.addEventListener('click', () => {
-        try {
-          if (this.sessionOs === 'Android') {
-            post(this.currentBlob!, this.modelViewerUrl);
-          }
-        } catch (error) {
-          console.log('Post failed on ar button press...');
-        }
-      });
-    }
   }
+
+  repostGLTF = () => {
+    try {
+      if (this.sessionOs === 'Android') {
+        post(this.currentBlob!, this.modelViewerUrl);
+      }
+    } catch (error) {
+      console.log('Post failed on ar button press...');
+    }
+  };
 
   // We set modelViewerUrl instead of directly fetching it because
   // scene-viewer requires the same url from the current model-viewer state,
   // and we need to make a POST request to that URL when scene-viewer is
   // triggered.
-  async waitForData(json: MobilePacket) {
+  waitForData(json: MobilePacket) {
     const updatedContent: EditorUpdates = json.updatedContent;
     this.overlay!.style.display = 'block';
 
+    this.updateState(json.snippet, json.urls);
+
     this.posterUrl =
         posterToSession(this.pipeId, this.sessionId, updatedContent.posterId);
-
-    if (updatedContent.stateChanged) {
-      this.updateState(json.snippet, json.urls);
-      await this.updateComplete;
-    }
 
     if (updatedContent.gltfChanged) {
       this.modelViewerUrl =
           gltfToSession(this.pipeId, this.sessionId, updatedContent.gltfId);
     }
 
-    if (updatedContent.envChanged) {
-      this.envImageUrl =
-          envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
+    const {environmentImage} = this.config;
+    this.envImageUrl =
+        environmentImage == null || environmentImage === 'neutral' ?
+        environmentImage :
+        envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
+
+    const arButton =
+        this.modelViewer.shadowRoot!.getElementById('default-ar-button')!;
+    arButton.removeEventListener('click', this.repostGLTF);
+    if (this.sceneViewerMode()) {
+      // Send a new POST out for each scene-viewer button press
+      arButton.addEventListener('click', this.repostGLTF);
     }
 
     this.overlay!.style.display = 'none';
@@ -155,9 +157,11 @@ export class MobileView extends LitElement {
       setTimeout(() => {
         this.toastClassName = '';
       }, TOAST_TIME);
-      await this.waitForData(json);
+      this.waitForData(json);
+      await this.updateComplete;
     } else {
       console.error('Error:', response);
+      await timePasses(1000);
     }
   }
 
@@ -166,14 +170,23 @@ export class MobileView extends LitElement {
       await this.fetchLoop();
     } catch (error) {
       console.log('error...', error);
+      await timePasses(1000);
     }
     await this.triggerFetchLoop();
+  }
+
+  sceneViewerMode() {
+    return this.arConfig.ar &&
+        this.arConfig.arModes?.split(' ')[0] === 'scene-viewer';
   }
 
   // When the model is loaded, we make a post for this specific model for
   // scene-viewer. Subsequently, everytime scene-viewer is opened, we send the
   // POST again.
   async modelIsLoaded() {
+    if (!this.sceneViewerMode()) {
+      return;
+    }
     this.currentBlob = await this.modelViewer.exportScene();
     try {
       await post(this.currentBlob, this.modelViewerUrl);
@@ -183,7 +196,7 @@ export class MobileView extends LitElement {
   }
 
   render() {
-    const config = {...this.config};
+    const config = this.config;
     const skyboxImage = (config.useEnvAsSkybox && this.editorUrls?.env) ?
         this.envImageUrl :
         undefined;
