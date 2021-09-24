@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Material as ThreeMaterial, Mesh, MeshStandardMaterial} from 'three';
+import {Material as ThreeMaterial, Mesh} from 'three';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {KHRMaterialsVariants, Primitive} from '../../../three-components/gltf-instance/gltf-2.0.js';
@@ -54,19 +54,21 @@ export class PrimitiveNode extends Node {
       correlatedSceneGraph: CorrelatedSceneGraph) {
     super(mesh.name);
     this[$mesh] = mesh;
-    const {gltf, threeGLTF} = correlatedSceneGraph;
+    const {gltf, threeGLTF, threeObjectMap} = correlatedSceneGraph;
+
     // Captures the primitive's initial material.
-    const material = (mesh.material as MeshStandardMaterial);
-    if (material.userData.associations != null &&
-        material.userData.associations.materials != null) {
-      this[$initialMaterialIdx] = material.userData.associations.materials;
+    const materialMappings =
+        threeObjectMap.get(mesh.material as ThreeMaterial)!;
+    if (materialMappings.materials != null) {
+      this[$initialMaterialIdx] = materialMappings.materials;
     } else {
       console.error(
           `Primitive (${mesh.name}) missing initial material reference.`);
     }
 
     // Gets the mesh index from the node.
-    const meshIndex = mesh.userData.associations.meshes;
+    const meshMappings = threeObjectMap.get(mesh)!;
+    const meshIndex = meshMappings.meshes!;
     // The gltf mesh array to sample from.
     const meshElementArray = gltf['meshes'] || [];
     // List of primitives under the mesh.

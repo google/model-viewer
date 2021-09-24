@@ -15,10 +15,6 @@ export type GLTFElementToThreeObjectMap = Map<GLTFElement, ThreeObjectSet>;
 export type ThreeObjectToGLTFElementHandleMap =
     Map<ThreeSceneObject, GLTFReference>;
 
-interface UserDataMapping {
-  userData: {associations: any};
-}
-
 const $threeGLTF = Symbol('threeGLTF');
 const $gltf = Symbol('gltf');
 const $gltfElementMap = Symbol('gltfElementMap');
@@ -27,7 +23,6 @@ const $parallelTraverseThreeScene = Symbol('parallelTraverseThreeScene');
 
 const $correlateOriginalThreeGLTF = Symbol('correlateOriginalThreeGLTF');
 const $correlateCloneThreeGLTF = Symbol('correlateCloneThreeGLTF');
-const $getAssociationsData = Symbol('getAssociationsData');
 
 /**
  * The Three.js GLTFLoader provides us with an in-memory representation
@@ -61,48 +56,44 @@ export class CorrelatedSceneGraph {
     }
   }
 
-  static[$getAssociationsData](object: ThreeSceneObject) {
-    // Ensures userData exists on the threeObject.
-    const userDataMapping = object as UserDataMapping;
-    userDataMapping.userData = userDataMapping.userData || {};
-    userDataMapping.userData.associations =
-        userDataMapping.userData.associations || {};
-    return userDataMapping.userData.associations;
-  }
-
-
   private static[$correlateOriginalThreeGLTF](threeGLTF: ThreeGLTF):
       CorrelatedSceneGraph {
     const gltf = threeGLTF.parser.json as GLTF;
 
     const associations =
-        threeGLTF.parser.associations as Map<Object3D, GLTFReference>;
+        threeGLTF.parser.associations as Map<ThreeSceneObject, GLTFReference>;
     const gltfElementMap: GLTFElementToThreeObjectMap = new Map();
 
     const defaultMaterial = {name: 'Default'} as Material;
     const defaultReference = {type: 'materials', index: -1} as
         GLTFReferencePair;
 
-    // NOTE: IE11 does not have Map iterator methods
-    associations.forEach((gltfMappings, threeObject) => {
-      // Note: GLTFLoader creates a "default" material that has no corresponding
-      // glTF element in the case that no materials are specified in the source
-      // glTF. In this case we append a default material to allow this to be
-      // operated upon.
-      if (gltfMappings == null) {
+    for (const threeMaterial of associations.keys()) {
+      // Note: GLTFLoader creates a "default" material that has no
+      // corresponding glTF element in the case that no materials are
+      // specified in the source glTF. In this case we append a default
+      // material to allow this to be operated upon.
+      if (threeMaterial instanceof Material &&
+          associations.get(threeMaterial) == null) {
         if (defaultReference.index < 0) {
           if (gltf.materials == null) {
             gltf.materials = [];
           }
           defaultReference.index = gltf.materials.length;
           gltf.materials.push(defaultMaterial);
-
-          // Updates the self-lookup user data.
-          CorrelatedSceneGraph[$getAssociationsData](threeObject).materials =
-              gltf.materials.length;
         }
 
-        gltfMappings = {materials: defaultReference.index};
+        threeMaterial.name = defaultMaterial.name;
+        associations.set(threeMaterial, {materials: defaultReference.index});
+      }
+    }
+
+    // Creates a reverse look up map (gltf-object to Three-object)
+    for (const [threeObject, gltfMappings] of associations) {
+      if (gltfMappings) {
+        const objWithUserData = threeObject as {userData: {associations: {}}};
+        objWithUserData.userData = objWithUserData.userData || {};
+        objWithUserData.userData.associations = gltfMappings;
       }
 
       for (const mapping in gltfMappings) {
@@ -110,7 +101,6 @@ export class CorrelatedSceneGraph {
           const type = mapping as GLTFReferenceType;
           const elementArray = gltf[type] || [];
           const gltfElement = elementArray[gltfMappings[type]!];
-
           if (gltfElement == null) {
             // TODO: Maybe throw here...
             continue;
@@ -126,7 +116,7 @@ export class CorrelatedSceneGraph {
           threeObjects.add(threeObject);
         }
       }
-    });
+    }
 
     return new CorrelatedSceneGraph(
         threeGLTF, gltf, associations, gltfElementMap);
@@ -147,48 +137,13 @@ export class CorrelatedSceneGraph {
     const cloneThreeObjectMap: ThreeObjectToGLTFElementHandleMap = new Map();
     const cloneGLTFElementMap: GLTFElementToThreeObjectMap = new Map();
 
-    const defaultMaterial = {name: 'Default'} as Material;
-    const defaultReference = {materials: -1} as GLTFReference;
-
     for (let i = 0; i < originalThreeGLTF.scenes.length; i++) {
       this[$parallelTraverseThreeScene](
           originalThreeGLTF.scenes[i],
           cloneThreeGLTF.scenes[i],
           (object: ThreeSceneObject, cloneObject: ThreeSceneObject) => {
-            let elementReference =
+            const elementReference =
                 upstreamCorrelatedSceneGraph.threeObjectMap.get(object);
-
-            if (((object as Mesh).isMesh || (object as Material).isMaterial) &&
-                elementReference == null) {
-              // Checks if default material was already added to the gltf.
-              if (cloneGLTF.materials && cloneGLTF.materials.length) {
-                const material =
-                    cloneGLTF.materials[cloneGLTF.materials.length - 1];
-                if (material.name === 'Default') {
-                  defaultReference.materials = cloneGLTF.materials.length - 1;
-                  CorrelatedSceneGraph[$getAssociationsData](object).materials =
-                      defaultReference.materials;
-                }
-              }
-
-              // Adds the default material if the default material was not
-              // added.
-              if (defaultReference.materials! < 0) {
-                if (cloneGLTF.materials == null) {
-                  cloneGLTF.materials = [];
-                }
-                defaultReference.materials = cloneGLTF.materials.length;
-                cloneGLTF.materials.push(defaultMaterial);
-
-                CorrelatedSceneGraph[$getAssociationsData](object).materials =
-                    defaultReference.materials;
-                // Applies the user-data to the cloneObject.
-                (cloneObject as UserDataMapping).userData =
-                    (object as UserDataMapping).userData;
-              }
-
-              elementReference = defaultReference;
-            }
 
             if (elementReference == null) {
               return;
