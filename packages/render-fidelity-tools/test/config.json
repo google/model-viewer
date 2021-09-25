@@ -30,10 +30,7 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DragonAttenuation/glTF/DragonAttenuation.gltf",
       "orbit": {
         "radius": 5
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-IridescentDishWithOlives",
@@ -51,7 +48,6 @@
         "y": 0.11
       },
       "exclude": [
-        "dspbr-pt",
         "babylon"
       ]
     },
@@ -85,10 +81,7 @@
       },
       "dimensions": {
         "height": 450
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-MaterialsVariantsShoe",
@@ -240,17 +233,17 @@
       },
       "dimensions": {
         "width": 1200
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-Suzanne",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
       "orbit": {
         "radius": 3
-      }
+      },
+      "exclude": [
+        "dspbr-pt"
+      ]
     },
     {
       "name": "khronos-SpecGlossVsMetalRough",
@@ -410,10 +403,7 @@
       },
       "dimensions": {
         "height": 700
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-TransmissionRoughnessTest",
@@ -426,10 +416,7 @@
       },
       "target": {
         "y": -0.09
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-AttenuationTest",
@@ -439,10 +426,7 @@
       },
       "orbit": {
         "radius": 22.00
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-SpecularTest",
@@ -455,20 +439,14 @@
       },
       "target": {
         "x": -0.18
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-ClearCoatTest",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ClearCoatTest/glTF/ClearCoatTest.gltf",
       "orbit": {
         "radius": 20
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-NormalTangentMirrorTest",

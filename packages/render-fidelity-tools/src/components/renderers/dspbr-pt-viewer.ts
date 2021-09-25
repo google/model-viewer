@@ -82,11 +82,11 @@ export class PathtracingViewer extends LitElement {
     this[$camera] = new PerspectiveCamera(45, this[$canvas]!.width/this[$canvas]!.height, 0.01, 1000);
     this[$renderer] = new PathtracingRenderer({ canvas: this[$canvas]!});
 
-    const renderer = this[$renderer];
-    renderer.pixelRatio = 1.0; 
+    this[$renderer].pixelRatio = 1.0; 
     // this.renderer.iblRotation = 180.0;
-    renderer.exposure = 1.0;
-    renderer.maxBounces = 8;
+    this[$renderer].exposure = 1.0;
+    this[$renderer].maxBounces = 8;
+    this[$renderer].tonemapping = "AcesFilm";
 
     await new Promise<void>((resolve) => {
       // console.log('Loading resources for', scenario.model);
@@ -115,12 +115,17 @@ export class PathtracingViewer extends LitElement {
     let numSamples = scenario.pt?.numSamples;
 
     if (numSamples == null) {
-      numSamples = 2048;
+      numSamples = 8192;
     }
 
     console.log('Rendering ' + numSamples + ' samples');
-    this[$renderer].render(this[$camera]!, numSamples, () => {},
+    this[$renderer].render(this[$camera]!, numSamples, (sampleCount: number) => {
+        if(sampleCount % 100 == 0) {
+          console.log(sampleCount, '/', numSamples);
+        }
+      },
       () => {
+        console.log('Done!');
         requestAnimationFrame(() => {
           this.dispatchEvent(
               new CustomEvent('model-visibility', {detail: {visible: true}}));
@@ -134,16 +139,15 @@ export class PathtracingViewer extends LitElement {
       return;
     }
 
-    const canvas = this[$canvas]!;
     const {dimensions, target, orbit, verticalFoV} = this.scenario;
 
-    const width = dimensions.width;
-    const height = dimensions.height;
+    const width = dimensions.width * window.devicePixelRatio;
+    const height = dimensions.height * window.devicePixelRatio;
 
-    canvas.width = width;
-    canvas.height = height;
-    canvas.style.width = `${dimensions.width}px`;
-    canvas.style.height = `${dimensions.height}px`;
+    this[$canvas]!.width = width;
+    this[$canvas]!.height = height;
+    this[$canvas]!.style.width = `${dimensions.width}px`;
+    this[$canvas]!.style.height = `${dimensions.height}px`;
 
     const center = [target.x, target.y, target.z];
 
