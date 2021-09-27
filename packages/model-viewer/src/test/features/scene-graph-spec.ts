@@ -242,7 +242,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     });
 
     suite('Scene-graph gltf-to-three mappings', () => {
-      test.only('has a mapping for each primitive mesh', async () => {
+      test('has a mapping for each primitive mesh', async () => {
         element.src = RIGGEDFIGURE_GLB_PATH;
 
         await waitForEvent(element, 'scene-graph-ready');
