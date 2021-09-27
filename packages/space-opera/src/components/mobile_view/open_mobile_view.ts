@@ -19,6 +19,7 @@ import {customElement, html, internalProperty, query} from 'lit-element';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {openMobileViewStyles} from '../../styles.css.js';
+import {timePasses} from '../../test/utils/test_utils.js';
 import {ArConfigState, ModelViewerSnippetState, State} from '../../types.js';
 import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -136,8 +137,8 @@ export class OpenMobileView extends ConnectedLitElement {
   getStaleContent(): EditorUpdates {
     return {
       gltfChanged: true, stateChanged: true, posterId: getRandomInt(1e+20),
-          envChanged: this.urls.env !== undefined, envIsHdr: this.envIsHdr(),
-          gltfId: getRandomInt(1e+20),
+          envChanged: this.urls.env != undefined && this.urls.env !== 'neutral',
+          envIsHdr: this.envIsHdr(), gltfId: getRandomInt(1e+20),
     }
   }
 
@@ -187,7 +188,7 @@ export class OpenMobileView extends ConnectedLitElement {
       gltfBlob: Blob|undefined, envBlob: Blob|undefined) {
     try {
       await this.sendSessionContent(
-          session, {...updatedContent}, posterBlob, gltfBlob, envBlob);
+          session, updatedContent, posterBlob, gltfBlob, envBlob);
     } catch (e) {
       console.log('error posting...');
     }
@@ -222,11 +223,13 @@ export class OpenMobileView extends ConnectedLitElement {
         await getModelViewer()!.exportScene() :
         undefined;
 
-    let envBlob;
-    if (updatedContent.envChanged || (haveStale && staleContent.envChanged)) {
-      const response = await fetch(this.urls.env!);
+    let envBlob: Blob|undefined;
+    const {env, gltf} = this.urls;
+    if (env != null && env !== 'neutral' &&
+        (updatedContent.envChanged || (haveStale && staleContent.envChanged))) {
+      const response = await fetch(env);
       if (!response.ok) {
-        throw new Error(`Failed to fetch url: ${this.urls.env!}`);
+        throw new Error(`Failed to fetch url: ${env}`);
       }
       envBlob = await response.blob();
     }
@@ -237,12 +240,12 @@ export class OpenMobileView extends ConnectedLitElement {
     // post their information asynchronously.
     for (let session of sessionList) {
       this.sendSessionContentHolder(
-          session, {...updatedContent}, posterBlob, gltfBlob, envBlob);
+          session, updatedContent, posterBlob, gltfBlob, envBlob);
     }
 
     this.lastSnippetSent = {...this.snippet};
-    this.lastUrlsSent['env'] = this.urls['env'];
-    this.lastUrlsSent['gltf'] = this.urls['gltf'];
+    this.lastUrlsSent.env = env;
+    this.lastUrlsSent.gltf = gltf;
 
     reduxStore.dispatch(dispatchModelDirty(false));
     this.contentHasChanged = this.getContentHasChanged();
@@ -269,9 +272,12 @@ export class OpenMobileView extends ConnectedLitElement {
   // refreshed.
   async pingLoop() {
     try {
-      await this.waitForPing();
+      if (!await this.waitForPing()) {
+        await timePasses(1000);
+      }
     } catch (error) {
       console.log('error...', error);
+      await timePasses(1000);
     }
     this.pingLoop();
   }
@@ -280,29 +286,14 @@ export class OpenMobileView extends ConnectedLitElement {
     this.mobileModal.open();
   }
 
-  // The editor is waiting for at least one mobile session to ping back.
-  async onDeploy() {
-    let wasPinged = false;
-    try {
-      wasPinged = await this.waitForPing();
-    } catch (error) {
-      console.log('error...', error);
-    }
-    if (wasPinged) {
-      this.pingLoop();
-    } else {
-      this.onDeploy();
-    }
-  }
-
   // Initialize AR values and start deploy loop
-  async onInitialDeploy() {
+  onInitialDeploy() {
     this.openModal();
     this.isDeployed = true;
     if (this.arConfig?.arModes === undefined) {
       reduxStore.dispatch(dispatchArModes('webxr scene-viewer quick-look'));
     }
-    await this.onDeploy();
+    this.pingLoop();
   }
 
   onEnableARChange(isEnabled: boolean) {
