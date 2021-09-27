@@ -32,7 +32,7 @@ import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
 
-const $currentGLTF = Symbol('currentGLTF');
+export const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
 const $variants = Symbol('variants');
 const $getOnUpdateMethod = Symbol('getOnUpdateMethod');

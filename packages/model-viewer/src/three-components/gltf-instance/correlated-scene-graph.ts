@@ -1,5 +1,5 @@
 import {Group, Material, Mesh, Object3D, Texture} from 'three';
-import {GLTF as ThreeGLTF, GLTFReference, GLTFReferencePair, GLTFReferenceType} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTF as ThreeGLTF, GLTFReference, GLTFReferenceType} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -65,8 +65,7 @@ export class CorrelatedSceneGraph {
     const gltfElementMap: GLTFElementToThreeObjectMap = new Map();
 
     const defaultMaterial = {name: 'Default'} as Material;
-    const defaultReference = {type: 'materials', index: -1} as
-        GLTFReferencePair;
+    const defaultReference = {type: 'materials', index: -1};
 
     for (const threeMaterial of associations.keys()) {
       // Note: GLTFLoader creates a "default" material that has no

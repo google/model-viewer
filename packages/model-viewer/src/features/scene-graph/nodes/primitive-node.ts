@@ -14,7 +14,6 @@
  */
 import {Material as ThreeMaterial, Mesh} from 'three';
 
-
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {KHRMaterialsVariants, Primitive} from '../../../three-components/gltf-instance/gltf-2.0.js';
 import {$getLoadedMaterial, Material} from '../material.js';
@@ -65,7 +64,6 @@ export class PrimitiveNode extends Node {
     } else {
       console.error(
           `Primitive (${mesh.name}) missing initial material reference.`);
-
     }
 
     // Gets the mesh index from the node.

@@ -15,10 +15,11 @@
 
 import {Mesh, MeshStandardMaterial} from 'three';
 
-import {SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
+import {$currentGLTF, SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
 import {$primitives} from '../../features/scene-graph/model.js';
 import {$initialMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
@@ -32,6 +33,9 @@ const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 const CUBES_GLB_PATH = assetPath('models/cubes.gltf');  // has variants
 const CUBE_GLB_PATH = assetPath('models/cube.gltf');    // has UV coords
 const SUNRISE_IMG_PATH = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
+const RIGGEDFIGURE_GLB_PATH = assetPath(
+    'models/glTF-Sample-Models/2.0/RiggedFigure/glTF-Binary/RiggedFigure.glb');
+
 
 suite('ModelViewerElementBase with SceneGraphMixin', () => {
   let nextId = 0;
@@ -234,6 +238,21 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
                 .material as MeshStandardMaterial;
 
         expect(newMaterial.color).to.include({r: 1, g: 0, b: 0});
+      });
+    });
+
+    suite('Scene-graph gltf-to-three mappings', () => {
+      test.only('has a mapping for each primitive mesh', async () => {
+        element.src = RIGGEDFIGURE_GLB_PATH;
+
+        await waitForEvent(element, 'scene-graph-ready');
+
+        const gltf = (element as any)[$currentGLTF] as ModelViewerGLTFInstance;
+
+        for (const primitive of element.model![$primitives]) {
+          expect(gltf.correlatedSceneGraph.threeObjectMap.get(primitive.mesh))
+              .to.be.ok;
+        }
       });
     });
   });
