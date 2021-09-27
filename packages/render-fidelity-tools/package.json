@@ -35,7 +35,7 @@
     "@types/pngjs": "^3.4.0",
     "@types/puppeteer": "^5.4.4",
     "@types/rimraf": "^3.0.1",
-    "dspbr-pt": "^0.3.3",
+    "dspbr-pt": "^0.3.4",
     "filament": "1.12.2",
     "focus-visible": "^5.2.0",
     "http-server": "^0.12.3",
