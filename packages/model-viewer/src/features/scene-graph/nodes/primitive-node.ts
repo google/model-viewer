@@ -135,14 +135,12 @@ export class PrimitiveNode extends Node {
   async enableVariant(name: string|
                       null): Promise<ThreeMaterial|ThreeMaterial[]|null> {
     if (name == null) {
-      // tslint:disable-next-line:no-return-await needed by FireFox
-      return await this.setActiveMaterial(this[$initialMaterialIdx]);
+      return this.setActiveMaterial(this[$initialMaterialIdx]);
     }
     if (this[$variantInfo] != null) {
       const material = this[$variantInfo].get(name);
       if (material != null) {
-        // tslint:disable-next-line:no-return-await needed by FireFox
-        return await this.setActiveMaterial(material.index);
+        return this.setActiveMaterial(material.index);
       }
     }
     return null;
