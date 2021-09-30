@@ -62,8 +62,8 @@ suite('scene-graph/model/mesh-primitives', () => {
       const model = element.model!;
       expect(model[$primitives].length).to.equal(1);
       expect(model.materials.length).to.equal(1);
-      expect(model.materials[model[$primitives][0][$initialMaterialIdx]].name)
-          .to.equal('Default');
+      expect(model[$primitives][0][$initialMaterialIdx]).to.equal(0);
+      expect(model.materials[0].name).to.equal('Default');
     });
   });
 
