@@ -21,6 +21,7 @@ import {PreparedGLTF} from '../../../three-components/GLTFInstance.js';
 import {createFakeThreeGLTF} from '../../helpers.js';
 
 
+
 const expect = chai.expect;
 
 suite('ModelViewerGLTFInstance', () => {

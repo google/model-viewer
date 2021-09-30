@@ -174,7 +174,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   get name(): string {
-    return (this[$sourceObject] as any).name || '';
+    return (this[$sourceObject] as Material).name || '';
   }
 
   get pbrMetallicRoughness(): PBRMetallicRoughness {

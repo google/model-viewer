@@ -114,16 +114,11 @@ export default class GLTFMaterialsVariantsExtension implements
         // supports meshes.
         const association = parser.associations.get(object);
 
-        if (!association || association.type !== 'nodes') {
+        if (association == null || association.meshes == null) {
           return;
         }
 
-        const nodeDef = json.nodes[association.index];
-        const meshIndex = nodeDef.mesh;
-
-        if (meshIndex === undefined) {
-          return;
-        }
+        const meshIndex = association.meshes;
 
         // Two limitations:
         // 1. The nodeDef shouldn't have any objects (camera, light, or

@@ -19,6 +19,7 @@ import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {Constructor} from '../utilities.js';
 
+
 export const $prepared = Symbol('prepared');
 
 export interface PreparedGLTF extends GLTF {

@@ -14,7 +14,7 @@
  */
 
 import {Group, Mesh, MeshStandardMaterial, Object3D} from 'three';
-import {GLTF, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
@@ -29,6 +29,9 @@ const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
     assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
+const TWOCYLENGINE_GLB_PATH = assetPath(
+    'models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Binary/2CylinderEngine.glb');
+const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const getObject3DByName =
     <T extends Object3D>(root: Object3D, name: string): T|null => {
@@ -58,9 +61,10 @@ suite('correlated-scene-graph', () => {
 
       expect(gltfReference).to.be.ok;
 
-      const {type, index} = gltfReference as GLTFReference;
+      const {materials} = gltfReference!;
 
-      const referencedGltfMaterial = threeGLTF.parser.json[type][index];
+      const referencedGltfMaterial =
+          threeGLTF.parser.json['materials'][materials!];
 
       expect(referencedGltfMaterial).to.be.equal(gltfMaterial);
     });
@@ -87,11 +91,37 @@ suite('correlated-scene-graph', () => {
 
       expect(gltfReference).to.be.ok;
 
-      const {type, index} = gltfReference as GLTFReference;
+      const {textures} = gltfReference!;
 
-      const referencedGltfTexture = threeGLTF.parser.json[type][index];
+      const referencedGltfTexture =
+          threeGLTF.parser.json['textures'][textures!];
 
       expect(referencedGltfTexture).to.be.equal(gltfTexture);
+    });
+
+    test('has a mapping for each node in scene', async () => {
+      const threeGLTF = await loadThreeGLTF(TWOCYLENGINE_GLB_PATH);
+      const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
+
+      threeGLTF.scene.traverse(node => {
+        if (threeGLTF.scene === node) {
+          return;
+        }
+        expect(correlatedSceneGraph.threeObjectMap.get(node)).to.be.ok;
+      });
+    });
+
+    test('has a mapping for each material & texture', async () => {
+      const threeGLTF = await loadThreeGLTF(ASTRONAUT_GLB_PATH);
+      const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
+
+      for (const texture of threeGLTF.parser.json.textures) {
+        expect(correlatedSceneGraph.gltfElementMap.get(texture)).to.be.ok;
+      }
+
+      for (const material of threeGLTF.parser.json.materials) {
+        expect(correlatedSceneGraph.gltfElementMap.get(material)).to.be.ok;
+      }
     });
 
     suite('when correlating a cloned glTF', () => {
@@ -109,11 +139,10 @@ suite('correlated-scene-graph', () => {
 
         let name;
         cloneCorrelatedSceneGraph.threeObjectMap.forEach(
-            (reference, threeObject) => {
+            (mappings, threeObject) => {
               if ((threeObject as MeshStandardMaterial).isMaterial) {
-                name =
-                    cloneCorrelatedSceneGraph.gltf.materials![reference.index]
-                        .name;
+                const index = mappings.materials!;
+                name = cloneCorrelatedSceneGraph.gltf.materials![index].name;
               }
             });
         expect(name).to.be.eq('Default');

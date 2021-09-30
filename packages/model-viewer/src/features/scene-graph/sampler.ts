@@ -113,7 +113,7 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   get name(): string {
-    return (this[$sourceObject] as any).name || '';
+    return (this[$sourceObject] as Sampler).name || '';
   }
 
   get minFilter(): MinFilter {

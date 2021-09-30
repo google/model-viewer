@@ -21,6 +21,8 @@ import {Renderer} from '../Renderer.js';
 
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
+
+
 const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 
@@ -81,7 +83,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     const clone: PreparedModelViewerGLTF = super[$clone]();
     const sourceUUIDToClonedMaterial = new Map<string, Material>();
 
-    clone.scene.traverse((node: any) => {
+    clone.scene.traverse((node: Object3D) => {
       // Materials aren't cloned when cloning meshes; geometry
       // and materials are copied by reference. This is necessary
       // for the same model to be used twice with different
