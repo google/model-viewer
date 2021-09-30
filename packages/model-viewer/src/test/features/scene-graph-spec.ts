@@ -16,8 +16,8 @@
 import {Mesh, MeshStandardMaterial} from 'three';
 
 import {$currentGLTF, SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
-import {$primitives} from '../../features/scene-graph/model.js';
-import {$initialMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
+import {$primitivesList} from '../../features/scene-graph/model.js';
+import {$initialMaterialIdx, MVPrimitive} from '../../features/scene-graph/nodes/primitive-node.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {waitForEvent} from '../../utilities.js';
@@ -97,9 +97,9 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
           `Setting varianName to null results in primitive
            reverting to default/initial material`,
           async () => {
-            let primitiveNode: PrimitiveNode|null = null
+            let primitiveNode: MVPrimitive|null = null
             // Finds the first primitive with material 0 assigned.
-            for (const primitive of element.model![$primitives]) {
+            for (const primitive of element.model![$primitivesList]) {
               if (primitive.variantInfo != null &&
                   primitive[$initialMaterialIdx] == 0) {
                 primitiveNode = primitive;
@@ -112,13 +112,13 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
             // Switches to a new variant.
             element.variantName = 'Yellow Red';
             await waitForEvent(element, 'variant-applied');
-            expect((primitiveNode!.mesh.material as MeshStandardMaterial).name)
+            expect((primitiveNode!.threeMesh.material as MeshStandardMaterial).name)
                 .equal('red');
 
             // Switches to null variant.
             element.variantName = null;
             await waitForEvent(element, 'variant-applied');
-            expect((primitiveNode!.mesh.material as MeshStandardMaterial).name)
+            expect((primitiveNode!.threeMesh.material as MeshStandardMaterial).name)
                 .equal('purple');
           });
 
@@ -249,8 +249,8 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
         const gltf = (element as any)[$currentGLTF] as ModelViewerGLTFInstance;
 
-        for (const primitive of element.model![$primitives]) {
-          expect(gltf.correlatedSceneGraph.threeObjectMap.get(primitive.mesh))
+        for (const primitive of element.model![$primitivesList]) {
+          expect(gltf.correlatedSceneGraph.threeObjectMap.get(primitive.threeMesh))
               .to.be.ok;
         }
       });

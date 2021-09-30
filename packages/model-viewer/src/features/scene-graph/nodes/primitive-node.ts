@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Material as ThreeMaterial, Mesh} from 'three';
+import {Group, Material as ThreeMaterial, Mesh, Object3D} from 'three';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {KHRMaterialsVariants, Primitive} from '../../../three-components/gltf-instance/gltf-2.0.js';
@@ -22,27 +22,49 @@ import {$getLoadedMaterial, Material} from '../material.js';
 
 export const $materials = Symbol('materials');
 const $variantInfo = Symbol('variantInfo');
-const $mesh = Symbol('mesh');
+const $threeMesh = Symbol('threeMesh');
+export const $threeNode = Symbol('threeMesh');
 export const $primitives = Symbol('primitives');
 export const $loadVariant = Symbol('loadVariant');
 export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
+export const $parent = Symbol('parent');
 export const $children = Symbol('children');
 export const $initialMaterialIdx = Symbol('initialMaterialIdx');
 
 // Defines the base level node methods and data.
-export class Node {
+export class MVNode {
   name: string = '';
-  [$children] = new Array<Node>();
-  constructor(name: string) {
+  nodesIndex: number;
+  [$children] = new Array<MVNode|MVPrimitive>();
+  mesh?: MVMesh;
+  [$threeNode]?: Mesh|Group|Object3D;
+  [$parent]?: MVNode;
+  constructor(
+      name: string, nodesIndex: number, threeNode?: Mesh|Group|Object3D,
+      parent?: MVNode) {
     this.name = name;
+    this.nodesIndex = nodesIndex;
+    this[$threeNode] = threeNode;
+    this[$parent] = parent;
+  }
+}
+
+// Defines a mesh component in the glTF hierarchy.
+export class MVMesh {
+  name?: string = '';
+  meshesIndex?: number;
+  [$primitives] = new Array<MVPrimitive>();
+  constructor(name?: string, meshesIndex?: number) {
+    this.name = name;
+    this.meshesIndex = meshesIndex;
   }
 }
 
 // Represents a primitive in a glTF mesh.
-export class PrimitiveNode extends Node {
-  private[$mesh]: Mesh;
+export class MVPrimitive {
+  private[$threeMesh]: Mesh;
   // Maps glTF material index number to a material that this primitive supports.
   private[$materials] = new Map<number, Material>();
   // Maps variant name to material index.
@@ -52,8 +74,7 @@ export class PrimitiveNode extends Node {
   constructor(
       mesh: Mesh, mvMaterials: Material[],
       correlatedSceneGraph: CorrelatedSceneGraph) {
-    super(mesh.name);
-    this[$mesh] = mesh;
+    this[$threeMesh] = mesh;
     const {gltf, threeGLTF, threeObjectMap} = correlatedSceneGraph;
 
     // Captures the primitive's initial material.
@@ -67,7 +88,6 @@ export class PrimitiveNode extends Node {
     }
 
     // Gets the mesh index from the node.
-
     const meshMappings = threeObjectMap.get(mesh)!;
     const meshIndex = meshMappings.meshes!;
 
@@ -119,17 +139,17 @@ export class PrimitiveNode extends Node {
     }
   }
 
-  get mesh() {
-    return this[$mesh];
+  get threeMesh() {
+    return this[$threeMesh];
   }
 
   async setActiveMaterial(material: number):
       Promise<ThreeMaterial|ThreeMaterial[]|null> {
     const mvMaterial = this[$materials].get(material);
     if (mvMaterial != null) {
-      this.mesh.material = await mvMaterial[$getLoadedMaterial]();
+      this.threeMesh.material = await mvMaterial[$getLoadedMaterial]();
     }
-    return this.mesh.material;
+    return this.threeMesh.material;
   }
 
   async enableVariant(name: string|
@@ -151,12 +171,13 @@ export class PrimitiveNode extends Node {
       return;
     }
     for (const name of this[$variantInfo].keys()) {
-      if (this.mesh.userData.variantMaterials.get(name).material != null) {
+      if (this.threeMesh.userData.variantMaterials.get(name).material != null) {
         continue;
       }
       const threeMaterial = await this.enableVariant(name);
       if (threeMaterial != null) {
-        this.mesh.userData.variantMaterials.get(name).material = threeMaterial;
+        this.threeMesh.userData.variantMaterials.get(name).material =
+            threeMaterial;
       }
     }
   }

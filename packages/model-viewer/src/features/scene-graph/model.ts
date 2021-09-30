@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D} from 'three';
+import {Material as ThreeMaterial, Mesh, MeshStandardMaterial} from 'three';
 
-import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
-import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet, UserDataAssociations} from '../../three-components/gltf-instance/correlated-scene-graph.js';
+import {GLTF, GLTFElement, Scene} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Model as ModelInterface} from './api.js';
 import {Material} from './material.js';
-import {$children, Node, PrimitiveNode} from './nodes/primitive-node.js';
+import {$primitives, $threeNode, MVMesh, MVNode, MVPrimitive} from './nodes/primitive-node.js';
 
 
 
 export const $materials = Symbol('materials');
-const $hierarchy = Symbol('hierarchy');
-const $roots = Symbol('roots');
-export const $primitives = Symbol('primitives');
+export const $primitivesList = Symbol('primitives');
 export const $loadVariant = Symbol('loadVariant');
 export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
+export const $roots = Symbol('roots');
+export const $hierarchy = Symbol('hierarchy');
 
 
 // Holds onto temporary scene context information needed to perform lazy loading
@@ -60,14 +60,19 @@ export class LazyLoader {
  */
 export class Model implements ModelInterface {
   private[$materials] = new Array<Material>();
-  private[$hierarchy] = new Array<Node>();
-  private[$roots] = new Array<Node>();
-  private[$primitives] = new Array<PrimitiveNode>();
-
+  private[$primitivesList] = new Array<MVPrimitive>();
+  private[$roots] = new Array<MVNode>();
+  private[$hierarchy] = new Array<MVNode>();
   constructor(
-      correlatedSceneGraph: CorrelatedSceneGraph,
+      sceneIndex: number, correlatedSceneGraph: CorrelatedSceneGraph,
       onUpdate: () => void = () => {}) {
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
+
+    if (gltf.scenes == null || sceneIndex >= gltf.scenes.length) {
+      console.warn(`Cannot create model for scene: ${
+          sceneIndex}, scene data does not exist.`);
+      return;
+    }
 
     for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
@@ -107,42 +112,72 @@ export class Model implements ModelInterface {
       }
     }
 
-    // Creates a hierarchy of Nodes. Allows not just for switching which
+    // Creates a hierarchy of MVNodes. Allows not just for switching which
     // material is applied to a mesh but also exposes a way to provide API for
     // switching materials and general assignment/modification.
 
-    // Prepares for scene iteration.
-    const parentMap = new Map<object, Node>();
-    const nodeStack = new Array<Object3D>();
-    for (const object of threeGLTF.scene.children) {
-      nodeStack.push(object);
-    }
+    const gltfScene = gltf.scenes![sceneIndex] as Scene;
+    // Prepares root nodes of the scene.
+    const stack = gltfScene.nodes.map(index => {
+      const node = gltf.nodes![index];
+      const associationsSet = gltfElementMap.get(node);
+      const threeObject = associationsSet!.values().next().value;
+      const nodesIdx =
+          (threeObject as UserDataAssociations).userData.associations!.nodes!;
+      const mvNode = new MVNode(node.name!, nodesIdx, threeObject);
+      this[$roots].push(mvNode);
+      return mvNode;
+    });
 
-    // Walks the hierarchy and creates a node tree.
-    while (nodeStack.length > 0) {
-      const object = nodeStack.pop()!;
+    while (stack.length > 0) {
+      const mvNode = stack.pop() as MVNode;
+      this[$hierarchy].push(mvNode);
 
-      let node: Node|null = null;
+      const threeObject = mvNode[$threeNode];
+      const node = gltf.nodes![mvNode.nodesIndex];
 
-      if (object instanceof Mesh) {
-        node = new PrimitiveNode(
-            object as Mesh, this.materials, correlatedSceneGraph);
-        this[$primitives].push(node as PrimitiveNode);
-      } else {
-        node = new Node(object.name);
+      if (threeObject == null) {
+        console.error('No associations found for node');
+        continue;
       }
 
-      const parent: Node|undefined = parentMap.get(object);
-      if (parent != null) {
-        parent[$children].push(node);
-      } else {
-        this[$roots].push(node);
+      let nodeIsAlsoMesh = false;
+      if ((threeObject as Mesh).isMesh) {
+        nodeIsAlsoMesh = true;
       }
-      this[$hierarchy].push(node);
 
-      for (const child of object.children) {
-        nodeStack.push(child);
-        parentMap.set(object, node);
+      // Attaches an MVMesh to the MVNode and adds MVPrimitives for each three
+      // mesh.
+      if (node.mesh != null) {
+        mvNode.mesh = new MVMesh(gltf.meshes![node.mesh].name, node.mesh);
+        if (nodeIsAlsoMesh) {
+          const primitiveIdx = (threeObject as UserDataAssociations)
+                                   .userData.associations!.primitives;
+          mvNode.mesh[$primitives][primitiveIdx] = new MVPrimitive(
+              threeObject as Mesh, this.materials, correlatedSceneGraph);
+        } else {
+          for (const child of threeObject.children) {
+            if ((child as Mesh).isMesh) {
+              const primitiveIdx = (child as UserDataAssociations)
+                                       .userData.associations!.primitives;
+              mvNode.mesh[$primitives][primitiveIdx] = new MVPrimitive(
+                  child as Mesh, this.materials, correlatedSceneGraph);
+            }
+          }
+        }
+
+        for (const primitive of mvNode.mesh[$primitives]) {
+          this[$primitivesList].push(primitive);
+        }
+      }
+
+      if (gltf.nodes![mvNode.nodesIndex].children) {
+        const children = gltf.nodes![mvNode.nodesIndex].children!;
+        for (const child of children) {
+          const gltfNode = gltf.nodes![child];
+          const threeNode = gltfElementMap.get(gltfNode)!.values().next().value;
+          stack.push(new MVNode(gltfNode.name!, child, threeNode, mvNode));
+        }
       }
     }
   }
@@ -163,7 +198,7 @@ export class Model implements ModelInterface {
    */
   async[$switchVariant](variantName: string|null) {
     const promises = new Array<Promise<ThreeMaterial|ThreeMaterial[]|null>>();
-    for (const primitive of this[$primitives]) {
+    for (const primitive of this[$primitivesList]) {
       promises.push(primitive.enableVariant(variantName));
     }
     await Promise.all(promises);
@@ -171,7 +206,7 @@ export class Model implements ModelInterface {
 
   async[$prepareVariantsForExport]() {
     const promises = new Array<Promise<void>>();
-    for (const primitive of this[$primitives]) {
+    for (const primitive of this[$primitivesList]) {
       promises.push(primitive.instantiateVariants());
     }
     await Promise.all(promises);

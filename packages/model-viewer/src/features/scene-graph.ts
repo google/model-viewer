@@ -194,7 +194,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (correlatedSceneGraph != null &&
             currentGLTF !== this[$currentGLTF]) {
           this[$model] =
-              new Model(correlatedSceneGraph, this[$getOnUpdateMethod]());
+              new Model(correlatedSceneGraph.gltf.scene || 0, correlatedSceneGraph, this[$getOnUpdateMethod]());
           this[$originalGltfJson] =
               JSON.parse(JSON.stringify(correlatedSceneGraph.gltf));
         }

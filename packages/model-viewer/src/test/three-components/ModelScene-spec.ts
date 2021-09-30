@@ -16,9 +16,9 @@
 import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import {DEFAULT_FOV_DEG} from '../../three-components/ModelScene.js';
-import {ModelScene} from '../../three-components/ModelScene.js';
+import {DEFAULT_FOV_DEG, ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
+
 
 
 const expect = chai.expect;

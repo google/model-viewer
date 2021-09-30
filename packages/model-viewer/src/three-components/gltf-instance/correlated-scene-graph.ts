@@ -24,6 +24,15 @@ const $parallelTraverseThreeScene = Symbol('parallelTraverseThreeScene');
 const $correlateOriginalThreeGLTF = Symbol('correlateOriginalThreeGLTF');
 const $correlateCloneThreeGLTF = Symbol('correlateCloneThreeGLTF');
 
+
+export type GLTFReferenceWithPrimitive = GLTFReference&{
+  primitives: number
+}
+
+export interface UserDataAssociations {
+  userData: {associations?: GLTFReferenceWithPrimitive}
+}
+
 /**
  * The Three.js GLTFLoader provides us with an in-memory representation
  * of a glTF in terms of Three.js constructs. It also provides us with a copy
@@ -90,9 +99,10 @@ export class CorrelatedSceneGraph {
     // Creates a reverse look up map (gltf-object to Three-object)
     for (const [threeObject, gltfMappings] of associations) {
       if (gltfMappings) {
-        const objWithUserData = threeObject as {userData: {associations: {}}};
+        const objWithUserData = threeObject as UserDataAssociations;
         objWithUserData.userData = objWithUserData.userData || {};
-        objWithUserData.userData.associations = gltfMappings;
+        objWithUserData.userData.associations =
+            gltfMappings as GLTFReferenceWithPrimitive;
       }
 
       for (const mapping in gltfMappings) {
