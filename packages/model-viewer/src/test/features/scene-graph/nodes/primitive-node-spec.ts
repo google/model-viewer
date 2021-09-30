@@ -45,7 +45,7 @@ const findPrimitivesWithVariant = (model: Model, variantName: string) => {
 };
 
 suite('scene-graph/model/mesh-primitives', () => {
-  suite.only('Primitive with default material', () => {
+  suite('Primitive with default material', () => {
     let element: ModelViewerElement;
     setup(async () => {
       element = new ModelViewerElement();
