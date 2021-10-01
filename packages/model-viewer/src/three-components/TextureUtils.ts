@@ -169,6 +169,7 @@ export default class TextureUtils extends EventDispatcher {
     if (this.generatedEnvironmentMap == null) {
       this.generatedEnvironmentMap =
           this.GenerateEnvironmentMap(new EnvironmentScene());
+      this.generatedEnvironmentMap.name = 'default';
     }
     return Promise.resolve(this.generatedEnvironmentMap);
   }
@@ -182,6 +183,7 @@ export default class TextureUtils extends EventDispatcher {
     if (this.generatedEnvironmentMapAlt == null) {
       this.generatedEnvironmentMapAlt =
           this.GenerateEnvironmentMap(new EnvironmentSceneAlt());
+      this.generatedEnvironmentMapAlt.name = 'neutral';
     }
     return Promise.resolve(this.generatedEnvironmentMapAlt);
   }

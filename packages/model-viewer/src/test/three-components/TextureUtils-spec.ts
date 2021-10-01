@@ -149,7 +149,7 @@ suite('TextureUtils', () => {
 
     test('throws if given an invalid url', async () => {
       try {
-        await textureUtils.generateEnvironmentMapAndSkybox({} as string);
+        await textureUtils.generateEnvironmentMapAndSkybox();
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;
@@ -162,7 +162,7 @@ suite('TextureUtils', () => {
       const environment =
           (await textureUtils.generateEnvironmentMapAndSkybox()).environmentMap;
 
-      expect(environment.name).to.be.eq(null);
+      expect(environment.name).to.be.eq('default');
       expect(environment.mapping).to.be.eq(CubeReflectionMapping);
     });
   });
