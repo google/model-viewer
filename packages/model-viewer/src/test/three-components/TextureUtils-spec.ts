@@ -95,7 +95,7 @@ suite('TextureUtils', () => {
           await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
 
       const skybox = textures.skybox as any;
-      const environment = textures.environmentMap.texture as any;
+      const environment = textures.environmentMap as any;
 
       expect(skybox.isTexture).to.be.ok;
       expect(environment.isTexture).to.be.ok;
@@ -114,7 +114,7 @@ suite('TextureUtils', () => {
               await textureUtils.generateEnvironmentMapAndSkybox(HDR_EQUI_URL);
 
           const skybox = textures.skybox as any;
-          const environment = textures.environmentMap.texture as any;
+          const environment = textures.environmentMap as any;
 
           expect(skybox.isTexture).to.be.ok;
           expect(environment.isTexture).to.be.ok;
@@ -133,7 +133,7 @@ suite('TextureUtils', () => {
               EQUI_URL, HDR_EQUI_URL);
 
           const skybox = textures.skybox as any;
-          const environment = textures.environmentMap.texture as any;
+          const environment = textures.environmentMap as any;
 
           expect(skybox.isTexture).to.be.ok;
           expect(environment.isTexture).to.be.ok;
@@ -158,7 +158,7 @@ suite('TextureUtils', () => {
   suite('dynamically generating environment maps', () => {
     test('creates a cubemap render target with PMREM', async () => {
       const environment = (await textureUtils.generateEnvironmentMapAndSkybox())
-                              .environmentMap.texture as any;
+                              .environmentMap as any;
 
       expect(environment.userData.url).to.be.eq(null);
       expect(environment.mapping).to.be.eq(CubeUVReflectionMapping);
