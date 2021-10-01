@@ -38,14 +38,6 @@ const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
 hdrLoader.setDataType(UnsignedByteType);
 
-// Attach a `userData` object for arbitrary data on textures that
-// originate from TextureUtils, similar to Object3D's userData,
-// for help debugging, providing metadata for tests, and semantically
-// describe the type of texture within the context of this application.
-const userData = {
-  url: null,
-};
-
 export default class TextureUtils extends EventDispatcher {
   private generatedEnvironmentMap: CubeTexture|null = null;
   private generatedEnvironmentMapAlt: CubeTexture|null = null;
@@ -70,7 +62,7 @@ export default class TextureUtils extends EventDispatcher {
 
       progressCallback(1.0);
 
-      this.addMetadata(texture, url);
+      texture.name = url;
       texture.mapping = EquirectangularReflectionMapping;
 
       if (!isHDR) {
@@ -140,18 +132,6 @@ export default class TextureUtils extends EventDispatcher {
     } finally {
       updateGenerationProgress(1.0);
     }
-  }
-
-  private addMetadata(texture: Texture|null, url: string|null) {
-    if (texture == null) {
-      return;
-    }
-    (texture as any).userData = {
-      ...userData,
-      ...({
-        url: url,
-      })
-    };
   }
 
   /**

@@ -143,10 +143,8 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (skybox != null) {
           // When using the same environment and skybox, use the environment as
           // it gives HDR filtering.
-          this[$scene].background = (skybox as any).userData.url ===
-                  (environmentMap as any).userData.url ?
-              environmentMap :
-              skybox;
+          this[$scene].background =
+              skybox.name === environmentMap.name ? environmentMap : skybox;
         } else {
           this[$scene].background = null;
         }
