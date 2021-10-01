@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, Scene, Texture, TextureLoader, UnsignedByteType, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, LinearEncoding, NoToneMapping, RGBEEncoding, RGBEFormat, Scene, Texture, TextureLoader, UnsignedByteType, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl} from '../utilities.js';
@@ -151,14 +151,30 @@ export default class TextureUtils extends EventDispatcher {
   }
 
   private GenerateEnvironmentMap(scene: Scene) {
-    const cubeTarget = new WebGLCubeRenderTarget(256);
+    const renderer = this.threeRenderer;
+    const cubeTarget = new WebGLCubeRenderTarget(256, {
+      generateMipmaps: false,
+      type: UnsignedByteType,
+      format: RGBEFormat,
+      encoding: RGBEEncoding,
+      depthBuffer: false
+    });
     const cubeCamera = new CubeCamera(0.1, 100, cubeTarget);
     scene.add(cubeCamera);
 
-    cubeCamera.update(this.threeRenderer, scene);
-    const generatedEnvironmentMap = cubeCamera.renderTarget.texture;
+    const outputEncoding = renderer.outputEncoding;
+    const toneMapping = renderer.toneMapping;
+    renderer.toneMapping = NoToneMapping;
+    renderer.outputEncoding = LinearEncoding;
 
-    cubeTarget.dispose();
+    cubeCamera.update(renderer, scene);
+    const generatedEnvironmentMap = cubeCamera.renderTarget.texture;
+    generatedEnvironmentMap.isRenderTargetTexture = false;
+    generatedEnvironmentMap.images = [1, 1, 1, 1, 1, 1];
+
+    renderer.toneMapping = toneMapping;
+    renderer.outputEncoding = outputEncoding;
+
     return generatedEnvironmentMap;
   }
 
