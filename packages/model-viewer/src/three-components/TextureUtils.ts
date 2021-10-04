@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, LinearEncoding, NoToneMapping, RGBEEncoding, RGBEFormat, Scene, Texture, TextureLoader, UnsignedByteType, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, HalfFloatType, LinearEncoding, NoToneMapping, RGBAFormat, Scene, Texture, TextureLoader, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl} from '../utilities.js';
@@ -36,7 +36,7 @@ export interface EnvironmentGenerationConfig {
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
-hdrLoader.setDataType(UnsignedByteType);
+hdrLoader.setDataType(HalfFloatType);
 
 export default class TextureUtils extends EventDispatcher {
   private generatedEnvironmentMap: CubeTexture|null = null;
@@ -154,9 +154,9 @@ export default class TextureUtils extends EventDispatcher {
     const renderer = this.threeRenderer;
     const cubeTarget = new WebGLCubeRenderTarget(256, {
       generateMipmaps: false,
-      type: UnsignedByteType,
-      format: RGBEFormat,
-      encoding: RGBEEncoding,
+      type: HalfFloatType,
+      format: RGBAFormat,
+      encoding: LinearEncoding,
       depthBuffer: false
     });
     const cubeCamera = new CubeCamera(0.1, 100, cubeTarget);
