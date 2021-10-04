@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, HalfFloatType, LinearEncoding, NoToneMapping, RGBAFormat, Scene, Texture, TextureLoader, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {BoxBufferGeometry, CubeCamera, CubeTexture, DoubleSide, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl} from '../utilities.js';
@@ -31,7 +31,10 @@ export interface EnvironmentGenerationConfig {
   progressTracker?: ProgressTracker;
 }
 
-// const GENERATED_SIGMA = 0.04;
+const GENERATED_SIGMA = 0.04;
+// The maximum length of the blur for loop. Smaller sigmas will use fewer
+// samples and exit early, but not recompile the shader.
+const MAX_SAMPLES = 20;
 
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 const ldrLoader = new TextureLoader();
@@ -43,6 +46,8 @@ export default class TextureUtils extends EventDispatcher {
   private generatedEnvironmentMapAlt: CubeTexture|null = null;
 
   private skyboxCache = new Map<string, Promise<Texture>>();
+
+  private blurMaterial: ShaderMaterial|null = null;
 
   constructor(private threeRenderer: WebGLRenderer) {
     super();
@@ -172,6 +177,8 @@ export default class TextureUtils extends EventDispatcher {
     generatedEnvironmentMap.isRenderTargetTexture = false;
     generatedEnvironmentMap.images = [1, 1, 1, 1, 1, 1];
 
+    this.blurCubemap(cubeTarget, GENERATED_SIGMA);
+
     renderer.toneMapping = toneMapping;
     renderer.outputEncoding = outputEncoding;
 
@@ -204,6 +211,168 @@ export default class TextureUtils extends EventDispatcher {
     return Promise.resolve(this.generatedEnvironmentMapAlt);
   }
 
+  private blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
+    if (this.blurMaterial == null) {
+      this.blurMaterial = this.getBlurShader(MAX_SAMPLES);
+    }
+    const tempTarget = cubeTarget.clone();
+    this.halfblur(cubeTarget, tempTarget, sigma, 'latitudinal');
+    this.halfblur(tempTarget, cubeTarget, sigma, 'longitudinal');
+    tempTarget.dispose();
+  }
+
+  private halfblur(
+      targetIn: WebGLCubeRenderTarget, targetOut: WebGLCubeRenderTarget,
+      sigmaRadians: number, direction: 'latitudinal'|'longitudinal') {
+    // Number of standard deviations at which to cut off the discrete
+    // approximation.
+    const STANDARD_DEVIATIONS = 3;
+
+    const cubeCamera = new CubeCamera(0.1, 100, targetOut);
+    const box = new BoxBufferGeometry();
+    const blurMesh = new Mesh(box, this.blurMaterial!);
+    const blurUniforms = this.blurMaterial!.uniforms;
+    const blurScene = new Scene();
+    blurScene.add(blurMesh);
+    blurScene.add(cubeCamera);
+
+    const pixels = targetIn.width;
+    const radiansPerPixel = isFinite(sigmaRadians) ?
+        Math.PI / (2 * pixels) :
+        2 * Math.PI / (2 * MAX_SAMPLES - 1);
+    const sigmaPixels = sigmaRadians / radiansPerPixel;
+    const samples = isFinite(sigmaRadians) ?
+        1 + Math.floor(STANDARD_DEVIATIONS * sigmaPixels) :
+        MAX_SAMPLES;
+
+    if (samples > MAX_SAMPLES) {
+      console.warn(`sigmaRadians, ${
+          sigmaRadians}, is too large and will clip, as it requested ${
+          samples} samples when the maximum is set to ${MAX_SAMPLES}`);
+    }
+
+    const weights = [];
+    let sum = 0;
+
+    for (let i = 0; i < MAX_SAMPLES; ++i) {
+      const x = i / sigmaPixels;
+      const weight = Math.exp(-x * x / 2);
+      weights.push(weight);
+
+      if (i == 0) {
+        sum += weight;
+
+      } else if (i < samples) {
+        sum += 2 * weight;
+      }
+    }
+
+    for (let i = 0; i < weights.length; i++) {
+      weights[i] = weights[i] / sum;
+    }
+
+    blurUniforms['envMap'].value = targetIn.texture;
+    blurUniforms['samples'].value = samples;
+    blurUniforms['weights'].value = weights;
+    blurUniforms['latitudinal'].value = direction === 'latitudinal';
+    blurUniforms['dTheta'].value = radiansPerPixel;
+
+    cubeCamera.update(this.threeRenderer, blurScene);
+  }
+
+  private getBlurShader(maxSamples: number) {
+    const weights = new Float32Array(maxSamples);
+    const poleAxis = new Vector3(0, 1, 0);
+    const shaderMaterial = new ShaderMaterial({
+
+      name: 'SphericalGaussianBlur',
+
+      defines: {'n': maxSamples},
+
+      uniforms: {
+        'envMap': {value: null},
+        'samples': {value: 1},
+        'weights': {value: weights},
+        'latitudinal': {value: false},
+        'dTheta': {value: 0},
+        'poleAxis': {value: poleAxis}
+      },
+
+      vertexShader: /* glsl */ `
+      
+      varying vec3 vOutputDirection;
+  
+      void main() {
+  
+        vOutputDirection = vec3( position );
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+  
+      }
+    `,
+
+      fragmentShader: /* glsl */ `
+        varying vec3 vOutputDirection;
+  
+        uniform samplerCube envMap;
+        uniform int samples;
+        uniform float weights[ n ];
+        uniform bool latitudinal;
+        uniform float dTheta;
+        uniform vec3 poleAxis;
+  
+        vec3 getSample( float theta, vec3 axis ) {
+  
+          float cosTheta = cos( theta );
+          // Rodrigues' axis-angle rotation
+          vec3 sampleDirection = vOutputDirection * cosTheta
+            + cross( axis, vOutputDirection ) * sin( theta )
+            + axis * dot( axis, vOutputDirection ) * ( 1.0 - cosTheta );
+  
+          return vec3( textureCube( envMap, sampleDirection ) );
+  
+        }
+  
+        void main() {
+  
+          vec3 axis = latitudinal ? poleAxis : cross( poleAxis, vOutputDirection );
+  
+          if ( all( equal( axis, vec3( 0.0 ) ) ) ) {
+  
+            axis = vec3( vOutputDirection.z, 0.0, - vOutputDirection.x );
+  
+          }
+  
+          axis = normalize( axis );
+  
+          gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+          gl_FragColor.rgb += weights[ 0 ] * getSample( 0.0, axis );
+  
+          for ( int i = 1; i < n; i++ ) {
+  
+            if ( i >= samples ) {
+  
+              break;
+  
+            }
+  
+            float theta = dTheta * float( i );
+            gl_FragColor.rgb += weights[ i ] * getSample( -1.0 * theta, axis );
+            gl_FragColor.rgb += weights[ i ] * getSample( theta, axis );
+  
+          }
+        }
+      `,
+
+      blending: NoBlending,
+      depthTest: false,
+      depthWrite: false,
+      side: DoubleSide
+
+    });
+
+    return shaderMaterial;
+  }
+
   async dispose() {
     for (const [, promise] of this.skyboxCache) {
       const skybox = await promise;
@@ -216,6 +385,9 @@ export default class TextureUtils extends EventDispatcher {
     if (this.generatedEnvironmentMapAlt != null) {
       this.generatedEnvironmentMapAlt!.dispose();
       this.generatedEnvironmentMapAlt = null;
+    }
+    if (this.blurMaterial != null) {
+      this.blurMaterial.dispose();
     }
   }
 }
