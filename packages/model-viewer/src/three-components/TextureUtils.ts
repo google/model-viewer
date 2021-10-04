@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BoxBufferGeometry, CubeCamera, CubeTexture, DoubleSide, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl} from '../utilities.js';
@@ -48,6 +48,7 @@ export default class TextureUtils extends EventDispatcher {
   private skyboxCache = new Map<string, Promise<Texture>>();
 
   private blurMaterial: ShaderMaterial|null = null;
+  private blurScene: Scene|null = null;
 
   constructor(private threeRenderer: WebGLRenderer) {
     super();
@@ -162,10 +163,16 @@ export default class TextureUtils extends EventDispatcher {
       type: HalfFloatType,
       format: RGBAFormat,
       encoding: LinearEncoding,
-      depthBuffer: false
+      depthBuffer: true
     });
     const cubeCamera = new CubeCamera(0.1, 100, cubeTarget);
-    scene.add(cubeCamera);
+    const generatedEnvironmentMap = cubeCamera.renderTarget.texture;
+    // These hacks are to work around the three.js PMREM not being applied to
+    // generated cube maps, and the coordinate flip not getting applied
+    // automatically.
+    generatedEnvironmentMap.isRenderTargetTexture = false;
+    generatedEnvironmentMap.images = [1, 1, 1, 1, 1, 1];
+    scene.scale.setComponent(0, -1);
 
     const outputEncoding = renderer.outputEncoding;
     const toneMapping = renderer.toneMapping;
@@ -173,9 +180,6 @@ export default class TextureUtils extends EventDispatcher {
     renderer.outputEncoding = LinearEncoding;
 
     cubeCamera.update(renderer, scene);
-    const generatedEnvironmentMap = cubeCamera.renderTarget.texture;
-    generatedEnvironmentMap.isRenderTargetTexture = false;
-    generatedEnvironmentMap.images = [1, 1, 1, 1, 1, 1];
 
     this.blurCubemap(cubeTarget, GENERATED_SIGMA);
 
@@ -214,11 +218,20 @@ export default class TextureUtils extends EventDispatcher {
   private blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
     if (this.blurMaterial == null) {
       this.blurMaterial = this.getBlurShader(MAX_SAMPLES);
+      const box = new BoxBufferGeometry();
+      const blurMesh = new Mesh(box, this.blurMaterial!);
+      this.blurScene = new Scene();
+      this.blurScene.add(blurMesh);
     }
     const tempTarget = cubeTarget.clone();
     this.halfblur(cubeTarget, tempTarget, sigma, 'latitudinal');
     this.halfblur(tempTarget, cubeTarget, sigma, 'longitudinal');
-    tempTarget.dispose();
+    // Disposing this target after we're done with it somehow corrupts Safari's
+    // whole graphics driver. It's random, but occurs more frequently on
+    // lower-powered GPUs (macbooks with intel graphics, older iPhones). It goes
+    // beyond just messing up the PMREM, as it also occasionally causes
+    // visible corruption on the canvas and even on the rest of the page.
+    /** tempTarget.dispose(); */
   }
 
   private halfblur(
@@ -227,14 +240,6 @@ export default class TextureUtils extends EventDispatcher {
     // Number of standard deviations at which to cut off the discrete
     // approximation.
     const STANDARD_DEVIATIONS = 3;
-
-    const cubeCamera = new CubeCamera(0.1, 100, targetOut);
-    const box = new BoxBufferGeometry();
-    const blurMesh = new Mesh(box, this.blurMaterial!);
-    const blurUniforms = this.blurMaterial!.uniforms;
-    const blurScene = new Scene();
-    blurScene.add(blurMesh);
-    blurScene.add(cubeCamera);
 
     const pixels = targetIn.width;
     const radiansPerPixel = isFinite(sigmaRadians) ?
@@ -271,13 +276,15 @@ export default class TextureUtils extends EventDispatcher {
       weights[i] = weights[i] / sum;
     }
 
+    const blurUniforms = this.blurMaterial!.uniforms;
     blurUniforms['envMap'].value = targetIn.texture;
     blurUniforms['samples'].value = samples;
     blurUniforms['weights'].value = weights;
     blurUniforms['latitudinal'].value = direction === 'latitudinal';
     blurUniforms['dTheta'].value = radiansPerPixel;
 
-    cubeCamera.update(this.threeRenderer, blurScene);
+    const cubeCamera = new CubeCamera(0.1, 100, targetOut);
+    cubeCamera.update(this.threeRenderer, this.blurScene!);
   }
 
   private getBlurShader(maxSamples: number) {
@@ -366,7 +373,7 @@ export default class TextureUtils extends EventDispatcher {
       blending: NoBlending,
       depthTest: false,
       depthWrite: false,
-      side: DoubleSide
+      side: BackSide
 
     });
 
