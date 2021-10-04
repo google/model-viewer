@@ -270,7 +270,7 @@ suite('scene-graph/model', () => {
                 const gltfInfo = {
                   node: hierarchy[i],
                   mesh: node.mesh,
-                  primitiveCount: primitiveCount
+                  primitiveCount: primitiveCount as number,
                 };
                 const mvInfo = {
                   node: model[$hierarchy][i].nodesIndex,
@@ -335,7 +335,7 @@ suite('scene-graph/model', () => {
                   (gltfObject: Node|Mesh, threeObject: ThreeSceneObject) => {
                     correlatedSceneGraph.gltfElementMap.get(gltfObject)
                         ?.delete(threeObject);
-                  }
+                  };
 
               // Walks over each MVNode and deletes its wrapped Three object
               // from the gltfElementMap
@@ -363,7 +363,7 @@ suite('scene-graph/model', () => {
 
               // Clears out empty sets.
               for (const [key, value] of correlatedSceneGraph.gltfElementMap) {
-                if (value.size == 0) {
+                if (value.size === 0) {
                   correlatedSceneGraph.gltfElementMap.delete(key);
                 }
               }
