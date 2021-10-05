@@ -148,7 +148,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (threeGLTF == null) {
           return;
         }
-
         await this[$model]![$switchVariant](variantName!);
         this[$needsRender]();
         this.dispatchEvent(new CustomEvent('variant-applied'));
@@ -193,8 +192,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (correlatedSceneGraph != null &&
             currentGLTF !== this[$currentGLTF]) {
-          this[$model] =
-              new Model(correlatedSceneGraph, this[$getOnUpdateMethod]());
+          this[$model] = new Model(
+              correlatedSceneGraph, this[$getOnUpdateMethod](), this[$scene]);
           this[$originalGltfJson] =
               JSON.parse(JSON.stringify(correlatedSceneGraph.gltf));
         }

@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D} from 'three';
+import {Camera, Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster, Vector2} from 'three';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {ModelScene} from '../../three-components/ModelScene.js';
 
 import {Model as ModelInterface} from './api.js';
 import {Material} from './material.js';
@@ -32,6 +33,9 @@ export const $loadVariant = Symbol('loadVariant');
 export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
+export const $threeScene = Symbol('threeScene');
+export const $raycaster = Symbol('raycaster');
+export const $modelScene = Symbol('modelScene');
 
 
 // Holds onto temporary scene context information needed to perform lazy loading
@@ -63,11 +67,16 @@ export class Model implements ModelInterface {
   private[$hierarchy] = new Array<Node>();
   private[$roots] = new Array<Node>();
   private[$primitives] = new Array<PrimitiveNode>();
+  private[$threeScene]: Object3D|Group;
+  private[$raycaster] = new Raycaster();
+  private[$modelScene]?: ModelScene;
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
-      onUpdate: () => void = () => {}) {
+      onUpdate: () => void = () => {}, modelScene?: ModelScene) {
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
+    this[$threeScene] = threeGLTF.scene;
+    this[$modelScene] = modelScene;
 
     for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
@@ -108,8 +117,8 @@ export class Model implements ModelInterface {
     }
 
     // Creates a hierarchy of Nodes. Allows not just for switching which
-    // material is applied to a mesh but also exposes a way to provide API for
-    // switching materials and general assignment/modification.
+    // material is applied to a mesh but also exposes a way to provide API
+    // for switching materials and general assignment/modification.
 
     // Prepares for scene iteration.
     const parentMap = new Map<object, Node>();
@@ -155,6 +164,43 @@ export class Model implements ModelInterface {
    */
   get materials(): Material[] {
     return this[$materials];
+  }
+
+  getMaterialByName(name: string): Material[] {
+    return this[$materials].filter(material => {
+      return material.name === name;
+    });
+  }
+
+  intersectMaterial(screenX: number, screenY: number, camera?: Camera):
+      Material[] {
+    if (camera == null && this[$modelScene] == null) {
+      console.error(
+          'Cannot intersect material, no camera provided or is accessible');
+    }
+    this[$raycaster].setFromCamera(
+        new Vector2(screenX, screenY),
+        camera != null ? camera : this[$modelScene]!.getCamera());
+    const hits = this[$raycaster].intersectObject(this[$threeScene], true);
+
+    // Map the object hits to primitives and then to the active material of
+    // the primitive.
+    return hits.map((hit: Intersection) => {
+      const found = this[$hierarchy].find((node: Node) => {
+        if (node instanceof PrimitiveNode) {
+          const primitive = node as PrimitiveNode;
+          if (primitive.mesh === hit.object) {
+            return true;
+          }
+        }
+        return false;
+      }) as PrimitiveNode;
+
+      if (found != null) {
+        return found.getActiveMaterial();
+      }
+      return null;
+    }) as Material[];
   }
 
   /**

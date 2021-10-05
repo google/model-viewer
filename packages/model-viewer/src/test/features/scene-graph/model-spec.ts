@@ -19,7 +19,9 @@ import {Mesh} from 'three/src/objects/Mesh.js';
 import {$lazyLoadGLTFInfo} from '../../../features/scene-graph/material.js';
 import {$materials, $switchVariant, Model} from '../../../features/scene-graph/model.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
+import {ModelViewerElement} from '../../../model-viewer.js';
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
+import {timePasses, waitForEvent} from '../../../utilities.js';
 import {assetPath, loadThreeGLTF} from '../../helpers.js';
 
 
@@ -127,6 +129,65 @@ suite('scene-graph/model', () => {
             expect(model[$materials][0][$correlatedObjects]!.size)
                 .equals(sizeBeforeSwitch);
           });
+    });
+
+    suite.only('Model e2e test', () => {
+      let element: ModelViewerElement;
+      let model: Model;
+      setup(async () => {
+        element = new ModelViewerElement();
+      });
+
+      teardown(() => {
+        document.body.removeChild(element);
+      });
+
+      const loadModel = async (src: string) => {
+        element.src = src;
+        document.body.insertBefore(element, document.body.firstChild);
+        await waitForEvent(element, 'load');
+
+        model = element.model!;
+      };
+
+      test('getMaterialByName returns material when name exists', async () => {
+        await loadModel(CUBES_GLTF_PATH);
+        const materials = model.getMaterialByName('red')!;
+        expect(materials).to.be.ok;
+        expect(materials[0].name).to.be.equal('red');
+      });
+
+      test(
+          'getMaterialByName returns empty list when name does not exists',
+          async () => {
+            await loadModel(CUBES_GLTF_PATH);
+            const materials = model.getMaterialByName('does-not-exist')!;
+            expect(materials).to.be.ok;
+            expect(materials.length).to.be.equal(0);
+          });
+
+      suite('Intersecting', () => {
+        test('intersectMaterial returns material', async () => {
+          await loadModel(ASTRONAUT_GLB_PATH);
+          const materials = model.intersectMaterial(0, 0)!;
+
+          expect(materials).to.be.ok;
+          expect(materials?.length).to.be.greaterThan(0);
+          expect(materials[0]).to.be.ok;
+        });
+
+        test(
+            'intersectMaterial does not return material when intersect fails',
+            async () => {
+              await loadModel(ASTRONAUT_GLB_PATH);
+
+              await timePasses(1000);
+
+              const materials = model.intersectMaterial(1, 1)!;
+              expect(materials).to.be.ok;
+              expect(materials.length).to.be.equal(0);
+            });
+      });
     });
   });
 });

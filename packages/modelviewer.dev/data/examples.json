@@ -250,6 +250,10 @@
       {
         "htmlId": "exporterWithOptions",
         "name": "Exporter w/ Options"
+      },
+      {
+        "htmlId": "pickMaterialExample",
+        "name": "Pick a material"
       }
     ]
   }
