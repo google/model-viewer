@@ -97,7 +97,6 @@ export class ARRenderer extends EventDispatcher {
   private exitWebXRButtonContainer: HTMLElement|null = null;
   private overlay: HTMLElement|null = null;
   private xrLight: XREstimatedLight|null = null;
-  private environmentEstimation = false;
 
   private tracking = true;
   private frames = 0;
@@ -126,22 +125,6 @@ export class ARRenderer extends EventDispatcher {
     super();
     this.threeRenderer = renderer.threeRenderer;
     this.threeRenderer.xr.enabled = true;
-
-    this.xrLight = new XREstimatedLight(this.threeRenderer);
-
-    this.xrLight.addEventListener('estimationstart', () => {
-      if (!this.isPresenting || this.xrLight == null) {
-        return;
-      }
-
-      const scene = this.presentedScene!;
-      scene.add(this.xrLight);
-
-      if (this.environmentEstimation && this.xrLight.environment) {
-        this.oldEnvironment = scene.environment;
-        scene.environment = this.xrLight.environment;
-      }
-    });
   }
 
   async resolveARSession(): Promise<XRSession> {
@@ -208,13 +191,27 @@ export class ARRenderer extends EventDispatcher {
     this._presentedScene = scene;
     this.overlay = scene.element.shadowRoot!.querySelector('div.default');
 
-    this.environmentEstimation = environmentEstimation;
-
     const currentSession = await this.resolveARSession();
 
     currentSession.addEventListener('end', () => {
       this.postSessionCleanup();
     }, {once: true});
+
+    if (environmentEstimation === true) {
+      this.xrLight = new XREstimatedLight(this.threeRenderer);
+
+      this.xrLight.addEventListener('estimationstart', () => {
+        if (!this.isPresenting || this.xrLight == null) {
+          return;
+        }
+
+        const scene = this.presentedScene!;
+        scene.add(this.xrLight);
+
+        this.oldEnvironment = scene.environment;
+        scene.environment = this.xrLight.environment;
+      });
+    }
 
     const exitButton = scene.element.shadowRoot!.querySelector(
                            '.slot.exit-webxr-ar-button') as HTMLElement;
@@ -340,6 +337,8 @@ export class ARRenderer extends EventDispatcher {
           scene.environment = this.oldEnvironment;
           this.oldEnvironment = null;
         }
+        (this.xrLight as any).dispose();
+        this.xrLight = null;
       }
 
       scene.position.set(0, 0, 0);
