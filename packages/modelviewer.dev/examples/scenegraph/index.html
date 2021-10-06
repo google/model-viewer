@@ -570,29 +570,24 @@ modelViewerTexture.addEventListener("load", () => {
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">Swap textures - Normals/Occlusion/Emission</h2>
-            <p>As above, you can change these values in AR, but only in WebXR
-              mode. iOS Quick Look reflects these texture changes so long as the
-              USDZ is auto-generated.</p>
+            <h2 class="demo-title">Pick a material</h2>
+            <p>Demonstrates selecting a material with pointer input and changing its color.</p>
           </div>
           <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
             <template>
-<model-viewer id="pickMaterial" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A Material Picking Example">
+<model-viewer id="pickMaterial" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF-Binary/Buggy.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A Material Picking Example">
 </model-viewer>
 <script type="module">
 const modelViewer = document.querySelector("model-viewer#pickMaterial");
 
 modelViewer.addEventListener("load", () => {
 
-  modelViewer.model.intersectMaterial(0,0);
-
   const changeColor = async (event) => {
-    const x = event.layerX / modelViewer.clientWidth * 2 - 1;
-    const y = event.layerY / modelViewer.clientHeight * 2 - 1;
-    let materials = modelViewer.model.intersectMaterial(x, y);
+    let materials = modelViewer.intersectMaterial(event.layerX, event.layerY);
 
     if(materials.length > 0) {
-      materials[0].pbrMetallicRoughness.setBaseColorFactor([Math.random(), Math.random(), Math.random(), 1]);
+      materials[0].pbrMetallicRoughness.
+        setBaseColorFactor([Math.random(), Math.random(), Math.random(), 1]);
     }
   }
 

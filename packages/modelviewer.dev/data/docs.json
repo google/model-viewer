@@ -924,6 +924,14 @@
         "links": [
           "<a href=\"../examples/scenegraph/#exporter\">Related examples</a>"
         ]
+      },
+      {
+        "name": "intersectMaterial(pixelX, pixelY)",
+        "htmlName": "intersectMaterial",
+        "description": "Returns a list of materials whose mesh primitives intersect with a ray created from the input pixel coordinates relative to the model-viewer element. The returned list is sorted with the nearest material first, if no intersection was found the list will be empty.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#pickMaterialExample\">Related examples</a>"
+        ]
       }
     ],
     "Events": [

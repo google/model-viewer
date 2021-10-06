@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-import {Camera, Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster, Vector2} from 'three';
+import {Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster} from 'three';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
-import {ModelScene} from '../../three-components/ModelScene.js';
 
 import {Model as ModelInterface} from './api.js';
 import {Material} from './material.js';
@@ -34,8 +33,7 @@ export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
 export const $threeScene = Symbol('threeScene');
-export const $raycaster = Symbol('raycaster');
-export const $modelScene = Symbol('modelScene');
+export const $intersectMaterial = Symbol('intersectMaterial');
 
 
 // Holds onto temporary scene context information needed to perform lazy loading
@@ -68,15 +66,12 @@ export class Model implements ModelInterface {
   private[$roots] = new Array<Node>();
   private[$primitives] = new Array<PrimitiveNode>();
   private[$threeScene]: Object3D|Group;
-  private[$raycaster] = new Raycaster();
-  private[$modelScene]?: ModelScene;
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
-      onUpdate: () => void = () => {}, modelScene?: ModelScene) {
+      onUpdate: () => void = () => {}) {
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
     this[$threeScene] = threeGLTF.scene;
-    this[$modelScene] = modelScene;
 
     for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
@@ -166,22 +161,24 @@ export class Model implements ModelInterface {
     return this[$materials];
   }
 
-  getMaterialByName(name: string): Material[] {
-    return this[$materials].filter(material => {
+  getMaterialByName(name: string): Material|null {
+    const matches = this[$materials].filter(material => {
       return material.name === name;
     });
+
+    if (matches.length > 0) {
+      return matches[0];
+    }
+    return null;
   }
 
-  intersectMaterial(screenX: number, screenY: number, camera?: Camera):
-      Material[] {
-    if (camera == null && this[$modelScene] == null) {
-      console.error(
-          'Cannot intersect material, no camera provided or is accessible');
-    }
-    this[$raycaster].setFromCamera(
-        new Vector2(screenX, screenY),
-        camera != null ? camera : this[$modelScene]!.getCamera());
-    const hits = this[$raycaster].intersectObject(this[$threeScene], true);
+
+  /**
+   * Intersects a ray with the Model and returns a list of materials who's
+   * objects were intersected.
+   */
+  [$intersectMaterial](raycaster: Raycaster): Material[] {
+    const hits = raycaster.intersectObject(this[$threeScene], true);
 
     // Map the object hits to primitives and then to the active material of
     // the primitive.

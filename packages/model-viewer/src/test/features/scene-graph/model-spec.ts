@@ -19,6 +19,7 @@ import {Mesh} from 'three/src/objects/Mesh.js';
 import {$lazyLoadGLTFInfo} from '../../../features/scene-graph/material.js';
 import {$materials, $switchVariant, Model} from '../../../features/scene-graph/model.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
+import {$scene} from '../../../model-viewer-base.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {timePasses, waitForEvent} from '../../../utilities.js';
@@ -131,7 +132,7 @@ suite('scene-graph/model', () => {
           });
     });
 
-    suite.only('Model e2e test', () => {
+    suite('Model e2e test', () => {
       let element: ModelViewerElement;
       let model: Model;
       setup(async () => {
@@ -152,24 +153,25 @@ suite('scene-graph/model', () => {
 
       test('getMaterialByName returns material when name exists', async () => {
         await loadModel(CUBES_GLTF_PATH);
-        const materials = model.getMaterialByName('red')!;
-        expect(materials).to.be.ok;
-        expect(materials[0].name).to.be.equal('red');
+        const material = model.getMaterialByName('red')!;
+        expect(material).to.be.ok;
+        expect(material.name).to.be.equal('red');
       });
 
       test(
-          'getMaterialByName returns empty list when name does not exists',
+          'getMaterialByName returns null when name does not exists',
           async () => {
             await loadModel(CUBES_GLTF_PATH);
-            const materials = model.getMaterialByName('does-not-exist')!;
-            expect(materials).to.be.ok;
-            expect(materials.length).to.be.equal(0);
+            const material = model.getMaterialByName('does-not-exist')!;
+            expect(material).to.not.be.ok;
           });
 
       suite('Intersecting', () => {
         test('intersectMaterial returns material', async () => {
           await loadModel(ASTRONAUT_GLB_PATH);
-          const materials = model.intersectMaterial(0, 0)!;
+
+          const materials = element.intersectMaterial(
+              element[$scene].width / 2, element[$scene].height / 2)!;
 
           expect(materials).to.be.ok;
           expect(materials?.length).to.be.greaterThan(0);
@@ -183,7 +185,8 @@ suite('scene-graph/model', () => {
 
               await timePasses(1000);
 
-              const materials = model.intersectMaterial(1, 1)!;
+              const materials = element.intersectMaterial(
+                  element[$scene].width, element[$scene].height)!;
               expect(materials).to.be.ok;
               expect(materials.length).to.be.equal(0);
             });

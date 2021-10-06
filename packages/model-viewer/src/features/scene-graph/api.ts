@@ -12,8 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Camera} from 'three';
-
 import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 
@@ -48,24 +46,9 @@ export declare interface Model {
   /**
    * Gets a material(s) by name.
    * @param name the name of the material to return.
-   * @returns a list of materials who's name is equal to `name` or an empty list
-   *     if no matching materials found.
+   * @returns the first material to whose name matches `name`
    */
-  getMaterialByName(name: string): Material[];
-
-  /**
-   * Intersects a ray with the Model and returns a list of materials who's
-   * objects were intersected.
-   * @param screenX 2D X coordinates of the mouse, in normalized device
-   *     coordinates (NDC)---X component should be between -1 and 1.
-   * @param screenX 2D Y coordinates of the mouse, in normalized device
-   *     coordinates (NDC)---Y component should be between -1 and 1.
-   * @param camera camera from which the ray should originate
-   * @returns a list of materials, if no intersection is made the an empty list
-   *     is returned.
-   */
-  intersectMaterial(screenX: number, screenY: number, camera: Camera):
-      Material[];
+  getMaterialByName(name: string): Material|null;
 }
 
 /**
