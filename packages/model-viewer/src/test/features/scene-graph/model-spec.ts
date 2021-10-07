@@ -163,7 +163,7 @@ suite('scene-graph/model', () => {
           async () => {
             await loadModel(CUBES_GLTF_PATH);
             const material = model.getMaterialByName('does-not-exist')!;
-            expect(material).to.not.be.ok;
+            expect(material).to.be.null;
           });
 
       suite('Intersecting', () => {
@@ -184,7 +184,7 @@ suite('scene-graph/model', () => {
 
               const material = element.materialFromPoint(
                   element[$scene].width, element[$scene].height)!;
-              expect(material).to.not.be.ok;
+              expect(material).to.be.null;
             });
       });
     });
