@@ -191,12 +191,6 @@ export class ARRenderer extends EventDispatcher {
     this._presentedScene = scene;
     this.overlay = scene.element.shadowRoot!.querySelector('div.default');
 
-    const currentSession = await this.resolveARSession();
-
-    currentSession.addEventListener('end', () => {
-      this.postSessionCleanup();
-    }, {once: true});
-
     if (environmentEstimation === true) {
       this.xrLight = new XREstimatedLight(this.threeRenderer);
 
@@ -212,6 +206,12 @@ export class ARRenderer extends EventDispatcher {
         scene.environment = this.xrLight.environment;
       });
     }
+
+    const currentSession = await this.resolveARSession();
+
+    currentSession.addEventListener('end', () => {
+      this.postSessionCleanup();
+    }, {once: true});
 
     const exitButton = scene.element.shadowRoot!.querySelector(
                            '.slot.exit-webxr-ar-button') as HTMLElement;
@@ -331,7 +331,7 @@ export class ARRenderer extends EventDispatcher {
     if (scene != null) {
       const {element} = scene;
 
-      if (this.xrLight != null && this.xrLight.parent != null) {
+      if (this.xrLight != null) {
         scene.remove(this.xrLight);
         if (this.oldEnvironment != null) {
           scene.environment = this.oldEnvironment;
