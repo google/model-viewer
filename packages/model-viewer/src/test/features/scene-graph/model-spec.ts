@@ -167,28 +167,24 @@ suite('scene-graph/model', () => {
           });
 
       suite('Intersecting', () => {
-        test('intersectMaterial returns material', async () => {
+        test('materialFromPoint returns material', async () => {
           await loadModel(ASTRONAUT_GLB_PATH);
 
-          const materials = element.intersectMaterial(
+          const material = element.materialFromPoint(
               element[$scene].width / 2, element[$scene].height / 2)!;
 
-          expect(materials).to.be.ok;
-          expect(materials?.length).to.be.greaterThan(0);
-          expect(materials[0]).to.be.ok;
+          expect(material).to.be.ok;
         });
 
         test(
-            'intersectMaterial does not return material when intersect fails',
-            async () => {
+            'materialFromPoint returns null when intersect fails', async () => {
               await loadModel(ASTRONAUT_GLB_PATH);
 
               await timePasses(1000);
 
-              const materials = element.intersectMaterial(
+              const material = element.materialFromPoint(
                   element[$scene].width, element[$scene].height)!;
-              expect(materials).to.be.ok;
-              expect(materials.length).to.be.equal(0);
+              expect(material).to.not.be.ok;
             });
       });
     });

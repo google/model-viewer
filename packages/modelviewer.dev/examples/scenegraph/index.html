@@ -570,7 +570,7 @@ modelViewerTexture.addEventListener("load", () => {
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">Pick a material</h2>
+            <h2 class="demo-title">Pick a Material</h2>
             <p>Demonstrates selecting a material with pointer input and changing its color.</p>
           </div>
           <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
@@ -583,11 +583,11 @@ const modelViewer = document.querySelector("model-viewer#pickMaterial");
 modelViewer.addEventListener("load", () => {
 
   const changeColor = async (event) => {
-    let materials = modelViewer.intersectMaterial(event.layerX, event.layerY);
+    let material = modelViewer.materialFromPoint(event.layerX, event.layerY);
 
-    if(materials.length > 0) {
-      materials[0].pbrMetallicRoughness.
-        setBaseColorFactor([Math.random(), Math.random(), Math.random(), 1]);
+    if(material != null) {
+      material.pbrMetallicRoughness.
+        setBaseColorFactor([Math.random(), Math.random(), Math.random()]);
     }
   }
 

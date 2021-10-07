@@ -33,7 +33,8 @@ export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
 export const $threeScene = Symbol('threeScene');
-export const $intersectMaterial = Symbol('intersectMaterial');
+export const $materialsFromPoint = Symbol('materialsFromPoint');
+export const $materialFromPoint = Symbol('materialFromPoint');
 
 
 // Holds onto temporary scene context information needed to perform lazy loading
@@ -174,10 +175,10 @@ export class Model implements ModelInterface {
 
 
   /**
-   * Intersects a ray with the Model and returns a list of materials who's
+   * Intersects a ray with the Model and returns a list of materials whose
    * objects were intersected.
    */
-  [$intersectMaterial](raycaster: Raycaster): Material[] {
+  [$materialsFromPoint](raycaster: Raycaster): Material[] {
     const hits = raycaster.intersectObject(this[$threeScene], true);
 
     // Map the object hits to primitives and then to the active material of
@@ -198,6 +199,20 @@ export class Model implements ModelInterface {
       }
       return null;
     }) as Material[];
+  }
+
+  /**
+   * Intersects a ray with the Model and returns the first material whose
+   * object was intersected.
+   */
+  [$materialFromPoint](raycaster: Raycaster): Material|null {
+    const materials = this[$materialsFromPoint](raycaster);
+
+    if (materials.length > 0) {
+      return materials[0];
+    }
+
+    return null;
   }
 
   /**

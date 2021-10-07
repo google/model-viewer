@@ -28,7 +28,7 @@ import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
 import {Material} from './scene-graph/material.js';
-import {$intersectMaterial, $prepareVariantsForExport, $switchVariant, Model} from './scene-graph/model.js';
+import {$materialFromPoint, $prepareVariantsForExport, $switchVariant, Model} from './scene-graph/model.js';
 import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
@@ -59,12 +59,11 @@ export interface SceneGraphInterface {
   /**
    * Intersects a ray with the scene and returns a list of materials who's
    * objects were intersected.
-   * @param pixelX 2D X coordinates of the mouse.
-   * @param pixelY 2D Y coordinates of the mouse.
-   * @returns a list of materials, if no intersection is made the an empty list
-   *     is returned.
+   * @param pixelX X coordinate of the mouse.
+   * @param pixelY Y coordinate of the mouse.
+   * @returns a material, if no intersection is made than null is returned.
    */
-  intersectMaterial(pixelX: number, pixelY: number): Material[];
+  materialFromPoint(pixelX: number, pixelY: number): Material|null;
 }
 
 /**
@@ -272,14 +271,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       });
     }
 
-    intersectMaterial(pixelX: number, pixelY: number): Material[] {
+    materialFromPoint(pixelX: number, pixelY: number): Material|null {
       const scene = this[$scene];
       const {width, height} = scene;
       this[$ndcCoords].set(pixelX, pixelY);
       NDCCoordsFromPixel_InPlace(this[$ndcCoords], width, height);
       scene.raycaster.setFromCamera(this[$ndcCoords], scene.getCamera());
 
-      return this[$model]![$intersectMaterial](scene.raycaster);
+      return this[$model]![$materialFromPoint](scene.raycaster);
     }
   }
 
