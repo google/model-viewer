@@ -931,6 +931,14 @@
         "links": [
           "<a href=\"../examples/scenegraph/#exporter\">Related examples</a>"
         ]
+      },
+      {
+        "name": "materialFromPoint(pixelX, pixelY)",
+        "htmlName": "materialFromPoint",
+        "description": "Returns a material whose mesh primitive intersects with a ray created from the input pixel coordinates relative to the model-viewer element. Returns the material whose mesh is nearest the camera.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#pickMaterialExample\">Related examples</a>"
+        ]
       }
     ],
     "Events": [
