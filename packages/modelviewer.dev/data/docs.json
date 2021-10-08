@@ -328,6 +328,13 @@
         ]
       }
     ],
+    "Properties": [
+      {
+        "name": "canActivateAR",
+        "htmlName": "canActivateAR",
+        "description": "This property returns true if the current platform supports AR, otherwise false is returned."
+      }
+    ],
     "Methods": [
       {
         "name": "activateAR()",
