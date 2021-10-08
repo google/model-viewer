@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Cache, CubeUVReflectionMapping, EquirectangularReflectionMapping, WebGLRenderer} from 'three';
+import {Cache, CubeReflectionMapping, EquirectangularReflectionMapping, WebGLRenderer} from 'three';
 
 import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath} from '../helpers.js';
@@ -60,20 +60,20 @@ suite('TextureUtils', () => {
     test('loads a valid texture from URL', async () => {
       let texture = await textureUtils.load(EQUI_URL);
       texture.dispose();
-      expect((texture as any).isTexture).to.be.ok;
-      expect((texture as any).userData.url).to.be.eq(EQUI_URL);
+      expect(texture.isTexture).to.be.ok;
+      expect(texture.name).to.be.eq(EQUI_URL);
       expect(texture.mapping).to.be.eq(EquirectangularReflectionMapping);
     });
     test('loads a valid HDR texture from URL', async () => {
       let texture = await textureUtils.load(HDR_EQUI_URL);
       texture.dispose();
-      expect((texture as any).isTexture).to.be.ok;
-      expect((texture as any).userData.url).to.be.eq(HDR_EQUI_URL);
+      expect(texture.isTexture).to.be.ok;
+      expect(texture.name).to.be.eq(HDR_EQUI_URL);
       expect(texture.mapping).to.be.eq(EquirectangularReflectionMapping);
     });
     test('throws on invalid URL', async () => {
       try {
-        await (textureUtils.load as any)(null);
+        await textureUtils.load('');
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;
@@ -94,17 +94,17 @@ suite('TextureUtils', () => {
       const textures =
           await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
 
-      const skybox = textures.skybox as any;
-      const environment = textures.environmentMap.texture as any;
+      const skybox = textures.skybox!;
+      const environment = textures.environmentMap;
 
       expect(skybox.isTexture).to.be.ok;
       expect(environment.isTexture).to.be.ok;
 
-      expect(skybox.userData.url).to.be.eq(EQUI_URL);
+      expect(skybox.name).to.be.eq(EQUI_URL);
       expect(skybox.mapping).to.be.eq(EquirectangularReflectionMapping);
 
-      expect(environment.userData.url).to.be.eq(EQUI_URL);
-      expect(environment.mapping).to.be.eq(CubeUVReflectionMapping);
+      expect(environment.name).to.be.eq(EQUI_URL);
+      expect(environment.mapping).to.be.eq(EquirectangularReflectionMapping);
     });
 
     test(
@@ -113,17 +113,18 @@ suite('TextureUtils', () => {
           const textures =
               await textureUtils.generateEnvironmentMapAndSkybox(HDR_EQUI_URL);
 
-          const skybox = textures.skybox as any;
-          const environment = textures.environmentMap.texture as any;
+          const skybox = textures.skybox!;
+          const environment = textures.environmentMap;
 
           expect(skybox.isTexture).to.be.ok;
           expect(environment.isTexture).to.be.ok;
 
-          expect(skybox.userData.url).to.be.eq(HDR_EQUI_URL);
+          expect(skybox.name).to.be.eq(HDR_EQUI_URL);
           expect(skybox.mapping).to.be.eq(EquirectangularReflectionMapping);
 
-          expect(environment.userData.url).to.be.eq(HDR_EQUI_URL);
-          expect(environment.mapping).to.be.eq(CubeUVReflectionMapping);
+          expect(environment.name).to.be.eq(HDR_EQUI_URL);
+          expect(environment.mapping)
+              .to.be.eq(EquirectangularReflectionMapping);
         });
 
     test(
@@ -132,22 +133,23 @@ suite('TextureUtils', () => {
           const textures = await textureUtils.generateEnvironmentMapAndSkybox(
               EQUI_URL, HDR_EQUI_URL);
 
-          const skybox = textures.skybox as any;
-          const environment = textures.environmentMap.texture as any;
+          const skybox = textures.skybox!;
+          const environment = textures.environmentMap;
 
           expect(skybox.isTexture).to.be.ok;
           expect(environment.isTexture).to.be.ok;
 
-          expect(skybox.userData.url).to.be.eq(EQUI_URL);
+          expect(skybox.name).to.be.eq(EQUI_URL);
           expect(skybox.mapping).to.be.eq(EquirectangularReflectionMapping);
 
-          expect(environment.userData.url).to.be.eq(HDR_EQUI_URL);
-          expect(environment.mapping).to.be.eq(CubeUVReflectionMapping);
+          expect(environment.name).to.be.eq(HDR_EQUI_URL);
+          expect(environment.mapping)
+              .to.be.eq(EquirectangularReflectionMapping);
         });
 
     test('throws if given an invalid url', async () => {
       try {
-        await textureUtils.generateEnvironmentMapAndSkybox({} as string);
+        await textureUtils.generateEnvironmentMapAndSkybox();
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;
@@ -157,11 +159,11 @@ suite('TextureUtils', () => {
 
   suite('dynamically generating environment maps', () => {
     test('creates a cubemap render target with PMREM', async () => {
-      const environment = (await textureUtils.generateEnvironmentMapAndSkybox())
-                              .environmentMap.texture as any;
+      const environment =
+          (await textureUtils.generateEnvironmentMapAndSkybox()).environmentMap;
 
-      expect(environment.userData.url).to.be.eq(null);
-      expect(environment.mapping).to.be.eq(CubeUVReflectionMapping);
+      expect(environment.name).to.be.eq('default');
+      expect(environment.mapping).to.be.eq(CubeReflectionMapping);
     });
   });
 });

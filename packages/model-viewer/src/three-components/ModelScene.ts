@@ -618,15 +618,19 @@ export class ModelScene extends Scene {
     }
   }
 
+  get raycaster() {
+    return raycaster;
+  }
+
   /**
    * This method returns the world position and model-space normal of the point
    * on the mesh corresponding to the input pixel coordinates given relative to
    * the model-viewer element. If the mesh is not hit, the result is null.
    */
-  positionAndNormalFromPoint(pixelPosition: Vector2, object: Object3D = this):
+  positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
       {position: Vector3, normal: Vector3}|null {
-    raycaster.setFromCamera(pixelPosition, this.getCamera());
-    const hits = raycaster.intersectObject(object, true);
+    this.raycaster.setFromCamera(ndcPosition, this.getCamera());
+    const hits = this.raycaster.intersectObject(object, true);
 
     if (hits.length === 0) {
       return null;

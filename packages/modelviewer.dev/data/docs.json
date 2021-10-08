@@ -328,6 +328,13 @@
         ]
       }
     ],
+    "Properties": [
+      {
+        "name": "canActivateAR",
+        "htmlName": "canActivateAR",
+        "description": "This property returns true if the current platform supports AR, otherwise false is returned."
+      }
+    ],
     "Methods": [
       {
         "name": "activateAR()",
@@ -923,6 +930,14 @@
         "description": "Exports the model in glTF or GLB formats. Returns a promise that resolves in a Blob of type \"application/octet-stream\" or \"application/json\" depending on the export format. For a list of parameters see <a href='https://threejs.org/docs/index.html#examples/en/exporters/GLTFExporter.parse'> GLTF exporter</a> documentation, with the exception that all animations are automatically exported and truncateDrawRange defaults to true.",
         "links": [
           "<a href=\"../examples/scenegraph/#exporter\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "materialFromPoint(pixelX, pixelY)",
+        "htmlName": "materialFromPoint",
+        "description": "Returns a material whose mesh primitive intersects with a ray created from the input pixel coordinates relative to the model-viewer element. Returns the material whose mesh is nearest the camera.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#pickMaterialExample\">Related examples</a>"
         ]
       }
     ],

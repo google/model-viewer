@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial, Mesh, MeshStandardMaterial} from 'three';
+import {Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster} from 'three';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet, UserDataAssociations} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {GLTF, GLTFElement, Scene} from '../../three-components/gltf-instance/gltf-2.0.js';
@@ -32,6 +32,9 @@ export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
 export const $roots = Symbol('roots');
 export const $hierarchy = Symbol('hierarchy');
+export const $threeScene = Symbol('threeScene');
+export const $materialsFromPoint = Symbol('materialsFromPoint');
+export const $materialFromPoint = Symbol('materialFromPoint');
 
 
 // Holds onto temporary scene context information needed to perform lazy loading
@@ -63,11 +66,12 @@ export class Model implements ModelInterface {
   private[$primitivesList] = new Array<MVPrimitive>();
   private[$roots] = new Array<MVNode>();
   private[$hierarchy] = new Array<MVNode>();
+  private[$threeScene]: Object3D|Group;
   constructor(
       sceneIndex: number, correlatedSceneGraph: CorrelatedSceneGraph,
       onUpdate: () => void = () => {}) {
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
-
+    this[$threeScene] = threeGLTF.scene;
     if (gltf.scenes == null || sceneIndex >= gltf.scenes.length) {
       console.warn(`Cannot create model for scene: ${
           sceneIndex}, scene data does not exist.`);
@@ -190,6 +194,59 @@ export class Model implements ModelInterface {
    */
   get materials(): Material[] {
     return this[$materials];
+  }
+
+  getMaterialByName(name: string): Material|null {
+    const matches = this[$materials].filter(material => {
+      return material.name === name;
+    });
+
+    if (matches.length > 0) {
+      return matches[0];
+    }
+    return null;
+  }
+
+
+  /**
+   * Intersects a ray with the Model and returns a list of materials whose
+   * objects were intersected.
+   */
+  [$materialsFromPoint](raycaster: Raycaster): Material[] {
+    const hits = raycaster.intersectObject(this[$threeScene], true);
+
+    // Map the object hits to primitives and then to the active material of
+    // the primitive.
+    return hits.map((hit: Intersection<Object3D>) => {
+      const found = this[$primitivesList].find((node: MVPrimitive) => {
+        if (node instanceof MVPrimitive) {
+          const primitive = node as MVPrimitive;
+          if (primitive.threeMesh === hit.object) {
+            return true;
+          }
+        }
+        return false;
+      }) as MVPrimitive;
+
+      if (found != null) {
+        return found.getActiveMaterial();
+      }
+      return null;
+    }) as Material[];
+  }
+
+  /**
+   * Intersects a ray with the Model and returns the first material whose
+   * object was intersected.
+   */
+  [$materialFromPoint](raycaster: Raycaster): Material|null {
+    const materials = this[$materialsFromPoint](raycaster);
+
+    if (materials.length > 0) {
+      return materials[0];
+    }
+
+    return null;
   }
 
   /**
