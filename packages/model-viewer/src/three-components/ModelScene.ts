@@ -69,6 +69,7 @@ export class ModelScene extends Scene {
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
   public annotationRenderer = new CSS2DRenderer();
+  public schemaElement = document.createElement('script');
   public width = 1;
   public height = 1;
   public aspect = 1;
@@ -109,7 +110,6 @@ export class ModelScene extends Scene {
   private cancelPendingSourceChange: (() => void)|null = null;
   private animationsByName: Map<string, AnimationClip> = new Map();
   private currentAnimationAction: AnimationAction|null = null;
-  private schemaElement = document.createElement('script');
 
   constructor({canvas, element, width, height}: ModelSceneConfig) {
     super();
@@ -723,9 +723,9 @@ export class ModelScene extends Scene {
       const encoding = [{
         '@type': 'MediaObject',
         contentUrl: src,
-        encodingFormat: src.split('.').pop()?.toLowerCase() === 'glb' ?
-            'model/gltf-binary' :
-            'model/gltf+json'
+        encodingFormat: src.split('.').pop()?.toLowerCase() === 'gltf' ?
+            'model/gltf+json' :
+            'model/gltf-binary'
       }];
 
       if (iosSrc) {

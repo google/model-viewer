@@ -14,7 +14,7 @@
  */
 
 import {$defaultPosterElement, $posterContainerElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
-import ModelViewerElementBase, {$userInputElement} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$scene, $userInputElement} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, until} from '../helpers.js';
@@ -141,6 +141,23 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             expect(size.x).to.be.eq(1);
             expect(size.y).to.be.eq(1);
             expect(size.z).to.be.eq(1);
+          });
+
+          test('generates 3DModel schema', async () => {
+            element.generateSchema = true;
+            await element.updateComplete;
+            const {schemaElement} = element[$scene];
+            expect(schemaElement.type).to.be.eq('application/ld+json');
+            expect(schemaElement.parentElement).to.be.eq(document.head);
+            const json = JSON.parse(schemaElement.textContent!);
+            const encoding = json.encoding[0];
+
+            expect(encoding.contentUrl).to.be.eq(CUBE_GLB_PATH);
+            expect(encoding.encodingFormat).to.be.eq('model/gltf+json');
+
+            element.generateSchema = false;
+            await element.updateComplete;
+            expect(schemaElement.parentElement).to.be.not.ok;
           });
         });
       });
