@@ -183,7 +183,7 @@ export class Model implements ModelInterface {
 
     // Map the object hits to primitives and then to the active material of
     // the primitive.
-    return hits.map((hit: Intersection) => {
+    return hits.map((hit: Intersection<Object3D>) => {
       const found = this[$hierarchy].find((node: Node) => {
         if (node instanceof PrimitiveNode) {
           const primitive = node as PrimitiveNode;
