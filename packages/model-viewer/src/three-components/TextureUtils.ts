@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, PMREMGenerator, Texture, TextureLoader, UnsignedByteType, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl} from '../utilities.js';
@@ -23,7 +23,7 @@ import EnvironmentScene from './EnvironmentScene.js';
 import EnvironmentSceneAlt from './EnvironmentSceneAlt.js';
 
 export interface EnvironmentMapAndSkybox {
-  environmentMap: WebGLRenderTarget;
+  environmentMap: Texture;
   skybox: Texture|null;
 }
 
@@ -32,31 +32,26 @@ export interface EnvironmentGenerationConfig {
 }
 
 const GENERATED_SIGMA = 0.04;
+// The maximum length of the blur for loop. Smaller sigmas will use fewer
+// samples and exit early, but not recompile the shader.
+const MAX_SAMPLES = 20;
 
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 const ldrLoader = new TextureLoader();
 const hdrLoader = new RGBELoader();
-hdrLoader.setDataType(UnsignedByteType);
-
-// Attach a `userData` object for arbitrary data on textures that
-// originate from TextureUtils, similar to Object3D's userData,
-// for help debugging, providing metadata for tests, and semantically
-// describe the type of texture within the context of this application.
-const userData = {
-  url: null,
-};
+hdrLoader.setDataType(HalfFloatType);
 
 export default class TextureUtils extends EventDispatcher {
-  private generatedEnvironmentMap: WebGLRenderTarget|null = null;
-  private generatedEnvironmentMapAlt: WebGLRenderTarget|null = null;
-  private PMREMGenerator: PMREMGenerator;
+  private generatedEnvironmentMap: CubeTexture|null = null;
+  private generatedEnvironmentMapAlt: CubeTexture|null = null;
 
   private skyboxCache = new Map<string, Promise<Texture>>();
-  private environmentMapCache = new Map<string, Promise<WebGLRenderTarget>>();
 
-  constructor(threeRenderer: WebGLRenderer) {
+  private blurMaterial: ShaderMaterial|null = null;
+  private blurScene: Scene|null = null;
+
+  constructor(private threeRenderer: WebGLRenderer) {
     super();
-    this.PMREMGenerator = new PMREMGenerator(threeRenderer);
   }
 
   async load(
@@ -73,7 +68,7 @@ export default class TextureUtils extends EventDispatcher {
 
       progressCallback(1.0);
 
-      this.addMetadata(texture, url);
+      texture.name = url;
       texture.mapping = EquirectangularReflectionMapping;
 
       if (!isHDR) {
@@ -110,21 +105,21 @@ export default class TextureUtils extends EventDispatcher {
 
     try {
       let skyboxLoads: Promise<Texture|null> = Promise.resolve(null);
-      let environmentMapLoads: Promise<WebGLRenderTarget>;
+      let environmentMapLoads: Promise<Texture>;
 
       // If we have a skybox URL, attempt to load it as a cubemap
       if (!!skyboxUrl) {
-        skyboxLoads = this.loadSkyboxFromUrl(skyboxUrl, progressTracker);
+        skyboxLoads = this.loadEquirectFromUrl(skyboxUrl, progressTracker);
       }
 
       if (!!environmentMapUrl) {
         // We have an available environment map URL
         environmentMapLoads =
-            this.loadEnvironmentMapFromUrl(environmentMapUrl, progressTracker);
+            this.loadEquirectFromUrl(environmentMapUrl, progressTracker);
       } else if (!!skyboxUrl) {
         // Fallback to deriving the environment map from an available skybox
         environmentMapLoads =
-            this.loadEnvironmentMapFromUrl(skyboxUrl, progressTracker);
+            this.loadEquirectFromUrl(skyboxUrl, progressTracker);
       } else {
         // Fallback to generating the environment map
         environmentMapLoads = useAltEnvironment === true ?
@@ -145,22 +140,10 @@ export default class TextureUtils extends EventDispatcher {
     }
   }
 
-  private addMetadata(texture: Texture|null, url: string|null) {
-    if (texture == null) {
-      return;
-    }
-    (texture as any).userData = {
-      ...userData,
-      ...({
-        url: url,
-      })
-    };
-  }
-
   /**
    * Loads an equirect Texture from a given URL, for use as a skybox.
    */
-  private loadSkyboxFromUrl(url: string, progressTracker?: ProgressTracker):
+  private loadEquirectFromUrl(url: string, progressTracker?: ProgressTracker):
       Promise<Texture> {
     if (!this.skyboxCache.has(url)) {
       const progressCallback =
@@ -173,40 +156,49 @@ export default class TextureUtils extends EventDispatcher {
     return this.skyboxCache.get(url)!;
   }
 
-  /**
-   * Loads a WebGLRenderTarget from a given URL. The render target in this
-   * case will be assumed to be used as an environment map.
-   */
-  private loadEnvironmentMapFromUrl(
-      url: string,
-      progressTracker?: ProgressTracker): Promise<WebGLRenderTarget> {
-    if (!this.environmentMapCache.has(url)) {
-      const environmentMapLoads =
-          this.loadSkyboxFromUrl(url, progressTracker).then((equirect) => {
-            const cubeUV = this.PMREMGenerator.fromEquirectangular(equirect);
-            this.addMetadata(cubeUV.texture, url);
-            return cubeUV;
-          });
-      this.PMREMGenerator.compileEquirectangularShader();
+  private GenerateEnvironmentMap(scene: Scene) {
+    const renderer = this.threeRenderer;
+    const cubeTarget = new WebGLCubeRenderTarget(256, {
+      generateMipmaps: false,
+      type: HalfFloatType,
+      format: RGBAFormat,
+      encoding: LinearEncoding,
+      depthBuffer: true
+    });
+    const cubeCamera = new CubeCamera(0.1, 100, cubeTarget);
+    const generatedEnvironmentMap = cubeCamera.renderTarget.texture;
+    // These hacks are to work around the three.js PMREM not being applied to
+    // generated cube maps, and the coordinate flip not getting applied
+    // automatically.
+    generatedEnvironmentMap.isRenderTargetTexture = false;
+    generatedEnvironmentMap.images = [1, 1, 1, 1, 1, 1];
+    scene.scale.setComponent(0, -1);
 
-      this.environmentMapCache.set(url, environmentMapLoads);
-    }
+    const outputEncoding = renderer.outputEncoding;
+    const toneMapping = renderer.toneMapping;
+    renderer.toneMapping = NoToneMapping;
+    renderer.outputEncoding = LinearEncoding;
 
-    return this.environmentMapCache.get(url)!;
+    cubeCamera.update(renderer, scene);
+
+    this.blurCubemap(cubeTarget, GENERATED_SIGMA);
+
+    renderer.toneMapping = toneMapping;
+    renderer.outputEncoding = outputEncoding;
+
+    return generatedEnvironmentMap;
   }
 
   /**
    * Loads a dynamically generated environment map.
    */
-  private loadGeneratedEnvironmentMap(): Promise<WebGLRenderTarget> {
+  private loadGeneratedEnvironmentMap(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMap == null) {
-      const defaultScene = new EnvironmentScene;
       this.generatedEnvironmentMap =
-          this.PMREMGenerator.fromScene(defaultScene, GENERATED_SIGMA);
-      this.addMetadata(this.generatedEnvironmentMap.texture, null);
+          this.GenerateEnvironmentMap(new EnvironmentScene());
+      this.generatedEnvironmentMap.name = 'default';
     }
-
-    return Promise.resolve(this.generatedEnvironmentMap!);
+    return Promise.resolve(this.generatedEnvironmentMap);
   }
 
   /**
@@ -214,39 +206,185 @@ export default class TextureUtils extends EventDispatcher {
    * color-preserving. Shows less contrast around the different sides of the
    * object.
    */
-  private loadGeneratedEnvironmentMapAlt(): Promise<WebGLRenderTarget> {
+  private loadGeneratedEnvironmentMapAlt(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMapAlt == null) {
-      const defaultScene = new EnvironmentSceneAlt;
       this.generatedEnvironmentMapAlt =
-          this.PMREMGenerator.fromScene(defaultScene, GENERATED_SIGMA);
-      this.addMetadata(this.generatedEnvironmentMapAlt.texture, null);
+          this.GenerateEnvironmentMap(new EnvironmentSceneAlt());
+      this.generatedEnvironmentMapAlt.name = 'neutral';
     }
-
-    return Promise.resolve(this.generatedEnvironmentMapAlt!);
+    return Promise.resolve(this.generatedEnvironmentMapAlt);
   }
 
-  async dispose() {
-    const allTargetsLoad: Array<Promise<WebGLRenderTarget>> = [];
+  private blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
+    if (this.blurMaterial == null) {
+      this.blurMaterial = this.getBlurShader(MAX_SAMPLES);
+      const box = new BoxBufferGeometry();
+      const blurMesh = new Mesh(box, this.blurMaterial!);
+      this.blurScene = new Scene();
+      this.blurScene.add(blurMesh);
+    }
+    const tempTarget = cubeTarget.clone();
+    this.halfblur(cubeTarget, tempTarget, sigma, 'latitudinal');
+    this.halfblur(tempTarget, cubeTarget, sigma, 'longitudinal');
+    // Disposing this target after we're done with it somehow corrupts Safari's
+    // whole graphics driver. It's random, but occurs more frequently on
+    // lower-powered GPUs (macbooks with intel graphics, older iPhones). It goes
+    // beyond just messing up the PMREM, as it also occasionally causes
+    // visible corruption on the canvas and even on the rest of the page.
+    /** tempTarget.dispose(); */
+  }
 
-    // NOTE(cdata): We would use for-of iteration on the maps here, but
-    // IE11 doesn't have the necessary iterator-returning methods. So,
-    // disposal of these render targets is kind of convoluted as a result.
+  private halfblur(
+      targetIn: WebGLCubeRenderTarget, targetOut: WebGLCubeRenderTarget,
+      sigmaRadians: number, direction: 'latitudinal'|'longitudinal') {
+    // Number of standard deviations at which to cut off the discrete
+    // approximation.
+    const STANDARD_DEVIATIONS = 3;
 
-    this.environmentMapCache.forEach((targetLoads) => {
-      allTargetsLoad.push(targetLoads);
-    });
+    const pixels = targetIn.width;
+    const radiansPerPixel = isFinite(sigmaRadians) ?
+        Math.PI / (2 * pixels) :
+        2 * Math.PI / (2 * MAX_SAMPLES - 1);
+    const sigmaPixels = sigmaRadians / radiansPerPixel;
+    const samples = isFinite(sigmaRadians) ?
+        1 + Math.floor(STANDARD_DEVIATIONS * sigmaPixels) :
+        MAX_SAMPLES;
 
-    this.environmentMapCache.clear();
+    if (samples > MAX_SAMPLES) {
+      console.warn(`sigmaRadians, ${
+          sigmaRadians}, is too large and will clip, as it requested ${
+          samples} samples when the maximum is set to ${MAX_SAMPLES}`);
+    }
 
-    for (const targetLoads of allTargetsLoad) {
-      try {
-        const target = await targetLoads;
-        target.dispose();
-      } catch (e) {
-        // Suppress errors, so that all render targets will be disposed
+    const weights = [];
+    let sum = 0;
+
+    for (let i = 0; i < MAX_SAMPLES; ++i) {
+      const x = i / sigmaPixels;
+      const weight = Math.exp(-x * x / 2);
+      weights.push(weight);
+
+      if (i == 0) {
+        sum += weight;
+
+      } else if (i < samples) {
+        sum += 2 * weight;
       }
     }
 
+    for (let i = 0; i < weights.length; i++) {
+      weights[i] = weights[i] / sum;
+    }
+
+    const blurUniforms = this.blurMaterial!.uniforms;
+    blurUniforms['envMap'].value = targetIn.texture;
+    blurUniforms['samples'].value = samples;
+    blurUniforms['weights'].value = weights;
+    blurUniforms['latitudinal'].value = direction === 'latitudinal';
+    blurUniforms['dTheta'].value = radiansPerPixel;
+
+    const cubeCamera = new CubeCamera(0.1, 100, targetOut);
+    cubeCamera.update(this.threeRenderer, this.blurScene!);
+  }
+
+  private getBlurShader(maxSamples: number) {
+    const weights = new Float32Array(maxSamples);
+    const poleAxis = new Vector3(0, 1, 0);
+    const shaderMaterial = new ShaderMaterial({
+
+      name: 'SphericalGaussianBlur',
+
+      defines: {'n': maxSamples},
+
+      uniforms: {
+        'envMap': {value: null},
+        'samples': {value: 1},
+        'weights': {value: weights},
+        'latitudinal': {value: false},
+        'dTheta': {value: 0},
+        'poleAxis': {value: poleAxis}
+      },
+
+      vertexShader: /* glsl */ `
+      
+      varying vec3 vOutputDirection;
+  
+      void main() {
+  
+        vOutputDirection = vec3( position );
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+  
+      }
+    `,
+
+      fragmentShader: /* glsl */ `
+        varying vec3 vOutputDirection;
+  
+        uniform samplerCube envMap;
+        uniform int samples;
+        uniform float weights[ n ];
+        uniform bool latitudinal;
+        uniform float dTheta;
+        uniform vec3 poleAxis;
+  
+        vec3 getSample( float theta, vec3 axis ) {
+  
+          float cosTheta = cos( theta );
+          // Rodrigues' axis-angle rotation
+          vec3 sampleDirection = vOutputDirection * cosTheta
+            + cross( axis, vOutputDirection ) * sin( theta )
+            + axis * dot( axis, vOutputDirection ) * ( 1.0 - cosTheta );
+  
+          return vec3( textureCube( envMap, sampleDirection ) );
+  
+        }
+  
+        void main() {
+  
+          vec3 axis = latitudinal ? poleAxis : cross( poleAxis, vOutputDirection );
+  
+          if ( all( equal( axis, vec3( 0.0 ) ) ) ) {
+  
+            axis = vec3( vOutputDirection.z, 0.0, - vOutputDirection.x );
+  
+          }
+  
+          axis = normalize( axis );
+  
+          gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+          gl_FragColor.rgb += weights[ 0 ] * getSample( 0.0, axis );
+  
+          for ( int i = 1; i < n; i++ ) {
+  
+            if ( i >= samples ) {
+  
+              break;
+  
+            }
+  
+            float theta = dTheta * float( i );
+            gl_FragColor.rgb += weights[ i ] * getSample( -1.0 * theta, axis );
+            gl_FragColor.rgb += weights[ i ] * getSample( theta, axis );
+  
+          }
+        }
+      `,
+
+      blending: NoBlending,
+      depthTest: false,
+      depthWrite: false,
+      side: BackSide
+
+    });
+
+    return shaderMaterial;
+  }
+
+  async dispose() {
+    for (const [, promise] of this.skyboxCache) {
+      const skybox = await promise;
+      skybox.dispose();
+    }
     if (this.generatedEnvironmentMap != null) {
       this.generatedEnvironmentMap!.dispose();
       this.generatedEnvironmentMap = null;
@@ -254,6 +392,9 @@ export default class TextureUtils extends EventDispatcher {
     if (this.generatedEnvironmentMapAlt != null) {
       this.generatedEnvironmentMapAlt!.dispose();
       this.generatedEnvironmentMapAlt = null;
+    }
+    if (this.blurMaterial != null) {
+      this.blurMaterial.dispose();
     }
   }
 }
