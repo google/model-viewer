@@ -80,6 +80,7 @@ export declare interface LoadingInterface {
   poster: string|null;
   reveal: RevealAttributeValue;
   loading: LoadingAttributeValue;
+  generateSchema: boolean;
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
@@ -217,6 +218,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     loading: LoadingAttributeValue = LoadingStrategy.AUTO;
 
     /**
+     * Generates a 3D model schema https://schema.org/3DModel associated with
+     * the loaded src and inserts it into the header of the page for search
+     * engines to crawl.
+     */
+    @property({type: Boolean, attribute: 'generate-schema'})
+    generateSchema = false;
+
+    /**
      * Dismisses the poster, causing the model to load and render if
      * necessary. This is currently effectively the same as interacting with
      * the poster via user input.
@@ -331,7 +340,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       CachingGLTFLoader.setKTX2TranscoderLocation(ktx2TranscoderLocation);
 
       if (ModelViewerElement.meshoptDecoderLocation) {
-        CachingGLTFLoader.setMeshoptDecoderLocation(ModelViewerElement.meshoptDecoderLocation);
+        CachingGLTFLoader.setMeshoptDecoderLocation(
+            ModelViewerElement.meshoptDecoderLocation);
       }
     }
 
@@ -377,6 +387,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('reveal') || changedProperties.has('loading')) {
         this[$updateSource]();
+      }
+
+      if (changedProperties.has('generateSchema')) {
+        if (this.generateSchema === true) {
+          this[$scene].updateSchema(this.src);
+        } else {
+          this[$scene].updateSchema(null);
+        }
       }
     }
 
@@ -484,6 +502,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     async[$updateSource]() {
       this[$lastReportedProgress] = 0;
+      if (this.generateSchema === true) {
+        this[$scene].updateSchema(this.src);
+      }
       if (this[$scene].currentGLTF == null || this.src == null ||
           !this[$shouldAttemptPreload]()) {
         // Don't show the poster when switching models.

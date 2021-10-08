@@ -17,6 +17,7 @@ import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as T
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
+import {ModelViewerElement} from '../model-viewer.js';
 import {resolveDpr} from '../utilities.js';
 
 import {Damper, SETTLING_TIME} from './Damper.js';
@@ -63,7 +64,7 @@ const vector3 = new Vector3();
  * Provides lights and cameras to be used in a renderer.
  */
 export class ModelScene extends Scene {
-  public element: ModelViewerElementBase;
+  public element: ModelViewerElement;
   public canvas: HTMLCanvasElement;
   public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
       null;
@@ -108,13 +109,14 @@ export class ModelScene extends Scene {
   private cancelPendingSourceChange: (() => void)|null = null;
   private animationsByName: Map<string, AnimationClip> = new Map();
   private currentAnimationAction: AnimationAction|null = null;
+  private schemaElement = document.createElement('script');
 
   constructor({canvas, element, width, height}: ModelSceneConfig) {
     super();
 
     this.name = 'ModelScene';
 
-    this.element = element;
+    this.element = element as ModelViewerElement;
     this.canvas = canvas;
 
     // These default camera values are never used, as they are reset once the
@@ -139,6 +141,8 @@ export class ModelScene extends Scene {
     style.position = 'absolute';
     style.top = '0';
     this.element.shadowRoot!.querySelector('.default')!.appendChild(domElement);
+
+    this.schemaElement.setAttribute('type', 'application/ld+json');
   }
 
   /**
@@ -710,5 +714,40 @@ export class ModelScene extends Scene {
     this.forHotspots((hotspot) => {
       hotspot.visible = visible;
     });
+  }
+
+  updateSchema(src: string|null) {
+    const {schemaElement, element} = this;
+    const {alt, poster, iosSrc} = element;
+    if (src != null) {
+      const encoding = [{
+        '@type': 'MediaObject',
+        contentUrl: src,
+        encodingFormat: src.split('.').pop()?.toLowerCase() === 'glb' ?
+            'model/gltf-binary' :
+            'model/gltf+json'
+      }];
+
+      if (iosSrc) {
+        encoding.push({
+          '@type': 'MediaObject',
+          contentUrl: iosSrc,
+          encodingFormat: 'model/vnd.usdz+zip'
+        });
+      }
+
+      const structuredData = {
+        '@context': 'http://schema.org/',
+        '@type': '3DModel',
+        image: poster ?? undefined,
+        name: alt ?? undefined,
+        encoding
+      };
+
+      schemaElement.textContent = JSON.stringify(structuredData);
+      document.head.appendChild(schemaElement);
+    } else if (schemaElement.parentElement != null) {
+      schemaElement.parentElement.removeChild(schemaElement);
+    }
   }
 }
