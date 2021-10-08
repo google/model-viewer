@@ -14,6 +14,8 @@
  */
 import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
+
+
 /**
  * All constructs in a 3DOM scene graph have a corresponding string name.
  * This is similar in spirit to the concept of a "tag name" in HTML, and exists
@@ -39,7 +41,14 @@ export declare interface Model {
    * correspond to the listing of materials in the glTF, with the possible
    * addition of a default material at the end.
    */
-  readonly materials: Readonly<Array<Material>>;
+  readonly materials: Readonly<Material[]>;
+
+  /**
+   * Gets a material(s) by name.
+   * @param name the name of the material to return.
+   * @returns the first material to whose name matches `name`
+   */
+  getMaterialByName(name: string): Material|null;
 }
 
 /**

@@ -30,6 +30,7 @@ export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
 export const $children = Symbol('children');
 export const $initialMaterialIdx = Symbol('initialMaterialIdx');
+export const $activeMaterialIdx = Symbol('activeMaterialIdx');
 
 // Defines the base level node methods and data.
 export class Node {
@@ -48,6 +49,7 @@ export class PrimitiveNode extends Node {
   // Maps variant name to material index.
   private[$variantInfo]: Map<string, {material: Material, index: number}>;
   private[$initialMaterialIdx]: number;
+  private[$activeMaterialIdx]: number;
 
   constructor(
       mesh: Mesh, mvMaterials: Material[],
@@ -60,14 +62,14 @@ export class PrimitiveNode extends Node {
     const materialMappings =
         threeObjectMap.get(mesh.material as ThreeMaterial)!;
     if (materialMappings.materials != null) {
-      this[$initialMaterialIdx] = materialMappings.materials;
+      this[$initialMaterialIdx] = this[$activeMaterialIdx] =
+          materialMappings.materials;
     } else {
       console.error(
           `Primitive (${mesh.name}) missing initial material reference.`);
     }
 
     // Gets the mesh index from the node.
-
     const meshMappings = threeObjectMap.get(mesh)!;
     const meshIndex = meshMappings.meshes!;
 
@@ -128,8 +130,13 @@ export class PrimitiveNode extends Node {
     const mvMaterial = this[$materials].get(material);
     if (mvMaterial != null) {
       this.mesh.material = await mvMaterial[$getLoadedMaterial]();
+      this[$activeMaterialIdx] = material;
     }
     return this.mesh.material;
+  }
+
+  getActiveMaterial(): Material {
+    return this[$materials].get(this[$activeMaterialIdx])!;
   }
 
   async enableVariant(name: string|

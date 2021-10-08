@@ -19,7 +19,10 @@ import {Mesh} from 'three/src/objects/Mesh.js';
 import {$lazyLoadGLTFInfo} from '../../../features/scene-graph/material.js';
 import {$materials, $switchVariant, Model} from '../../../features/scene-graph/model.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
+import {$scene} from '../../../model-viewer-base.js';
+import {ModelViewerElement} from '../../../model-viewer.js';
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
+import {timePasses, waitForEvent} from '../../../utilities.js';
 import {assetPath, loadThreeGLTF} from '../../helpers.js';
 
 
@@ -127,6 +130,63 @@ suite('scene-graph/model', () => {
             expect(model[$materials][0][$correlatedObjects]!.size)
                 .equals(sizeBeforeSwitch);
           });
+    });
+
+    suite('Model e2e test', () => {
+      let element: ModelViewerElement;
+      let model: Model;
+      setup(async () => {
+        element = new ModelViewerElement();
+      });
+
+      teardown(() => {
+        document.body.removeChild(element);
+      });
+
+      const loadModel = async (src: string) => {
+        element.src = src;
+        document.body.insertBefore(element, document.body.firstChild);
+        await waitForEvent(element, 'load');
+
+        model = element.model!;
+      };
+
+      test('getMaterialByName returns material when name exists', async () => {
+        await loadModel(CUBES_GLTF_PATH);
+        const material = model.getMaterialByName('red')!;
+        expect(material).to.be.ok;
+        expect(material.name).to.be.equal('red');
+      });
+
+      test(
+          'getMaterialByName returns null when name does not exists',
+          async () => {
+            await loadModel(CUBES_GLTF_PATH);
+            const material = model.getMaterialByName('does-not-exist')!;
+            expect(material).to.be.null;
+          });
+
+      suite('Intersecting', () => {
+        test('materialFromPoint returns material', async () => {
+          await loadModel(ASTRONAUT_GLB_PATH);
+
+          const material = element.materialFromPoint(
+              element[$scene].width / 2, element[$scene].height / 2)!;
+
+          expect(material).to.be.ok;
+        });
+
+        test(
+            'materialFromPoint returns null when intersect fails', async () => {
+              await loadModel(ASTRONAUT_GLB_PATH);
+
+              await timePasses(1000);
+
+              const material = element.materialFromPoint(
+                  element[$scene].width, element[$scene].height)!;
+              expect(material).to.be.null;
+            });
+      });
     });
   });
 });

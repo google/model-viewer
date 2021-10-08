@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D} from 'three';
+import {Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster} from 'three';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
@@ -32,6 +32,9 @@ export const $loadVariant = Symbol('loadVariant');
 export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
+export const $threeScene = Symbol('threeScene');
+export const $materialsFromPoint = Symbol('materialsFromPoint');
+export const $materialFromPoint = Symbol('materialFromPoint');
 
 
 // Holds onto temporary scene context information needed to perform lazy loading
@@ -63,11 +66,13 @@ export class Model implements ModelInterface {
   private[$hierarchy] = new Array<Node>();
   private[$roots] = new Array<Node>();
   private[$primitives] = new Array<PrimitiveNode>();
+  private[$threeScene]: Object3D|Group;
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
       onUpdate: () => void = () => {}) {
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
+    this[$threeScene] = threeGLTF.scene;
 
     for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
@@ -108,8 +113,8 @@ export class Model implements ModelInterface {
     }
 
     // Creates a hierarchy of Nodes. Allows not just for switching which
-    // material is applied to a mesh but also exposes a way to provide API for
-    // switching materials and general assignment/modification.
+    // material is applied to a mesh but also exposes a way to provide API
+    // for switching materials and general assignment/modification.
 
     // Prepares for scene iteration.
     const parentMap = new Map<object, Node>();
@@ -155,6 +160,59 @@ export class Model implements ModelInterface {
    */
   get materials(): Material[] {
     return this[$materials];
+  }
+
+  getMaterialByName(name: string): Material|null {
+    const matches = this[$materials].filter(material => {
+      return material.name === name;
+    });
+
+    if (matches.length > 0) {
+      return matches[0];
+    }
+    return null;
+  }
+
+
+  /**
+   * Intersects a ray with the Model and returns a list of materials whose
+   * objects were intersected.
+   */
+  [$materialsFromPoint](raycaster: Raycaster): Material[] {
+    const hits = raycaster.intersectObject(this[$threeScene], true);
+
+    // Map the object hits to primitives and then to the active material of
+    // the primitive.
+    return hits.map((hit: Intersection<Object3D>) => {
+      const found = this[$hierarchy].find((node: Node) => {
+        if (node instanceof PrimitiveNode) {
+          const primitive = node as PrimitiveNode;
+          if (primitive.mesh === hit.object) {
+            return true;
+          }
+        }
+        return false;
+      }) as PrimitiveNode;
+
+      if (found != null) {
+        return found.getActiveMaterial();
+      }
+      return null;
+    }) as Material[];
+  }
+
+  /**
+   * Intersects a ray with the Model and returns the first material whose
+   * object was intersected.
+   */
+  [$materialFromPoint](raycaster: Raycaster): Material|null {
+    const materials = this[$materialsFromPoint](raycaster);
+
+    if (materials.length > 0) {
+      return materials[0];
+    }
+
+    return null;
   }
 
   /**
