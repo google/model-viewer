@@ -63,12 +63,15 @@
       height: 100vw;
       max-width: 600px;
       max-height: 600px;
-      background-color: #eee;
-      --poster-color: #eee;
+      --poster-color: #fff0;
+    }
+
+    model-viewer::part(default-progress-mask) {
+      display: none;
     }
 
     /* This keeps child nodes hidden while the element loads, except the poster */
-    :not(:defined) > :not(.poster) {
+    :not(:defined) {
       display: none;
     }
 
@@ -245,13 +248,16 @@
     <model-viewer
         id="first"
         src="../assets/ShopifyModels/Chair.glb"
-        poster="../assets/ShopifyModels/ChairPoster.png"
+        poster="../assets/ShopifyModels/ChairPoster.webp"
         reveal="interaction"
-        camera-orbit="1.2195rad 1.362rad auto"
+        camera-orbit="1.2195rad 1.362rad 100%"
+        environment-image="neutral"
         interaction-prompt-threshold="0"
         shadow-intensity="1"
         ar
+        ar-modes="webxr scene-viewer quick-look"
         camera-controls
+        generate-schema
         alt="3D model of a chair with footrest"
       >
 
@@ -295,12 +301,15 @@
     <model-viewer
       id="second"
       src="../assets/ShopifyModels/Mixer.glb"
-      poster="../assets/ShopifyModels/MixerPoster.png"
-      camera-orbit="0.9677rad 1.2427rad auto"
+      poster="../assets/ShopifyModels/MixerPoster.webp"
+      camera-orbit="0.9677rad 1.2427rad 100%"
+      environment-image="neutral"
       interaction-prompt-threshold="0"
       shadow-intensity="1"
       ar
+      ar-modes="webxr scene-viewer quick-look"
       camera-controls
+      generate-schema
       alt="3D model of a countertop mixer"
     >
 
