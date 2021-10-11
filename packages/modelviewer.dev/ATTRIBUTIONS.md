@@ -77,3 +77,15 @@ Contributed by <a href="https://github.com/donmccurdy">donmccurdy</a>
 ## odd-shape.glb, odd-shape-labeled.glb
 
 Contributed by <a href="https://github.com/cdata">cdata</a>
+
+## Duck
+
+Duck by Sony Computer Entertainment Inc.,
+Licensed under the SCEA Shared Source License, Version 1.0
+(<a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/Duck">source</a>)
+
+## Buggy
+
+Buggy by Okino Computer Graphics,
+Data conversion from original JT to COLLADA has been kindly performed by Okino Computer Graphics, using
+(<a href="http://www.okino.com/conv/conv.htm">Okino Polytrans Software</a>)
