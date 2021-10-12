@@ -15,6 +15,9 @@
  *
  */
 
+import '@material/mwc-icon-button';
+import '@polymer/paper-item';
+import '@polymer/paper-slider';
 import '../shared/checkbox/checkbox.js';
 import '../shared/color_picker/color_picker.js';
 import '../shared/dropdown/dropdown.js';
@@ -23,11 +26,9 @@ import '../shared/expandable_content/expandable_tab.js';
 import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
-import '@polymer/paper-item';
-import '@polymer/paper-slider';
-import '@material/mwc-icon-button';
 
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
+import {PaperListboxElement} from '@polymer/paper-listbox';
 import {customElement, html, internalProperty, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
@@ -48,6 +49,7 @@ import {ALPHA_BLEND_MODES} from '../utils/gltf_constants.js';
 import {checkFinite} from '../utils/reducer_utils.js';
 
 import {styles} from './materials_panel.css.js';
+
 
 
 /** Material panel. */
@@ -71,6 +73,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('me-slider-with-input#metallic-factor')
   metallicFactorSlider!: SliderWithInputElement;
   @query('me-dropdown#material-selector') materialSelector!: Dropdown;
+  @query('me-dropdown#variant-selector') variantSelector!: Dropdown;
   @query('me-texture-picker#base-color-texture-picker')
   baseColorTexturePicker!: TexturePicker;
   @query('me-texture-picker#metallic-roughness-texture-picker')
@@ -766,6 +769,40 @@ export class MaterialPanel extends ConnectedLitElement {
     `;
   }
 
+  async onSelectVariant(_event) {
+    const paperItem = this.variantSelector.selectedItem as PaperListboxElement;
+    if (paperItem != null) {
+      getModelViewer().variantName = paperItem.id;
+    }
+  }
+
+  renderVariantsTab() {
+    if (getModelViewer().availableVariants.length > 0) {
+      return html`
+      <me-expandable-tab tabName="Selected Variant" .open=${true} .sticky=${
+          true}>
+        <me-dropdown
+          slot="content"
+          id="variant-selector"
+          @select=${this.onSelectVariant}
+          >${
+          getModelViewer().availableVariants.map(
+              (name, id) =>
+                  html`<paper-item id="${name}">(${id}) ${name}</paper-item>`)}
+        </me-dropdown>
+      </me-expandable-tab>
+    `;
+    } else {
+      return html`
+      <me-expandable-tab tabName="Variants">
+        <div slot="content">
+        Add Variant
+        </div>
+      </me-expandable-tab>
+    `;
+    }
+  }
+
   render() {
     return html`
     <div id="material-container" style="display: none">
@@ -776,6 +813,7 @@ export class MaterialPanel extends ConnectedLitElement {
     ${this.renderEmissiveTextureTab()}
     ${this.renderOcclusionTextureTab()}
     ${this.renderOtherTab()}
+    ${this.renderVariantsTab()}
     </div>
     `;
   }
