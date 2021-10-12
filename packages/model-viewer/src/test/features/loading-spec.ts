@@ -17,7 +17,7 @@ import {$defaultPosterElement, $posterContainerElement, LoadingInterface, Loadin
 import ModelViewerElementBase, {$scene, $userInputElement} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, until} from '../helpers.js';
+import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, rafPasses, until} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
@@ -203,6 +203,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                   'model-visibility',
                   (event: any) => event.detail.visible);
 
+              await rafPasses();
+
               const input = element[$userInputElement];
               const picked = pickShadowDescendant(element);
 
@@ -311,6 +313,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               'model-visibility',
               event => event.detail.visible === true);
 
+          await rafPasses();
+
           const ostensiblyNotThePoster = pickShadowDescendant(element);
 
           expect(ostensiblyThePoster).to.not.be.equal(ostensiblyNotThePoster);
@@ -323,6 +327,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                 element,
                 'model-visibility',
                 event => event.detail.visible === true);
+            await rafPasses();
           });
 
           test('allows the input to be interactive', async () => {

@@ -112,12 +112,16 @@ canvas.show {
 
 .slot.poster {
   opacity: 0;
-  transition: opacity 0.3s 0.3s;
+  transition: opacity 0.3s;
   background-color: inherit;
 }
 
 .slot.poster.show {
   opacity: 1;
+  transition: none;
+}
+
+.slot.poster.quick {
   transition: none;
 }
 
