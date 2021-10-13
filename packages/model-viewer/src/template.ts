@@ -121,6 +121,10 @@ canvas.show {
   transition: none;
 }
 
+.slot.poster.quick {
+  transition: none;
+}
+
 .slot.poster > * {
   pointer-events: initial;
 }
