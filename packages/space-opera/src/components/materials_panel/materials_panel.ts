@@ -777,12 +777,21 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   renderVariantsTab() {
+    return html`
+      <me-expandable-tab tabName="Variants">
+        <div slot="content">
+          <div class="DropdownContainer">
+            ${this.renderVariantsSelector()}
+          </div>
+        </div>
+      </me-expandable-tab>
+    `;
+  }
+
+  renderVariantsSelector() {
     if (getModelViewer().availableVariants.length > 0) {
       return html`
-      <me-expandable-tab tabName="Selected Variant" .open=${true} .sticky=${
-          true}>
         <me-dropdown
-          slot="content"
           id="variant-selector"
           @select=${this.onSelectVariant}
           >${
@@ -790,7 +799,6 @@ export class MaterialPanel extends ConnectedLitElement {
               (name, id) =>
                   html`<paper-item id="${name}">(${id}) ${name}</paper-item>`)}
         </me-dropdown>
-      </me-expandable-tab>
     `;
     } else {
       return html`
@@ -807,13 +815,13 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
     <div id="material-container" style="display: none">
     ${this.renderSelectMaterialTab()}
+    ${this.renderVariantsTab()}
     ${this.renderBaseColorTab()}
     ${this.renderMetallicRoughnessTab()}
     ${this.renderNormalTextureTab()}
     ${this.renderEmissiveTextureTab()}
     ${this.renderOcclusionTextureTab()}
     ${this.renderOtherTab()}
-    ${this.renderVariantsTab()}
     </div>
     `;
   }
