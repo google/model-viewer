@@ -231,7 +231,7 @@ export class Renderer extends EventDispatcher {
       canvas.height = Math.round(height * dpr);
       canvas.style.width = `${widthCSS}px`;
       canvas.style.height = `${heightCSS}px`;
-      scene.isDirty = true;
+      scene.queueRender();
     }
   }
 
@@ -261,7 +261,7 @@ export class Renderer extends EventDispatcher {
       const {style} = scene.canvas;
       style.width = `${width}px`;
       style.height = `${height}px`;
-      scene.isDirty = true;
+      scene.queueRender();
     }
   }
 
@@ -279,7 +279,7 @@ export class Renderer extends EventDispatcher {
     if (this.multipleScenesVisible) {
       canvas.classList.add('show');
     }
-    scene.isDirty = true;
+    scene.queueRender();
 
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop(
@@ -346,12 +346,12 @@ export class Renderer extends EventDispatcher {
       const canvas = scene.element[$canvas];
       if (multipleScenesVisible) {
         canvas.classList.add('show');
-        scene.isDirty = true;
+        scene.queueRender();
       } else if (scene.canvas === visibleCanvas) {
         scene.canvas.parentElement!.appendChild(canvas3D);
         canvas3D.classList.add('show');
         canvas.classList.remove('show');
-        scene.isDirty = true;
+        scene.queueRender();
       }
     }
   }
@@ -427,7 +427,7 @@ export class Renderer extends EventDispatcher {
 
       this.preRender(scene, t, delta);
 
-      if (!scene.isDirty) {
+      if (!scene.shouldRender()) {
         continue;
       }
 
@@ -453,7 +453,7 @@ export class Renderer extends EventDispatcher {
         // visible scene dirty to ensure it overwrites us.
         for (const visibleScene of this.scenes) {
           if (visibleScene.element.modelIsVisible) {
-            visibleScene.isDirty = true;
+            visibleScene.queueRender();
           }
         }
       }
@@ -482,7 +482,7 @@ export class Renderer extends EventDispatcher {
             this.canvas3D, 0, 0, width, height, 0, 0, width, height);
       }
 
-      scene.isDirty = false;
+      scene.hasRendered();
       if (element.loaded) {
         ++scene.renderCount;
       }

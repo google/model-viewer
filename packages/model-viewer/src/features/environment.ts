@@ -164,6 +164,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
      * or `null` if the Model should remove its' environment map.
      */
     private[$applyEnvironmentMap](environmentMap: Texture|null) {
+      if (this[$scene].environment === environmentMap) {
+        return;
+      }
       this[$currentEnvironmentMap] = environmentMap;
       this[$scene].environment = this[$currentEnvironmentMap];
       this.dispatchEvent(new CustomEvent('environment-change'));

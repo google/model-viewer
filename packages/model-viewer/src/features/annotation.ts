@@ -104,7 +104,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {annotationRenderer} = scene;
       const camera = scene.getCamera();
 
-      if (scene.isDirty) {
+      if (scene.shouldRender()) {
         scene.updateHotspots(camera.position);
         annotationRenderer.domElement.style.display = '';
         annotationRenderer.render(scene, camera);
@@ -177,7 +177,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].addHotspot(hotspot);
       }
-      this[$scene].isDirty = true;
+      this[$scene].queueRender();
     }
 
     private[$removeHotspot](node: Node) {
@@ -195,7 +195,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$scene].removeHotspot(hotspot);
         this[$hotspotMap].delete(node.slot);
       }
-      this[$scene].isDirty = true;
+      this[$scene].queueRender();
     }
   }
 
