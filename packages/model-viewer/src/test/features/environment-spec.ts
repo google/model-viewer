@@ -86,7 +86,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     let environmentChanges = 0;
     suite('and a src property', () => {
       setup(async () => {
-        let onLoad = waitForLoadAndEnvMap(element);
+        const onLoad = waitForLoadAndEnvMap(element);
         element.src = MODEL_URL;
         document.body.insertBefore(element, document.body.firstChild);
 
@@ -159,7 +159,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
   suite('environment-image', () => {
     setup(async () => {
-      let onLoad = waitForLoadAndEnvMap(element);
+      const onLoad = waitForLoadAndEnvMap(element);
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('environment-image', HDR_BG_IMAGE_URL);
       document.body.insertBefore(element, document.body.firstChild);
@@ -176,7 +176,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     suite('and environment-image subsequently removed', () => {
       setup(async () => {
-        let envMapChanged = waitForEvent(scene, 'envmap-update');
+        const envMapChanged = waitForEvent(scene, 'envmap-update');
         element.removeAttribute('environment-image');
         await envMapChanged;
       });
@@ -189,7 +189,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
   suite('with skybox-image property', () => {
     setup(async () => {
-      let onLoad = waitForLoadAndEnvMap(element);
+      const onLoad = waitForLoadAndEnvMap(element);
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('skybox-image', HDR_BG_IMAGE_URL);
       document.body.insertBefore(element, document.body.firstChild);
@@ -234,10 +234,9 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
       suite('and skybox-image subsequently removed', () => {
         setup(async () => {
-          const environmentChanged =
-              waitForEvent(element, 'environment-change');
+          const envMapChanged = waitForEvent(scene, 'envmap-update');
           element.removeAttribute('skybox-image');
-          await environmentChanged;
+          await envMapChanged;
         });
 
         test('continues using environment-image as environment map', () => {
@@ -252,7 +251,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
 
     suite('and skybox-image subsequently removed', () => {
       setup(async () => {
-        let envMapChanged = waitForEvent(scene, 'envmap-update');
+        const envMapChanged = waitForEvent(scene, 'envmap-update');
         element.removeAttribute('skybox-image');
         await envMapChanged;
       });

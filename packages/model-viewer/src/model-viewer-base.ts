@@ -517,7 +517,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$needsRender]() {
-    this[$scene].isDirty = true;
+    this[$scene].queueRender();
   }
 
   [$onModelLoad]() {
