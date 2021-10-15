@@ -43,6 +43,7 @@ import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
+import {TabbedPanel} from '../shared/tabs/tabs.js';
 import {FileDetails, TexturePicker} from '../shared/texture_picker/texture_picker.js';
 import {ALPHA_BLEND_MODES} from '../utils/gltf_constants.js';
 import {checkFinite} from '../utils/reducer_utils.js';
@@ -271,6 +272,28 @@ export class MaterialPanel extends ConnectedLitElement {
     this.materialSelector.selectedIndex = index;
     this.onSelectMaterial();
   }
+
+  firstUpdated() {
+    getModelViewer().addEventListener('click', this.onClick);
+  }
+
+  onClick = (event) => {
+    if (!(this.parentElement as TabbedPanel).selected) {
+      return;
+    }
+    const modelviewer = getModelViewer();
+    const pickedMaterial =
+        modelviewer.materialFromPoint(event.layerX, event.layerY);
+    if (pickedMaterial == null) {
+      return;
+    }
+    for (const [index, material] of modelviewer.model!.materials!.entries()) {
+      if (material === pickedMaterial) {
+        this.selectedMaterialIndex = index;
+        return;
+      }
+    }
+  };
 
   get selectedBaseColor(): RGBA {
     const alphaFactor =
