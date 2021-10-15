@@ -157,7 +157,9 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       // clobber the camera.
       const {enabled} = threeRenderer.xr;
       threeRenderer.xr.enabled = false;
+      const {image} = clone.roughnessMap;
       roughnessMipmapper.generateMipmaps(clone as MeshStandardMaterial);
+      clone.roughnessMap.image = image;
       threeRenderer.xr.enabled = enabled;
     }
 
