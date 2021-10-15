@@ -35,6 +35,16 @@
     ga('send', 'pageview');
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
+  <style>
+    .demo model-viewer {
+      background-color: #fff;
+      --poster-color: #fff0;
+    }
+
+    model-viewer::part(default-progress-mask) {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
@@ -56,7 +66,7 @@
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
 <!-- Use it like any other HTML element -->
-<model-viewer src="shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut" ar ar-modes="webxr scene-viewer quick-look" environment-image="neutral" auto-rotate camera-controls></model-viewer>
+<model-viewer alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" src="shared-assets/models/NeilArmstrong.glb" ar ar-modes="webxr scene-viewer quick-look" environment-image="shared-assets/environments/moon_1k.hdr" poster="assets/NeilArmstrong.webp" seamless-poster shadow-intensity="1" camera-controls></model-viewer>
                 </template>
               </example-snippet>
             </div>
@@ -191,11 +201,11 @@
   <div class="footer">
     <ul>
       <li class="attribution">
-        <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
-        licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        <a href="https://3d.si.edu/object/3d/neil-armstrong-spacesuit:d8c63ba6-4ebc-11ea-b77f-2e728ce88125">Neil Armstrong Space Suit</a> 
+        provided by the Smithsonian Digitization Programs Office and the National Air and Space Museum; Usage Conditions Apply.
       </li>
     </ul>
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2021 Google Inc. Licensed under the Apache License 2.0.</div>
     <div id='footer-links'></div>
   </div>
 
