@@ -173,6 +173,8 @@ export class MaterialPanel extends ConnectedLitElement {
     let start = -1;
     const DURATION = 1600;  // in milliseconds
 
+    const material = this.getMaterial();
+
     const interpolateStep = (timestamp: number) => {
       // New model is loaded mid interpolation
       if (start === -1) {
@@ -181,11 +183,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
       const baseColorFactor = this.getInterpolatedColor(
           originalBaseColor, timestamp - start, DURATION);
-      this.getMaterial().pbrMetallicRoughness.setBaseColorFactor(
-          baseColorFactor);
+      material.pbrMetallicRoughness.setBaseColorFactor(baseColorFactor);
       const emissiveFactor = this.getInterpolatedEmissive(
           originalEmissiveFactor, timestamp - start, DURATION);
-      this.getMaterial().setEmissiveFactor(emissiveFactor);
+      material.setEmissiveFactor(emissiveFactor);
 
       if (timestamp - start <= DURATION) {
         requestAnimationFrame(interpolateStep);
