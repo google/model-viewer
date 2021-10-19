@@ -6,6 +6,10 @@ Astronaut by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
 licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>
 (<a href="https://poly.google.com/view/dLHpzNdygsg">source</a>)
 
+## Neil Armstrong Spacesuit
+
+<a href="https://3d.si.edu/object/3d/neil-armstrong-spacesuit:d8c63ba6-4ebc-11ea-b77f-2e728ce88125">Neil Armstrong Space Suit</a> provided by the Smithsonian Digitization Programs Office and the National Air and Space Museum; <a href=https://www.si.edu/Termsofuse>Usage Conditions Apply</a>.
+
 ## Barramundi Fish
 
 Barramundi Fish by <a href="https://www.microsoft.com/">Microsoft</a>,
