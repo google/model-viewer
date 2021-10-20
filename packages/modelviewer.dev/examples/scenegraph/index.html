@@ -583,7 +583,7 @@ const modelViewer = document.querySelector("model-viewer#pickMaterial");
 modelViewer.addEventListener("load", () => {
 
   const changeColor = async (event) => {
-    let material = modelViewer.materialFromPoint(event.layerX, event.layerY);
+    let material = modelViewer.materialFromPoint(event.offsetX, event.offsetY);
 
     if(material != null) {
       material.pbrMetallicRoughness.

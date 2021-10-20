@@ -171,7 +171,7 @@ export class MaterialPanel extends ConnectedLitElement {
     const originalEmissiveFactor = this.selectedEmissiveFactor;
 
     let start = -1;
-    const DURATION = 1600;  // in milliseconds
+    const DURATION = 500;  // in milliseconds
 
     const material = this.getMaterial();
 
@@ -284,7 +284,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const modelviewer = getModelViewer();
     const pickedMaterial =
-        modelviewer.materialFromPoint(event.layerX, event.layerY);
+        modelviewer.materialFromPoint(event.offsetX, event.offsetY);
     if (pickedMaterial == null) {
       return;
     }
