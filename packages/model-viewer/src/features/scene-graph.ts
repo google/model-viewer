@@ -156,12 +156,11 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         const threeGLTF = this[$currentGLTF];
         const {variantName} = this;
 
-        if (threeGLTF == null) {
-          return;
+        if (threeGLTF != null) {
+          await this[$model]![$switchVariant](variantName!);
+          this[$needsRender]();
+          this.dispatchEvent(new CustomEvent('variant-applied'));
         }
-        await this[$model]![$switchVariant](variantName!);
-        this[$needsRender]();
-        this.dispatchEvent(new CustomEvent('variant-applied'));
       }
 
       if (changedProperties.has('orientation') ||
