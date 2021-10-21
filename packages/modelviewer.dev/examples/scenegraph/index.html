@@ -492,6 +492,43 @@ modelViewerTexture.addEventListener("load", () => {
     </div>
 
     <div class="sample">
+      <div id="pickMaterialExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Pick a Material</h2>
+            <p>Demonstrates selecting a material with pointer input and changing its color. Note this also works in the WebXR AR mode. Also demonstrates the use of the scale attribute since this GLB was erroneously modeled in mm instead of meters.</p>
+          </div>
+          <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
+            <template>
+<model-viewer id="pickMaterial" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF-Binary/Buggy.glb" ar ar-modes="webxr scene-viewer" scale="0.001 0.001 0.001" alt="A Material Picking Example">
+</model-viewer>
+<script type="module">
+const modelViewer = document.querySelector("model-viewer#pickMaterial");
+
+modelViewer.addEventListener("load", () => {
+
+  const changeColor = async (event) => {
+    let material = modelViewer.materialFromPoint(event.clientX, event.clientY);
+
+    if(material != null) {
+      material.pbrMetallicRoughness.
+        setBaseColorFactor([Math.random(), Math.random(), Math.random()]);
+    }
+  }
+
+  modelViewer.addEventListener("click", changeColor);
+
+});
+
+</script>
+</template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
       <div id="exporter" class="demo"></div>
       <div class="content">
         <div class="wrapper">
@@ -560,43 +597,6 @@ modelViewerTexture.addEventListener("load", () => {
   }
 </script>
             </template>
-          </example-snippet>
-        </div>
-      </div>
-    </div>
-
-    <div class="sample">
-      <div id="pickMaterialExample" class="demo"></div>
-      <div class="content">
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">Pick a Material</h2>
-            <p>Demonstrates selecting a material with pointer input and changing its color.</p>
-          </div>
-          <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
-            <template>
-<model-viewer id="pickMaterial" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF-Binary/Buggy.glb" ar ar-modes="webxr scene-viewer" scale="0.001 0.001 0.001" alt="A Material Picking Example">
-</model-viewer>
-<script type="module">
-const modelViewer = document.querySelector("model-viewer#pickMaterial");
-
-modelViewer.addEventListener("load", () => {
-
-  const changeColor = async (event) => {
-    let material = modelViewer.materialFromPoint(event.clientX, event.clientY);
-
-    if(material != null) {
-      material.pbrMetallicRoughness.
-        setBaseColorFactor([Math.random(), Math.random(), Math.random()]);
-    }
-  }
-
-  modelViewer.addEventListener("click", changeColor);
-
-});
-
-</script>
-</template>
           </example-snippet>
         </div>
       </div>
