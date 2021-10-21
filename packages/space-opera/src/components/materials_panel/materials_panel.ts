@@ -284,7 +284,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
     const modelviewer = getModelViewer();
     const pickedMaterial =
-        modelviewer.materialFromPoint(event.offsetX, event.offsetY);
+        modelviewer.materialFromPoint(event.clientX, event.clientY);
     if (pickedMaterial == null) {
       return;
     }
