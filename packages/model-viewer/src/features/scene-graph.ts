@@ -270,7 +270,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     materialFromPoint(pixelX: number, pixelY: number): Material|null {
       const scene = this[$scene];
       const ndcCoords = scene.getNDC(pixelX, pixelY);
-      console.log('ndc: ', ndcCoords);
       scene.raycaster.setFromCamera(ndcCoords, scene.getCamera());
 
       return this[$model]![$materialFromPoint](scene.raycaster);
