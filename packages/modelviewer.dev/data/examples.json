@@ -244,16 +244,16 @@
         "name": "Create Textures"
       },
       {
+        "htmlId": "pickMaterialExample",
+        "name": "Pick a material"
+      },
+      {
         "htmlId": "exporter",
         "name": "Exporter"
       },
       {
         "htmlId": "exporterWithOptions",
         "name": "Exporter w/ Options"
-      },
-      {
-        "htmlId": "pickMaterialExample",
-        "name": "Pick a material"
       }
     ]
   }

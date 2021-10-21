@@ -57,6 +57,7 @@ const normalWorld = new Vector3();
 
 const raycaster = new Raycaster();
 const vector3 = new Vector3();
+const ndc = new Vector2();
 
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
@@ -387,6 +388,20 @@ export class ModelScene extends Scene {
     const vertical =
         DEFAULT_TAN_FOV * Math.max(1, this.fieldOfViewAspect / this.aspect);
     this.framedFieldOfView = 2 * Math.atan(vertical) * 180 / Math.PI;
+  }
+
+  getNDC(clientX: number, clientY: number): Vector2 {
+    if (this.xrCamera != null) {
+      ndc.set(clientX / window.screen.width, clientY / window.screen.height);
+    } else {
+      const rect = this.element.getBoundingClientRect();
+      ndc.set(
+          (clientX - rect.x) / this.width, (clientY - rect.y) / this.height);
+    }
+
+    ndc.multiplyScalar(2).subScalar(1);
+    ndc.y *= -1;
+    return ndc;
   }
 
   /**
