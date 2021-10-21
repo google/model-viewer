@@ -242,17 +242,17 @@
 
   const recenter = (pointer) => {
     panning = false;
-    if (Math.abs(pointer.offsetX - startX) > tapDistance ||
-        Math.abs(pointer.offsetY - startY) > tapDistance)
+    if (Math.abs(pointer.clientX - startX) > tapDistance ||
+        Math.abs(pointer.clientY - startY) > tapDistance)
       return;
-    const hit = modelViewer.positionAndNormalFromPoint(pointer.offsetX, pointer.offsetY);
+    const hit = modelViewer.positionAndNormalFromPoint(pointer.clientX, pointer.clientY);
     modelViewer.cameraTarget =
         hit == null ? 'auto auto auto' : hit.position.toString();
   };
 
   modelViewer.addEventListener('mousedown', (event) => {
-    startX = event.offsetX;
-    startY = event.offsetY;
+    startX = event.clientX;
+    startY = event.clientY;
     panning = event.button === 2 || event.ctrlKey || event.metaKey ||
         event.shiftKey;
     if (!panning)
@@ -266,14 +266,14 @@
 
   modelViewer.addEventListener('touchstart', (event) => {
     const {targetTouches, touches} = event;
-    startX = targetTouches[0].offsetX;
-    startY = targetTouches[0].offsetY;
+    startX = targetTouches[0].clientX;
+    startY = targetTouches[0].clientY;
     panning = targetTouches.length === 2 && targetTouches.length === touches.length;
     if (!panning)
       return;
 
-    lastX = 0.5 * (targetTouches[0].offsetX + targetTouches[1].offsetX);
-    lastY = 0.5 * (targetTouches[0].offsetY + targetTouches[1].offsetY);
+    lastX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
+    lastY = 0.5 * (targetTouches[0].clientY + targetTouches[1].clientY);
     startPan();
   }, true);
 
@@ -281,7 +281,7 @@
     if (!panning)
       return;
 
-    movePan(event.offsetX, event.offsetY);
+    movePan(event.clientX, event.clientY);
     event.stopPropagation();
   }, true);
 
@@ -290,8 +290,8 @@
       return;
 
     const {targetTouches} = event;
-    const thisX = 0.5 * (targetTouches[0].offsetX + targetTouches[1].offsetX);
-    const thisY = 0.5 * (targetTouches[0].offsetY + targetTouches[1].offsetY);
+    const thisX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
+    const thisY = 0.5 * (targetTouches[0].clientY + targetTouches[1].clientY);
     movePan(thisX, thisY);
   }, true);
 
@@ -360,7 +360,7 @@
     if (!panning)
       return;
 
-    lastX = event.offsetX;
+    lastX = event.clientX;
     startPan();
     event.stopPropagation();
   }, true);
@@ -371,7 +371,7 @@
     if (!panning)
       return;
 
-    lastX = 0.5 * (targetTouches[0].offsetX + targetTouches[1].offsetX);
+    lastX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
     startPan();
   }, true);
 
@@ -379,7 +379,7 @@
     if (!panning)
       return;
 
-    updatePan(event.offsetX);
+    updatePan(event.clientX);
     event.stopPropagation();
   }, true);
 
@@ -388,7 +388,7 @@
       return;
 
     const {targetTouches} = event;
-    const thisX = 0.5 * (targetTouches[0].offsetX + targetTouches[1].offsetX);
+    const thisX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
     updatePan(thisX);
   }, true);
 
