@@ -704,9 +704,9 @@
         "description": "Updates the position and/or normal of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position and normal are given in the same string format as the hotspot attributes <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span>, which are also in the same format as the <span class='attribute'>camera-target</span> attribute."
       },
       {
-        "name": "positionAndNormalFromPoint(pixelX, pixelY)",
+        "name": "positionAndNormalFromPoint(clientX, clientY)",
         "htmlName": "positionAndNormalFromPoint",
-        "description": "Returns the world position and normal of the point on the mesh corresponding to the input pixel coordinates given relative to the model-viewer element. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. The function returns null if no object is hit.",
+        "description": "Returns the world position and normal of the point on the mesh corresponding to the input pixel coordinates given relative to the screen. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. The function returns null if no object is hit.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>positionAndNormalFromPoint</span> example</a>"
         ]
@@ -938,9 +938,9 @@
         ]
       },
       {
-        "name": "materialFromPoint(pixelX, pixelY)",
+        "name": "materialFromPoint(clientX, clientY)",
         "htmlName": "materialFromPoint",
-        "description": "Returns a material whose mesh primitive intersects with a ray created from the input pixel coordinates relative to the model-viewer element. Returns the material whose mesh is nearest the camera.",
+        "description": "Returns a material whose mesh primitive intersects with a ray created from the input pixel coordinates relative to the screen. Returns the material whose mesh is nearest the camera.",
         "links": [
           "<a href=\"../examples/scenegraph/#pickMaterialExample\">Related examples</a>"
         ]
