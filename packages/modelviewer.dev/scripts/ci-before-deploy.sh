@@ -54,7 +54,7 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Models/2.0/Suzanne \
   shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
   shared-assets/models/glTF-Sample-Models/2.0/WaterBottle \
-  shared-assets/models/glTF-Sample-Models/2.0/SheenChair \
+  shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe \
   shared-assets/models/glTF-Sample-Models/2.0/Buggy \
   shared-assets/environments \
   shared-assets/icons \
