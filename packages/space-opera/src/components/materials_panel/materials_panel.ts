@@ -20,6 +20,7 @@ import '@polymer/paper-item';
 import '@polymer/paper-slider';
 import '../shared/checkbox/checkbox.js';
 import '../shared/color_picker/color_picker.js';
+import '../shared/dialog/dialog_box.js';
 import '../shared/dropdown/dropdown.js';
 import '../shared/editor_panel/editor_panel.js';
 import '../shared/expandable_content/expandable_tab.js';
@@ -27,7 +28,10 @@ import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
 
+import {Material} from '@google/model-viewer/lib/features/scene-graph/material';
+import {$primitivesList} from '@google/model-viewer/lib/features/scene-graph/model';
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
+import {Button} from '@material/mwc-button';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {customElement, html, internalProperty, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
@@ -42,6 +46,7 @@ import {dispatchModelDirty, getModel, getModelViewer, getTextureId, pushThumbnai
 import {Thumbnail} from '../model_viewer_preview/types.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
+import {DialogBox} from '../shared/dialog/dialog_box.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 import {FileDetails, TexturePicker} from '../shared/texture_picker/texture_picker.js';
@@ -51,6 +56,11 @@ import {checkFinite} from '../utils/reducer_utils.js';
 import {styles} from './materials_panel.css.js';
 
 
+
+export interface VariantToMaterialMapping {
+  materialIndex: number;
+  variantName: string;
+}
 
 /** Material panel. */
 @customElement('me-materials-panel')
@@ -74,6 +84,8 @@ export class MaterialPanel extends ConnectedLitElement {
   metallicFactorSlider!: SliderWithInputElement;
   @query('me-dropdown#material-selector') materialSelector!: Dropdown;
   @query('me-dropdown#variant-selector') variantSelector!: Dropdown;
+  @query('me-dropdown#create-variant-selector')
+  createVariantSelector!: Dropdown;
   @query('me-texture-picker#base-color-texture-picker')
   baseColorTexturePicker!: TexturePicker;
   @query('me-texture-picker#metallic-roughness-texture-picker')
@@ -93,6 +105,13 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('me-checkbox#doubleSidedCheckbox')
   doubleSidedCheckbox!: CheckboxElement;
 
+  private selectedVariant = 0;
+  private currentVariant: string|null = null;
+
+  private materialToVariants =
+      new Map<Material, Set<VariantToMaterialMapping>>();
+
+
   stateChanged(state: State) {
     const {originalGltf, thumbnailsById} = getModel(state);
     if (this.originalGltf !== originalGltf) {
@@ -109,6 +128,8 @@ export class MaterialPanel extends ConnectedLitElement {
         this.isNewModel = true;
         this.selectedMaterialIndex = 0;
         this.isNewModel = false;
+
+        this.selectedVariant = 0;
       }
     }
   }
@@ -199,6 +220,14 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onSelectMaterial() {
+    // TODO clean this up
+    const el = this.materialSelector.selectedItem;
+    if (el != null) {
+      const value = el.getAttribute('value');
+      this.materialSelector.selectedIndex = Number(value);
+    }
+    //
+
     const material = this.getMaterial();
     if (material == null) {
       return;
@@ -248,7 +277,37 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
+  updateMaterialList() {
+    if (getModelViewer() != null && getModelViewer()!.model != null) {
+      // Creates mapping of material to variant.
+      console.log('Gathers material-to-variant mappings');
+
+      // Ensures selected variant is within the range of available variants.
+      this.selectedVariant = Math.min(
+          getModelViewer().availableVariants.length - 1, this.selectedVariant);
+
+      const primitivesList = getModelViewer()!.model![$primitivesList];
+      this.materialToVariants.clear();
+      for (const primitive of primitivesList) {
+        if (primitive.variantInfo == null) {
+          continue;
+        }
+        for (const [variantName, varEntry] of primitive.variantInfo) {
+          const mappings = this.materialToVariants.get(varEntry.material) ||
+              new Set<VariantToMaterialMapping>();
+          mappings.add({materialIndex: varEntry.materialIndex, variantName});
+
+          this.materialToVariants.set(varEntry.material, mappings);
+        }
+      }
+    }
+  }
+
   renderSelectMaterialTab() {
+    // TODO this is getting lost after correct the 'selectedIndex'
+    // we probably need a local index value that can be updated without causing
+    // lit to re-render.
+    const materialPairs = this.getMaterialsForVariant(this.currentVariant);
     return html`
     <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
         true}>
@@ -257,10 +316,10 @@ export class MaterialPanel extends ConnectedLitElement {
         id="material-selector"
         @select=${this.onSelectMaterial}
         >${
-        getModelViewer()?.model?.materials.map(
-            (material, id) => html`<paper-item value="${id}">(${id}) ${
-                material.name ? material.name :
-                                'Unnamed Material'}</paper-item>`)}
+        materialPairs.map(
+            (pair) => html`<paper-item value="${pair.index}">(${pair.index}) ${
+                pair.material.name ? pair.material.name :
+                                     'Unnamed Material'}</paper-item>`)}
       </me-dropdown>
     </me-expandable-tab>
     `;
@@ -271,6 +330,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   set selectedMaterialIndex(index: number) {
+    // TODO need to get the material index from the 'value' attribute
     this.materialSelector.selectedIndex = index;
     this.onSelectMaterial();
   }
@@ -769,10 +829,69 @@ export class MaterialPanel extends ConnectedLitElement {
     `;
   }
 
-  async onSelectVariant(_event) {
+  getMaterialsForVariant(variant: string|null) {
+    const selectableMaterials = new Array<number>();
+    const materials = new Array<{index: number, material: Material}>();
+
+    if (getModelViewer().model == null ||
+        getModelViewer().model!.materials == null) {
+      return materials;
+    }
+
+    for (const [i, material] of getModelViewer().model!.materials!.entries()) {
+      const variantSet = this.materialToVariants.get(material);
+      if (this.currentVariant == null) {
+        // No filtering occurs if there is no current variant.
+        materials.push({index: i, material});
+      }
+      // If there is no matching variant set.
+      if (variantSet == null) {
+        // Passes the filter, the material is limited to a variant.
+        selectableMaterials.push(i);
+        materials.push({index: i, material});
+        continue;
+      }
+      for (const set of variantSet) {
+        if (set.variantName === variant) {
+          // Passes the filter, this material is part of the current
+          // variants material set.
+          selectableMaterials.push(i);
+          materials.push({index: i, material});
+          break;
+        }
+      }
+    }
+
+    return materials;
+  }
+
+  async onSelectVariant() {
     const paperItem = this.variantSelector.selectedItem as PaperListboxElement;
     if (paperItem != null) {
       getModelViewer().variantName = paperItem.id;
+    }
+
+    // TODO update the selected variant index if needed.
+
+    // Selectable materials come from the current variant.
+    this.currentVariant = paperItem.id;
+
+    this.updateMaterialList();
+
+    const selectableMaterials =
+        this.getMaterialsForVariant(this.currentVariant);
+
+    this.selectedMaterialIndex = selectableMaterials[0].index;
+
+    this.requestUpdate();
+  }
+
+  async onSelectCreateMaterialForVariant() {
+    const paperItem =
+        this.createVariantSelector.selectedItem as PaperListboxElement &
+        {value: string};
+    if (paperItem != null) {
+      alert(`selected ${paperItem.value}`);
     }
   }
 
@@ -781,6 +900,7 @@ export class MaterialPanel extends ConnectedLitElement {
       <me-expandable-tab tabName="Variants">
         <div slot="content">
           <div class="DropdownContainer">
+            ${this.renderCreateVariants()}
             ${this.renderVariantsSelector()}
           </div>
         </div>
@@ -788,9 +908,51 @@ export class MaterialPanel extends ConnectedLitElement {
     `;
   }
 
+  @query('#material-dialog') materialDialog!: DialogBox;
+
+  openCreateMaterialDialog(event: Event) {
+    this.materialDialog.positionTarget = event.currentTarget as Button;
+    this.materialDialog.open();
+  }
+
+  // <me-section-row class="VariantSection" label="Create New Material From:">
+  //   <me-dropdown
+  //   id="create-variant-selector"
+  //   @select=${this.onSelectCreateMaterialForVariant}
+  //   >${
+  //   getModelViewer()?.model?.materials.map(
+  //       (material, id) => html`<paper-item value="${id}">(${id}) ${
+  //           material.name ? material.name :
+  //                           'Unnamed Material'}</paper-item>`)}
+  //   </me-dropdown>
+  // </me-section-row label>
+
+  renderCreateVariants() {
+    return html`
+      <me-dialog id="material-dialog" dialogClass="AlignedDialog">
+      </me-dialog>
+      <mwc-button raised @click=${
+        this.openCreateMaterialDialog}>Open</mwc-button>
+
+
+      <me-section-row class="VariantSection" label="Create New Material From:">
+        <me-dropdown
+        id="create-variant-selector"
+        @select=${this.onSelectCreateMaterialForVariant}
+        >${
+        getModelViewer()?.model?.materials.map(
+            (material, id) => html`<paper-item value="${id}">(${id}) ${
+                material.name ? material.name :
+                                'Unnamed Material'}</paper-item>`)}
+        </me-dropdown>
+      </me-section-row label>
+    `;
+  }
+
   renderVariantsSelector() {
     if (getModelViewer().availableVariants.length > 0) {
       return html`
+      <me-section-row label="Select Variant">
         <me-dropdown
           id="variant-selector"
           @select=${this.onSelectVariant}
@@ -799,16 +961,10 @@ export class MaterialPanel extends ConnectedLitElement {
               (name, id) =>
                   html`<paper-item id="${name}">(${id}) ${name}</paper-item>`)}
         </me-dropdown>
-    `;
-    } else {
-      return html`
-      <me-expandable-tab tabName="Variants">
-        <div slot="content">
-        Add Variant
-        </div>
-      </me-expandable-tab>
+      </me-section-row label>
     `;
     }
+    return html``;
   }
 
   render() {

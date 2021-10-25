@@ -15,7 +15,7 @@
 
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial';
 
-import {$primitives, Model} from '../../../../features/scene-graph/model.js';
+import {$primitivesList, Model} from '../../../../features/scene-graph/model.js';
 import {$initialMaterialIdx} from '../../../../features/scene-graph/nodes/primitive-node.js';
 import {ModelViewerElement} from '../../../../model-viewer.js';
 import {CorrelatedSceneGraph} from '../../../../three-components/gltf-instance/correlated-scene-graph.js';
@@ -35,7 +35,7 @@ const KHRONOS_TRIANGLE_GLB_PATH =
 
 const findPrimitivesWithVariant = (model: Model, variantName: string) => {
   const result = new Array<any>();
-  for (const primitive of model![$primitives]) {
+  for (const primitive of model![$primitivesList]) {
     if (primitive.variantInfo != null &&
         primitive.variantInfo.has(variantName)) {
       result.push(primitive);
@@ -60,9 +60,9 @@ suite('scene-graph/model/mesh-primitives', () => {
 
     test('has a default material', async () => {
       const model = element.model!;
-      expect(model[$primitives].length).to.equal(1);
+      expect(model[$primitivesList].length).to.equal(1);
       expect(model.materials.length).to.equal(1);
-      expect(model[$primitives][0][$initialMaterialIdx]).to.equal(0);
+      expect(model[$primitivesList][0][$initialMaterialIdx]).to.equal(0);
       expect(model.materials[0].name).to.equal('Default');
     });
   });
@@ -76,7 +76,7 @@ suite('scene-graph/model/mesh-primitives', () => {
 
     test('Should not have any primitives with variant info', async () => {
       let hasVariantInfoCount = 0;
-      for (const primitive of model![$primitives]) {
+      for (const primitive of model![$primitivesList]) {
         if (primitive.variantInfo != null) {
           hasVariantInfoCount++;
         }
@@ -93,7 +93,7 @@ suite('scene-graph/model/mesh-primitives', () => {
     });
 
     test('Primitive count matches glTF file', async () => {
-      expect(model![$primitives].length).to.equal(2);
+      expect(model![$primitivesList].length).to.equal(2);
     });
 
     test('Primitives should have expected variant names', async () => {
@@ -104,7 +104,7 @@ suite('scene-graph/model/mesh-primitives', () => {
 
     test('Should not have any primitives without variant info', async () => {
       let hasNoVariantInfoCount = 0;
-      for (const primitive of model![$primitives]) {
+      for (const primitive of model![$primitivesList]) {
         if (primitive.variantInfo == null) {
           hasNoVariantInfoCount++;
         }
@@ -173,7 +173,7 @@ suite('scene-graph/model/mesh-primitives', () => {
     test('Primitive count matches glTF file', async () => {
       const threeGLTF = await loadThreeGLTF(BRAIN_STEM_GLB_PATH);
       const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
-      expect(model![$primitives].length).to.equal(59);
+      expect(model![$primitivesList].length).to.equal(59);
     });
   });
 });
