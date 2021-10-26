@@ -68,12 +68,14 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       const mesh = node as Mesh;
       if (mesh.isMesh) {
         mesh.castShadow = true;
-        // Akin to disablig frustum culling above, we have to also manually
-        // disable the bounds to make raycasting correct for skinned meshes.
-        mesh.geometry.boundingSphere = nullSphere;
-        // The bounding box is set in GLTFLoader by the accessor bounds, which
-        // are not updated with animation.
-        mesh.geometry.boundingBox = null;
+        if ((mesh as any).isSkinnedMesh) {
+          // Akin to disablig frustum culling above, we have to also manually
+          // disable the bounds to make raycasting correct for skinned meshes.
+          mesh.geometry.boundingSphere = nullSphere;
+          // The bounding box is set in GLTFLoader by the accessor bounds, which
+          // are not updated with animation.
+          mesh.geometry.boundingBox = null;
+        }
       }
     });
 
