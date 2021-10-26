@@ -133,7 +133,7 @@ export const INITIAL_STATE: State = {
       hotspots: [],
       relativeFilePaths:
           {posterName: 'poster.webp', environmentName: 'neutral'},
-      extraAttributes: {},
+      extraAttributes: {bounds: 'tight'},
     },
   },
 };
