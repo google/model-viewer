@@ -178,10 +178,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private addHotspot(event: MouseEvent) {
-    const rect = this.modelViewer.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    const positionAndNormal = this.modelViewer.positionAndNormalFromPoint(x, y);
+    const positionAndNormal = this.modelViewer.positionAndNormalFromPoint(
+        event.clientX, event.clientY);
     if (!positionAndNormal) {
       console.log('Click was not on model, no hotspot added.');
       return;

@@ -16,7 +16,7 @@
 import {BackSide, BoxBufferGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
-import {deserializeUrl} from '../utilities.js';
+import {deserializeUrl, timePasses} from '../utilities.js';
 import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentScene from './EnvironmentScene.js';
@@ -42,8 +42,8 @@ const hdrLoader = new RGBELoader();
 hdrLoader.setDataType(HalfFloatType);
 
 export default class TextureUtils extends EventDispatcher {
-  private generatedEnvironmentMap: CubeTexture|null = null;
-  private generatedEnvironmentMapAlt: CubeTexture|null = null;
+  private generatedEnvironmentMap: Promise<CubeTexture>|null = null;
+  private generatedEnvironmentMapAlt: Promise<CubeTexture>|null = null;
 
   private skyboxCache = new Map<string, Promise<Texture>>();
 
@@ -143,8 +143,8 @@ export default class TextureUtils extends EventDispatcher {
   /**
    * Loads an equirect Texture from a given URL, for use as a skybox.
    */
-  private loadEquirectFromUrl(url: string, progressTracker?: ProgressTracker):
-      Promise<Texture> {
+  private async loadEquirectFromUrl(
+      url: string, progressTracker?: ProgressTracker): Promise<Texture> {
     if (!this.skyboxCache.has(url)) {
       const progressCallback =
           progressTracker ? progressTracker.beginActivity() : () => {};
@@ -156,7 +156,9 @@ export default class TextureUtils extends EventDispatcher {
     return this.skyboxCache.get(url)!;
   }
 
-  private GenerateEnvironmentMap(scene: Scene) {
+  private async GenerateEnvironmentMap(scene: Scene, name: string) {
+    await timePasses();
+
     const renderer = this.threeRenderer;
     const cubeTarget = new WebGLCubeRenderTarget(256, {
       generateMipmaps: false,
@@ -167,6 +169,7 @@ export default class TextureUtils extends EventDispatcher {
     });
     const cubeCamera = new CubeCamera(0.1, 100, cubeTarget);
     const generatedEnvironmentMap = cubeCamera.renderTarget.texture;
+    generatedEnvironmentMap.name = name;
     // These hacks are to work around the three.js PMREM not being applied to
     // generated cube maps, and the coordinate flip not getting applied
     // automatically.
@@ -181,7 +184,7 @@ export default class TextureUtils extends EventDispatcher {
 
     cubeCamera.update(renderer, scene);
 
-    this.blurCubemap(cubeTarget, GENERATED_SIGMA);
+    await this.blurCubemap(cubeTarget, GENERATED_SIGMA);
 
     renderer.toneMapping = toneMapping;
     renderer.outputEncoding = outputEncoding;
@@ -192,13 +195,12 @@ export default class TextureUtils extends EventDispatcher {
   /**
    * Loads a dynamically generated environment map.
    */
-  private loadGeneratedEnvironmentMap(): Promise<CubeTexture> {
+  private async loadGeneratedEnvironmentMap(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMap == null) {
       this.generatedEnvironmentMap =
-          this.GenerateEnvironmentMap(new EnvironmentScene());
-      this.generatedEnvironmentMap.name = 'default';
+          this.GenerateEnvironmentMap(new EnvironmentScene(), 'default');
     }
-    return Promise.resolve(this.generatedEnvironmentMap);
+    return this.generatedEnvironmentMap;
   }
 
   /**
@@ -206,16 +208,15 @@ export default class TextureUtils extends EventDispatcher {
    * color-preserving. Shows less contrast around the different sides of the
    * object.
    */
-  private loadGeneratedEnvironmentMapAlt(): Promise<CubeTexture> {
+  private async loadGeneratedEnvironmentMapAlt(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMapAlt == null) {
       this.generatedEnvironmentMapAlt =
-          this.GenerateEnvironmentMap(new EnvironmentSceneAlt());
-      this.generatedEnvironmentMapAlt.name = 'neutral';
+          this.GenerateEnvironmentMap(new EnvironmentSceneAlt(), 'neutral');
     }
-    return Promise.resolve(this.generatedEnvironmentMapAlt);
+    return this.generatedEnvironmentMapAlt;
   }
 
-  private blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
+  private async blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
     if (this.blurMaterial == null) {
       this.blurMaterial = this.getBlurShader(MAX_SAMPLES);
       const box = new BoxBufferGeometry();
@@ -234,7 +235,7 @@ export default class TextureUtils extends EventDispatcher {
     /** tempTarget.dispose(); */
   }
 
-  private halfblur(
+  private async halfblur(
       targetIn: WebGLCubeRenderTarget, targetOut: WebGLCubeRenderTarget,
       sigmaRadians: number, direction: 'latitudinal'|'longitudinal') {
     // Number of standard deviations at which to cut off the discrete
@@ -386,11 +387,11 @@ export default class TextureUtils extends EventDispatcher {
       skybox.dispose();
     }
     if (this.generatedEnvironmentMap != null) {
-      this.generatedEnvironmentMap!.dispose();
+      (await this.generatedEnvironmentMap).dispose();
       this.generatedEnvironmentMap = null;
     }
     if (this.generatedEnvironmentMapAlt != null) {
-      this.generatedEnvironmentMapAlt!.dispose();
+      (await this.generatedEnvironmentMapAlt).dispose();
       this.generatedEnvironmentMapAlt = null;
     }
     if (this.blurMaterial != null) {

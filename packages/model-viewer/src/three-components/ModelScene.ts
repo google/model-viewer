@@ -57,6 +57,7 @@ const normalWorld = new Vector3();
 
 const raycaster = new Raycaster();
 const vector3 = new Vector3();
+const ndc = new Vector2();
 
 /**
  * A THREE.Scene object that takes a Model and CanvasHTMLElement and
@@ -73,7 +74,6 @@ export class ModelScene extends Scene {
   public width = 1;
   public height = 1;
   public aspect = 1;
-  public isDirty = false;
   public renderCount = 0;
   public externalRenderer: RendererInterface|null = null;
 
@@ -99,6 +99,8 @@ export class ModelScene extends Scene {
   public exposure = 1;
   public canScale = true;
   public tightBounds = false;
+
+  private isDirty = false;
 
   private goalTarget = new Vector3();
   private targetDamperX = new Damper();
@@ -157,6 +159,18 @@ export class ModelScene extends Scene {
 
   getCamera(): Camera {
     return this.xrCamera != null ? this.xrCamera : this.camera;
+  }
+
+  queueRender() {
+    this.isDirty = true;
+  }
+
+  shouldRender() {
+    return this.isDirty;
+  }
+
+  hasRendered() {
+    this.isDirty = false;
   }
 
   /**
@@ -266,7 +280,7 @@ export class ModelScene extends Scene {
 
   reset() {
     this.url = null;
-    this.isDirty = true;
+    this.queueRender();
     if (this.shadow != null) {
       this.shadow.setIntensity(0);
     }
@@ -312,7 +326,7 @@ export class ModelScene extends Scene {
       this.externalRenderer.resize(width * dpr, height * dpr);
     }
 
-    this.isDirty = true;
+    this.queueRender();
   }
 
   updateBoundingBox() {
@@ -376,6 +390,20 @@ export class ModelScene extends Scene {
     this.framedFieldOfView = 2 * Math.atan(vertical) * 180 / Math.PI;
   }
 
+  getNDC(clientX: number, clientY: number): Vector2 {
+    if (this.xrCamera != null) {
+      ndc.set(clientX / window.screen.width, clientY / window.screen.height);
+    } else {
+      const rect = this.element.getBoundingClientRect();
+      ndc.set(
+          (clientX - rect.x) / this.width, (clientY - rect.y) / this.height);
+    }
+
+    ndc.multiplyScalar(2).subScalar(1);
+    ndc.y *= -1;
+    return ndc;
+  }
+
   /**
    * Returns the size of the corresponding canvas element.
    */
@@ -429,7 +457,7 @@ export class ModelScene extends Scene {
       this.target.position.set(x, y, z);
       this.target.updateMatrixWorld();
       this.setShadowRotation(this.yaw);
-      this.isDirty = true;
+      this.queueRender();
     }
   }
 
@@ -449,7 +477,7 @@ export class ModelScene extends Scene {
     this.rotation.y = radiansY;
     this.updateMatrixWorld(true);
     this.setShadowRotation(radiansY);
-    this.isDirty = true;
+    this.queueRender();
   }
 
   get yaw(): number {

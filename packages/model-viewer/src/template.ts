@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+import {html, render} from 'lit-html';
+
 import CloseIcon from './assets/close-material-svg.js';
 import ControlsPrompt from './assets/controls-svg.js';
 import ARGlyph from './assets/view-in-ar-material-svg.js';
 
-const template = document.createElement('template');
-template.innerHTML = `
+const templateResult = html`
 <style>
 :host {
   display: block;
@@ -118,6 +119,10 @@ canvas.show {
 
 .slot.poster.show {
   opacity: 1;
+  transition: none;
+}
+
+.slot.poster.quick {
   transition: none;
 }
 
@@ -343,13 +348,6 @@ canvas.show {
   </div>
 </div>`;
 
-export default template;
-
-export const makeTemplate = (tagName: string) => {
-  const clone = document.createElement('template');
-  clone.innerHTML = template.innerHTML;
-  if ((window as any).ShadyCSS) {
-    (window as any).ShadyCSS.prepareTemplate(clone, tagName);
-  }
-  return clone;
+export const makeTemplate = (shadowRoot: ShadowRoot) => {
+  render(templateResult, shadowRoot);
 };

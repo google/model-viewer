@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {Matrix3, Matrix4, Vector2} from 'three';
+import {Matrix3, Matrix4} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
-import {NDCCoordsFromPixel_InPlace} from '../three-components/ModelUtils.js';
 import {Constructor} from '../utilities.js';
 
 
@@ -29,8 +28,6 @@ const $observer = Symbol('observer');
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
 
-// Used internally by positionAndNormalFromPoint()
-const ndcPosition = new Vector2();
 const worldToModel = new Matrix4();
 const worldToModelNormal = new Matrix3();
 
@@ -104,7 +101,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {annotationRenderer} = scene;
       const camera = scene.getCamera();
 
-      if (scene.isDirty) {
+      if (scene.shouldRender()) {
         scene.updateHotspots(camera.position);
         annotationRenderer.domElement.style.display = '';
         annotationRenderer.render(scene, camera);
@@ -139,16 +136,14 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
         {position: Vector3D, normal: Vector3D}|null {
       const scene = this[$scene];
-      const {width, height, target} = scene;
-      ndcPosition.set(pixelX, pixelY);
-      NDCCoordsFromPixel_InPlace(ndcPosition, width, height);
+      const ndcPosition = scene.getNDC(pixelX, pixelY);
 
       const hit = scene.positionAndNormalFromPoint(ndcPosition);
       if (hit == null) {
         return null;
       }
 
-      worldToModel.copy(target.matrixWorld).invert();
+      worldToModel.copy(scene.target.matrixWorld).invert();
       const position = toVector3D(hit.position.applyMatrix4(worldToModel));
 
       worldToModelNormal.getNormalMatrix(worldToModel);
@@ -177,7 +172,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].addHotspot(hotspot);
       }
-      this[$scene].isDirty = true;
+      this[$scene].queueRender();
     }
 
     private[$removeHotspot](node: Node) {
@@ -195,7 +190,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$scene].removeHotspot(hotspot);
         this[$hotspotMap].delete(node.slot);
       }
-      this[$scene].isDirty = true;
+      this[$scene].queueRender();
     }
   }
 

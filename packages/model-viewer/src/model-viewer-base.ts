@@ -34,7 +34,6 @@ const UNSIZED_MEDIA_HEIGHT = 150;
 
 export const blobCanvas = document.createElement('canvas');
 
-const $template = Symbol('template');
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
 const $resizeObserver = Symbol('resizeObserver');
@@ -108,19 +107,8 @@ export interface RendererInterface {
  * Definition for a basic <model-viewer> element.
  */
 export default class ModelViewerElementBase extends UpdatingElement {
-  protected static[$template]: HTMLTemplateElement|void;
-
   static get is() {
     return 'model-viewer';
-  }
-
-  /** @nocollapse */
-  static get template() {
-    if (!this.hasOwnProperty($template)) {
-      this[$template] = makeTemplate(this.is);
-    }
-
-    return this[$template];
   }
 
   /** @export */
@@ -203,22 +191,11 @@ export default class ModelViewerElementBase extends UpdatingElement {
   constructor() {
     super();
 
-    // NOTE(cdata): It is *very important* to access this template first so that
-    // the ShadyCSS template preparation steps happen before element styling in
-    // IE11:
-    const template = (this.constructor as any).template as HTMLTemplateElement;
-
-    if ((window as any).ShadyCSS) {
-      (window as any).ShadyCSS.styleElement(this, {});
-    }
-
-    // NOTE(cdata): The canonical ShadyCSS examples suggest that the Shadow Root
-    // should be created after the invocation of ShadyCSS.styleElement
     this.attachShadow({mode: 'open'});
 
     const shadowRoot = this.shadowRoot!;
 
-    shadowRoot.appendChild(template.content.cloneNode(true));
+    makeTemplate(shadowRoot);
 
     this[$container] = shadowRoot.querySelector('.container') as HTMLDivElement;
     this[$userInputElement] =
@@ -517,7 +494,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   [$needsRender]() {
-    this[$scene].isDirty = true;
+    this[$scene].queueRender();
   }
 
   [$onModelLoad]() {

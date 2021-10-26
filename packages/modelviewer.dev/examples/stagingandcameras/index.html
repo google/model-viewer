@@ -199,9 +199,8 @@
           </div>
           <example-snippet stamp-to="panning" highlight-as="html">
             <template>
-<model-viewer id="pan-demo" auto-rotate camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
-<script>
-(() => {
+<model-viewer id="pan-demo" auto-rotate camera-controls oncontextmenu="return false;" src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum"></model-viewer>
+<script type="module">
   const modelViewer = document.querySelector('#pan-demo');
   const tapDistance = 2;
   let panning = false;
@@ -246,10 +245,7 @@
     if (Math.abs(pointer.clientX - startX) > tapDistance ||
         Math.abs(pointer.clientY - startY) > tapDistance)
       return;
-    const rect = modelViewer.getBoundingClientRect();
-    const x = pointer.clientX - rect.left;
-    const y = pointer.clientY - rect.top;
-    const hit = modelViewer.positionAndNormalFromPoint(x, y);
+    const hit = modelViewer.positionAndNormalFromPoint(pointer.clientX, pointer.clientY);
     modelViewer.cameraTarget =
         hit == null ? 'auto auto auto' : hit.position.toString();
   };
@@ -312,7 +308,6 @@
       }
     }
   }, true);
-})();
 </script>
             </template>
           </example-snippet>
@@ -332,11 +327,10 @@
           </div>
           <example-snippet stamp-to="turnSkybox" highlight-as="html">
             <template>
-<model-viewer id="envlight-demo" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a damaged helmet"></model-viewer>
+<model-viewer id="envlight-demo" camera-controls oncontextmenu="return false;" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a damaged helmet"></model-viewer>
 
 <script type="module">
   const modelViewer = document.querySelector("#envlight-demo");
-  modelViewer.addEventListener('contextmenu', event => event.preventDefault());
   
   let lastX;
   let panning = false;
@@ -362,8 +356,7 @@
   }
   
   modelViewer.addEventListener('mousedown', (event) => {
-    panning = event.button === 2 || event.ctrlKey || event.metaKey ||
-        event.shiftKey;
+    panning = event.button === 2 || event.ctrlKey || event.metaKey || event.shiftKey;
     if (!panning)
       return;
 
@@ -418,6 +411,11 @@
         <li class="attribution">
           <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
           licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://3d.si.edu/object/3d/neil-armstrong-spacesuit:d8c63ba6-4ebc-11ea-b77f-2e728ce88125">Neil Armstrong Space Suit</a> 
+          provided by the Smithsonian Digitization Programs Office and the National Air and Space Museum; <a href=https://www.si.edu/Termsofuse>Usage Conditions Apply</a>.
         </li>
 
         <li class="attribution">

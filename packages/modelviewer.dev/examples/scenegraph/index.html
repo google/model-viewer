@@ -78,7 +78,7 @@ button {
           </div>
           <example-snippet stamp-to="variants" highlight-as="html">
             <template>
-<model-viewer id="chair" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a chair">
+<model-viewer id="chair" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a chair">
   <div class="controls">
     <div>Variant: <select id="variant"></select></div>
   </div>
@@ -492,6 +492,43 @@ modelViewerTexture.addEventListener("load", () => {
     </div>
 
     <div class="sample">
+      <div id="pickMaterialExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Pick a Material</h2>
+            <p>Demonstrates selecting a material with pointer input and changing its color. Note this also works in the WebXR AR mode. Also demonstrates the use of the scale attribute since this GLB was erroneously modeled in mm instead of meters.</p>
+          </div>
+          <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
+            <template>
+<model-viewer id="pickMaterial" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF-Binary/Buggy.glb" ar ar-modes="webxr scene-viewer" scale="0.001 0.001 0.001" alt="A Material Picking Example">
+</model-viewer>
+<script type="module">
+const modelViewer = document.querySelector("model-viewer#pickMaterial");
+
+modelViewer.addEventListener("load", () => {
+
+  const changeColor = async (event) => {
+    let material = modelViewer.materialFromPoint(event.clientX, event.clientY);
+
+    if(material != null) {
+      material.pbrMetallicRoughness.
+        setBaseColorFactor([Math.random(), Math.random(), Math.random()]);
+    }
+  }
+
+  modelViewer.addEventListener("click", changeColor);
+
+});
+
+</script>
+</template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
       <div id="exporter" class="demo"></div>
       <div class="content">
         <div class="wrapper">
@@ -565,45 +602,12 @@ modelViewerTexture.addEventListener("load", () => {
       </div>
     </div>
 
-    <div class="sample">
-      <div id="pickMaterialExample" class="demo"></div>
-      <div class="content">
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">Pick a Material</h2>
-            <p>Demonstrates selecting a material with pointer input and changing its color.</p>
-          </div>
-          <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
-            <template>
-<model-viewer id="pickMaterial" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF-Binary/Buggy.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A Material Picking Example">
-</model-viewer>
-<script type="module">
-const modelViewer = document.querySelector("model-viewer#pickMaterial");
-
-modelViewer.addEventListener("load", () => {
-
-  const changeColor = async (event) => {
-    let material = modelViewer.materialFromPoint(event.layerX, event.layerY);
-
-    if(material != null) {
-      material.pbrMetallicRoughness.
-        setBaseColorFactor([Math.random(), Math.random(), Math.random()]);
-    }
-  }
-
-  modelViewer.addEventListener("click", changeColor);
-
-});
-
-</script>
-</template>
-          </example-snippet>
-        </div>
-      </div>
-    </div>
-
     <div class="footer">
       <ul>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/MaterialsVariantsShoe">Shoe</a> ©Copyright 2020 <a href="https://www.shopify.com/">Shopify Inc.</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>.
+        </li>
         <li class="attribution">
           <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
           licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.

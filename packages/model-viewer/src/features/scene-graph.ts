@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader, Vector2} from 'three';
+import {Euler, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
@@ -23,7 +23,6 @@ import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
-import {NDCCoordsFromPixel_InPlace} from '../three-components/ModelUtils.js';
 import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
@@ -39,7 +38,6 @@ const $variants = Symbol('variants');
 const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
 const $textureLoader = Symbol('textureLoader');
 const $originalGltfJson = Symbol('originalGltfJson');
-const $ndcCoords = Symbol('ndcCoords');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
@@ -78,7 +76,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$variants]: Array<string> = [];
     private[$textureLoader] = new TextureLoader();
     private[$originalGltfJson]: GLTF|null = null;
-    private[$ndcCoords] = new Vector2();
 
     @property({type: String, attribute: 'variant-name'})
     variantName: string|null = null;
@@ -156,12 +153,11 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         const threeGLTF = this[$currentGLTF];
         const {variantName} = this;
 
-        if (threeGLTF == null) {
-          return;
+        if (threeGLTF != null) {
+          await this[$model]![$switchVariant](variantName!);
+          this[$needsRender]();
+          this.dispatchEvent(new CustomEvent('variant-applied'));
         }
-        await this[$model]![$switchVariant](variantName!);
-        this[$needsRender]();
-        this.dispatchEvent(new CustomEvent('variant-applied'));
       }
 
       if (changedProperties.has('orientation') ||
@@ -273,10 +269,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     materialFromPoint(pixelX: number, pixelY: number): Material|null {
       const scene = this[$scene];
-      const {width, height} = scene;
-      this[$ndcCoords].set(pixelX, pixelY);
-      NDCCoordsFromPixel_InPlace(this[$ndcCoords], width, height);
-      scene.raycaster.setFromCamera(this[$ndcCoords], scene.getCamera());
+      const ndcCoords = scene.getNDC(pixelX, pixelY);
+      scene.raycaster.setFromCamera(ndcCoords, scene.getCamera());
 
       return this[$model]![$materialFromPoint](scene.raycaster);
     }

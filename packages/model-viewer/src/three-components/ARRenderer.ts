@@ -183,7 +183,7 @@ export class ARRenderer extends EventDispatcher {
     });
 
     scene.setHotspotsVisibility(false);
-    scene.isDirty = true;
+    scene.queueRender();
     // Render a frame to turn off the hotspots
     await waitForAnimationFrame;
 

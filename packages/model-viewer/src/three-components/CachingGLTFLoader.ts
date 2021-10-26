@@ -52,12 +52,12 @@ export const loadWithLoader =
 /** Helper to load a script tag. */
 const fetchScript = (src: string): Promise<Event> => {
   return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      document.body.appendChild(script);
-      script.onload = resolve;
-      script.onerror = reject;
-      script.async = true;
-      script.src = src;
+    const script = document.createElement('script');
+    document.body.appendChild(script);
+    script.onload = resolve;
+    script.onerror = reject;
+    script.async = true;
+    script.src = src;
   });
 };
 
@@ -71,7 +71,7 @@ let ktx2TranscoderLocation: string;
 const ktx2Loader = new KTX2Loader();
 
 let meshoptDecoderLocation: string;
-let meshoptDecoder: Promise<typeof MeshoptDecoder> | undefined;
+let meshoptDecoder: Promise<typeof MeshoptDecoder>|undefined;
 
 interface MeshoptDecoder {
   ready: Promise<void>;
@@ -111,8 +111,8 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     if (meshoptDecoderLocation !== url) {
       meshoptDecoderLocation = url;
       meshoptDecoder = fetchScript(url)
-        .then(() => MeshoptDecoder.ready)
-        .then(() => MeshoptDecoder);
+                           .then(() => MeshoptDecoder.ready)
+                           .then(() => MeshoptDecoder);
     }
   }
 

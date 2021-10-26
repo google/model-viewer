@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {BufferAttribute, InterleavedBufferAttribute, Object3D, Vector2, Vector3} from 'three';
+import {BufferAttribute, InterleavedBufferAttribute, Object3D, Vector3} from 'three';
 
 
 
@@ -50,26 +50,6 @@ export const moveChildren = (from: Object3D, to: Object3D) => {
     to.add(from.children.shift()!);
   }
 };
-
-/**
- * Converts a 2D coordinate in pixel space to normalized device coordinates [-1,
- * 1]
- * @param position 2D pixel space coordinates such as mouse coordinates.
- * @param viewWidth the width of the scene canvas.
- * @param viewWHeight the height of the scene canvas.
- * @return modifies input parameter `position` with the resulting NDC
- *     coordinates and returns it.
- */
-export const NDCCoordsFromPixel_InPlace =
-    (position: Vector2, viewWidth: number, viewHeight: number) => {
-      position.set(position.x / viewWidth, position.y / viewHeight)
-          .multiplyScalar(2)
-          .subScalar(1);
-
-      position.y *= -1;
-
-      return position;
-    };
 
 /**
  * Performs a reduction across all the vertices of the input model and all its

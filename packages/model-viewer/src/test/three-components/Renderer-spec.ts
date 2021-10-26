@@ -165,7 +165,7 @@ suite('Renderer with two scenes', () => {
       expect(scene.renderCount).to.be.equal(1, 'scene first render');
       expect(otherScene.renderCount).to.be.equal(1, 'otherScene first render');
 
-      scene.isDirty = true;
+      scene.queueRender();
       renderer.render(performance.now());
       expect(scene.renderCount).to.be.equal(2, 'scene second render');
       expect(otherScene.renderCount).to.be.equal(1, 'otherScene second render');
@@ -176,8 +176,8 @@ suite('Renderer with two scenes', () => {
       expect(scene.renderCount).to.be.equal(1, 'scene first render');
       expect(otherScene.renderCount).to.be.equal(1, 'otherScene first render');
 
-      scene.isDirty = true;
-      otherScene.isDirty = true;
+      scene.queueRender();
+      otherScene.queueRender();
       otherScene.element[$isElementInViewport] = false;
 
       renderer.render(performance.now());

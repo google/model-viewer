@@ -101,7 +101,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
 
         test('changing currentTime triggers render', () => {
           element.currentTime = 5;
-          expect(element[$scene].isDirty).to.be.true;
+          expect(element[$scene].shouldRender()).to.be.true;
         });
       });
     });
