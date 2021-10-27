@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Texture} from 'three';
+import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Sphere, Texture} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
@@ -48,6 +48,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
 
     const {scene} = prepared;
 
+    const nullSphere = new Sphere(undefined, Infinity);
+
     scene.traverse((node: Object3D) => {
       // Set a high renderOrder while we're here to ensure the model
       // always renders on top of the skysphere
@@ -63,8 +65,17 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       if (!node.name) {
         node.name = node.uuid;
       }
-      if ((node as Mesh).isMesh) {
-        node.castShadow = true;
+      const mesh = node as Mesh;
+      if (mesh.isMesh) {
+        mesh.castShadow = true;
+        if ((mesh as any).isSkinnedMesh) {
+          // Akin to disablig frustum culling above, we have to also manually
+          // disable the bounds to make raycasting correct for skinned meshes.
+          mesh.geometry.boundingSphere = nullSphere;
+          // The bounding box is set in GLTFLoader by the accessor bounds, which
+          // are not updated with animation.
+          mesh.geometry.boundingBox = null;
+        }
       }
     });
 

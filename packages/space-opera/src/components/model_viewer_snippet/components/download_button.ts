@@ -75,6 +75,10 @@ export async function prepareGlbPayload(modelName: string): Promise<Payload> {
   return {blob: await getModelViewer()!.exportScene(), filename: modelName};
 }
 
+async function preparePosterPayload(posterName: string): Promise<Payload> {
+  return {blob: await createPoster(), filename: posterName};
+}
+
 // Fixes some formatting issues with the snippet as it is being placed into the
 // template.
 function beautify_snippet(snippetList: string[]): string {
@@ -188,18 +192,18 @@ async function prepareZipArchive(
 /**
  * A button to download GLB file resources.
  */
-@customElement('me-download-button')
-export class DownloadButton extends GenericDownloadButton {
+@customElement('me-export-poster-button')
+export class ExportPosterButton extends GenericDownloadButton {
   constructor() {
     super();
-    this.buttonLabel = 'GLB';
+    this.buttonLabel = 'POSTER';
   }
 
   stateChanged(state: State) {
     const loaded = getModelViewer()?.loaded;
-    const modelName = getRelativeFilePaths(state).modelName!;
+    const {posterName} = getRelativeFilePaths(state);
     this.preparePayload =
-        loaded ? () => prepareGlbPayload(modelName) : undefined;
+        loaded ? () => preparePosterPayload(posterName) : undefined;
   }
 }
 
@@ -237,7 +241,7 @@ export class ExportZipButton extends GenericDownloadButton {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'me-download-button': DownloadButton;
+    'me-export-poster-button': ExportPosterButton;
     'me-export-zip-button': ExportZipButton;
   }
 }
