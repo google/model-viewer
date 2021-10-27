@@ -50,7 +50,9 @@ export function dispatchExtraAttributes(attributes: any) {
 export const getExtraAttributes = (state: State): any =>
     state.entities.modelViewerSnippet.extraAttributes;
 
-export function extraAttributesReducer(state: any = {}, action: Action): any {
+export function extraAttributesReducer(
+    state: any = INITIAL_STATE.entities.modelViewerSnippet.extraAttributes,
+    action: Action): any {
   switch (action.type) {
     case SET_EXTRA_ATTRIBUTES:
       return action.payload;
