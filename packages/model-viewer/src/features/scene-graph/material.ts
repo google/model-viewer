@@ -36,6 +36,7 @@ export const $lazyLoadGLTFInfo = Symbol('lazyLoadGLTFInfo');
 const $initialize = Symbol('initialize');
 export const $getLoadedMaterial = Symbol('getLoadedMaterial');
 export const $ensureMaterialIsLoaded = Symbol('ensureMaterialIsLoaded');
+export const $materialIndex = Symbol('materialIndex');
 
 /**
  * Material facade implementation for Three.js materials
@@ -46,6 +47,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$occlusionTexture]: TextureInfo;
   private[$emissiveTexture]: TextureInfo;
   private[$lazyLoadGLTFInfo]?: LazyLoader;
+  [$materialIndex]: number;
 
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
@@ -56,9 +58,11 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   constructor(
       onUpdate: () => void, gltf: GLTF, gltfMaterial: GLTFMaterial,
-      correlatedMaterials: Set<MeshStandardMaterial>,
+      materialIndex: number, correlatedMaterials: Set<MeshStandardMaterial>,
       lazyLoadInfo: LazyLoader|undefined = undefined) {
     super(onUpdate, gltfMaterial, correlatedMaterials);
+    this[$materialIndex] = materialIndex;
+
     if (lazyLoadInfo == null) {
       this[$initialize](gltf);
     } else {

@@ -151,7 +151,7 @@ export class PrimitiveNode extends Node {
     if (this[$variantInfo] != null) {
       const material = this[$variantInfo].get(name);
       if (material != null) {
-        return this.setActiveMaterial(material.index);
+        return this.setActiveMaterial(material.materialIndex);
       }
     }
     return null;

@@ -80,7 +80,7 @@ export class Model implements ModelInterface {
 
       if (correlatedMaterial != null) {
         this[$materials].push(
-            new Material(onUpdate, gltf, material, correlatedMaterial));
+            new Material(onUpdate, gltf, material, i, correlatedMaterial));
       } else {
         const elementArray = gltf['materials'] || [];
         const gltfMaterialDef = elementArray[i];
@@ -106,6 +106,7 @@ export class Model implements ModelInterface {
             onUpdate,
             gltf,
             gltfMaterialDef,
+            i,
             correlatedMaterial,
             new LazyLoader(
                 gltf, gltfElementMap, gltfMaterialDef, materialLoadCallback)));

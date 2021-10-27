@@ -28,7 +28,7 @@ import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
 
-import {Material} from '@google/model-viewer/lib/features/scene-graph/material';
+import {$materialIndex, Material} from '@google/model-viewer/lib/features/scene-graph/material';
 import {$primitivesList} from '@google/model-viewer/lib/features/scene-graph/model';
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {Button} from '@material/mwc-button';
@@ -105,13 +105,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('#alpha-cutoff-container') alphaCutoffContainer!: HTMLDivElement;
   @query('me-checkbox#doubleSidedCheckbox')
   doubleSidedCheckbox!: CheckboxElement;
-
-  private selectedVariant = 0;
-  private currentVariant: string|null = null;
-
-  private materialToVariants =
-      new Map<Material, Set<VariantToMaterialMapping>>();
-
+  private selectableMaterials = new Array<Material>();
 
   stateChanged(state: State) {
     const {originalGltf, thumbnailsById} = getModel(state);
@@ -125,12 +119,13 @@ export class MaterialPanel extends ConnectedLitElement {
           this.thumbnailIds.push(id);
           this.thumbnailUrls.push(thumbnail.objectUrl);
         }
+
+        this.updateSelectableMaterials();
+
         // If a new model is loaded, don't interpolate material
         this.isNewModel = true;
         this.selectedMaterialIndex = 0;
         this.isNewModel = false;
-
-        this.selectedVariant = 0;
       }
     }
   }
@@ -222,14 +217,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onSelectMaterial() {
-    // TODO clean this up
-    const el = this.materialSelector.selectedItem;
-    if (el != null) {
-      const value = el.getAttribute('value');
-      this.materialSelector.selectedIndex = Number(value);
-    }
-    //
-
     const material = this.getMaterial();
     if (material == null) {
       return;
@@ -279,37 +266,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
-  updateMaterialList() {
-    if (getModelViewer() != null && getModelViewer()!.model != null) {
-      // Creates mapping of material to variant.
-      console.log('Gathers material-to-variant mappings');
-
-      // Ensures selected variant is within the range of available variants.
-      this.selectedVariant = Math.min(
-          getModelViewer().availableVariants.length - 1, this.selectedVariant);
-
-      const primitivesList = getModelViewer()!.model![$primitivesList];
-      this.materialToVariants.clear();
-      for (const primitive of primitivesList) {
-        if (primitive.variantInfo == null) {
-          continue;
-        }
-        for (const [variantName, varEntry] of primitive.variantInfo) {
-          const mappings = this.materialToVariants.get(varEntry.material) ||
-              new Set<VariantToMaterialMapping>();
-          mappings.add({materialIndex: varEntry.materialIndex, variantName});
-
-          this.materialToVariants.set(varEntry.material, mappings);
-        }
-      }
-    }
-  }
-
   renderSelectMaterialTab() {
-    // TODO this is getting lost after correct the 'selectedIndex'
-    // we probably need a local index value that can be updated without causing
-    // lit to re-render.
-    const materialPairs = this.getMaterialsForVariant(this.currentVariant);
     return html`
     <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
         true}>
@@ -318,27 +275,35 @@ export class MaterialPanel extends ConnectedLitElement {
         id="material-selector"
         @select=${this.onSelectMaterial}
         >${
-        materialPairs.map(
-            (pair) => html`<paper-item value="${pair.index}">(${pair.index}) ${
-                pair.material.name ? pair.material.name :
-                                     'Unnamed Material'}</paper-item>`)}
+        this.selectableMaterials.map(
+            (material, i) =>
+                html`<paper-item value="${i}">(${material[$materialIndex]}) ${
+                    material.name ? material.name :
+                                    'Unnamed Material'}</paper-item>`)}
       </me-dropdown>
     </me-expandable-tab>
     `;
   }
 
   get selectedMaterialIndex(): number {
-    return this.materialSelector.selectedIndex;
+    return this.selectableMaterials[this.materialSelector
+                                        .selectedIndex][$materialIndex];
   }
 
   set selectedMaterialIndex(index: number) {
-    // TODO need to get the material index from the 'value' attribute
     this.materialSelector.selectedIndex = index;
     this.onSelectMaterial();
   }
 
   firstUpdated() {
-    getModelViewer().addEventListener('click', this.onClick);
+    let drag = false;
+    getModelViewer().addEventListener('pointerdown', () => drag = false);
+    getModelViewer().addEventListener('pointermove', () => drag = true);
+    getModelViewer().addEventListener('pointerup', (event) => {
+      if (!drag) {
+        this.onClick(event);
+      }
+    });
   }
 
   onClick = (event) => {
@@ -351,7 +316,8 @@ export class MaterialPanel extends ConnectedLitElement {
     if (pickedMaterial == null) {
       return;
     }
-    for (const [index, material] of modelviewer.model!.materials!.entries()) {
+
+    for (const [index, material] of this.selectableMaterials.entries()) {
       if (material === pickedMaterial) {
         this.selectedMaterialIndex = index;
         return;
@@ -577,7 +543,7 @@ export class MaterialPanel extends ConnectedLitElement {
         ALPHA_BLEND_MODES[this.alphaModePicker.selectedIndex] as AlphaMode;
     this.alphaCutoffContainer.style.display =
         selectedMode === 'MASK' ? '' : 'none';
-    const material = this.getMaterial()
+    const material = this.getMaterial();
     material.setAlphaMode(selectedMode);
     this.alphaCutoffSlider.value = material.getAlphaCutoff();
     reduxStore.dispatch(dispatchModelDirty());
@@ -853,61 +819,33 @@ export class MaterialPanel extends ConnectedLitElement {
     `;
   }
 
-  getMaterialsForVariant(variant: string|null) {
-    const selectableMaterials = new Array<number>();
-    const materials = new Array<{index: number, material: Material}>();
+  updateSelectableMaterials() {
+    this.selectableMaterials = [];
+    if (getModelViewer() != null && getModelViewer()!.model != null) {
+      const primitivesList = getModelViewer()!.model![$primitivesList];
 
-    if (getModelViewer().model == null ||
-        getModelViewer().model!.materials == null) {
-      return materials;
-    }
-
-    for (const [i, material] of getModelViewer().model!.materials!.entries()) {
-      const variantSet = this.materialToVariants.get(material);
-      if (this.currentVariant == null) {
-        // No filtering occurs if there is no current variant.
-        materials.push({index: i, material});
-      }
-      // If there is no matching variant set.
-      if (variantSet == null) {
-        // Passes the filter, the material is limited to a variant.
-        selectableMaterials.push(i);
-        materials.push({index: i, material});
-        continue;
-      }
-      for (const set of variantSet) {
-        if (set.variantName === variant) {
-          // Passes the filter, this material is part of the current
-          // variants material set.
-          selectableMaterials.push(i);
-          materials.push({index: i, material});
-          break;
-        }
+      for (const primitive of primitivesList) {
+        this.selectableMaterials.push(primitive.getActiveMaterial());
       }
     }
-
-    return materials;
   }
 
   async onSelectVariant() {
     const paperItem = this.variantSelector.selectedItem as PaperListboxElement;
     if (paperItem != null) {
       getModelViewer().variantName = paperItem.id;
+
+      const onVariantApplied = () => {
+        this.updateSelectableMaterials();
+        this.selectedMaterialIndex = 0;
+      };
+
+      getModelViewer().addEventListener('variant-applied', () => {
+        onVariantApplied();
+        getModelViewer().removeEventListener(
+            'variant-applied', onVariantApplied);
+      });
     }
-
-    // TODO update the selected variant index if needed.
-
-    // Selectable materials come from the current variant.
-    this.currentVariant = paperItem.id;
-
-    this.updateMaterialList();
-
-    const selectableMaterials =
-        this.getMaterialsForVariant(this.currentVariant);
-
-    this.selectedMaterialIndex = selectableMaterials[0].index;
-
-    this.requestUpdate();
   }
 
   async onSelectCreateMaterialForVariant() {
@@ -939,25 +877,12 @@ export class MaterialPanel extends ConnectedLitElement {
     this.materialDialog.open();
   }
 
-  // <me-section-row class="VariantSection" label="Create New Material From:">
-  //   <me-dropdown
-  //   id="create-variant-selector"
-  //   @select=${this.onSelectCreateMaterialForVariant}
-  //   >${
-  //   getModelViewer()?.model?.materials.map(
-  //       (material, id) => html`<paper-item value="${id}">(${id}) ${
-  //           material.name ? material.name :
-  //                           'Unnamed Material'}</paper-item>`)}
-  //   </me-dropdown>
-  // </me-section-row label>
-
   renderCreateVariants() {
     return html`
       <me-dialog id="material-dialog" dialogClass="AlignedDialog">
       </me-dialog>
       <mwc-button raised @click=${
         this.openCreateMaterialDialog}>Open</mwc-button>
-
 
       <me-section-row class="VariantSection" label="Create New Material From:">
         <me-dropdown
@@ -994,8 +919,8 @@ export class MaterialPanel extends ConnectedLitElement {
   render() {
     return html`
     <div id="material-container" style="display: none">
-    ${this.renderSelectMaterialTab()}
     ${this.renderVariantsTab()}
+    ${this.renderSelectMaterialTab()}
     ${this.renderBaseColorTab()}
     ${this.renderMetallicRoughnessTab()}
     ${this.renderNormalTextureTab()}
