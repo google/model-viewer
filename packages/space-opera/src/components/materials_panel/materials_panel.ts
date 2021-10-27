@@ -20,7 +20,6 @@ import '@polymer/paper-item';
 import '@polymer/paper-slider';
 import '../shared/checkbox/checkbox.js';
 import '../shared/color_picker/color_picker.js';
-import '../shared/dialog/dialog_box.js';
 import '../shared/dropdown/dropdown.js';
 import '../shared/editor_panel/editor_panel.js';
 import '../shared/expandable_content/expandable_tab.js';
@@ -31,7 +30,6 @@ import '../shared/texture_picker/texture_picker.js';
 import {$gltfIndex, Material} from '@google/model-viewer/lib/features/scene-graph/material';
 import {$primitivesList} from '@google/model-viewer/lib/features/scene-graph/model';
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
-import {Button} from '@material/mwc-button';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {customElement, html, internalProperty, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
@@ -46,7 +44,6 @@ import {dispatchModelDirty, getModel, getModelViewer, getTextureId, pushThumbnai
 import {Thumbnail} from '../model_viewer_preview/types.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
-import {DialogBox} from '../shared/dialog/dialog_box.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 import {TabbedPanel} from '../shared/tabs/tabs.js';
@@ -877,13 +874,6 @@ export class MaterialPanel extends ConnectedLitElement {
     if (paperItem != null) {
       alert(`selected ${paperItem.value}`);
     }
-  }
-
-  @query('#material-dialog') materialDialog!: DialogBox;
-
-  openCreateMaterialDialog(event: Event) {
-    this.materialDialog.positionTarget = event.currentTarget as Button;
-    this.materialDialog.open();
   }
 
   render() {
