@@ -77,12 +77,4 @@ export const styles: CSSResult = css`.EditingMaterial {
 #alpha-cutoff-label {
   margin-top: 10px;
 }
-
-.VariantSection {
-  padding-bottom: 4px;
-}
-
-#material-dialog paper-dialog {
-  max-height: 400px;
-}
 `;
