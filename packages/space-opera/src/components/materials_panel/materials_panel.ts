@@ -28,7 +28,7 @@ import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
 
-import {$materialIndex, Material} from '@google/model-viewer/lib/features/scene-graph/material';
+import {$gltfIndex, Material} from '@google/model-viewer/lib/features/scene-graph/material';
 import {$primitivesList} from '@google/model-viewer/lib/features/scene-graph/model';
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {Button} from '@material/mwc-button';
@@ -266,28 +266,50 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
+  renderVariantsSelector() {
+    if (getModelViewer().availableVariants.length > 0) {
+      return html`
+      <me-section-row label="Variant">
+        <me-dropdown
+          id="variant-selector"
+          @select=${this.onSelectVariant}
+          >${
+          getModelViewer().availableVariants.map(
+              (name, id) =>
+                  html`<paper-item id="${name}">(${id}) ${name}</paper-item>`)}
+        </me-dropdown>
+      </me-section-row label>
+    `;
+    }
+    return html``;
+  }
+
   renderSelectMaterialTab() {
     return html`
     <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
         true}>
-      <me-dropdown
-        slot="content"
-        id="material-selector"
-        @select=${this.onSelectMaterial}
-        >${
+      <div slot="content">
+        ${this.renderVariantsSelector()}
+        <me-section-row label="Material">
+          <me-dropdown
+            id="material-selector"
+            @select=${this.onSelectMaterial}
+            >${
         this.selectableMaterials.map(
             (material, i) =>
-                html`<paper-item value="${i}">(${material[$materialIndex]}) ${
+                html`<paper-item value="${i}">(${material[$gltfIndex]}) ${
                     material.name ? material.name :
                                     'Unnamed Material'}</paper-item>`)}
-      </me-dropdown>
+          </me-dropdown>
+        </me-section-row label>
+      </div>
     </me-expandable-tab>
     `;
   }
 
   get selectedMaterialIndex(): number {
-    return this.selectableMaterials[this.materialSelector
-                                        .selectedIndex][$materialIndex];
+    return this
+        .selectableMaterials[this.materialSelector.selectedIndex][$gltfIndex];
   }
 
   set selectedMaterialIndex(index: number) {
@@ -857,19 +879,6 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
-  renderVariantsTab() {
-    return html`
-      <me-expandable-tab tabName="Variants">
-        <div slot="content">
-          <div class="DropdownContainer">
-            ${this.renderCreateVariants()}
-            ${this.renderVariantsSelector()}
-          </div>
-        </div>
-      </me-expandable-tab>
-    `;
-  }
-
   @query('#material-dialog') materialDialog!: DialogBox;
 
   openCreateMaterialDialog(event: Event) {
@@ -877,49 +886,9 @@ export class MaterialPanel extends ConnectedLitElement {
     this.materialDialog.open();
   }
 
-  renderCreateVariants() {
-    return html`
-      <me-dialog id="material-dialog" dialogClass="AlignedDialog">
-      </me-dialog>
-      <mwc-button raised @click=${
-        this.openCreateMaterialDialog}>Open</mwc-button>
-
-      <me-section-row class="VariantSection" label="Create New Material From:">
-        <me-dropdown
-        id="create-variant-selector"
-        @select=${this.onSelectCreateMaterialForVariant}
-        >${
-        getModelViewer()?.model?.materials.map(
-            (material, id) => html`<paper-item value="${id}">(${id}) ${
-                material.name ? material.name :
-                                'Unnamed Material'}</paper-item>`)}
-        </me-dropdown>
-      </me-section-row label>
-    `;
-  }
-
-  renderVariantsSelector() {
-    if (getModelViewer().availableVariants.length > 0) {
-      return html`
-      <me-section-row label="Select Variant">
-        <me-dropdown
-          id="variant-selector"
-          @select=${this.onSelectVariant}
-          >${
-          getModelViewer().availableVariants.map(
-              (name, id) =>
-                  html`<paper-item id="${name}">(${id}) ${name}</paper-item>`)}
-        </me-dropdown>
-      </me-section-row label>
-    `;
-    }
-    return html``;
-  }
-
   render() {
     return html`
     <div id="material-container" style="display: none">
-    ${this.renderVariantsTab()}
     ${this.renderSelectMaterialTab()}
     ${this.renderBaseColorTab()}
     ${this.renderMetallicRoughnessTab()}
