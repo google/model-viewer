@@ -115,7 +115,10 @@ export class ExportPanel extends ConnectedLitElement {
 <me-expandable-tab tabName="File Manager" .open=${true}>
   <div slot="content">
     <me-import-card></me-import-card>
-    <me-export-zip-button id="export-zip" style="display: block; margin-top: 10px;"></me-export-zip-button>
+    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+      <me-export-zip-button id="export-zip"></me-export-zip-button>
+      <me-export-poster-button></me-export-poster-button>
+    </div>
   </div>
 </me-expandable-tab>
 <me-expandable-tab tabName="Mobile View" .open=${true}>
