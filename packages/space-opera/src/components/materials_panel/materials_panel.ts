@@ -27,8 +27,7 @@ import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
 
-import {$gltfIndex, Material} from '@google/model-viewer/lib/features/scene-graph/material';
-import {$primitivesList} from '@google/model-viewer/lib/features/scene-graph/model';
+import {Material} from '@google/model-viewer/lib/features/scene-graph/material';
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {customElement, html, internalProperty, query} from 'lit-element';
@@ -294,7 +293,7 @@ export class MaterialPanel extends ConnectedLitElement {
             >${
         this.selectableMaterials.map(
             (material, i) =>
-                html`<paper-item value="${i}">(${material[$gltfIndex]}) ${
+                html`<paper-item value="${i}">(${material.gltfIndex}) ${
                     material.name ? material.name :
                                     'Unnamed Material'}</paper-item>`)}
           </me-dropdown>
@@ -305,8 +304,8 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedMaterialIndex(): number {
-    return this
-        .selectableMaterials[this.materialSelector.selectedIndex][$gltfIndex];
+    return this.selectableMaterials[this.materialSelector.selectedIndex]
+        .gltfIndex;
   }
 
   set selectedMaterialIndex(index: number) {
@@ -326,6 +325,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   firstUpdated() {
+    // Enables material picking but prevents selection while dragging a model.
     let drag = false;
     getModelViewer().addEventListener('pointerdown', () => drag = false);
     getModelViewer().addEventListener('pointermove', () => drag = true);
@@ -851,19 +851,12 @@ export class MaterialPanel extends ConnectedLitElement {
 
   updateSelectableMaterials() {
     if (getModelViewer() != null && getModelViewer()!.model != null) {
-      const primitivesList = getModelViewer()!.model![$primitivesList];
-
-      // Creates list of unique materials.
-      const selectableSet = new Set<Material>();
-      for (const primitive of primitivesList) {
-        selectableSet.add(primitive.getActiveMaterial());
+      this.selectableMaterials = [];
+      for (const material of getModelViewer()!.model!.materials) {
+        if (material.isActive) {
+          this.selectableMaterials.push(material);
+        }
       }
-
-      // Sorts by gltf order.
-      this.selectableMaterials = Array.from(selectableSet);
-      this.selectableMaterials.sort((a, b) => {
-        return a[$gltfIndex] - b[$gltfIndex];
-      });
     }
   }
 
