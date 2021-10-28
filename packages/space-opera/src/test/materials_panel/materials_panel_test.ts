@@ -24,7 +24,8 @@ import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {waitForEvent} from '../utils/test_utils.js';
 
-const CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
+const TEXTURE_CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
+const CUBES_GLTF_PATH = '../base/shared-assets/models/cubes.gltf';
 const TEXTURE_PATH = 'base/shared-assets/models/ORM.png';
 
 async function checkUpload(
@@ -62,7 +63,7 @@ describe('material panel test', () => {
     panel.isTesting = true;
     document.body.appendChild(panel);
 
-    reduxStore.dispatch(dispatchGltfUrl(CUBE_GLTF_PATH));
+    reduxStore.dispatch(dispatchGltfUrl(TEXTURE_CUBE_GLTF_PATH));
     await preview.loadComplete;
     await panel.updateComplete;
   });
@@ -86,6 +87,49 @@ describe('material panel test', () => {
        expect(panel.selectedRoughnessFactor).toEqual(1);
        expect(panel.selectedMetallicFactor).toEqual(1);
      });
+
+  it('Model with variants has variant selector', async () => {
+    reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
+    await preview.loadComplete;
+    await panel.updateComplete;
+
+    const selector = panel.shadowRoot?.getElementById('variant-selector');
+    expect(selector!.id).toEqual('variant-selector');
+  });
+
+  it('Model without variants does not have variant selector', async () => {
+    reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
+    await preview.loadComplete;
+    await panel.updateComplete;
+
+    const selector = panel.shadowRoot?.getElementById('variant-selector');
+    expect(selector).toBeUndefined
+  });
+
+  it('selecting a variant changes the material at index 0', async () => {
+    reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
+    await preview.loadComplete;
+    await panel.updateComplete;
+
+    let expectedMaterialName = '';
+    const onVariantApplied = async () => {
+      panel.selectedMaterialIndex = 0;
+      await panel.updateComplete;
+      expect(panel.selectableMaterials[0].name).toEqual(expectedMaterialName);
+    };
+    preview.addEventListener('variant-applied', onVariantApplied);
+
+    panel.selectedVariant = 'Purple Yellow';
+    expectedMaterialName = 'purple';
+
+    panel.selectedVariant = 'Yellow Yellow';
+    expectedMaterialName = 'yellow';
+
+    panel.selectedVariant = 'Yellow Red';
+    expectedMaterialName = 'red';
+
+    preview.removeEventListener('variant-applied', onVariantApplied);
+  });
 
   it('reflects textures in GLTF', async () => {
     panel.selectedMaterialIndex = 0;

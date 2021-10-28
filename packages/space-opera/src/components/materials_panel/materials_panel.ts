@@ -102,7 +102,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('#alpha-cutoff-container') alphaCutoffContainer!: HTMLDivElement;
   @query('me-checkbox#doubleSidedCheckbox')
   doubleSidedCheckbox!: CheckboxElement;
-  private selectableMaterials = new Array<Material>();
+  selectableMaterials = new Array<Material>();
 
   stateChanged(state: State) {
     const {originalGltf, thumbnailsById} = getModel(state);
@@ -272,8 +272,8 @@ export class MaterialPanel extends ConnectedLitElement {
           @select=${this.onSelectVariant}
           >${
           getModelViewer().availableVariants.map(
-              (name, id) =>
-                  html`<paper-item id="${name}">(${id}) ${name}</paper-item>`)}
+              (name, id) => html`<paper-item value="${name}">(${id}) ${
+                  name}</paper-item>`)}
         </me-dropdown>
       </me-section-row label>
     `;
@@ -312,6 +312,17 @@ export class MaterialPanel extends ConnectedLitElement {
   set selectedMaterialIndex(index: number) {
     this.materialSelector.selectedIndex = index;
     this.onSelectMaterial();
+  }
+
+  get selectedVariant(): string|null {
+    if (!getModelViewer()) {
+      return null;
+    }
+    return getModelViewer().variantName;
+  }
+
+  set selectedVariant(name: string|null) {
+    getModelViewer().variantName = name;
   }
 
   firstUpdated() {
@@ -839,20 +850,27 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   updateSelectableMaterials() {
-    this.selectableMaterials = [];
     if (getModelViewer() != null && getModelViewer()!.model != null) {
       const primitivesList = getModelViewer()!.model![$primitivesList];
 
+      // Creates list of unique materials.
+      const selectableSet = new Set<Material>();
       for (const primitive of primitivesList) {
-        this.selectableMaterials.push(primitive.getActiveMaterial());
+        selectableSet.add(primitive.getActiveMaterial());
       }
+
+      // Sorts by gltf order.
+      this.selectableMaterials = Array.from(selectableSet);
+      this.selectableMaterials.sort((a, b) => {
+        return a[$gltfIndex] - b[$gltfIndex];
+      });
     }
   }
 
   async onSelectVariant() {
     const paperItem = this.variantSelector.selectedItem as PaperListboxElement;
-    if (paperItem != null) {
-      getModelViewer().variantName = paperItem.id;
+    if (paperItem != null && paperItem.hasAttribute('value')) {
+      this.selectedVariant = paperItem.getAttribute('value');
 
       const onVariantApplied = () => {
         this.updateSelectableMaterials();
@@ -864,15 +882,6 @@ export class MaterialPanel extends ConnectedLitElement {
         getModelViewer().removeEventListener(
             'variant-applied', onVariantApplied);
       });
-    }
-  }
-
-  async onSelectCreateMaterialForVariant() {
-    const paperItem =
-        this.createVariantSelector.selectedItem as PaperListboxElement &
-        {value: string};
-    if (paperItem != null) {
-      alert(`selected ${paperItem.value}`);
     }
   }
 
