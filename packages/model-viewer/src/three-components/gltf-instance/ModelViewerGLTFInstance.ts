@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Sphere, Texture} from 'three';
+import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Sphere} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
@@ -21,9 +21,6 @@ import {Renderer} from '../Renderer.js';
 
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
-
-
-const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 
 interface PreparedModelViewerGLTF extends PreparedGLTF {
@@ -76,6 +73,23 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
           // are not updated with animation.
           mesh.geometry.boundingBox = null;
         }
+
+        const material = mesh.material as MeshStandardMaterial;
+        // This makes shadows better for non-manifold meshes
+        material.shadowSide = FrontSide;
+
+        if (material.roughnessMap != null) {
+          // Generates mipmaps from the clone of the roughnessMap.
+          const {threeRenderer, roughnessMipmapper} = Renderer.singleton;
+          // XR must be disabled while doing offscreen rendering or it will
+          // clobber the camera.
+          const {enabled} = threeRenderer.xr;
+          threeRenderer.xr.enabled = false;
+          const {image} = material.roughnessMap;
+          roughnessMipmapper.generateMipmaps(material as MeshStandardMaterial);
+          material.roughnessMap!.image = image;
+          threeRenderer.xr.enabled = enabled;
+        }
       }
     });
 
@@ -98,18 +112,18 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       // Materials aren't cloned when cloning meshes; geometry
       // and materials are copied by reference. This is necessary
       // for the same model to be used twice with different
-      // environment maps.
+      // scene-graph operations.
       if ((node as Mesh).isMesh) {
         const mesh = node as Mesh;
-        if (Array.isArray(mesh.material)) {
-          mesh.material = mesh.material.map(
-              (material) => this[$cloneAndPatchMaterial](
-                  material as MeshStandardMaterial,
-                  sourceUUIDToClonedMaterial));
-        } else if (mesh.material != null) {
-          mesh.material = this[$cloneAndPatchMaterial](
-              mesh.material as MeshStandardMaterial,
-              sourceUUIDToClonedMaterial);
+        const material = mesh.material as MeshStandardMaterial;
+        if (material != null) {
+          if (sourceUUIDToClonedMaterial.has(material.uuid)) {
+            mesh.material = sourceUUIDToClonedMaterial.get(material.uuid)!;
+            return;
+          }
+
+          mesh.material = material.clone() as MeshStandardMaterial;
+          sourceUUIDToClonedMaterial.set(material.uuid, mesh.material);
         }
       }
     });
@@ -119,83 +133,6 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
     // Three.js object graph and the glTF scene graph will be lost.
     clone[$correlatedSceneGraph] =
         CorrelatedSceneGraph.from(clone, this.correlatedSceneGraph);
-
-    return clone;
-  }
-
-  /**
-   * Creates a clone of the given material, and applies a patch to the
-   * shader program.
-   */
-  [$cloneAndPatchMaterial](
-      material: MeshStandardMaterial,
-      sourceUUIDToClonedMaterial: Map<string, Material>) {
-    // If we already cloned this material (determined by tracking the UUID of
-    // source materials that have been cloned), then return that previously
-    // cloned instance:
-    if (sourceUUIDToClonedMaterial.has(material.uuid)) {
-      return sourceUUIDToClonedMaterial.get(material.uuid)!;
-    }
-
-    const clone = material.clone() as MeshStandardMaterial;
-    if (material.map != null) {
-      clone.map = material.map.clone();
-      clone.map.needsUpdate = true;
-    }
-    if (material.normalMap != null) {
-      clone.normalMap = material.normalMap.clone();
-      clone.normalMap.needsUpdate = true;
-    }
-    if (material.emissiveMap != null) {
-      clone.emissiveMap = material.emissiveMap.clone();
-      clone.emissiveMap.needsUpdate = true;
-    }
-
-    // Clones the roughnessMap if it exists.
-    let roughnessMap: Texture|null = null;
-    if (material.roughnessMap != null) {
-      roughnessMap = material.roughnessMap.clone();
-    }
-
-    // Assigns the roughnessMap to the cloned material and generates mipmaps.
-    if (roughnessMap != null) {
-      roughnessMap.needsUpdate = true;
-      clone.roughnessMap = roughnessMap;
-
-      // Generates mipmaps from the clone of the roughnessMap.
-      const {threeRenderer, roughnessMipmapper} = Renderer.singleton;
-      // XR must be disabled while doing offscreen rendering or it will
-      // clobber the camera.
-      const {enabled} = threeRenderer.xr;
-      threeRenderer.xr.enabled = false;
-      const {image} = clone.roughnessMap;
-      roughnessMipmapper.generateMipmaps(clone as MeshStandardMaterial);
-      clone.roughnessMap.image = image;
-      threeRenderer.xr.enabled = enabled;
-    }
-
-    // Checks if roughnessMap and metalnessMap share the same texture and
-    // either clones or assigns.
-    if (material.roughnessMap === material.metalnessMap) {
-      clone.metalnessMap = roughnessMap;
-    } else if (material.metalnessMap != null) {
-      clone.metalnessMap = material.metalnessMap.clone();
-      clone.metalnessMap.needsUpdate = true;
-    }
-
-    // Checks if roughnessMap and aoMap share the same texture and
-    // either clones or assigns.
-    if (material.roughnessMap === material.aoMap) {
-      clone.aoMap = roughnessMap;
-    } else if (material.aoMap != null) {
-      clone.aoMap = material.aoMap.clone();
-      clone.aoMap.needsUpdate = true;
-    }
-
-    // This makes shadows better for non-manifold meshes
-    clone.shadowSide = FrontSide;
-
-    sourceUUIDToClonedMaterial.set(material.uuid, clone);
 
     return clone;
   }
