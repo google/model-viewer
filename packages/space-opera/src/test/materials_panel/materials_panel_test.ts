@@ -94,8 +94,7 @@ describe('material panel test', () => {
     await preview.loadComplete;
     await panel.updateComplete;
 
-    const section =
-        panel.shadowRoot?.getElementById('variant-selector')?.parentElement;
+    const section = panel.shadowRoot?.getElementById('variant-selector');
     expect(section!.style.display).not.toEqual('none');
   });
 
@@ -105,8 +104,7 @@ describe('material panel test', () => {
        await preview.loadComplete;
        await panel.updateComplete;
 
-       const section =
-           panel.shadowRoot?.getElementById('variant-selector')?.parentElement;
+       const section = panel.shadowRoot?.getElementById('variant-selector');
        expect(section?.style.display).toEqual('none');
      });
 
