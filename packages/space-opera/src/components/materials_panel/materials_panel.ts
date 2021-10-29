@@ -257,12 +257,13 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
-  renderVariantsSelector() {
+  renderVariantsTab() {
+    const hasVariants = getModelViewer().availableVariants.length > 0;
     return html`
+    <me-expandable-tab tabName="Variants" .open=${hasVariants}>
+      <div slot="content">
       <me-section-row
-      label="Variant"
-      style='display: ${
-        getModelViewer().availableVariants.length > 0 ? 'block' : 'none'}'>
+      style='display: ${hasVariants ? '' : 'none'}'>
         <me-dropdown
           id="variant-selector"
           @select=${this.onSelectVariant}
@@ -272,6 +273,8 @@ export class MaterialPanel extends ConnectedLitElement {
                 html`<paper-item value="${name}">(${id}) ${name}</paper-item>`)}
         </me-dropdown>
       </me-section-row label>
+      <div>
+    </me-expandable-tab>
     `;
   }
 
@@ -280,8 +283,7 @@ export class MaterialPanel extends ConnectedLitElement {
     <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
         true}>
       <div slot="content">
-        ${this.renderVariantsSelector()}
-        <me-section-row label="Material">
+        <me-section-row>
           <me-dropdown
             id="material-selector"
             @select=${this.onSelectMaterial}
@@ -867,6 +869,7 @@ export class MaterialPanel extends ConnectedLitElement {
   render() {
     return html`
     <div id="material-container" style="display: none">
+    ${this.renderVariantsTab()}
     ${this.renderSelectMaterialTab()}
     ${this.renderBaseColorTab()}
     ${this.renderMetallicRoughnessTab()}
