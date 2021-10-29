@@ -36,6 +36,9 @@ export const $lazyLoadGLTFInfo = Symbol('lazyLoadGLTFInfo');
 const $initialize = Symbol('initialize');
 export const $getLoadedMaterial = Symbol('getLoadedMaterial');
 export const $ensureMaterialIsLoaded = Symbol('ensureMaterialIsLoaded');
+export const $gltfIndex = Symbol('gltfIndex');
+export const $setActive = Symbol('setActive');
+const $isActive = Symbol('isActive');
 
 /**
  * Material facade implementation for Three.js materials
@@ -46,6 +49,8 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$occlusionTexture]: TextureInfo;
   private[$emissiveTexture]: TextureInfo;
   private[$lazyLoadGLTFInfo]?: LazyLoader;
+  private[$gltfIndex]: number;
+  private[$isActive]: boolean;
 
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
@@ -56,9 +61,13 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   constructor(
       onUpdate: () => void, gltf: GLTF, gltfMaterial: GLTFMaterial,
+      gltfIndex: number, isActive: boolean,
       correlatedMaterials: Set<MeshStandardMaterial>,
       lazyLoadInfo: LazyLoader|undefined = undefined) {
     super(onUpdate, gltfMaterial, correlatedMaterials);
+    this[$gltfIndex] = gltfIndex;
+    this[$isActive] = isActive;
+
     if (lazyLoadInfo == null) {
       this[$initialize](gltf);
     } else {
@@ -173,6 +182,14 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return this[$lazyLoadGLTFInfo] == null;
   }
 
+  get isActive(): boolean {
+    return this[$isActive];
+  }
+
+  [$setActive](isActive: boolean) {
+    this[$isActive] = isActive;
+  }
+
   get name(): string {
     return (this[$sourceObject] as Material).name || '';
   }
@@ -200,6 +217,10 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   get emissiveFactor(): RGB {
     this[$ensureMaterialIsLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).emissiveFactor;
+  }
+
+  get index(): number {
+    return this[$gltfIndex];
   }
 
   setEmissiveFactor(rgb: RGB) {
