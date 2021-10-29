@@ -76,7 +76,6 @@ export class MaterialPanel extends ConnectedLitElement {
   metallicFactorSlider!: SliderWithInputElement;
   @query('me-dropdown#material-selector') materialSelector!: Dropdown;
   @query('me-dropdown#variant-selector') variantSelector!: Dropdown;
-  @query('me-dropdown#create-variant-selector')
   createVariantSelector!: Dropdown;
   @query('me-texture-picker#base-color-texture-picker')
   baseColorTexturePicker!: TexturePicker;
@@ -261,41 +260,34 @@ export class MaterialPanel extends ConnectedLitElement {
     const hasVariants = getModelViewer().availableVariants.length > 0;
     return html`
     <me-expandable-tab tabName="Variants" .open=${hasVariants}>
-      <div slot="content">
-      <me-section-row
-      style='display: ${hasVariants ? '' : 'none'}'>
-        <me-dropdown
-          id="variant-selector"
-          @select=${this.onSelectVariant}
-          >${
+      <me-dropdown
+        style='display: ${hasVariants ? '' : 'none'}'
+        slot="content"
+        id="variant-selector"
+        @select=${this.onSelectVariant}
+        >${
         getModelViewer().availableVariants.map(
             (name, id) =>
                 html`<paper-item value="${name}">(${id}) ${name}</paper-item>`)}
-        </me-dropdown>
-      </me-section-row label>
-      <div>
+      </me-dropdown>
     </me-expandable-tab>
     `;
   }
 
   renderSelectMaterialTab() {
     return html`
-    <me-expandable-tab tabName="Selected Material" .open=${true} .sticky=${
-        true}>
-      <div slot="content">
-        <me-section-row>
-          <me-dropdown
-            id="material-selector"
-            @select=${this.onSelectMaterial}
-            >${
+    <me-expandable-tab tabName="Selected Material" .open=${true}>
+      <me-dropdown
+        slot="content"
+        id="material-selector"
+        @select=${this.onSelectMaterial}
+        >${
         this.selectableMaterials.map(
             (material, i) =>
                 html`<paper-item value="${i}">(${material.index}) ${
                     material.name ? material.name :
                                     'Unnamed Material'}</paper-item>`)}
-          </me-dropdown>
-        </me-section-row label>
-      </div>
+      </me-dropdown>
     </me-expandable-tab>
     `;
   }
