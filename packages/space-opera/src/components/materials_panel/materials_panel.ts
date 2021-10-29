@@ -54,11 +54,6 @@ import {styles} from './materials_panel.css.js';
 
 
 
-export interface VariantToMaterialMapping {
-  materialIndex: number;
-  variantName: string;
-}
-
 /** Material panel. */
 @customElement('me-materials-panel')
 export class MaterialPanel extends ConnectedLitElement {
@@ -263,21 +258,21 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   renderVariantsSelector() {
-    if (getModelViewer().availableVariants.length > 0) {
-      return html`
-      <me-section-row label="Variant">
+    return html`
+      <me-section-row
+      label="Variant"
+      style='display: ${
+        getModelViewer().availableVariants.length > 0 ? 'block' : 'none'}'>
         <me-dropdown
           id="variant-selector"
           @select=${this.onSelectVariant}
           >${
-          getModelViewer().availableVariants.map(
-              (name, id) => html`<paper-item value="${name}">(${id}) ${
-                  name}</paper-item>`)}
+        getModelViewer().availableVariants.map(
+            (name, id) =>
+                html`<paper-item value="${name}">(${id}) ${name}</paper-item>`)}
         </me-dropdown>
       </me-section-row label>
     `;
-    }
-    return html``;
   }
 
   renderSelectMaterialTab() {
@@ -293,7 +288,7 @@ export class MaterialPanel extends ConnectedLitElement {
             >${
         this.selectableMaterials.map(
             (material, i) =>
-                html`<paper-item value="${i}">(${material.gltfIndex}) ${
+                html`<paper-item value="${i}">(${material.index}) ${
                     material.name ? material.name :
                                     'Unnamed Material'}</paper-item>`)}
           </me-dropdown>
@@ -304,8 +299,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedMaterialIndex(): number {
-    return this.selectableMaterials[this.materialSelector.selectedIndex]
-        .gltfIndex;
+    return this.selectableMaterials[this.materialSelector.selectedIndex].index;
   }
 
   set selectedMaterialIndex(index: number) {
@@ -314,9 +308,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedVariant(): string|null {
-    if (!getModelViewer()) {
-      return null;
-    }
     return getModelViewer().variantName;
   }
 
@@ -850,12 +841,10 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   updateSelectableMaterials() {
-    if (getModelViewer() != null && getModelViewer()!.model != null) {
-      this.selectableMaterials = [];
-      for (const material of getModelViewer()!.model!.materials) {
-        if (material.isActive) {
-          this.selectableMaterials.push(material);
-        }
+    this.selectableMaterials = [];
+    for (const material of getModelViewer()!.model!.materials) {
+      if (material.isActive) {
+        this.selectableMaterials.push(material);
       }
     }
   }
@@ -870,11 +859,8 @@ export class MaterialPanel extends ConnectedLitElement {
         this.selectedMaterialIndex = 0;
       };
 
-      getModelViewer().addEventListener('variant-applied', () => {
-        onVariantApplied();
-        getModelViewer().removeEventListener(
-            'variant-applied', onVariantApplied);
-      });
+      getModelViewer().addEventListener(
+          'variant-applied', onVariantApplied, {once: true});
     }
   }
 

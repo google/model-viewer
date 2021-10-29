@@ -96,6 +96,11 @@ export declare interface Material {
    * Returns true if the material is participating in scene renders.
    */
   readonly isActive: boolean;
+
+  /**
+   * Returns the glTF index of this material.
+   */
+  readonly index: number;
 }
 
 /**

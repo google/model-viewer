@@ -234,7 +234,7 @@ export class Model implements ModelInterface {
     }
     // Marks the materials that are now in use after the variant switch.
     for (const primitive of this[$primitivesList]) {
-      this.materials[primitive.getActiveMaterial().gltfIndex][$setActive](true);
+      this.materials[primitive.getActiveMaterial().index][$setActive](true);
     }
   }
 

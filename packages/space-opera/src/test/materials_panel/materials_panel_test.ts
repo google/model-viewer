@@ -26,6 +26,7 @@ import {waitForEvent} from '../utils/test_utils.js';
 
 const TEXTURE_CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
 const CUBES_GLTF_PATH = '../base/shared-assets/models/cubes.gltf';
+const TRIANGLE_GLTF_PATH = '../base/shared-assets/models/Triangle.gltf';
 const TEXTURE_PATH = 'base/shared-assets/models/ORM.png';
 
 async function checkUpload(
@@ -88,23 +89,26 @@ describe('material panel test', () => {
        expect(panel.selectedMetallicFactor).toEqual(1);
      });
 
-  it('Model with variants has variant selector', async () => {
+  it('Model with variants has visible variant selector', async () => {
     reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
     await preview.loadComplete;
     await panel.updateComplete;
 
-    const selector = panel.shadowRoot?.getElementById('variant-selector');
-    expect(selector!.id).toEqual('variant-selector');
+    const section =
+        panel.shadowRoot?.getElementById('variant-selector')?.parentElement;
+    expect(section!.style.display).not.toEqual('none');
   });
 
-  it('Model without variants does not have variant selector', async () => {
-    reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
-    await preview.loadComplete;
-    await panel.updateComplete;
+  it('Model without variants does not have visible variant selector',
+     async () => {
+       reduxStore.dispatch(dispatchGltfUrl(TRIANGLE_GLTF_PATH));
+       await preview.loadComplete;
+       await panel.updateComplete;
 
-    const selector = panel.shadowRoot?.getElementById('variant-selector');
-    expect(selector).toBeUndefined
-  });
+       const section =
+           panel.shadowRoot?.getElementById('variant-selector')?.parentElement;
+       expect(section?.style.display).toEqual('none');
+     });
 
   it('selecting a variant changes the material at index 0', async () => {
     reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));

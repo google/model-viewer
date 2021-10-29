@@ -219,7 +219,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return (this[$sourceObject] as DefaultedMaterial).emissiveFactor;
   }
 
-  get gltfIndex(): number {
+  get index(): number {
     return this[$gltfIndex];
   }
 
