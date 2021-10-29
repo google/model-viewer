@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGL1Renderer} from 'three';
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {$updateEnvironment} from '../features/environment.js';
@@ -91,7 +91,7 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  public threeRenderer!: WebGLRenderer;
+  public threeRenderer!: WebGL1Renderer;
   public canvas3D: HTMLCanvasElement;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
@@ -138,7 +138,7 @@ export class Renderer extends EventDispatcher {
     this.canvas3D.id = 'webgl-canvas';
 
     try {
-      this.threeRenderer = new WebGLRenderer({
+      this.threeRenderer = new WebGL1Renderer({
         canvas: this.canvas3D,
         alpha: true,
         antialias: true,
