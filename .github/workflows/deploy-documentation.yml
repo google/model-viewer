@@ -42,6 +42,7 @@ jobs:
       run: npm run build
 
     - name: Generate fidelity artifacts 
+      continue-on-error: true
       uses: GabrielBB/xvfb-action@v1.0
       with:
         run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test --stream
