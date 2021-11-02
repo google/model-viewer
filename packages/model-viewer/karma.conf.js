@@ -160,6 +160,15 @@ module.exports = function(config) {
         real_mobile: 'true',
         browserstack: {localIdentifier: 'iOS14'}
       },
+      'Android (Huawei P30)': {
+        base: 'BrowserStack',
+        os: 'Android',
+        os_version: '9.0',
+        device: 'Huawei P30',
+        browser: 'Android',
+        real_mobile: 'true',
+        browserstack: {localIdentifier: 'AndroidP30'}
+      },
     };
 
     config.set({
