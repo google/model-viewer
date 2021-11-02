@@ -162,14 +162,8 @@ suite('ModelViewerElementBase with ARMixin', () => {
         }
       });
 
-      test('hides the AR button if not on AR platform', () => {
-        expect(element.canActivateAR).to.be.equal(false);
-      });
-
-      test('shows the AR button if on AR platform', () => {
-        if (IS_ANDROID) {
-          expect(element.canActivateAR).to.be.equal(true);
-        }
+      test('shows the AR button if on a WebXR platform', () => {
+        expect(element.canActivateAR).to.be.equal(IS_ANDROID);
       });
     });
 
