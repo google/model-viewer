@@ -16,16 +16,17 @@ import {Material as ThreeMaterial, Mesh} from 'three';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {KHRMaterialsVariants, Primitive} from '../../../three-components/gltf-instance/gltf-2.0.js';
+import {UserDataVariantMapping} from '../../../three-components/gltf-instance/VariantMaterialLoaderPlugin.js';
 import {$getLoadedMaterial, Material} from '../material.js';
+import {$sourceObject} from '../three-dom-element.js';
 
 
 
-export const $materials = Symbol('materials');
+const $materials = Symbol('materials');
 const $variantInfo = Symbol('variantInfo');
 const $mesh = Symbol('mesh');
 export const $primitives = Symbol('primitives');
 export const $loadVariant = Symbol('loadVariant');
-export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
 export const $children = Symbol('children');
@@ -41,18 +42,13 @@ export class Node {
   }
 }
 
-export interface VariantMapping {
-  material: Material;
-  materialIndex: number;
-}
-
 // Represents a primitive in a glTF mesh.
 export class PrimitiveNode extends Node {
   private[$mesh]: Mesh;
   // Maps glTF material index number to a material that this primitive supports.
-  private[$materials] = new Map<number, Material>();
+  [$materials] = new Map<number, Material>();
   // Maps variant name to material index.
-  private[$variantInfo]: Map<string, VariantMapping>;
+  private[$variantInfo]: Map<string, Material>;
   private[$initialMaterialIdx]: number;
   private[$activeMaterialIdx]: number;
 
@@ -109,16 +105,16 @@ export class PrimitiveNode extends Node {
         const variantNames = extensions['KHR_materials_variants'].variants;
         // Provides definition now that we know there are variants to
         // support.
-        this[$variantInfo] = new Map<string, VariantMapping>();
+        this[$variantInfo] = new Map<string, Material>();
         for (const mapping of variantsExtension.mappings) {
+          const mvMaterial = mvMaterials[mapping.material];
           // Maps variant indices to Materials.
-          this[$materials].set(mapping.material, mvMaterials[mapping.material]);
+          this[$materials].set(mapping.material, mvMaterial);
           for (const variant of mapping.variants) {
             const {name} = variantNames[variant];
-            this[$variantInfo].set(name, {
-              material: mvMaterials[mapping.material],
-              materialIndex: mapping.material
-            });
+            this[$variantInfo].set(name, mvMaterial);
+            // Provides variant info for material self lookup.
+            mvMaterial.variants.add(name);
           }
         }
       }
@@ -151,7 +147,7 @@ export class PrimitiveNode extends Node {
     if (this[$variantInfo] != null) {
       const material = this[$variantInfo].get(name);
       if (material != null) {
-        return this.setActiveMaterial(material.materialIndex);
+        return this.setActiveMaterial(material.index);
       }
     }
     return null;
@@ -174,5 +170,35 @@ export class PrimitiveNode extends Node {
 
   get variantInfo() {
     return this[$variantInfo];
+  }
+
+  addVariantForMaterial(
+      originalMaterialIndex: number, variant: Material, variantName: string) {
+    if (!this[$materials].has(originalMaterialIndex)) {
+      console.warn(`originalMaterialIndex does not exist on this primitive,
+           cannot add a variant for it.`);
+      return false;
+    }
+
+    if (this.variantInfo.has(variantName)) {
+      console.warn(`Primitive cannot add variant '${
+          variantName}'' for this material, it already exists.`);
+      return false;
+    }
+
+    this[$variantInfo].set(variantName, variant);
+    this[$materials].set(variant.index, variant);
+
+    // Updates import data (see VariantMaterialLoaderPlugin.ts).
+    this.mesh.userData.variantMaterials = this.mesh.userData.variantMaterials ||
+        new Map<string, UserDataVariantMapping>();
+    const map = this.mesh.userData.variantMaterials! as
+        Map<string, UserDataVariantMapping>;
+    map.set(variantName, {
+      material: (variant[$sourceObject] as ThreeMaterial),
+      gltfMaterialIndex: variant.index
+    });
+
+    return true;
   }
 }

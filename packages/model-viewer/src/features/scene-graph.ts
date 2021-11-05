@@ -34,7 +34,6 @@ import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 export const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
-const $variants = Symbol('variants');
 const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
 const $textureLoader = Symbol('textureLoader');
 const $originalGltfJson = Symbol('originalGltfJson');
@@ -48,7 +47,7 @@ interface SceneExportOptions {
 export interface SceneGraphInterface {
   readonly model?: Model;
   variantName: string|null;
-  readonly availableVariants: Array<string>;
+  readonly availableVariants: string[];
   orientation: string;
   scale: string;
   readonly originalGltfJson: GLTF|null;
@@ -73,7 +72,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
   class SceneGraphModelViewerElement extends ModelViewerElement {
     protected[$model]: Model|undefined = undefined;
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
-    protected[$variants]: Array<string> = [];
     private[$textureLoader] = new TextureLoader();
     private[$originalGltfJson]: GLTF|null = null;
 
@@ -92,7 +90,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     get availableVariants() {
-      return this[$variants];
+      return this.model!.availableVariants();
     }
 
     /**
@@ -190,7 +188,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onModelLoad]() {
       super[$onModelLoad]();
 
-      this[$variants] = [];
 
       const {currentGLTF} = this[$scene];
 
@@ -209,7 +206,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
 
         if ('variants' in currentGLTF.userData) {
-          this[$variants] = currentGLTF.userData.variants.slice();
           this.requestUpdate('variantName');
         }
       }

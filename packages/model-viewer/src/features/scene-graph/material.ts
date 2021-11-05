@@ -39,6 +39,7 @@ export const $ensureMaterialIsLoaded = Symbol('ensureMaterialIsLoaded');
 export const $gltfIndex = Symbol('gltfIndex');
 export const $setActive = Symbol('setActive');
 const $isActive = Symbol('isActive');
+const $variantSet = Symbol('variantSet');
 
 /**
  * Material facade implementation for Three.js materials
@@ -51,6 +52,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$lazyLoadGLTFInfo]?: LazyLoader;
   private[$gltfIndex]: number;
   private[$isActive]: boolean;
+  private[$variantSet] = new Set<string>();
 
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
@@ -221,6 +223,10 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   get index(): number {
     return this[$gltfIndex];
+  }
+
+  get variants(): Set<string> {
+    return this[$variantSet];
   }
 
   setEmissiveFactor(rgb: RGB) {

@@ -101,6 +101,11 @@ export declare interface Material {
    * Returns the glTF index of this material.
    */
   readonly index: number;
+
+  /**
+   * Returns a list of variants that this materials participates in.
+   */
+  readonly variants: Set<string>;
 }
 
 /**

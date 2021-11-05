@@ -16,11 +16,13 @@
 import {Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster} from 'three';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
-import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, GLTFElement, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {$cloneAndPatchMaterial, ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Model as ModelInterface} from './api.js';
 import {$setActive, Material} from './material.js';
 import {$children, Node, PrimitiveNode} from './nodes/primitive-node.js';
+import {$correlatedObjects, $sourceObject} from './three-dom-element.js';
 
 
 
@@ -35,7 +37,9 @@ export const $switchVariant = Symbol('switchVariant');
 export const $threeScene = Symbol('threeScene');
 export const $materialsFromPoint = Symbol('materialsFromPoint');
 export const $materialFromPoint = Symbol('materialFromPoint');
-
+const $modelOnUpdate = Symbol('modelOnUpdate');
+const $variants = Symbol('variants');
+const $cloneMaterial = Symbol('cloneMaterial');
 
 // Holds onto temporary scene context information needed to perform lazy loading
 // of a resource.
@@ -67,12 +71,21 @@ export class Model implements ModelInterface {
   private[$roots] = new Array<Node>();
   private[$primitivesList] = new Array<PrimitiveNode>();
   private[$threeScene]: Object3D|Group;
+  private[$modelOnUpdate]: () => void = () => {};
+  private[$correlatedSceneGraph]: CorrelatedSceneGraph;
+  private[$variants]: string[];
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
       onUpdate: () => void = () => {}) {
+    this[$modelOnUpdate] = onUpdate;
+    this[$correlatedSceneGraph] = correlatedSceneGraph;
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
     this[$threeScene] = threeGLTF.scene;
+
+    if (threeGLTF.userData.variants != null) {
+      this[$variants] = threeGLTF.userData.variants.slice();
+    }
 
     for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
@@ -164,6 +177,10 @@ export class Model implements ModelInterface {
     return this[$materials];
   }
 
+  availableVariants() {
+    return this[$variants];
+  }
+
   getMaterialByName(name: string): Material|null {
     const matches = this[$materials].filter(material => {
       return material.name === name;
@@ -244,5 +261,82 @@ export class Model implements ModelInterface {
       promises.push(primitive.instantiateVariants());
     }
     await Promise.all(promises);
+  }
+
+  [$cloneMaterial](index: number, materialName: string): Material {
+    const material = this.materials[index];
+
+    if (!material.isLoaded) {
+      console.error(`Cloning an unloaded material,
+           call 'material.ensureLoaded() before cloning the material.`);
+    }
+
+    const threeMaterialSet =
+        material[$correlatedObjects] as unknown as Set<MeshStandardMaterial>;
+
+    // clones the gltf material data and updates the material name.
+    const gltfSourceMaterial =
+        JSON.parse(JSON.stringify(material[$sourceObject])) as GLTFMaterial;
+    gltfSourceMaterial.name = materialName;
+
+    const clonedSet = new Set<MeshStandardMaterial>();
+    for (const threeMaterial of threeMaterialSet) {
+      clonedSet.add(
+          ModelViewerGLTFInstance[$cloneAndPatchMaterial](threeMaterial) as
+          MeshStandardMaterial);
+    }
+
+    const clonedMaterial = new Material(
+        this[$modelOnUpdate],
+        this[$correlatedSceneGraph].gltf,
+        gltfSourceMaterial,
+        this[$materials].length,
+        false,  // Cloned as inactive.
+        clonedSet);
+
+    this[$materials].push(clonedMaterial);
+
+    return clonedMaterial;
+  }
+
+  createVariantFromMaterial(
+      originalMaterialIndex: number, materialName: string,
+      variantName: string): Material|null {
+    const variant = this[$cloneMaterial](originalMaterialIndex, materialName);
+
+    let created = false;
+    for (const primitive of this[$primitivesList]) {
+      if (primitive.variantInfo.has(variantName) ||
+          (primitive.variantInfo.has(variantName) &&
+           primitive.variantInfo.get(variantName)!.index !==
+               originalMaterialIndex)) {
+        continue;
+      }
+
+
+      if (primitive.addVariantForMaterial(
+              originalMaterialIndex, variant, variantName)) {
+        created = true;
+      }
+    }
+
+    if (!created) {
+      return null;
+    }
+    // Updates the variants list in user data.
+    const threeGLTF = this[$correlatedSceneGraph].threeGLTF;
+    threeGLTF.userData.variants =
+        threeGLTF.userData.variants || new Array<string>();
+    const variants = threeGLTF.userData.variants as string[];
+
+    const found = variants.find(name => name === variantName);
+    if (found == null) {
+      variants.push(variantName);
+    }
+
+    // Updates variant names seen by the rest of ModelViewer.
+    this[$variants] = variants.slice();
+
+    return variant;
   }
 }

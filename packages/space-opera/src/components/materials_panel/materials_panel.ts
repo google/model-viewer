@@ -120,6 +120,7 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
+
   getMaterial() {
     return getModelViewer()!.model!.materials[this.selectedMaterialIndex];
   }
@@ -417,6 +418,16 @@ export class MaterialPanel extends ConnectedLitElement {
     this.getMaterial().pbrMetallicRoughness.setBaseColorFactor(
         this.selectedBaseColor);
     reduxStore.dispatch(dispatchModelDirty());
+
+    if (this.selectedVariant != null) {
+      const material =
+          getModelViewer().model!.materials[this.selectedMaterialIndex];
+
+      if (!material.variants.has(this.selectedVariant)) {
+        // Creates unique material instance for this variant.
+        
+      }
+    }
   }
 
   onRoughnessChange() {
