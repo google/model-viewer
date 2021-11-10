@@ -184,8 +184,9 @@ suite('scene-graph/model', () => {
               const startingSize2 = primitive2.variantInfo.size;
 
               // Creates a variant from material 0.
-              model.createVariantFromMaterial(
-                  0, 'test-material', 'test-variant');
+              expect(model.createVariantFromMaterial(
+                         0, 'test-material', 'test-variant'))
+                  .to.be.ok;
 
               // primitive1 uses material '0' so it should have a vew variant.
               expect(primitive1.variantInfo.size).to.equal(startingSize + 1);

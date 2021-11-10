@@ -101,20 +101,21 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       // environment maps.
       if ((node as Mesh).isMesh) {
         const mesh = node as Mesh;
+        const sourceMaterial = mesh.material;
 
-        if (Array.isArray(mesh.material)) {
-          mesh.material = mesh.material.map((material) => {
+        if (Array.isArray(sourceMaterial)) {
+          mesh.material = sourceMaterial.map((material) => {
             const result = sourceUUIDToClonedMaterial.get(material.uuid) ||
                 ModelViewerGLTFInstance[$cloneAndPatchMaterial](
                                mesh.material as MeshStandardMaterial);
             sourceUUIDToClonedMaterial.set(result.uuid, result);
             return result;
           });
-        } else if (mesh.material != null) {
-          mesh.material = sourceUUIDToClonedMaterial.get(mesh.material.uuid) ||
+        } else if (sourceMaterial != null) {
+          mesh.material = sourceUUIDToClonedMaterial.get(sourceMaterial.uuid) ||
               ModelViewerGLTFInstance[$cloneAndPatchMaterial](
                               mesh.material as MeshStandardMaterial);
-          sourceUUIDToClonedMaterial.set(mesh.material.uuid, mesh.material);
+          sourceUUIDToClonedMaterial.set(sourceMaterial.uuid, mesh.material);
         }
       }
     });
