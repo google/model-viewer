@@ -73,7 +73,7 @@ export class Model implements ModelInterface {
   private[$threeScene]: Object3D|Group;
   private[$modelOnUpdate]: () => void = () => {};
   private[$correlatedSceneGraph]: CorrelatedSceneGraph;
-  private[$variants]: string[];
+  private[$variants] = new Array<string>();
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
@@ -263,7 +263,7 @@ export class Model implements ModelInterface {
     await Promise.all(promises);
   }
 
-  [$cloneMaterial](index: number, materialName: string): Material {
+  [$cloneMaterial](index: number, newMaterialName: string): Material {
     const material = this.materials[index];
 
     if (!material.isLoaded) {
@@ -277,13 +277,15 @@ export class Model implements ModelInterface {
     // clones the gltf material data and updates the material name.
     const gltfSourceMaterial =
         JSON.parse(JSON.stringify(material[$sourceObject])) as GLTFMaterial;
-    gltfSourceMaterial.name = materialName;
+    gltfSourceMaterial.name = newMaterialName;
 
     const clonedSet = new Set<MeshStandardMaterial>();
-    for (const threeMaterial of threeMaterialSet) {
-      clonedSet.add(
-          ModelViewerGLTFInstance[$cloneAndPatchMaterial](threeMaterial) as
-          MeshStandardMaterial);
+    for (const [i, threeMaterial] of threeMaterialSet.entries()) {
+      const clone = ModelViewerGLTFInstance[$cloneAndPatchMaterial](
+                        threeMaterial) as MeshStandardMaterial;
+      clone.name =
+          newMaterialName + (threeMaterialSet.size > 1 ? '_inst' + i : '');
+      clonedSet.add(clone);
     }
 
     const clonedMaterial = new Material(
@@ -300,9 +302,10 @@ export class Model implements ModelInterface {
   }
 
   createVariantFromMaterial(
-      originalMaterialIndex: number, materialName: string,
-      variantName: string): Material|null {
-    const variant = this[$cloneMaterial](originalMaterialIndex, materialName);
+      originalMaterialIndex: number, newMaterialName: string,
+      variantName: string, activateVariant: boolean = true): Material|null {
+    const variantMaterial =
+        this[$cloneMaterial](originalMaterialIndex, newMaterialName);
 
     let created = false;
     for (const primitive of this[$primitivesList]) {
@@ -314,8 +317,7 @@ export class Model implements ModelInterface {
       }
 
 
-      if (primitive.addVariantForMaterial(
-              originalMaterialIndex, variant, variantName)) {
+      if (primitive.addVariant(variantMaterial, variantName)) {
         created = true;
       }
     }
@@ -323,6 +325,18 @@ export class Model implements ModelInterface {
     if (!created) {
       return null;
     }
+
+    this.createVariant(variantName);
+
+    if (activateVariant) {
+      variantMaterial[$setActive](true);
+      this.materials[originalMaterialIndex][$setActive](false);
+    }
+
+    return variantMaterial;
+  }
+
+  createVariant(variantName: string) {
     // Updates the variants list in user data.
     const threeGLTF = this[$correlatedSceneGraph].threeGLTF;
     threeGLTF.userData.variants =
@@ -332,11 +346,25 @@ export class Model implements ModelInterface {
     const found = variants.find(name => name === variantName);
     if (found == null) {
       variants.push(variantName);
+      // Updates variant names seen by the rest of ModelViewer.
+      this[$variants] = variants.slice();
+    }
+  }
+
+  addMaterialToVariant(materialIndex: number, targetVariantName: string) {
+    if (this[$variants].find(name => name === targetVariantName) == null) {
+      this.createVariant(targetVariantName);
+    }
+    if (materialIndex < 0 || materialIndex >= this.materials.length) {
+      console.error(`addMaterialToVariant(): materialIndex is out of bounds.`);
+      return;
     }
 
-    // Updates variant names seen by the rest of ModelViewer.
-    this[$variants] = variants.slice();
-
-    return variant;
+    for (const primitive of this[$primitivesList]) {
+      const material = primitive.getMaterial(materialIndex);
+      if (material != null) {
+        primitive.addMaterialToVariant(materialIndex, targetVariantName);
+      }
+    }
   }
 }

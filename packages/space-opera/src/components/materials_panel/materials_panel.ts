@@ -15,6 +15,7 @@
  *
  */
 
+import '@material/mwc-button';
 import '@material/mwc-icon-button';
 import '@polymer/paper-item';
 import '@polymer/paper-slider';
@@ -28,6 +29,7 @@ import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
 
 import {Material} from '@google/model-viewer/lib/features/scene-graph/material';
+import {$switchVariant} from '@google/model-viewer/lib/features/scene-graph/model';
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {customElement, html, internalProperty, query} from 'lit-element';
@@ -54,6 +56,11 @@ import {styles} from './materials_panel.css.js';
 
 
 
+enum GetMaterialOptions {
+  Default,
+  AllowInstancing
+}
+
 /** Material panel. */
 @customElement('me-materials-panel')
 export class MaterialPanel extends ConnectedLitElement {
@@ -62,6 +69,8 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
   private thumbnailUrls: string[] = [];
   private thumbnailIds: string[] = [];
+  private variantNameDecor = 0;
+
   @internalProperty() originalGltf?: GLTF;
 
   @internalProperty() isNewModel: boolean = true;
@@ -76,7 +85,6 @@ export class MaterialPanel extends ConnectedLitElement {
   metallicFactorSlider!: SliderWithInputElement;
   @query('me-dropdown#material-selector') materialSelector!: Dropdown;
   @query('me-dropdown#variant-selector') variantSelector!: Dropdown;
-  createVariantSelector!: Dropdown;
   @query('me-texture-picker#base-color-texture-picker')
   baseColorTexturePicker!: TexturePicker;
   @query('me-texture-picker#metallic-roughness-texture-picker')
@@ -110,6 +118,10 @@ export class MaterialPanel extends ConnectedLitElement {
           this.thumbnailUrls.push(thumbnail.objectUrl);
         }
 
+        if (getModelViewer().availableVariants.length > 0) {
+          getModelViewer().variantName = getModelViewer().availableVariants[0];
+        }
+
         this.updateSelectableMaterials();
 
         // If a new model is loaded, don't interpolate material
@@ -120,9 +132,33 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
+  getMaterial(options: GetMaterialOptions = GetMaterialOptions.Default) {
+    let material =
+        getModelViewer()!.model!.materials[this.selectedMaterialIndex];
 
-  getMaterial() {
-    return getModelViewer()!.model!.materials[this.selectedMaterialIndex];
+    // Creates a new instance if allowed.
+    if (options === GetMaterialOptions.AllowInstancing) {
+      if (this.selectedVariant != null &&
+          !material.variants.has(this.selectedVariant)) {
+        // Creates unique material instance for this variant if one does not
+        // exist.
+        const clone = getModelViewer().model!.createVariantFromMaterial(
+            this.selectedMaterialIndex,
+            material.name + ' ' + this.selectedVariant,
+            this.selectedVariant,
+            true)!;
+
+        getModelViewer().model![$switchVariant](this.selectedVariant);
+
+        this.updateSelectableMaterials();
+
+        this.requestUpdate();
+
+        material = clone;
+      }
+    }
+
+    return material;
   }
 
   getOriginalMaterial() {
@@ -212,6 +248,7 @@ export class MaterialPanel extends ConnectedLitElement {
     if (material == null) {
       return;
     }
+
     this.panel.style.display = '';
     const {
       pbrMetallicRoughness,
@@ -261,18 +298,37 @@ export class MaterialPanel extends ConnectedLitElement {
     const hasVariants = getModelViewer().availableVariants.length > 0;
     return html`
     <me-expandable-tab tabName="Variants" .open=${hasVariants}>
-      <me-dropdown
-        style='display: ${hasVariants ? '' : 'none'}'
-        slot="content"
-        id="variant-selector"
-        @select=${this.onSelectVariant}
-        >${
+      <div slot="content">
+        <me-dropdown
+          style='display: ${hasVariants ? '' : 'none'}'
+          id="variant-selector"
+          @select=${this.onSelectVariant}
+          >${
         getModelViewer().availableVariants.map(
-            (name, id) =>
-                html`<paper-item value="${name}">(${id}) ${name}</paper-item>`)}
-      </me-dropdown>
+            (name, id) => html`<paper-input value="${name}">(${id}) ${
+                name}</paper-input>`)}
+        </me-dropdown>
+        <mwc-button
+          label="Create Variant"
+          id="create-variant"
+          @click=${this.onCreateVariant}
+          ></mwc-button>
+      </div>
     </me-expandable-tab>
     `;
+  }
+
+  onCreateVariant() {
+    if (getModelViewer().availableVariants.length === 0) {
+      // Creates a default variant for existing materials to live under if there
+      // were no variants in the model to begin with.
+      getModelViewer().model!.createVariant('Default');
+      for (const material of getModelViewer().model!.materials) {
+        getModelViewer().model!.addMaterialToVariant(material.index, 'Default');
+      }
+    }
+    getModelViewer().model!.createVariant('Variant' + this.variantNameDecor++);
+    this.requestUpdate();
   }
 
   renderSelectMaterialTab() {
@@ -415,30 +471,22 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onBaseColorChange() {
-    this.getMaterial().pbrMetallicRoughness.setBaseColorFactor(
-        this.selectedBaseColor);
+    const material = this.getMaterial(GetMaterialOptions.AllowInstancing);
+
+    material.pbrMetallicRoughness.setBaseColorFactor(this.selectedBaseColor);
+
     reduxStore.dispatch(dispatchModelDirty());
-
-    if (this.selectedVariant != null) {
-      const material =
-          getModelViewer().model!.materials[this.selectedMaterialIndex];
-
-      if (!material.variants.has(this.selectedVariant)) {
-        // Creates unique material instance for this variant.
-        
-      }
-    }
   }
 
   onRoughnessChange() {
-    this.getMaterial().pbrMetallicRoughness.setRoughnessFactor(
-        this.selectedRoughnessFactor);
+    this.getMaterial(GetMaterialOptions.AllowInstancing)
+        .pbrMetallicRoughness.setRoughnessFactor(this.selectedRoughnessFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onMetallicChange() {
-    this.getMaterial().pbrMetallicRoughness.setMetallicFactor(
-        this.selectedMetallicFactor);
+    this.getMaterial(GetMaterialOptions.AllowInstancing)
+        .pbrMetallicRoughness.setMetallicFactor(this.selectedMetallicFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -447,7 +495,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   updateDoubleSided(value: boolean) {
-    this.getMaterial().setDoubleSided(value);
+    this.getMaterial(GetMaterialOptions.AllowInstancing).setDoubleSided(value);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -500,68 +548,76 @@ export class MaterialPanel extends ConnectedLitElement {
   onBaseColorTextureChange() {
     this.onTextureChange(
         this.selectedBaseColorTextureId,
-        this.getMaterial().pbrMetallicRoughness.baseColorTexture);
+        this.getMaterial(GetMaterialOptions.AllowInstancing)
+            .pbrMetallicRoughness.baseColorTexture);
   }
 
   onBaseColorTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.baseColorTexturePicker,
-        this.getMaterial().pbrMetallicRoughness.baseColorTexture);
+        this.getMaterial(GetMaterialOptions.AllowInstancing)
+            .pbrMetallicRoughness.baseColorTexture);
   }
 
   onMetallicRoughnessTextureChange() {
     this.onTextureChange(
         this.selectedMetallicRoughnessTextureId,
-        this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
+        this.getMaterial(GetMaterialOptions.AllowInstancing)
+            .pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
   onMetallicRoughnessTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.metallicRoughnessTexturePicker,
-        this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
+        this.getMaterial(GetMaterialOptions.AllowInstancing)
+            .pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
   onNormalTextureChange() {
     this.onTextureChange(
-        this.selectedNormalTextureId, this.getMaterial().normalTexture);
+        this.selectedNormalTextureId,
+        this.getMaterial(GetMaterialOptions.AllowInstancing).normalTexture);
   }
 
   onNormalTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.normalTexturePicker,
-        this.getMaterial().normalTexture);
+        this.getMaterial(GetMaterialOptions.AllowInstancing).normalTexture);
   }
 
   onEmissiveTextureChange() {
     this.onTextureChange(
-        this.selectedEmissiveTextureId, this.getMaterial().emissiveTexture);
+        this.selectedEmissiveTextureId,
+        this.getMaterial(GetMaterialOptions.AllowInstancing).emissiveTexture);
   }
 
   onEmissiveTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.emissiveTexturePicker,
-        this.getMaterial().emissiveTexture);
+        this.getMaterial(GetMaterialOptions.AllowInstancing).emissiveTexture);
   }
 
   onEmissiveFactorChanged() {
-    this.getMaterial().setEmissiveFactor(this.selectedEmissiveFactor);
+    this.getMaterial(GetMaterialOptions.AllowInstancing)
+        .setEmissiveFactor(this.selectedEmissiveFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onOcclusionTextureChange() {
     this.onTextureChange(
-        this.selectedOcclusionTextureId, this.getMaterial().occlusionTexture);
+        this.selectedOcclusionTextureId,
+        this.getMaterial(GetMaterialOptions.AllowInstancing).occlusionTexture);
   }
 
   onOcclusionTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.occlusionTexturePicker,
-        this.getMaterial().occlusionTexture);
+        this.getMaterial(GetMaterialOptions.AllowInstancing).occlusionTexture);
   }
 
   onAlphaModeSelect() {
@@ -569,14 +625,15 @@ export class MaterialPanel extends ConnectedLitElement {
         ALPHA_BLEND_MODES[this.alphaModePicker.selectedIndex] as AlphaMode;
     this.alphaCutoffContainer.style.display =
         selectedMode === 'MASK' ? '' : 'none';
-    const material = this.getMaterial();
+    const material = this.getMaterial(GetMaterialOptions.AllowInstancing);
     material.setAlphaMode(selectedMode);
     this.alphaCutoffSlider.value = material.getAlphaCutoff();
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onAlphaCutoffChange() {
-    this.getMaterial().setAlphaCutoff(this.selectedAlphaCutoff);
+    this.getMaterial(GetMaterialOptions.AllowInstancing)
+        .setAlphaCutoff(this.selectedAlphaCutoff);
     reduxStore.dispatch(dispatchModelDirty());
   }
 

@@ -49,6 +49,12 @@ export declare interface Model {
    * @returns the first material to whose name matches `name`
    */
   getMaterialByName(name: string): Material|null;
+
+  createVariantFromMaterial(
+      originalMaterialIndex: number, materialName: string,
+      variantName: string): Material|null;
+
+  createVariant(variantName: string): void;
 }
 
 /**

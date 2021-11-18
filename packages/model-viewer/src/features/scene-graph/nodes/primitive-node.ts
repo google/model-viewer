@@ -48,7 +48,7 @@ export class PrimitiveNode extends Node {
   // Maps glTF material index number to a material that this primitive supports.
   [$materials] = new Map<number, Material>();
   // Maps variant name to material index.
-  private[$variantInfo]: Map<string, Material>;
+  private[$variantInfo] = new Map<string, Material>();
   private[$initialMaterialIdx]: number;
   private[$activeMaterialIdx]: number;
 
@@ -105,7 +105,6 @@ export class PrimitiveNode extends Node {
         const variantNames = extensions['KHR_materials_variants'].variants;
         // Provides definition now that we know there are variants to
         // support.
-        this[$variantInfo] = new Map<string, Material>();
         for (const mapping of variantsExtension.mappings) {
           const mvMaterial = mvMaterials[mapping.material];
           // Maps variant indices to Materials.
@@ -137,6 +136,10 @@ export class PrimitiveNode extends Node {
 
   getActiveMaterial(): Material {
     return this[$materials].get(this[$activeMaterialIdx])!;
+  }
+
+  getMaterial(index: number): Material|undefined {
+    return this[$materials].get(index);
   }
 
   async enableVariant(name: string|
@@ -172,22 +175,35 @@ export class PrimitiveNode extends Node {
     return this[$variantInfo];
   }
 
-  addVariantForMaterial(
-      originalMaterialIndex: number, variant: Material, variantName: string) {
-    if (!this[$materials].has(originalMaterialIndex)) {
-      console.warn(`originalMaterialIndex does not exist on this primitive,
-           cannot add a variant for it.`);
-      return false;
+  addMaterialToVariant(materialIndex: number, variantName: string) {
+    if (!this.validateMaterial(materialIndex) ||
+        !this.validateVariant(variantName)) {
+      return;
     }
+    const material = this[$materials].get(materialIndex)!;
+    material.variants.add(variantName);
+    this.variantInfo.set(variantName, material);
 
-    if (this.variantInfo.has(variantName)) {
-      console.warn(`Primitive cannot add variant '${
-          variantName}'' for this material, it already exists.`);
+    this.updateVariantUserData(
+        variantName, this[$materials].get(materialIndex)!);
+  }
+
+  addVariant(variant: Material, variantName: string) {
+    if (!this.validateVariant(variantName)) {
       return false;
     }
 
     this[$variantInfo].set(variantName, variant);
     this[$materials].set(variant.index, variant);
+
+    this.updateVariantUserData(variantName, variant);
+
+    return true;
+  }
+
+  private updateVariantUserData(variantName: string, variant: Material) {
+    // Adds variants name to material variants set.
+    variant.variants.add(variantName);
 
     // Updates import data (see VariantMaterialLoaderPlugin.ts).
     this.mesh.userData.variantMaterials = this.mesh.userData.variantMaterials ||
@@ -198,7 +214,23 @@ export class PrimitiveNode extends Node {
       material: (variant[$sourceObject] as ThreeMaterial),
       gltfMaterialIndex: variant.index
     });
+  }
 
+  private validateMaterial(materialIndex: number) {
+    if (!this[$materials].has(materialIndex)) {
+      console.warn(
+          `materialIndex ${materialIndex} does not exist on primitive.`);
+      return false;
+    }
+    return true;
+  }
+
+  private validateVariant(variantName: string) {
+    if (this.variantInfo.has(variantName)) {
+      console.warn(`Primitive cannot add variant '${
+          variantName}' for this material, it already exists.`);
+      return false;
+    }
     return true;
   }
 }

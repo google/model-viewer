@@ -90,7 +90,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     get availableVariants() {
-      return this.model!.availableVariants();
+      return this.model ? this.model.availableVariants() : [] as string[];
     }
 
     /**

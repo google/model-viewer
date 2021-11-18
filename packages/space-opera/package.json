@@ -47,6 +47,7 @@
     "@polymer/paper-dialog": "^3.0.1",
     "@polymer/paper-dropdown-menu": "^3.2.0",
     "@polymer/paper-item": "^3.0.1",
+    "@polymer/paper-input": "^3.0.1",
     "@polymer/paper-listbox": "^3.0.1",
     "@polymer/paper-slider": "^3.0.1",
     "@rollup/plugin-commonjs": "^19.0.0",
