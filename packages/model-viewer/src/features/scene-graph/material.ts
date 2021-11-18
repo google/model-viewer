@@ -109,7 +109,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     }
 
     if (gltfMaterial.alphaCutoff == null) {
-      gltfMaterial.alphaCutoff = 0.5;
+      gltfMaterial.alphaCutoff = 0.0;
     }
 
     const {
@@ -238,7 +238,11 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     const gltfMaterial = this[$sourceObject] as DefaultedMaterial;
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
-      material.alphaTest = gltfMaterial.alphaCutoff;
+      if ((this[$sourceObject] as DefaultedMaterial).alphaMode === 'MASK') {
+        material.alphaTest = gltfMaterial.alphaCutoff;
+      } else {
+        material.alphaTest = 0;
+      }
       material.needsUpdate = true;
     }
   }
