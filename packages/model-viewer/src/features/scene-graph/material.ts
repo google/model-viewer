@@ -109,7 +109,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     }
 
     if (gltfMaterial.alphaCutoff == null) {
-      gltfMaterial.alphaCutoff = 0.0;
+      gltfMaterial.alphaCutoff = 0.5;
     }
 
     const {
