@@ -203,16 +203,10 @@ suite('scene-graph/model', () => {
 
           model.createVariantFromMaterial(0, 'test-material', 'test-variant');
 
-          const onVariantApplied = async () => {
-            expect(primitive.getActiveMaterial().name)
-                .to.equal('test-material');
-          };
-
-          element.addEventListener('variant-applied', onVariantApplied);
           element.variantName = 'test-variant';
 
           await element.updateComplete;
-          element.removeEventListener('variant-applied', onVariantApplied);
+          expect(primitive.getActiveMaterial().name).to.equal('test-material');
         });
 
         test('New variant is available to model-viewer', async () => {
@@ -221,16 +215,61 @@ suite('scene-graph/model', () => {
 
           expect(element.availableVariants.find(variant => {
             return variant === 'test-variant';
-          })).to.not.be.undefined;
+          })).to.be.ok;
         });
 
         test(
-            'Creating a variant fails when there is a variant name collision',
+            `createVariantFromMaterial() fails when there is a variant name
+            collision`,
             async () => {
               await loadModel(CUBES_GLTF_PATH);
               expect(model.createVariantFromMaterial(
                          0, 'test-material', 'Purple Yellow'))
                   .to.be.null;
+            });
+
+        test('createVariant() creates a variant', async () => {
+          await loadModel(CUBES_GLTF_PATH);
+          model.createVariant('test-variant');
+
+          expect(element.availableVariants.find(variant => {
+            return variant === 'test-variant';
+          })).to.be.ok;
+        });
+
+        test('createVariant() is a noop if the variant exists', async () => {
+          await loadModel(CUBES_GLTF_PATH);
+          const length = model.availableVariants().length;
+          model.createVariant('Purple Yellow');
+
+          expect(length).to.equal(model.availableVariants().length);
+        });
+
+        test(
+            `addMaterialToVariant() adds variants mapping
+          only to primitives that use the source material`,
+            async () => {
+              await loadModel(CUBES_GLTF_PATH);
+
+              const primitive1 = model[$primitivesList].find(prim => {
+                return prim.mesh.name === 'Box';
+              })!;
+              const primitive2 = model[$primitivesList].find(prim => {
+                return prim.mesh.name === 'Box_1';
+              })!;
+
+              const startingSize = primitive1.variantInfo.size;
+              const startingSize2 = primitive2.variantInfo.size;
+
+              model.createVariant('test-variant');
+
+              // Adds material 0 to the variant.
+              model.addMaterialToVariant(0, 'test-variant');
+
+              // primitive1 uses material '0' so it should have a vew variant.
+              expect(primitive1.variantInfo.size).to.equal(startingSize + 1);
+              // primitive2 to should remain unchanged.
+              expect(primitive2.variantInfo.size).to.equal(startingSize2);
             });
       });
 

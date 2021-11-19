@@ -77,7 +77,7 @@ suite('scene-graph/model/mesh-primitives', () => {
     test('Should not have any primitives with variant info', async () => {
       let hasVariantInfoCount = 0;
       for (const primitive of model![$primitivesList]) {
-        if (primitive.variantInfo != null) {
+        if (primitive.variantInfo.size > 0) {
           hasVariantInfoCount++;
         }
       }

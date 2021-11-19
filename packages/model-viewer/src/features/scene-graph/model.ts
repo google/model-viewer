@@ -14,15 +14,15 @@
  */
 
 import {Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster} from 'three';
-
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {GLTF, GLTFElement, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {$cloneAndPatchMaterial, ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
-
 import {Model as ModelInterface} from './api.js';
 import {$setActive, Material} from './material.js';
 import {$children, Node, PrimitiveNode} from './nodes/primitive-node.js';
 import {$correlatedObjects, $sourceObject} from './three-dom-element.js';
+
+
 
 
 
@@ -272,7 +272,7 @@ export class Model implements ModelInterface {
     }
 
     const threeMaterialSet =
-        material[$correlatedObjects] as unknown as Set<MeshStandardMaterial>;
+        material[$correlatedObjects] as Set<MeshStandardMaterial>;
 
     // clones the gltf material data and updates the material name.
     const gltfSourceMaterial =
@@ -309,13 +309,16 @@ export class Model implements ModelInterface {
 
     let created = false;
     for (const primitive of this[$primitivesList]) {
-      if (primitive.variantInfo.has(variantName) ||
-          (primitive.variantInfo.has(variantName) &&
-           primitive.variantInfo.get(variantName)!.index !==
-               originalMaterialIndex)) {
+      // Skips the primitive if the variant already exists.
+      if (primitive.variantInfo.has(variantName)) {
         continue;
       }
 
+      // Skips the primitive if the source/original material does not exist
+      // here.
+      if (primitive.getMaterial(originalMaterialIndex) == null) {
+        continue;
+      }
 
       if (primitive.addVariant(variantMaterial, variantName)) {
         created = true;
@@ -348,13 +351,18 @@ export class Model implements ModelInterface {
       variants.push(variantName);
       // Updates variant names seen by the rest of ModelViewer.
       this[$variants] = variants.slice();
+    } else {
+      console.warn(`Variant '${variantName}'' already exists`);
     }
   }
 
   addMaterialToVariant(materialIndex: number, targetVariantName: string) {
     if (this[$variants].find(name => name === targetVariantName) == null) {
-      this.createVariant(targetVariantName);
+      console.warn(`Can't add material to '${
+          targetVariantName}', the variant does not exist.'`);
+      return;
     }
+
     if (materialIndex < 0 || materialIndex >= this.materials.length) {
       console.error(`addMaterialToVariant(): materialIndex is out of bounds.`);
       return;
