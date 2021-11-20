@@ -50,11 +50,31 @@ export declare interface Model {
    */
   getMaterialByName(name: string): Material|null;
 
+  /**
+   * Creates a new material variant from an existing material.
+   * @param originalMaterialIndex index of the material to clone the variant
+   *     from.
+   * @param materialName the name of the new material
+   * @param variantName the name of the variant
+   * @param activateVariant activates this material variant, i.e. the variant
+   *     material is rendered, not the existing material.
+   */
   createVariantFromMaterial(
-      originalMaterialIndex: number, materialName: string,
-      variantName: string): Material|null;
+      originalMaterialIndex: number, newMaterialName: string,
+      variantName: string, activateVariant: boolean): Material|null;
 
+  /**
+   * Adds a variant name to the model.
+   * @param variantName
+   */
   createVariant(variantName: string): void;
+
+  /**
+   * Adds an existing material to a variant name.
+   * @param materialIndex
+   * @param targetVariantName
+   */
+  addMaterialToVariant(materialIndex: number, targetVariantName: string): void;
 }
 
 /**
