@@ -132,8 +132,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   getMaterialVariant() {
-    let material =
-        getModelViewer()!.model!.materials[this.selectedMaterialIndex];
+    let material = this.getMaterial();
 
     // Creates a new material instance if it does not currently exist under the
     // variant.

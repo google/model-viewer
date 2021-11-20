@@ -14,15 +14,15 @@
  */
 
 import {Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster} from 'three';
+
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {GLTF, GLTFElement, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {$cloneAndPatchMaterial, ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
+
 import {Model as ModelInterface} from './api.js';
 import {$setActive, Material} from './material.js';
 import {$children, Node, PrimitiveNode} from './nodes/primitive-node.js';
 import {$correlatedObjects, $sourceObject} from './three-dom-element.js';
-
-
 
 
 
@@ -371,7 +371,7 @@ export class Model implements ModelInterface {
     for (const primitive of this[$primitivesList]) {
       const material = primitive.getMaterial(materialIndex);
       if (material != null) {
-        primitive.addMaterialToVariant(materialIndex, targetVariantName);
+        primitive.addMaterialToVariant(material.index, targetVariantName);
       }
     }
   }
