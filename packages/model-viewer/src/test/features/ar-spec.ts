@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {IS_IOS} from '../../constants.js';
+import {IS_ANDROID, IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer, ARInterface, ARMixin} from '../../features/ar.js';
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {Constructor, timePasses, waitForEvent} from '../../utilities.js';
@@ -162,11 +162,9 @@ suite('ModelViewerElementBase with ARMixin', () => {
         }
       });
 
-      test('hides the AR button if not on AR platform', () => {
-        expect(element.canActivateAR).to.be.equal(false);
+      test('shows the AR button if on a WebXR platform', () => {
+        expect(element.canActivateAR).to.be.equal(IS_ANDROID);
       });
-
-      test('shows the AR button if on AR platform');
     });
 
     suite('ios-src', () => {
@@ -205,8 +203,8 @@ suite('ModelViewerElementBase with ARMixin', () => {
             });
           });
         });
-      } else {
-        suite('on browsers that are not iOS Safari', () => {
+      } else if (!IS_ANDROID) {
+        suite('on browsers that do not support AR', () => {
           test('hides the AR button', () => {
             expect(element.canActivateAR).to.be.equal(false);
           });

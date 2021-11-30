@@ -16,7 +16,7 @@
 import {Mesh, MeshStandardMaterial} from 'three';
 
 import {$currentGLTF, SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
-import {$primitives} from '../../features/scene-graph/model.js';
+import {$primitivesList} from '../../features/scene-graph/model.js';
 import {$initialMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
@@ -99,7 +99,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
           async () => {
             let primitiveNode: PrimitiveNode|null = null
             // Finds the first primitive with material 0 assigned.
-            for (const primitive of element.model![$primitives]) {
+            for (const primitive of element.model![$primitivesList]) {
               if (primitive.variantInfo != null &&
                   primitive[$initialMaterialIdx] == 0) {
                 primitiveNode = primitive;
@@ -249,7 +249,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
         const gltf = (element as any)[$currentGLTF] as ModelViewerGLTFInstance;
 
-        for (const primitive of element.model![$primitives]) {
+        for (const primitive of element.model![$primitivesList]) {
           expect(gltf.correlatedSceneGraph.threeObjectMap.get(primitive.mesh))
               .to.be.ok;
         }

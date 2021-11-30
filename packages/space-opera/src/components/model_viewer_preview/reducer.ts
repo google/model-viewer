@@ -24,6 +24,8 @@ import {HotspotConfig} from '../hotspot_panel/types.js';
 import {ModelState, Thumbnail} from '../model_viewer_preview/types.js';
 import {renderHotspots} from '../utils/hotspot/render_hotspots.js';
 
+
+
 const THUMBNAIL_SIZE = 256;
 
 export function getModelViewer() {
@@ -95,6 +97,7 @@ export async function pushThumbnail(
 async function createThumbnails(): Promise<Map<string, Thumbnail>> {
   const thumbnailsById = new Map<string, Thumbnail>();
   for (const material of getModelViewer()!.model?.materials!) {
+    await material.ensureLoaded();
     const {
       pbrMetallicRoughness,
       normalTexture,
@@ -107,7 +110,7 @@ async function createThumbnails(): Promise<Map<string, Thumbnail>> {
     await pushThumbnail(thumbnailsById, occlusionTexture);
     await pushThumbnail(thumbnailsById, baseColorTexture);
     await pushThumbnail(thumbnailsById, metallicRoughnessTexture);
-  };
+  }
   return thumbnailsById;
 }
 

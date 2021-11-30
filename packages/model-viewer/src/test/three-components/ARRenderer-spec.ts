@@ -15,6 +15,7 @@
 
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
+import {IS_ANDROID} from '../../constants.js';
 import {ControlsInterface, ControlsMixin} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
@@ -171,9 +172,8 @@ suite('ARRenderer', () => {
     arRenderer = Renderer.singleton.arRenderer;
   });
 
-  // NOTE(cdata): It will be a notable day when this test fails
   test('does not support presenting to AR on any browser', async () => {
-    expect(await arRenderer.supportsPresentation()).to.be.equal(false);
+    expect(await arRenderer.supportsPresentation()).to.be.equal(IS_ANDROID);
   });
 
   test('is not presenting if present has not been invoked', () => {
