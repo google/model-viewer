@@ -238,7 +238,12 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     const gltfMaterial = this[$sourceObject] as DefaultedMaterial;
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
-      material.alphaTest = gltfMaterial.alphaCutoff;
+      if ((this[$sourceObject] as DefaultedMaterial).alphaMode === 'MASK') {
+        material.alphaTest = gltfMaterial.alphaCutoff;
+      } else {
+        (material.alphaTest as number | undefined) = undefined;
+      }
+
       material.needsUpdate = true;
     }
   }
