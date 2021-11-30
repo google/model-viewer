@@ -240,6 +240,8 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
          Set<MeshStandardMaterial>) {
       if ((this[$sourceObject] as DefaultedMaterial).alphaMode === 'MASK') {
         material.alphaTest = gltfMaterial.alphaCutoff;
+      } else {
+        (material.alphaTest as number | undefined) = undefined;
       }
 
       material.needsUpdate = true;
