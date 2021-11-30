@@ -180,7 +180,7 @@ export class PrimitiveNode extends Node {
         !this.validateVariant(variantName)) {
       return;
     }
-    const material = this[$materials].get(materialIndex)!;
+    const material = this.getMaterial(materialIndex)!;
     material.variants.add(variantName);
     this.variantInfo.set(variantName, material);
 
