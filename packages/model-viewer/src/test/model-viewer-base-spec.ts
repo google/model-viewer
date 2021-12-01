@@ -82,21 +82,6 @@ suite('ModelViewerElementBase', () => {
         await timePasses();
         expect(input.getAttribute('aria-label')).to.be.equal(altText);
       });
-
-      suite('that is removed', () => {
-        test('reverts input to default aria-label', async () => {
-          const defaultAriaLabel = input.getAttribute('aria-label');
-          const altText = 'foo';
-
-          element.alt = altText;
-          await timePasses();
-          element.alt = null;
-          await timePasses();
-
-          expect(input.getAttribute('aria-label'))
-              .to.be.equal(defaultAriaLabel);
-        });
-      });
     });
 
     suite('with a valid src', () => {
