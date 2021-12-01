@@ -282,9 +282,7 @@ canvas.show {
 }
 </style>
 <div class="container">
-  <div class="userInput" tabindex="0" role="img"
-      aria-label="A depiction of a 3D model"
-      aria-live="polite">
+  <div class="userInput" tabindex="0" role="img">
       <div class="slot canvas">
         <slot name="canvas">
           <canvas></canvas>

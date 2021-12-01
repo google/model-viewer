@@ -15,6 +15,7 @@
 
 import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
+
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$ariaLabel, $container, $hasTransitioned, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
@@ -25,6 +26,7 @@ import {SAFE_RADIUS_RATIO} from '../three-components/ModelScene.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
+
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -61,8 +63,6 @@ const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 
 export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
-export const INTERACTION_PROMPT =
-    'Use mouse, touch or arrow keys to control the camera!';
 
 export interface CameraChangeDetails {
   source: ChangeSource;
@@ -603,9 +603,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (this.loaded &&
             now > thresholdTime + this.interactionPromptThreshold) {
-          this[$userInputElement].setAttribute(
-              'aria-label', INTERACTION_PROMPT);
-
           this[$waitingToPromptUser] = false;
           this[$promptElementVisibleTime] = now;
 
