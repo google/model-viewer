@@ -23,7 +23,7 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="player"/>
   <meta name="twitter:site" content="modelviewer"/>
-  <meta name="twitter:player" content="https://modelviewer.dev/examples/twitter/player.html"/>
+  <meta id="link" name="twitter:player" content="https://modelviewer.dev/examples/twitter/player.html"/>
   <meta name="twitter:player:width" content="480"/>
   <meta name="twitter:player:height" content="480"/> 
 
@@ -83,6 +83,18 @@
       const keyVal = param.split('=');
       modelViewer[keyVal[0]] = keyVal[1];
     }
-    
+    const image = document.createElement('meta');
+    image.property = 'og:image';
+    image.content = modelViewer.poster;
+    document.head.appendChild(image);
+    const title = document.createElement('meta');
+    title.property = 'og:title';
+    title.content = '&lt;model-viewer&gt;';
+    document.head.appendChild(title);
+    const description = document.createElement('meta');
+    description.property = 'og:description';
+    description.content = modelViewer.alt;
+    document.head.appendChild(description);
+    document.querySelector('#link').content = window.location;
   </script>
 </body>
