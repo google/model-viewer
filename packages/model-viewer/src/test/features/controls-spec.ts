@@ -14,9 +14,9 @@
  */
 
 import {Camera, Vector3} from 'three';
-import {IS_IOS} from '../../constants.js';
 
-import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {IS_IOS} from '../../constants.js';
+import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
@@ -596,16 +596,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             expect(input.getAttribute('aria-label')).to.be.equal(element.alt);
           });
 
-          test.skip('prompts user to interact when focused', async () => {
-            input.focus();
-
-            await until(
-                () => input.getAttribute('aria-label') === INTERACTION_PROMPT);
-
-            expect(promptElement.classList.contains('visible'))
-                .to.be.equal(true);
-          });
-
           test.skip(
               'does not prompt users to interact before a model is loaded',
               async () => {
@@ -634,19 +624,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                 expect(promptElement.classList.contains('visible'))
                     .to.be.equal(true);
               });
-
-          test('does not prompt if user already interacted', async () => {
-            input.focus();
-
-            interactWith(input);
-
-            await timePasses(element.interactionPromptThreshold + 100);
-
-            expect(input.getAttribute('aria-label'))
-                .to.not.be.equal(INTERACTION_PROMPT);
-            expect(promptElement.classList.contains('visible'))
-                .to.be.equal(false);
-          });
         });
 
         test(
