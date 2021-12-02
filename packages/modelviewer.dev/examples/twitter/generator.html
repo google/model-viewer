@@ -20,8 +20,13 @@
   <title><code>&lt;model-viewer&gt;</code> Player</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="player"/>
+  <meta name="twitter:site" content="modelviewer"/>
+  <meta id="link" name="twitter:player" content="https://modelviewer.dev/examples/twitter/player.html"/>
+  <meta name="twitter:player:width" content="480"/>
+  <meta name="twitter:player:height" content="480"/> 
 
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
     ga('create', 'UA-169901325-1', { 'storage': 'none' });
@@ -30,52 +35,25 @@
     ga('send', 'pageview');
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
-
-  <style>
-    html {
-      height: 100%;
-    }
-
-    body {
-      height: 100%;
-      margin: 0;
-    }
-
-    model-viewer {
-      display: block;
-      width: 100%;
-      height: 100%;
-      --poster-color: #fff0;
-    }
-
-    model-viewer::part(default-progress-mask) {
-      display: none;
-    }
-
-    /* This keeps child nodes hidden while the element loads, except the poster */
-    :not(:defined) {
-      display: none;
-    }
-  </style>
 </head>
-
 <body>
-  <model-viewer
-    id="mv"
-    seamless-poster
-    environment-image="neutral"
-    shadow-intensity="1"
-    ar
-    ar-modes="webxr scene-viewer quick-look"
-    camera-controls
-  >
-
-  <script type="module">
-    const modelViewer = document.querySelector('#mv');
-    const queryParams = window.location.search.substring(1).split('&');
-    for (const param of queryParams) {
-      const keyVal = param.split('=');
-      modelViewer[keyVal[0]] = keyVal[1];
-    }
-  </script>
-</body>
+    <iframe id="frame"></iframe>
+  
+    <script type="module">
+      const iframe = document.querySelector('#frame');
+      
+      const image = document.createElement('meta');
+      image.property = 'og:image';
+      image.content = modelViewer.poster;
+      document.head.appendChild(image);
+      const title = document.createElement('meta');
+      title.property = 'og:title';
+      title.content = '&lt;model-viewer&gt;';
+      document.head.appendChild(title);
+      const description = document.createElement('meta');
+      description.property = 'og:description';
+      description.content = modelViewer.alt;
+      document.head.appendChild(description);
+      document.querySelector('#link').content = window.location;
+    </script>
+  </body>
