@@ -20,13 +20,8 @@
   <title><code>&lt;model-viewer&gt;</code> Player</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="player"/>
-  <meta name="twitter:site" content="modelviewer"/>
-  <meta id="link" name="twitter:player" content="https://modelviewer.dev/examples/twitter/player.html"/>
-  <meta name="twitter:player:width" content="480"/>
-  <meta name="twitter:player:height" content="480"/> 
-
+  
+  <script type="module" src="generator.js"></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
     ga('create', 'UA-169901325-1', { 'storage': 'none' });
@@ -35,25 +30,34 @@
     ga('send', 'pageview');
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+  <style>
+      #player {
+          width: 480px;
+          height: 480px;
+      }
+  </style>
 </head>
 <body>
-    <iframe id="frame"></iframe>
-  
-    <script type="module">
-      const iframe = document.querySelector('#frame');
-      
-      const image = document.createElement('meta');
-      image.property = 'og:image';
-      image.content = modelViewer.poster;
-      document.head.appendChild(image);
-      const title = document.createElement('meta');
-      title.property = 'og:title';
-      title.content = '&lt;model-viewer&gt;';
-      document.head.appendChild(title);
-      const description = document.createElement('meta');
-      description.property = 'og:description';
-      description.content = modelViewer.alt;
-      document.head.appendChild(description);
-      document.querySelector('#link').content = window.location;
-    </script>
+    <iframe id="player"></iframe><br/>
+
+    <label for="url">Page Link:</label>
+    <input id="url" value="https://modelviewer.dev/"><br/>
+
+    <label for="glb">GLB/glTF URL:</label>
+    <input id="glb" value="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"><br/>
+
+    <label for="description">Description:</label>
+    <input id="description" value="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum"><br/>
+
+    <p>Extra property = value:</p>
+    <input id="property" value="environmentImage"> = <input id="value" value="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"><br/>
+    <button id="add">+</button><br/><br/>
+
+    <button id="download">Download Poster</button><br/>
+
+    <pre>
+        <code id="display">
+        </code>
+    </pre>
   </body>
