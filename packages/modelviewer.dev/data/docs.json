@@ -864,6 +864,11 @@
         "description": "Causes animations to be played. Use the autoplay attribute if you want animations to be played automatically. If there are no animations, nothing will happen, so make sure that the model is loaded before invoking this method."
       },
       {
+        "name": "playOnce()",
+        "htmlName": "playOnce",
+        "description": "Causes animations to be played just once. If there are no animations, nothing will happen, so make sure that the model is loaded before invoking this method."
+      },
+      {
         "name": "pause()",
         "htmlName": "pause",
         "description": "Causes animations to be paused. If you want to reset the current animation to the beginning, you should also set the <span class='attribute'>currentTime</span> property to 0."
