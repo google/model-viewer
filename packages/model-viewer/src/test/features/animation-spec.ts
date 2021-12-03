@@ -106,6 +106,39 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
       });
     });
 
+    suite('when playOnce is invoked', () => {
+      setup(async () => {
+        const animationsPlay = waitForEvent(element, 'play');
+        element.playOnce();
+        await animationsPlay;
+      });
+
+      test('animations playOnce', async () => {
+        expect(animationIsPlaying(element)).to.be.true;
+      });
+
+      test('has a duration greater than 0', () => {
+        expect(element.duration).to.be.greaterThan(0);
+      });
+
+      suite('when pause is invoked', () => {
+        setup(async () => {
+          const animationsPause = waitForEvent(element, 'pause');
+          element.pause();
+          await animationsPause;
+        });
+
+        test('animations pause', () => {
+          expect(animationIsPlaying(element)).to.be.false;
+        });
+
+        test('changing currentTime triggers render', () => {
+          element.currentTime = 5;
+          expect(element[$scene].shouldRender()).to.be.true;
+        });
+      });
+    });
+
     suite('when configured to autoplay', () => {
       setup(async () => {
         element.autoplay = true;
