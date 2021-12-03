@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3, LoopRepeat} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -515,7 +515,7 @@ export class ModelScene extends Scene {
    * provided, or if no animation is found by the given name, always falls back
    * to playing the first animation.
    */
-  playAnimation(name: string|null = null, crossfadeTime: number = 0) {
+  playAnimation(name: string|null = null, crossfadeTime: number = 0, loopMode: number = LoopRepeat, repetitionCount: number = Infinity) {
     if (this._currentGLTF == null) {
       return;
     }
@@ -548,6 +548,8 @@ export class ModelScene extends Scene {
           lastAnimationAction != null && action !== lastAnimationAction) {
         action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
       }
+
+      action.setLoop(loopMode, repetitionCount);
 
       action.enabled = true;
       action.play();

@@ -14,6 +14,7 @@
  */
 
 import {property} from 'lit-element';
+import {LoopOnce, LoopRepeat} from 'three';
 
 import ModelViewerElementBase, {$hasTransitioned, $needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
@@ -33,6 +34,7 @@ export declare interface AnimationInterface {
   currentTime: number;
   pause(): void;
   play(): void;
+  playOnce(): void;
 }
 
 export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -98,6 +100,19 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
+    playOnce() {
+      if (this[$paused] && this.availableAnimations.length > 0) {
+        this[$paused] = false;
+        this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
+
+        if (!this[$scene].hasActiveAnimation) {
+          this[$changeAnimation](LoopOnce);
+        }
+
+        this.dispatchEvent(new CustomEvent('play'));
+      }
+    }
+
     [$onModelLoad]() {
       super[$onModelLoad]();
 
@@ -144,10 +159,11 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       return super[$updateSource]();
     }
 
-    [$changeAnimation]() {
+    [$changeAnimation](loopMode: number = LoopRepeat) {
       this[$scene].playAnimation(
           this.animationName,
-          this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND);
+          this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND,
+          loopMode);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation
