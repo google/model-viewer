@@ -52,7 +52,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$lazyLoadGLTFInfo]?: LazyLoader;
   private[$gltfIndex]: number;
   private[$isActive]: boolean;
-  private[$variantSet] = new Set<string>();
+  private[$variantSet] = new Set<number>();
 
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
@@ -225,7 +225,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return this[$gltfIndex];
   }
 
-  get variants(): Set<string> {
+  get variants(): Set<number> {
     return this[$variantSet];
   }
 

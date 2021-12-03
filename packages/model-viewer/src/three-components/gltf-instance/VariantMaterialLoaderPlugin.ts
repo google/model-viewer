@@ -72,18 +72,16 @@ const ensureUniqueNames = (variantNames: string[]) => {
  * @param variantNames {Array<string>} Required to be unique names
  * @return {Map}
  */
-const mappingsArrayToTable = (extensionDef: any, variantNames: string[]):
-    Map<string, UserDataVariantMapping> => {
-      const table = new Map<string, UserDataVariantMapping>();
-      for (const mapping of extensionDef.mappings) {
-        for (const variant of mapping.variants) {
-          table.set(
-              variantNames[variant],
-              {material: null, gltfMaterialIndex: mapping.material});
-        }
-      }
-      return table;
-    };
+const mappingsArrayToTable = (extensionDef:
+                                  any): Map<number, UserDataVariantMapping> => {
+  const table = new Map<number, UserDataVariantMapping>();
+  for (const mapping of extensionDef.mappings) {
+    for (const variant of mapping.variants) {
+      table.set(variant, {material: null, gltfMaterialIndex: mapping.material});
+    }
+  }
+  return table;
+};
 
 export default class GLTFMaterialsVariantsExtension implements
     GLTFLoaderPlugin {
@@ -146,7 +144,7 @@ export default class GLTFMaterialsVariantsExtension implements
             continue;
           }
           meshes[i].userData.variantMaterials =
-              mappingsArrayToTable(extensionsDef[this.name], variants);
+              mappingsArrayToTable(extensionsDef[this.name]);
         }
       });
     }

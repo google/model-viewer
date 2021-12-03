@@ -37,8 +37,8 @@ export const $switchVariant = Symbol('switchVariant');
 export const $threeScene = Symbol('threeScene');
 export const $materialsFromPoint = Symbol('materialsFromPoint');
 export const $materialFromPoint = Symbol('materialFromPoint');
+export const $variantData = Symbol('variantData');
 const $modelOnUpdate = Symbol('modelOnUpdate');
-const $variants = Symbol('variants');
 const $cloneMaterial = Symbol('cloneMaterial');
 
 // Holds onto temporary scene context information needed to perform lazy loading
@@ -61,6 +61,19 @@ export class LazyLoader {
 }
 
 /**
+ * Facades variant mapping data.
+ */
+export class VariantData {
+  name: string;
+  index: number;
+  materialVariants = new Array<number>();
+  constructor(name: string, index: number) {
+    this.name = name;
+    this.index = index;
+  }
+}
+
+/**
  * A Model facades the top-level GLTF object returned by Three.js' GLTFLoader.
  * Currently, the model only bothers itself with the materials in the Three.js
  * scene graph.
@@ -73,7 +86,7 @@ export class Model implements ModelInterface {
   private[$threeScene]: Object3D|Group;
   private[$modelOnUpdate]: () => void = () => {};
   private[$correlatedSceneGraph]: CorrelatedSceneGraph;
-  private[$variants] = new Array<string>();
+  private[$variantData] = new Map<string, VariantData>();
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
@@ -82,10 +95,6 @@ export class Model implements ModelInterface {
     this[$correlatedSceneGraph] = correlatedSceneGraph;
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
     this[$threeScene] = threeGLTF.scene;
-
-    if (threeGLTF.userData.variants != null) {
-      this[$variants] = threeGLTF.userData.variants.slice();
-    }
 
     for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
@@ -146,7 +155,10 @@ export class Model implements ModelInterface {
 
       if (object instanceof Mesh) {
         node = new PrimitiveNode(
-            object as Mesh, this.materials, correlatedSceneGraph);
+            object as Mesh,
+            this.materials,
+            this[$variantData],
+            correlatedSceneGraph);
         this[$primitivesList].push(node as PrimitiveNode);
       } else {
         node = new Node(object.name);
@@ -178,7 +190,9 @@ export class Model implements ModelInterface {
   }
 
   availableVariants() {
-    return this[$variants];
+    return Array.from(this[$variantData].values()).map(variant => {
+      return variant.name;
+    });
   }
 
   getMaterialByName(name: string): Material|null {
@@ -310,14 +324,17 @@ export class Model implements ModelInterface {
     let created = false;
     for (const primitive of this[$primitivesList]) {
       // Skips the primitive if the variant already exists.
-      if (primitive.variantInfo.has(variantName)) {
+      if (this[$variantData].has(variantName)) {
         continue;
       }
 
-      // Skips the primitive if the source/original material does not exist
-      // here.
+      // Skips the primitive if the source/original material does not exist.
       if (primitive.getMaterial(originalMaterialIndex) == null) {
         continue;
+      }
+
+      if (!this.hasVariant(variantName)) {
+        this.createVariant(variantName);
       }
 
       if (primitive.addVariant(variantMaterial, variantName)) {
@@ -329,8 +346,6 @@ export class Model implements ModelInterface {
       return null;
     }
 
-    this.createVariant(variantName);
-
     if (activateVariant) {
       variantMaterial[$setActive](true);
       this.materials[originalMaterialIndex][$setActive](false);
@@ -340,24 +355,22 @@ export class Model implements ModelInterface {
   }
 
   createVariant(variantName: string) {
-    // Updates the variants list in user data.
-    const threeGLTF = this[$correlatedSceneGraph].threeGLTF;
-    threeGLTF.userData.variants =
-        threeGLTF.userData.variants || new Array<string>();
-    const variants = threeGLTF.userData.variants as string[];
-
-    const found = variants.find(name => name === variantName);
-    if (found == null) {
-      variants.push(variantName);
-      // Updates variant names seen by the rest of ModelViewer.
-      this[$variants] = variants.slice();
+    if (!this[$variantData].has(variantName)) {
+      // Adds the name if it's not already in the list.
+      this[$variantData].set(
+          variantName, new VariantData(variantName, this[$variantData].size));
     } else {
       console.warn(`Variant '${variantName}'' already exists`);
     }
   }
 
+  hasVariant(variantName: string) {
+    return this[$variantData].has(variantName);
+  }
+
   addMaterialToVariant(materialIndex: number, targetVariantName: string) {
-    if (this[$variants].find(name => name === targetVariantName) == null) {
+    if (this.availableVariants().find(name => name === targetVariantName) ==
+        null) {
       console.warn(`Can't add material to '${
           targetVariantName}', the variant does not exist.'`);
       return;

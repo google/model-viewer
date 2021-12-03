@@ -131,7 +131,7 @@ export declare interface Material {
   /**
    * Returns a list of variants that this materials participates in.
    */
-  readonly variants: Set<string>;
+  readonly variants: Set<number>;
 }
 
 /**
