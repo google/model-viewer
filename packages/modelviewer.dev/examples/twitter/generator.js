@@ -24,6 +24,7 @@ const val = document.querySelector('#value');
 const addExtra = document.querySelector('#add');
 const downloader = document.querySelector('#download');
 const display = document.querySelector('#display');
+const copy = document.querySelector('#copy');
 
 const extrasList = [{p: prop, v: val}];
 
@@ -33,24 +34,28 @@ const getPosterUrl = () => {
 
 const update = () => {
   const posterUrl = getPosterUrl();
+
   let extraParams = '';
   for (const e of extrasList) {
-    if (!!e.p.value) {
+    if (!!e.p.value && !!e.v.value) {
       extraParams += `&${e.p.value}=${e.v.value}`;
     }
   }
+
   const playerUrl = `${playerLocation}?src=${glb.value}&poster=${
       posterUrl}&alt=${description.value}${extraParams}`;
+
   player.src = playerUrl;
   display.textContent = `
 <meta name="twitter:card" content="player"/>
 <meta name="twitter:site" content="modelviewer"/>
 <meta name="twitter:player:width" content="480"/>
 <meta name="twitter:player:height" content="480"/>
-<meta id="link" name="twitter:player" content="${playerUrl}"/>
+<meta name="twitter:player" content="${player.src}"/>
 <meta property="og:title" content="&lt;model-viewer&gt; embed"/>
 <meta property="og:description" content="${description.value}"/>
 <meta property="og:image" content="${posterUrl}"/>
+
 <meta http-equiv="refresh" content="0; url='${url.value}'"/>
     `;
 };
@@ -58,17 +63,14 @@ const update = () => {
 const newExtra = () => {
   const p = document.createElement('input');
   const v = document.createElement('input');
-  extrasList.push({p, v});
-  addExtra.before(p);
-  addExtra.before(v);
-  addExtra.before(document.createElement('br'));
   p.addEventListener('change', update);
   v.addEventListener('change', update);
-};
 
-const download = () => {
-  const posterUrl = getPosterUrl().replace(/^.*?([^\\\/]*)$/, '$1');
-  player.contentWindow.downloadPoster(posterUrl);
+  extrasList.push({p, v});
+  addExtra.before(p);
+  addExtra.before(document.createTextNode(' = '));
+  addExtra.before(v);
+  addExtra.before(document.createElement('br'));
 };
 
 url.addEventListener('change', update);
@@ -77,6 +79,57 @@ description.addEventListener('change', update);
 prop.addEventListener('change', update);
 val.addEventListener('change', update);
 addExtra.addEventListener('click', newExtra);
-downloader.addEventListener('click', download);
+copy.addEventListener(
+    'click', () => navigator.clipboard.writeText(display.textContent));
+
+player.addEventListener('load', () => {
+  const download = async () => {
+    const modelViewer = player.contentWindow.document.querySelector('#mv');
+    const filename = getPosterUrl().replace(/^.*?([^\\\/]*)$/, '$1');
+
+    // Ensure full-res capture
+    const ModelViewerElement =
+        player.contentWindow.customElements.get('model-viewer');
+    const oldMinScale = ModelViewerElement.minimumRenderScale;
+    ModelViewerElement.minimumRenderScale = 1;
+
+    // Set to beginning of animation
+    modelViewer.pause();
+    modelViewer.currentTime = 0;
+
+    // Set to initial camera orbit
+    const cameraOrbit = modelViewer.cameraOrbit;
+    modelViewer.cameraOrbit = null;
+    modelViewer.cameraOrbit = cameraOrbit;
+    modelViewer.jumpCameraToGoal();
+
+    // Wait for model-viewer to resize and render.
+    await new Promise(
+        resolve => requestAnimationFrame(
+            () => {requestAnimationFrame(() => resolve())}));
+
+    // Take screenshot
+    const posterBlob = await modelViewer.toBlob(
+        {mimeType: 'image/webp', qualityArgument: 0.85});
+
+    // Reset to original state
+    modelViewer.play();
+    ModelViewerElement.minimumRenderScale = oldMinScale;
+
+    // Download the poster
+    const url = URL.createObjectURL(posterBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 250);
+  };
+
+  downloader.addEventListener('click', download);
+});
 
 update();

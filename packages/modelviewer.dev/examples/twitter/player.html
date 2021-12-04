@@ -22,7 +22,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
 
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <script type="module" src="player.js"></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
     ga('create', 'UA-169901325-1', { 'storage': 'none' });
@@ -71,4 +70,20 @@
     ar-modes="webxr scene-viewer quick-look"
     camera-controls
   >
+
+  <script type="module">
+    const modelViewer = document.querySelector('#mv');
+    const queryParams = window.location.search.substring(1).split('&');
+    for (const param of queryParams) {
+      const keyVal = param.split('=');
+      const key = keyVal[0];
+      const val = decodeURI(keyVal[1]);
+      if (key == 'style') {
+        modelViewer.style.cssText = val;
+      } else {
+        const num = Number(val);
+        modelViewer[key] = isFinite(num) ? num : val;
+      }
+    }
+  </script>
 </body>
