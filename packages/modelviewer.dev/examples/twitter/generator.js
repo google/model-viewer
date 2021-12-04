@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-const playerLocation =
-    'player.html';  //'https://modelviewer.dev/examples/twitter/player.html';
+const playerLocation = 'player.html';
 const player = document.querySelector('#player');
 const url = document.querySelector('#url');
 const glb = document.querySelector('#glb');
