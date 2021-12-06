@@ -40,6 +40,7 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/*.glb \
   shared-assets/models/*.gltf \
   shared-assets/models/*.usdz \
+  shared-assets/models/*.webp \
   shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine \
   shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest \
   shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \
