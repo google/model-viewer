@@ -51,7 +51,7 @@ const update = () => {
 <meta name="twitter:player:width" content="480"/>
 <meta name="twitter:player:height" content="480"/>
 <meta name="twitter:player" content="${player.src}"/>
-<meta property="og:title" content="&lt;model-viewer&gt; embed"/>
+<meta property="og:title" content="3D model-viewer embed"/>
 <meta property="og:description" content="${description.value}"/>
 <meta property="og:image" content="${posterUrl}"/>
 
