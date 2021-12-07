@@ -47,8 +47,9 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       gltfImage: GLTFImage|null) {
     gltfImage = gltfImage ?? {
       name: 'adhoc_image',
-      uri: (texture && texture.image) ? texture.image.src : 'adhoc_image'
-    } as GLTFImage;
+      uri: (texture && texture.image && texture.image.src) ? texture.image.src :
+                                                             'adhoc_image'
+    };
     super(onUpdate, gltfImage, new Set<ThreeTexture>(texture ? [texture] : []));
   }
 
