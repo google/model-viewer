@@ -71,7 +71,6 @@
     environment-image="neutral"
     shadow-intensity="1"
     autoplay
-    ar
     ar-modes="webxr scene-viewer quick-look"
     camera-controls
   >
@@ -90,5 +89,7 @@
         modelViewer[key] = isFinite(num) ? num : val;
       }
     }
+    // Work-around for a bug
+    modelViewer.ar = true;
   </script>
 </body>
