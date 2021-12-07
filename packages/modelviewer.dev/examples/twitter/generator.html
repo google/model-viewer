@@ -20,6 +20,7 @@
   <title>&lt;model-viewer&gt; Player</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <meta name="color-scheme" content="dark light">
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
   
   <script type="module" src="generator.js"></script>
@@ -43,11 +44,9 @@
       max-width: 700px;
       margin: 1em;
       text-align: left;
-      background-color: #f7f7f7;
       font-family: 'Rubik', sans-serif;
       font-size: 16px;
       line-height: 24px;
-      color: rgba(0,0,0,.87);
       font-weight: 400;
       -webkit-font-smoothing: antialiased;
     }
@@ -87,6 +86,11 @@
       margin-bottom: 6px;
       color: rgba(0,0,0,.87);
     }
+    @media (prefers-color-scheme: dark) {
+      .lockup {
+        filter: invert(100%);
+      }
+    }
     .attribute {
       white-space: pre-wrap !important;
       font-family: 'Roboto Mono', monospace;
@@ -109,7 +113,8 @@
     <h1>3D Twitter card generator</h1>
     <p>Use this page to create custom markup for your site and get interactive 3D in any tweet linking to it. 
         The below is only an example; replace the entries with your own data and see a live preview of what will be embedded in your tweet.
-        See Twitter's validator below to view the complete experience.</p>
+        See Twitter's validator below to view the complete experience. Note this page supports both light and dark browser themes 
+        to help with testing what different Twitter users will see.</p>
     
     <iframe id="player"></iframe><br/>
 

@@ -20,6 +20,7 @@
   <title><code>&lt;model-viewer&gt;</code> Player</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <meta name="color-scheme" content="dark light">
 
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script>
@@ -52,7 +53,11 @@
       display: none;
     }
 
-    /* This keeps child nodes hidden while the element loads, except the poster */
+    model-viewer::part(default-progress-bar) {
+      background-color: rgba(127, 127, 127, 0.8);
+    }
+
+    /* This keeps child nodes hidden while the element loads */
     :not(:defined) {
       display: none;
     }
