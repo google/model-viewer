@@ -27,13 +27,20 @@ const copy = document.querySelector('#copy');
 
 const extrasList = [{p: prop, v: val}];
 
+// 900x900 is the maximum PNG size Twitter will allow (no WebP support)
+const height = 900 / window.devicePixelRatio;
+player.style.width = `${height}px`;
+player.style.height = `${height}px`;
+
 const getPosterUrl = () => {
-  return glb.value.replace(/\.[^/.]+$/, '') + '.webp';
+  return glb.value.replace(/\.[^/.]+$/, '') + 'Poster.webp';
+};
+
+const getImageUrl = () => {
+  return glb.value.replace(/\.[^/.]+$/, '') + '.png';
 };
 
 const update = () => {
-  const posterUrl = getPosterUrl();
-
   let extraParams = '';
   for (const e of extrasList) {
     if (!!e.p.value && !!e.v.value) {
@@ -42,7 +49,7 @@ const update = () => {
   }
 
   const playerUrl = `${playerLocation}?src=${glb.value}&poster=${
-      posterUrl}&alt=${description.value}${extraParams}`;
+      getPosterUrl()}&alt=${description.value}${extraParams}`;
 
   player.src = playerUrl;
   display.textContent = `
@@ -53,7 +60,7 @@ const update = () => {
 <meta name="twitter:player" content="${player.src}"/>
 <meta property="og:title" content="3D model-viewer embed"/>
 <meta property="og:description" content="${description.value}"/>
-<meta property="og:image" content="${posterUrl}"/>
+<meta property="og:image" content="${getImageUrl()}"/>
 
 <meta http-equiv="refresh" content="0; url='${url.value}'"/>
     `;
@@ -107,25 +114,32 @@ player.addEventListener('load', () => {
         resolve => requestAnimationFrame(
             () => {requestAnimationFrame(() => resolve())}));
 
-    // Take screenshot
+    // Take screenshots
+    const thumbnailBlob = await modelViewer.toBlob({mimeType: 'image/png'});
     const posterBlob = await modelViewer.toBlob(
-        {mimeType: 'image/webp', qualityArgument: 0.85});
+        {idealAspect: true, mimeType: 'image/webp', qualityArgument: 0.85});
 
     // Reset to original state
     modelViewer.play();
     ModelViewerElement.minimumRenderScale = oldMinScale;
 
-    // Download the poster
-    const url = URL.createObjectURL(posterBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 250);
+    const downloadImage = (blob, filename) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 250);
+    };
+
+    // Download the poster and thumbnail
+    downloadImage(posterBlob, getPosterUrl().replace(/^.*?([^\\\/]*)$/, '$1'));
+    downloadImage(
+        thumbnailBlob, getImageUrl().replace(/^.*?([^\\\/]*)$/, '$1'));
   };
 
   downloader.addEventListener('click', download);
