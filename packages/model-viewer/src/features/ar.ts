@@ -178,7 +178,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (!changedProperties.has('ar') && !changedProperties.has('arModes') &&
-          !changedProperties.has('iosSrc')) {
+          !changedProperties.has('src') && !changedProperties.has('iosSrc')) {
         return;
       }
 

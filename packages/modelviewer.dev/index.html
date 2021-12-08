@@ -21,6 +21,16 @@
   <meta charset="utf-8">
   <meta name="description" content="Easily display interactive 3D models on the web and in AR">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="twitter:card" content="player"/>
+  <meta name="twitter:site" content="modelviewer"/>
+  <meta name="twitter:player:width" content="480"/>
+  <meta name="twitter:player:height" content="480"/>
+  <meta name="twitter:player" content="https://modelviewer.dev/examples/twitter/player.html?src=https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb&poster=https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp&alt=Neil%20Armstrong%27s%20Spacesuit%20from%20the%20Smithsonian%20Digitization%20Programs%20Office%20and%20National%20Air%20and%20Space%20Museum&environmentImage=https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"/>
+  <meta property="og:title" content="3D model-viewer embed"/>
+  <meta property="og:description" content="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum"/>
+  <meta property="og:image" content="https://modelviewer.dev/shared-assets/models/NeilArmstrongTwitter.png"/>
+
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
 
@@ -66,7 +76,7 @@
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
 <!-- Use it like any other HTML element -->
-<model-viewer alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" src="shared-assets/models/NeilArmstrong.glb" ar ar-modes="webxr scene-viewer quick-look" environment-image="shared-assets/environments/moon_1k.hdr" poster="assets/NeilArmstrong.webp" seamless-poster shadow-intensity="1" camera-controls></model-viewer>
+<model-viewer alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" src="shared-assets/models/NeilArmstrong.glb" ar ar-modes="webxr scene-viewer quick-look" environment-image="shared-assets/environments/moon_1k.hdr" poster="shared-assets/models/NeilArmstrong.webp" seamless-poster shadow-intensity="1" camera-controls></model-viewer>
                 </template>
               </example-snippet>
             </div>
@@ -87,11 +97,16 @@
           </a>
 
         <div id="section-editor">
-          <h3 class="grouping-title grouping-title-new border-bottom">Editor</h3>
+          <h3 class="grouping-title grouping-title-new border-bottom">Tools</h3>
           <ol class="new-list-example">
             <li>
               <h4>
-                Try out your glTF & GLB models with our <a href="editor">Editor</a>, and download a whole customized starter website.
+                Use our <a href="editor">Editor</a> to test your 3D models and download a starter website.
+              </h4>
+            </li>
+            <li>
+              <h4>
+                Generate your own <a href="examples/twitter/generator.html">3D Twitter card</a> for any website.
               </h4>
             </li>
           </ol>
