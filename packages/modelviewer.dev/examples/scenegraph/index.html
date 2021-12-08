@@ -78,13 +78,13 @@ button {
           </div>
           <example-snippet stamp-to="variants" highlight-as="html">
             <template>
-<model-viewer id="chair" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a chair">
+<model-viewer id="shoe" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a Shoe">
   <div class="controls">
     <div>Variant: <select id="variant"></select></div>
   </div>
 </model-viewer>
 <script>
-const modelViewerVariants = document.querySelector("model-viewer#chair");
+const modelViewerVariants = document.querySelector("model-viewer#shoe");
 const select = document.querySelector('#variant');
 
 modelViewerVariants.addEventListener('load', () => {
@@ -137,7 +137,7 @@ select.addEventListener('input', (event) => {
           </div>
           <example-snippet stamp-to="transforms" highlight-as="html">
             <template>
-<model-viewer id="transform" orientation="20deg 0 0" bounds="tight" shadow-intensity="1" camera-controls ar ar-modes="webxr scene-viewer quick-look" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of a chair">
+<model-viewer id="transform" orientation="20deg 0 0" bounds="tight" shadow-intensity="1" camera-controls ar ar-modes="webxr scene-viewer quick-look" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <div class="controls">
     <div>Roll: <input id="roll" value="20" size="3" class="number"> degrees</div>
     <div>Pitch: <input id="pitch" value="0" size="3" class="number"> degrees</div>
@@ -201,7 +201,7 @@ z.addEventListener('input', () => {
       <div id="changeColor" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph</h4>
+          <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph</span></h4>
           <div class="heading">
             <h2 class="demo-title">Change Material Base Color</h2>
             <p>This is an experimental feature, and the API is considered highly
@@ -447,7 +447,6 @@ modelViewerTexture.addEventListener("load", () => {
             <template>
 <model-viewer id="duck" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
   <div class="controls">
-    <div>
       <p>Normals</p>
       <select id="normals2">
         <option>None</option>
