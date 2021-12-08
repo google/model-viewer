@@ -170,32 +170,6 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         });
       });
 
-      suite('a model without animations', () => {
-        setup(async () => {
-          element.src = NON_ANIMATED_GLB_PATH;
-          await waitForEvent(element, 'load');
-        });
-
-        test('does not play an animation', () => {
-          expect(animationIsPlaying(element)).to.be.false;
-        });
-
-        test('has a duration of 0', () => {
-          expect(element.duration).to.be.equal(0);
-        });
-
-        suite('with a specified animation-name', () => {
-          setup(async () => {
-            element.animationName = element.availableAnimations[1];
-            await timePasses();
-          });
-
-          test('does not play an animation', () => {
-            expect(animationIsPlaying(element)).to.be.false;
-          });
-        });
-      });
-
       suite('when playOnce is invoked', () => {
         setup(async () => {
           const animationsPlay = waitForEvent(element, 'play');
@@ -225,6 +199,32 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
           test('changing currentTime triggers render', () => {
             element.currentTime = 5;
             expect(element[$scene].shouldRender()).to.be.true;
+          });
+        });
+      });
+
+      suite('a model without animations', () => {
+        setup(async () => {
+          element.src = NON_ANIMATED_GLB_PATH;
+          await waitForEvent(element, 'load');
+        });
+
+        test('does not play an animation', () => {
+          expect(animationIsPlaying(element)).to.be.false;
+        });
+
+        test('has a duration of 0', () => {
+          expect(element.duration).to.be.equal(0);
+        });
+
+        suite('with a specified animation-name', () => {
+          setup(async () => {
+            element.animationName = element.availableAnimations[1];
+            await timePasses();
+          });
+
+          test('does not play an animation', () => {
+            expect(animationIsPlaying(element)).to.be.false;
           });
         });
       });
