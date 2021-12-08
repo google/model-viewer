@@ -14,7 +14,13 @@
  */
 
 import {property} from 'lit-element';
-import {Event as ThreeEvent, Texture} from 'three';
+import {
+  Event as ThreeEvent,
+  LightProbe,
+  SphericalHarmonics3,
+  Texture,
+  Vector3,
+} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $shouldAttemptPreload} from '../model-viewer-base.js';
 import {PreloadEvent} from '../three-components/CachingGLTFLoader.js';
@@ -24,10 +30,13 @@ import {Constructor, deserializeUrl} from '../utilities.js';
 export const BASE_OPACITY = 0.1;
 const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_SHADOW_SOFTNESS = 1.0;
+const DEFAULT_LIGHT_PROBE_INTENSITY = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
 
 const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
+const $currentLightProbe = Symbol('currentLightProbe');
 const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
+const $applyLightProbe = Symbol('applyLightProbe');
 export const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 const $onPreload = Symbol('onPreload');
@@ -56,17 +65,34 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     shadowSoftness: number = DEFAULT_SHADOW_SOFTNESS;
 
     @property({
+      type: String,
+      attribute: 'spherical-harmonics',
+    })
+    sphericalHarmonics: string|null = null;
+
+    @property({
+      type: Number,
+      attribute: 'spherical-harmonics-intensity',
+    })
+    sphericalHarmonicsIntensity: number = DEFAULT_LIGHT_PROBE_INTENSITY;
+
+    @property({
       type: Number,
     })
     exposure: number = DEFAULT_EXPOSURE;
 
     private[$currentEnvironmentMap]: Texture|null = null;
+    private[$currentLightProbe]: LightProbe|null = null;
 
     private[$cancelEnvironmentUpdate]: ((...args: any[]) => any)|null = null;
 
     private[$onPreload] = (event: ThreeEvent) => {
       if ((event as PreloadEvent).element === this) {
         this[$updateEnvironment]();
+      }
+
+      if (this.sphericalHarmonics) {
+        this[$applyLightProbe]();
       }
     };
 
@@ -103,6 +129,11 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$shouldAttemptPreload]()) {
         this[$updateEnvironment]();
       }
+
+      if (changedProperties.has('sphericalHarmonics') ||
+          changedProperties.has('sphericalHarmonicsIntensity')) {
+        this[$applyLightProbe]();
+      }
     }
 
     [$onModelLoad]() {
@@ -113,7 +144,41 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    async[$updateEnvironment]() {
+    [$applyLightProbe]() {
+      const coefficients = this.sphericalHarmonics?.split(' ').map(parseFloat);
+
+      if (!coefficients) {
+        if (this[$currentLightProbe]) {
+          this[$scene].remove(this[$currentLightProbe]!);
+          this[$currentLightProbe] = null;
+        }
+        return;
+      }
+
+      const sphericalHarmonic = new SphericalHarmonics3();
+      const vectorCoefficients: Vector3[] = [];
+
+      for(let i = 0; i < coefficients.length; i += 3) {
+        vectorCoefficients.push(new Vector3(
+          coefficients[i],
+          coefficients[i + 1],
+          coefficients[i + 2],
+        ));
+      }
+
+      sphericalHarmonic.set(vectorCoefficients);
+
+      if (this[$currentLightProbe]) {
+        this[$currentLightProbe]!.sh = sphericalHarmonic;
+        this[$currentLightProbe]!.intensity = this.sphericalHarmonicsIntensity;
+        return;
+      }
+
+      this[$currentLightProbe] = new LightProbe(sphericalHarmonic, this.sphericalHarmonicsIntensity);
+      this[$scene].add(this[$currentLightProbe]!);
+    }
+
+    async [$updateEnvironment]() {
       const {skyboxImage, environmentImage} = this;
 
       if (this[$cancelEnvironmentUpdate] != null) {
