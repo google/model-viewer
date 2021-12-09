@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {LoopOnce, LoopRepeat} from 'three';
+import {LoopOnce, LoopPingPong, LoopRepeat} from 'three';
 
 import ModelViewerElementBase, {$hasTransitioned, $needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
@@ -23,6 +23,10 @@ const MILLISECONDS_PER_SECOND = 1000.0
 
 const $changeAnimation = Symbol('changeAnimation');
 const $paused = Symbol('paused');
+
+interface PlayAnimationOptions {
+  repetitions: number, pingpong: boolean,
+}
 
 export declare interface AnimationInterface {
   autoplay: boolean;
@@ -33,8 +37,7 @@ export declare interface AnimationInterface {
   readonly duration: number;
   currentTime: number;
   pause(): void;
-  play(): void;
-  playOnce(): void;
+  play(options?: PlayAnimationOptions): void;
 }
 
 export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -87,26 +90,13 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.dispatchEvent(new CustomEvent('pause'));
     }
 
-    play() {
+    play(options: PlayAnimationOptions = {repetitions: Infinity, pingpong: false}) {
       if (this[$paused] && this.availableAnimations.length > 0) {
         this[$paused] = false;
         this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
 
         if (!this[$scene].hasActiveAnimation) {
-          this[$changeAnimation]();
-        }
-
-        this.dispatchEvent(new CustomEvent('play'));
-      }
-    }
-
-    playOnce() {
-      if (this[$paused] && this.availableAnimations.length > 0) {
-        this[$paused] = false;
-        this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
-
-        if (!this[$scene].hasActiveAnimation) {
-          this[$changeAnimation](LoopOnce);
+          this[$changeAnimation](options);
         }
 
         this.dispatchEvent(new CustomEvent('play'));
@@ -159,11 +149,14 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       return super[$updateSource]();
     }
 
-    [$changeAnimation](loopMode: number = LoopRepeat) {
+    [$changeAnimation](options: PlayAnimationOptions = {repetitions: Infinity, pingpong: false}) {
+      const repetitions = options.repetitions;
+      const mode = options.pingpong ? LoopPingPong : repetitions === Infinity ? LoopRepeat : LoopOnce;
       this[$scene].playAnimation(
           this.animationName,
           this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND,
-          loopMode);
+          mode,
+          repetitions);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation
