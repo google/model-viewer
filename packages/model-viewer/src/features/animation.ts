@@ -150,7 +150,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$changeAnimation](options: PlayAnimationOptions = {repetitions: Infinity, pingpong: false}) {
-      const repetitions = options.repetitions;
+      const repetitions = options.repetitions ?? Infinity;
       const mode = options.pingpong ? LoopPingPong : repetitions === Infinity ? LoopRepeat : LoopOnce;
       this[$scene].playAnimation(
           this.animationName,
