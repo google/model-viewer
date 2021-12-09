@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  frontend:
+    image: node:14-alpine
+    working_dir: /repo
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/repo
+    entrypoint: ["/bin/sh", "-c" , "apk --update add curl git && npm install && tail -f /dev/null"] # && npm run serve
+    

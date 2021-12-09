@@ -952,6 +952,11 @@
         "links": [
           "<a href=\"../examples/scenegraph/#pickMaterialExample\">Related examples</a>"
         ]
+      },
+      {
+        "name": "uvFromPoint(clientX, clientY)",
+        "htmlName": "uvFromPoint",
+        "description": "Returns the x and y texture-coordinate of the point on the mesh corresponding to the input pixel coordinates given relative to the screen. The texture-coordinate is returned as Vector2D, which has a method toString(). The function returns null if no object is hit."
       }
     ],
     "Events": [

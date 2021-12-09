@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Euler, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene, toVector2D, Vector2D} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
@@ -59,9 +59,17 @@ export interface SceneGraphInterface {
    * objects were intersected.
    * @param pixelX X coordinate of the mouse.
    * @param pixelY Y coordinate of the mouse.
-   * @returns a material, if no intersection is made than null is returned.
+   * @returns a material, if no intersection is made then null is returned.
    */
   materialFromPoint(pixelX: number, pixelY: number): Material|null;
+  /**
+   * Intersects a ray with the scene and returns the texture-coordinate of 
+   * intersected objects.
+   * @param pixelX X coordinate of the mouse.
+   * @param pixelY Y coordinate of the mouse.
+   * @returns a Vector2, if no intersection is made then null is returned.
+   */
+  uvFromPoint(pixelX: number, pixelY: number): Vector2D|null;
 }
 
 /**
@@ -273,6 +281,20 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       scene.raycaster.setFromCamera(ndcCoords, scene.getCamera());
 
       return this[$model]![$materialFromPoint](scene.raycaster);
+    }
+
+    uvFromPoint(pixelX: number, pixelY: number): Vector2D|null {
+      const scene = this[$scene];
+      const ndcCoords = scene.getNDC(pixelX, pixelY);
+      scene.raycaster.setFromCamera(ndcCoords, scene.getCamera());
+
+      const textcoord = scene.uvFromPoint(ndcCoords);
+      if (textcoord == null) {
+        return null;
+      }
+      const uv = toVector2D(textcoord);
+      
+      return uv;
     }
   }
 
