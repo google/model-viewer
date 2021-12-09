@@ -16,7 +16,9 @@
  */
 
 import '@material/mwc-button';
+import '@material/mwc-dialog';
 import '@material/mwc-icon-button';
+import '@material/mwc-textfield';
 import '@polymer/paper-item';
 import '@polymer/paper-slider';
 import '../shared/checkbox/checkbox.js';
@@ -26,11 +28,13 @@ import '../shared/editor_panel/editor_panel.js';
 import '../shared/expandable_content/expandable_tab.js';
 import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
+import '../shared/dialog/input_dialog';
 import '../shared/texture_picker/texture_picker.js';
 
 import {Material} from '@google/model-viewer/lib/features/scene-graph/material';
 import {$switchVariant} from '@google/model-viewer/lib/features/scene-graph/model';
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
+import {TextField} from '@material/mwc-textfield';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {customElement, html, internalProperty, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
@@ -48,6 +52,7 @@ import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 import {TabbedPanel} from '../shared/tabs/tabs.js';
+import {InputDialog} from '../shared/dialog/input_dialog';
 import {FileDetails, TexturePicker} from '../shared/texture_picker/texture_picker.js';
 import {ALPHA_BLEND_MODES} from '../utils/gltf_constants.js';
 import {checkFinite} from '../utils/reducer_utils.js';
@@ -64,7 +69,6 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
   private thumbnailUrls: string[] = [];
   private thumbnailIds: string[] = [];
-  private variantNameDecor = 0;
 
   @internalProperty() originalGltf?: GLTF;
 
@@ -99,6 +103,11 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('me-checkbox#doubleSidedCheckbox')
   doubleSidedCheckbox!: CheckboxElement;
   selectableMaterials = new Array<Material>();
+  @query('input-dialog#edit-variant-name') editVariantNameDialog!: InputDialog;
+  @query('input-dialog#create-variant-name')
+  createVariantNameDialog!: InputDialog;
+
+  @query('mwc-textfield#set-variant-name') setVariantName!: TextField;
 
   stateChanged(state: State) {
     const {originalGltf, thumbnailsById} = getModel(state);
@@ -137,7 +146,7 @@ export class MaterialPanel extends ConnectedLitElement {
     // Creates a new material instance if it does not currently exist under the
     // variant.
     if (this.selectedVariant != null &&
-        !material.variants.has(this.selectedVariant)) {
+        !material.hasVariant(this.selectedVariant)) {
       // Creates unique material instance for this variant if one does not
       // exist.
       const clone = getModelViewer().model!.createVariantFromMaterial(
@@ -291,6 +300,11 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
+  editVariantName(currentVariant: string, newVariantName: string) {
+    getModelViewer().model!.updateVariantName(currentVariant, newVariantName);
+    this.requestUpdate();
+  }
+
   renderVariantsTab() {
     const hasVariants = getModelViewer().availableVariants.length > 0;
     return html`
@@ -299,32 +313,112 @@ export class MaterialPanel extends ConnectedLitElement {
         <me-dropdown
           style='display: ${hasVariants ? '' : 'none'}'
           id="variant-selector"
-          @select=${this.onSelectVariant}
-          >${
+          @select="${() => {
+      const paperItem =
+          this.variantSelector.selectedItem as PaperListboxElement;
+      if (paperItem != null && paperItem.hasAttribute('value')) {
+        const selectedVariantName = paperItem.getAttribute('value');
+        if (selectedVariantName != null) {
+          this.onSelectVariant(selectedVariantName);
+        }
+      }
+    }}">${
         getModelViewer().availableVariants.map(
-            (name, id) => html`<paper-input value="${name}">(${id}) ${
-                name}</paper-input>`)}
+            (name, id) => html`<paper-item value="${name}">
+            (${id}) ${name}
+            <mwc-icon-button icon="create"
+            @click="${() => {
+              this.editVariantNameDialog.textFieldValue = '';
+              this.editVariantNameDialog.placeholder = name;
+              this.editVariantNameDialog.open = true;
+            }}"
+            value="${name}"
+            ></mwc-icon-button>
+            </paper-item>
+            `)}
         </me-dropdown>
         <mwc-button
           label="Create Variant"
           id="create-variant"
-          @click=${this.onCreateVariant}
-          ></mwc-button>
-      </div>
+          @click="${() => {
+      this.createVariantNameDialog.open = true;
+    }}"></mwc-button>
+        </div>
     </me-expandable-tab>
     `;
   }
 
-  onCreateVariant() {
+  validateInput(textField: TextField): boolean {
+    textField.validityTransform =
+        (value: string, nativeValidity: ValidityState) => {
+          // Validates length.
+          if (value.length < 1) {
+            textField.validationMessage = `Invalid input.`;
+            return {valid: false} as ValidityState;
+          }
+
+          // Verifies name is unique.
+          if (getModelViewer().availableVariants.find((existingNames) => {
+                return existingNames === value;
+              })) {
+            textField.validationMessage = `The name ${value} already exists.`;
+            return {valid: false};
+          }
+
+          return nativeValidity;
+        };
+
+    return textField.reportValidity();
+  }
+
+  isValidInput(_value: string): {valid: boolean, validationMessage: string} {
+    // Validates length.
+    if (_value.length < 1) {
+      return {valid: false, validationMessage: `Invalid input.`};
+    }
+
+    // Verifies name is unique.
+    if (getModelViewer().availableVariants.find((existingNames) => {
+          return existingNames === _value;
+        })) {
+      return {
+        valid: false,
+        validationMessage: `The name ${_value} already exists.`
+      };
+    }
+
+    return {valid: true, validationMessage: ''};
+  }
+
+  renderEditVariantDialog() {
+    return html`
+      <input-dialog id="edit-variant-name" modal="true"
+        placeholder="Enter Variant Name">
+      </input-dialog>
+    `;
+  }
+
+  renderCreateVariantDialog() {
+    return html`
+      <input-dialog id="create-variant-name" modal="true"
+        placeholder="Enter Variant Name">
+      </input-dialog>
+    `;
+  }
+
+  onCreateVariant(newVariantName: string) {
     if (getModelViewer().availableVariants.length === 0) {
-      // Creates a default variant for existing materials to live under if there
-      // were no variants in the model to begin with.
+      // Creates a default variant for existing materials to live under if
+      // there were no variants in the model to begin with.
       getModelViewer().model!.createVariant('Default');
       for (const material of getModelViewer().model!.materials) {
         getModelViewer().model!.addMaterialToVariant(material.index, 'Default');
       }
     }
-    getModelViewer().model!.createVariant('Variant' + this.variantNameDecor++);
+    getModelViewer().model!.createVariant(newVariantName);
+    this.variantSelector.selectedIndex =
+        getModelViewer().availableVariants.indexOf(newVariantName)!;
+    this.selectedVariant = newVariantName;
     this.requestUpdate();
   }
 
@@ -373,6 +467,20 @@ export class MaterialPanel extends ConnectedLitElement {
         this.onClick(event);
       }
     });
+
+    const self = this;
+    this.createVariantNameDialog.OnHandleValue = (value: string) => {
+      self.onCreateVariant(value);
+    };
+    this.createVariantNameDialog.onValidate = (value: string) => {
+      return self.isValidInput(value);
+    };
+    this.editVariantNameDialog.OnHandleValue = (value: string) => {
+      self.editVariantName(self.editVariantNameDialog.placeholder, value);
+    };
+    this.editVariantNameDialog.onValidate = (value: string) => {
+      return self.isValidInput(value);
+    };
   }
 
   onClick = (event) => {
@@ -903,25 +1011,24 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
-  async onSelectVariant() {
-    const paperItem = this.variantSelector.selectedItem as PaperListboxElement;
-    if (paperItem != null && paperItem.hasAttribute('value')) {
-      this.selectedVariant = paperItem.getAttribute('value');
+  async onSelectVariant(name: string) {
+    this.selectedVariant = name;
 
-      const onVariantApplied = () => {
-        this.updateSelectableMaterials();
-        this.selectedMaterialIndex = 0;
-      };
+    const onVariantApplied = () => {
+      this.updateSelectableMaterials();
+      this.selectedMaterialIndex = 0;
+    };
 
-      getModelViewer().addEventListener(
-          'variant-applied', onVariantApplied, {once: true});
-    }
+    getModelViewer().addEventListener(
+        'variant-applied', onVariantApplied, {once: true});
   }
 
   render() {
     return html`
     <div id="material-container" style="display: none">
     ${this.renderVariantsTab()}
+    ${this.renderEditVariantDialog()}
+    ${this.renderCreateVariantDialog()}
     ${this.renderSelectMaterialTab()}
     ${this.renderBaseColorTab()}
     ${this.renderMetallicRoughnessTab()}

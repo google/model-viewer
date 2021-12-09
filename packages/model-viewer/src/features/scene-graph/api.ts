@@ -114,6 +114,12 @@ export declare interface Material {
   ensureLoaded(): void;
 
   /**
+   * Returns true if the material participates in the variant.
+   * @param name the variant name.
+   */
+  hasVariant(name: string): boolean;
+
+  /**
    * Returns true if the material is loaded.
    */
   readonly isLoaded: boolean;
@@ -131,7 +137,7 @@ export declare interface Material {
   /**
    * Returns a list of variants that this materials participates in.
    */
-  readonly variants: Set<number>;
+  readonly variantIndices: Set<number>;
 }
 
 /**

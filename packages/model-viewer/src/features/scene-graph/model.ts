@@ -102,7 +102,13 @@ export class Model implements ModelInterface {
 
       if (correlatedMaterial != null) {
         this[$materials].push(new Material(
-            onUpdate, gltf, material, i, true, correlatedMaterial));
+            onUpdate,
+            gltf,
+            material,
+            i,
+            true,
+            this[$variantData],
+            correlatedMaterial));
       } else {
         const elementArray = gltf['materials'] || [];
         const gltfMaterialDef = elementArray[i];
@@ -130,6 +136,7 @@ export class Model implements ModelInterface {
             gltfMaterialDef,
             i,
             false,
+            this[$variantData],
             correlatedMaterial,
             new LazyLoader(
                 gltf, gltfElementMap, gltfMaterialDef, materialLoadCallback)));
@@ -190,9 +197,11 @@ export class Model implements ModelInterface {
   }
 
   availableVariants() {
-    return Array.from(this[$variantData].values()).map(variant => {
-      return variant.name;
-    });
+    const result = new Array<string>();
+    for (const [name, data] of this[$variantData]) {
+      result[data.index] = name;
+    }
+    return result;
   }
 
   getMaterialByName(name: string): Material|null {
@@ -308,6 +317,7 @@ export class Model implements ModelInterface {
         gltfSourceMaterial,
         this[$materials].length,
         false,  // Cloned as inactive.
+        this[$variantData],
         clonedSet);
 
     this[$materials].push(clonedMaterial);
@@ -323,8 +333,9 @@ export class Model implements ModelInterface {
 
     let created = false;
     for (const primitive of this[$primitivesList]) {
+      const variantData = this[$variantData].get(variantName);
       // Skips the primitive if the variant already exists.
-      if (this[$variantData].has(variantName)) {
+      if (variantData != null && primitive.variantInfo.has(variantData.index)) {
         continue;
       }
 
@@ -387,5 +398,15 @@ export class Model implements ModelInterface {
         primitive.addMaterialToVariant(material.index, targetVariantName);
       }
     }
+  }
+
+  updateVariantName(currentName: string, newName: string) {
+    const variantData = this[$variantData].get(currentName);
+    if (variantData == null) {
+      return;
+    }
+    variantData.name = newName;
+    this[$variantData].set(newName, variantData!);
+    this[$variantData].delete(currentName);
   }
 }
