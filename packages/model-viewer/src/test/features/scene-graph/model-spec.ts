@@ -246,7 +246,7 @@ suite('scene-graph/model', () => {
         });
 
         test(
-            `addMaterialToVariant() adds variants mapping
+            `setMaterialToVariant() adds variants mapping
           only to primitives that use the source material`,
             async () => {
               await loadModel(CUBES_GLTF_PATH);
@@ -264,7 +264,7 @@ suite('scene-graph/model', () => {
               model.createVariant('test-variant');
 
               // Adds material 0 to the variant.
-              model.addMaterialToVariant(0, 'test-variant');
+              model.setMaterialToVariant(0, 'test-variant');
 
               // primitive1 uses material '0' so it should have a vew variant.
               expect(primitive1.variantInfo.size).to.equal(startingSize + 1);

@@ -74,7 +74,7 @@ export declare interface Model {
    * @param materialIndex
    * @param targetVariantName
    */
-  addMaterialToVariant(materialIndex: number, targetVariantName: string): void;
+  setMaterialToVariant(materialIndex: number, targetVariantName: string): void;
 }
 
 /**

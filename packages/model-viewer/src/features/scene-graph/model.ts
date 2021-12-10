@@ -266,16 +266,18 @@ export class Model implements ModelInterface {
     for (const primitive of this[$primitivesList]) {
       promises.push(primitive.enableVariant(variantName));
     }
-
     await Promise.all(promises);
 
-    for (const material of this.materials) {
-      material[$setActive](false);
-    }
-    // Marks the materials that are now in use after the variant switch.
-    for (const primitive of this[$primitivesList]) {
-      this.materials[primitive.getActiveMaterial().index][$setActive](true);
-    }
+    const updateActiveState = async () => {
+      for (const material of this.materials) {
+        material[$setActive](false);
+      }
+      // Marks the materials that are now in use after the variant switch.
+      for (const primitive of this[$primitivesList]) {
+        this.materials[primitive.getActiveMaterial().index][$setActive](true);
+      }
+    };
+    await updateActiveState();
   }
 
   async[$prepareVariantsForExport]() {
@@ -301,6 +303,9 @@ export class Model implements ModelInterface {
     const gltfSourceMaterial =
         JSON.parse(JSON.stringify(material[$sourceObject])) as GLTFMaterial;
     gltfSourceMaterial.name = newMaterialName;
+    // Adds the source material clone to the gltf def.
+    const gltf = this[$correlatedSceneGraph].gltf;
+    gltf.materials!.push(gltfSourceMaterial);
 
     const clonedSet = new Set<MeshStandardMaterial>();
     for (const [i, threeMaterial] of threeMaterialSet.entries()) {
@@ -360,6 +365,9 @@ export class Model implements ModelInterface {
     if (activateVariant) {
       variantMaterial[$setActive](true);
       this.materials[originalMaterialIndex][$setActive](false);
+      for (const primitive of this[$primitivesList]) {
+        primitive.enableVariant(variantName);
+      }
     }
 
     return variantMaterial;
@@ -379,7 +387,7 @@ export class Model implements ModelInterface {
     return this[$variantData].has(variantName);
   }
 
-  addMaterialToVariant(materialIndex: number, targetVariantName: string) {
+  setMaterialToVariant(materialIndex: number, targetVariantName: string) {
     if (this.availableVariants().find(name => name === targetVariantName) ==
         null) {
       console.warn(`Can't add material to '${
@@ -388,14 +396,16 @@ export class Model implements ModelInterface {
     }
 
     if (materialIndex < 0 || materialIndex >= this.materials.length) {
-      console.error(`addMaterialToVariant(): materialIndex is out of bounds.`);
+      console.error(`setMaterialToVariant(): materialIndex is out of bounds.`);
       return;
     }
 
     for (const primitive of this[$primitivesList]) {
       const material = primitive.getMaterial(materialIndex);
+      // Ensures the material exists on the primitive before setting it to a
+      // variant.
       if (material != null) {
-        primitive.addMaterialToVariant(material.index, targetVariantName);
+        primitive.addVariant(material, targetVariantName);
       }
     }
   }

@@ -49,7 +49,7 @@ export class PrimitiveNode extends Node {
   private[$mesh]: Mesh;
   // Maps glTF material index number to a material that this primitive supports.
   [$materials] = new Map<number, Material>();
-  // Maps variant number to material index.
+  // Maps variant index to material.
   private[$variantToMaterialMap] = new Map<number, Material>();
   private[$initialMaterialIdx]: number;
   private[$activeMaterialIdx]: number;
@@ -193,26 +193,6 @@ export class PrimitiveNode extends Node {
     return this[$variantToMaterialMap];
   }
 
-  addMaterialToVariant(materialIndex: number, variantName: string) {
-    if (!this.validateMaterial(materialIndex) ||
-        !this.ensureVariantIsUnused(variantName)) {
-      return;
-    }
-    const modelVariantData = this[$modelVariants].get(variantName)!;
-    const variantIndex = modelVariantData.index;
-
-    // Updates materials mapped to the variant.
-    modelVariantData.materialVariants.push(materialIndex);
-
-    // Updates internal mappings.
-    const material = this.getMaterial(materialIndex)!;
-    material.variantIndices.add(variantIndex);
-    this.variantInfo.set(variantIndex, material);
-
-    this.updateVariantUserData(
-        variantIndex, this[$materials].get(materialIndex)!);
-  }
-
   addVariant(materialVariant: Material, variantName: string) {
     if (!this.ensureVariantIsUnused(variantName)) {
       return false;
@@ -228,19 +208,21 @@ export class PrimitiveNode extends Node {
 
     // Updates materials mapped to the variant.
     modelVariantData.materialVariants.push(variantIndex);
+    materialVariant.variantIndices.add(variantIndex);
 
     // Updates internal mappings.
     this[$variantToMaterialMap].set(variantIndex, materialVariant);
-    this[$materials].set(variantIndex, materialVariant);
+    this[$materials].set(materialVariant.index, materialVariant);
 
     this.updateVariantUserData(variantIndex, materialVariant);
 
     return true;
   }
 
-  private updateVariantUserData(variantIndex: number, variant: Material) {
+  private updateVariantUserData(
+      variantIndex: number, materialVariant: Material) {
     // Adds variants name to material variants set.
-    variant.variantIndices.add(variantIndex);
+    materialVariant.variantIndices.add(variantIndex);
 
     // Updates import data (see VariantMaterialLoaderPlugin.ts).
     this.mesh.userData.variantMaterials = this.mesh.userData.variantMaterials ||
@@ -248,8 +230,8 @@ export class PrimitiveNode extends Node {
     const map = this.mesh.userData.variantMaterials! as
         Map<number, UserDataVariantMapping>;
     map.set(variantIndex, {
-      material: (variant[$sourceObject] as ThreeMaterial),
-      gltfMaterialIndex: variant.index
+      material: (materialVariant[$sourceObject] as ThreeMaterial),
+      gltfMaterialIndex: materialVariant.index
     });
   }
 

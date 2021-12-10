@@ -43,7 +43,6 @@ export class InputDialog extends LitElement {
   onValidate = (_value: string) => {
     return {valid: true, validationMessage: ''};
   };
-
   @query('mwc-textfield') textfield!: TextField;
   @query('mwc-button') button!: Button;
   @query('mwc-dialog') inputDialog!: Dialog;
@@ -57,6 +56,7 @@ export class InputDialog extends LitElement {
   }
 
   set open(value: boolean) {
+    this.textfield.validationMessage = '';
     this.textfield.value = '';
     this.textfield.placeholder = this.placeholder;
     this.inputDialog.open = value;

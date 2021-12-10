@@ -23,16 +23,15 @@ import '@polymer/paper-item';
 import '@polymer/paper-slider';
 import '../shared/checkbox/checkbox.js';
 import '../shared/color_picker/color_picker.js';
+import '../shared/dialog/input_dialog';
 import '../shared/dropdown/dropdown.js';
 import '../shared/editor_panel/editor_panel.js';
 import '../shared/expandable_content/expandable_tab.js';
 import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
-import '../shared/dialog/input_dialog';
 import '../shared/texture_picker/texture_picker.js';
 
 import {Material} from '@google/model-viewer/lib/features/scene-graph/material';
-import {$switchVariant} from '@google/model-viewer/lib/features/scene-graph/model';
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {TextField} from '@material/mwc-textfield';
 import {PaperListboxElement} from '@polymer/paper-listbox';
@@ -49,10 +48,10 @@ import {dispatchModelDirty, getModel, getModelViewer, getTextureId, pushThumbnai
 import {Thumbnail} from '../model_viewer_preview/types.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
+import {InputDialog} from '../shared/dialog/input_dialog';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 import {TabbedPanel} from '../shared/tabs/tabs.js';
-import {InputDialog} from '../shared/dialog/input_dialog';
 import {FileDetails, TexturePicker} from '../shared/texture_picker/texture_picker.js';
 import {ALPHA_BLEND_MODES} from '../utils/gltf_constants.js';
 import {checkFinite} from '../utils/reducer_utils.js';
@@ -69,6 +68,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
   private thumbnailUrls: string[] = [];
   private thumbnailIds: string[] = [];
+  private originalMaterialFromCloneMap = new Map<number, number>();
 
   @internalProperty() originalGltf?: GLTF;
 
@@ -137,7 +137,8 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   getMaterial() {
-    return getModelViewer()!.model!.materials[this.selectedMaterialIndex];
+    const materials = getModelViewer()!.model!.materials;
+    return materials[this.selectedMaterialIndex];
   }
 
   getMaterialVariant() {
@@ -146,6 +147,7 @@ export class MaterialPanel extends ConnectedLitElement {
     // Creates a new material instance if it does not currently exist under the
     // variant.
     if (this.selectedVariant != null &&
+        this.variantSelector.selectedIndex !== 0 &&
         !material.hasVariant(this.selectedVariant)) {
       // Creates unique material instance for this variant if one does not
       // exist.
@@ -155,12 +157,15 @@ export class MaterialPanel extends ConnectedLitElement {
           this.selectedVariant,
           true)!;
 
-      getModelViewer().model![$switchVariant](this.selectedVariant);
+      const sourceIndex = this.originalMaterialFromCloneMap.get(material.index);
+      if (sourceIndex != null) {
+        this.originalMaterialFromCloneMap.set(clone.index, sourceIndex);
+      } else {
+        this.originalMaterialFromCloneMap.set(clone.index, material.index);
+      }
 
       this.updateSelectableMaterials();
-
       this.requestUpdate();
-
       material = clone;
     }
 
@@ -168,7 +173,12 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   getOriginalMaterial() {
-    return this.originalGltf!.materials[this.selectedMaterialIndex];
+    if (this.originalGltf!.materials.length > this.selectedMaterialIndex) {
+      return this.originalGltf!.materials[this.selectedMaterialIndex];
+    } else {
+      return this.originalGltf!.materials[this.originalMaterialFromCloneMap.get(
+          this.selectedMaterialIndex)!];
+    }
   }
 
   getOriginalTextureId(index: number) {
@@ -302,6 +312,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   editVariantName(currentVariant: string, newVariantName: string) {
     getModelViewer().model!.updateVariantName(currentVariant, newVariantName);
+    this.selectedVariant = newVariantName;
     this.requestUpdate();
   }
 
@@ -310,6 +321,7 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
     <me-expandable-tab tabName="Variants" .open=${hasVariants}>
       <div slot="content">
+      <div id="variant-row" style='display: ${hasVariants ? '' : 'none'}'>
         <me-dropdown
           style='display: ${hasVariants ? '' : 'none'}'
           id="variant-selector"
@@ -325,18 +337,18 @@ export class MaterialPanel extends ConnectedLitElement {
     }}">${
         getModelViewer().availableVariants.map(
             (name, id) => html`<paper-item value="${name}">
-            (${id}) ${name}
-            <mwc-icon-button icon="create"
-            @click="${() => {
-              this.editVariantNameDialog.textFieldValue = '';
-              this.editVariantNameDialog.placeholder = name;
-              this.editVariantNameDialog.open = true;
-            }}"
-            value="${name}"
-            ></mwc-icon-button>
-            </paper-item>
+            (${id}) ${name}</paper-item>
             `)}
         </me-dropdown>
+        <mwc-icon-button icon="create"
+        @click="${() => {
+      this.editVariantNameDialog.textFieldValue = '';
+      this.editVariantNameDialog.placeholder = this.selectedVariant!;
+      this.editVariantNameDialog.open = true;
+    }}"
+        value="${this.selectedVariant}">
+        </mwc-icon-button>
+        </div>
         <mwc-button
           label="Create Variant"
           id="create-variant"
@@ -412,7 +424,7 @@ export class MaterialPanel extends ConnectedLitElement {
       // there were no variants in the model to begin with.
       getModelViewer().model!.createVariant('Default');
       for (const material of getModelViewer().model!.materials) {
-        getModelViewer().model!.addMaterialToVariant(material.index, 'Default');
+        getModelViewer().model!.setMaterialToVariant(material.index, 'Default');
       }
     }
     getModelViewer().model!.createVariant(newVariantName);
@@ -504,7 +516,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   get selectedBaseColor(): RGBA {
     const alphaFactor =
-        this.getMaterial().pbrMetallicRoughness.baseColorFactor[3];
+        this.getMaterialVariant().pbrMetallicRoughness.baseColorFactor[3];
     const selectedColor = color.hexToRgb(this.baseColorPicker.selectedColorHex);
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
@@ -1012,8 +1024,6 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   async onSelectVariant(name: string) {
-    this.selectedVariant = name;
-
     const onVariantApplied = () => {
       this.updateSelectableMaterials();
       this.selectedMaterialIndex = 0;
@@ -1021,6 +1031,8 @@ export class MaterialPanel extends ConnectedLitElement {
 
     getModelViewer().addEventListener(
         'variant-applied', onVariantApplied, {once: true});
+
+    this.selectedVariant = name;
   }
 
   render() {
