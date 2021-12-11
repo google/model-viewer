@@ -84,17 +84,17 @@ export const toVector3D = (v: Vector3) => {
 };
 
 export interface Vector2D {
-  x: number
-  y: number
+  u: number
+  v: number
   toString(): string
 }
 
 export const toVector2D = (v: Vector2) => {
   return {
-    x: v.x,
-    y: v.y,
+    u: v.x,
+    v: v.y,
     toString() {
-      return `u:${this.x} v:${this.y}`;
+      return `${this.u} ${this.v}`;
     }
   };
 };

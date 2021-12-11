@@ -186,25 +186,6 @@ suite('scene-graph/model', () => {
                   element[$scene].width, element[$scene].height)!;
               expect(material).to.be.null;
             });
-        test('uvFromPoint returns texture-coordinates', async () => {
-          await loadModel(ASTRONAUT_GLB_PATH);
-
-          const uv = element.uvFromPoint(
-              element[$scene].width / 2, element[$scene].height / 2)!;
-
-          expect(uv).to.be.ok;
-        });
-
-        test(
-            'uvFromPoint returns null when intersect fails', async () => {
-              await loadModel(ASTRONAUT_GLB_PATH);
-
-              await timePasses(1000);
-
-              const uv = element.uvFromPoint(
-                  element[$scene].width, element[$scene].height)!;
-              expect(uv).to.be.null;
-            });
       });
     });
   });
