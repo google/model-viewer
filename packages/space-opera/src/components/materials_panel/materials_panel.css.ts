@@ -78,7 +78,7 @@ export const styles: CSSResult = css`.EditingMaterial {
   margin-top: 10px;
 }
 
-#variant-row {
+.EditableSelector {
   display: flex;
 }
 `;

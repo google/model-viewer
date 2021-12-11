@@ -235,15 +235,6 @@ export class PrimitiveNode extends Node {
     });
   }
 
-  private validateMaterial(materialIndex: number) {
-    if (!this[$materials].has(materialIndex)) {
-      console.warn(
-          `materialIndex ${materialIndex} does not exist on primitive.`);
-      return false;
-    }
-    return true;
-  }
-
   private ensureVariantIsUnused(variantName: string) {
     const modelVariants = this[$modelVariants].get(variantName);
 

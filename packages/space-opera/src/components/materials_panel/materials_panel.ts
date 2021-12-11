@@ -106,6 +106,8 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('input-dialog#edit-variant-name') editVariantNameDialog!: InputDialog;
   @query('input-dialog#create-variant-name')
   createVariantNameDialog!: InputDialog;
+  @query('input-dialog#edit-material-name')
+  editMaterialNameDialog!: InputDialog;
 
   @query('mwc-textfield#set-variant-name') setVariantName!: TextField;
 
@@ -316,12 +318,18 @@ export class MaterialPanel extends ConnectedLitElement {
     this.requestUpdate();
   }
 
+  editMaterialName(_currentName: string, newName: string) {
+    this.selectedMaterial.name = newName;
+    this.requestUpdate();
+  }
+
   renderVariantsTab() {
     const hasVariants = getModelViewer().availableVariants.length > 0;
     return html`
     <me-expandable-tab tabName="Variants" .open=${hasVariants}>
       <div slot="content">
-      <div id="variant-row" style='display: ${hasVariants ? '' : 'none'}'>
+      <div class="EditableSelector" style='display: ${
+        hasVariants ? '' : 'none'}'>
         <me-dropdown
           style='display: ${hasVariants ? '' : 'none'}'
           id="variant-selector"
@@ -418,6 +426,14 @@ export class MaterialPanel extends ConnectedLitElement {
     `;
   }
 
+  renderEditMaterialNameDialog() {
+    return html`
+      <input-dialog id="edit-material-name" modal="true"
+        placeholder="Enter Material Name">
+      </input-dialog>
+    `;
+  }
+
   onCreateVariant(newVariantName: string) {
     if (getModelViewer().availableVariants.length === 0) {
       // Creates a default variant for existing materials to live under if
@@ -437,8 +453,8 @@ export class MaterialPanel extends ConnectedLitElement {
   renderSelectMaterialTab() {
     return html`
     <me-expandable-tab tabName="Selected Material" .open=${true}>
+      <div slot="content" class="EditableSelector">
       <me-dropdown
-        slot="content"
         id="material-selector"
         @select=${this.onSelectMaterial}
         >${
@@ -448,6 +464,14 @@ export class MaterialPanel extends ConnectedLitElement {
                     material.name ? material.name :
                                     'Unnamed Material'}</paper-item>`)}
       </me-dropdown>
+      <mwc-icon-button icon="create"
+        @click="${() => {
+      this.editMaterialNameDialog.textFieldValue = '';
+      this.editMaterialNameDialog.placeholder = this.selectedMaterial!.name;
+      this.editMaterialNameDialog.open = true;
+    }}">
+      </mwc-icon-button>
+      </div>
     </me-expandable-tab>
     `;
   }
@@ -467,6 +491,10 @@ export class MaterialPanel extends ConnectedLitElement {
 
   set selectedVariant(name: string|null) {
     getModelViewer().variantName = name;
+  }
+
+  get selectedMaterial(): Material {
+    return getModelViewer().model!.materials[this.selectedMaterialIndex];
   }
 
   firstUpdated() {
@@ -493,6 +521,9 @@ export class MaterialPanel extends ConnectedLitElement {
     this.editVariantNameDialog.onValidate = (value: string) => {
       return self.isValidInput(value);
     };
+    this.editMaterialNameDialog.OnHandleValue = (value: string) => {
+      self.editMaterialName(self.editMaterialNameDialog.placeholder, value);
+    };
   }
 
   onClick = (event) => {
@@ -516,7 +547,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   get selectedBaseColor(): RGBA {
     const alphaFactor =
-        this.getMaterialVariant().pbrMetallicRoughness.baseColorFactor[3];
+        this.getMaterial().pbrMetallicRoughness.baseColorFactor[3];
     const selectedColor = color.hexToRgb(this.baseColorPicker.selectedColorHex);
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
@@ -1041,6 +1072,7 @@ export class MaterialPanel extends ConnectedLitElement {
     ${this.renderVariantsTab()}
     ${this.renderEditVariantDialog()}
     ${this.renderCreateVariantDialog()}
+    ${this.renderEditMaterialNameDialog()}
     ${this.renderSelectMaterialTab()}
     ${this.renderBaseColorTab()}
     ${this.renderMetallicRoughnessTab()}
