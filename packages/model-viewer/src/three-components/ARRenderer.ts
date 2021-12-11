@@ -233,7 +233,7 @@ export class ARRenderer extends EventDispatcher {
     scene.background = null;
 
     this.oldShadowIntensity = scene.shadowIntensity;
-    scene.setShadowIntensity(0);
+    scene.setShadowIntensity(0.01);  // invisible, but not changing the shader
 
     this.oldTarget.copy(scene.getTarget());
     this.oldFramedFieldOfView = scene.framedFieldOfView;
