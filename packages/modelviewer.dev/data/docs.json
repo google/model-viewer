@@ -859,14 +859,9 @@
     ],
     "Methods": [
       {
-        "name": "play()",
+        "name": "play(options: {repetitions, pingpong})",
         "htmlName": "play",
-        "description": "Causes animations to be played. Use the autoplay attribute if you want animations to be played automatically. If there are no animations, nothing will happen, so make sure that the model is loaded before invoking this method."
-      },
-      {
-        "name": "playOnce()",
-        "htmlName": "playOnce",
-        "description": "Causes animations to be played just once. If there are no animations, nothing will happen, so make sure that the model is loaded before invoking this method."
+        "description": "Causes animations to be played. You can specify the number of repetitions of the animation by setting the number of <i>repetitions</i> to any value greater than 0 (defaults to Infinity). Also if you set <i>pingpong</i> to true, alternately playing forward and backward (defaults to false). Use the autoplay attribute if you want animations to be played automatically. If there are no animations, nothing will happen, so make sure that the model is loaded before invoking this method."
       },
       {
         "name": "pause()",
