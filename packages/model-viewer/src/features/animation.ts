@@ -107,7 +107,6 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$paused] = true;
 
       if (this.autoplay) {
-        this[$changeAnimation]({repetitions: Infinity, pingpong: false});
         this.play();
       }
     }
