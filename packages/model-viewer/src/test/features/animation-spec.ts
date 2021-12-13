@@ -103,39 +103,22 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
           element.currentTime = 5;
           expect(element[$scene].shouldRender()).to.be.true;
         });
-      });
-    });
 
-    suite('when play is invoked with options', () => {
-      setup(async () => {
-        const animationsPlay = waitForEvent(element, 'play');
-        element.play({repitations: 10, pingpong: true});
-        await animationsPlay;
-      });
+        suite('when play is invoked again with options', () => {
+          setup(async () => {
+            const animationsPlay = waitForEvent(element, 'play');
+            element.play({repitations: 10, pingpong: true});
+            await animationsPlay;
+          });
 
-      test('animations play', async () => {
-        expect(animationIsPlaying(element)).to.be.true;
-      });
+          test('animations play', () => {
+            expect(animationIsPlaying(element)).to.be.true;
+          });
 
-      test('has a duration greater than 0', () => {
-        expect(element.duration).to.be.greaterThan(0);
-      });
-
-      suite('when pause is invoked', () => {
-        setup(async () => {
-          const animationsPause = waitForEvent(element, 'pause');
-          element.pause();
-          await animationsPause;
-        });
-
-        test('animations pause', () => {
-          expect(animationIsPlaying(element)).to.be.false;
-        });
-
-        test('changing currentTime triggers render', () => {
-          element.currentTime = 5;
-          expect(element[$scene].shouldRender()).to.be.true;
-        });
+          test('has a duration greater than 0', () => {
+            expect(element.duration).to.be.greaterThan(0);
+          });
+        })
       });
     });
 
