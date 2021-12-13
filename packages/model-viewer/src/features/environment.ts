@@ -233,7 +233,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
       this[$currentEnvironmentMap] = environmentMap;
-      this[$scene].environment = this[$currentEnvironmentMap];
+      // this[$scene].environment = this[$currentEnvironmentMap];
       this.dispatchEvent(new CustomEvent('environment-change'));
 
       this[$needsRender]();
