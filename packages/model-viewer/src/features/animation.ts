@@ -95,9 +95,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$paused] = false;
         this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
 
-        if (!this[$scene].hasActiveAnimation) {
-          this[$changeAnimation](options);
-        }
+        this[$changeAnimation](options);
 
         this.dispatchEvent(new CustomEvent('play'));
       }
