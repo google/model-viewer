@@ -43,7 +43,8 @@ export declare interface AnimationInterface {
 export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<AnimationInterface>&T => {
   class AnimationModelViewerElement extends ModelViewerElement {
-    @property({type: Boolean}) autoplay: boolean = false;
+    @property({type: Boolean})
+    autoplay: boolean = false;
     @property({type: String, attribute: 'animation-name'})
     animationName: string|undefined = undefined;
     @property({type: Number, attribute: 'animation-crossfade-duration'})
@@ -128,6 +129,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('autoplay') && this.autoplay) {
+        this[$changeAnimation]({repetitions: Infinity, pingpong: false});
         this.play();
       }
 
