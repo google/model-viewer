@@ -552,7 +552,13 @@ export class ModelScene extends Scene {
       action.setLoop(loopMode, repetitionCount);
 
       action.enabled = true;
-      action.play();
+
+      if (repetitionCount === Infinity) {
+        action.play();
+      } else {
+        action.reset();
+        action.play();
+      }
     } catch (error) {
       console.error(error);
     }
