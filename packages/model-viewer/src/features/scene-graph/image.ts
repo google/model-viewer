@@ -27,6 +27,7 @@ import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './t
 const loader = new ImageLoader();
 const quadMaterial = new MeshBasicMaterial();
 const quad = new PlaneGeometry(2, 2);
+let adhocNum = 0;
 
 export const $threeTexture = Symbol('threeTexture');
 export const $applyTexture = Symbol('applyTexture');
@@ -47,8 +48,10 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       gltfImage: GLTFImage|null) {
     gltfImage = gltfImage ?? {
       name: 'adhoc_image',
-      uri: (texture && texture.image) ? texture.image.src : 'adhoc_image'
-    } as GLTFImage;
+      uri: (texture && texture.image && texture.image.src) ?
+          texture.image.src :
+          'adhoc_image' + adhocNum++
+    };
     super(onUpdate, gltfImage, new Set<ThreeTexture>(texture ? [texture] : []));
   }
 

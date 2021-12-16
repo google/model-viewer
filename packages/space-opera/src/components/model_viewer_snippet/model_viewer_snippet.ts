@@ -24,7 +24,8 @@ import '../shared/expandable_content/expandable_tab.js';
 
 import {customElement, html, internalProperty, property, query} from 'lit-element';
 
-import {ArConfigState, BestPracticesState, ModelViewerConfig, RelativeFilePathsState, State} from '../../types.js';
+import {reduxStore} from '../../space_opera_base.js';
+import {ArConfigState, BestPracticesState, ImageType, INITIAL_STATE, ModelViewerConfig, RelativeFilePathsState, State} from '../../types.js';
 import {getBestPractices} from '../best_practices/reducer.js';
 import {getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -32,13 +33,18 @@ import {getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {getArConfig} from '../mobile_view/reducer.js';
 import {getGltfUrl, renderCommonChildElements} from '../model_viewer_preview/reducer.js';
-import {getRelativeFilePaths} from '../relative_file_paths/reducer.js';
+import {dispatchSetPosterName, getRelativeFilePaths} from '../relative_file_paths/reducer.js';
+import {DraggableInput} from '../shared/draggable_input/draggable_input.js';
+import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SnippetViewer} from '../shared/snippet_viewer/snippet_viewer.js';
 import {renderModelViewer} from '../utils/render_model_viewer.js';
 
 import {ExportZipButton} from './components/download_button.js';
 import {ImportCard} from './components/open_button.js';
-import {applyRelativeFilePaths, getExtraAttributes} from './reducer.js';
+import {applyRelativeFilePaths, dispatchHeight, dispatchMimeType, getExtraAttributes} from './reducer.js';
+
+const DEFAULT_POSTER_HEIGHT =
+    INITIAL_STATE.entities.modelViewerSnippet.poster.height;
 
 /**
  *
@@ -58,6 +64,7 @@ export class ExportPanel extends ConnectedLitElement {
   @query('snippet-viewer') snippetViewer!: SnippetViewer;
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
   @query('me-import-card') importCard!: ImportCard;
+  @query('me-draggable-input#height') heightInput!: DraggableInput;
 
   stateChanged(state: State) {
     this.config = getConfig(state);
@@ -75,6 +82,18 @@ export class ExportPanel extends ConnectedLitElement {
 
   onSnippetOpen() {
     this.importCard.onSnippetOpen();
+  }
+
+  onHeightChange() {
+    reduxStore.dispatch(dispatchHeight(this.heightInput.value));
+  }
+
+  onPosterSelect(event: CustomEvent) {
+    const dropdown = event.target as Dropdown;
+    const type = dropdown.selectedItem.getAttribute('value') as ImageType;
+    reduxStore.dispatch(dispatchMimeType(type));
+    const name = 'poster.' + type.substring(6);
+    reduxStore.dispatch(dispatchSetPosterName(name));
   }
 
   render() {
@@ -115,6 +134,19 @@ export class ExportPanel extends ConnectedLitElement {
 <me-expandable-tab tabName="File Manager" .open=${true}>
   <div slot="content">
     <me-import-card></me-import-card>
+    <me-section-row class="Row" style="display: flex; margin-top: 10px;" label="Poster:">
+      <me-draggable-input id="height" style="width: 100px; align-self: center;" value=${
+        DEFAULT_POSTER_HEIGHT}
+      min=256 max=2048 precision=0 dragStepSize=8 @change=${
+        this.onHeightChange} innerLabel="Height"></me-draggable-input>
+      <me-dropdown style="width: 80px; margin-left: 10px;"
+        @select=${this.onPosterSelect}
+      >
+        <paper-item value='image/webp'>WEBP</paper-item>
+        <paper-item value='image/png'>PNG</paper-item>
+        <paper-item value='image/jpeg'>JPEG</paper-item>
+      </me-dropdown>
+    </me-section-row>
     <div style="display: flex; justify-content: space-between; margin-top: 10px;">
       <me-export-zip-button id="export-zip"></me-export-zip-button>
       <me-export-poster-button></me-export-poster-button>
