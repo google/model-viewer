@@ -177,6 +177,9 @@ const cloneVariantMaterials = (dst: Object3D, src: Object3D) => {
     if (src.userData.variantMaterials !== undefined) {
       dst.userData.variantMaterials = new Map(src.userData.variantMaterials);
     }
+    if (src.userData.variantData !== undefined) {
+      dst.userData.variantData = src.userData.variantData;
+    }
     if (src.userData.originalMaterial !== undefined) {
       dst.userData.originalMaterial = src.userData.originalMaterial;
     }

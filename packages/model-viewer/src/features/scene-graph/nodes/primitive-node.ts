@@ -20,7 +20,7 @@ import {KHRMaterialsVariants, Primitive} from '../../../three-components/gltf-in
 import {UserDataVariantMapping} from '../../../three-components/gltf-instance/VariantMaterialLoaderPlugin.js';
 import {$getLoadedMaterial, Material} from '../material.js';
 import {VariantData} from '../model.js';
-import {$sourceObject} from '../three-dom-element.js';
+import {$correlatedObjects} from '../three-dom-element.js';
 
 
 
@@ -234,14 +234,15 @@ export class PrimitiveNode extends Node {
     // Adds variants name to material variants set.
     materialVariant.variantIndices.add(variantIndex);
 
+    this.mesh.userData.variantData = this[$modelVariants];
     // Updates import data (see VariantMaterialLoaderPlugin.ts).
     this.mesh.userData.variantMaterials = this.mesh.userData.variantMaterials ||
         new Map<number, UserDataVariantMapping>();
     const map = this.mesh.userData.variantMaterials! as
         Map<number, UserDataVariantMapping>;
     map.set(variantIndex, {
-      material: (materialVariant[$sourceObject] as ThreeMaterial),
-      gltfMaterialIndex: materialVariant.index
+      material: materialVariant[$correlatedObjects]!.values().next().value,
+      gltfMaterialIndex: materialVariant.index,
     });
   }
 

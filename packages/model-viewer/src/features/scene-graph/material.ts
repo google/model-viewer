@@ -41,7 +41,6 @@ export const $setActive = Symbol('setActive');
 const $isActive = Symbol('isActive');
 const $variantSet = Symbol('variantSet');
 const $modelVariants = Symbol('modelVariants');
-const $internalName = Symbol('internalName');
 
 /**
  * Material facade implementation for Three.js materials
@@ -56,8 +55,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$isActive]: boolean;
   private[$variantSet] = new Set<number>();
   readonly[$modelVariants]: Map<string, VariantData>;
-  private[$internalName]: string = '';
-
 
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
@@ -200,7 +197,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   get name(): string {
-    return (this[$sourceObject] as Material).name || this[$internalName];
+    return (this[$sourceObject] as Material).name;
   }
 
   set name(name: string) {
@@ -208,7 +205,12 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     if (sourceMaterial != null) {
       sourceMaterial.name = name;
     }
-    this[$internalName] = name;
+
+    if (this[$correlatedObjects] != null) {
+      for (const threeMaterial of this[$correlatedObjects]!) {
+        threeMaterial.name = name;
+      }
+    }
   }
 
   get pbrMetallicRoughness(): PBRMetallicRoughness {
