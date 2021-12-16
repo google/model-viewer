@@ -167,6 +167,12 @@ export class MaterialPanel extends ConnectedLitElement {
       }
 
       this.updateSelectableMaterials();
+      // Cloned material becomes the selected material.
+      this.materialSelector.selectedIndex =
+          this.selectableMaterials.indexOf(clone);
+      if (this.materialSelector.selectedIndex === -1) {
+        console.error('Could not select the new variant material');
+      }
       this.requestUpdate();
       material = clone;
     }

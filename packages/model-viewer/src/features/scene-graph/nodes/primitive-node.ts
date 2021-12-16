@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import {Material as ThreeMaterial, Mesh} from 'three';
+import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {KHRMaterialsVariants, Primitive} from '../../../three-components/gltf-instance/gltf-2.0.js';
@@ -75,55 +76,64 @@ export class PrimitiveNode extends Node {
     }
 
     // Gets the mesh index from the node.
-    const meshMappings = threeObjectMap.get(mesh)!;
-    const meshIndex = meshMappings.meshes!;
+    const associations =
+        (mesh.userData.associations as GLTFReference & {primitives: number}) ||
+        {};
 
+    if (associations.meshes == null) {
+      console.error('Mesh is missing primitive index association');
+      return;
+    }
     // The gltf mesh array to sample from.
     const meshElementArray = gltf['meshes'] || [];
     // List of primitives under the mesh.
     const gltfPrimitives =
-        (meshElementArray[meshIndex].primitives || []) as Primitive[];
+        (meshElementArray[associations.meshes].primitives || []) as Primitive[];
 
-    for (const primitive of gltfPrimitives) {
-      // Maps the primitive default to a material.
-      if (primitive.material != null) {
-        this[$materials].set(
-            primitive.material, mvMaterials[primitive.material]);
+    const gltfPrimitive = gltfPrimitives[associations.primitives];
+    if (gltfPrimitive == null) {
+      console.error('Mesh primitive definition is missing.');
+      return;
+    }
+
+    // Maps the gltfPrimitive default to a material.
+    if (gltfPrimitive.material != null) {
+      this[$materials].set(
+          gltfPrimitive.material, mvMaterials[gltfPrimitive.material]);
+    } else {
+      const defaultIdx = mvMaterials.findIndex((mat: Material) => {
+        return mat.name === 'Default';
+      });
+      if (defaultIdx >= 0) {
+        this[$materials].set(defaultIdx, mvMaterials[defaultIdx]);
       } else {
-        const defaultIdx = mvMaterials.findIndex((mat: Material) => {
-          return mat.name === 'Default';
-        });
-        if (defaultIdx >= 0) {
-          this[$materials].set(defaultIdx, mvMaterials[defaultIdx]);
-        } else {
-          console.warn('Primitive has no material!');
-        }
+        console.warn('gltfPrimitive has no material!');
       }
+    }
 
-      if (primitive.extensions &&
-          primitive.extensions['KHR_materials_variants']) {
-        const variantsExtension =
-            primitive.extensions['KHR_materials_variants'] as
-            KHRMaterialsVariants;
-        const extensions = threeGLTF.parser.json.extensions;
-        const variantNames = extensions['KHR_materials_variants'].variants;
-        // Provides definition now that we know there are variants to
-        // support.
-        for (const mapping of variantsExtension.mappings) {
-          const mvMaterial = mvMaterials[mapping.material];
-          // Maps variant indices to Materials.
-          this[$materials].set(mapping.material, mvMaterial);
-          for (const variant of mapping.variants) {
-            const {name} = variantNames[variant];
-            this[$variantToMaterialMap].set(variant, mvMaterial);
-            // Provides variant info for material self lookup.
-            mvMaterial.variantIndices.add(variant);
-            // Updates the models variant data.
-            if (!modelVariants.has(name)) {
-              modelVariants.set(name, new VariantData(name, variant));
-            }
-            modelVariants.get(name)!.materialVariants.push(mvMaterial.index);
+    if (gltfPrimitive.extensions &&
+        gltfPrimitive.extensions['KHR_materials_variants']) {
+      const variantsExtension =
+          gltfPrimitive.extensions['KHR_materials_variants'] as
+          KHRMaterialsVariants;
+      const extensions = threeGLTF.parser.json.extensions;
+      const variantNames = extensions['KHR_materials_variants'].variants;
+      // Provides definition now that we know there are variants to
+      // support.
+      for (const mapping of variantsExtension.mappings) {
+        const mvMaterial = mvMaterials[mapping.material];
+        // Maps variant indices to Materials.
+        this[$materials].set(mapping.material, mvMaterial);
+        for (const variant of mapping.variants) {
+          const {name} = variantNames[variant];
+          this[$variantToMaterialMap].set(variant, mvMaterial);
+          // Provides variant info for material self lookup.
+          mvMaterial.variantIndices.add(variant);
+          // Updates the models variant data.
+          if (!modelVariants.has(name)) {
+            modelVariants.set(name, new VariantData(name, variant));
           }
+          modelVariants.get(name)!.materialVariants.push(mvMaterial.index);
         }
       }
     }
