@@ -64,6 +64,7 @@ export class PrimitiveNode extends Node {
     this[$mesh] = mesh;
     const {gltf, threeGLTF, threeObjectMap} = correlatedSceneGraph;
     this[$modelVariants] = modelVariants;
+    this.mesh.userData.variantData = modelVariants;
     // Captures the primitive's initial material.
     const materialMappings =
         threeObjectMap.get(mesh.material as ThreeMaterial)!;
