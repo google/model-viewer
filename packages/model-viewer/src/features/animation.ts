@@ -56,10 +56,11 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       super(args)
 
       this[$scene].subscribeMixerEvent('loop', (e) => {
-        this.dispatchEvent(new CustomEvent('loop', {detail: e}));
+        const count = e.action._loopCount;
+        this.dispatchEvent(new CustomEvent('loop', {detail: { count }}));
       })
-      this[$scene].subscribeMixerEvent('finished', (e) => {
-        this.dispatchEvent(new CustomEvent('finished', {detail: e}));
+      this[$scene].subscribeMixerEvent('finished', () => {
+        this.dispatchEvent(new CustomEvent('finished'));
       })
     }
 
