@@ -38,6 +38,7 @@ export const $getLoadedMaterial = Symbol('getLoadedMaterial');
 export const $ensureMaterialIsLoaded = Symbol('ensureMaterialIsLoaded');
 export const $gltfIndex = Symbol('gltfIndex');
 export const $setActive = Symbol('setActive');
+export const $variantIndices = Symbol('variantIndices');
 const $isActive = Symbol('isActive');
 const $variantSet = Symbol('variantSet');
 const $modelVariants = Symbol('modelVariants');
@@ -242,7 +243,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return this[$gltfIndex];
   }
 
-  get variantIndices(): Set<number> {
+  [$variantIndices]() {
     return this[$variantSet];
   }
 

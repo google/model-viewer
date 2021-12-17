@@ -17,7 +17,7 @@ import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js'
 import {Mesh} from 'three/src/objects/Mesh.js';
 
 import {$lazyLoadGLTFInfo} from '../../../features/scene-graph/material.js';
-import {$materials, $primitivesList, $switchVariant, Model} from '../../../features/scene-graph/model.js';
+import {$availableVariants, $materials, $primitivesList, $switchVariant, Model} from '../../../features/scene-graph/model.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
 import {$scene} from '../../../model-viewer-base.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
@@ -239,10 +239,10 @@ suite('scene-graph/model', () => {
 
         test('createVariant() is a noop if the variant exists', async () => {
           await loadModel(CUBES_GLTF_PATH);
-          const length = model.availableVariants().length;
+          const length = model[$availableVariants]().length;
           model.createVariant('Purple Yellow');
 
-          expect(length).to.equal(model.availableVariants().length);
+          expect(length).to.equal(model[$availableVariants]().length);
         });
 
         test(

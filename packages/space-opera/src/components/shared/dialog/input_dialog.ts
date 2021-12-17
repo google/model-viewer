@@ -15,15 +15,12 @@
  *
  */
 
-import '@material/mwc-dialog';
 import '@material/mwc-textfield';
 
 import {Button} from '@material/mwc-button';
 import {Dialog} from '@material/mwc-dialog';
 import {TextField} from '@material/mwc-textfield';
 import {customElement, html, LitElement, property, query} from 'lit-element';
-
-import {styles} from './input_dialog.css.js';
 
 
 
@@ -32,7 +29,6 @@ import {styles} from './input_dialog.css.js';
  */
 @customElement('input-dialog')
 export class InputDialog extends LitElement {
-  static styles = styles;
 
   /** Proxies to mwc-checkbox's checked field */
   @property({type: Boolean}) openDialog = false;

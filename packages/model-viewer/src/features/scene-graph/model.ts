@@ -38,6 +38,7 @@ export const $threeScene = Symbol('threeScene');
 export const $materialsFromPoint = Symbol('materialsFromPoint');
 export const $materialFromPoint = Symbol('materialFromPoint');
 export const $variantData = Symbol('variantData');
+export const $availableVariants = Symbol('availableVariants');
 const $modelOnUpdate = Symbol('modelOnUpdate');
 const $cloneMaterial = Symbol('cloneMaterial');
 
@@ -196,7 +197,7 @@ export class Model implements ModelInterface {
     return this[$materials];
   }
 
-  availableVariants() {
+  [$availableVariants]() {
     const result = new Array<string>();
     for (const [name, data] of this[$variantData]) {
       result[data.index] = name;
@@ -388,7 +389,7 @@ export class Model implements ModelInterface {
   }
 
   setMaterialToVariant(materialIndex: number, targetVariantName: string) {
-    if (this.availableVariants().find(name => name === targetVariantName) ==
+    if (this[$availableVariants]().find(name => name === targetVariantName) ==
         null) {
       console.warn(`Can't add material to '${
           targetVariantName}', the variant does not exist.'`);

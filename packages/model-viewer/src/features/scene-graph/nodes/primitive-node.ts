@@ -18,7 +18,7 @@ import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader';
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {KHRMaterialsVariants, Primitive} from '../../../three-components/gltf-instance/gltf-2.0.js';
 import {UserDataVariantMapping} from '../../../three-components/gltf-instance/VariantMaterialLoaderPlugin.js';
-import {$getLoadedMaterial, Material} from '../material.js';
+import {$getLoadedMaterial, $variantIndices, Material} from '../material.js';
 import {VariantData} from '../model.js';
 import {$correlatedObjects} from '../three-dom-element.js';
 
@@ -129,7 +129,7 @@ export class PrimitiveNode extends Node {
           const {name} = variantNames[variant];
           this[$variantToMaterialMap].set(variant, mvMaterial);
           // Provides variant info for material self lookup.
-          mvMaterial.variantIndices.add(variant);
+          mvMaterial[$variantIndices]().add(variant);
           // Updates the models variant data.
           if (!modelVariants.has(name)) {
             modelVariants.set(name, new VariantData(name, variant));
@@ -219,7 +219,7 @@ export class PrimitiveNode extends Node {
 
     // Updates materials mapped to the variant.
     modelVariantData.materialVariants.push(variantIndex);
-    materialVariant.variantIndices.add(variantIndex);
+    materialVariant[$variantIndices]().add(variantIndex);
 
     // Updates internal mappings.
     this[$variantToMaterialMap].set(variantIndex, materialVariant);
@@ -233,7 +233,7 @@ export class PrimitiveNode extends Node {
   private updateVariantUserData(
       variantIndex: number, materialVariant: Material) {
     // Adds variants name to material variants set.
-    materialVariant.variantIndices.add(variantIndex);
+    materialVariant[$variantIndices]().add(variantIndex);
 
     this.mesh.userData.variantData = this[$modelVariants];
     // Updates import data (see VariantMaterialLoaderPlugin.ts).
