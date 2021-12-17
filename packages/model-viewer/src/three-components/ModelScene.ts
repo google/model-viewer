@@ -573,6 +573,10 @@ export class ModelScene extends Scene {
     this.mixer.update(step);
   }
 
+  subscribeMixerEvent(event: string, callback: (...args: any[]) => void) {
+    this.mixer.addEventListener(event, callback);
+  }
+
   /**
    * Call if the object has been changed in such a way that the shadow's shape
    * has changed (not a rotation about the Y axis).
