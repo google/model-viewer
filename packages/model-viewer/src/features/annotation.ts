@@ -34,7 +34,7 @@ const worldToModelNormal = new Matrix3();
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
   positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D, uv: Vector2D}|null
+      {position: Vector3D, normal: Vector3D, uv: Vector2D | null}|null
 }
 
 /**
@@ -135,7 +135,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * not hit, the result is null.
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
-        {position: Vector3D, normal: Vector3D, uv: Vector2D}|null {
+        {position: Vector3D, normal: Vector3D, uv: Vector2D | null}|null {
       const scene = this[$scene];
       const ndcPosition = scene.getNDC(pixelX, pixelY);
 
@@ -151,7 +151,10 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const normal =
           toVector3D(hit.normal.applyNormalMatrix(worldToModelNormal));
 
-      const uv = toVector2D(hit.uv);
+      let uv = null;
+      if (hit.uv != null){
+        uv = toVector2D(hit.uv);
+      }
 
       return {position: position, normal: normal, uv: uv};
     }

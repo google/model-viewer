@@ -213,7 +213,9 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       const {position, normal, uv} = hitResult!;
       closeToVector3(position, new Vector3(0, 0, 0.5));
       closeToVector3(normal, new Vector3(0, 0, 1));
-      withinRange(uv, 0, 1);
+      if(uv != null){
+        withinRange(uv, 0, 1);
+      }
     });
 
     test('gets expected hit result when turned', () => {
@@ -225,7 +227,9 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       const {position, normal, uv} = hitResult!;
       closeToVector3(position, new Vector3(0.5, 0, 0));
       closeToVector3(normal, new Vector3(1, 0, 0));
-      withinRange(uv, 0, 1);
+      if(uv != null){
+        withinRange(uv, 0, 1);
+      }
     });
   });
 });

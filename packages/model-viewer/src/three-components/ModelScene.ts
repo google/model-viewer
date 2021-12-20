@@ -661,7 +661,7 @@ export class ModelScene extends Scene {
    * is not hit, the result is null.
    */
   positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
-      {position: Vector3, normal: Vector3, uv: Vector2}|null {
+      {position: Vector3, normal: Vector3, uv: Vector2 | null}|null {
     this.raycaster.setFromCamera(ndcPosition, this.getCamera());
     const hits = this.raycaster.intersectObject(object, true);
 
@@ -675,7 +675,7 @@ export class ModelScene extends Scene {
     }
 
     if (hit.uv == null) {
-      return null;
+      return {position: hit.point, normal: hit.face.normal, uv: null};
     }
 
     hit.face.normal.applyNormalMatrix(
@@ -683,34 +683,6 @@ export class ModelScene extends Scene {
 
     return {position: hit.point, normal: hit.face.normal, uv: hit.uv};
   }
-
-  /**
-   * This method returns the x and y texture-coordinate of the point
-   * on the mesh corresponding to the input pixel coordinates given relative to
-   * the model-viewer element. If the mesh is not hit, the result is null.
-   */
-  /*
-  uvFromPoint(ndcPosition: Vector2, object: Object3D = this): Vector2|null {
-    this.raycaster.setFromCamera(ndcPosition, this.getCamera());
-    const hits = this.raycaster.intersectObject(object, true);
-      
-      if (hits.length === 0) {
-        return null;
-      }
-  
-      const hit = hits[0];
-  
-      if (hit.face == null) {
-        return null;
-      }
-  
-      if (hit.uv == null) {
-        return null;
-      }
-  
-      return hit.uv;
-  }
-  */
 
   /**
    * The following methods are for operating on the set of Hotspot objects
