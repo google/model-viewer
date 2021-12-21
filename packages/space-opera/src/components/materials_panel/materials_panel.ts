@@ -181,12 +181,10 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   getOriginalMaterial() {
-    if (this.originalGltf!.materials.length > this.selectedMaterialIndex) {
-      return this.originalGltf!.materials[this.selectedMaterialIndex];
-    } else {
-      return this.originalGltf!.materials[this.originalMaterialFromCloneMap.get(
-          this.selectedMaterialIndex)!];
-    }
+    return this.originalGltf!.materials.length > this.selectedMaterialIndex ?
+        this.originalGltf!.materials[this.selectedMaterialIndex] :
+        this.originalGltf!.materials[this.originalMaterialFromCloneMap.get(
+            this.selectedMaterialIndex)!];
   }
 
   getOriginalTextureId(index: number) {
@@ -544,21 +542,27 @@ export class MaterialPanel extends ConnectedLitElement {
       }
     });
 
+    // Captures this reference for use in callbacks.
     const self = this;
-    this.createVariantNameDialog.OnHandleValue = (value: string) => {
+    // Sets up the OnOK callback methods of the InputDialogs these
+    // handle dialog results.
+    this.createVariantNameDialog.OnOK = (value: string) => {
       self.onCreateVariant(value);
     };
+    this.editVariantNameDialog.OnOK = (value: string) => {
+      self.editVariantName(self.editVariantNameDialog.placeholder, value);
+    };
+    this.editMaterialNameDialog.OnOK = (value: string) => {
+      self.editMaterialName(self.editMaterialNameDialog.placeholder, value);
+    };
+
+    // Sets up the onValidate callbacks for InputDialogs these let the input
+    // dialog know if input is valid or not.
     this.createVariantNameDialog.onValidate = (value: string) => {
       return self.isValidInput(value);
     };
-    this.editVariantNameDialog.OnHandleValue = (value: string) => {
-      self.editVariantName(self.editVariantNameDialog.placeholder, value);
-    };
     this.editVariantNameDialog.onValidate = (value: string) => {
       return self.isValidInput(value);
-    };
-    this.editMaterialNameDialog.OnHandleValue = (value: string) => {
-      self.editMaterialName(self.editMaterialNameDialog.placeholder, value);
     };
   }
 

@@ -67,7 +67,6 @@ export class LazyLoader {
 export class VariantData {
   name: string;
   index: number;
-  materialVariants = new Array<number>();
   constructor(name: string, index: number) {
     this.name = name;
     this.index = index;
@@ -270,18 +269,16 @@ export class Model implements ModelInterface {
     for (const primitive of this[$primitivesList]) {
       promises.push(primitive.enableVariant(variantName));
     }
+
     await Promise.all(promises);
 
-    const updateActiveState = async () => {
-      for (const material of this.materials) {
-        material[$setActive](false);
-      }
-      // Marks the materials that are now in use after the variant switch.
-      for (const primitive of this[$primitivesList]) {
-        this.materials[primitive.getActiveMaterial().index][$setActive](true);
-      }
-    };
-    await updateActiveState();
+    for (const material of this.materials) {
+      material[$setActive](false);
+    }
+    // Marks the materials that are now in use after the variant switch.
+    for (const primitive of this[$primitivesList]) {
+      this.materials[primitive.getActiveMaterial().index][$setActive](true);
+    }
   }
 
   async[$prepareVariantsForExport]() {

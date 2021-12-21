@@ -29,12 +29,11 @@ import {customElement, html, LitElement, property, query} from 'lit-element';
  */
 @customElement('input-dialog')
 export class InputDialog extends LitElement {
-
   /** Proxies to mwc-checkbox's checked field */
   @property({type: Boolean}) openDialog = false;
   @property({type: Boolean}) modal = false;
   @property({type: String}) placeholder = 'Enter Value';
-  @property({type: Function}) OnHandleValue = (_value: string) => {};
+  @property({type: Function}) OnOK = (_value: string) => {};
   @property({type: Function})
   onValidate = (_value: string) => {
     return {valid: true, validationMessage: ''};
@@ -44,7 +43,7 @@ export class InputDialog extends LitElement {
   @query('mwc-dialog') inputDialog!: Dialog;
 
   onClick = () => {
-    this.OnHandleValue(this.textfield.value);
+    this.OnOK(this.textfield.value);
   };
 
   get open() {

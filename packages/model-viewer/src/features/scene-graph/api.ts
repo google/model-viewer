@@ -58,6 +58,8 @@ export declare interface Model {
    * @param variantName the name of the variant
    * @param activateVariant activates this material variant, i.e. the variant
    *     material is rendered, not the existing material.
+   * @returns returns the material clone if successful otherwise null is
+   *     returned.
    */
   createVariantFromMaterial(
       originalMaterialIndex: number, newMaterialName: string,
@@ -93,7 +95,7 @@ export declare interface Material {
   /**
    * The name of the material, if any.
    */
-  readonly name: string;
+  name: string;
 
   readonly normalTexture: TextureInfo|null;
   readonly occlusionTexture: TextureInfo|null;

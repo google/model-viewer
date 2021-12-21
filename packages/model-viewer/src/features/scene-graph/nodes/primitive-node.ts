@@ -134,7 +134,6 @@ export class PrimitiveNode extends Node {
           if (!modelVariants.has(name)) {
             modelVariants.set(name, new VariantData(name, variant));
           }
-          modelVariants.get(name)!.materialVariants.push(mvMaterial.index);
         }
       }
     }
@@ -218,7 +217,6 @@ export class PrimitiveNode extends Node {
     const variantIndex = modelVariantData.index;
 
     // Updates materials mapped to the variant.
-    modelVariantData.materialVariants.push(variantIndex);
     materialVariant[$variantIndices]().add(variantIndex);
 
     // Updates internal mappings.
