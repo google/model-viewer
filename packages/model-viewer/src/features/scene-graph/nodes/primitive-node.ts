@@ -230,6 +230,18 @@ export class PrimitiveNode extends Node {
     return true;
   }
 
+  deleteVariant(variantIndex: number) {
+    if (this.variantInfo.has(variantIndex)) {
+      this.variantInfo.delete(variantIndex);
+
+      const userDataMap = this.mesh.userData.variantMaterials! as
+          Map<number, UserDataVariantMapping>;
+      if (userDataMap != null) {
+        userDataMap.delete(variantIndex);
+      }
+    }
+  }
+
   private updateVariantUserData(
       variantIndex: number, materialVariant: Material) {
     // Adds variants name to material variants set.

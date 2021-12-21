@@ -75,6 +75,12 @@ export declare interface Model {
    * @param targetVariantName
    */
   setMaterialToVariant(materialIndex: number, targetVariantName: string): void;
+
+  /**
+   * Removes the variant name from the model.
+   * @param variantName the variant to remove.
+   */
+  deleteVariant(variantName: string): void;
 }
 
 /**

@@ -20,7 +20,7 @@ import {GLTF, GLTFElement, Material as GLTFMaterial} from '../../three-component
 import {$cloneAndPatchMaterial, ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Model as ModelInterface} from './api.js';
-import {$setActive, Material} from './material.js';
+import {$setActive, $variantSet, Material} from './material.js';
 import {$children, Node, PrimitiveNode} from './nodes/primitive-node.js';
 import {$correlatedObjects, $sourceObject} from './three-dom-element.js';
 
@@ -198,11 +198,14 @@ export class Model implements ModelInterface {
   }
 
   [$availableVariants]() {
-    const result = new Array<string>();
-    for (const [name, data] of this[$variantData]) {
-      result[data.index] = name;
-    }
-    return result;
+    const variants = Array.from(this[$variantData].values());
+    variants.sort((a, b) => {
+      return a.index - b.index;
+    });
+
+    return variants.map((data) => {
+      return data.name;
+    });
   }
 
   getMaterialByName(name: string): Material|null {
@@ -419,5 +422,24 @@ export class Model implements ModelInterface {
     variantData.name = newName;
     this[$variantData].set(newName, variantData!);
     this[$variantData].delete(currentName);
+  }
+
+  deleteVariant(variantName: string) {
+    const variant = this[$variantData].get(variantName);
+    if (variant == null) {
+      return;
+    }
+
+    for (const material of this.materials) {
+      if (material.hasVariant(variantName)) {
+        material[$variantSet].delete(variant.index);
+      }
+    }
+
+    for (const primitive of this[$primitivesList]) {
+      primitive.deleteVariant(variant.index);
+    }
+
+    this[$variantData].delete(variantName);
   }
 }

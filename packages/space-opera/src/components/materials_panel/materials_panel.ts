@@ -329,6 +329,33 @@ export class MaterialPanel extends ConnectedLitElement {
     this.requestUpdate();
   }
 
+  deleteCurrentVariant() {
+    const deleteVariant = this.selectedVariant;
+    let nextVariant: number = 0;
+    let nextVariantName: string|null = null;
+    const variantCount = getModelViewer().availableVariants.length;
+
+    if (variantCount > 1) {
+      nextVariant = (this.variantSelector.selectedIndex + 1) % variantCount;
+      nextVariantName = getModelViewer().availableVariants[nextVariant];
+      this.onSelectVariant(nextVariantName, () => {
+        getModelViewer().model!.deleteVariant(deleteVariant!);
+        if (nextVariantName == null) {
+          this.variantSelector.selectedIndex = 0;
+        } else {
+          this.variantSelector.selectedIndex =
+              getModelViewer().availableVariants.indexOf(nextVariantName);
+        }
+      });
+    } else {
+      getModelViewer().model!.deleteVariant(deleteVariant!);
+      this.variantSelector.selectedIndex = 0;
+      this.onSelectVariant(null);
+    }
+
+    this.requestUpdate();
+  }
+
   renderVariantsTab() {
     const hasVariants = getModelViewer().availableVariants.length > 0;
     return html`
@@ -361,6 +388,9 @@ export class MaterialPanel extends ConnectedLitElement {
       this.editVariantNameDialog.open = true;
     }}"
         value="${this.selectedVariant}">
+        </mwc-icon-button>
+        <mwc-icon-button icon="delete"
+        @click="${this.deleteCurrentVariant}">
         </mwc-icon-button>
         </div>
         <mwc-button
@@ -1060,10 +1090,13 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
-  async onSelectVariant(name: string) {
+  async onSelectVariant(name: string|null, onApplied?: () => void) {
     const onVariantApplied = () => {
       this.updateSelectableMaterials();
       this.selectedMaterialIndex = 0;
+      if (onApplied != null) {
+        onApplied();
+      }
     };
 
     getModelViewer().addEventListener(

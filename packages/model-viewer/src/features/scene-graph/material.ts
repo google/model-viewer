@@ -40,7 +40,7 @@ export const $gltfIndex = Symbol('gltfIndex');
 export const $setActive = Symbol('setActive');
 export const $variantIndices = Symbol('variantIndices');
 const $isActive = Symbol('isActive');
-const $variantSet = Symbol('variantSet');
+export const $variantSet = Symbol('variantSet');
 const $modelVariants = Symbol('modelVariants');
 
 /**
