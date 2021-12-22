@@ -63,6 +63,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this.currentTime = 0;
         this[$paused] = true;
         this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
+        this[$changeAnimation]({repetitions: Infinity, pingpong: false});
         this.dispatchEvent(new CustomEvent('finished'));
       })
     }
