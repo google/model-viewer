@@ -64,13 +64,9 @@ export class LazyLoader {
 /**
  * Facades variant mapping data.
  */
-export class VariantData {
+export interface VariantData {
   name: string;
   index: number;
-  constructor(name: string, index: number) {
-    this.name = name;
-    this.index = index;
-  }
 }
 
 /**
@@ -378,7 +374,8 @@ export class Model implements ModelInterface {
     if (!this[$variantData].has(variantName)) {
       // Adds the name if it's not already in the list.
       this[$variantData].set(
-          variantName, new VariantData(variantName, this[$variantData].size));
+          variantName,
+          {name: variantName, index: this[$variantData].size} as VariantData);
     } else {
       console.warn(`Variant '${variantName}'' already exists`);
     }

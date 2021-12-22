@@ -132,7 +132,7 @@ export class PrimitiveNode extends Node {
           mvMaterial[$variantIndices]().add(variant);
           // Updates the models variant data.
           if (!modelVariants.has(name)) {
-            modelVariants.set(name, new VariantData(name, variant));
+            modelVariants.set(name, {name, index: variant} as VariantData);
           }
         }
       }
@@ -211,7 +211,7 @@ export class PrimitiveNode extends Node {
     // Adds the variant to the model variants if needed.
     if (!this[$modelVariants].has(variantName)) {
       this[$modelVariants].set(
-          variantName, new VariantData(variantName, this[$modelVariants].size));
+          variantName, {name: variantName, index: this[$modelVariants].size});
     }
     const modelVariantData = this[$modelVariants].get(variantName)!;
     const variantIndex = modelVariantData.index;

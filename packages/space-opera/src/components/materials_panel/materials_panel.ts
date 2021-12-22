@@ -149,10 +149,10 @@ export class MaterialPanel extends ConnectedLitElement {
     // Creates a new material instance if it does not currently exist under the
     // variant.
     if (this.selectedVariant != null &&
-        this.variantSelector.selectedIndex !== 0 &&
         !material.hasVariant(this.selectedVariant)) {
       // Creates unique material instance for this variant if one does not
       // exist.
+
       const clone = getModelViewer().model!.createVariantFromMaterial(
           this.selectedMaterialIndex,
           material.name + ' ' + this.selectedVariant,
@@ -175,6 +175,20 @@ export class MaterialPanel extends ConnectedLitElement {
       }
       this.requestUpdate();
       material = clone;
+    } else {
+      // Ensures any other variants using this material create their own
+      // instance.
+      const otherVariants = getModelViewer().availableVariants;
+      for (const variant of otherVariants) {
+        if (variant === this.selectedVariant) {
+          continue;
+        }
+        getModelViewer().model!.createVariantFromMaterial(
+            this.selectedMaterialIndex,
+            material.name + ' ' + variant,
+            variant,
+            false);
+      }
     }
 
     return material;
