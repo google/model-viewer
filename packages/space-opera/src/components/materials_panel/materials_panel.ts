@@ -175,20 +175,19 @@ export class MaterialPanel extends ConnectedLitElement {
       }
       this.requestUpdate();
       material = clone;
-    } else {
-      // Ensures any other variants using this material create their own
-      // instance.
-      const otherVariants = getModelViewer().availableVariants;
-      for (const variant of otherVariants) {
-        if (variant === this.selectedVariant) {
-          continue;
-        }
-        getModelViewer().model!.createMaterialInstanceForVariant(
-            this.selectedMaterialIndex,
-            material.name + ' ' + variant,
-            variant,
-            false);
+    }
+    // Ensures any other variants using this material create their own
+    // instance.
+    const otherVariants = getModelViewer().availableVariants;
+    for (const variant of otherVariants) {
+      if (variant === this.selectedVariant) {
+        continue;
       }
+      getModelViewer().model!.createMaterialInstanceForVariant(
+          this.selectedMaterialIndex,
+          material.name + ' ' + variant,
+          variant,
+          false);
     }
 
     return material;
