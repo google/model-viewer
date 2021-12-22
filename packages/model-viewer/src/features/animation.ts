@@ -60,6 +60,9 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this.dispatchEvent(new CustomEvent('loop', {detail: { count }}));
       })
       this[$scene].subscribeMixerEvent('finished', () => {
+        this.currentTime = 0;
+        this[$paused] = true;
+        this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
         this.dispatchEvent(new CustomEvent('finished'));
       })
     }

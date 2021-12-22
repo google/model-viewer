@@ -104,10 +104,10 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
           expect(element[$scene].shouldRender()).to.be.true;
         });
 
-        suite('when play is invoked again with options', () => {
+        suite('when play is invoked again', () => {
           setup(async () => {
             const animationsPlay = waitForEvent(element, 'play');
-            element.play({repitations: 10, pingpong: true});
+            element.play();
             await animationsPlay;
           });
 
@@ -119,6 +119,40 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
             expect(element.duration).to.be.greaterThan(0);
           });
         })
+      });
+    });
+
+    suite('when play is invoked with options', () => {
+      setup(async() => {
+        const animationsPlay = waitForEvent(element, 'play');
+        element.play({repetitions: 2, pingpong: true});
+        await animationsPlay;
+      });
+
+      test('animations play at eash elapsed time', (done) => {
+        let t = 0;
+
+        suite('at 80% duration', () => {
+          setTimeout(() => {
+            expect(animationIsPlaying(element)).to.be.true;
+            t = element.currentTime;
+            done();
+          }, element.duration * 0.8 * 1000);
+        })
+
+        suite('at 180% duration', () => {
+          setTimeout(() => {
+            expect(animationIsPlaying(element)).to.be.true;
+            expect(element.currentTime).to.be.lessThan(t);
+            done();
+          }, element.duration * 1.8 * 1000);
+        });
+
+        setTimeout(() => {
+          expect(animationIsPlaying(element)).to.be.false;
+          expect(element.currentTime).to.be.equal(0);
+          done();
+        }, element.duration * 2.2 * 1000);
       });
     });
 
