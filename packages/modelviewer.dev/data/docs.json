@@ -879,6 +879,16 @@
         "name": "pause",
         "htmlName": "pause",
         "description": "Dispatched when animations are paused. A model always begins in the paused state, so it is worth mentioning that this event will not be dispatched until the the <span class='attribute'>.pause()</span> method is invoked after animations have begun playing."
+      },
+      {
+        "name": "loop",
+        "htmlName": "loop",
+        "description": "Dispatched when the current animation has looped. You can get the loop count with <span class='attribute'>e.detail.count</span>."
+      },
+      {
+        "name": "finished",
+        "htmlName": "finished",
+        "description": "Dispatched when the current animation has finished playing."
       }
     ]
   },
