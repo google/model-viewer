@@ -125,6 +125,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
     suite('when play is invoked with options', () => {
       setup(async() => {
         const animationsPlay = waitForEvent(element, 'play');
+        element.animationName = 'Punch';
         element.play({repetitions: 2, pingpong: true});
         await animationsPlay;
       });
