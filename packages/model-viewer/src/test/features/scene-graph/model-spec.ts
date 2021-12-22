@@ -168,7 +168,7 @@ suite('scene-graph/model', () => {
 
       suite('Create Variant', () => {
         test(
-            `createVariantFromMaterial() adds new primitive variants mapping
+            `createMaterialInstanceForVariant() adds new primitive variants mapping
             only to primitives that use the source material`,
             async () => {
               await loadModel(CUBES_GLTF_PATH);
@@ -184,7 +184,7 @@ suite('scene-graph/model', () => {
               const startingSize2 = primitive2.variantInfo.size;
 
               // Creates a variant from material 0.
-              expect(model.createVariantFromMaterial(
+              expect(model.createMaterialInstanceForVariant(
                          0, 'test-material', 'test-variant'))
                   .to.be.ok;
 
@@ -201,7 +201,8 @@ suite('scene-graph/model', () => {
             return prim.mesh.name === 'Box';
           })!;
 
-          model.createVariantFromMaterial(0, 'test-material', 'test-variant');
+          model.createMaterialInstanceForVariant(
+              0, 'test-material', 'test-variant');
 
           element.variantName = 'test-variant';
 
@@ -211,7 +212,8 @@ suite('scene-graph/model', () => {
 
         test('New variant is available to model-viewer', async () => {
           await loadModel(CUBES_GLTF_PATH);
-          model.createVariantFromMaterial(0, 'test-material', 'test-variant');
+          model.createMaterialInstanceForVariant(
+              0, 'test-material', 'test-variant');
 
           expect(element.availableVariants.find(variant => {
             return variant === 'test-variant';
@@ -219,11 +221,11 @@ suite('scene-graph/model', () => {
         });
 
         test(
-            `createVariantFromMaterial() fails when there is a variant name
+            `createMaterialInstanceForVariant() fails when there is a variant name
             collision`,
             async () => {
               await loadModel(CUBES_GLTF_PATH);
-              expect(model.createVariantFromMaterial(
+              expect(model.createMaterialInstanceForVariant(
                          0, 'test-material', 'Purple Yellow'))
                   .to.be.null;
             });

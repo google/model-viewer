@@ -58,12 +58,11 @@ export declare interface Model {
    * @param variantName the name of the variant
    * @param activateVariant activates this material variant, i.e. the variant
    *     material is rendered, not the existing material.
-   * @returns returns the material clone if successful otherwise null is
-   *     returned.
+   * @returns returns a clone of the original material.
    */
-  createVariantFromMaterial(
+  createMaterialInstanceForVariant(
       originalMaterialIndex: number, newMaterialName: string,
-      variantName: string, activateVariant: boolean): Material|null;
+      variantName: string, activateVariant: boolean): Material;
 
   /**
    * Adds a variant name to the model.

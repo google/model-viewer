@@ -153,7 +153,7 @@ export class MaterialPanel extends ConnectedLitElement {
       // Creates unique material instance for this variant if one does not
       // exist.
 
-      const clone = getModelViewer().model!.createVariantFromMaterial(
+      const clone = getModelViewer().model!.createMaterialInstanceForVariant(
           this.selectedMaterialIndex,
           material.name + ' ' + this.selectedVariant,
           this.selectedVariant,
@@ -183,7 +183,7 @@ export class MaterialPanel extends ConnectedLitElement {
         if (variant === this.selectedVariant) {
           continue;
         }
-        getModelViewer().model!.createVariantFromMaterial(
+        getModelViewer().model!.createMaterialInstanceForVariant(
             this.selectedMaterialIndex,
             material.name + ' ' + variant,
             variant,

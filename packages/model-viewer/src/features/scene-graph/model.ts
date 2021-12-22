@@ -327,17 +327,25 @@ export class Model implements ModelInterface {
     return clonedMaterial;
   }
 
-  createVariantFromMaterial(
+  createMaterialInstanceForVariant(
       originalMaterialIndex: number, newMaterialName: string,
-      variantName: string, activateVariant: boolean = true): Material|null {
-    const variantMaterial =
-        this[$cloneMaterial](originalMaterialIndex, newMaterialName);
+      variantName: string, activateVariant: boolean = true): Material {
+    let variantMaterialInstance: Material|null = null;
+    const getInstance =
+        () => {
+          if (variantMaterialInstance == null) {
+            variantMaterialInstance =
+                this[$cloneMaterial](originalMaterialIndex, newMaterialName);
+          }
+          return variantMaterialInstance;
+        }
 
-    let created = false;
     for (const primitive of this[$primitivesList]) {
       const variantData = this[$variantData].get(variantName);
       // Skips the primitive if the variant already exists.
       if (variantData != null && primitive.variantInfo.has(variantData.index)) {
+        variantMaterialInstance =
+            primitive.variantInfo.get(variantData.index) as Material;
         continue;
       }
 
@@ -350,24 +358,18 @@ export class Model implements ModelInterface {
         this.createVariant(variantName);
       }
 
-      if (primitive.addVariant(variantMaterial, variantName)) {
-        created = true;
-      }
-    }
-
-    if (!created) {
-      return null;
+      primitive.addVariant(getInstance(), variantName)
     }
 
     if (activateVariant) {
-      variantMaterial[$setActive](true);
+      getInstance()[$setActive](true);
       this.materials[originalMaterialIndex][$setActive](false);
       for (const primitive of this[$primitivesList]) {
         primitive.enableVariant(variantName);
       }
     }
 
-    return variantMaterial;
+    return getInstance();
   }
 
   createVariant(variantName: string) {
