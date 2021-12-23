@@ -77,4 +77,8 @@ export const styles: CSSResult = css`.EditingMaterial {
 #alpha-cutoff-label {
   margin-top: 10px;
 }
+
+.EditableSelector {
+  display: flex;
+}
 `;

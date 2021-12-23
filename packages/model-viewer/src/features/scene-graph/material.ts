@@ -19,7 +19,7 @@ import {AlphaMode, GLTF, Material as GLTFMaterial, RGB} from '../../three-compon
 import {Material as DefaultedMaterial} from '../../three-components/gltf-instance/gltf-defaulted.js';
 
 import {Material as MaterialInterface} from './api.js';
-import {LazyLoader} from './model.js';
+import {LazyLoader, VariantData} from './model.js';
 import {PBRMetallicRoughness} from './pbr-metallic-roughness.js';
 import {TextureInfo, TextureUsage} from './texture-info.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
@@ -38,7 +38,10 @@ export const $getLoadedMaterial = Symbol('getLoadedMaterial');
 export const $ensureMaterialIsLoaded = Symbol('ensureMaterialIsLoaded');
 export const $gltfIndex = Symbol('gltfIndex');
 export const $setActive = Symbol('setActive');
+export const $variantIndices = Symbol('variantIndices');
 const $isActive = Symbol('isActive');
+export const $variantSet = Symbol('variantSet');
+const $modelVariants = Symbol('modelVariants');
 
 /**
  * Material facade implementation for Three.js materials
@@ -51,6 +54,8 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$lazyLoadGLTFInfo]?: LazyLoader;
   private[$gltfIndex]: number;
   private[$isActive]: boolean;
+  private[$variantSet] = new Set<number>();
+  readonly[$modelVariants]: Map<string, VariantData>;
 
   get[$backingThreeMaterial](): MeshStandardMaterial {
     return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
@@ -62,11 +67,13 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   constructor(
       onUpdate: () => void, gltf: GLTF, gltfMaterial: GLTFMaterial,
       gltfIndex: number, isActive: boolean,
+      modelVariants: Map<string, VariantData>,
       correlatedMaterials: Set<MeshStandardMaterial>,
       lazyLoadInfo: LazyLoader|undefined = undefined) {
     super(onUpdate, gltfMaterial, correlatedMaterials);
     this[$gltfIndex] = gltfIndex;
     this[$isActive] = isActive;
+    this[$modelVariants] = modelVariants;
 
     if (lazyLoadInfo == null) {
       this[$initialize](gltf);
@@ -191,7 +198,20 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   get name(): string {
-    return (this[$sourceObject] as Material).name || '';
+    return (this[$sourceObject] as Material).name;
+  }
+
+  set name(name: string) {
+    const sourceMaterial = (this[$sourceObject] as Material);
+    if (sourceMaterial != null) {
+      sourceMaterial.name = name;
+    }
+
+    if (this[$correlatedObjects] != null) {
+      for (const threeMaterial of this[$correlatedObjects]!) {
+        threeMaterial.name = name;
+      }
+    }
   }
 
   get pbrMetallicRoughness(): PBRMetallicRoughness {
@@ -221,6 +241,15 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   get index(): number {
     return this[$gltfIndex];
+  }
+
+  [$variantIndices]() {
+    return this[$variantSet];
+  }
+
+  hasVariant(name: string): boolean {
+    const variantData = this[$modelVariants].get(name);
+    return variantData != null && this[$variantSet].has(variantData.index);
   }
 
   setEmissiveFactor(rgb: RGB) {

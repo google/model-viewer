@@ -15,11 +15,15 @@
  *
  */
 
+import '@material/mwc-button';
+import '@material/mwc-dialog';
 import '@material/mwc-icon-button';
+import '@material/mwc-textfield';
 import '@polymer/paper-item';
 import '@polymer/paper-slider';
 import '../shared/checkbox/checkbox.js';
 import '../shared/color_picker/color_picker.js';
+import '../shared/dialog/input_dialog';
 import '../shared/dropdown/dropdown.js';
 import '../shared/editor_panel/editor_panel.js';
 import '../shared/expandable_content/expandable_tab.js';
@@ -29,6 +33,7 @@ import '../shared/texture_picker/texture_picker.js';
 
 import {Material} from '@google/model-viewer/lib/features/scene-graph/material';
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
+import {TextField} from '@material/mwc-textfield';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {customElement, html, internalProperty, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
@@ -43,6 +48,7 @@ import {dispatchModelDirty, getModel, getModelViewer, getTextureId, pushThumbnai
 import {Thumbnail} from '../model_viewer_preview/types.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
 import {ColorPicker} from '../shared/color_picker/color_picker.js';
+import {InputDialog} from '../shared/dialog/input_dialog';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
 import {TabbedPanel} from '../shared/tabs/tabs.js';
@@ -62,6 +68,8 @@ export class MaterialPanel extends ConnectedLitElement {
   @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
   private thumbnailUrls: string[] = [];
   private thumbnailIds: string[] = [];
+  private originalMaterialFromCloneMap = new Map<number, number>();
+
   @internalProperty() originalGltf?: GLTF;
 
   @internalProperty() isNewModel: boolean = true;
@@ -76,7 +84,6 @@ export class MaterialPanel extends ConnectedLitElement {
   metallicFactorSlider!: SliderWithInputElement;
   @query('me-dropdown#material-selector') materialSelector!: Dropdown;
   @query('me-dropdown#variant-selector') variantSelector!: Dropdown;
-  createVariantSelector!: Dropdown;
   @query('me-texture-picker#base-color-texture-picker')
   baseColorTexturePicker!: TexturePicker;
   @query('me-texture-picker#metallic-roughness-texture-picker')
@@ -96,6 +103,13 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('me-checkbox#doubleSidedCheckbox')
   doubleSidedCheckbox!: CheckboxElement;
   selectableMaterials = new Array<Material>();
+  @query('input-dialog#edit-variant-name') editVariantNameDialog!: InputDialog;
+  @query('input-dialog#create-variant-name')
+  createVariantNameDialog!: InputDialog;
+  @query('input-dialog#edit-material-name')
+  editMaterialNameDialog!: InputDialog;
+
+  @query('mwc-textfield#set-variant-name') setVariantName!: TextField;
 
   stateChanged(state: State) {
     const {originalGltf, thumbnailsById} = getModel(state);
@@ -110,6 +124,10 @@ export class MaterialPanel extends ConnectedLitElement {
           this.thumbnailUrls.push(thumbnail.objectUrl);
         }
 
+        if (getModelViewer().availableVariants.length > 0) {
+          getModelViewer().variantName = getModelViewer().availableVariants[0];
+        }
+
         this.updateSelectableMaterials();
 
         // If a new model is loaded, don't interpolate material
@@ -121,11 +139,66 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   getMaterial() {
-    return getModelViewer()!.model!.materials[this.selectedMaterialIndex];
+    const materials = getModelViewer()!.model!.materials;
+    return materials[this.selectedMaterialIndex];
+  }
+
+  getMaterialVariant() {
+    let material = this.getMaterial();
+    const originalMaterial = material;
+
+    // Creates a new material instance if it does not currently exist under the
+    // variant.
+    if (this.selectedVariant != null &&
+        !material.hasVariant(this.selectedVariant)) {
+      // Creates unique material instance for this variant if one does not
+      // exist.
+
+      const clone = getModelViewer().model!.createMaterialInstanceForVariant(
+          this.selectedMaterialIndex,
+          material.name + ' ' + this.selectedVariant,
+          this.selectedVariant,
+          true)!;
+
+      const sourceIndex = this.originalMaterialFromCloneMap.get(material.index);
+      if (sourceIndex != null) {
+        this.originalMaterialFromCloneMap.set(clone.index, sourceIndex);
+      } else {
+        this.originalMaterialFromCloneMap.set(clone.index, material.index);
+      }
+
+      this.updateSelectableMaterials();
+      // Cloned material becomes the selected material.
+      this.materialSelector.selectedIndex =
+          this.selectableMaterials.indexOf(clone);
+      if (this.materialSelector.selectedIndex === -1) {
+        console.error('Could not select the new variant material');
+      }
+      material = clone;
+    }
+    // Ensures any other variants using this material create their own
+    // instance.
+    const otherVariants = getModelViewer().availableVariants;
+    for (const variant of otherVariants) {
+      if (variant === this.selectedVariant) {
+        continue;
+      }
+      getModelViewer().model!.createMaterialInstanceForVariant(
+          this.selectedMaterialIndex,
+          originalMaterial.name + ' ' + variant,
+          variant,
+          false);
+    }
+
+    this.requestUpdate();
+    return material;
   }
 
   getOriginalMaterial() {
-    return this.originalGltf!.materials[this.selectedMaterialIndex];
+    return this.originalGltf!.materials.length > this.selectedMaterialIndex ?
+        this.originalGltf!.materials[this.selectedMaterialIndex] :
+        this.originalGltf!.materials[this.originalMaterialFromCloneMap.get(
+            this.selectedMaterialIndex)!];
   }
 
   getOriginalTextureId(index: number) {
@@ -211,6 +284,7 @@ export class MaterialPanel extends ConnectedLitElement {
     if (material == null) {
       return;
     }
+
     this.panel.style.display = '';
     const {
       pbrMetallicRoughness,
@@ -256,29 +330,179 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
+  editVariantName(currentVariant: string, newVariantName: string) {
+    getModelViewer().model!.updateVariantName(currentVariant, newVariantName);
+    this.selectedVariant = newVariantName;
+    this.requestUpdate();
+  }
+
+  editMaterialName(_currentName: string, newName: string) {
+    this.selectedMaterial.name = newName;
+    this.requestUpdate();
+  }
+
+  deleteCurrentVariant() {
+    const deleteVariant = this.selectedVariant;
+    let nextVariant: number = 0;
+    let nextVariantName: string|null = null;
+    const variantCount = getModelViewer().availableVariants.length;
+
+    if (variantCount > 1) {
+      nextVariant = (this.variantSelector.selectedIndex + 1) % variantCount;
+      nextVariantName = getModelViewer().availableVariants[nextVariant];
+      this.onSelectVariant(nextVariantName, () => {
+        getModelViewer().model!.deleteVariant(deleteVariant!);
+        if (nextVariantName == null) {
+          this.variantSelector.selectedIndex = 0;
+        } else {
+          this.variantSelector.selectedIndex =
+              getModelViewer().availableVariants.indexOf(nextVariantName);
+        }
+      });
+    } else {
+      getModelViewer().model!.deleteVariant(deleteVariant!);
+      this.variantSelector.selectedIndex = 0;
+      this.onSelectVariant(null);
+    }
+
+    this.requestUpdate();
+  }
+
   renderVariantsTab() {
-    const hasVariants = getModelViewer().availableVariants.length > 0;
+    const hasVariants = getModelViewer().availableVariants.length > 1;
     return html`
     <me-expandable-tab tabName="Variants" .open=${hasVariants}>
-      <me-dropdown
-        style='display: ${hasVariants ? '' : 'none'}'
-        slot="content"
-        id="variant-selector"
-        @select=${this.onSelectVariant}
-        >${
+      <div slot="content">
+      <div class="EditableSelector" style='display: ${
+        hasVariants ? '' : 'none'}'>
+        <me-dropdown
+          style='display: ${hasVariants ? '' : 'none'}'
+          id="variant-selector"
+          @select="${() => {
+      const paperItem =
+          this.variantSelector.selectedItem as PaperListboxElement;
+      if (paperItem != null && paperItem.hasAttribute('value')) {
+        const selectedVariantName = paperItem.getAttribute('value');
+        if (selectedVariantName != null) {
+          this.onSelectVariant(selectedVariantName);
+        }
+      }
+    }}">${
         getModelViewer().availableVariants.map(
-            (name, id) =>
-                html`<paper-item value="${name}">(${id}) ${name}</paper-item>`)}
-      </me-dropdown>
+            (name, id) => html`<paper-item value="${name}">
+            (${id}) ${name}</paper-item>
+            `)}
+        </me-dropdown>
+        <mwc-icon-button icon="create"
+        @click="${() => {
+      this.editVariantNameDialog.textFieldValue = '';
+      this.editVariantNameDialog.placeholder = this.selectedVariant!;
+      this.editVariantNameDialog.open = true;
+    }}"
+        value="${this.selectedVariant}">
+        </mwc-icon-button>
+        <mwc-icon-button icon="delete"
+        @click="${this.deleteCurrentVariant}">
+        </mwc-icon-button>
+        </div>
+        <mwc-button
+          label="Create Variant"
+          id="create-variant"
+          @click="${() => {
+      this.createVariantNameDialog.open = true;
+    }}"></mwc-button>
+        </div>
     </me-expandable-tab>
     `;
+  }
+
+  validateInput(textField: TextField): boolean {
+    textField.validityTransform =
+        (value: string, nativeValidity: ValidityState) => {
+          // Validates length.
+          if (value.length < 1) {
+            textField.validationMessage = `Invalid input.`;
+            return {valid: false} as ValidityState;
+          }
+
+          // Verifies name is unique.
+          if (getModelViewer().availableVariants.find((existingNames) => {
+                return existingNames === value;
+              })) {
+            textField.validationMessage = `The name ${value} already exists.`;
+            return {valid: false};
+          }
+
+          return nativeValidity;
+        };
+
+    return textField.reportValidity();
+  }
+
+  isValidInput(_value: string): {valid: boolean, validationMessage: string} {
+    // Validates length.
+    if (_value.length < 1) {
+      return {valid: false, validationMessage: `Invalid input.`};
+    }
+
+    // Verifies name is unique.
+    if (getModelViewer().availableVariants.find((existingNames) => {
+          return existingNames === _value;
+        })) {
+      return {
+        valid: false,
+        validationMessage: `The name ${_value} already exists.`
+      };
+    }
+
+    return {valid: true, validationMessage: ''};
+  }
+
+  renderEditVariantDialog() {
+    return html`
+      <input-dialog id="edit-variant-name" modal="true"
+        placeholder="Enter Variant Name">
+      </input-dialog>
+    `;
+  }
+
+  renderCreateVariantDialog() {
+    return html`
+      <input-dialog id="create-variant-name" modal="true"
+        placeholder="Enter Variant Name">
+      </input-dialog>
+    `;
+  }
+
+  renderEditMaterialNameDialog() {
+    return html`
+      <input-dialog id="edit-material-name" modal="true"
+        placeholder="Enter Material Name">
+      </input-dialog>
+    `;
+  }
+
+  onCreateVariant(newVariantName: string) {
+    if (getModelViewer().availableVariants.length === 0) {
+      // Creates a default variant for existing materials to live under if
+      // there were no variants in the model to begin with.
+      getModelViewer().model!.createVariant('Default');
+      for (const material of getModelViewer().model!.materials) {
+        getModelViewer().model!.setMaterialToVariant(material.index, 'Default');
+      }
+    }
+    getModelViewer().model!.createVariant(newVariantName);
+    this.variantSelector.selectedIndex =
+        getModelViewer().availableVariants.indexOf(newVariantName)!;
+    this.selectedVariant = newVariantName;
+    this.requestUpdate();
   }
 
   renderSelectMaterialTab() {
     return html`
     <me-expandable-tab tabName="Selected Material" .open=${true}>
+      <div slot="content" class="EditableSelector">
       <me-dropdown
-        slot="content"
         id="material-selector"
         @select=${this.onSelectMaterial}
         >${
@@ -288,6 +512,14 @@ export class MaterialPanel extends ConnectedLitElement {
                     material.name ? material.name :
                                     'Unnamed Material'}</paper-item>`)}
       </me-dropdown>
+      <mwc-icon-button icon="create"
+        @click="${() => {
+      this.editMaterialNameDialog.textFieldValue = '';
+      this.editMaterialNameDialog.placeholder = this.selectedMaterial!.name;
+      this.editMaterialNameDialog.open = true;
+    }}">
+      </mwc-icon-button>
+      </div>
     </me-expandable-tab>
     `;
   }
@@ -309,6 +541,10 @@ export class MaterialPanel extends ConnectedLitElement {
     getModelViewer().variantName = name;
   }
 
+  get selectedMaterial(): Material {
+    return getModelViewer().model!.materials[this.selectedMaterialIndex];
+  }
+
   firstUpdated() {
     // Enables material picking but prevents selection while dragging a model.
     let drag = false;
@@ -319,6 +555,29 @@ export class MaterialPanel extends ConnectedLitElement {
         this.onClick(event);
       }
     });
+
+    // Captures this reference for use in callbacks.
+    const self = this;
+    // Sets up the OnOK callback methods of the InputDialogs these
+    // handle dialog results.
+    this.createVariantNameDialog.OnOK = (value: string) => {
+      self.onCreateVariant(value);
+    };
+    this.editVariantNameDialog.OnOK = (value: string) => {
+      self.editVariantName(self.editVariantNameDialog.placeholder, value);
+    };
+    this.editMaterialNameDialog.OnOK = (value: string) => {
+      self.editMaterialName(self.editMaterialNameDialog.placeholder, value);
+    };
+
+    // Sets up the onValidate callbacks for InputDialogs these let the input
+    // dialog know if input is valid or not.
+    this.createVariantNameDialog.onValidate = (value: string) => {
+      return self.isValidInput(value);
+    };
+    this.editVariantNameDialog.onValidate = (value: string) => {
+      return self.isValidInput(value);
+    };
   }
 
   onClick = (event) => {
@@ -414,19 +673,21 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onBaseColorChange() {
-    this.getMaterial().pbrMetallicRoughness.setBaseColorFactor(
-        this.selectedBaseColor);
+    const material = this.getMaterialVariant();
+
+    material.pbrMetallicRoughness.setBaseColorFactor(this.selectedBaseColor);
+
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onRoughnessChange() {
-    this.getMaterial().pbrMetallicRoughness.setRoughnessFactor(
+    this.getMaterialVariant().pbrMetallicRoughness.setRoughnessFactor(
         this.selectedRoughnessFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onMetallicChange() {
-    this.getMaterial().pbrMetallicRoughness.setMetallicFactor(
+    this.getMaterialVariant().pbrMetallicRoughness.setMetallicFactor(
         this.selectedMetallicFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
@@ -436,7 +697,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   updateDoubleSided(value: boolean) {
-    this.getMaterial().setDoubleSided(value);
+    this.getMaterialVariant().setDoubleSided(value);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -489,68 +750,72 @@ export class MaterialPanel extends ConnectedLitElement {
   onBaseColorTextureChange() {
     this.onTextureChange(
         this.selectedBaseColorTextureId,
-        this.getMaterial().pbrMetallicRoughness.baseColorTexture);
+        this.getMaterialVariant().pbrMetallicRoughness.baseColorTexture);
   }
 
   onBaseColorTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.baseColorTexturePicker,
-        this.getMaterial().pbrMetallicRoughness.baseColorTexture);
+        this.getMaterialVariant().pbrMetallicRoughness.baseColorTexture);
   }
 
   onMetallicRoughnessTextureChange() {
     this.onTextureChange(
         this.selectedMetallicRoughnessTextureId,
-        this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
+        this.getMaterialVariant()
+            .pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
   onMetallicRoughnessTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.metallicRoughnessTexturePicker,
-        this.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
+        this.getMaterialVariant()
+            .pbrMetallicRoughness.metallicRoughnessTexture);
   }
 
   onNormalTextureChange() {
     this.onTextureChange(
-        this.selectedNormalTextureId, this.getMaterial().normalTexture);
+        this.selectedNormalTextureId, this.getMaterialVariant().normalTexture);
   }
 
   onNormalTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.normalTexturePicker,
-        this.getMaterial().normalTexture);
+        this.getMaterialVariant().normalTexture);
   }
 
   onEmissiveTextureChange() {
     this.onTextureChange(
-        this.selectedEmissiveTextureId, this.getMaterial().emissiveTexture);
+        this.selectedEmissiveTextureId,
+        this.getMaterialVariant().emissiveTexture);
   }
 
   onEmissiveTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.emissiveTexturePicker,
-        this.getMaterial().emissiveTexture);
+        this.getMaterialVariant().emissiveTexture);
   }
 
   onEmissiveFactorChanged() {
-    this.getMaterial().setEmissiveFactor(this.selectedEmissiveFactor);
+    this.getMaterialVariant().setEmissiveFactor(this.selectedEmissiveFactor);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onOcclusionTextureChange() {
     this.onTextureChange(
-        this.selectedOcclusionTextureId, this.getMaterial().occlusionTexture);
+        this.selectedOcclusionTextureId,
+        this.getMaterialVariant().occlusionTexture);
   }
 
   onOcclusionTextureUpload(event: CustomEvent<FileDetails>) {
     this.onTextureUpload(
         event.detail,
         this.occlusionTexturePicker,
-        this.getMaterial().occlusionTexture);
+        this.getMaterialVariant().occlusionTexture);
   }
 
   onAlphaModeSelect() {
@@ -558,14 +823,14 @@ export class MaterialPanel extends ConnectedLitElement {
         ALPHA_BLEND_MODES[this.alphaModePicker.selectedIndex] as AlphaMode;
     this.alphaCutoffContainer.style.display =
         selectedMode === 'MASK' ? '' : 'none';
-    const material = this.getMaterial();
+    const material = this.getMaterialVariant();
     material.setAlphaMode(selectedMode);
     this.alphaCutoffSlider.value = material.getAlphaCutoff();
     reduxStore.dispatch(dispatchModelDirty());
   }
 
   onAlphaCutoffChange() {
-    this.getMaterial().setAlphaCutoff(this.selectedAlphaCutoff);
+    this.getMaterialVariant().setAlphaCutoff(this.selectedAlphaCutoff);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -843,25 +1108,28 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   }
 
-  async onSelectVariant() {
-    const paperItem = this.variantSelector.selectedItem as PaperListboxElement;
-    if (paperItem != null && paperItem.hasAttribute('value')) {
-      this.selectedVariant = paperItem.getAttribute('value');
+  async onSelectVariant(name: string|null, onApplied?: () => void) {
+    const onVariantApplied = () => {
+      this.updateSelectableMaterials();
+      this.selectedMaterialIndex = 0;
+      if (onApplied != null) {
+        onApplied();
+      }
+    };
 
-      const onVariantApplied = () => {
-        this.updateSelectableMaterials();
-        this.selectedMaterialIndex = 0;
-      };
+    getModelViewer().addEventListener(
+        'variant-applied', onVariantApplied, {once: true});
 
-      getModelViewer().addEventListener(
-          'variant-applied', onVariantApplied, {once: true});
-    }
+    this.selectedVariant = name;
   }
 
   render() {
     return html`
     <div id="material-container" style="display: none">
     ${this.renderVariantsTab()}
+    ${this.renderEditVariantDialog()}
+    ${this.renderCreateVariantDialog()}
+    ${this.renderEditMaterialNameDialog()}
     ${this.renderSelectMaterialTab()}
     ${this.renderBaseColorTab()}
     ${this.renderMetallicRoughnessTab()}

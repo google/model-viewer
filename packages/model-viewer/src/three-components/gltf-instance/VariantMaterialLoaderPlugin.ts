@@ -25,8 +25,14 @@
  * https://github.com/takahirox/three-gltf-extensions/tree/main/loaders/KHR_materials_variants
  */
 
-import {Material} from 'three';
+import {Material as ThreeMaterial} from 'three';
 import {GLTF, GLTFLoaderPlugin, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+
+export interface UserDataVariantMapping {
+  material: ThreeMaterial|null;
+  gltfMaterialIndex: number;
+}
 
 /**
  * KHR_materials_variants specification allows duplicated variant names
@@ -66,14 +72,12 @@ const ensureUniqueNames = (variantNames: string[]) => {
  * @param variantNames {Array<string>} Required to be unique names
  * @return {Map}
  */
-const mappingsArrayToTable = (extensionDef: any, variantNames: string[]) => {
-  const table =
-      new Map<string, {material: Material | null, gltfMaterialIndex: number}>();
+const mappingsArrayToTable = (extensionDef:
+                                  any): Map<number, UserDataVariantMapping> => {
+  const table = new Map<number, UserDataVariantMapping>();
   for (const mapping of extensionDef.mappings) {
     for (const variant of mapping.variants) {
-      table.set(
-          variantNames[variant],
-          {material: null, gltfMaterialIndex: mapping.material});
+      table.set(variant, {material: null, gltfMaterialIndex: mapping.material});
     }
   }
   return table;
@@ -140,7 +144,7 @@ export default class GLTFMaterialsVariantsExtension implements
             continue;
           }
           meshes[i].userData.variantMaterials =
-              mappingsArrayToTable(extensionsDef[this.name], variants);
+              mappingsArrayToTable(extensionsDef[this.name]);
         }
       });
     }

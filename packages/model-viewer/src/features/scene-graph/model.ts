@@ -16,11 +16,13 @@
 import {Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster} from 'three';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
-import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {GLTF, GLTFElement, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
+import {$cloneAndPatchMaterial, ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 
 import {Model as ModelInterface} from './api.js';
-import {$setActive, Material} from './material.js';
+import {$setActive, $variantSet, Material} from './material.js';
 import {$children, Node, PrimitiveNode} from './nodes/primitive-node.js';
+import {$correlatedObjects, $sourceObject} from './three-dom-element.js';
 
 
 
@@ -35,7 +37,10 @@ export const $switchVariant = Symbol('switchVariant');
 export const $threeScene = Symbol('threeScene');
 export const $materialsFromPoint = Symbol('materialsFromPoint');
 export const $materialFromPoint = Symbol('materialFromPoint');
-
+export const $variantData = Symbol('variantData');
+export const $availableVariants = Symbol('availableVariants');
+const $modelOnUpdate = Symbol('modelOnUpdate');
+const $cloneMaterial = Symbol('cloneMaterial');
 
 // Holds onto temporary scene context information needed to perform lazy loading
 // of a resource.
@@ -57,6 +62,14 @@ export class LazyLoader {
 }
 
 /**
+ * Facades variant mapping data.
+ */
+export interface VariantData {
+  name: string;
+  index: number;
+}
+
+/**
  * A Model facades the top-level GLTF object returned by Three.js' GLTFLoader.
  * Currently, the model only bothers itself with the materials in the Three.js
  * scene graph.
@@ -67,10 +80,15 @@ export class Model implements ModelInterface {
   private[$roots] = new Array<Node>();
   private[$primitivesList] = new Array<PrimitiveNode>();
   private[$threeScene]: Object3D|Group;
+  private[$modelOnUpdate]: () => void = () => {};
+  private[$correlatedSceneGraph]: CorrelatedSceneGraph;
+  private[$variantData] = new Map<string, VariantData>();
 
   constructor(
       correlatedSceneGraph: CorrelatedSceneGraph,
       onUpdate: () => void = () => {}) {
+    this[$modelOnUpdate] = onUpdate;
+    this[$correlatedSceneGraph] = correlatedSceneGraph;
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
     this[$threeScene] = threeGLTF.scene;
 
@@ -80,7 +98,13 @@ export class Model implements ModelInterface {
 
       if (correlatedMaterial != null) {
         this[$materials].push(new Material(
-            onUpdate, gltf, material, i, true, correlatedMaterial));
+            onUpdate,
+            gltf,
+            material,
+            i,
+            true,
+            this[$variantData],
+            correlatedMaterial));
       } else {
         const elementArray = gltf['materials'] || [];
         const gltfMaterialDef = elementArray[i];
@@ -108,6 +132,7 @@ export class Model implements ModelInterface {
             gltfMaterialDef,
             i,
             false,
+            this[$variantData],
             correlatedMaterial,
             new LazyLoader(
                 gltf, gltfElementMap, gltfMaterialDef, materialLoadCallback)));
@@ -133,7 +158,10 @@ export class Model implements ModelInterface {
 
       if (object instanceof Mesh) {
         node = new PrimitiveNode(
-            object as Mesh, this.materials, correlatedSceneGraph);
+            object as Mesh,
+            this.materials,
+            this[$variantData],
+            correlatedSceneGraph);
         this[$primitivesList].push(node as PrimitiveNode);
       } else {
         node = new Node(object.name);
@@ -162,6 +190,17 @@ export class Model implements ModelInterface {
    */
   get materials(): Material[] {
     return this[$materials];
+  }
+
+  [$availableVariants]() {
+    const variants = Array.from(this[$variantData].values());
+    variants.sort((a, b) => {
+      return a.index - b.index;
+    });
+
+    return variants.map((data) => {
+      return data.name;
+    });
   }
 
   getMaterialByName(name: string): Material|null {
@@ -244,5 +283,153 @@ export class Model implements ModelInterface {
       promises.push(primitive.instantiateVariants());
     }
     await Promise.all(promises);
+  }
+
+  [$cloneMaterial](index: number, newMaterialName: string): Material {
+    const material = this.materials[index];
+
+    if (!material.isLoaded) {
+      console.error(`Cloning an unloaded material,
+           call 'material.ensureLoaded() before cloning the material.`);
+    }
+
+    const threeMaterialSet =
+        material[$correlatedObjects] as Set<MeshStandardMaterial>;
+
+    // clones the gltf material data and updates the material name.
+    const gltfSourceMaterial =
+        JSON.parse(JSON.stringify(material[$sourceObject])) as GLTFMaterial;
+    gltfSourceMaterial.name = newMaterialName;
+    // Adds the source material clone to the gltf def.
+    const gltf = this[$correlatedSceneGraph].gltf;
+    gltf.materials!.push(gltfSourceMaterial);
+
+    const clonedSet = new Set<MeshStandardMaterial>();
+    for (const [i, threeMaterial] of threeMaterialSet.entries()) {
+      const clone = ModelViewerGLTFInstance[$cloneAndPatchMaterial](
+                        threeMaterial) as MeshStandardMaterial;
+      clone.name =
+          newMaterialName + (threeMaterialSet.size > 1 ? '_inst' + i : '');
+      clonedSet.add(clone);
+    }
+
+    const clonedMaterial = new Material(
+        this[$modelOnUpdate],
+        this[$correlatedSceneGraph].gltf,
+        gltfSourceMaterial,
+        this[$materials].length,
+        false,  // Cloned as inactive.
+        this[$variantData],
+        clonedSet);
+
+    this[$materials].push(clonedMaterial);
+
+    return clonedMaterial;
+  }
+
+  createMaterialInstanceForVariant(
+      originalMaterialIndex: number, newMaterialName: string,
+      variantName: string, activateVariant: boolean = true): Material|null {
+    let variantMaterialInstance: Material|null = null;
+
+    for (const primitive of this[$primitivesList]) {
+      const variantData = this[$variantData].get(variantName);
+      // Skips the primitive if the variant already exists.
+      if (variantData != null && primitive.variantInfo.has(variantData.index)) {
+        continue;
+      }
+
+      // Skips the primitive if the source/original material does not exist.
+      if (primitive.getMaterial(originalMaterialIndex) == null) {
+        continue;
+      }
+
+      if (!this.hasVariant(variantName)) {
+        this.createVariant(variantName);
+      }
+
+      if (variantMaterialInstance == null) {
+        variantMaterialInstance =
+            this[$cloneMaterial](originalMaterialIndex, newMaterialName);
+      }
+      primitive.addVariant(variantMaterialInstance, variantName)
+    }
+
+    if (activateVariant && variantMaterialInstance != null) {
+      (variantMaterialInstance as Material)[$setActive](true);
+      this.materials[originalMaterialIndex][$setActive](false);
+      for (const primitive of this[$primitivesList]) {
+        primitive.enableVariant(variantName);
+      }
+    }
+
+    return variantMaterialInstance;
+  }
+
+  createVariant(variantName: string) {
+    if (!this[$variantData].has(variantName)) {
+      // Adds the name if it's not already in the list.
+      this[$variantData].set(
+          variantName,
+          {name: variantName, index: this[$variantData].size} as VariantData);
+    } else {
+      console.warn(`Variant '${variantName}'' already exists`);
+    }
+  }
+
+  hasVariant(variantName: string) {
+    return this[$variantData].has(variantName);
+  }
+
+  setMaterialToVariant(materialIndex: number, targetVariantName: string) {
+    if (this[$availableVariants]().find(name => name === targetVariantName) ==
+        null) {
+      console.warn(`Can't add material to '${
+          targetVariantName}', the variant does not exist.'`);
+      return;
+    }
+
+    if (materialIndex < 0 || materialIndex >= this.materials.length) {
+      console.error(`setMaterialToVariant(): materialIndex is out of bounds.`);
+      return;
+    }
+
+    for (const primitive of this[$primitivesList]) {
+      const material = primitive.getMaterial(materialIndex);
+      // Ensures the material exists on the primitive before setting it to a
+      // variant.
+      if (material != null) {
+        primitive.addVariant(material, targetVariantName);
+      }
+    }
+  }
+
+  updateVariantName(currentName: string, newName: string) {
+    const variantData = this[$variantData].get(currentName);
+    if (variantData == null) {
+      return;
+    }
+    variantData.name = newName;
+    this[$variantData].set(newName, variantData!);
+    this[$variantData].delete(currentName);
+  }
+
+  deleteVariant(variantName: string) {
+    const variant = this[$variantData].get(variantName);
+    if (variant == null) {
+      return;
+    }
+
+    for (const material of this.materials) {
+      if (material.hasVariant(variantName)) {
+        material[$variantSet].delete(variant.index);
+      }
+    }
+
+    for (const primitive of this[$primitivesList]) {
+      primitive.deleteVariant(variant.index);
+    }
+
+    this[$variantData].delete(variantName);
   }
 }

@@ -23,7 +23,7 @@ import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
 
 
-const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
+export const $cloneAndPatchMaterial = Symbol('cloneAndPatchMaterial');
 const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 
 interface PreparedModelViewerGLTF extends PreparedGLTF {
@@ -101,15 +101,21 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       // environment maps.
       if ((node as Mesh).isMesh) {
         const mesh = node as Mesh;
-        if (Array.isArray(mesh.material)) {
-          mesh.material = mesh.material.map(
-              (material) => this[$cloneAndPatchMaterial](
-                  material as MeshStandardMaterial,
-                  sourceUUIDToClonedMaterial));
-        } else if (mesh.material != null) {
-          mesh.material = this[$cloneAndPatchMaterial](
-              mesh.material as MeshStandardMaterial,
-              sourceUUIDToClonedMaterial);
+        const sourceMaterial = mesh.material;
+
+        if (Array.isArray(sourceMaterial)) {
+          mesh.material = sourceMaterial.map((material) => {
+            const result = sourceUUIDToClonedMaterial.get(material.uuid) ||
+                ModelViewerGLTFInstance[$cloneAndPatchMaterial](
+                               mesh.material as MeshStandardMaterial);
+            sourceUUIDToClonedMaterial.set(result.uuid, result);
+            return result;
+          });
+        } else if (sourceMaterial != null) {
+          mesh.material = sourceUUIDToClonedMaterial.get(sourceMaterial.uuid) ||
+              ModelViewerGLTFInstance[$cloneAndPatchMaterial](
+                              mesh.material as MeshStandardMaterial);
+          sourceUUIDToClonedMaterial.set(sourceMaterial.uuid, mesh.material);
         }
       }
     });
@@ -127,16 +133,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
    * Creates a clone of the given material, and applies a patch to the
    * shader program.
    */
-  [$cloneAndPatchMaterial](
-      material: MeshStandardMaterial,
-      sourceUUIDToClonedMaterial: Map<string, Material>) {
-    // If we already cloned this material (determined by tracking the UUID of
-    // source materials that have been cloned), then return that previously
-    // cloned instance:
-    if (sourceUUIDToClonedMaterial.has(material.uuid)) {
-      return sourceUUIDToClonedMaterial.get(material.uuid)!;
-    }
-
+  static[$cloneAndPatchMaterial](material: MeshStandardMaterial): Material {
     const clone = material.clone() as MeshStandardMaterial;
     if (material.map != null) {
       clone.map = material.map.clone();
@@ -194,8 +191,6 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
 
     // This makes shadows better for non-manifold meshes
     clone.shadowSide = FrontSide;
-
-    sourceUUIDToClonedMaterial.set(material.uuid, clone);
 
     return clone;
   }

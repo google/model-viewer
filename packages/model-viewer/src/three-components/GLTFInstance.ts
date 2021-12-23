@@ -20,6 +20,7 @@ import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {Constructor} from '../utilities.js';
 
 
+
 export const $prepared = Symbol('prepared');
 
 export interface PreparedGLTF extends GLTF {
@@ -175,6 +176,9 @@ const cloneVariantMaterials = (dst: Object3D, src: Object3D) => {
   traversePair(dst, src, (dst, src) => {
     if (src.userData.variantMaterials !== undefined) {
       dst.userData.variantMaterials = new Map(src.userData.variantMaterials);
+    }
+    if (src.userData.variantData !== undefined) {
+      dst.userData.variantData = src.userData.variantData;
     }
     if (src.userData.originalMaterial !== undefined) {
       dst.userData.originalMaterial = src.userData.originalMaterial;
