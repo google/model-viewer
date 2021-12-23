@@ -145,6 +145,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   getMaterialVariant() {
     let material = this.getMaterial();
+    const originalMaterial = material;
 
     // Creates a new material instance if it does not currently exist under the
     // variant.
@@ -173,7 +174,6 @@ export class MaterialPanel extends ConnectedLitElement {
       if (this.materialSelector.selectedIndex === -1) {
         console.error('Could not select the new variant material');
       }
-      this.requestUpdate();
       material = clone;
     }
     // Ensures any other variants using this material create their own
@@ -185,11 +185,12 @@ export class MaterialPanel extends ConnectedLitElement {
       }
       getModelViewer().model!.createMaterialInstanceForVariant(
           this.selectedMaterialIndex,
-          material.name + ' ' + variant,
+          originalMaterial.name + ' ' + variant,
           variant,
           false);
     }
 
+    this.requestUpdate();
     return material;
   }
 

@@ -221,12 +221,13 @@ suite('scene-graph/model', () => {
         });
 
         test(
-            `createMaterialInstanceForVariant() returns existing material if it exists`,
+            `createMaterialInstanceForVariant() fails when there is a variant name
+            collision`,
             async () => {
               await loadModel(CUBES_GLTF_PATH);
               expect(model.createMaterialInstanceForVariant(
-                         0, 'test-material', 'Yellow Red'))
-                  .to.equal(model.materials[1]);
+                         0, 'test-material', 'Purple Yellow'))
+                  .to.be.null;
             });
 
         test('createVariant() creates a variant', async () => {

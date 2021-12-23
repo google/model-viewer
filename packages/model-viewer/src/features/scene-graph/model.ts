@@ -329,23 +329,13 @@ export class Model implements ModelInterface {
 
   createMaterialInstanceForVariant(
       originalMaterialIndex: number, newMaterialName: string,
-      variantName: string, activateVariant: boolean = true): Material {
+      variantName: string, activateVariant: boolean = true): Material|null {
     let variantMaterialInstance: Material|null = null;
-    const getInstance =
-        () => {
-          if (variantMaterialInstance == null) {
-            variantMaterialInstance =
-                this[$cloneMaterial](originalMaterialIndex, newMaterialName);
-          }
-          return variantMaterialInstance;
-        }
 
     for (const primitive of this[$primitivesList]) {
       const variantData = this[$variantData].get(variantName);
       // Skips the primitive if the variant already exists.
       if (variantData != null && primitive.variantInfo.has(variantData.index)) {
-        variantMaterialInstance =
-            primitive.variantInfo.get(variantData.index) as Material;
         continue;
       }
 
@@ -358,18 +348,22 @@ export class Model implements ModelInterface {
         this.createVariant(variantName);
       }
 
-      primitive.addVariant(getInstance(), variantName)
+      if (variantMaterialInstance == null) {
+        variantMaterialInstance =
+            this[$cloneMaterial](originalMaterialIndex, newMaterialName);
+      }
+      primitive.addVariant(variantMaterialInstance, variantName)
     }
 
-    if (activateVariant) {
-      getInstance()[$setActive](true);
+    if (activateVariant && variantMaterialInstance != null) {
+      (variantMaterialInstance as Material)[$setActive](true);
       this.materials[originalMaterialIndex][$setActive](false);
       for (const primitive of this[$primitivesList]) {
         primitive.enableVariant(variantName);
       }
     }
 
-    return getInstance();
+    return variantMaterialInstance;
   }
 
   createVariant(variantName: string) {
