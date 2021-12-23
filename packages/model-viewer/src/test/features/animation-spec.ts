@@ -130,22 +130,21 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         await animationsPlay;
       });
 
-      test('animations play at eash elapsed time', (done) => {
-        let t = 0;
+      test('animations play at eash elapsed time', function(done) {
+        this.timeout(element.duration * 2.5 * 1000);
 
+        let t = 0;
         suite('at 80% duration', () => {
           setTimeout(() => {
             expect(animationIsPlaying(element)).to.be.true;
             t = element.currentTime;
-            done();
           }, element.duration * 0.8 * 1000);
-        })
+        });
 
         suite('at 180% duration', () => {
           setTimeout(() => {
             expect(animationIsPlaying(element)).to.be.true;
             expect(element.currentTime).to.be.lessThan(t);
-            done();
           }, element.duration * 1.8 * 1000);
         });
 
