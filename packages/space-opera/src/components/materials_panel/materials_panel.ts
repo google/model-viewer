@@ -369,7 +369,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   renderVariantsTab() {
-    const hasVariants = getModelViewer().availableVariants.length > 0;
+    const hasVariants = getModelViewer().availableVariants.length > 1;
     return html`
     <me-expandable-tab tabName="Variants" .open=${hasVariants}>
       <div slot="content">

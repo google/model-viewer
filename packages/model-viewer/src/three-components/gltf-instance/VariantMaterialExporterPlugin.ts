@@ -105,6 +105,16 @@ export default class GLTFExporterMaterialsVariantsExtension {
     const variantDataMap = userData.variantData as Map<string, VariantData>;
     const mappingTable　=
         new Map<number, {material: number, variants: number[]}>();
+
+    // Removes gaps in the variant indices list (caused by deleting variants).
+    const reIndexedVariants = new Map<number, number>();
+    const variants = Array.from(variantDataMap.values()).sort((a, b) => {
+      return a.index - b.index;
+    });
+    for (const [i, variantData] of variants.entries()) {
+      reIndexedVariants.set(variantData.index, i);
+    }
+
     for (const variantData of variantDataMap.values()) {
       const variantMaterialInstance =
           variantMaterials.get(variantData.index).material;
@@ -118,7 +128,8 @@ export default class GLTFExporterMaterialsVariantsExtension {
         mappingTable.set(
             materialIndex, {material: materialIndex, variants: []});
       }
-      mappingTable.get(materialIndex)!.variants.push(variantData.index);
+      mappingTable.get(materialIndex)!.variants.push(
+          reIndexedVariants.get(variantData.index)!);
     }
 
     const mappingsDef =
