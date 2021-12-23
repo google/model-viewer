@@ -146,7 +146,7 @@ module.exports = function(config) {
         base: 'BrowserStack',
         os: 'iOS',
         os_version: '14',
-        device: 'iPhone 8',
+        device: 'iPhone 11',
         browser: 'iPhone',
         real_mobile: 'true',
         browserstack: {localIdentifier: 'iOS14'}
@@ -155,7 +155,7 @@ module.exports = function(config) {
         base: 'BrowserStack',
         os: 'iOS',
         os_version: '15',
-        device: 'iPhone 11',
+        device: 'iPhone 13',
         browser: 'iPhone',
         real_mobile: 'true',
         browserstack: {localIdentifier: 'iOS15'}
