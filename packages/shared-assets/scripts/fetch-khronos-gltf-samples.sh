@@ -22,7 +22,7 @@ REPO_URL=https://github.com/KhronosGroup/glTF-Sample-Models.git
 CLONE_PATH=$(dirname $0)/../models/glTF-Sample-Models
 
 if [ ! -d "$CLONE_PATH/.git" ]; then
-  git clone $REPO_URL $CLONE_PATH
+  git clone --depth=1 $REPO_URL $CLONE_PATH
 fi
 
 pushd $CLONE_PATH
