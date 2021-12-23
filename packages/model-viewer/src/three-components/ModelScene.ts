@@ -655,12 +655,13 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * This method returns the world position and model-space normal of the point
-   * on the mesh corresponding to the input pixel coordinates given relative to
-   * the model-viewer element. If the mesh is not hit, the result is null.
+   * This method returns the world position, model-space normal and texture 
+   * coordinate of the point on the mesh corresponding to the input pixel 
+   * coordinates given relative to the model-viewer element. If the mesh 
+   * is not hit, the result is null.
    */
   positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
-      {position: Vector3, normal: Vector3}|null {
+      {position: Vector3, normal: Vector3, uv: Vector2 | null}|null {
     this.raycaster.setFromCamera(ndcPosition, this.getCamera());
     const hits = this.raycaster.intersectObject(object, true);
 
@@ -673,10 +674,14 @@ export class ModelScene extends Scene {
       return null;
     }
 
+    if (hit.uv == null) {
+      return {position: hit.point, normal: hit.face.normal, uv: null};
+    }
+
     hit.face.normal.applyNormalMatrix(
         new Matrix3().getNormalMatrix(hit.object.matrixWorld));
 
-    return {position: hit.point, normal: hit.face.normal};
+    return {position: hit.point, normal: hit.face.normal, uv: hit.uv};
   }
 
   /**

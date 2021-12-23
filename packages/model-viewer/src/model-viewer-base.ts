@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
-import {Event as ThreeEvent, Vector3} from 'three';
+import {Event as ThreeEvent, Vector3, Vector2} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
@@ -79,6 +79,22 @@ export const toVector3D = (v: Vector3) => {
     z: v.z,
     toString() {
       return `${this.x}m ${this.y}m ${this.z}m`;
+    }
+  };
+};
+
+export interface Vector2D {
+  u: number
+  v: number
+  toString(): string
+}
+
+export const toVector2D = (v: Vector2) => {
+  return {
+    u: v.x,
+    v: v.y,
+    toString() {
+      return `${this.u} ${this.v}`;
     }
   };
 };

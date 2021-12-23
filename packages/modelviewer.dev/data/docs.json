@@ -714,7 +714,7 @@
       {
         "name": "positionAndNormalFromPoint(clientX, clientY)",
         "htmlName": "positionAndNormalFromPoint",
-        "description": "Returns the world position and normal of the point on the mesh corresponding to the input pixel coordinates given relative to the screen. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. The function returns null if no object is hit.",
+        "description": "Returns the world position, normal and texture coordinate of the point on the mesh corresponding to the input pixel coordinates given relative to the screen. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. The texture coordinate is returned as Vector2D, which has also a own toString() method. The function returns null if no object is hit.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>positionAndNormalFromPoint</span> example</a>"
         ]

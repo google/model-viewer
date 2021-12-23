@@ -58,7 +58,7 @@ export interface SceneGraphInterface {
    * objects were intersected.
    * @param pixelX X coordinate of the mouse.
    * @param pixelY Y coordinate of the mouse.
-   * @returns a material, if no intersection is made than null is returned.
+   * @returns a material, if no intersection is made then null is returned.
    */
   materialFromPoint(pixelX: number, pixelY: number): Material|null;
 }
