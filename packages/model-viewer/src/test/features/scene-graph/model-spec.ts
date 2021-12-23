@@ -273,6 +273,46 @@ suite('scene-graph/model', () => {
               // primitive2 to should remain unchanged.
               expect(primitive2.variantInfo.size).to.equal(startingSize2);
             });
+
+        test('updateVariantName() updates the variant name', async () => {
+          await loadModel(CUBES_GLTF_PATH);
+          element.variantName = 'Yellow Red';
+          await element.updateComplete;
+
+          element.model!.updateVariantName('Yellow Red', 'NewName');
+
+          expect(element.availableVariants[2]).equal('NewName');
+        });
+
+        test(
+            'deleteVariant() removes variant from primitives, materials and available variants.',
+            async () => {
+              await loadModel(CUBES_GLTF_PATH);
+
+              element.model!.deleteVariant('Yellow Red');
+
+              // Removed from the list of available variants.
+              expect(element.availableVariants.length).equal(2);
+
+              // No longer present in primitives
+              for (const primitive of model[$primitivesList]) {
+                if (primitive.variantInfo.size > 0) {
+                  expect(primitive.variantInfo.has(2)).to.be.false;
+                }
+              }
+
+              // Materials do not reference the variant.
+              for (const material of model.materials) {
+                expect(material.hasVariant('Yellow Red')).to.be.false;
+              }
+            });
+
+        test('hasVariant() positive and negative test', async () => {
+          await loadModel(CUBES_GLTF_PATH);
+
+          expect(model.hasVariant('Yellow Red')).to.be.true;
+          expect(model.hasVariant('DoesNotExist')).to.be.false;
+        });
       });
 
       suite('Intersecting', () => {
