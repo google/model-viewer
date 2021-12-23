@@ -7,7 +7,7 @@
     "test": "echo \"No tests specified\" && exit 0",
     "clean": "rm -rf ./examples/built ./lib ./dist",
     "build": "tsc && rollup -c",
-    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi"
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi"
   },
   "contributors": [
     "Jordan Santell <jsantell@google.com>",
@@ -32,7 +32,6 @@
     "web-animations-js": "^2.3.2"
   },
   "devDependencies": {
-    "@google/model-viewer-shared-assets": "^0.0.1",
     "rollup": "^2.53.1",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "@rollup/plugin-replace": "^2.4.2",
