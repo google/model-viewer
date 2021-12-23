@@ -419,7 +419,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onClick] = () => {
-      if (this.reveal === RevealStrategy.MANUAL) {
+      if (this.reveal === RevealStrategy.MANUAL || this.reveal === RevealStrategy.AUTO) {
         return;
       }
       this.dismissPoster();
