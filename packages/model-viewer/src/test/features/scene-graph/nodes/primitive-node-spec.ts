@@ -15,7 +15,7 @@
 
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial';
 
-import {$primitivesList, Model} from '../../../../features/scene-graph/model.js';
+import {$primitivesList, $variantData, Model} from '../../../../features/scene-graph/model.js';
 import {$initialMaterialIdx} from '../../../../features/scene-graph/nodes/primitive-node.js';
 import {ModelViewerElement} from '../../../../model-viewer.js';
 import {CorrelatedSceneGraph} from '../../../../three-components/gltf-instance/correlated-scene-graph.js';
@@ -36,8 +36,9 @@ const KHRONOS_TRIANGLE_GLB_PATH =
 const findPrimitivesWithVariant = (model: Model, variantName: string) => {
   const result = new Array<any>();
   for (const primitive of model![$primitivesList]) {
-    if (primitive.variantInfo != null &&
-        primitive.variantInfo.has(variantName)) {
+    if (primitive.variantInfo != null && model.hasVariant(variantName) &&
+        primitive.variantInfo.has(
+            model[$variantData].get(variantName)!.index)) {
       result.push(primitive);
     }
   }
@@ -77,7 +78,7 @@ suite('scene-graph/model/mesh-primitives', () => {
     test('Should not have any primitives with variant info', async () => {
       let hasVariantInfoCount = 0;
       for (const primitive of model![$primitivesList]) {
-        if (primitive.variantInfo != null) {
+        if (primitive.variantInfo.size > 0) {
           hasVariantInfoCount++;
         }
       }

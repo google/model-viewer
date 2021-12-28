@@ -142,15 +142,6 @@ module.exports = function(config) {
         browser_version: 'latest',
         browserstack: {localIdentifier: 'Safari'}
       },
-      'iOS Safari (iOS 13)': {
-        base: 'BrowserStack',
-        os: 'iOS',
-        os_version: '13',
-        device: 'iPhone 8',
-        browser: 'iPhone',
-        real_mobile: 'true',
-        browserstack: {localIdentifier: 'iOS13'}
-      },
       'iOS Safari (iOS 14)': {
         base: 'BrowserStack',
         os: 'iOS',
@@ -159,6 +150,15 @@ module.exports = function(config) {
         browser: 'iPhone',
         real_mobile: 'true',
         browserstack: {localIdentifier: 'iOS14'}
+      },
+      'iOS Safari (iOS 15)': {
+        base: 'BrowserStack',
+        os: 'iOS',
+        os_version: '15',
+        device: 'iPhone 13',
+        browser: 'iPhone',
+        real_mobile: 'true',
+        browserstack: {localIdentifier: 'iOS15'}
       },
       'Android (Huawei P30)': {
         base: 'BrowserStack',

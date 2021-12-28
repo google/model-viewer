@@ -27,6 +27,10 @@
 
 import {Material, Mesh, Object3D} from 'three';
 
+import {VariantData} from '../../features/scene-graph/model';
+
+
+
 /**
  * @param object {THREE.Object3D}
  * @return {boolean}
@@ -76,8 +80,10 @@ export default class GLTFExporterMaterialsVariantsExtension {
           return;
         }
         const variantMaterials = o.userData.variantMaterials;
-        for (const variantName of variantMaterials.keys()) {
-          const variantMaterial = variantMaterials.get(variantName);
+        const variantDataMap =
+            o.userData.variantData as Map<string, VariantData>;
+        for (const [variantName, variantData] of variantDataMap) {
+          const variantMaterial = variantMaterials.get(variantData.index);
           // Ignore unloaded variant materials
           if (compatibleMaterial(variantMaterial.material)) {
             variantNameSet.add(variantName);
@@ -96,23 +102,34 @@ export default class GLTFExporterMaterialsVariantsExtension {
 
     const userData = mesh.userData;
     const variantMaterials = userData.variantMaterials;
+    const variantDataMap = userData.variantData as Map<string, VariantData>;
     const mappingTable　=
         new Map<number, {material: number, variants: number[]}>();
-    for (const variantName of variantMaterials.keys()) {
+
+    // Removes gaps in the variant indices list (caused by deleting variants).
+    const reIndexedVariants = new Map<number, number>();
+    const variants = Array.from(variantDataMap.values()).sort((a, b) => {
+      return a.index - b.index;
+    });
+    for (const [i, variantData] of variants.entries()) {
+      reIndexedVariants.set(variantData.index, i);
+    }
+
+    for (const variantData of variantDataMap.values()) {
       const variantMaterialInstance =
-          variantMaterials.get(variantName).material;
+          variantMaterials.get(variantData.index).material;
       if (!compatibleMaterial(variantMaterialInstance)) {
         continue;
       }
-      const variantIndex =
-          this.variantNames.indexOf(variantName);  // Shouldn't be -1
+
       const materialIndex =
           this.writer.processMaterial(variantMaterialInstance);
       if (!mappingTable.has(materialIndex)) {
         mappingTable.set(
             materialIndex, {material: materialIndex, variants: []});
       }
-      mappingTable.get(materialIndex)!.variants.push(variantIndex);
+      mappingTable.get(materialIndex)!.variants.push(
+          reIndexedVariants.get(variantData.index)!);
     }
 
     const mappingsDef =

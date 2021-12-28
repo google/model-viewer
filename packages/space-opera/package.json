@@ -11,7 +11,7 @@
     "clean": "rm tsconfig.tsbuildinfo; rm -rf lib && rm -rf dist",
     "test": "karma start --single-run",
     "test:ci": "npm run test",
-    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ./node_modules/@google/model-viewer-shared-assets ./shared-assets; fi",
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi",
     "watch:test": "karma start",
     "watch:tsc": "tsc -w",
     "watch:rollup": "rollup -c -w",
@@ -35,7 +35,7 @@
   ],
   "devDependencies": {
     "@google/model-viewer": "^1.9.0",
-    "@google/model-viewer-shared-assets": "^0.0.1",
+    "@material/mwc-dialog": "^0.18.0",
     "@material/mwc-button": "^0.18.0",
     "@material/mwc-checkbox": "^0.18.0",
     "@material/mwc-icon-button": "^0.18.0",

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, GammaEncoding, PCFSoftShadowMap, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, PCFSoftShadowMap, sRGBEncoding, WebGLRenderer} from 'three';
 import {RoughnessMipmapper} from 'three/examples/jsm/utils/RoughnessMipmapper';
 
 import {$updateEnvironment} from '../features/environment.js';
@@ -146,7 +146,7 @@ export class Renderer extends EventDispatcher {
         preserveDrawingBuffer: true
       });
       this.threeRenderer.autoClear = true;
-      this.threeRenderer.outputEncoding = GammaEncoding;
+      this.threeRenderer.outputEncoding = sRGBEncoding;
       this.threeRenderer.physicallyCorrectLights = true;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
       this.threeRenderer.shadowMap.enabled = true;

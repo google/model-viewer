@@ -49,6 +49,40 @@ export declare interface Model {
    * @returns the first material to whose name matches `name`
    */
   getMaterialByName(name: string): Material|null;
+
+  /**
+   * Creates a new material variant from an existing material.
+   * @param originalMaterialIndex index of the material to clone the variant
+   *     from.
+   * @param materialName the name of the new material
+   * @param variantName the name of the variant
+   * @param activateVariant activates this material variant, i.e. the variant
+   *     material is rendered, not the existing material.
+   * @returns returns a clone of the original material, returns `null` if the
+   *     material instance for this variant already exists.
+   */
+  createMaterialInstanceForVariant(
+      originalMaterialIndex: number, newMaterialName: string,
+      variantName: string, activateVariant: boolean): Material|null;
+
+  /**
+   * Adds a variant name to the model.
+   * @param variantName
+   */
+  createVariant(variantName: string): void;
+
+  /**
+   * Adds an existing material to a variant name.
+   * @param materialIndex
+   * @param targetVariantName
+   */
+  setMaterialToVariant(materialIndex: number, targetVariantName: string): void;
+
+  /**
+   * Removes the variant name from the model.
+   * @param variantName the variant to remove.
+   */
+  deleteVariant(variantName: string): void;
 }
 
 /**
@@ -61,7 +95,7 @@ export declare interface Material {
   /**
    * The name of the material, if any.
    */
-  readonly name: string;
+  name: string;
 
   readonly normalTexture: TextureInfo|null;
   readonly occlusionTexture: TextureInfo|null;
@@ -86,6 +120,12 @@ export declare interface Material {
    * unloaded, otherwise the method is a noop.
    */
   ensureLoaded(): void;
+
+  /**
+   * Returns true if the material participates in the variant.
+   * @param name the variant name.
+   */
+  hasVariant(name: string): boolean;
 
   /**
    * Returns true if the material is loaded.
