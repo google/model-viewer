@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {FrontSide, Mesh, MeshStandardMaterial, Object3D, Sphere} from 'three';
+import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Sphere} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
@@ -106,6 +106,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
    */
   [$clone](): PreparedGLTF {
     const clone: PreparedModelViewerGLTF = super[$clone]();
+    const sourceUUIDToClonedMaterial = new Map<string, Material>();
 
     clone.scene.traverse((node: Object3D) => {
       // Materials aren't cloned when cloning meshes; geometry
@@ -116,7 +117,13 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
         const mesh = node as Mesh;
         const material = mesh.material as MeshStandardMaterial;
         if (material != null) {
+          if (sourceUUIDToClonedMaterial.has(material.uuid)) {
+            mesh.material = sourceUUIDToClonedMaterial.get(material.uuid)!;
+            return;
+          }
+
           mesh.material = material.clone() as MeshStandardMaterial;
+          sourceUUIDToClonedMaterial.set(material.uuid, mesh.material);
         }
       }
     });
