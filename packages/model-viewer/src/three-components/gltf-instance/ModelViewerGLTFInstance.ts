@@ -17,7 +17,6 @@ import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Sphere} from 
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
-import {Renderer} from '../Renderer.js';
 
 import {CorrelatedSceneGraph} from './correlated-scene-graph.js';
 
@@ -77,19 +76,6 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
         const material = mesh.material as MeshStandardMaterial;
         // This makes shadows better for non-manifold meshes
         material.shadowSide = FrontSide;
-
-        if (material.roughnessMap != null) {
-          // Generates mipmaps from the clone of the roughnessMap.
-          const {threeRenderer, roughnessMipmapper} = Renderer.singleton;
-          // XR must be disabled while doing offscreen rendering or it will
-          // clobber the camera.
-          const {enabled} = threeRenderer.xr;
-          threeRenderer.xr.enabled = false;
-          // const {image} = material.roughnessMap;
-          roughnessMipmapper.generateMipmaps(material as MeshStandardMaterial);
-          // material.roughnessMap!.image = image;
-          threeRenderer.xr.enabled = enabled;
-        }
       }
     });
 
