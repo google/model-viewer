@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, GammaEncoding, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {BackSide, BoxBufferGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
@@ -72,7 +72,7 @@ export default class TextureUtils extends EventDispatcher {
       texture.mapping = EquirectangularReflectionMapping;
 
       if (!isHDR) {
-        texture.encoding = GammaEncoding;
+        texture.encoding = sRGBEncoding;
       }
 
       return texture;
