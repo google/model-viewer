@@ -236,16 +236,12 @@
         "name": "Change Material"
       },
       {
-        "htmlId": "swapTextures",
-        "name": "Swap Textures"
-      },
-      {
-        "htmlId": "swapTextures2",
-        "name": "Swap Textures 2"
-      },
-      {
         "htmlId": "createTexturesExample",
         "name": "Create Textures"
+      },
+      {
+        "htmlId": "swapTextures",
+        "name": "Swap Textures"
       },
       {
         "htmlId": "pickMaterialExample",
