@@ -301,19 +301,75 @@ modelViewerParameters.addEventListener("load", (ev) => {
       </div>
     </div>
 
+
+    <div class="sample">
+      <div id="createTexturesExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Create textures</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+              mode. iOS Quick Look reflects these texture changes so long as the
+              USDZ is auto-generated.</p>
+          </div>
+          <example-snippet stamp-to="createTexturesExample" highlight-as="html">
+            <template>
+<model-viewer id="duck" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
+  <div class="controls">
+      <p>Normals</p>
+      <select id="normals2">
+        <option>None</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
+      </select>
+    </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture = document.querySelector("model-viewer#duck");
+
+modelViewerTexture.addEventListener("load", () => {
+
+  const material = modelViewerTexture.model.materials[0];
+
+  const createAndApplyTexture = async (channel, event) => {
+    if (event.target.value == "None") {
+      // Clears the texture.
+      material[channel].setTexture(null);
+    } else if (event.target.value) {
+      // Creates a new texture.
+      const texture = await modelViewerTexture.createTexture(event.target.value);
+      // Applies the new texture to the specified channel.
+      material[channel].setTexture(texture);
+    }
+  }
+
+  document.querySelector('#normals2').addEventListener('input', (event) => {
+    createAndApplyTexture('normalTexture', event);
+  });
+});
+
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
     <div class="sample">
       <div id="swapTextures" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">Swap textures - Diffuse/MetallicRoughness</h2>
+            <h2 class="demo-title">Swap textures</h2>
             <p>As above, you can change these values in AR, but only in WebXR
-            mode. iOS Quick Look reflects these texture changes so long as the
-            USDZ is auto-generated.</p>
+              mode. iOS Quick Look reflects these texture changes so long as the
+              USDZ is auto-generated.</p>
           </div>
           <example-snippet stamp-to="swapTextures" highlight-as="html">
             <template>
-<model-viewer id="lantern" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
+<model-viewer id="helmet" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
   <div class="controls">
     <div>
       <p>Diffuse</p>
@@ -331,49 +387,6 @@ modelViewerParameters.addEventListener("load", (ev) => {
         <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
       </select>
     </div>
-  </div>
-</model-viewer>
-<script type="module">
-const modelViewerTexture = document.querySelector("model-viewer#lantern");
-
-modelViewerTexture.addEventListener("load", (ev) => {
-
-  let material = modelViewerTexture.model.materials[0];
-
-  let applyPBRTexture = (channel, event) => {
-    material.pbrMetallicRoughness[channel].texture.source.setURI(event.target.value);
-  }
-
-  document.querySelector('#diffuse').addEventListener('input', (event) => {
-    applyPBRTexture('baseColorTexture', event);
-  });
-
-  document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
-    applyPBRTexture('metallicRoughnessTexture', event);
-  });
-})
-
-</script>
-            </template>
-          </example-snippet>
-        </div>
-      </div>
-    </div>
-
-    <div class="sample">
-      <div id="swapTextures2" class="demo"></div>
-      <div class="content">
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">Swap textures - Normals/Occlusion/Emission</h2>
-            <p>As above, you can change these values in AR, but only in WebXR
-              mode. iOS Quick Look reflects these texture changes so long as the
-              USDZ is auto-generated.</p>
-          </div>
-          <example-snippet stamp-to="swapTextures2" highlight-as="html">
-            <template>
-<model-viewer id="helmet" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
-  <div class="controls">
     <div>
       <p>Normals</p>
       <select id="normals">
@@ -404,11 +417,15 @@ const modelViewerTexture = document.querySelector("model-viewer#helmet");
 
 modelViewerTexture.addEventListener("load", () => {
 
-  let material = modelViewerTexture.model.materials[0];
+  const material = modelViewerTexture.model.materials[0];
 
-  let createAndApplyTexture = async (channel, event) => {
-    let texture = await modelViewerTexture.createTexture(event.target.value);
-    material[channel].setTexture(texture);
+  const createAndApplyTexture = async (channel, event) => {
+    const texture = await modelViewerTexture.createTexture(event.target.value);
+    if (channel.includes('base') || channel.includes('metallic')) {
+      material.pbrMetallicRoughness[channel].setTexture(texture);
+    } else {
+      material[channel].setTexture(texture);
+    }
   }
 
   document.querySelector('#normals').addEventListener('input', (event) => {
@@ -422,73 +439,23 @@ modelViewerTexture.addEventListener("load", () => {
   document.querySelector('#emission').addEventListener('input', (event) => {
     createAndApplyTexture('emissiveTexture', event);
   });
-});
 
-</script>
-            </template>
-          </example-snippet>
-        </div>
-      </div>
-    </div>
+  document.querySelector('#diffuse').addEventListener('input', (event) => {
+    createAndApplyTexture('baseColorTexture', event);
+  });
 
-
-
-    <div class="sample">
-      <div id="createTexturesExample" class="demo"></div>
-      <div class="content">
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">Swap textures - Normals/Occlusion/Emission</h2>
-            <p>As above, you can change these values in AR, but only in WebXR
-              mode. iOS Quick Look reflects these texture changes so long as the
-              USDZ is auto-generated.</p>
-          </div>
-          <example-snippet stamp-to="createTexturesExample" highlight-as="html">
-            <template>
-<model-viewer id="duck" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
-  <div class="controls">
-      <p>Normals</p>
-      <select id="normals2">
-        <option>None</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
-      </select>
-    </div>
-</model-viewer>
-<script type="module">
-const modelViewerTexture = document.querySelector("model-viewer#duck");
-
-modelViewerTexture.addEventListener("load", () => {
-
-  let material = modelViewerTexture.model.materials[0];
-
-  let createAndApplyTexture = async (channel, event) => {
-    if(event.target.value == "None"){
-      // Clears the texture.
-      material[channel].setTexture(null);
-    }else if(event.target.value) {
-      // Creates a new texture.
-      let texture = await modelViewerTexture.createTexture(event.target.value);
-      // Applies the new texture to the specified channel.
-      material[channel].setTexture(texture);
-    }
-  }
-
-  document.querySelector('#normals2').addEventListener('input', (event) => {
-    createAndApplyTexture('normalTexture', event);
+  document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
+    createAndApplyTexture('metallicRoughnessTexture', event);
   });
 });
 
 </script>
-
-
-
             </template>
           </example-snippet>
         </div>
       </div>
     </div>
+
 
     <div class="sample">
       <div id="pickMaterialExample" class="demo"></div>
