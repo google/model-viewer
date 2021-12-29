@@ -125,34 +125,30 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
     suite('when play is invoked with options', () => {
       setup(async() => {
         const animationsPlay = waitForEvent(element, 'play');
-        element.animationName = 'Punch';
         element.play({repetitions: 2, pingpong: true});
         await animationsPlay;
       });
 
-      test('animations play at eash elapsed time', function(done) {
-        this.timeout(element.duration * 2.5 * 1000);
-
+      suite('animations play at eash elapsed time', () => {
         let t = 0;
-        suite('at 80% duration', () => {
-          setTimeout(() => {
-            expect(animationIsPlaying(element)).to.be.true;
-            t = element.currentTime;
-          }, element.duration * 0.8 * 1000);
+
+        test('at 80% duration', async() => {
+          await timePasses(element.duration * 0.8 * 1000);
+          expect(animationIsPlaying(element)).to.be.true;
+          t = element.currentTime;
         });
 
-        suite('at 180% duration', () => {
-          setTimeout(() => {
-            expect(animationIsPlaying(element)).to.be.true;
-            expect(element.currentTime).to.be.lessThan(t);
-          }, element.duration * 1.8 * 1000);
+        test('at 180% duration', async() => {
+          await timePasses(element.duration * 1.8 * 1000);
+          expect(animationIsPlaying(element)).to.be.true;
+          expect(element.currentTime).to.be.lessThan(t)
         });
 
-        setTimeout(() => {
+        test('at 220% duration', async() => {
+          await timePasses(element.duration * 2.2 * 1000);
           expect(animationIsPlaying(element)).to.be.false;
           expect(element.currentTime).to.be.equal(0);
-          done();
-        }, element.duration * 2.2 * 1000);
+        });
       });
     });
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3, LoopRepeat} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3, LoopRepeat, LoopPingPong} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -490,7 +490,12 @@ export class ModelScene extends Scene {
 
   get animationTime(): number {
     if (this.currentAnimationAction != null) {
-      return this.currentAnimationAction.time;
+      const loopCount = Math.max((this.currentAnimationAction as any)._loopCount, 0);
+      if (this.currentAnimationAction.loop === LoopPingPong && (loopCount & 1) === 1) {
+        return this.duration - this.currentAnimationAction.time
+      } else {
+        return this.currentAnimationAction.time;
+      }
     }
 
     return 0;
