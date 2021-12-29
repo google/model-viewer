@@ -386,9 +386,6 @@ export class SmoothControls extends EventDispatcher {
 
     if (deltaZoom !== 0) {
       const goalLogFov = this.goalLogFov + deltaZoom;
-      console.log(
-          'radius: ', radius, ', goal: ', goalRadius, ', ratio: ', deltaRatio);
-      console.log('logFov: ', this.goalLogFov, ', goal: ', goalLogFov);
       this.setFieldOfView(Math.exp(goalLogFov));
     }
   }
