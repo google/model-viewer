@@ -449,11 +449,11 @@ export class ModelScene extends Scene {
     const goal = this.goalTarget;
     const target = this.target.position;
     if (!goal.equals(target)) {
-      const radius = this.idealCameraDistance;
+      const normalization = this.idealCameraDistance / 10;
       let {x, y, z} = target;
-      x = this.targetDamperX.update(x, goal.x, delta, radius);
-      y = this.targetDamperY.update(y, goal.y, delta, radius);
-      z = this.targetDamperZ.update(z, goal.z, delta, radius);
+      x = this.targetDamperX.update(x, goal.x, delta, normalization);
+      y = this.targetDamperY.update(y, goal.y, delta, normalization);
+      z = this.targetDamperZ.update(z, goal.z, delta, normalization);
       this.target.position.set(x, y, z);
       this.target.updateMatrixWorld();
       this.setShadowRotation(this.yaw);
@@ -655,13 +655,13 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * This method returns the world position, model-space normal and texture 
-   * coordinate of the point on the mesh corresponding to the input pixel 
-   * coordinates given relative to the model-viewer element. If the mesh 
+   * This method returns the world position, model-space normal and texture
+   * coordinate of the point on the mesh corresponding to the input pixel
+   * coordinates given relative to the model-viewer element. If the mesh
    * is not hit, the result is null.
    */
   positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
-      {position: Vector3, normal: Vector3, uv: Vector2 | null}|null {
+      {position: Vector3, normal: Vector3, uv: Vector2|null}|null {
     this.raycaster.setFromCamera(ndcPosition, this.getCamera());
     const hits = this.raycaster.intersectObject(object, true);
 

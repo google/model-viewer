@@ -15,6 +15,7 @@
 
 import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
+
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$ariaLabel, $container, $hasTransitioned, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
@@ -25,6 +26,7 @@ import {SAFE_RADIUS_RATIO} from '../three-components/ModelScene.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
+
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -251,6 +253,7 @@ export declare interface ControlsInterface {
   jumpCameraToGoal(): void;
   updateFraming(): Promise<void>;
   resetInteractionPrompt(): void;
+  zoom(keyPresses: number): void;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -409,6 +412,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$waitingToPromptUser] =
           this.interactionPrompt === InteractionPromptStrategy.AUTO &&
           this.cameraControls;
+    }
+
+    zoom(keyPresses: number) {
+      const event = new WheelEvent('wheel', {deltaY: -30 * keyPresses});
+      this[$userInputElement].dispatchEvent(event);
     }
 
     connectedCallback() {
