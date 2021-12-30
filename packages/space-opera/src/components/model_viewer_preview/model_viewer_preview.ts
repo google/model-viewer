@@ -87,6 +87,9 @@ export class ModelViewerPreview extends ConnectedLitElement {
   firstUpdated() {
     this.addEventListener('drop', this.onDrop);
     this.addEventListener('dragover', this.onDragover);
+    (self as any).ModelViewerElement = (self as any).ModelViewerElement || {};
+    (self as any).ModelViewerElement.meshoptDecoderLocation =
+        'https://unpkg.com/meshoptimizer/meshopt_decoder.js';
   }
 
   private async onGltfUrlChanged() {
