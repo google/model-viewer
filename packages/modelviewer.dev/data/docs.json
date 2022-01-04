@@ -864,9 +864,9 @@
     ],
     "Methods": [
       {
-        "name": "play()",
+        "name": "play(options: {repetitions, pingpong})",
         "htmlName": "play",
-        "description": "Causes animations to be played. Use the autoplay attribute if you want animations to be played automatically. If there are no animations, nothing will happen, so make sure that the model is loaded before invoking this method."
+        "description": "Causes animations to be played. You can specify the number of repetitions of the animation by setting the number of <i>repetitions</i> to any value greater than 0 (defaults to Infinity). Also if you set <i>pingpong</i> to true, alternately playing forward and backward (defaults to false). Use the autoplay attribute if you want animations to be played automatically. If there are no animations, nothing will happen, so make sure that the model is loaded before invoking this method."
       },
       {
         "name": "pause()",
@@ -884,6 +884,16 @@
         "name": "pause",
         "htmlName": "pause",
         "description": "Dispatched when animations are paused. A model always begins in the paused state, so it is worth mentioning that this event will not be dispatched until the the <span class='attribute'>.pause()</span> method is invoked after animations have begun playing."
+      },
+      {
+        "name": "loop",
+        "htmlName": "loop",
+        "description": "Dispatched when the current animation has looped. You can get the loop count with <span class='attribute'>e.detail.count</span>."
+      },
+      {
+        "name": "finished",
+        "htmlName": "finished",
+        "description": "Dispatched when the current animation has finished playing."
       }
     ]
   },

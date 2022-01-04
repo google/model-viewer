@@ -73,7 +73,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
       expect(element.paused).to.be.true;
     });
 
-    suite('when play is invoked', () => {
+    suite('when play is invoked with no options', () => {
       setup(async () => {
         const animationsPlay = waitForEvent(element, 'play');
         element.play();
@@ -102,6 +102,52 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         test('changing currentTime triggers render', () => {
           element.currentTime = 5;
           expect(element[$scene].shouldRender()).to.be.true;
+        });
+
+        suite('when play is invoked again', () => {
+          setup(async () => {
+            const animationsPlay = waitForEvent(element, 'play');
+            element.play();
+            await animationsPlay;
+          });
+
+          test('animations play', () => {
+            expect(animationIsPlaying(element)).to.be.true;
+          });
+
+          test('has a duration greater than 0', () => {
+            expect(element.duration).to.be.greaterThan(0);
+          });
+        })
+      });
+    });
+
+    suite('when play is invoked with options', () => {
+      setup(async() => {
+        const animationsPlay = waitForEvent(element, 'play');
+        element.play({repetitions: 2, pingpong: true});
+        await animationsPlay;
+      });
+
+      suite('animations play at eash elapsed time', () => {
+        let t = 0;
+
+        test('at 80% duration', async() => {
+          await timePasses(element.duration * 0.8 * 1000);
+          expect(animationIsPlaying(element)).to.be.true;
+          t = element.currentTime;
+        });
+
+        test('at 180% duration', async() => {
+          await timePasses(element.duration * 1.8 * 1000);
+          expect(animationIsPlaying(element)).to.be.true;
+          expect(element.currentTime).to.be.lessThan(t)
+        });
+
+        test('at 220% duration', async() => {
+          await timePasses(element.duration * 2.2 * 1000);
+          expect(animationIsPlaying(element)).to.be.false;
+          expect(element.currentTime).to.be.equal(0);
         });
       });
     });

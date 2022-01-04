@@ -14,6 +14,7 @@
  */
 
 import {property} from 'lit-element';
+import {LoopOnce, LoopPingPong, LoopRepeat} from 'three';
 
 import ModelViewerElementBase, {$hasTransitioned, $needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
@@ -22,6 +23,10 @@ const MILLISECONDS_PER_SECOND = 1000.0
 
 const $changeAnimation = Symbol('changeAnimation');
 const $paused = Symbol('paused');
+
+interface PlayAnimationOptions {
+  repetitions: number, pingpong: boolean,
+}
 
 export declare interface AnimationInterface {
   autoplay: boolean;
@@ -32,19 +37,36 @@ export declare interface AnimationInterface {
   readonly duration: number;
   currentTime: number;
   pause(): void;
-  play(): void;
+  play(options?: PlayAnimationOptions): void;
 }
 
 export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<AnimationInterface>&T => {
   class AnimationModelViewerElement extends ModelViewerElement {
-    @property({type: Boolean}) autoplay: boolean = false;
+    @property({type: Boolean})
+    autoplay: boolean = false;
     @property({type: String, attribute: 'animation-name'})
     animationName: string|undefined = undefined;
     @property({type: Number, attribute: 'animation-crossfade-duration'})
     animationCrossfadeDuration: number = 300;
 
     protected[$paused]: boolean = true;
+
+    constructor(...args: any[]) {
+      super(args)
+
+      this[$scene].subscribeMixerEvent('loop', (e) => {
+        const count = e.action._loopCount;
+        this.dispatchEvent(new CustomEvent('loop', {detail: { count }}));
+      })
+      this[$scene].subscribeMixerEvent('finished', () => {
+        this.currentTime = 0;
+        this[$paused] = true;
+        this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
+        this[$changeAnimation]({repetitions: Infinity, pingpong: false});
+        this.dispatchEvent(new CustomEvent('finished'));
+      })
+    }
 
     /**
      * Returns an array
@@ -85,14 +107,12 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.dispatchEvent(new CustomEvent('pause'));
     }
 
-    play() {
-      if (this[$paused] && this.availableAnimations.length > 0) {
+    play(options: PlayAnimationOptions = {repetitions: Infinity, pingpong: false}) {
+      if (this.availableAnimations.length > 0) {
         this[$paused] = false;
         this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
 
-        if (!this[$scene].hasActiveAnimation) {
-          this[$changeAnimation]();
-        }
+        this[$changeAnimation](options);
 
         this.dispatchEvent(new CustomEvent('play'));
       }
@@ -104,7 +124,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$paused] = true;
 
       if (this.autoplay) {
-        this[$changeAnimation]();
+        this[$changeAnimation]({repetitions: Infinity, pingpong: false});
         this.play();
       }
     }
@@ -130,7 +150,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('animationName')) {
-        this[$changeAnimation]();
+        this[$changeAnimation]({repetitions: Infinity, pingpong: false});
       }
     }
 
@@ -144,10 +164,14 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       return super[$updateSource]();
     }
 
-    [$changeAnimation]() {
+    [$changeAnimation](options: PlayAnimationOptions) {
+      const repetitions = options.repetitions ?? Infinity;
+      const mode = options.pingpong ? LoopPingPong : (repetitions === 1 ? LoopOnce : LoopRepeat);
       this[$scene].playAnimation(
           this.animationName,
-          this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND);
+          this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND,
+          mode,
+          repetitions);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation

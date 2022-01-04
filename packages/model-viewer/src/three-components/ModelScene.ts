@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3, LoopRepeat, LoopPingPong} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -490,7 +490,12 @@ export class ModelScene extends Scene {
 
   get animationTime(): number {
     if (this.currentAnimationAction != null) {
-      return this.currentAnimationAction.time;
+      const loopCount = Math.max((this.currentAnimationAction as any)._loopCount, 0);
+      if (this.currentAnimationAction.loop === LoopPingPong && (loopCount & 1) === 1) {
+        return this.duration - this.currentAnimationAction.time
+      } else {
+        return this.currentAnimationAction.time;
+      }
     }
 
     return 0;
@@ -515,7 +520,7 @@ export class ModelScene extends Scene {
    * provided, or if no animation is found by the given name, always falls back
    * to playing the first animation.
    */
-  playAnimation(name: string|null = null, crossfadeTime: number = 0) {
+  playAnimation(name: string|null = null, crossfadeTime: number = 0, loopMode: number = LoopRepeat, repetitionCount: number = Infinity) {
     if (this._currentGLTF == null) {
       return;
     }
@@ -549,7 +554,10 @@ export class ModelScene extends Scene {
         action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
       }
 
+      action.setLoop(loopMode, repetitionCount);
+
       action.enabled = true;
+
       action.play();
     } catch (error) {
       console.error(error);
@@ -563,6 +571,10 @@ export class ModelScene extends Scene {
 
   updateAnimation(step: number) {
     this.mixer.update(step);
+  }
+
+  subscribeMixerEvent(event: string, callback: (...args: any[]) => void) {
+    this.mixer.addEventListener(event, callback);
   }
 
   /**
