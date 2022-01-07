@@ -527,10 +527,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const scene = this[$scene];
       const oldFramedFieldOfView = scene.framedFieldOfView;
 
-      await this.requestUpdate('cameraTarget');
-
-      scene.updateFraming(
-          this.bounds === 'tight' ? scene.getTarget() : undefined);
+      await scene.updateFraming();
       scene.frameModel();
 
       const newFramedFieldOfView = scene.framedFieldOfView;
