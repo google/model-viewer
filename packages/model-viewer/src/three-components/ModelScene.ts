@@ -89,7 +89,7 @@ export class ModelScene extends Scene {
   public boundingBox = new Box3();
   public size = new Vector3();
   public idealCameraDistance = 0;
-  public fieldOfViewAspect = 0;
+  public idealAspect = 0;
   public framedFieldOfView = DEFAULT_FOV_DEG;
 
   public shadow: Shadow|null = null;
@@ -201,7 +201,7 @@ export class ModelScene extends Scene {
       const framingInfo = await this.externalRenderer.load(progressCallback);
 
       this.idealCameraDistance = framingInfo.framedRadius / SAFE_RADIUS_RATIO;
-      this.fieldOfViewAspect = framingInfo.fieldOfViewAspect;
+      this.idealAspect = framingInfo.idealAspect;
       this.frameModel();
 
       this.dispatchEvent({type: 'model-load', url: this.url});
@@ -341,7 +341,7 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Calculates the idealCameraDistance and fieldOfViewAspect that allows the 3D
+   * Calculates the idealCameraDistance and idealAspect that allows the 3D
    * object to be framed tightly in a 2D window of any aspect ratio without
    * clipping at any camera orbit. The camera's center target point can be
    * optionally specified. If no center is specified, it defaults to the center
@@ -371,7 +371,7 @@ export class ModelScene extends Scene {
       return Math.max(
           value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
     };
-    this.fieldOfViewAspect =
+    this.idealAspect =
         reduceVertices(this.modelContainer, horizontalFov, 0) / DEFAULT_TAN_FOV;
 
     this.target.add(this.modelContainer);
@@ -383,7 +383,7 @@ export class ModelScene extends Scene {
    */
   frameModel() {
     const vertical =
-        DEFAULT_TAN_FOV * Math.max(1, this.fieldOfViewAspect / this.aspect);
+        DEFAULT_TAN_FOV * Math.max(1, this.idealAspect / this.aspect);
     this.framedFieldOfView = 2 * Math.atan(vertical) * 180 / Math.PI;
   }
 
