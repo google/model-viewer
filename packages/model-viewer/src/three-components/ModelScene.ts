@@ -47,9 +47,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
 };
 
 export const DEFAULT_FOV_DEG = 45;
-const DEFAULT_HALF_FOV = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
-export const SAFE_RADIUS_RATIO = Math.sin(DEFAULT_HALF_FOV);
-export const DEFAULT_TAN_FOV = Math.tan(DEFAULT_HALF_FOV);
 
 const view = new Vector3();
 const target = new Vector3();
@@ -90,7 +87,8 @@ export class ModelScene extends Scene {
   public size = new Vector3();
   public idealCameraDistance = 0;
   public idealAspect = 0;
-  public framedFieldOfView = DEFAULT_FOV_DEG;
+  public framedFoVDeg = DEFAULT_FOV_DEG;
+  public boundingRadius = 0;
 
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
@@ -200,9 +198,10 @@ export class ModelScene extends Scene {
     if (this.externalRenderer != null) {
       const framingInfo = await this.externalRenderer.load(progressCallback);
 
-      this.idealCameraDistance = framingInfo.framedRadius / SAFE_RADIUS_RATIO;
+      this.boundingRadius = framingInfo.framedRadius;
+      this.idealCameraDistance = framingInfo.framedRadius /
+          Math.sin((this.framedFoVDeg / 2) * Math.PI / 180);
       this.idealAspect = framingInfo.idealAspect;
-      this.frameModel();
 
       this.dispatchEvent({type: 'model-load', url: this.url});
       return;
@@ -267,7 +266,6 @@ export class ModelScene extends Scene {
 
     await this.updateFraming();
 
-    this.frameModel();
     this.updateShadow();
     this.setShadowIntensity(this.shadowIntensity);
     this.dispatchEvent({type: 'model-load', url: this.url});
@@ -314,7 +312,6 @@ export class ModelScene extends Scene {
     this.annotationRenderer.setSize(width, height);
 
     this.aspect = this.width / this.height;
-    this.frameModel();
 
     if (this.externalRenderer != null) {
       const dpr = resolveDpr();
@@ -360,19 +357,21 @@ export class ModelScene extends Scene {
     const radiusSquared = (value: number, vertex: Vector3): number => {
       return Math.max(value, center!.distanceToSquared(vertex));
     };
-    const framedRadius =
+    this.boundingRadius =
         Math.sqrt(reduceVertices(this.modelContainer, radiusSquared, 0));
 
-    this.idealCameraDistance = framedRadius / SAFE_RADIUS_RATIO;
+    const halfFovRad = (this.framedFoVDeg / 2) * Math.PI / 180;
+    this.idealCameraDistance = this.boundingRadius / Math.sin(halfFovRad);
 
-    const horizontalFov = (value: number, vertex: Vector3): number => {
+    const horizontalTanFov = (value: number, vertex: Vector3): number => {
       vertex.sub(center!);
       const radiusXZ = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z);
       return Math.max(
           value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
     };
     this.idealAspect =
-        reduceVertices(this.modelContainer, horizontalFov, 0) / DEFAULT_TAN_FOV;
+        reduceVertices(this.modelContainer, horizontalTanFov, 0) /
+        Math.tan(halfFovRad);
 
     this.target.add(this.modelContainer);
   }
@@ -381,10 +380,10 @@ export class ModelScene extends Scene {
    * Set's the framedFieldOfView based on the aspect ratio of the window in
    * order to keep the model fully visible at any camera orientation.
    */
-  frameModel() {
-    const vertical =
-        DEFAULT_TAN_FOV * Math.max(1, this.idealAspect / this.aspect);
-    this.framedFieldOfView = 2 * Math.atan(vertical) * 180 / Math.PI;
+  adjustedFoV(fovDeg: number): number {
+    const vertical = Math.tan((fovDeg / 2) * Math.PI / 180) *
+        Math.max(1, this.idealAspect / this.aspect);
+    return 2 * Math.atan(vertical) * 180 / Math.PI;
   }
 
   getNDC(clientX: number, clientY: number): Vector2 {
