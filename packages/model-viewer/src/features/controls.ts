@@ -249,6 +249,7 @@ export declare interface ControlsInterface {
   getFieldOfView(): number;
   getMinimumFieldOfView(): number;
   getMaximumFieldOfView(): number;
+  getIdealAspect(): number;
   jumpCameraToGoal(): void;
   updateFraming(): Promise<void>;
   resetInteractionPrompt(): void;
@@ -396,6 +397,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     getMaximumFieldOfView(): number {
       return this[$controls].options.maximumFieldOfView!;
+    }
+
+    getIdealAspect(): number {
+      return this[$scene].idealAspect;
     }
 
     jumpCameraToGoal() {

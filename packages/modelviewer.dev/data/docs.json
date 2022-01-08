@@ -665,6 +665,11 @@
         "description": "Returns the maximum camera vertical field of view in degrees."
       },
       {
+        "name": "getIdealAspect()",
+        "htmlName": "getIdealAspect",
+        "description": "Returns the ideal aspect ratio for the poster image for this model as currently framed."
+      },
+      {
         "name": "zoom(keyPresses)",
         "htmlName": "zoom",
         "description": "Applies the default zoom behavior (a combination of radius and field of view change), mimicking keyboard or mouse wheel inputs. If keyPresses = 1.0, it will zoom in as much as a single keystroke; negative values zoom out."
