@@ -112,9 +112,6 @@
     {
       "name": "khronos-FlightHelmet",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf",
-      "dimensions": {
-        "width": 512
-      },
       "target": {
         "y": 0.32
       }
