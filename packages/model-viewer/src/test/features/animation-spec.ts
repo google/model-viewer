@@ -123,32 +123,30 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
     });
 
     suite('when play is invoked with options', () => {
-      setup(async() => {
+      setup(async () => {
+        element.animationName = 'Punch';
+        await element.updateComplete;
         const animationsPlay = waitForEvent(element, 'play');
         element.play({repetitions: 2, pingpong: true});
         await animationsPlay;
       });
 
-      suite('animations play at eash elapsed time', () => {
-        let t = 0;
+      test('plays forward, backward, and stops', async () => {
+        await timePasses(element.duration * 0.8 * 1000);
+        expect(animationIsPlaying(element), 'failed to start playing!')
+            .to.be.true;
+        const t = element.currentTime;
 
-        test('at 80% duration', async() => {
-          await timePasses(element.duration * 0.8 * 1000);
-          expect(animationIsPlaying(element)).to.be.true;
-          t = element.currentTime;
-        });
+        await timePasses(element.duration * 1.0 * 1000);
+        expect(animationIsPlaying(element), 'not playing after 1.8 * duration!')
+            .to.be.true;
+        expect(element.currentTime, 'not playing backwards!').to.be.lessThan(t);
 
-        test('at 180% duration', async() => {
-          await timePasses(element.duration * 1.8 * 1000);
-          expect(animationIsPlaying(element)).to.be.true;
-          expect(element.currentTime).to.be.lessThan(t)
-        });
-
-        test('at 220% duration', async() => {
-          await timePasses(element.duration * 2.2 * 1000);
-          expect(animationIsPlaying(element)).to.be.false;
-          expect(element.currentTime).to.be.equal(0);
-        });
+        await timePasses(element.duration * 0.4 * 1000);
+        expect(animationIsPlaying(element), 'failed to stop playing!')
+            .to.be.false;
+        expect(element.currentTime, 'did not return to beginning of animation!')
+            .to.be.equal(0);
       });
     });
 
