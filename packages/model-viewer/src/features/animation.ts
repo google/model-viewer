@@ -28,6 +28,11 @@ interface PlayAnimationOptions {
   repetitions: number, pingpong: boolean,
 }
 
+const DEFAULT_PLAY_OPTIONS: PlayAnimationOptions = {
+  repetitions: Infinity,
+  pingpong: false
+};
+
 export declare interface AnimationInterface {
   autoplay: boolean;
   animationName: string|void;
@@ -43,8 +48,7 @@ export declare interface AnimationInterface {
 export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<AnimationInterface>&T => {
   class AnimationModelViewerElement extends ModelViewerElement {
-    @property({type: Boolean})
-    autoplay: boolean = false;
+    @property({type: Boolean}) autoplay: boolean = false;
     @property({type: String, attribute: 'animation-name'})
     animationName: string|undefined = undefined;
     @property({type: Number, attribute: 'animation-crossfade-duration'})
@@ -53,19 +57,19 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$paused]: boolean = true;
 
     constructor(...args: any[]) {
-      super(args)
+      super(args);
 
       this[$scene].subscribeMixerEvent('loop', (e) => {
         const count = e.action._loopCount;
-        this.dispatchEvent(new CustomEvent('loop', {detail: { count }}));
-      })
+        this.dispatchEvent(new CustomEvent('loop', {detail: {count}}));
+      });
       this[$scene].subscribeMixerEvent('finished', () => {
         this.currentTime = 0;
         this[$paused] = true;
         this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
         this[$changeAnimation]({repetitions: Infinity, pingpong: false});
         this.dispatchEvent(new CustomEvent('finished'));
-      })
+      });
     }
 
     /**
@@ -107,7 +111,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.dispatchEvent(new CustomEvent('pause'));
     }
 
-    play(options: PlayAnimationOptions = {repetitions: Infinity, pingpong: false}) {
+    play(options: PlayAnimationOptions = DEFAULT_PLAY_OPTIONS) {
       if (this.availableAnimations.length > 0) {
         this[$paused] = false;
         this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
@@ -166,7 +170,9 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$changeAnimation](options: PlayAnimationOptions) {
       const repetitions = options.repetitions ?? Infinity;
-      const mode = options.pingpong ? LoopPingPong : (repetitions === 1 ? LoopOnce : LoopRepeat);
+      const mode = options.pingpong ?
+          LoopPingPong :
+          (repetitions === 1 ? LoopOnce : LoopRepeat);
       this[$scene].playAnimation(
           this.animationName,
           this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND,
