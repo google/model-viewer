@@ -105,7 +105,7 @@ interface ToBlobOptions {
 
 export interface FramingInfo {
   framedRadius: number;
-  idealAspect: number;
+  fieldOfViewAspect: number;
 }
 
 export interface Camera {

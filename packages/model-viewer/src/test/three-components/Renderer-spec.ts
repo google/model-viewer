@@ -29,7 +29,7 @@ let externalHeight = 0;
 class ExternalRenderer implements RendererInterface {
   load(callback: (progress: number) => void) {
     callback(1.0);
-    return Promise.resolve({framedRadius: 15, idealAspect: 2});
+    return Promise.resolve({framedRadius: 15, fieldOfViewAspect: 2});
   }
   render(camera: Camera) {
     externalCamera = camera;

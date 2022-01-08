@@ -198,7 +198,7 @@ export class ModelScene extends Scene {
       const framingInfo = await this.externalRenderer.load(progressCallback);
 
       this.boundingRadius = framingInfo.framedRadius;
-      this.idealAspect = framingInfo.idealAspect;
+      this.idealAspect = framingInfo.fieldOfViewAspect;
 
       this.dispatchEvent({type: 'model-load', url: this.url});
       return;
