@@ -105,7 +105,8 @@ suite('ModelScene', () => {
 
       const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
       const expectedDistance = dummyRadius / Math.sin(halfFov);
-      expect(scene.idealCameraDistance).to.be.closeTo(expectedDistance, 0.0001);
+      expect(scene.idealCameraDistance())
+          .to.be.closeTo(expectedDistance, 0.0001);
     });
 
     test('idealAspect is set correctly', async () => {

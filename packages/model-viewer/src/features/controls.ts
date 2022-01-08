@@ -139,7 +139,7 @@ export const cameraOrbitIntrinsics = (() => {
   const phi = normalizeUnit(defaultTerms[1]) as NumberNode<'rad'>;
 
   return (element: ModelViewerElementBase) => {
-    const radius = element[$scene].idealCameraDistance;
+    const radius = element[$scene].idealCameraDistance();
 
     return {
       basis: [theta, phi, numberNode(radius, 'm')],
@@ -663,8 +663,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
      * orbiting at the supplied radius.
      */
     [$updateCameraForRadius](radius: number) {
-      const {idealCameraDistance} = this[$scene];
-      const maximumRadius = Math.max(idealCameraDistance, radius);
+      const maximumRadius = Math.max(this[$scene].boundingRadius, radius);
 
       const near = 0;
       const far = 2 * maximumRadius;

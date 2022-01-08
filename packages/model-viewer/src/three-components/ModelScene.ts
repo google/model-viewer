@@ -85,7 +85,6 @@ export class ModelScene extends Scene {
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();
   public size = new Vector3();
-  public idealCameraDistance = 0;
   public idealAspect = 0;
   public framedFoVDeg = DEFAULT_FOV_DEG;
   public boundingRadius = 0;
@@ -199,8 +198,6 @@ export class ModelScene extends Scene {
       const framingInfo = await this.externalRenderer.load(progressCallback);
 
       this.boundingRadius = framingInfo.framedRadius;
-      this.idealCameraDistance = framingInfo.framedRadius /
-          Math.sin((this.framedFoVDeg / 2) * Math.PI / 180);
       this.idealAspect = framingInfo.idealAspect;
 
       this.dispatchEvent({type: 'model-load', url: this.url});
@@ -338,7 +335,7 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Calculates the idealCameraDistance and idealAspect that allows the 3D
+   * Calculates the boundingRadius and idealAspect that allows the 3D
    * object to be framed tightly in a 2D window of any aspect ratio without
    * clipping at any camera orbit. The camera's center target point can be
    * optionally specified. If no center is specified, it defaults to the center
@@ -360,20 +357,22 @@ export class ModelScene extends Scene {
     this.boundingRadius =
         Math.sqrt(reduceVertices(this.modelContainer, radiusSquared, 0));
 
-    const halfFovRad = (this.framedFoVDeg / 2) * Math.PI / 180;
-    this.idealCameraDistance = this.boundingRadius / Math.sin(halfFovRad);
-
     const horizontalTanFov = (value: number, vertex: Vector3): number => {
       vertex.sub(center!);
       const radiusXZ = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z);
       return Math.max(
-          value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
+          value, radiusXZ / (this.idealCameraDistance() - Math.abs(vertex.y)));
     };
     this.idealAspect =
         reduceVertices(this.modelContainer, horizontalTanFov, 0) /
-        Math.tan(halfFovRad);
+        Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
 
     this.target.add(this.modelContainer);
+  }
+
+  idealCameraDistance(): number {
+    const halfFovRad = (this.framedFoVDeg / 2) * Math.PI / 180;
+    return this.boundingRadius / Math.sin(halfFovRad);
   }
 
   /**
@@ -445,7 +444,7 @@ export class ModelScene extends Scene {
     const goal = this.goalTarget;
     const target = this.target.position;
     if (!goal.equals(target)) {
-      const normalization = this.idealCameraDistance / 10;
+      const normalization = this.boundingRadius / 10;
       let {x, y, z} = target;
       x = this.targetDamperX.update(x, goal.x, delta, normalization);
       y = this.targetDamperY.update(y, goal.y, delta, normalization);
