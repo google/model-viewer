@@ -113,8 +113,7 @@
       "name": "khronos-FlightHelmet",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf",
       "dimensions": {
-        "width": 512,
-        "height": 1024
+        "width": 512
       },
       "target": {
         "y": 0.32
@@ -123,9 +122,6 @@
     {
       "name": "khronos-SciFiHelmet",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SciFiHelmet/glTF/SciFiHelmet.gltf",
-      "dimensions": {
-        "height": 1024
-      },
       "orbit": {
         "radius": 4
       }
@@ -142,8 +138,7 @@
       "name": "khronos-AntiqueCamera",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
       "dimensions": {
-        "width": 512,
-        "height": 1024
+        "width": 512
       },
       "target": {
         "y": 3.6
@@ -155,9 +150,6 @@
     {
       "name": "khronos-Corset",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Corset/glTF/Corset.gltf",
-      "dimensions": {
-        "height": 1024
-      },
       "target": {
         "y": 0.03
       },
@@ -266,6 +258,7 @@
         "radius": 0
       },
       "exclude": [
+        "model-viewer",
         "dspbr-pt"
       ]
     },
@@ -471,9 +464,6 @@
     {
       "name": "khronos-BoomBoxWithAxes",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
-      "dimensions": {
-        "height": 1024
-      },
       "target": {
         "y": 0.01
       },
