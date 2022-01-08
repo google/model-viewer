@@ -702,7 +702,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onResize](event: any) {
+    async[$onResize](event: any) {
       const controls = this[$controls];
       const scene = this[$scene];
       const oldFramedFoV = scene.adjustedFoV(scene.framedFoVDeg);
@@ -713,11 +713,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const newFramedFoV = scene.adjustedFoV(scene.framedFoVDeg);
       const zoom = controls.getFieldOfView() / oldFramedFoV;
-      this[$controls].setFieldOfView(newFramedFoV * zoom);
 
       controls.updateAspect(this[$scene].aspect);
 
-      this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
+      await this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
+      this[$controls].setFieldOfView(newFramedFoV * zoom);
+
       this.jumpCameraToGoal();
     }
 
