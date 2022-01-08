@@ -184,6 +184,12 @@ export class CameraSettings extends ConnectedLitElement {
     reduxStore.dispatch(dispatchSaveCameraOrbit(undefined));
   }
 
+  onUpdateFraming() {
+    const modelViewer = getModelViewer();
+    modelViewer.updateFraming();
+    modelViewer.cameraOrbit = this.config.cameraOrbit!;
+  }
+
   onCameraOrbitEditorChange() {
     reduxStore.dispatch(
         dispatchSaveCameraOrbit(this.cameraOrbitEditor.currentOrbit));
@@ -225,6 +231,15 @@ export class CameraSettings extends ConnectedLitElement {
             title="Reset initial camera" @click=${this.resetInitialCamera}>
             </mwc-icon-button>
           </div>
+          <mwc-button
+            class="SaveCameraButton"
+            id="update-framing"
+            unelevated
+            icon="photo_camera"
+            style="align-self: center"
+            @click=${this.onUpdateFraming}>
+            Reset framing
+          </mwc-button>
         </div>
         <div style="font-size: 14px; font-weight: 500; margin-top: 20px">Target Point:</div>
         <me-camera-target-input .change=${this.onCameraTargetChange}>
