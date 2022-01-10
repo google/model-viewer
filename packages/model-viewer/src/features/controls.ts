@@ -22,7 +22,7 @@ import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
 import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
-import {SAFE_RADIUS_RATIO} from '../three-components/ModelScene.js';
+import {DEFAULT_FOV_DEG} from '../three-components/ModelScene.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
@@ -57,7 +57,7 @@ export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
 
-const MINIMUM_RADIUS_RATIO = 1.1 * SAFE_RADIUS_RATIO;
+const MINIMUM_RADIUS_RATIO = 1.1;
 
 const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
@@ -107,10 +107,11 @@ export const TouchAction: {[index: string]: TouchAction} = {
   NONE: 'none'
 };
 
-export const fieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
+export const fieldOfViewIntrinsics = () => {
   return {
-    basis: [numberNode(
-        (element as any)[$zoomAdjustedFieldOfView] * Math.PI / 180, 'rad')],
+    basis:
+        [degreesToRadians(numberNode(DEFAULT_FOV_DEG, 'deg')) as
+         NumberNode<'rad'>],
     keywords: {auto: [null]}
   };
 };
@@ -120,12 +121,12 @@ const minFieldOfViewIntrinsics = {
   keywords: {auto: [null]}
 };
 
-const maxFieldOfViewIntrinsics = (element: ModelViewerElementBase) => {
-  const scene = element[$scene];
-
+const maxFieldOfViewIntrinsics = () => {
   return {
-    basis: [degreesToRadians(numberNode(45, 'deg')) as NumberNode<'rad'>],
-    keywords: {auto: [numberNode(scene.framedFieldOfView, 'deg')]}
+    basis:
+        [degreesToRadians(numberNode(DEFAULT_FOV_DEG, 'deg')) as
+         NumberNode<'rad'>],
+    keywords: {auto: [null]}
   };
 };
 
@@ -138,7 +139,7 @@ export const cameraOrbitIntrinsics = (() => {
   const phi = normalizeUnit(defaultTerms[1]) as NumberNode<'rad'>;
 
   return (element: ModelViewerElementBase) => {
-    const radius = element[$scene].idealCameraDistance;
+    const radius = element[$scene].idealCameraDistance();
 
     return {
       basis: [theta, phi, numberNode(radius, 'm')],
@@ -148,7 +149,7 @@ export const cameraOrbitIntrinsics = (() => {
 })();
 
 const minCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
-  const radius = MINIMUM_RADIUS_RATIO * element[$scene].idealCameraDistance;
+  const radius = MINIMUM_RADIUS_RATIO * element[$scene].boundingRadius;
 
   return {
     basis: [
@@ -196,7 +197,6 @@ const TAU = 2.0 * Math.PI;
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
-export const $idealCameraDistance = Symbol('idealCameraDistance');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
@@ -213,7 +213,6 @@ const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
 const $lastPromptOffset = Symbol('lastPromptOffset');
 const $focusedTime = Symbol('focusedTime');
 
-const $zoomAdjustedFieldOfView = Symbol('zoomAdjustedFieldOfView');
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
 const $initialized = Symbol('initialized');
@@ -250,6 +249,7 @@ export declare interface ControlsInterface {
   getFieldOfView(): number;
   getMinimumFieldOfView(): number;
   getMaximumFieldOfView(): number;
+  getIdealAspect(): number;
   jumpCameraToGoal(): void;
   updateFraming(): Promise<void>;
   resetInteractionPrompt(): void;
@@ -363,7 +363,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$controls] = new SmoothControls(
         this[$scene].camera as PerspectiveCamera, this[$userInputElement]);
 
-    protected[$zoomAdjustedFieldOfView] = 0;
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
     protected[$initialized] = false;
@@ -398,6 +397,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     getMaximumFieldOfView(): number {
       return this[$controls].options.maximumFieldOfView!;
+    }
+
+    getIdealAspect(): number {
+      return this[$scene].idealAspect;
     }
 
     jumpCameraToGoal() {
@@ -525,17 +528,13 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     async updateFraming() {
       const scene = this[$scene];
-      const oldFramedFieldOfView = scene.framedFieldOfView;
+      const oldFramedFoV = scene.adjustedFoV(scene.framedFoVDeg);
 
-      await this.requestUpdate('cameraTarget');
+      await scene.updateFraming();
 
-      scene.updateFraming(
-          this.bounds === 'tight' ? scene.getTarget() : undefined);
-      scene.frameModel();
-
-      const newFramedFieldOfView = scene.framedFieldOfView;
-      const zoom = this[$controls].getFieldOfView() / oldFramedFieldOfView;
-      this[$zoomAdjustedFieldOfView] = newFramedFieldOfView * zoom;
+      const newFramedFoV = scene.adjustedFoV(scene.framedFoVDeg);
+      const zoom = this[$controls].getFieldOfView() / oldFramedFoV;
+      this[$controls].setFieldOfView(newFramedFoV * zoom);
       this[$maintainThetaPhi] = true;
 
       this.requestUpdate('maxFieldOfView');
@@ -546,7 +545,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
-      this[$controls].setFieldOfView(style[0] * 180 / Math.PI);
+      const scene = this[$scene];
+      scene.framedFoVDeg = style[0] * 180 / Math.PI;
+      this[$controls].setFieldOfView(scene.adjustedFoV(scene.framedFoVDeg));
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
@@ -585,8 +586,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncMaxFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
-      this[$controls].applyOptions(
-          {maximumFieldOfView: style[0] * 180 / Math.PI});
+      const fov = this[$scene].adjustedFoV(style[0] * 180 / Math.PI);
+      this[$controls].applyOptions({maximumFieldOfView: fov});
       this.jumpCameraToGoal();
     }
 
@@ -662,8 +663,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
      * orbiting at the supplied radius.
      */
     [$updateCameraForRadius](radius: number) {
-      const {idealCameraDistance} = this[$scene];
-      const maximumRadius = Math.max(idealCameraDistance, radius);
+      const maximumRadius = Math.max(this[$scene].boundingRadius, radius);
 
       const near = 0;
       const far = 2 * maximumRadius;
@@ -706,30 +706,28 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onResize](event: any) {
+    async[$onResize](event: any) {
       const controls = this[$controls];
-      const oldFramedFieldOfView = this[$scene].framedFieldOfView;
+      const scene = this[$scene];
+      const oldFramedFoV = scene.adjustedFoV(scene.framedFoVDeg);
 
-      // The super of $onResize will update the scene's framedFieldOfView, so we
+      // The super of $onResize may update the scene's adjustedFoV, so we
       // compare the before and after to calculate the proper zoom.
       super[$onResize](event);
 
-      const newFramedFieldOfView = this[$scene].framedFieldOfView;
-      const zoom = controls.getFieldOfView() / oldFramedFieldOfView;
-      this[$zoomAdjustedFieldOfView] = newFramedFieldOfView * zoom;
+      const newFramedFoV = scene.adjustedFoV(scene.framedFoVDeg);
+      const zoom = controls.getFieldOfView() / oldFramedFoV;
 
       controls.updateAspect(this[$scene].aspect);
 
-      this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
-      this.requestUpdate('fieldOfView', this.fieldOfView);
+      await this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
+      this[$controls].setFieldOfView(newFramedFoV * zoom);
+
       this.jumpCameraToGoal();
     }
 
     [$onModelLoad]() {
       super[$onModelLoad]();
-
-      const {framedFieldOfView} = this[$scene];
-      this[$zoomAdjustedFieldOfView] = framedFieldOfView;
 
       if (this[$initialized]) {
         this[$maintainThetaPhi] = true;

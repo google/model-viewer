@@ -16,8 +16,7 @@
 import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import {DEFAULT_FOV_DEG} from '../../three-components/ModelScene.js';
-import {ModelScene} from '../../three-components/ModelScene.js';
+import {DEFAULT_FOV_DEG, ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
 
 
@@ -106,13 +105,14 @@ suite('ModelScene', () => {
 
       const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
       const expectedDistance = dummyRadius / Math.sin(halfFov);
-      expect(scene.idealCameraDistance).to.be.closeTo(expectedDistance, 0.0001);
+      expect(scene.idealCameraDistance())
+          .to.be.closeTo(expectedDistance, 0.0001);
     });
 
-    test('fieldOfViewAspect is set correctly', async () => {
+    test('idealAspect is set correctly', async () => {
       await scene.setObject(dummyMesh);
 
-      expect(scene.fieldOfViewAspect).to.be.closeTo(1, 0.0001);
+      expect(scene.idealAspect).to.be.closeTo(1, 0.0001);
     });
 
     test('cannot set the canvas smaller than 1x1', () => {

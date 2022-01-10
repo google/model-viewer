@@ -14,11 +14,11 @@
  */
 
 import {Camera, Vector3} from 'three';
-import {IS_IOS} from '../../constants.js';
 
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
+import {DEFAULT_FOV_DEG} from '../../three-components/ModelScene.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor, step, timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
@@ -240,14 +240,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('changes FOV basis when aspect ratio changes', async () => {
-        if (IS_IOS) {  // Flaky on iOS 13
-          return;
-        }
         const fov = element.getFieldOfView();
         expect(fov).to.be.closeTo(DEFAULT_MAX_FOV, .001);
         element.setAttribute('style', 'width: 200px; height: 300px');
+        await rafPasses();
+        await rafPasses();
 
-        await until(() => element.getFieldOfView() !== fov);
         expect(element.getFieldOfView()).to.be.greaterThan(fov);
       });
 
@@ -322,14 +320,12 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           settleControls(controls);
         });
 
-        test('defaults maxFieldOfView to ideal value', async () => {
-          const scene = element[$scene];
-
+        test('defaults maxFieldOfView correctly', async () => {
           element.fieldOfView = '180deg';
           await timePasses();
           settleControls(controls);
           expect(element.getFieldOfView())
-              .to.be.closeTo(scene.framedFieldOfView, 0.001);
+              .to.be.closeTo(DEFAULT_FOV_DEG, 0.001);
         });
 
         test('jumps to maxCameraOrbit when outside', async () => {

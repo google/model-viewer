@@ -112,13 +112,13 @@ suite('Renderer with two scenes', () => {
     });
 
     test('load sets framing', async () => {
-      expect(externalScene.fieldOfViewAspect).to.be.eq(0);
+      expect(externalScene.idealAspect).to.be.eq(0);
 
       const sourceLoads = waitForEvent(externalScene.element, 'load');
       externalElement[$isElementInViewport] = true;
       await sourceLoads;
 
-      expect(externalScene.fieldOfViewAspect).to.be.eq(2);
+      expect(externalScene.idealAspect).to.be.eq(2);
       expect((externalElement as any)[$controls].options.minimumRadius)
           .to.be.greaterThan(15);
     });

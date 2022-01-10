@@ -15,7 +15,7 @@
 
 import {property} from 'lit-element';
 import {UpdatingElement} from 'lit-element/lib/updating-element';
-import {Event as ThreeEvent, Vector3, Vector2} from 'three';
+import {Event as ThreeEvent, Vector2, Vector3} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {makeTemplate} from './template.js';
@@ -389,22 +389,22 @@ export default class ModelViewerElementBase extends UpdatingElement {
   async toBlob(options?: ToBlobOptions): Promise<Blob> {
     const mimeType = options ? options.mimeType : undefined;
     const qualityArgument = options ? options.qualityArgument : undefined;
-    const idealAspect = options ? options.idealAspect : undefined;
+    const useIdealAspect = options ? options.idealAspect : undefined;
 
-    const {width, height, fieldOfViewAspect, aspect} = this[$scene];
+    const {width, height, idealAspect, aspect} = this[$scene];
     const {dpr, scaleFactor} = this[$renderer];
     let outputWidth = width * scaleFactor * dpr;
     let outputHeight = height * scaleFactor * dpr;
     let offsetX = 0;
     let offsetY = 0;
-    if (idealAspect === true) {
-      if (fieldOfViewAspect > aspect) {
+    if (useIdealAspect === true) {
+      if (idealAspect > aspect) {
         const oldHeight = outputHeight;
-        outputHeight = Math.round(outputWidth / fieldOfViewAspect);
+        outputHeight = Math.round(outputWidth / idealAspect);
         offsetY = (oldHeight - outputHeight) / 2;
       } else {
         const oldWidth = outputWidth;
-        outputWidth = Math.round(outputHeight * fieldOfViewAspect);
+        outputWidth = Math.round(outputHeight * idealAspect);
         offsetX = (oldWidth - outputWidth) / 2;
       }
     }

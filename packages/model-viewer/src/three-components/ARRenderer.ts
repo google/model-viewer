@@ -102,7 +102,6 @@ export class ARRenderer extends EventDispatcher {
   private frames = 0;
   private initialized = false;
   private oldTarget = new Vector3();
-  private oldFramedFieldOfView = 45;
   private placementComplete = false;
   private isTranslating = false;
   private isRotating = false;
@@ -236,7 +235,6 @@ export class ARRenderer extends EventDispatcher {
     scene.setShadowIntensity(0.01);  // invisible, but not changing the shader
 
     this.oldTarget.copy(scene.getTarget());
-    this.oldFramedFieldOfView = scene.framedFieldOfView;
 
     scene.addEventListener('model-load', this.onUpdateScene);
 
@@ -358,7 +356,6 @@ export class ARRenderer extends EventDispatcher {
       }
       const point = this.oldTarget;
       scene.setTarget(point.x, point.y, point.z);
-      scene.framedFieldOfView = this.oldFramedFieldOfView;
       scene.xrCamera = null;
 
       scene.removeEventListener('model-load', this.onUpdateScene);
@@ -691,16 +688,16 @@ export class ARRenderer extends EventDispatcher {
 
   private moveScene(delta: number) {
     const scene = this.presentedScene!;
-    const {position, yaw, idealCameraDistance: radius} = scene;
+    const {position, yaw, boundingRadius} = scene;
     const goal = this.goalPosition;
     const oldScale = scene.scale.x;
     const box = this.placementBox!;
 
     if (!goal.equals(position) || this.goalScale !== oldScale) {
       let {x, y, z} = position;
-      x = this.xDamper.update(x, goal.x, delta, radius);
-      y = this.yDamper.update(y, goal.y, delta, radius);
-      z = this.zDamper.update(z, goal.z, delta, radius);
+      x = this.xDamper.update(x, goal.x, delta, boundingRadius);
+      y = this.yDamper.update(y, goal.y, delta, boundingRadius);
+      z = this.zDamper.update(z, goal.z, delta, boundingRadius);
       position.set(x, y, z);
 
       const newScale =

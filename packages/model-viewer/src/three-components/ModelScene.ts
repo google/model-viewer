@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3, LoopRepeat, LoopPingPong} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -47,9 +47,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
 };
 
 export const DEFAULT_FOV_DEG = 45;
-const DEFAULT_HALF_FOV = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
-export const SAFE_RADIUS_RATIO = Math.sin(DEFAULT_HALF_FOV);
-export const DEFAULT_TAN_FOV = Math.tan(DEFAULT_HALF_FOV);
 
 const view = new Vector3();
 const target = new Vector3();
@@ -88,9 +85,9 @@ export class ModelScene extends Scene {
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();
   public size = new Vector3();
-  public idealCameraDistance = 0;
-  public fieldOfViewAspect = 0;
-  public framedFieldOfView = DEFAULT_FOV_DEG;
+  public idealAspect = 0;
+  public framedFoVDeg = DEFAULT_FOV_DEG;
+  public boundingRadius = 0;
 
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
@@ -200,9 +197,8 @@ export class ModelScene extends Scene {
     if (this.externalRenderer != null) {
       const framingInfo = await this.externalRenderer.load(progressCallback);
 
-      this.idealCameraDistance = framingInfo.framedRadius / SAFE_RADIUS_RATIO;
-      this.fieldOfViewAspect = framingInfo.fieldOfViewAspect;
-      this.frameModel();
+      this.boundingRadius = framingInfo.framedRadius;
+      this.idealAspect = framingInfo.fieldOfViewAspect;
 
       this.dispatchEvent({type: 'model-load', url: this.url});
       return;
@@ -265,14 +261,8 @@ export class ModelScene extends Scene {
   private async setupScene() {
     this.updateBoundingBox();
 
-    let target = null;
-    if (this.tightBounds === true) {
-      await this.element.requestUpdate('cameraTarget');
-      target = this.getTarget();
-    }
-    this.updateFraming(target);
+    await this.updateFraming();
 
-    this.frameModel();
     this.updateShadow();
     this.setShadowIntensity(this.shadowIntensity);
     this.dispatchEvent({type: 'model-load', url: this.url});
@@ -319,7 +309,6 @@ export class ModelScene extends Scene {
     this.annotationRenderer.setSize(width, height);
 
     this.aspect = this.width / this.height;
-    this.frameModel();
 
     if (this.externalRenderer != null) {
       const dpr = resolveDpr();
@@ -346,48 +335,54 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Calculates the idealCameraDistance and fieldOfViewAspect that allows the 3D
+   * Calculates the boundingRadius and idealAspect that allows the 3D
    * object to be framed tightly in a 2D window of any aspect ratio without
    * clipping at any camera orbit. The camera's center target point can be
    * optionally specified. If no center is specified, it defaults to the center
    * of the bounding box, which means asymmetric models will tend to be tight on
    * one side instead of both. Proper choice of center can correct this.
    */
-  updateFraming(center: Vector3|null = null) {
+  async updateFraming() {
     this.target.remove(this.modelContainer);
 
-    if (center == null) {
-      center = this.boundingBox.getCenter(new Vector3());
+    let center = this.boundingBox.getCenter(new Vector3());
+    if (this.tightBounds === true) {
+      await this.element.requestUpdate('cameraTarget');
+      center = this.getTarget();
     }
 
     const radiusSquared = (value: number, vertex: Vector3): number => {
       return Math.max(value, center!.distanceToSquared(vertex));
     };
-    const framedRadius =
+    this.boundingRadius =
         Math.sqrt(reduceVertices(this.modelContainer, radiusSquared, 0));
 
-    this.idealCameraDistance = framedRadius / SAFE_RADIUS_RATIO;
-
-    const horizontalFov = (value: number, vertex: Vector3): number => {
+    const horizontalTanFov = (value: number, vertex: Vector3): number => {
       vertex.sub(center!);
       const radiusXZ = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z);
       return Math.max(
-          value, radiusXZ / (this.idealCameraDistance - Math.abs(vertex.y)));
+          value, radiusXZ / (this.idealCameraDistance() - Math.abs(vertex.y)));
     };
-    this.fieldOfViewAspect =
-        reduceVertices(this.modelContainer, horizontalFov, 0) / DEFAULT_TAN_FOV;
+    this.idealAspect =
+        reduceVertices(this.modelContainer, horizontalTanFov, 0) /
+        Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
 
     this.target.add(this.modelContainer);
+  }
+
+  idealCameraDistance(): number {
+    const halfFovRad = (this.framedFoVDeg / 2) * Math.PI / 180;
+    return this.boundingRadius / Math.sin(halfFovRad);
   }
 
   /**
    * Set's the framedFieldOfView based on the aspect ratio of the window in
    * order to keep the model fully visible at any camera orientation.
    */
-  frameModel() {
-    const vertical =
-        DEFAULT_TAN_FOV * Math.max(1, this.fieldOfViewAspect / this.aspect);
-    this.framedFieldOfView = 2 * Math.atan(vertical) * 180 / Math.PI;
+  adjustedFoV(fovDeg: number): number {
+    const vertical = Math.tan((fovDeg / 2) * Math.PI / 180) *
+        Math.max(1, this.idealAspect / this.aspect);
+    return 2 * Math.atan(vertical) * 180 / Math.PI;
   }
 
   getNDC(clientX: number, clientY: number): Vector2 {
@@ -449,7 +444,7 @@ export class ModelScene extends Scene {
     const goal = this.goalTarget;
     const target = this.target.position;
     if (!goal.equals(target)) {
-      const normalization = this.idealCameraDistance / 10;
+      const normalization = this.boundingRadius / 10;
       let {x, y, z} = target;
       x = this.targetDamperX.update(x, goal.x, delta, normalization);
       y = this.targetDamperY.update(y, goal.y, delta, normalization);
@@ -490,8 +485,10 @@ export class ModelScene extends Scene {
 
   get animationTime(): number {
     if (this.currentAnimationAction != null) {
-      const loopCount = Math.max((this.currentAnimationAction as any)._loopCount, 0);
-      if (this.currentAnimationAction.loop === LoopPingPong && (loopCount & 1) === 1) {
+      const loopCount =
+          Math.max((this.currentAnimationAction as any)._loopCount, 0);
+      if (this.currentAnimationAction.loop === LoopPingPong &&
+          (loopCount & 1) === 1) {
         return this.duration - this.currentAnimationAction.time
       } else {
         return this.currentAnimationAction.time;
@@ -520,7 +517,9 @@ export class ModelScene extends Scene {
    * provided, or if no animation is found by the given name, always falls back
    * to playing the first animation.
    */
-  playAnimation(name: string|null = null, crossfadeTime: number = 0, loopMode: number = LoopRepeat, repetitionCount: number = Infinity) {
+  playAnimation(
+      name: string|null = null, crossfadeTime: number = 0,
+      loopMode: number = LoopRepeat, repetitionCount: number = Infinity) {
     if (this._currentGLTF == null) {
       return;
     }

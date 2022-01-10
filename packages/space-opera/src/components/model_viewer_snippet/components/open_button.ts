@@ -229,7 +229,7 @@ export class ImportCard extends LitElement {
               rootPath + url.substr(index + 1).replace(/^(\.?\/)/, '');
 
           if (fileMap.has(normalizedURL)) {
-            const blob = fileMap.get(normalizedURL);
+            const blob = fileMap.get(normalizedURL)!;
             const blobURL = URL.createObjectURL(blob);
             blobURLs.push(blobURL);
             return blobURL;
