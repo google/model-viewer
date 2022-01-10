@@ -17,12 +17,8 @@ import {clamp} from '../utilities.js';
 
 interface OngoingActivity {
   progress: number;
+  completed: boolean;
 }
-const $ongoingActivities = Symbol('ongoingActivities');
-const $announceTotalProgress = Symbol('announceTotalProgress');
-const $eventDelegate = Symbol('eventDelegate');
-
-const ACTIVITY_PROGRESS_WEIGHT = 0.5;
 
 /**
  * An Activity is represented by a callback that accepts values from 0 to 1,
@@ -61,31 +57,15 @@ export interface ProgressDetails {
  * of total progress until all currently tracked ongoing activities have
  * completed.
  */
-export class ProgressTracker implements EventTarget {
-  // NOTE(cdata): This eventDelegate hack is a quick trick to let us get the
-  // EventTarget interface without implementing or requiring a full polyfill. We
-  // should remove this once EventTarget is inheritable everywhere.
-  protected[$eventDelegate]: DocumentFragment =
-      document.createDocumentFragment();
-
-  // NOTE(cdata): We declare each of these methods independently here so that we
-  // can inherit the correct types from EventTarget's interface. Maybe there is
-  // a better way to do this dynamically so that we don't repeat ourselves?
-  public addEventListener: typeof EventTarget.prototype.addEventListener =
-      (...args) => this[$eventDelegate].addEventListener(...args);
-  public removeEventListener: typeof EventTarget.prototype.removeEventListener =
-      (...args) => this[$eventDelegate].removeEventListener(...args);
-  public dispatchEvent: typeof EventTarget.prototype.dispatchEvent =
-      (...args) => this[$eventDelegate].dispatchEvent(...args);
-
-
-  protected[$ongoingActivities]: Set<OngoingActivity> = new Set();
+export class ProgressTracker extends EventTarget {
+  private ongoingActivities: Set<OngoingActivity> = new Set();
+  private totalProgress = 0;
 
   /**
    * The total number of activities currently being tracked.
    */
   get ongoingActivityCount(): number {
-    return this[$ongoingActivities].size;
+    return this.ongoingActivities.size;
   }
 
   /**
@@ -104,14 +84,14 @@ export class ProgressTracker implements EventTarget {
    * ignored.
    */
   beginActivity(): Activity {
-    const activity: OngoingActivity = {progress: 0};
+    const activity: OngoingActivity = {progress: 0, completed: false};
 
-    this[$ongoingActivities].add(activity);
+    this.ongoingActivities.add(activity);
 
     if (this.ongoingActivityCount === 1) {
       // Announce the first progress event (which should always be 0 / 1
       // total progress):
-      this[$announceTotalProgress]();
+      this.announceTotalProgress(activity, 0);
     }
 
     return (progress: number): number => {
@@ -120,37 +100,46 @@ export class ProgressTracker implements EventTarget {
       nextProgress = Math.max(clamp(progress, 0, 1), activity.progress);
 
       if (nextProgress !== activity.progress) {
-        activity.progress = nextProgress;
-        this[$announceTotalProgress]();
+        this.announceTotalProgress(activity, nextProgress);
       }
 
       return activity.progress;
     };
   }
 
-  [$announceTotalProgress]() {
-    let totalProgress = 0;
-    let statusCount = 0;
+  private announceTotalProgress(
+      updatedActivity: OngoingActivity, nextProgress: number) {
+    let progressLeft = 0;
     let completedActivities = 0;
 
-    for (const activity of this[$ongoingActivities]) {
+    if (nextProgress == 1.0)
+      updatedActivity.completed = true;
+
+    for (const activity of this.ongoingActivities) {
       const {progress} = activity;
-      const compoundWeight =
-          ACTIVITY_PROGRESS_WEIGHT / Math.pow(2, statusCount++);
+      progressLeft += 1.0 - progress;
 
-      totalProgress += progress * compoundWeight;
-
-      if (progress === 1.0) {
+      if (activity.completed === true) {
         completedActivities++;
       }
     }
 
-    if (completedActivities === this.ongoingActivityCount) {
-      totalProgress = 1.0;
-      this[$ongoingActivities].clear();
-    }
+    const delta =
+        (nextProgress - updatedActivity.progress) * (1.0 - this.totalProgress);
+    this.totalProgress +=
+        delta * (1.0 - updatedActivity.progress) / progressLeft;
+    updatedActivity.progress = nextProgress;
+
+    const totalProgress = completedActivities === this.ongoingActivityCount ?
+        1.0 :
+        this.totalProgress;
 
     this.dispatchEvent(new CustomEvent<ProgressDetails>(
         'progress', {detail: {totalProgress}}));
+
+    if (completedActivities === this.ongoingActivityCount) {
+      this.totalProgress = 0.0;
+      this.ongoingActivities.clear();
+    }
   }
 }
