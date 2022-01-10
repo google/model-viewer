@@ -30,8 +30,11 @@ export type Activity = (progress: number) => number;
 
 /**
  * A progress event contains the total progress of all ongoing activities in the
- * ProgressTracker. The progress is a heuristic, should not be considered an
- * absolute representation of progress across any or all events.
+ * ProgressTracker. The total progress is a heuristic, but has some useful
+ * properties: for a single activity, it equals the input progress; for multiple
+ * activities that progress in lockstep, it will also equal each input progress.
+ * When more activities overlap as time goes on, total progress will tend to
+ * decelerate.
  */
 export interface ProgressDetails {
   totalProgress: number;
@@ -126,6 +129,8 @@ export class ProgressTracker extends EventTarget {
 
     const delta =
         (nextProgress - updatedActivity.progress) * (1.0 - this.totalProgress);
+    // Advance the total progress by the fraction of total remaining progress
+    // due to this activity.
     this.totalProgress +=
         delta * (1.0 - updatedActivity.progress) / progressLeft;
     updatedActivity.progress = nextProgress;
