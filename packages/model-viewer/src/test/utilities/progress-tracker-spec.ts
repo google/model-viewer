@@ -50,7 +50,7 @@ suite('ProgressTracker', () => {
             const event: CustomEvent<ProgressDetails> =
                 await progressEventDispatches;
 
-            expect(event.detail.totalProgress).to.be.greaterThan(0);
+            expect(event.detail.totalProgress).to.be.equal(0.5);
           });
 
       test('only allows progress to advance', () => {
