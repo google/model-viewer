@@ -54,6 +54,7 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Models/2.0/WaterBottle \
   shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe \
   shared-assets/models/glTF-Sample-Models/2.0/Buggy \
+  shared-assets/models/glTF-Sample-Models/2.0/ToyCar \
   shared-assets/environments \
   shared-assets/icons \
 )
