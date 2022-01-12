@@ -47,10 +47,17 @@ suite('ProgressTracker', () => {
                 waitForEvent<CustomEvent<ProgressDetails>>(
                     progressTracker, 'progress');
             firstActivity(0.5);
-            const event: CustomEvent<ProgressDetails> =
-                await progressEventDispatches;
+            const event = await progressEventDispatches;
 
             expect(event.detail.totalProgress).to.be.equal(0.5);
+
+            const progressEventDispatches2 =
+                waitForEvent<CustomEvent<ProgressDetails>>(
+                    progressTracker, 'progress');
+            firstActivity(0.75);
+            const event2 = await progressEventDispatches2;
+
+            expect(event2.detail.totalProgress).to.be.equal(0.75);
           });
 
       test('only allows progress to advance', () => {
