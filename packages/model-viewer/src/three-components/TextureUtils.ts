@@ -90,54 +90,48 @@ export default class TextureUtils extends EventDispatcher {
    * is a Texture from a WebGLRenderCubeTarget.
    */
   async generateEnvironmentMapAndSkybox(
-      skyboxUrl: string|null = null, environmentMap: string|null = null,
+      skyboxUrl: string|null = null, environmentMapUrl: string|null = null,
       options: EnvironmentGenerationConfig = {}):
       Promise<EnvironmentMapAndSkybox> {
     const {progressTracker} = options;
-    const updateGenerationProgress =
-        progressTracker != null ? progressTracker.beginActivity() : () => {};
 
-    const useAltEnvironment = environmentMap === 'neutral';
+    const useAltEnvironment = environmentMapUrl === 'neutral';
     if (useAltEnvironment === true) {
-      environmentMap = null;
+      environmentMapUrl = null;
     }
-    const environmentMapUrl = deserializeUrl(environmentMap);
+    environmentMapUrl = deserializeUrl(environmentMapUrl);
 
-    try {
-      let skyboxLoads: Promise<Texture|null> = Promise.resolve(null);
-      let environmentMapLoads: Promise<Texture>;
+    let skyboxLoads: Promise<Texture|null> = Promise.resolve(null);
+    let environmentMapLoads: Promise<Texture>;
 
-      // If we have a skybox URL, attempt to load it as a cubemap
-      if (!!skyboxUrl) {
-        skyboxLoads = this.loadEquirectFromUrl(skyboxUrl, progressTracker);
-      }
-
-      if (!!environmentMapUrl) {
-        // We have an available environment map URL
-        environmentMapLoads =
-            this.loadEquirectFromUrl(environmentMapUrl, progressTracker);
-      } else if (!!skyboxUrl) {
-        // Fallback to deriving the environment map from an available skybox
-        environmentMapLoads =
-            this.loadEquirectFromUrl(skyboxUrl, progressTracker);
-      } else {
-        // Fallback to generating the environment map
-        environmentMapLoads = useAltEnvironment === true ?
-            this.loadGeneratedEnvironmentMapAlt() :
-            this.loadGeneratedEnvironmentMap();
-      }
-
-      let [environmentMap, skybox] =
-          await Promise.all([environmentMapLoads, skyboxLoads]);
-
-      if (environmentMap == null) {
-        throw new Error('Failed to load environment map.');
-      }
-
-      return {environmentMap, skybox};
-    } finally {
-      updateGenerationProgress(1.0);
+    // If we have a skybox URL, attempt to load it as a cubemap
+    if (!!skyboxUrl) {
+      skyboxLoads = this.loadEquirectFromUrl(skyboxUrl, progressTracker);
     }
+
+    if (!!environmentMapUrl) {
+      // We have an available environment map URL
+      environmentMapLoads =
+          this.loadEquirectFromUrl(environmentMapUrl, progressTracker);
+    } else if (!!skyboxUrl) {
+      // Fallback to deriving the environment map from an available skybox
+      environmentMapLoads =
+          this.loadEquirectFromUrl(skyboxUrl, progressTracker);
+    } else {
+      // Fallback to generating the environment map
+      environmentMapLoads = useAltEnvironment === true ?
+          this.loadGeneratedEnvironmentMapAlt() :
+          this.loadGeneratedEnvironmentMap();
+    }
+
+    let [environmentMap, skybox] =
+        await Promise.all([environmentMapLoads, skyboxLoads]);
+
+    if (environmentMap == null) {
+      throw new Error('Failed to load environment map.');
+    }
+
+    return {environmentMap, skybox};
   }
 
   /**

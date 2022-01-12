@@ -539,14 +539,13 @@ export default class ModelViewerElementBase extends UpdatingElement {
     const source = this.src;
     try {
       await this[$scene].setSource(
-          source, (progress: number) => updateSourceProgress(progress * 0.8));
+          source, (progress: number) => updateSourceProgress(progress * 0.95));
 
       const detail = {url: source};
       this.dispatchEvent(new CustomEvent('preload', {detail}));
     } catch (error) {
       this.dispatchEvent(new CustomEvent('error', {detail: error}));
     } finally {
-      updateSourceProgress(0.9);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           updateSourceProgress(1.0);

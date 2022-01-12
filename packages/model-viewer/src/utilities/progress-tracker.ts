@@ -127,13 +127,13 @@ export class ProgressTracker extends EventTarget {
       }
     }
 
-    const delta =
-        (nextProgress - updatedActivity.progress) * (1.0 - this.totalProgress);
+    const lastProgress = updatedActivity.progress;
+    updatedActivity.progress = nextProgress;
+
     // Advance the total progress by the fraction of total remaining progress
     // due to this activity.
-    this.totalProgress +=
-        delta * (1.0 - updatedActivity.progress) / progressLeft;
-    updatedActivity.progress = nextProgress;
+    this.totalProgress += (nextProgress - lastProgress) *
+        (1.0 - this.totalProgress) / progressLeft;
 
     const totalProgress = completedActivities === this.ongoingActivityCount ?
         1.0 :
