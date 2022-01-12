@@ -22,7 +22,7 @@
     "node": ">=6.0.0"
   },
   "dependencies": {
-    "@google/model-viewer": "^1.9.0",
+    "@google/model-viewer": "^1.10.0",
     "@types/prismjs": "^1.16.6",
     "focus-visible": "^5.2.0",
     "lit-element": "^2.5.1",
