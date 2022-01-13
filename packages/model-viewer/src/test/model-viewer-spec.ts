@@ -105,7 +105,7 @@ suite('ModelViewerElement', () => {
 
   BasicSpecTemplate(() => ModelViewer, () => tagName);
 
-  suite.only('Render Functionality Test', () => {
+  suite('Render Functionality Test', () => {
     let element: ModelViewerElement;
 
     setup(async () => {
