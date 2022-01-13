@@ -126,7 +126,7 @@ suite('ModelViewerElement', () => {
       testFidelity(screenshotContext);
     });
 
-    test.skip('Metal roughness sphere with HDR lighting', async () => {
+    test('Metal roughness sphere with HDR lighting', async () => {
       await setupLighting(element, SUNRISE_HDR_PATH);
       const screenshotContext = element[$renderer].threeRenderer.getContext();
       testFidelity(screenshotContext);
