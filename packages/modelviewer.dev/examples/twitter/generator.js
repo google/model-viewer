@@ -88,8 +88,12 @@ addExtra.addEventListener('click', newExtra);
 copy.addEventListener(
     'click', () => navigator.clipboard.writeText(display.textContent));
 
+let download = null;
+
 player.addEventListener('load', () => {
-  const download = async () => {
+  downloader.removeEventListener('click', download);
+
+  download = async () => {
     const modelViewer = player.contentWindow.document.querySelector('#mv');
     const filename = getPosterUrl().replace(/^.*?([^\\\/]*)$/, '$1');
 
