@@ -105,7 +105,7 @@ suite('ModelViewerElement', () => {
 
   BasicSpecTemplate(() => ModelViewer, () => tagName);
 
-  suite('Render Functionality Test', () => {
+  suite.only('Render Functionality Test', () => {
     let element: ModelViewerElement;
 
     setup(async () => {
@@ -126,7 +126,7 @@ suite('ModelViewerElement', () => {
       testFidelity(screenshotContext);
     });
 
-    test.only('Metal roughness sphere with HDR lighting', async () => {
+    test('Metal roughness sphere with HDR lighting', async () => {
       await setupLighting(element, SUNRISE_HDR_PATH);
       const screenshotContext = element[$renderer].threeRenderer.getContext();
       testFidelity(screenshotContext);
