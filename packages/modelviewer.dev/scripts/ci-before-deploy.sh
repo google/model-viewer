@@ -38,6 +38,7 @@ DEPLOYABLE_STATIC_FILES=( \
   node_modules/js-beautify \
   node_modules/web-animations-js \
   shared-assets/models/*.* \
+  shared-assets/models/twitter \
   shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine \
   shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest \
   shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \

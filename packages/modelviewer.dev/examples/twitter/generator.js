@@ -88,10 +88,13 @@ addExtra.addEventListener('click', newExtra);
 copy.addEventListener(
     'click', () => navigator.clipboard.writeText(display.textContent));
 
+let download = null;
+
 player.addEventListener('load', () => {
-  const download = async () => {
+  downloader.removeEventListener('click', download);
+
+  download = async () => {
     const modelViewer = player.contentWindow.document.querySelector('#mv');
-    const filename = getPosterUrl().replace(/^.*?([^\\\/]*)$/, '$1');
 
     // Ensure full-res capture
     const ModelViewerElement =
@@ -107,6 +110,9 @@ player.addEventListener('load', () => {
     const cameraOrbit = modelViewer.cameraOrbit;
     modelViewer.cameraOrbit = null;
     modelViewer.cameraOrbit = cameraOrbit;
+    modelViewer.autoRotate = false;
+    modelViewer.interactionPrompt = 'none';
+    modelViewer.resetTurntableRotation();
     modelViewer.jumpCameraToGoal();
 
     // Wait for model-viewer to resize and render.
@@ -121,6 +127,8 @@ player.addEventListener('load', () => {
 
     // Reset to original state
     modelViewer.play();
+    modelViewer.autoRotate = true;
+    modelViewer.interactionPrompt = 'auto';
     ModelViewerElement.minimumRenderScale = oldMinScale;
 
     const downloadImage = (blob, filename) => {
