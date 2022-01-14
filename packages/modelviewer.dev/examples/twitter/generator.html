@@ -135,11 +135,15 @@
         This works not just for the <code>&lt;model-viewer&gt;</code> properties, 
         but you can also specify <code>style</code> and put all of your desired CSS on the value side.</p>
 
+    <p>By default, this player sets the following attributes: <code>seamless-poster environment-image="neutral"
+      shadow-intensity="1" autoplay ar ar-modes="webxr scene-viewer quick-look" camera-controls auto-rotate
+      interaction-prompt-threshold="1500"</code>.</p>
+
     <button id="download">Download Poster & Thumbnail</button>
 
     <p>Download the poster and card image and serve them from the same path as you serve your GLB/glTF model above. 
         They can't be the same image because different aspect ratios are required.
-        Ensure your model is served with permissive CORS headers so that it can be loaded by our domain.</p>
+        Ensure your model is served with permissive CORS headers so that it can be loaded by <code>https://modelviewer.dev</code>.</p>
 
     <p>Then copy the HTML snippet below, remix this <a href="https://glitch.com/edit/#!/model-viewer-twitter">Glitch</a>, 
         and replace the snippet in the <code>&lt;head&gt;</code>. 
@@ -150,7 +154,10 @@
     <p>Alternatively, you can simply copy all but the last line (the redirect) into the <code>&lt;head&gt;</code> 
         of the page you want to link to, then use its URL directly in your tweet.</p>
 
-    <p>Be sure to test your URL on Twitter's <a href="https://cards-dev.twitter.com/validator">validator</a> to see how it will look in a tweet.</p>
+    <p>Be sure to test your URL on Twitter's <a href="https://cards-dev.twitter.com/validator">validator</a> to see how it will look in a tweet
+        and to ensure the URLs are working right. 
+        Unfortunately, their validator messes up the encoding of special characters, so if it seems like certain extras are not being respected, 
+        just go ahead and tweet it; we've found it works better in Twitter than the validator.</p>
 
     <button id="copy">Copy Snippet</button>
     <pre>

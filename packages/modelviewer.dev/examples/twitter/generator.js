@@ -44,12 +44,13 @@ const update = () => {
   let extraParams = '';
   for (const e of extrasList) {
     if (!!e.p.value && !!e.v.value) {
-      extraParams += `&${e.p.value}=${e.v.value}`;
+      extraParams += `&${e.p.value}=${encodeURIComponent(e.v.value)}`;
     }
   }
 
-  const playerUrl = `${playerLocation}?src=${glb.value}&poster=${
-      getPosterUrl()}&alt=${description.value}${extraParams}`;
+  const playerUrl =
+      `${playerLocation}?src=${glb.value}&poster=${getPosterUrl()}&alt=${
+          encodeURIComponent(description.value)}${extraParams}`;
 
   player.src = playerUrl;
   display.textContent = `
