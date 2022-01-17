@@ -556,6 +556,7 @@ export class ModelScene extends Scene {
       action.setLoop(loopMode, repetitionCount);
 
       action.enabled = true;
+      action.clampWhenFinished = true;
 
       action.play();
     } catch (error) {
