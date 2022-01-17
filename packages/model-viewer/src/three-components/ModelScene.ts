@@ -498,6 +498,14 @@ export class ModelScene extends Scene {
     return 0;
   }
 
+  set animationTimeScale(value: number) {
+    this.mixer.timeScale = value;
+  }
+
+  get animationTimeScale(): number {
+    return this.mixer.timeScale;
+  }
+
   get duration(): number {
     if (this.currentAnimationAction != null &&
         this.currentAnimationAction.getClip()) {
