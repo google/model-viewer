@@ -81,6 +81,34 @@
     </div>
 
     <div class="sample">
+      <div id="controlSpeed" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Change animation speed</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="controlSpeed" highlight-as="html">
+            <template>
+<model-viewer id="change-speed-demo" camera-controls autoplay animation-name="Dance" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#change-speed-demo');
+  const speeds = [1, 2, 0.5, -1, 0];
+
+  let i = 0;
+  self.setInterval(() => {
+    modelViewer.timeScale = speeds[i++%speeds.length];
+  }, 3000.0);
+})();
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
       <div id="crossFade" class="demo"></div>
       <div class="content">
         <div class="wrapper">
