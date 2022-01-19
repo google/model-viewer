@@ -41,7 +41,7 @@ export declare interface AnimationInterface {
   readonly paused: boolean;
   readonly duration: number;
   currentTime: number;
-  currentTimeScale: number;
+  timeScale: number;
   pause(): void;
   play(options?: PlayAnimationOptions): void;
 }
@@ -101,14 +101,12 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$needsRender]();
     }
 
-    get currentTimeScale(): number {
+    get timeScale(): number {
       return this[$scene].animationTimeScale;
     }
 
-    set currentTimeScale(value: number) {
+    set timeScale(value: number) {
       this[$scene].animationTimeScale = value;
-      this[$renderer].threeRenderer.shadowMap.needsUpdate = true;
-      this[$needsRender]();
     }
 
     pause() {
