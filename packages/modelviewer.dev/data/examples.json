@@ -206,6 +206,10 @@
         "name": "Selecting Animations"
       },
       {
+        "htmlId": "controlSpeed",
+        "name": "Control Speed"
+      },
+      {
         "htmlId": "crossFade",
         "name": "Crossfade"
       },

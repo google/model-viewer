@@ -41,6 +41,7 @@ export declare interface AnimationInterface {
   readonly paused: boolean;
   readonly duration: number;
   currentTime: number;
+  timeScale: number;
   pause(): void;
   play(options?: PlayAnimationOptions): void;
 }
@@ -64,7 +65,6 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this.dispatchEvent(new CustomEvent('loop', {detail: {count}}));
       });
       this[$scene].subscribeMixerEvent('finished', () => {
-        this.currentTime = 0;
         this[$paused] = true;
         this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
         this[$changeAnimation]({repetitions: Infinity, pingpong: false});
@@ -99,6 +99,14 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$scene].animationTime = value;
       this[$renderer].threeRenderer.shadowMap.needsUpdate = true;
       this[$needsRender]();
+    }
+
+    get timeScale(): number {
+      return this[$scene].animationTimeScale;
+    }
+
+    set timeScale(value: number) {
+      this[$scene].animationTimeScale = value;
     }
 
     pause() {
