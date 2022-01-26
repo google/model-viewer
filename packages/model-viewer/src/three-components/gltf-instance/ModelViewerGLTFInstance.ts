@@ -46,6 +46,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
 
     const nullSphere = new Sphere(undefined, Infinity);
 
+    let hasPBR = false;
+
     scene.traverse((node: Object3D) => {
       // Set a high renderOrder while we're here to ensure the model
       // always renders on top of the skysphere
@@ -74,10 +76,15 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
         }
 
         const material = mesh.material as MeshStandardMaterial;
+        if (material.isMeshStandardMaterial === true) {
+          hasPBR = true;
+        }
         // This makes shadows better for non-manifold meshes
         material.shadowSide = FrontSide;
       }
     });
+
+    scene.userData.isUnlit = !hasPBR;
 
     return prepared;
   }

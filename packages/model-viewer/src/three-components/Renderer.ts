@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, PCFSoftShadowMap, sRGBEncoding, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, NoToneMapping, PCFSoftShadowMap, sRGBEncoding, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -461,6 +461,9 @@ export class Renderer extends EventDispatcher {
           Math.ceil(scene.width * scaleFactor * dpr), this.canvas3D.width);
       const height = Math.min(
           Math.ceil(scene.height * scaleFactor * dpr), this.canvas3D.height);
+
+      this.threeRenderer.toneMapping =
+          scene.isUnlit ? NoToneMapping : ACESFilmicToneMapping;
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer

@@ -60,6 +60,16 @@ suite('ModelScene', () => {
       await scene.setSource(assetPath('models/Astronaut.glb'));
       expect(fired).to.be.ok;
     });
+
+    test('PBR model is not marked Unlit', async function() {
+      await scene.setSource(assetPath('models/Astronaut.glb'));
+      expect(scene.isUnlit).to.be.false;
+    });
+
+    test('Unlit model is marked Unlit', async function() {
+      await scene.setSource(assetPath('models/Astronaut-Unlit.glb'));
+      expect(scene.isUnlit).to.be.true;
+    });
   });
 
   suite('with a model', () => {
