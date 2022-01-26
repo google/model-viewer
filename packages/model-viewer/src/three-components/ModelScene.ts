@@ -88,6 +88,7 @@ export class ModelScene extends Scene {
   public idealAspect = 0;
   public framedFoVDeg = DEFAULT_FOV_DEG;
   public boundingRadius = 0;
+  public isUnlit = false;
 
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
@@ -240,6 +241,7 @@ export class ModelScene extends Scene {
 
     if (gltf != null) {
       this.modelContainer.add(gltf.scene);
+      this.isUnlit = gltf.scene.userData.isUnlit;
     }
 
     const {animations} = gltf!;
