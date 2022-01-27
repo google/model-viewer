@@ -24,8 +24,7 @@ import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
-// import {Shadow} from './Shadow.js';
-import {ShadowNew} from './ShadowNew.js';
+import {Shadow} from './Shadow.js';
 
 
 
@@ -91,7 +90,7 @@ export class ModelScene extends Scene {
   public boundingRadius = 0;
   public isUnlit = false;
 
-  public shadow: ShadowNew|null = null;
+  public shadow: Shadow|null = null;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
 
@@ -454,7 +453,6 @@ export class ModelScene extends Scene {
       z = this.targetDamperZ.update(z, goal.z, delta, normalization);
       this.target.position.set(x, y, z);
       this.target.updateMatrixWorld();
-      this.setShadowRotation(this.yaw);
       this.queueRender();
     }
   }
@@ -473,7 +471,6 @@ export class ModelScene extends Scene {
    */
   set yaw(radiansY: number) {
     this.rotation.y = radiansY;
-    this.setShadowRotation(radiansY);
     this.queueRender();
   }
 
@@ -483,6 +480,7 @@ export class ModelScene extends Scene {
 
   set animationTime(value: number) {
     this.mixer.setTime(value);
+    this.renderShadow();
   }
 
   get animationTime(): number {
@@ -581,6 +579,7 @@ export class ModelScene extends Scene {
 
   updateAnimation(step: number) {
     this.mixer.update(step);
+    this.renderShadow();
   }
 
   subscribeMixerEvent(event: string, callback: (...args: any[]) => void) {
@@ -597,7 +596,12 @@ export class ModelScene extends Scene {
       const side =
           (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
       shadow.setScene(this, this.shadowSoftness, side);
-      shadow.setRotation(this.yaw);
+    }
+  }
+
+  renderShadow() {
+    if (this.shadow != null) {
+      this.shadow.needsUpdate = true;
     }
   }
 
@@ -616,8 +620,7 @@ export class ModelScene extends Scene {
     if (this.shadow == null) {
       const side =
           (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
-      this.shadow = new ShadowNew(this, this.shadowSoftness, side);
-      this.shadow.setRotation(this.yaw);
+      this.shadow = new Shadow(this, this.shadowSoftness, side);
     }
     this.shadow.setIntensity(shadowIntensity);
   }
@@ -632,17 +635,6 @@ export class ModelScene extends Scene {
     const shadow = this.shadow;
     if (shadow != null) {
       shadow.setSoftness(softness);
-    }
-  }
-
-  /**
-   * The shadow must be rotated manually to match any global rotation applied to
-   * this model. The input is the global orientation about the Y axis.
-   */
-  setShadowRotation(radiansY: number) {
-    const shadow = this.shadow;
-    if (shadow != null) {
-      shadow.setRotation(radiansY);
     }
   }
 

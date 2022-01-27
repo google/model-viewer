@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2019 Google LLC. All Rights Reserved.
+ * Copyright 2022 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-import {Box3, DirectionalLight, Mesh, PlaneBufferGeometry, ShadowMaterial, Vector3} from 'three';
+import {BackSide, Box3, CameraHelper, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneBufferGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
+import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
+import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
 
 import {ModelScene} from './ModelScene';
 
@@ -45,9 +47,17 @@ const ANIMATION_SCALING = 2;
  * The softness of the shadow is controlled by changing its resolution, making
  * softer shadows faster, but less precise.
  */
-export class Shadow extends DirectionalLight {
-  private shadowMaterial = new ShadowMaterial();
+export class Shadow extends Object3D {
+  public camera = new OrthographicCamera();
+  public cameraHelper = new CameraHelper(this.camera);
+  private renderTarget: WebGLRenderTarget|null = null;
+  private renderTargetBlur: WebGLRenderTarget|null = null;
+  private depthMaterial = new MeshDepthMaterial();
+  private horizontalBlurMaterial = new ShaderMaterial(HorizontalBlurShader);
+  private verticalBlurMaterial = new ShaderMaterial(VerticalBlurShader);
+  private intensity = 0;
   private floor: Mesh;
+  private blurPlane: Mesh;
   private boundingBox = new Box3;
   private size = new Vector3;
   private shadowScale = 1;
@@ -58,20 +68,44 @@ export class Shadow extends DirectionalLight {
   constructor(scene: ModelScene, softness: number, side: Side) {
     super();
 
-    // We use the light only to cast a shadow, not to light the scene.
-    this.intensity = 0;
-    this.castShadow = true;
-    this.frustumCulled = false;
+    const {camera} = this;
+    camera.rotateX(Math.PI / 2);
+    camera.left = -0.5;
+    camera.right = 0.5;
+    camera.bottom = -0.5;
+    camera.top = 0.5;
+    this.add(camera);
 
-    this.floor = new Mesh(new PlaneBufferGeometry, this.shadowMaterial);
-    this.floor.rotateX(-Math.PI / 2);
-    this.floor.receiveShadow = true;
-    this.floor.castShadow = false;
-    this.floor.frustumCulled = false;
-    this.add(this.floor);
+    this.add(this.cameraHelper);
+    this.cameraHelper.updateMatrixWorld = function() {
+      this.matrixWorld = this.camera.matrixWorld;
+    };
+
+    const plane = new PlaneBufferGeometry();
+    const shadowMaterial = new MeshBasicMaterial({
+      opacity: 1,  // this.intensity,
+      transparent: true,
+      side: BackSide,
+    });
+    this.floor = new Mesh(plane, shadowMaterial);
+    camera.add(this.floor);
+
+    // the plane onto which to blur the texture
+    this.blurPlane = new Mesh(plane);
+    this.blurPlane.visible = false;
+    camera.add(this.blurPlane);
 
     scene.target.add(this);
-    this.target = scene.target;
+
+    // like MeshDepthMaterial, but goes from black to transparent
+    this.depthMaterial.onBeforeCompile = function(shader) {
+      shader.fragmentShader = shader.fragmentShader.replace(
+          'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
+          'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) * opacity );');
+    };
+
+    this.horizontalBlurMaterial.depthTest = false;
+    this.verticalBlurMaterial.depthTest = false;
 
     this.setScene(scene, softness, side);
   }
@@ -99,21 +133,22 @@ export class Shadow extends DirectionalLight {
     const {boundingBox, size} = this;
 
     if (this.isAnimated) {
+      const minY = boundingBox.min.y;
+      const maxY = boundingBox.max.y;
       const maxDimension = Math.max(size.x, size.y, size.z) * ANIMATION_SCALING;
       size.y = maxDimension;
       boundingBox.expandByVector(
           size.subScalar(maxDimension).multiplyScalar(-0.5));
-      boundingBox.max.y = boundingBox.min.y + maxDimension;
-      size.set(maxDimension, maxDimension, maxDimension);
+      boundingBox.min.y = minY;
+      boundingBox.max.y = maxY;
+      size.set(maxDimension, maxY - minY, maxDimension);
     }
 
-    boundingBox.getCenter(this.floor.position);
-    const shadowOffset = boundingBox.max.y + size.y * OFFSET;
+    boundingBox.getCenter(this.position);
+    const shadowOffset = boundingBox.min.y + size.y * OFFSET;
     if (side === 'bottom') {
       this.position.y = shadowOffset;
-      this.position.z = 0;
     } else {
-      this.position.y = 0;
       this.position.z = shadowOffset;
     }
 
@@ -125,10 +160,11 @@ export class Shadow extends DirectionalLight {
    * not be called frequently, as this results in reallocation.
    */
   setSoftness(softness: number) {
-    const resolution = Math.pow(
-        2,
-        LOG_MAX_RESOLUTION -
-            softness * (LOG_MAX_RESOLUTION - LOG_MIN_RESOLUTION));
+    const resolution = (this.isAnimated ? ANIMATION_SCALING : 1) *
+        Math.pow(
+            2,
+            LOG_MAX_RESOLUTION -
+                softness * (LOG_MAX_RESOLUTION - LOG_MIN_RESOLUTION));
     this.setMapSize(resolution);
   }
 
@@ -136,15 +172,7 @@ export class Shadow extends DirectionalLight {
    * Lower-level version of the above function.
    */
   setMapSize(maxMapSize: number) {
-    const {camera, mapSize, map} = this.shadow;
-    const {size, boundingBox} = this;
-
-    // This feels like a three.js bug; changing the mapSize has no effect unless
-    // the map is manually disposed of.
-    if (map != null) {
-      (map as any).dispose();
-      (this.shadow.map as any) = null;
-    }
+    const {size} = this;
 
     if (this.isAnimated) {
       maxMapSize *= ANIMATION_SCALING;
@@ -155,21 +183,35 @@ export class Shadow extends DirectionalLight {
     const height =
         Math.floor(size.x > size.z ? maxMapSize * size.z / size.x : maxMapSize);
 
-    mapSize.set(width, height);
+    if (this.renderTarget != null &&
+        (this.renderTarget.width !== width ||
+         this.renderTarget.height !== height)) {
+      this.renderTarget.dispose();
+      this.renderTarget = null;
+      this.renderTargetBlur!.dispose();
+      this.renderTargetBlur = null;
+    }
+
+    if (this.renderTarget == null) {
+      const params: WebGLRenderTargetOptions = {format: RGBAFormat};
+      this.renderTarget = new WebGLRenderTarget(width, height, params);
+      this.renderTargetBlur = new WebGLRenderTarget(width, height, params);
+
+      (this.floor.material as MeshBasicMaterial).map =
+          this.renderTarget.texture;
+      this.horizontalBlurMaterial.uniforms.tDiffuse.value =
+          this.renderTarget.texture;
+      this.verticalBlurMaterial.uniforms.tDiffuse.value =
+          this.renderTargetBlur.texture;
+    }
     // These pads account for the softening radius around the shadow.
     const widthPad = 2.5 * size.x / width;
     const heightPad = 2.5 * size.z / height;
 
-    camera.left = -boundingBox.max.x - widthPad;
-    camera.right = -boundingBox.min.x + widthPad;
-    camera.bottom = boundingBox.min.z - heightPad;
-    camera.top = boundingBox.max.z + heightPad;
-
     this.setScaleAndOffset(this.shadowScale, 0);
 
-    this.floor.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
+    this.camera.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
     this.needsUpdate = true;
-    this.shadow.needsUpdate = true;
   }
 
   /**
@@ -177,7 +219,7 @@ export class Shadow extends DirectionalLight {
    * shadow rendering if zero.
    */
   setIntensity(intensity: number) {
-    this.shadowMaterial.opacity = intensity;
+    this.intensity = intensity;
     if (intensity > 0) {
       this.visible = true;
       this.floor.visible = true;
@@ -188,23 +230,7 @@ export class Shadow extends DirectionalLight {
   }
 
   getIntensity(): number {
-    return this.shadowMaterial.opacity;
-  }
-
-  /**
-   * The shadow does not rotate with its parent transforms, so the rotation must
-   * be manually updated here if it rotates in world space. The input is its
-   * absolute orientation about the Y-axis (other rotations are not supported).
-   */
-  setRotation(radiansY: number) {
-    if (this.side !== 'bottom') {
-      // We don't support rotation about a horizontal axis yet.
-      this.shadow.camera.up.set(0, 1, 0);
-      this.shadow.updateMatrices(this);
-      return;
-    }
-    this.shadow.camera.up.set(Math.sin(radiansY), 0, Math.cos(radiansY));
-    this.shadow.updateMatrices(this);
+    return this.intensity;
   }
 
   /**
@@ -213,17 +239,74 @@ export class Shadow extends DirectionalLight {
    * shadow vertically relative to the bottom of the scene. Positive is up, so
    * values are generally negative.
    */
-  setScaleAndOffset(scale: number, offset: number) {
+  setScaleAndOffset(_scale: number, offset: number) {
     const sizeY = this.size.y;
-    const {camera} = this.shadow;
-    this.shadowScale = scale;
+    const {camera} = this;
     camera.near = 0;
-    camera.far = sizeY - offset / scale;
+    camera.far = sizeY / 2 - offset;
     camera.updateProjectionMatrix();
-    camera.scale.setScalar(scale);
+    this.cameraHelper.update();
     // Floor plane is up slightly from the bottom of the bounding box to avoid
     // Z-fighting with baked-in shadows and to stay inside the shadow camera.
-    const shadowOffset = sizeY * OFFSET;
-    this.floor.position.y = 2 * shadowOffset - camera.far;
+    // const shadowOffset = sizeY * OFFSET;
+    // this.floor.position.y = 2 * shadowOffset;
+  }
+
+  render(renderer: WebGLRenderer, scene: Scene) {
+    // force the depthMaterial to everything
+    this.cameraHelper.visible = false;
+    scene.overrideMaterial = this.depthMaterial;
+
+    // set renderer clear alpha
+    const initialClearAlpha = renderer.getClearAlpha();
+    renderer.setClearAlpha(0);
+    this.floor.visible = false;
+
+    // render to the render target to get the depths
+    renderer.setRenderTarget(this.renderTarget);
+    renderer.render(scene, this.camera);
+
+    // and reset the override material
+    scene.overrideMaterial = null;
+    this.cameraHelper.visible = true;
+    this.floor.visible = true;
+
+    this.blurShadow(renderer);
+
+    // a second pass to reduce the artifacts
+    // (0.4 is the minimum blur amout so that the artifacts are gone)
+    // this.blurShadow(renderer, BLUR * 0.4);
+
+    // reset and render the normal scene
+    renderer.setRenderTarget(null);
+    renderer.setClearAlpha(initialClearAlpha);
+  }
+
+  blurShadow(renderer: WebGLRenderer) {
+    const {
+      camera,
+      horizontalBlurMaterial,
+      verticalBlurMaterial,
+      renderTarget,
+      renderTargetBlur,
+      blurPlane
+    } = this;
+    blurPlane.visible = true;
+
+    // blur horizontally and draw in the renderTargetBlur
+    blurPlane.material = horizontalBlurMaterial;
+    horizontalBlurMaterial.uniforms.h.value = 1 / this.renderTarget!.width;
+
+    renderer.setRenderTarget(renderTargetBlur);
+    renderer.render(blurPlane, camera);
+
+    // blur vertically and draw in the main renderTarget
+    blurPlane.material = verticalBlurMaterial;
+    verticalBlurMaterial.uniforms.v.value = 1 / this.renderTarget!.height;
+
+    renderer.setRenderTarget(renderTarget);
+    renderer.render(blurPlane, camera);
+
+    blurPlane.visible = false;
   }
 }

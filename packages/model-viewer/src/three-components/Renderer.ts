@@ -25,7 +25,6 @@ import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {Debugger} from './Debugger.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
-import {ShadowNew} from './ShadowNew.js';
 import TextureUtils from './TextureUtils.js';
 
 export interface RendererOptions {
@@ -467,7 +466,7 @@ export class Renderer extends EventDispatcher {
           scene.isUnlit ? NoToneMapping : ACESFilmicToneMapping;
 
       if (scene.isShadowDirty()) {
-        (scene.shadow as ShadowNew).render(this.threeRenderer, scene);
+        scene.shadow!.render(this.threeRenderer, scene);
       }
 
       // Need to set the render target in order to prevent
