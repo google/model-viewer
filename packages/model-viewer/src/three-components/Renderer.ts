@@ -25,6 +25,7 @@ import {CachingGLTFLoader} from './CachingGLTFLoader.js';
 import {Debugger} from './Debugger.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
+import {ShadowNew} from './ShadowNew.js';
 import TextureUtils from './TextureUtils.js';
 
 export interface RendererOptions {
@@ -387,9 +388,9 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !(self as any).isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 
-    if (scene.isShadowDirty()) {
-      this.threeRenderer.shadowMap.needsUpdate = true;
-    }
+    // if (scene.isShadowDirty()) {
+    //   this.threeRenderer.shadowMap.needsUpdate = true;
+    // }
   }
 
   render(t: number, frame?: XRFrame) {
@@ -464,6 +465,10 @@ export class Renderer extends EventDispatcher {
 
       this.threeRenderer.toneMapping =
           scene.isUnlit ? NoToneMapping : ACESFilmicToneMapping;
+
+      if (scene.isShadowDirty()) {
+        (scene.shadow as ShadowNew).render(this.threeRenderer, scene);
+      }
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer

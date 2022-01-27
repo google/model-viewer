@@ -24,7 +24,8 @@ import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
-import {Shadow} from './Shadow.js';
+// import {Shadow} from './Shadow.js';
+import {ShadowNew} from './ShadowNew.js';
 
 
 
@@ -90,7 +91,7 @@ export class ModelScene extends Scene {
   public boundingRadius = 0;
   public isUnlit = false;
 
-  public shadow: Shadow|null = null;
+  public shadow: ShadowNew|null = null;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
 
@@ -472,7 +473,6 @@ export class ModelScene extends Scene {
    */
   set yaw(radiansY: number) {
     this.rotation.y = radiansY;
-    this.updateMatrixWorld(true);
     this.setShadowRotation(radiansY);
     this.queueRender();
   }
@@ -616,7 +616,7 @@ export class ModelScene extends Scene {
     if (this.shadow == null) {
       const side =
           (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
-      this.shadow = new Shadow(this, this.shadowSoftness, side);
+      this.shadow = new ShadowNew(this, this.shadowSoftness, side);
       this.shadow.setRotation(this.yaw);
     }
     this.shadow.setIntensity(shadowIntensity);
