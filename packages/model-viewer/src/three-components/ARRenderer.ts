@@ -31,7 +31,7 @@ import {Renderer} from './Renderer.js';
 const INIT_FRAMES = 30;
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
 // estimation, which will be used once available in WebXR.
-const AR_SHADOW_INTENSITY = 0.3;
+const AR_SHADOW_INTENSITY = 1.0;
 const ROTATION_RATE = 1.5;
 // Angle down (towards bottom of screen) from camera center ray to use for hit
 // testing against the floor. This makes placement faster and more intuitive
@@ -341,7 +341,7 @@ export class ARRenderer extends EventDispatcher {
 
       scene.position.set(0, 0, 0);
       scene.scale.set(1, 1, 1);
-      scene.setShadowScaleAndOffset(1, 0);
+      scene.setShadowOffset(0);
       const yaw = this.turntableRotation;
       if (yaw != null) {
         scene.yaw = yaw;
@@ -671,7 +671,7 @@ export class ARRenderer extends EventDispatcher {
           // drop the placement box to the floor. The model falls on select end.
           if (offset < 0) {
             this.placementBox!.offsetHeight = offset / scale;
-            this.presentedScene!.setShadowScaleAndOffset(scale, offset);
+            this.presentedScene!.setShadowOffset(offset);
             // Interpolate hit ray up to drag plane
             const cameraPosition = vector3.copy(scene.getCamera().position);
             const alpha = -offset / (cameraPosition.y - hit.y);
@@ -708,7 +708,7 @@ export class ARRenderer extends EventDispatcher {
         const offset = goal.y - y;
         if (this.placementComplete && this.placeOnWall === false) {
           box.offsetHeight = offset / newScale;
-          scene.setShadowScaleAndOffset(newScale, offset);
+          scene.setShadowOffset(offset);
         } else if (offset === 0) {
           this.placementComplete = true;
           box.show = false;
@@ -764,6 +764,10 @@ export class ARRenderer extends EventDispatcher {
         this.moveScene(delta);
         this.renderer.preRender(scene, time, delta);
         this.lastTick = time;
+
+        if (scene.isShadowDirty()) {
+          scene.shadow!.render(this.threeRenderer, scene);
+        }
       }
 
       // TODO: This is a workaround for a Chrome bug, which should be fixed

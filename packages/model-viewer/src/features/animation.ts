@@ -66,7 +66,6 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       });
       this[$scene].subscribeMixerEvent('finished', () => {
         this[$paused] = true;
-        this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
         this[$changeAnimation]({repetitions: Infinity, pingpong: false});
         this.dispatchEvent(new CustomEvent('finished'));
       });
@@ -97,7 +96,6 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     set currentTime(value: number) {
       this[$scene].animationTime = value;
-      this[$renderer].threeRenderer.shadowMap.needsUpdate = true;
       this[$needsRender]();
     }
 
@@ -115,14 +113,12 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$paused] = true;
-      this[$renderer].threeRenderer.shadowMap.autoUpdate = false;
       this.dispatchEvent(new CustomEvent('pause'));
     }
 
     play(options: PlayAnimationOptions = DEFAULT_PLAY_OPTIONS) {
       if (this.availableAnimations.length > 0) {
         this[$paused] = false;
-        this[$renderer].threeRenderer.shadowMap.autoUpdate = true;
 
         this[$changeAnimation](options);
 

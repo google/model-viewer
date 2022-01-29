@@ -596,6 +596,7 @@ export class ModelScene extends Scene {
       const side =
           (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
       shadow.setScene(this, this.shadowSoftness, side);
+      shadow.needsUpdate = true;
     }
   }
 
@@ -657,10 +658,10 @@ export class ModelScene extends Scene {
    * Shift the floor vertically from the bottom of the model's bounding box by
    * offset (should generally be negative).
    */
-  setShadowScaleAndOffset(scale: number, offset: number) {
+  setShadowOffset(offset: number) {
     const shadow = this.shadow;
     if (shadow != null) {
-      shadow.setScaleAndOffset(scale, offset);
+      shadow.setOffset(offset);
     }
   }
 
