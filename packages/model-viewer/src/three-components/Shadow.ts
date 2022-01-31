@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-import {BackSide, Box3, CameraHelper, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneBufferGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
+import {BackSide, Box3, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneBufferGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
 import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
 import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
+import {lerp} from 'three/src/math/MathUtils';
 
 import {ModelScene} from './ModelScene';
 
 export type Side = 'back'|'bottom';
 
-// Nothing within Offset of the bottom of the scene casts a shadow
-// (this is to avoid having a baked-in shadow plane cast its own shadow).
-const OFFSET = 0.002;
 // The softness [0, 1] of the shadow is mapped to a resolution between
 // 2^LOG_MAX_RESOLUTION and 2^LOG_MIN_RESOLUTION.
 const LOG_MAX_RESOLUTION = 9;
@@ -33,6 +31,10 @@ const LOG_MIN_RESOLUTION = 6;
 // for animated models sized to their largest bounding box dimesion multiplied
 // by this scale factor.
 const ANIMATION_SCALING = 2;
+// Since hard shadows are not lightened by blurring and depth, set a lower
+// default intensity to make them more perceptually similar to the intensity of
+// the soft shadows.
+const DEFAULT_HARD_INTENSITY = 0.3;
 
 /**
  * The Shadow class creates a shadow that fits a given scene and follows a
@@ -49,13 +51,14 @@ const ANIMATION_SCALING = 2;
  */
 export class Shadow extends Object3D {
   public camera = new OrthographicCamera();
-  public cameraHelper = new CameraHelper(this.camera);
+  // public cameraHelper = new CameraHelper(this.camera);
   private renderTarget: WebGLRenderTarget|null = null;
   private renderTargetBlur: WebGLRenderTarget|null = null;
   private depthMaterial = new MeshDepthMaterial();
   private horizontalBlurMaterial = new ShaderMaterial(HorizontalBlurShader);
   private verticalBlurMaterial = new ShaderMaterial(VerticalBlurShader);
   private intensity = 0;
+  private softness = 1;
   private floor: Mesh;
   private blurPlane: Mesh;
   private boundingBox = new Box3;
@@ -75,10 +78,10 @@ export class Shadow extends Object3D {
     camera.top = 0.5;
     this.add(camera);
 
-    this.add(this.cameraHelper);
-    this.cameraHelper.updateMatrixWorld = function() {
-      this.matrixWorld = this.camera.matrixWorld;
-    };
+    // this.add(this.cameraHelper);
+    // this.cameraHelper.updateMatrixWorld = function() {
+    //   this.matrixWorld = this.camera.matrixWorld;
+    // };
 
     const plane = new PlaneBufferGeometry();
     const shadowMaterial = new MeshBasicMaterial({
@@ -144,11 +147,10 @@ export class Shadow extends Object3D {
     }
 
     boundingBox.getCenter(this.position);
-    const shadowOffset = boundingBox.min.y + size.y * OFFSET;
     if (side === 'bottom') {
-      this.position.y = shadowOffset;
+      this.position.y = boundingBox.min.y;
     } else {
-      this.position.z = shadowOffset;
+      this.position.z = boundingBox.min.y;
     }
 
     this.setSoftness(softness);
@@ -159,28 +161,49 @@ export class Shadow extends Object3D {
    * not be called frequently, as this results in reallocation.
    */
   setSoftness(softness: number) {
-    const resolution = (this.isAnimated ? ANIMATION_SCALING : 1) *
+    this.softness = softness;
+    const {size, camera} = this;
+    const scaleY = (this.isAnimated ? ANIMATION_SCALING : 1);
+
+    const resolution = scaleY *
         Math.pow(
             2,
             LOG_MAX_RESOLUTION -
                 softness * (LOG_MAX_RESOLUTION - LOG_MIN_RESOLUTION));
     this.setMapSize(resolution);
+
+    const softFar = size.y / 2;
+    const hardFar = size.y * scaleY;
+
+    camera.near = 0;
+    camera.far = lerp(hardFar, softFar, softness);
+    // we have co-opted opacity to scale the depth to clip
+    this.depthMaterial.opacity = 1.0 / softness;
+    camera.updateProjectionMatrix();
+    // this.cameraHelper.update();
+
+    this.setIntensity(this.intensity);
+    this.setOffset(0);
   }
 
   /**
    * Lower-level version of the above function.
    */
   setMapSize(maxMapSize: number) {
-    const {size, camera} = this;
+    const {size} = this;
 
     if (this.isAnimated) {
       maxMapSize *= ANIMATION_SCALING;
     }
 
-    const width =
+    const baseWidth =
         Math.floor(size.x > size.z ? maxMapSize : maxMapSize * size.x / size.z);
-    const height =
+    const baseHeight =
         Math.floor(size.x > size.z ? maxMapSize * size.z / size.x : maxMapSize);
+    // width of blur filter in pixels (not adjustable)
+    const TAP_WIDTH = 10;
+    const width = TAP_WIDTH + baseWidth;
+    const height = TAP_WIDTH + baseHeight;
 
     if (this.renderTarget != null &&
         (this.renderTarget.width !== width ||
@@ -199,18 +222,12 @@ export class Shadow extends Object3D {
       (this.floor.material as MeshBasicMaterial).map =
           this.renderTarget.texture;
     }
+
     // These pads account for the softening radius around the shadow.
-    const widthPad = 2.5 * size.x / width;
-    const heightPad = 2.5 * size.z / height;
-
-    camera.near = 0;
-    camera.far = size.y / 2;
-    camera.updateProjectionMatrix();
-    this.cameraHelper.update();
-
-    this.setOffset(0);
-
-    this.camera.scale.set(size.x + 2 * widthPad, size.z + 2 * heightPad, 1);
+    this.camera.scale.set(
+        size.x * (1 + TAP_WIDTH / baseWidth),
+        size.z * (1 + TAP_WIDTH / baseHeight),
+        1);
     this.needsUpdate = true;
   }
 
@@ -223,7 +240,8 @@ export class Shadow extends Object3D {
     if (intensity > 0) {
       this.visible = true;
       this.floor.visible = true;
-      (this.floor.material as MeshBasicMaterial).opacity = intensity;
+      (this.floor.material as MeshBasicMaterial).opacity = intensity *
+          lerp(DEFAULT_HARD_INTENSITY, 1, this.softness * this.softness);
     } else {
       this.visible = false;
       this.floor.visible = false;
@@ -244,8 +262,9 @@ export class Shadow extends Object3D {
   }
 
   render(renderer: WebGLRenderer, scene: Scene) {
+    // this.cameraHelper.visible = false;
+
     // force the depthMaterial to everything
-    this.cameraHelper.visible = false;
     scene.overrideMaterial = this.depthMaterial;
 
     // set renderer clear alpha
@@ -263,7 +282,6 @@ export class Shadow extends Object3D {
 
     // and reset the override material
     scene.overrideMaterial = null;
-    this.cameraHelper.visible = true;
     this.floor.visible = true;
 
     this.blurShadow(renderer);
@@ -272,6 +290,7 @@ export class Shadow extends Object3D {
     renderer.xr.enabled = xrEnabled;
     renderer.setRenderTarget(null);
     renderer.setClearAlpha(initialClearAlpha);
+    // this.cameraHelper.visible = true;
   }
 
   blurShadow(renderer: WebGLRenderer) {
