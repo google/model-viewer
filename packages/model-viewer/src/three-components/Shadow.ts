@@ -253,6 +253,10 @@ export class Shadow extends Object3D {
     renderer.setClearAlpha(0);
     this.floor.visible = false;
 
+    // disable XR for offscreen rendering
+    const xrEnabled = renderer.xr.enabled;
+    renderer.xr.enabled = false;
+
     // render to the render target to get the depths
     renderer.setRenderTarget(this.renderTarget);
     renderer.render(scene, this.camera);
@@ -265,6 +269,7 @@ export class Shadow extends Object3D {
     this.blurShadow(renderer);
 
     // reset and render the normal scene
+    renderer.xr.enabled = xrEnabled;
     renderer.setRenderTarget(null);
     renderer.setClearAlpha(initialClearAlpha);
   }
