@@ -339,12 +339,15 @@ modelViewerTexture.addEventListener("load", () => {
     } else if (event.target.value) {
       // Creates a new texture.
       const texture = await modelViewerTexture.createTexture(event.target.value);
+      texture.name = "ciao";
       // Applies the new texture to the specified channel.
       material[channel].setTexture(texture);
+      console.log(material[channel])
     }
   }
 
   document.querySelector('#normals2').addEventListener('input', (event) => {
+    console.log("here")
     createAndApplyTexture('normalTexture', event);
   });
 });
