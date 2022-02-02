@@ -52,7 +52,7 @@ export interface SceneGraphInterface {
   scale: string;
   readonly originalGltfJson: GLTF|null;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
-  createTexture(uri: string, type?: string, name?: string): Promise<ModelViewerTexture|null>;
+  createTexture(uri: string, type?: string): Promise<ModelViewerTexture|null>;
   /**
    * Intersects a ray with the scene and returns a list of materials who's
    * objects were intersected.
@@ -119,7 +119,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
     }
 
-    async createTexture(uri: string, type: string = 'image/png', name: string):
+    async createTexture(uri: string, type: string = 'image/png'):
         Promise<ModelViewerTexture|null> {
       const currentGLTF = this[$currentGLTF];
       const texture: Texture = await new Promise<Texture>(
@@ -139,10 +139,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       // to PNGs, we allow the user of the API to specify the type.
       if (type === 'image/jpeg') {
         texture.format = RGBFormat;
-      }
-
-      if (name) {
-        texture.name = name;
       }
 
       return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);
