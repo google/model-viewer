@@ -118,6 +118,7 @@ export class PlacementBox extends Mesh {
     }
 
     scene.target.add(this);
+    this.offsetHeight = 0;
   }
 
   /**
@@ -145,6 +146,7 @@ export class PlacementBox extends Mesh {
    * is up, so generally only negative values are used.
    */
   set offsetHeight(offset: number) {
+    offset -= 0.001;  // push 1 mm below shadow to avoid z-fighting
     if (this.side === 'back') {
       this.position.z = this.shadowHeight + offset;
     } else {

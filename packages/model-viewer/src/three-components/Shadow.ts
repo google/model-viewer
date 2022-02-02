@@ -71,7 +71,7 @@ export class Shadow extends Object3D {
     super();
 
     const {camera} = this;
-    camera.rotateX(Math.PI / 2);
+    camera.rotation.x = Math.PI / 2;
     camera.left = -0.5;
     camera.right = 0.5;
     camera.bottom = -0.5;
@@ -85,6 +85,7 @@ export class Shadow extends Object3D {
 
     const plane = new PlaneBufferGeometry();
     const shadowMaterial = new MeshBasicMaterial({
+      // color: new Color(1, 0, 0),
       opacity: 1,
       transparent: true,
       side: BackSide,
@@ -121,6 +122,9 @@ export class Shadow extends Object3D {
     this.isAnimated = scene.animationNames.length > 0;
     this.boundingBox.copy(scene.boundingBox);
     this.size.copy(scene.size);
+
+    this.boundingBox.getCenter(this.position);
+
     if (this.side === 'back') {
       const {min, max} = this.boundingBox;
       [min.y, min.z] = [min.z, min.y];
@@ -146,7 +150,6 @@ export class Shadow extends Object3D {
       size.set(maxDimension, maxY - minY, maxDimension);
     }
 
-    boundingBox.getCenter(this.position);
     if (side === 'bottom') {
       this.position.y = boundingBox.min.y;
     } else {
