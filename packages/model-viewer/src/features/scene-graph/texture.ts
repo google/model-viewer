@@ -54,6 +54,10 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
     return (this[$sourceObject] as any).name || '';
   }
 
+  set name(name: string) {
+    (this[$sourceObject] as any).name = name;
+  }
+
   get sampler(): Sampler {
     return this[$sampler];
   }

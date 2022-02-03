@@ -47,7 +47,9 @@ export class Image extends ThreeDOMElement implements ImageInterface {
       onUpdate: () => void, texture: ThreeTexture|null,
       gltfImage: GLTFImage|null) {
     gltfImage = gltfImage ?? {
-      name: 'adhoc_image',
+      name: (texture && texture.image && texture.image.src) ?
+          texture.image.src.split('/').pop() :
+          'adhoc_image',
       uri: (texture && texture.image && texture.image.src) ?
           texture.image.src :
           'adhoc_image' + adhocNum++
@@ -71,8 +73,13 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return this.uri != null ? 'external' : 'embedded';
   }
 
+  set name(name: string) {
+    (this[$sourceObject] as GLTFImage).name = name;
+  }
+
   async setURI(uri: string): Promise<void> {
     (this[$sourceObject] as GLTFImage).uri = uri;
+    (this[$sourceObject] as GLTFImage).name = uri.split('/').pop();
 
     const image = await new Promise((resolve, reject) => {
       loader.load(uri, resolve, undefined, reject);

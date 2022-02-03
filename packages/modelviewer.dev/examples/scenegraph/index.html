@@ -47,6 +47,11 @@
   left: 8px;
 }
 
+#texture-name,
+#image-name {
+  font-size: 0.8em;
+}
+
 button {
   font-size: 1.3em;
   margin: 0 0.25em;
@@ -323,6 +328,10 @@ modelViewerParameters.addEventListener("load", (ev) => {
         <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
         <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
       </select>
+      <p>Custom texture name</p>
+      <p id="texture-name">None</p>
+      <p>Image name from file name</p>
+      <p id="image-name">None</p>
     </div>
 </model-viewer>
 <script type="module">
@@ -339,8 +348,13 @@ modelViewerTexture.addEventListener("load", () => {
     } else if (event.target.value) {
       // Creates a new texture.
       const texture = await modelViewerTexture.createTexture(event.target.value);
+      // Set the texture name
+      texture.name = event.target.options[event.target.selectedIndex].text.replace(/ /g, "_").toLowerCase();
       // Applies the new texture to the specified channel.
       material[channel].setTexture(texture);
+      // Display the names values
+      document.querySelector('#texture-name').innerText = texture.name;
+      document.querySelector('#image-name').innerText = texture.source.name;
     }
   }
 
