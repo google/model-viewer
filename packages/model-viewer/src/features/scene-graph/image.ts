@@ -74,7 +74,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   }
 
   set name(name: string) {
-    (this[$sourceObject] as GLTFImage).name = "image_" + name;
+    (this[$sourceObject] as GLTFImage).name = name;
   }
 
   async setURI(uri: string): Promise<void> {
