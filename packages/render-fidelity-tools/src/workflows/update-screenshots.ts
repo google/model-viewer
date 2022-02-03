@@ -22,6 +22,7 @@ import {ImageComparisonConfig} from '../common.js';
 import {ConfigReader} from '../config-reader.js';
 
 import {rendererScreenshot} from './update-screenshots/renderer-screenshot.js';
+import {rendererOffline} from './update-screenshots/renderer-offline.js';
 
 const require = module.createRequire(import.meta.url);
 
@@ -117,9 +118,8 @@ const updateScreenshots = async (config: ImageComparisonConfig) => {
     }
 
     for (const renderer of renderers) {
-      const {name: rendererName, description: rendererDescription, scripts} =
-          renderer;
-
+      const {name: rendererName, description: rendererDescription, scripts: scripts, command: rendererCommand} = renderer;
+   
       if (exclude != null && exclude.includes(rendererName) ||
           rendererWhitelist != null && !rendererWhitelist.has(rendererName)) {
         continue;
@@ -151,18 +151,36 @@ const updateScreenshots = async (config: ImageComparisonConfig) => {
             rendererDirectory);
       }
 
-      try {
-        await rendererScreenshot(
-            config,
-            resolve(dirname(configPath)),
-            rendererName,
-            scenarioName,
-            goldenPath,
-            width,
-            height);
-      } catch (error) {
-        throw new Error(`Failed to update ${rendererDescription} screenshot: ${
-            error.message}`);
+      if(rendererCommand) {
+        if(rendererCommand.executable) {
+          try {
+            process.stdout.write(rendererName + `: Rendering ` + scenarioName + "...");
+            await rendererOffline(
+              scenario,
+              rendererCommand.executable,
+              rendererCommand.args,
+              goldenPath);
+          }
+          catch (error) {
+            throw new Error(`Offline rendering process for ${rendererDescription} failed: ${
+                error.message}`);
+          }
+        }
+      } else {
+        try {
+          await rendererScreenshot(
+              config,
+              resolve(dirname(configPath)),
+              rendererName,
+              scenarioName,
+              goldenPath,
+              width,
+              height);
+        }
+        catch (error) {
+            throw new Error(`Failed to update ${rendererDescription} screenshot: ${
+                error.message}`);
+        }
       }
     }
   }

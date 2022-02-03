@@ -22,6 +22,11 @@
     {
       "name": "dspbr-pt",
       "description": "dspbr-pt"
+    },
+    {
+      "name": "stellar",
+      "description": "Dassault Systèmes STELLAR",
+      "command": {}
     }
   ],
   "scenarios": [
@@ -99,7 +104,8 @@
         "height": 500
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -243,7 +249,8 @@
         "radius": 3
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -253,7 +260,8 @@
         "radius": 0.5
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -268,7 +276,8 @@
       },
       "exclude": [
         "model-viewer",
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -317,7 +326,8 @@
       },
       "renderSkybox": true,
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -329,6 +339,7 @@
       },
       "exclude": [
         "dspbr-pt",
+        "stellar",
         "babylon",
         "gltf-sample-viewer"
       ],
@@ -348,7 +359,8 @@
       "renderSkybox": true,
       "exclude": [
         "model-viewer",
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -364,7 +376,8 @@
         "radius": 20
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -374,7 +387,8 @@
         "radius": 11
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -391,7 +405,8 @@
         "radius": 6
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -442,7 +457,10 @@
       },
       "target": {
         "x": -0.18
-      }
+      },
+      "exclude": [
+        "stellar"
+      ]
     },
     {
       "name": "khronos-ClearCoatTest",
@@ -458,7 +476,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -468,7 +487,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -481,7 +501,8 @@
         "radius": 0.05
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -495,7 +516,8 @@
         "radius": 800
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -508,7 +530,8 @@
         "radius": 3.6
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -554,7 +577,8 @@
         "radius": 124
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -573,7 +597,8 @@
         "radius": 25
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -593,7 +618,8 @@
         "radius": 300
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -607,7 +633,8 @@
         "y": -0.28
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -623,7 +650,8 @@
         "y": 0.3
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -640,7 +668,8 @@
         "width": 680
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -653,7 +682,8 @@
         "y": 0.5
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -664,7 +694,8 @@
         "radius": 3.5
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -677,7 +708,8 @@
         "radius": 2
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -689,7 +721,8 @@
         "radius": 4.75
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -701,7 +734,8 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -714,7 +748,8 @@
         "radius": 18.4
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -726,7 +761,8 @@
         "radius": 4.75
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -738,7 +774,8 @@
         "radius": 23
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -748,7 +785,8 @@
         "radius": 3
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -762,7 +800,8 @@
         "radius": 1.5
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -774,7 +813,8 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -786,7 +826,8 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -798,7 +839,8 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -810,7 +852,8 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -822,7 +865,8 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -838,7 +882,8 @@
         "width": 400
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -853,7 +898,8 @@
         "radius": 1.2
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -866,7 +912,8 @@
         "radius": 2.5
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -876,7 +923,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -890,7 +938,8 @@
         "radius": 13
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -906,7 +955,8 @@
         "radius": 3
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -920,7 +970,8 @@
         "radius": 3.5
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -934,7 +985,8 @@
         "radius": 9
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -944,7 +996,8 @@
         "radius": 4
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -954,7 +1007,8 @@
         "radius": 15
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -964,7 +1018,8 @@
         "radius": 4
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -978,7 +1033,8 @@
         "radius": 1.5
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -992,7 +1048,8 @@
         "radius": 1.5
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -1002,7 +1059,8 @@
         "radius": 7
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -1012,7 +1070,8 @@
         "radius": 4
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ]
     },
     {
@@ -1026,7 +1085,8 @@
         "radius": 10
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ],
       "renderSkybox": true
     },
@@ -1044,7 +1104,8 @@
         "radius": 20
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "stellar"
       ],
       "renderSkybox": true
     }
