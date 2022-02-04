@@ -109,7 +109,13 @@ export interface ScenarioConfig {
 }
 
 export interface RendererConfig {
-  name: string, description: string, scripts?: {setup: string}
+  name: string, 
+  description: string, 
+  scripts?: {setup: string}, 
+  command?: {
+    executable?: string, 
+    args?: string[]
+  }
 }
 
 export interface GoldenConfig extends RendererConfig {

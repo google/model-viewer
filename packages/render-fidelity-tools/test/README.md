@@ -116,3 +116,51 @@ Quick Look skybox in renderers that we wish to appear at least somewhat
 comparable to Quick Look: [quick_1k.png](../../examples/assets/quick_1k.png).
 
 
+## Adding CLI renderer backends
+
+The `command` property of the renderer configuration allows adding external renderer processes to the screenshot generation and fidelity testing.
+
+```json
+"renderers": [
+    {
+      "name": "cli_renderer",
+      "description": "An offline rendering backend",
+      "command": { 
+        "executable": "python",
+        "args": ["test/renderers/cli_renderer/run.py"]
+      }
+    }
+]
+```
+Providing an empty object will skip the renderer for image generation during `update-screenshots`, but it is still expected to provide renderings in the golden folders for image comparison and report generation.
+
+
+On execution, a stringyfied scenario configuration will automatically be attached to `args`, the list of arguments to the `executable`. Please note the additional `outputFile` property.
+
+Example configuration:
+```json
+{ 
+  "scenario": {
+    "lighting": "../../../shared-assets/environments/lightroom_14b.hdr",
+    "dimensions": {
+      "width": 768,
+      "height": 450
+    },
+    "target": {
+      "x": 0,
+      "y": 0.3,
+      "z": 0
+    },
+    "orbit": {
+      "theta": 0,
+      "phi": 90,
+      "radius": 1
+    },
+    "verticalFoV": 45,
+    "renderSkybox": False,
+    "name": "khronos-SheenChair",
+    "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb"
+  },
+  "outputFile": "./test/goldens/khronos-SheenChair/stellar-golden.png"
+}
+```
