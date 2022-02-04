@@ -31,7 +31,7 @@ import {Renderer} from './Renderer.js';
 const INIT_FRAMES = 30;
 // AR shadow is not user-configurable. This is to pave the way for AR lighting
 // estimation, which will be used once available in WebXR.
-const AR_SHADOW_INTENSITY = 1.0;
+const AR_SHADOW_INTENSITY = 0.8;
 const ROTATION_RATE = 1.5;
 // Angle down (towards bottom of screen) from camera center ray to use for hit
 // testing against the floor. This makes placement faster and more intuitive
