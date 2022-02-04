@@ -248,8 +248,7 @@
         "radius": 3
       },
       "exclude": [
-        "dspbr-pt",
-        "stellar"
+        "dspbr-pt"
       ]
     },
     {
