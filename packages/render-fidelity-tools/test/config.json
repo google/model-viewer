@@ -325,8 +325,7 @@
       },
       "renderSkybox": true,
       "exclude": [
-        "dspbr-pt",
-        "stellar"
+        "dspbr-pt"
       ]
     },
     {
