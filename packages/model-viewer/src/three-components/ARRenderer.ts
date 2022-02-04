@@ -765,9 +765,7 @@ export class ARRenderer extends EventDispatcher {
         this.renderer.preRender(scene, time, delta);
         this.lastTick = time;
 
-        if (scene.isShadowDirty()) {
-          scene.shadow!.render(this.threeRenderer, scene);
-        }
+        scene.renderShadow(this.threeRenderer);
       }
 
       // TODO: This is a workaround for a Chrome bug, which should be fixed

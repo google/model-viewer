@@ -458,9 +458,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.toneMapping =
           scene.isUnlit ? NoToneMapping : ACESFilmicToneMapping;
 
-      if (scene.isShadowDirty()) {
-        scene.shadow!.render(this.threeRenderer, scene);
-      }
+      scene.renderShadow(this.threeRenderer);
 
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -480,7 +480,7 @@ export class ModelScene extends Scene {
 
   set animationTime(value: number) {
     this.mixer.setTime(value);
-    this.renderShadow();
+    this.queueShadowRender();
   }
 
   get animationTime(): number {
@@ -579,7 +579,7 @@ export class ModelScene extends Scene {
 
   updateAnimation(step: number) {
     this.mixer.update(step);
-    this.renderShadow();
+    this.queueShadowRender();
   }
 
   subscribeMixerEvent(event: string, callback: (...args: any[]) => void) {
@@ -600,7 +600,15 @@ export class ModelScene extends Scene {
     }
   }
 
-  renderShadow() {
+  renderShadow(renderer: WebGLRenderer) {
+    const shadow = this.shadow;
+    if (shadow != null && shadow.needsUpdate == true) {
+      shadow.render(renderer, this);
+      shadow.needsUpdate = false;
+    }
+  }
+
+  private queueShadowRender() {
     if (this.shadow != null) {
       this.shadow.needsUpdate = true;
     }
@@ -636,21 +644,6 @@ export class ModelScene extends Scene {
     const shadow = this.shadow;
     if (shadow != null) {
       shadow.setSoftness(softness);
-    }
-  }
-
-  /**
-   * Call to check if the shadow needs an updated render; returns true if an
-   * update is needed and resets the state.
-   */
-  isShadowDirty(): boolean {
-    const shadow = this.shadow;
-    if (shadow == null) {
-      return false;
-    } else {
-      const {needsUpdate} = shadow;
-      shadow.needsUpdate = false;
-      return needsUpdate;
     }
   }
 

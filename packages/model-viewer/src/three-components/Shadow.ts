@@ -50,8 +50,8 @@ const DEFAULT_HARD_INTENSITY = 0.3;
  * softer shadows faster, but less precise.
  */
 export class Shadow extends Object3D {
-  public camera = new OrthographicCamera();
-  // public cameraHelper = new CameraHelper(this.camera);
+  private camera = new OrthographicCamera();
+  // private cameraHelper = new CameraHelper(this.camera);
   private renderTarget: WebGLRenderTarget|null = null;
   private renderTargetBlur: WebGLRenderTarget|null = null;
   private depthMaterial = new MeshDepthMaterial();
@@ -63,8 +63,8 @@ export class Shadow extends Object3D {
   private blurPlane: Mesh;
   private boundingBox = new Box3;
   private size = new Vector3;
+  private maxDimension = 0;
   private isAnimated = false;
-  private side: Side = 'bottom';
   public needsUpdate = false;
 
   constructor(scene: ModelScene, softness: number, side: Side) {
@@ -118,42 +118,43 @@ export class Shadow extends Object3D {
    * needed, as this controls the shadow's resolution.
    */
   setScene(scene: ModelScene, softness: number, side: Side) {
-    this.side = side;
+    const {boundingBox, size, rotation, position} = this;
+
     this.isAnimated = scene.animationNames.length > 0;
     this.boundingBox.copy(scene.boundingBox);
     this.size.copy(scene.size);
+    this.maxDimension = Math.max(size.x, size.y, size.z) *
+        (this.isAnimated ? ANIMATION_SCALING : 1);
 
-    this.boundingBox.getCenter(this.position);
+    this.boundingBox.getCenter(position);
 
-    if (this.side === 'back') {
-      const {min, max} = this.boundingBox;
+    if (side === 'back') {
+      const {min, max} = boundingBox;
       [min.y, min.z] = [min.z, min.y];
       [max.y, max.z] = [max.z, max.y];
-      [this.size.y, this.size.z] = [this.size.z, this.size.y];
-      this.rotation.x = Math.PI / 2;
-      this.rotation.y = Math.PI;
+      [size.y, size.z] = [size.z, size.y];
+      rotation.x = Math.PI / 2;
+      rotation.y = Math.PI;
     } else {
-      this.rotation.x = 0;
-      this.rotation.y = 0;
+      rotation.x = 0;
+      rotation.y = 0;
     }
-    const {boundingBox, size} = this;
 
     if (this.isAnimated) {
       const minY = boundingBox.min.y;
       const maxY = boundingBox.max.y;
-      const maxDimension = Math.max(size.x, size.y, size.z) * ANIMATION_SCALING;
-      size.y = maxDimension;
+      size.y = this.maxDimension;
       boundingBox.expandByVector(
-          size.subScalar(maxDimension).multiplyScalar(-0.5));
+          size.subScalar(this.maxDimension).multiplyScalar(-0.5));
       boundingBox.min.y = minY;
       boundingBox.max.y = maxY;
-      size.set(maxDimension, maxY - minY, maxDimension);
+      size.set(this.maxDimension, maxY - minY, this.maxDimension);
     }
 
     if (side === 'bottom') {
-      this.position.y = boundingBox.min.y;
+      position.y = boundingBox.min.y;
     } else {
-      this.position.z = boundingBox.min.y;
+      position.z = boundingBox.min.y;
     }
 
     this.setSoftness(softness);
@@ -258,10 +259,11 @@ export class Shadow extends Object3D {
   /**
    * An offset can be specified to move the
    * shadow vertically relative to the bottom of the scene. Positive is up, so
-   * values are generally negative.
+   * values are generally negative. A small offset keeps our shadow from
+   * z-fighting with any baked-in shadow plane.
    */
   setOffset(offset: number) {
-    this.floor.position.z = -offset;
+    this.floor.position.z = -offset + 0.001 * this.maxDimension;
   }
 
   render(renderer: WebGLRenderer, scene: Scene) {
