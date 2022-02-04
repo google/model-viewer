@@ -104,8 +104,7 @@
         "height": 500
       },
       "exclude": [
-        "dspbr-pt",
-        "stellar"
+        "dspbr-pt"
       ]
     },
     {

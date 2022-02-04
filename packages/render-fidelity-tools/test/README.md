@@ -125,18 +125,21 @@ The `command` property of the renderer configuration allows adding external rend
     {
       "name": "cli_renderer",
       "description": "An offline rendering backend",
-      "command": { // providing an empty object will skip the renderer for image generation, but it is still expected to provide renderings in the golden folders for image comparison and report generation
+      "command": { 
         "executable": "python",
         "args": ["test/renderers/cli_renderer/run.py"]
       }
     }
 ]
 ```
+Providing an empty object will skip the renderer for image generation during `update-screenshots`, but it is still expected to provide renderings in the golden folders for image comparison and report generation.
+
 
 On execution, a stringyfied scenario configuration will automatically be attached to `args`, the list of arguments to the `executable`. Please note the additional `outputFile` property.
 
+Example configuration:
 ```json
-{ // Example configuration
+{ 
   "scenario": {
     "lighting": "../../../shared-assets/environments/lightroom_14b.hdr",
     "dimensions": {
@@ -158,6 +161,6 @@ On execution, a stringyfied scenario configuration will automatically be attache
     "name": "khronos-SheenChair",
     "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb"
   },
-  "outputFile": "E:/dev/model-viewer/packages/render-fidelity-tools/test/goldens/khronos-SheenChair/stellar-golden.png"
+  "outputFile": "./test/goldens/khronos-SheenChair/stellar-golden.png"
 }
 ```
