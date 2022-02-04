@@ -66,7 +66,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       });
       this[$scene].subscribeMixerEvent('finished', () => {
         this[$paused] = true;
-        this[$changeAnimation]({repetitions: Infinity, pingpong: false});
+        this[$changeAnimation]();
         this.dispatchEvent(new CustomEvent('finished'));
       });
     }
@@ -116,7 +116,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.dispatchEvent(new CustomEvent('pause'));
     }
 
-    play(options: PlayAnimationOptions = DEFAULT_PLAY_OPTIONS) {
+    play(options?: PlayAnimationOptions) {
       if (this.availableAnimations.length > 0) {
         this[$paused] = false;
 
@@ -132,7 +132,6 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$paused] = true;
 
       if (this.autoplay) {
-        this[$changeAnimation]({repetitions: Infinity, pingpong: false});
         this.play();
       }
     }
@@ -158,7 +157,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('animationName')) {
-        this[$changeAnimation]({repetitions: Infinity, pingpong: false});
+        this[$changeAnimation]();
       }
     }
 
@@ -172,7 +171,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       return super[$updateSource]();
     }
 
-    [$changeAnimation](options: PlayAnimationOptions) {
+    [$changeAnimation](options: PlayAnimationOptions = DEFAULT_PLAY_OPTIONS) {
       const repetitions = options.repetitions ?? Infinity;
       const mode = options.pingpong ?
           LoopPingPong :

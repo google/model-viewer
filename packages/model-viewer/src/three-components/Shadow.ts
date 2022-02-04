@@ -282,6 +282,7 @@ export class Shadow extends Object3D {
     renderer.xr.enabled = false;
 
     // render to the render target to get the depths
+    const oldRenderTarget = renderer.getRenderTarget();
     renderer.setRenderTarget(this.renderTarget);
     renderer.render(scene, this.camera);
 
@@ -293,7 +294,7 @@ export class Shadow extends Object3D {
 
     // reset and render the normal scene
     renderer.xr.enabled = xrEnabled;
-    renderer.setRenderTarget(null);
+    renderer.setRenderTarget(oldRenderTarget);
     renderer.setClearAlpha(initialClearAlpha);
     // this.cameraHelper.visible = true;
   }

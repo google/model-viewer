@@ -768,13 +768,6 @@ export class ARRenderer extends EventDispatcher {
         scene.renderShadow(this.threeRenderer);
       }
 
-      // TODO: This is a workaround for a Chrome bug, which should be fixed
-      // soon: https://bugs.chromium.org/p/chromium/issues/detail?id=1184085
-      const gl = this.threeRenderer.getContext();
-      gl.depthMask(false);
-      gl.clear(gl.DEPTH_BUFFER_BIT);
-      gl.depthMask(true);
-
       this.threeRenderer.render(scene, scene.getCamera());
       isFirstView = false;
     }
