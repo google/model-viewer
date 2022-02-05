@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, NoToneMapping, PCFSoftShadowMap, sRGBEncoding, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, NoToneMapping, sRGBEncoding, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -147,9 +147,6 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.outputEncoding = sRGBEncoding;
       this.threeRenderer.physicallyCorrectLights = true;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
-      this.threeRenderer.shadowMap.enabled = true;
-      this.threeRenderer.shadowMap.type = PCFSoftShadowMap;
-      this.threeRenderer.shadowMap.autoUpdate = false;
 
       this.debugger = !!options.debug ? new Debugger(this) : null;
       this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
@@ -386,10 +383,6 @@ export class Renderer extends EventDispatcher {
     const exposureIsNumber =
         typeof exposure === 'number' && !(self as any).isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
-
-    if (scene.isShadowDirty()) {
-      this.threeRenderer.shadowMap.needsUpdate = true;
-    }
   }
 
   render(t: number, frame?: XRFrame) {
@@ -465,6 +458,8 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.toneMapping =
           scene.isUnlit ? NoToneMapping : ACESFilmicToneMapping;
 
+      scene.renderShadow(this.threeRenderer);
+
       // Need to set the render target in order to prevent
       // clearing the depth from a different buffer
       this.threeRenderer.setRenderTarget(null);
@@ -525,6 +520,5 @@ export class Renderer extends EventDispatcher {
     for (const scene of this.scenes) {
       (scene.element as any)[$updateEnvironment]();
     }
-    this.threeRenderer.shadowMap.needsUpdate = true;
   };
 }

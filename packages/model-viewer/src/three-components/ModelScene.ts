@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -453,7 +453,6 @@ export class ModelScene extends Scene {
       z = this.targetDamperZ.update(z, goal.z, delta, normalization);
       this.target.position.set(x, y, z);
       this.target.updateMatrixWorld();
-      this.setShadowRotation(this.yaw);
       this.queueRender();
     }
   }
@@ -472,8 +471,6 @@ export class ModelScene extends Scene {
    */
   set yaw(radiansY: number) {
     this.rotation.y = radiansY;
-    this.updateMatrixWorld(true);
-    this.setShadowRotation(radiansY);
     this.queueRender();
   }
 
@@ -483,6 +480,7 @@ export class ModelScene extends Scene {
 
   set animationTime(value: number) {
     this.mixer.setTime(value);
+    this.queueShadowRender();
   }
 
   get animationTime(): number {
@@ -581,6 +579,7 @@ export class ModelScene extends Scene {
 
   updateAnimation(step: number) {
     this.mixer.update(step);
+    this.queueShadowRender();
   }
 
   subscribeMixerEvent(event: string, callback: (...args: any[]) => void) {
@@ -597,7 +596,21 @@ export class ModelScene extends Scene {
       const side =
           (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
       shadow.setScene(this, this.shadowSoftness, side);
-      shadow.setRotation(this.yaw);
+      shadow.needsUpdate = true;
+    }
+  }
+
+  renderShadow(renderer: WebGLRenderer) {
+    const shadow = this.shadow;
+    if (shadow != null && shadow.needsUpdate == true) {
+      shadow.render(renderer, this);
+      shadow.needsUpdate = false;
+    }
+  }
+
+  private queueShadowRender() {
+    if (this.shadow != null) {
+      this.shadow.needsUpdate = true;
     }
   }
 
@@ -617,7 +630,6 @@ export class ModelScene extends Scene {
       const side =
           (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
       this.shadow = new Shadow(this, this.shadowSoftness, side);
-      this.shadow.setRotation(this.yaw);
     }
     this.shadow.setIntensity(shadowIntensity);
   }
@@ -636,39 +648,13 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * The shadow must be rotated manually to match any global rotation applied to
-   * this model. The input is the global orientation about the Y axis.
-   */
-  setShadowRotation(radiansY: number) {
-    const shadow = this.shadow;
-    if (shadow != null) {
-      shadow.setRotation(radiansY);
-    }
-  }
-
-  /**
-   * Call to check if the shadow needs an updated render; returns true if an
-   * update is needed and resets the state.
-   */
-  isShadowDirty(): boolean {
-    const shadow = this.shadow;
-    if (shadow == null) {
-      return false;
-    } else {
-      const {needsUpdate} = shadow;
-      shadow.needsUpdate = false;
-      return needsUpdate;
-    }
-  }
-
-  /**
    * Shift the floor vertically from the bottom of the model's bounding box by
    * offset (should generally be negative).
    */
-  setShadowScaleAndOffset(scale: number, offset: number) {
+  setShadowOffset(offset: number) {
     const shadow = this.shadow;
     if (shadow != null) {
-      shadow.setScaleAndOffset(scale, offset);
+      shadow.setOffset(offset);
     }
   }
 

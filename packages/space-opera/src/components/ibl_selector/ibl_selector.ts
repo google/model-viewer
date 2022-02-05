@@ -179,7 +179,7 @@ export class IblSelector extends ConnectedLitElement {
             html`<div class="defaultError"><small>Choose a non-default environment</small></div>` :
             html``}
           <me-section-row class="Row" label="Shadow Intensity">
-            <me-slider-with-input min="0" max="10" step="0.1" id="shadow-intensity"
+            <me-slider-with-input min="0" max="2" step="0.01" id="shadow-intensity"
               @change="${this.onShadowIntensityChange}"
               value="${
         this.config.shadowIntensity ?? DEFAULT_SHADOW_INTENSITY}">
