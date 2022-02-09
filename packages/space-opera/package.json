@@ -15,7 +15,7 @@
     "watch:test": "karma start",
     "watch:tsc": "tsc -w",
     "watch:rollup": "rollup -c -w",
-    "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /demo/ -c-1",
+    "serve": "./node_modules/.bin/http-server -a 127.0.0.1 -o /editor/ -c-1",
     "pyserve": "echo This assumes 'python' is Python 2. && which python && echo Visit $(hostname):8000/index.html && python -m SimpleHTTPServer 8000",
     "dev": "npm run build -- --incremental && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput --incremental' 'watch:rollup' 'watch:test' 'serve -- -s'",
     "dev-py": "npm run build -- --incremental && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput --incremental' 'watch:rollup' 'watch:test' 'pyserve'"

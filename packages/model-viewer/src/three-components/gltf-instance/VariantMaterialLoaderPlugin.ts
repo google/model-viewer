@@ -143,7 +143,8 @@ export default class GLTFMaterialsVariantsExtension implements
           if (!extensionsDef || !extensionsDef[this.name]) {
             continue;
           }
-          meshes[i].userData.variantMaterials =
+          const meshObjectIndex = i < meshes.length  ? i : 0;
+          meshes[meshObjectIndex].userData.variantMaterials =
               mappingsArrayToTable(extensionsDef[this.name]);
         }
       });
