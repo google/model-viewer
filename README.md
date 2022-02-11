@@ -20,7 +20,6 @@ Check out the README.md files for specific projects to get more details:
 
 When developing across all the projects in this repository, first install git,
 Node.js and npm.
-*(npm version 6.14 is recommended due compatibility issues with version 7)*
 
 Then, perform the following steps to get set up for development:
 
@@ -49,5 +48,5 @@ You should now be ready to work on any of the `<model-viewer>` projects!
 Due to dependency issues on Windows 10 we recommend running `<model-viewer>` setup from a WSL2 environment.
  * [WSL2 Install walkthrough](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
-And installing Node.js & npm via NVM (*npm version 6.14 is recommended*)
+And installing Node.js & npm via NVM
  * [Node.js/NVM install walkthrough](https://docs.microsoft.com/en-us/windows/nodejs/setup-on-wsl2)
