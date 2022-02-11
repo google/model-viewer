@@ -73,9 +73,7 @@ const ensureUniqueNames = (variantNames: string[]) => {
  * @param variantNames {Array<string>} Required to be unique names
  * @return {Map}
  */
-// @ts-ignore
-const mappingsArrayToTable = (extensionDef:
-                                  any): Map<number, UserDataVariantMapping> => {
+const mappingsArrayToTable = (extensionDef: any): Map<number, UserDataVariantMapping> => {
   const table = new Map<number, UserDataVariantMapping>();
   for (const mapping of extensionDef.mappings) {
     for (const variant of mapping.variants) {
