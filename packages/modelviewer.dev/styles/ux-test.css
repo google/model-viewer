@@ -3,10 +3,10 @@
 
 body {
     font-family: 'Rubik', sans-serif;
-    font-size: 16px;
-    line-height: 24px;
+    font-size: 12px;
+    line-height: 18px;
     margin: 0;
-    padding: 0;
+    padding: 2%;
     font-weight: 400;
     max-width: 80vh;
     -webkit-font-smoothing: antialiased;
@@ -18,14 +18,18 @@ body {
 
 model-viewer {
     display: block;
-    width: 100vw;
-    height: 100vw;
+    width: 100%;
+    height: 96vw;
     max-width: 80vh;
     max-height: 80vh;
 }
 
 h1 {
     margin: 10px;
+    font-size: 16px;
+    line-height: 24px;
+    font-style: normal;
+    font-weight: normal;
 }
 
 p {
