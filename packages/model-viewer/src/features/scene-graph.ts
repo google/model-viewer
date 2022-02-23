@@ -151,6 +151,25 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         texture.format = RGBFormat;
       }
 
+      if (src instanceof HTMLCanvasElement) {
+        const canvas = src;
+        return new ModelViewerTexture(
+            this[$getOnUpdateMethod](), texture, null, null, {
+              name: 'canvas',
+              // lazily set the canvas dataURL as the "uri"
+              get uri() {
+                // invoke own setter with dataURL
+                this.uri = canvas.toDataURL();
+                return this.uri;
+              },
+              set uri(uri) {
+                // delete getter and setter and set "uri" as a regular
+                // property
+                delete this.uri;
+                this.uri = uri;
+              }
+            });
+      }
       return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);
     }
 
