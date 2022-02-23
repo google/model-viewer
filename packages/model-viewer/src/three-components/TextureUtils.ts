@@ -178,7 +178,7 @@ export default class TextureUtils extends EventDispatcher {
 
     cubeCamera.update(renderer, scene);
 
-    await this.blurCubemap(cubeTarget, GENERATED_SIGMA);
+    this.blurCubemap(cubeTarget, GENERATED_SIGMA);
 
     renderer.toneMapping = toneMapping;
     renderer.outputEncoding = outputEncoding;
@@ -210,7 +210,7 @@ export default class TextureUtils extends EventDispatcher {
     return this.generatedEnvironmentMapAlt;
   }
 
-  private async blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
+  private blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
     if (this.blurMaterial == null) {
       this.blurMaterial = this.getBlurShader(MAX_SAMPLES);
       const box = new BoxBufferGeometry();
@@ -229,7 +229,7 @@ export default class TextureUtils extends EventDispatcher {
     /** tempTarget.dispose(); */
   }
 
-  private async halfblur(
+  private halfblur(
       targetIn: WebGLCubeRenderTarget, targetOut: WebGLCubeRenderTarget,
       sigmaRadians: number, direction: 'latitudinal'|'longitudinal') {
     // Number of standard deviations at which to cut off the discrete
