@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
+import {CanvasTexture, Euler, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
@@ -52,6 +52,7 @@ export interface SceneGraphInterface {
   scale: string;
   readonly originalGltfJson: GLTF|null;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
+  createTexture(canvas: HTMLCanvasElement): Promise<ModelViewerTexture|null>;
   createTexture(uri: string, type?: string): Promise<ModelViewerTexture|null>;
   /**
    * Intersects a ray with the scene and returns a list of materials who's
@@ -119,11 +120,20 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
     }
 
-    async createTexture(uri: string, type: string = 'image/png'):
-        Promise<ModelViewerTexture|null> {
+    async createTexture(canvas: HTMLCanvasElement):
+        Promise<ModelViewerTexture|null>;
+    async createTexture(uri: string, type?: string):
+        Promise<ModelViewerTexture|null>;
+    async createTexture(
+        src: HTMLCanvasElement|string,
+        type: string = 'image/png'): Promise<ModelViewerTexture|null> {
       const currentGLTF = this[$currentGLTF];
-      const texture: Texture = await new Promise<Texture>(
-          (resolve) => this[$textureLoader].load(uri, resolve));
+
+      const texture: Texture = src instanceof HTMLCanvasElement ?
+          new CanvasTexture(src) :
+          await new Promise<Texture>(
+              (resolve) => this[$textureLoader].load(src, resolve));
+
       if (!currentGLTF || !texture) {
         return null;
       }
