@@ -36,6 +36,8 @@ export const $applyTexture = Symbol('applyTexture');
  * Image facade implementation for Three.js textures
  */
 export class Image extends ThreeDOMElement implements ImageInterface {
+  [$sourceObject]: GLTFImage;
+
   get[$threeTexture]() {
     console.assert(
         this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
@@ -58,15 +60,15 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   }
 
   get name(): string {
-    return (this[$sourceObject] as GLTFImage).name || '';
+    return this[$sourceObject].name || '';
   }
 
   get uri(): string|undefined {
-    return (this[$sourceObject] as GLTFImage).uri;
+    return this[$sourceObject].uri;
   }
 
   get bufferView(): number|undefined {
-    return (this[$sourceObject] as GLTFImage).bufferView;
+    return this[$sourceObject].bufferView;
   }
 
   get type(): 'embedded'|'external' {
@@ -74,12 +76,12 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   }
 
   set name(name: string) {
-    (this[$sourceObject] as GLTFImage).name = name;
+    this[$sourceObject].name = name;
   }
 
   async setURI(uri: string): Promise<void> {
-    (this[$sourceObject] as GLTFImage).uri = uri;
-    (this[$sourceObject] as GLTFImage).name = uri.split('/').pop();
+    this[$sourceObject].uri = uri;
+    this[$sourceObject].name = uri.split('/').pop();
 
     const image = await new Promise((resolve, reject) => {
       loader.load(uri, resolve, undefined, reject);
