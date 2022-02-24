@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import {Material as ThreeMaterial, Mesh} from 'three';
-import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader';
+import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {KHRMaterialsVariants, Primitive} from '../../../three-components/gltf-instance/gltf-2.0.js';

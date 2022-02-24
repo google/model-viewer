@@ -14,8 +14,8 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
-import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
+import {Euler, RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
+import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
@@ -52,7 +52,7 @@ export interface SceneGraphInterface {
   scale: string;
   readonly originalGltfJson: GLTF|null;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
-  createTexture(uri: string, type?: string): Promise<ModelViewerTexture|null>;
+  createTexture(uri: string): Promise<ModelViewerTexture|null>;
   /**
    * Intersects a ray with the scene and returns a list of materials who's
    * objects were intersected.
@@ -119,8 +119,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
     }
 
-    async createTexture(uri: string, type: string = 'image/png'):
-        Promise<ModelViewerTexture|null> {
+    async createTexture(uri: string): Promise<ModelViewerTexture|null> {
       const currentGLTF = this[$currentGLTF];
       const texture: Texture = await new Promise<Texture>(
           (resolve) => this[$textureLoader].load(uri, resolve));
@@ -132,14 +131,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       texture.wrapS = RepeatWrapping;
       texture.wrapT = RepeatWrapping;
       texture.flipY = false;
-      // This hack is because GLTFExporter checks if format is RGB vs RGBA to
-      // decide if it should save as JPEG vs PNG. However, TextureLoader sets
-      // format based on if the url ends in .jpg, which does not work for an
-      // ObjectURL like we're passing here. So, to keep from inflating all JPEGs
-      // to PNGs, we allow the user of the API to specify the type.
-      if (type === 'image/jpeg') {
-        texture.format = RGBFormat;
-      }
 
       return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);
     }

@@ -16,7 +16,7 @@
 import {BackSide, Box3, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneBufferGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
 import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
 import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
-import {lerp} from 'three/src/math/MathUtils';
+import {lerp} from 'three/src/math/MathUtils.js';
 
 import {ModelScene} from './ModelScene';
 

@@ -722,12 +722,12 @@ export class MaterialPanel extends ConnectedLitElement {
   async onTextureUpload(
       detail: FileDetails, texturePicker: TexturePicker,
       textureInfo: TextureInfo) {
-    const {url, type} = detail;
+    const {url} = detail;
     if (this.thumbnailsById.has(url)) {
       console.log('URL collision! Texture not updated.');
       return;
     }
-    const texture = await getModelViewer()?.createTexture(url, type);
+    const texture = await getModelViewer()?.createTexture(url);
     if (texture == null) {
       return;
     }
