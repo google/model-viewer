@@ -549,6 +549,7 @@ export class ModelScene extends Scene {
         if (!isNaN(parsedAnimationIndex) && parsedAnimationIndex >= 0 && parsedAnimationIndex < animations.length) {
           animationClip = animations[parsedAnimationIndex];
         }
+      }
     }
 
     if (animationClip == null) {
