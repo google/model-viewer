@@ -22,6 +22,7 @@ import {BasicSpecTemplate} from '../templates.js';
 const expect = chai.expect;
 const NON_ANIMATED_GLB_PATH = assetPath('models/Astronaut.glb');
 const ANIMATED_GLB_PATH = assetPath('models/RobotExpressive.glb');
+const ANIMATED_GLB_DUPLICATE_ANIMATION_NAMES_PATH = assetPath('models/DuplicateAnimationNames.glb');
 
 const animationIsPlaying = (element: any, animationName = null): boolean => {
   const {currentAnimationAction} = element[$scene];
@@ -172,6 +173,32 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
       suite('with a specified animation-name', () => {
         setup(async () => {
           element.animationName = element.availableAnimations[1];
+          await timePasses();
+        });
+
+        test('plays the specified animation', () => {
+          expect(animationIsPlaying(element, element.availableAnimations[1]))
+              .to.be.true;
+        });
+      });
+
+      suite('with a specified index as animation-name', () => {
+        setup(async () => {
+          element.animationName = "1";
+          await timePasses();
+        });
+
+        test('plays the specified animation', () => {
+          expect(animationIsPlaying(element, element.availableAnimations[1]))
+              .to.be.true;
+        });
+      });
+
+      suite('a model with duplicate animation names', () => {
+        setup(async () => {
+          element.src = ANIMATED_GLB_DUPLICATE_ANIMATION_NAMES_PATH;
+          await waitForEvent(element, 'load');
+          element.animationName = "1";
           await timePasses();
         });
 
