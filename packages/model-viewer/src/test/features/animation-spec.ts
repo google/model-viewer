@@ -182,6 +182,18 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         });
       });
 
+      suite('with an invalid animation-name', () => {
+        setup(async () => {
+          element.animationName = "invalid-animation-name";
+          await timePasses();
+        });
+
+        test('plays the first animation', () => {
+          expect(animationIsPlaying(element, element.availableAnimations[0]))
+              .to.be.true;
+        });
+      });
+
       suite('with a specified index as animation-name', () => {
         setup(async () => {
           element.animationName = "1";
@@ -190,6 +202,18 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
 
         test('plays the specified animation', () => {
           expect(animationIsPlaying(element, element.availableAnimations[1]))
+              .to.be.true;
+        });
+      });
+
+      suite('with an invalid index as animation-name', () => {
+        setup(async () => {
+          element.animationName = "-1";
+          await timePasses();
+        });
+
+        test('plays the first animation', () => {
+          expect(animationIsPlaying(element, element.availableAnimations[0]))
               .to.be.true;
         });
       });
