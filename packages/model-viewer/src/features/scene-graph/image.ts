@@ -36,7 +36,7 @@ export const $applyTexture = Symbol('applyTexture');
  * Image facade implementation for Three.js textures
  */
 export class Image extends ThreeDOMElement implements ImageInterface {
-  [$sourceObject]: GLTFImage;
+  readonly[$sourceObject]: GLTFImage;
 
   get[$threeTexture]() {
     console.assert(
