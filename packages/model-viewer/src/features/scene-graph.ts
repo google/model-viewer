@@ -23,7 +23,7 @@ import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
-import {Constructor} from '../utilities.js';
+import {Constructor, defineLazyMemoizedProperty} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
 import {Material} from './scene-graph/material.js';
@@ -153,22 +153,10 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (src instanceof HTMLCanvasElement) {
         const canvas = src;
+        const gltfImage = {name: 'canvas', uri: ''};
+        defineLazyMemoizedProperty(gltfImage, 'uri', () => canvas.toDataURL());
         return new ModelViewerTexture(
-            this[$getOnUpdateMethod](), texture, null, null, {
-              name: 'canvas',
-              // lazily set the canvas dataURL as the "uri"
-              get uri() {
-                // invoke own setter with dataURL
-                this.uri = canvas.toDataURL();
-                return this.uri;
-              },
-              set uri(uri) {
-                // delete getter and setter and set "uri" as a regular
-                // property
-                delete this.uri;
-                this.uri = uri;
-              }
-            });
+            this[$getOnUpdateMethod](), texture, null, null, gltfImage);
       }
       return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);
     }

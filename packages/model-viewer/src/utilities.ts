@@ -256,3 +256,19 @@ export const waitForEvent = <T extends AnyEvent = Event>(
       }
       target.addEventListener(eventName, handler);
     });
+
+export const defineLazyMemoizedProperty = <P extends string, T>(
+    o: Record<P, T>, propertyKey: P, lazyGet: () => T) => {
+  Object.defineProperty(o, propertyKey, {
+    get() {
+      // invoke own setter with lazyGet result
+      this[propertyKey] = lazyGet();
+      return this[propertyKey];
+    },
+    set(value: T) {
+      // delete getter and setter and set as regular property
+      delete this[propertyKey];
+      this[propertyKey] = value;
+    }
+  });
+};
