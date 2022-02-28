@@ -149,8 +149,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (src instanceof HTMLCanvasElement) {
         const canvas = src;
-        const gltfImage = {name: 'canvas', uri: ''};
-        defineLazyMemoizedProperty(gltfImage, 'uri', () => canvas.toDataURL());
+        const gltfImage = defineLazyMemoizedProperty(
+            {name: 'canvas'}, 'uri', () => canvas.toDataURL());
         return new ModelViewerTexture(
             this[$getOnUpdateMethod](), texture, null, null, gltfImage);
       }

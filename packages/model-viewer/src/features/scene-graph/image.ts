@@ -18,6 +18,7 @@ import {ImageLoader, Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry,
 import {blobCanvas} from '../../model-viewer-base.js';
 import {Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Renderer} from '../../three-components/Renderer.js';
+import {defineLazyMemoizedProperty} from '../../utilities.js';
 
 import {Image as ImageInterface} from './api.js';
 import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
@@ -79,17 +80,35 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     this[$sourceObject].name = name;
   }
 
-  async setURI(uri: string): Promise<void> {
-    this[$sourceObject].uri = uri;
-    this[$sourceObject].name = uri.split('/').pop();
+  async setURI(uri: string) {
+    return this.setSrc(uri);
+  }
 
-    const image = await new Promise((resolve, reject) => {
-      loader.load(uri, resolve, undefined, reject);
-    });
-
+  async setSrc(src: string|HTMLCanvasElement): Promise<void> {
     const texture = this[$threeTexture]!;
-    texture.image = image;
-    texture.needsUpdate = true;
+
+    if (src instanceof HTMLCanvasElement) {
+      defineLazyMemoizedProperty(
+          this[$sourceObject], 'uri', () => src.toDataURL());
+      this[$sourceObject].name = 'canvas';
+
+      texture.image = src;
+    } else {
+      this[$sourceObject].uri = src;
+      this[$sourceObject].name = src.split('/').pop();
+
+      const image = await new Promise((resolve, reject) => {
+        loader.load(src, resolve, undefined, reject);
+      });
+
+      texture.image = image;
+    }
+
+    this.update();
+  }
+
+  update() {
+    this[$threeTexture]!.needsUpdate = true;
     this[$onUpdate]();
   }
 
