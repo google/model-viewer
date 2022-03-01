@@ -68,7 +68,6 @@ export class Hotspot extends CSS2DObject {
    * Sets the hotspot to be in the highly visible foreground state.
    */
   show() {
-    console.log('show ', this.slot.name);
     if (!this.facingCamera || !this.initialized) {
       this.updateVisibility(true);
     }
@@ -78,7 +77,6 @@ export class Hotspot extends CSS2DObject {
    * Sets the hotspot to be in the diminished background state.
    */
   hide() {
-    console.log('hide ', this.slot.name);
     if (this.facingCamera || !this.initialized) {
       this.updateVisibility(false);
     }

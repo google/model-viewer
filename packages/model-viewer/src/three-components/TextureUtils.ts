@@ -164,7 +164,6 @@ export default class TextureUtils extends EventDispatcher {
     const cubeCamera = new CubeCamera(0.1, 100, cubeTarget);
     const generatedEnvironmentMap = cubeCamera.renderTarget.texture;
     generatedEnvironmentMap.name = name;
-    scene.scale.setComponent(0, -1);
 
     const outputEncoding = renderer.outputEncoding;
     const toneMapping = renderer.toneMapping;
