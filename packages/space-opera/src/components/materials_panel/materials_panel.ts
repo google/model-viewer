@@ -31,16 +31,16 @@ import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/texture_picker/texture_picker.js';
 
-import {Material} from '@google/model-viewer/lib/features/scene-graph/material.js';
-import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer.js';
+import {Material} from '@google/model-viewer/lib/features/scene-graph/material';
+import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/texture-info.js';
+import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
+import {AlphaMode} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-2.0';
+import {GLTF, TextureInfo as GLTFTextureInfo} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
 import {TextField} from '@material/mwc-textfield';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {customElement, html, internalProperty, query} from 'lit-element';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
-import {TextureInfo} from '../../../../model-viewer/lib/features/scene-graph/texture-info.js';
-import {AlphaMode} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
-import {GLTF, TextureInfo as GLTFTextureInfo} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-defaulted.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -722,12 +722,12 @@ export class MaterialPanel extends ConnectedLitElement {
   async onTextureUpload(
       detail: FileDetails, texturePicker: TexturePicker,
       textureInfo: TextureInfo) {
-    const {url} = detail;
+    const {url, type} = detail;
     if (this.thumbnailsById.has(url)) {
       console.log('URL collision! Texture not updated.');
       return;
     }
-    const texture = await getModelViewer()?.createTexture(url);
+    const texture = await getModelViewer()?.createTexture(url, type);
     if (texture == null) {
       return;
     }

@@ -151,7 +151,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
               'models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_albedo.jpg');
           const blob = await fetch(url).then(r => r.blob());
           const objectUrl = URL.createObjectURL(blob);
-          const texture = await element.createTexture(objectUrl);
+          const texture = await element.createTexture(objectUrl, 'image/jpeg');
 
           element.model!.materials[0]
               .pbrMetallicRoughness.baseColorTexture.setTexture(texture);
