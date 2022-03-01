@@ -38,6 +38,21 @@ const animationIsPlaying = (element: any, animationName = null): boolean => {
   return false;
 };
 
+const animationWithIndexIsPlaying = (element: any, animationIndex = 0): boolean => {
+  const {currentAnimationAction} = element[$scene];
+  const {_currentGLTF} = element[$scene];
+
+  if (currentAnimationAction != null && 
+      animationIndex >= 0 && animationIndex < _currentGLTF.animations.length && 
+      currentAnimationAction.getClip() == _currentGLTF.animations[animationIndex]) {
+    return element.paused === false &&
+      currentAnimationAction.enabled === true &&
+      !currentAnimationAction.paused;
+  }
+
+  return false;
+}
+
 suite('ModelViewerElementBase with AnimationMixin', () => {
   let nextId = 0;
   let tagName: string;
@@ -201,7 +216,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         });
 
         test('plays the specified animation', () => {
-          expect(animationIsPlaying(element, element.availableAnimations[1]))
+          expect(animationWithIndexIsPlaying(element, 1))
               .to.be.true;
         });
       });
@@ -213,7 +228,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         });
 
         test('plays the first animation', () => {
-          expect(animationIsPlaying(element, element.availableAnimations[0]))
+          expect(animationWithIndexIsPlaying(element, 0))
               .to.be.true;
         });
       });
@@ -227,8 +242,20 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         });
 
         test('plays the specified animation', () => {
-          expect(animationIsPlaying(element, element.availableAnimations[1]))
+          expect(animationWithIndexIsPlaying(element, 1))
               .to.be.true;
+        });
+
+        suite('when playing an animation by name', () => {
+          setup(async () => {
+            element.animationName = element.availableAnimations[1];
+            await timePasses();
+          });
+  
+          test('fails to play the specified animation', () => {
+            expect(animationWithIndexIsPlaying(element, 1))
+                .to.be.false;
+          });
         });
       });
 
@@ -249,6 +276,17 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         suite('with a specified animation-name', () => {
           setup(async () => {
             element.animationName = element.availableAnimations[1];
+            await timePasses();
+          });
+
+          test('does not play an animation', () => {
+            expect(animationIsPlaying(element)).to.be.false;
+          });
+        });
+
+        suite('with a specified animation by index', () => {
+          setup(async () => {
+            element.animationName = "1";
             await timePasses();
           });
 
