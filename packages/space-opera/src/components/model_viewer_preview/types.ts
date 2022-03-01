@@ -15,8 +15,8 @@
  *
  */
 
-import {Texture} from '../../../../model-viewer/lib/features/scene-graph/texture';
-import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
+import {Texture} from '../../../../model-viewer/lib/features/scene-graph/texture.js';
+import {GLTF} from '../../../../model-viewer/lib/three-components/gltf-instance/gltf-defaulted.js';
 
 export interface Thumbnail {
   objectUrl: string;

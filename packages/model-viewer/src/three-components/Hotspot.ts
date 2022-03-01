@@ -15,6 +15,7 @@
 
 import {Vector3} from 'three';
 import {CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 
@@ -67,6 +68,7 @@ export class Hotspot extends CSS2DObject {
    * Sets the hotspot to be in the highly visible foreground state.
    */
   show() {
+    console.log('show ', this.slot.name);
     if (!this.facingCamera || !this.initialized) {
       this.updateVisibility(true);
     }
@@ -76,6 +78,7 @@ export class Hotspot extends CSS2DObject {
    * Sets the hotspot to be in the diminished background state.
    */
   hide() {
+    console.log('hide ', this.slot.name);
     if (this.facingCamera || !this.initialized) {
       this.updateVisibility(false);
     }
