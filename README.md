@@ -44,9 +44,82 @@ Command                        | Description
 
 You should now be ready to work on any of the `<model-viewer>` projects!
 
-## Windows 10 Setup
+## Windows 10/11 Setup
 Due to dependency issues on Windows 10 we recommend running `<model-viewer>` setup from a WSL2 environment.
  * [WSL2 Install walkthrough](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
 And installing Node.js & npm via NVM
  * [Node.js/NVM install walkthrough](https://docs.microsoft.com/en-us/windows/nodejs/setup-on-wsl2)
+
+You should clone model-viewer from _inside_ WSL, not from inside Windows. Otherwise, you might run into line endings and symlink issues.  
+To clone via HTTPS in WSL (there are known file permissions issues with SSH keys inside WSL):  
+```
+git clone --depth=1 https://github.com/google/model-viewer.git
+cd model-viewer
+npm install
+npm run bootstrap
+```
+
+To run tests in WSL, you need to bind `CHROME_BIN`:
+```
+export CHROME_BIN="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+npm run test
+```
+
+Note that you should be able to run the `packages/model-viewer` tests with that setup, but running fidelity tests requires GUI support which is only available in WSL on Windows 11.  
+
+<details>
+ <summary>Additional WSL Troubleshooting – provided for reference only</summary>
+ 
+> These issues should not happen when you have followed the above WSL setup steps (clone via HTTPS, clone from inside WSL, bind CHROME_BIN). The notes here might be helpful if you're trying to develop model-viewer from inside Windows (not WSL) instead (not recommended).  
+
+### Running Tests
+Running `npm run test` requires an environment variable on WSL that points to `CHROME_BIN`.
+You can set that via this command (this is the default Chrome install directory, might be somewhere else on your machine)
+```
+export CHROME_BIN="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+npm run test
+```
+
+Tests in `packages/model-viewer` should now run properly; fidelity tests might still fail (see errors and potential workarounds below).
+
+### Error: `/bin/bash^M: bad interpreter: No such file or directory`
+**Symptom**
+Running a .sh script, for example  `fetch-khronos-gltf-samples.sh`, throws an error message `/bin/bash^M: bad interpreter: No such file or directory`
+
+Alternative error:  
+```
+! was unexpected at this time.
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! @google/model-viewer@1.10.1 prepare: `if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-samples.sh`
+```
+
+**Solution**
+This is caused by incorrect line endings in some of the .sh files due to git changing these on checkout on Windows (not inside WSL). It's recommended to clone the model-viewer repository from a WSL session.  
+
+As a workaround, you can re-write line endings using the following command:  
+```
+sed -i -e 's/\r$//' ../shared-assets/scripts/fetch-khronos-gltf-samples.sh
+```
+
+### Error: `ERROR:browser_main_loop.cc(1409)] Unable to open X display.`
+**Symptom**
+When trying to `npm run test`, errors are logged similar to:
+```
+❌Fail to analyze scenario :khronos-IridescentDishWithOlives! Error message: ❌ Failed to capture model-viewer's screenshot
+[836:836:0301/095227.204808:ERROR:browser_main_loop.cc(1409)] Unable to open X display.
+```
+Pupeteer tests need a display output; this means GUI support for WSL is required which seems to only be (easily) available on Windows 11, not Windows 10.  
+https://docs.microsoft.com/de-de/windows/wsl/tutorials/gui-apps#install-support-for-linux-gui-apps
+
+So, the workaround seems to be running Windows 11 (but not tested yet).
+
+### Error: `ERROR: Task not found: "'watch:tsc"`
+**Symptom**
+Running `npm run dev` in `packages/model-viewer` on Windows throws error `ERROR: Task not found: "'watch:tsc"`.
+
+**Solution**
+(if you have one please make a PR!)
+
+</details>
