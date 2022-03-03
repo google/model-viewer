@@ -71,13 +71,13 @@
       {
         "name": "with-credentials",
         "htmlName": "withCredentials",
-        "description": "This attribute is a boolean value that indicates whether or not 3D model fetch should be made using credentials such as cookies, authorization headers or TLS client certificates.",
+        "description": "This attribute make the browser include credentials (cookies, authorization headers or TLS client certificates) in the request to fetch the 3D model. It's useful if the 3D model file is stored on another server that require authentication. By default the file will be fetch without credentials. Note that this has no effect if you are loading files locally or from the same domain.",
         "links": [
-          "<a href=\"../examples/loading/#withCredentials\">Related examples</a>"
+          "<a href=\"https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials\">MDN documentation</a>"
         ],
         "default": {
           "default": "false",
-          "options": "any legal boolean"
+          "options": "true, false"
         }
       }
     ],
