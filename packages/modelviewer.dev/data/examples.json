@@ -54,10 +54,6 @@
       {
         "htmlId": "cyclingModels",
         "name": "Cycling Models"
-      },
-      {
-        "htmlId": "withCredentials",
-        "name": "With credentials"
       }
     ]
   },
