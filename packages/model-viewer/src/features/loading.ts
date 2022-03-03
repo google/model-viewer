@@ -368,10 +368,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
 
-      if (this.withCredentials) {
-        CachingGLTFLoader.setWithCredentials(this.withCredentials)
-      }
-
       // Fired when a user first clicks the model element. Used to
       // change the visibility of a poster image, or start loading
       // a model.
@@ -429,10 +425,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-      if (changedProperties.has('withCrendentials')) {
-        if (this.withCredentials) {
-          CachingGLTFLoader.setWithCredentials(this.withCredentials)
-        }
+      if (changedProperties.has('withCrendentials') || this.withCredentials === true) {
+        CachingGLTFLoader.setWithCredentials(this.withCredentials)
       }
     }
 
