@@ -199,7 +199,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
   async preload(
       url: string, element: ModelViewerElementBase,
       progressCallback: ProgressCallback = () => {}) {
-    if (withCredentials == true) {
+    if (withCredentials === true) {
       this[$loader].setWithCredentials(withCredentials);
     }
     this.dispatchEvent(
