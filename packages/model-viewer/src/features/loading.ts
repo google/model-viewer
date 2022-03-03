@@ -83,7 +83,6 @@ export declare interface LoadingInterface {
   loading: LoadingAttributeValue;
   generateSchema: boolean;
   seamlessPoster: boolean;
-  withCredentials: boolean;
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
@@ -237,13 +236,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     @property({type: Boolean, attribute: 'seamless-poster'})
     seamlessPoster = false;
-
-    /**
-     * This attribute is a boolean value that indicates whether or not 3D model fetch
-     * should be made using credentials such as cookies, authorization headers or TLS client certificates.
-     */
-    @property({type: Boolean, attribute: 'with-credentials'})
-    withCredentials = false;
 
     /**
      * Dismisses the poster, causing the model to load and render if
@@ -423,10 +415,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         } else {
           this[$posterContainerElement].classList.remove('quick');
         }
-      }
-
-      if (changedProperties.has('withCrendentials') || this.withCredentials === true) {
-        CachingGLTFLoader.setWithCredentials(this.withCredentials)
       }
     }
 
