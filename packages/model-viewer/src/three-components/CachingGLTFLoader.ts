@@ -73,6 +73,8 @@ const ktx2Loader = new KTX2Loader();
 let meshoptDecoderLocation: string;
 let meshoptDecoder: Promise<typeof MeshoptDecoder>|undefined;
 
+let withCredentials: boolean;
+
 interface MeshoptDecoder {
   ready: Promise<void>;
   supported: boolean;
@@ -122,6 +124,14 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
 
   static initializeKTX2Loader(renderer: WebGLRenderer) {
     ktx2Loader.detectSupport(renderer);
+  }
+
+  static setWithCredentials(state: boolean) {
+    withCredentials = state
+  }
+
+  static getWithCredentials() {
+    return withCredentials
   }
 
   static[$evictionPolicy]: CacheEvictionPolicy =
@@ -189,6 +199,9 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
   async preload(
       url: string, element: ModelViewerElementBase,
       progressCallback: ProgressCallback = () => {}) {
+    if (withCredentials == true) {
+      this[$loader].setWithCredentials(withCredentials);
+    }
     this.dispatchEvent(
         {type: 'preload', element: element, src: url} as PreloadEvent);
     if (!cache.has(url)) {

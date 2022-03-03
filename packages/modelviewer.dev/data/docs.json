@@ -67,6 +67,18 @@
           "default": "auto",
           "options": "auto, interaction, manual"
         }
+      },
+      {
+        "name": "with-credentials",
+        "htmlName": "withCredentials",
+        "description": "This attribute is a boolean value that indicates whether or not 3D model fetch should be made using credentials such as cookies, authorization headers or TLS client certificates.",
+        "links": [
+          "<a href=\"../examples/loading/#withCredentials\">Related examples</a>"
+        ],
+        "default": {
+          "default": "false",
+          "options": "any legal boolean"
+        }
       }
     ],
     "CSS": [
