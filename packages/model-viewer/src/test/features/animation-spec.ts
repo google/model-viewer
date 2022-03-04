@@ -252,8 +252,8 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
             await timePasses();
           });
 
-          test('fails to play the specified animation and plays the first animation instead', () => {
-            expect(animationWithIndexIsPlaying(element, 0))
+          test('fails to play the specified animation and plays the last animation with that name instead', () => {
+            expect(animationWithIndexIsPlaying(element, 3))
                 .to.be.true;
           });
         });
