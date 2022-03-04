@@ -89,6 +89,8 @@ const $GLTFInstance = Symbol('GLTFInstance');
 export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
                                              GLTFInstanceConstructor> extends
     EventDispatcher {
+  static withCredentials: boolean;
+
   static setDRACODecoderLocation(url: string) {
     dracoDecoderLocation = url;
     dracoLoader.setDecoderPath(url);
@@ -189,6 +191,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
   async preload(
       url: string, element: ModelViewerElementBase,
       progressCallback: ProgressCallback = () => {}) {
+    this[$loader].setWithCredentials(CachingGLTFLoader.withCredentials);
     this.dispatchEvent(
         {type: 'preload', element: element, src: url} as PreloadEvent);
     if (!cache.has(url)) {

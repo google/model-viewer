@@ -159,6 +159,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   @property({type: String}) src: string|null = null;
 
+  @property({type: Boolean, attribute: 'with-credentials'}) withCredentials: boolean = false;
+
   protected[$isElementInViewport] = false;
   protected[$loaded] = false;
   protected[$loadedTime] = 0;
@@ -375,6 +377,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
     if (changedProperties.has('alt')) {
       const ariaLabel = this.alt == null ? this[$defaultAriaLabel] : this.alt;
       this[$userInputElement].setAttribute('aria-label', ariaLabel);
+    }
+
+    if (changedProperties.has('withCredentials')) {
+      CachingGLTFLoader.withCredentials = this.withCredentials
     }
   }
 
