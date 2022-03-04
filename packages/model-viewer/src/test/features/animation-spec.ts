@@ -246,15 +246,15 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
               .to.be.true;
         });
 
-        suite('when playing an animation by name', () => {
+        suite('when playing a duplicate animation by name', () => {
           setup(async () => {
             element.animationName = element.availableAnimations[1];
             await timePasses();
           });
-  
-          test('fails to play the specified animation', () => {
-            expect(animationWithIndexIsPlaying(element, 1))
-                .to.be.false;
+
+          test('fails to play the specified animation and plays the first animation instead', () => {
+            expect(animationWithIndexIsPlaying(element, 0))
+                .to.be.true;
           });
         });
       });
