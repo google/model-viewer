@@ -81,9 +81,9 @@ export class ValidationModal extends LitElement {
         <li>${this.report.info!.materialCount} materials</li>
         <li>${this.report.info!.totalVertexCount} vertices</li>
         <li>${this.report.info!.totalTriangleCount} triangles</li>
-        <li>${this.report.info!.width!.toPrecision(3)} x-width (meters)</li>
-        <li>${this.report.info!.height!.toPrecision(3)} y-height (meters)</li>
-        <li>${this.report.info!.length!.toPrecision(3)} z-length (meters)</li>
+        <li>${this.report.info!.width!.toPrecision(3)} m x-width</li>
+        <li>${this.report.info!.height!.toPrecision(3)} m y-height</li>
+        <li>${this.report.info!.length!.toPrecision(3)} m z-length</li>
       </ul>
     </li>
   </ul>
