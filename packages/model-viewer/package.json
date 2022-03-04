@@ -69,7 +69,7 @@
     "3d"
   ],
   "dependencies": {
-    "three": "^0.136.0",
+    "three": "^0.138.3",
     "lit-element": "^2.5.1",
     "lit-html": "^1.4.1"
   },
@@ -81,7 +81,7 @@
     "@types/chai": "^4.2.21",
     "@types/mocha": "^8.2.3",
     "@types/pngjs": "^6.0.1",
-    "@types/three": "^0.135.0",
+    "@types/three": "^0.137.0",
     "@ungap/event-target": "^0.2.2",
     "chai": "^4.3.4",
     "focus-visible": "^5.2.0",

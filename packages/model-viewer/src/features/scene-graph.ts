@@ -14,8 +14,8 @@
  */
 
 import {property} from 'lit-element';
-import {Euler, RepeatWrapping, RGBFormat, sRGBEncoding, Texture, TextureLoader} from 'three';
-import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter';
+import {Euler, RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
+import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
 import {normalizeUnit} from '../styles/conversions.js';
@@ -132,14 +132,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       texture.wrapS = RepeatWrapping;
       texture.wrapT = RepeatWrapping;
       texture.flipY = false;
-      // This hack is because GLTFExporter checks if format is RGB vs RGBA to
-      // decide if it should save as JPEG vs PNG. However, TextureLoader sets
-      // format based on if the url ends in .jpg, which does not work for an
-      // ObjectURL like we're passing here. So, to keep from inflating all JPEGs
-      // to PNGs, we allow the user of the API to specify the type.
-      if (type === 'image/jpeg') {
-        texture.format = RGBFormat;
-      }
+      texture.userData.mimeType = type;
 
       return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);
     }

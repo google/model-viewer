@@ -15,7 +15,7 @@
  *
  */
 
-import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/texture-info';
+import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/texture-info.js';
 import {Image} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-2.0.js';
 
 import {Action, BestPracticesState, INITIAL_STATE, State} from '../../types.js';

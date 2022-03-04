@@ -16,7 +16,7 @@
 import {Event as ThreeEvent, EventDispatcher, WebGLRenderer} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader';
+import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';

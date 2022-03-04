@@ -15,7 +15,8 @@
  *
  */
 
-import {TextureInfo} from '../../../../model-viewer/lib/features/scene-graph/api.js';
+import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/api';
+
 import {MaterialPanel} from '../../components/materials_panel/materials_panel.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getTextureId} from '../../components/model_viewer_preview/reducer.js';
