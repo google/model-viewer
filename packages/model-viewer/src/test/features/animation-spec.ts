@@ -22,6 +22,7 @@ import {BasicSpecTemplate} from '../templates.js';
 const expect = chai.expect;
 const NON_ANIMATED_GLB_PATH = assetPath('models/Astronaut.glb');
 const ANIMATED_GLB_PATH = assetPath('models/RobotExpressive.glb');
+const ANIMATED_GLB_DUPLICATE_ANIMATION_NAMES_PATH = assetPath('models/DuplicateAnimationNames.glb');
 
 const animationIsPlaying = (element: any, animationName = null): boolean => {
   const {currentAnimationAction} = element[$scene];
@@ -36,6 +37,21 @@ const animationIsPlaying = (element: any, animationName = null): boolean => {
 
   return false;
 };
+
+const animationWithIndexIsPlaying = (element: any, animationIndex = 0): boolean => {
+  const {currentAnimationAction} = element[$scene];
+  const {_currentGLTF} = element[$scene];
+
+  if (currentAnimationAction != null && 
+      animationIndex >= 0 && animationIndex < _currentGLTF.animations.length && 
+      currentAnimationAction.getClip() == _currentGLTF.animations[animationIndex]) {
+    return element.paused === false &&
+      currentAnimationAction.enabled === true &&
+      !currentAnimationAction.paused;
+  }
+
+  return false;
+}
 
 suite('ModelViewerElementBase with AnimationMixin', () => {
   let nextId = 0;
@@ -181,6 +197,68 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         });
       });
 
+      suite('with an invalid animation-name', () => {
+        setup(async () => {
+          element.animationName = "invalid-animation-name";
+          await timePasses();
+        });
+
+        test('plays the first animation', () => {
+          expect(animationIsPlaying(element, element.availableAnimations[0]))
+              .to.be.true;
+        });
+      });
+
+      suite('with a specified index as animation-name', () => {
+        setup(async () => {
+          element.animationName = "1";
+          await timePasses();
+        });
+
+        test('plays the specified animation', () => {
+          expect(animationWithIndexIsPlaying(element, 1))
+              .to.be.true;
+        });
+      });
+
+      suite('with an invalid index as animation-name', () => {
+        setup(async () => {
+          element.animationName = "-1";
+          await timePasses();
+        });
+
+        test('plays the first animation', () => {
+          expect(animationWithIndexIsPlaying(element, 0))
+              .to.be.true;
+        });
+      });
+
+      suite('a model with duplicate animation names', () => {
+        setup(async () => {
+          element.src = ANIMATED_GLB_DUPLICATE_ANIMATION_NAMES_PATH;
+          await waitForEvent(element, 'load');
+          element.animationName = "1";
+          await timePasses();
+        });
+
+        test('plays the specified animation', () => {
+          expect(animationWithIndexIsPlaying(element, 1))
+              .to.be.true;
+        });
+
+        suite('when playing a duplicate animation by name', () => {
+          setup(async () => {
+            element.animationName = element.availableAnimations[1];
+            await timePasses();
+          });
+
+          test('fails to play the specified animation and plays the last animation with that name instead', () => {
+            expect(animationWithIndexIsPlaying(element, 3))
+                .to.be.true;
+          });
+        });
+      });
+
       suite('a model without animations', () => {
         setup(async () => {
           element.src = NON_ANIMATED_GLB_PATH;
@@ -198,6 +276,17 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         suite('with a specified animation-name', () => {
           setup(async () => {
             element.animationName = element.availableAnimations[1];
+            await timePasses();
+          });
+
+          test('does not play an animation', () => {
+            expect(animationIsPlaying(element)).to.be.false;
+          });
+        });
+
+        suite('with a specified animation by index', () => {
+          setup(async () => {
+            element.animationName = "1";
             await timePasses();
           });
 

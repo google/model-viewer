@@ -540,6 +540,14 @@ export class ModelScene extends Scene {
 
     if (name != null) {
       animationClip = this.animationsByName.get(name);
+      
+      if (animationClip == null) {
+        const parsedAnimationIndex = parseInt(name);
+
+        if (!isNaN(parsedAnimationIndex) && parsedAnimationIndex >= 0 && parsedAnimationIndex < animations.length) {
+          animationClip = animations[parsedAnimationIndex];
+        }
+      }
     }
 
     if (animationClip == null) {
