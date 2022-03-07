@@ -16,7 +16,7 @@
 import {Event as ThreeEvent, EventDispatcher, WebGLRenderer} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader';
+import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
@@ -89,6 +89,8 @@ const $GLTFInstance = Symbol('GLTFInstance');
 export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
                                              GLTFInstanceConstructor> extends
     EventDispatcher {
+  static withCredentials: boolean;
+
   static setDRACODecoderLocation(url: string) {
     dracoDecoderLocation = url;
     dracoLoader.setDecoderPath(url);
@@ -189,6 +191,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
   async preload(
       url: string, element: ModelViewerElementBase,
       progressCallback: ProgressCallback = () => {}) {
+    this[$loader].setWithCredentials(CachingGLTFLoader.withCredentials);
     this.dispatchEvent(
         {type: 'preload', element: element, src: url} as PreloadEvent);
     if (!cache.has(url)) {

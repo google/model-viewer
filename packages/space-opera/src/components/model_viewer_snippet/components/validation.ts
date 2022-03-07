@@ -20,7 +20,7 @@ import {customElement, html, internalProperty, LitElement, property, query} from
 import {validationStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
-import {getModel} from '../../model_viewer_preview/reducer.js';
+import {getModel, getModelViewer} from '../../model_viewer_preview/reducer.js';
 
 import {resolveExternalResource, validateGltf} from './validation_utils.js';
 
@@ -81,6 +81,9 @@ export class ValidationModal extends LitElement {
         <li>${this.report.info!.materialCount} materials</li>
         <li>${this.report.info!.totalVertexCount} vertices</li>
         <li>${this.report.info!.totalTriangleCount} triangles</li>
+        <li>${this.report.info!.width!.toPrecision(3)} m x-width</li>
+        <li>${this.report.info!.height!.toPrecision(3)} m y-height</li>
+        <li>${this.report.info!.length!.toPrecision(3)} m z-length</li>
       </ul>
     </li>
   </ul>
@@ -158,6 +161,14 @@ export class Validation extends ConnectedLitElement {
 
       await this.awaitLoad(gltfUrl);
       this.countJoints(originalGltf);
+
+      const dimensions = getModelViewer().getDimensions();
+      this.report.info = {
+        ...this.report?.info,
+        width: dimensions.x,
+        length: dimensions.z,
+        height: dimensions.y
+      };
     }
   }
 
@@ -194,7 +205,7 @@ export class Validation extends ConnectedLitElement {
         }
       }
     }
-    this.report.info = {...this.report?.info, totalJointCount: jointSet.size }
+    this.report.info = {...this.report?.info, totalJointCount: jointSet.size};
   }
 
   onOpen() {

@@ -16,7 +16,7 @@
 import '../types/webxr.js';
 
 import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
-import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight';
+import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {ControlsInterface} from '../features/controls.js';
 import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';

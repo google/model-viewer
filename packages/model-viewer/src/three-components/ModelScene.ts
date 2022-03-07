@@ -14,7 +14,7 @@
  */
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3, WebGLRenderer} from 'three';
-import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer';
+import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
@@ -88,7 +88,6 @@ export class ModelScene extends Scene {
   public idealAspect = 0;
   public framedFoVDeg = DEFAULT_FOV_DEG;
   public boundingRadius = 0;
-  public isUnlit = false;
 
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
@@ -241,7 +240,6 @@ export class ModelScene extends Scene {
 
     if (gltf != null) {
       this.modelContainer.add(gltf.scene);
-      this.isUnlit = gltf.scene.userData.isUnlit;
     }
 
     const {animations} = gltf!;
@@ -542,6 +540,14 @@ export class ModelScene extends Scene {
 
     if (name != null) {
       animationClip = this.animationsByName.get(name);
+      
+      if (animationClip == null) {
+        const parsedAnimationIndex = parseInt(name);
+
+        if (!isNaN(parsedAnimationIndex) && parsedAnimationIndex >= 0 && parsedAnimationIndex < animations.length) {
+          animationClip = animations[parsedAnimationIndex];
+        }
+      }
     }
 
     if (animationClip == null) {

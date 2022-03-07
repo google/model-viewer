@@ -164,12 +164,6 @@ export default class TextureUtils extends EventDispatcher {
     const cubeCamera = new CubeCamera(0.1, 100, cubeTarget);
     const generatedEnvironmentMap = cubeCamera.renderTarget.texture;
     generatedEnvironmentMap.name = name;
-    // These hacks are to work around the three.js PMREM not being applied to
-    // generated cube maps, and the coordinate flip not getting applied
-    // automatically.
-    generatedEnvironmentMap.isRenderTargetTexture = false;
-    generatedEnvironmentMap.images = [1, 1, 1, 1, 1, 1];
-    scene.scale.setComponent(0, -1);
 
     const outputEncoding = renderer.outputEncoding;
     const toneMapping = renderer.toneMapping;
@@ -178,7 +172,7 @@ export default class TextureUtils extends EventDispatcher {
 
     cubeCamera.update(renderer, scene);
 
-    await this.blurCubemap(cubeTarget, GENERATED_SIGMA);
+    this.blurCubemap(cubeTarget, GENERATED_SIGMA);
 
     renderer.toneMapping = toneMapping;
     renderer.outputEncoding = outputEncoding;
@@ -210,7 +204,7 @@ export default class TextureUtils extends EventDispatcher {
     return this.generatedEnvironmentMapAlt;
   }
 
-  private async blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
+  private blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
     if (this.blurMaterial == null) {
       this.blurMaterial = this.getBlurShader(MAX_SAMPLES);
       const box = new BoxBufferGeometry();
@@ -229,7 +223,7 @@ export default class TextureUtils extends EventDispatcher {
     /** tempTarget.dispose(); */
   }
 
-  private async halfblur(
+  private halfblur(
       targetIn: WebGLCubeRenderTarget, targetOut: WebGLCubeRenderTarget,
       sigmaRadians: number, direction: 'latitudinal'|'longitudinal') {
     // Number of standard deviations at which to cut off the discrete

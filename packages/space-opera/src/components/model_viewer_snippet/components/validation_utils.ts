@@ -32,6 +32,9 @@ export type Report = {
     totalVertexCount?: number;
     totalTriangleCount?: number;
     totalJointCount?: number;
+    width?: number;
+    length?: number;
+    height?: number;
   };
   validatorVersion?: string;
   issues?: {

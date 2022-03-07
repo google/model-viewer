@@ -67,6 +67,18 @@
           "default": "auto",
           "options": "auto, interaction, manual"
         }
+      },
+      {
+        "name": "with-credentials",
+        "htmlName": "withCredentials",
+        "description": "This attribute makes the browser include credentials (cookies, authorization headers or TLS client certificates) in the request to fetch the 3D model. It's useful if the 3D model file is stored on another server that require authentication. By default the file will be fetch without credentials. Note that this has no effect if you are loading files locally or from the same domain.",
+        "links": [
+          "<a href=\"https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials\">MDN documentation</a>"
+        ],
+        "default": {
+          "default": "false",
+          "options": "true, false"
+        }
       }
     ],
     "CSS": [
