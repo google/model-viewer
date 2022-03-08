@@ -193,21 +193,8 @@ suite('scene-graph/model/mesh-primitives', () => {
       expect(material).to.be.null;
     });
 
-    test('Switching to current variant', async () => {
-      const primitives = findPrimitivesWithVariant(model, 'Normal')!;
-      const materials = new Array<MeshStandardMaterial>();
-      for (const primitive of primitives) {
-        materials.push(
-            await primitive.enableVariant('Inverse') as
-                MeshStandardMaterial);
-      }
-      expect(materials).to.not.be.empty;
-      expect(materials.find((material: MeshStandardMaterial) => {
-        return material.name === 'STEEL BLACK';
-      })).to.not.be.ok;
-    });
-
     test('Switching to variant and then switch back', async () => {
+      const MATERIAL_NAME = 'STEEL BLACK';
       const primitives = findPrimitivesWithVariant(model, 'Normal')!;
       let materials = new Array<MeshStandardMaterial>();
       for (const primitive of primitives) {
@@ -215,9 +202,11 @@ suite('scene-graph/model/mesh-primitives', () => {
             await primitive.enableVariant('Inverse') as
                 MeshStandardMaterial);
       }
+
+      expect(materials).to.not.be.empty;
       expect(materials.find((material: MeshStandardMaterial) => {
-        return material.name === 'STEEL BLACK';
-      })).to.not.be.ok;
+        return material.name === MATERIAL_NAME;
+      })).to.be.undefined;
 
       materials = new Array<MeshStandardMaterial>();
       for (const primitive of primitives) {
@@ -225,8 +214,9 @@ suite('scene-graph/model/mesh-primitives', () => {
             await primitive.enableVariant('Normal') as
                 MeshStandardMaterial);
       }
+
       expect(materials.find((material: MeshStandardMaterial) => {
-        return material.name === 'STEEL BLACK';
+        return material.name === MATERIAL_NAME;
       })).to.be.ok;
     });
 
