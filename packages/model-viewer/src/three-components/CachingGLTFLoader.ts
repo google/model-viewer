@@ -212,8 +212,10 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
                                     .then((preparedGLTF) => {
                                       progressCallback(0.9);
                                       return new GLTFInstance(preparedGLTF);
-                                    });
-
+                                    }).catch((reason => {
+                                      console.error(reason);
+                                      return new GLTFInstance();
+                                    }));
       cache.set(url, gltfInstanceLoads);
     }
 

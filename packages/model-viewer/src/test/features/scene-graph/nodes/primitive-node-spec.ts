@@ -30,6 +30,7 @@ const BRAIN_STEM_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb');
 const CUBES_GLTF_PATH = assetPath('models/cubes.gltf');
 const CUBE_GLTF_PATH = assetPath('models/cube.gltf');
+const MESH_PRIMITIVES_GLB_PATH = assetPath('models/MeshPrimitivesVariants.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
     assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
 
@@ -163,6 +164,69 @@ suite('scene-graph/model/mesh-primitives', () => {
       const initialMaterial = await primitive.enableVariant('Purple Yellow');
       // Switches to variant.
       const variantMaterial = await primitive.enableVariant('Yellow Red');
+      expect(initialMaterial).to.not.equal(variantMaterial)
+      // Switches to initial material.
+      const resetMaterial = await primitive.enableVariant(null);
+      expect(resetMaterial).to.equal(initialMaterial);
+    });
+  });
+
+  suite('Mesh with multiple primitives each with variants', () => {
+    let model: Model;
+    setup(async () => {
+      const threeGLTF = await loadThreeGLTF(MESH_PRIMITIVES_GLB_PATH);
+      model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+    });
+
+    test('Primitive count matches glTF file', async () => {
+      expect(model![$primitivesList].length).to.equal(3) ;
+    });
+
+    test('Primitives should have expected variant names', async () => {
+      expect(findPrimitivesWithVariant(model, 'Normal')).to.not.be.null;
+      expect(findPrimitivesWithVariant(model, 'Inverse')).to.not.be.null;
+    });
+
+    test('Switching to incorrect variant name', async () => {
+      const primitive = findPrimitivesWithVariant(model, 'Normal')![0];
+      const material = await primitive.enableVariant('Does not exist');
+      expect(material).to.be.null;
+    });
+
+    test('Switching to variant and then switch back', async () => {
+      const MATERIAL_NAME = 'STEEL BLACK';
+      const primitives = findPrimitivesWithVariant(model, 'Normal')!;
+      let materials = new Array<MeshStandardMaterial>();
+      for (const primitive of primitives) {
+        materials.push(
+            await primitive.enableVariant('Inverse') as
+                MeshStandardMaterial);
+      }
+
+      expect(materials).to.not.be.empty;
+      expect(materials.find((material: MeshStandardMaterial) => {
+        return material.name === MATERIAL_NAME;
+      })).to.be.undefined;
+
+      materials = new Array<MeshStandardMaterial>();
+      for (const primitive of primitives) {
+        materials.push(
+            await primitive.enableVariant('Normal') as
+                MeshStandardMaterial);
+      }
+
+      expect(materials.find((material: MeshStandardMaterial) => {
+        return material.name === MATERIAL_NAME;
+      })).to.be.ok;
+    });
+
+    test('Primitive switches to initial material', async () => {
+      const primitive = findPrimitivesWithVariant(model, 'Normal')![0];
+
+      // Gets current material.
+      const initialMaterial = await primitive.enableVariant('Normal');
+      // Switches to variant.
+      const variantMaterial = await primitive.enableVariant('Inverse');
       expect(initialMaterial).to.not.equal(variantMaterial)
       // Switches to initial material.
       const resetMaterial = await primitive.enableVariant(null);

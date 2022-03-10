@@ -25,8 +25,9 @@
  * https://github.com/takahirox/three-gltf-extensions/tree/main/loaders/KHR_materials_variants
  */
 
-import {Material as ThreeMaterial} from 'three';
+import {Material as ThreeMaterial, Mesh} from 'three';
 import {GLTF, GLTFLoaderPlugin, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTFReference} from "three/examples/jsm/loaders/GLTFLoader";
 
 
 export interface UserDataVariantMapping {
@@ -72,8 +73,7 @@ const ensureUniqueNames = (variantNames: string[]) => {
  * @param variantNames {Array<string>} Required to be unique names
  * @return {Map}
  */
-const mappingsArrayToTable = (extensionDef:
-                                  any): Map<number, UserDataVariantMapping> => {
+const mappingsArrayToTable = (extensionDef: any): Map<number, UserDataVariantMapping> => {
   const table = new Map<number, UserDataVariantMapping>();
   for (const mapping of extensionDef.mappings) {
     for (const variant of mapping.variants) {
@@ -114,38 +114,28 @@ export default class GLTFMaterialsVariantsExtension implements
     for (const scene of gltf.scenes) {
       // Save the variants data under associated mesh.userData
       scene.traverse(object => {
-        // The following code can be simplified if parser.associations directly
-        // supports meshes.
-        const association = parser.associations.get(object);
+        const mesh = object as Mesh;
 
-        if (association == null || association.meshes == null) {
+        if (!mesh.isMesh) {
           return;
         }
 
-        const meshIndex = association.meshes;
+        const association = parser.associations.get(mesh) as GLTFReference & {primitives: number};
 
-        // Two limitations:
-        // 1. The nodeDef shouldn't have any objects (camera, light, or
-        // nodeDef.extensions object)
-        //    other than nodeDef.mesh
-        // 2. Other plugins shouldn't change any scene graph hierarchy
-        // The following code can cause error if hitting the either or both
-        // limitations If parser.associations will directly supports meshes
-        // these limitations can be removed
-
-        const meshDef = json.meshes[meshIndex];
-        const primitivesDef = meshDef.primitives;
-        const meshes = 'isMesh' in object ? [object] : object.children;
-
-        for (let i = 0; i < primitivesDef.length; i++) {
-          const primitiveDef = primitivesDef[i];
-          const extensionsDef = primitiveDef.extensions;
-          if (!extensionsDef || !extensionsDef[this.name]) {
-            continue;
-          }
-          meshes[i].userData.variantMaterials =
-              mappingsArrayToTable(extensionsDef[this.name]);
+        if (association == null || association.meshes == null || association.primitives == null) {
+          return;
         }
+
+        const meshDef = json.meshes[association.meshes];
+        const primitivesDef = meshDef.primitives;
+        const primitiveDef = primitivesDef[association.primitives];
+        const extensionsDef = primitiveDef.extensions;
+
+        if (!extensionsDef || !extensionsDef[this.name]) {
+          return;
+        }
+
+        mesh.userData.variantMaterials = mappingsArrayToTable(extensionsDef[this.name]);
       });
     }
 
