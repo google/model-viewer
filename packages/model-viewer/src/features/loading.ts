@@ -15,12 +15,10 @@
 
 import {property} from 'lit-element';
 
-import ModelViewerElementBase, {$announceModelVisibility, $ariaLabel, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
-
-import {LoadingStatusAnnouncer} from './loading/status-announcer.js';
 
 export type RevealAttributeValue = 'auto'|'interaction'|'manual';
 export type LoadingAttributeValue = 'auto'|'lazy'|'eager';
@@ -55,8 +53,6 @@ const PosterDismissalSource: {[index: string]: DismissalSource} = {
   INTERACTION: 'interaction'
 };
 
-const loadingStatusAnnouncer = new LoadingStatusAnnouncer();
-
 export const $defaultProgressBarElement = Symbol('defaultProgressBarElement');
 export const $defaultProgressMaskElement = Symbol('defaultProgressMaskElement');
 
@@ -69,7 +65,7 @@ const $modelIsRevealed = Symbol('modelIsRevealed');
 const $updateProgressBar = Symbol('updateProgressBar');
 const $lastReportedProgress = Symbol('lastReportedProgress');
 const $transitioned = Symbol('transitioned');
-const $onTransitionEnd = Symbol('onTransitionEnd')
+const $onTransitionEnd = Symbol('onTransitionEnd');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
@@ -367,8 +363,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$posterContainerElement].addEventListener(
           'keydown', this[$onKeydown]);
       this[$progressTracker].addEventListener('progress', this[$onProgress]);
-
-      loadingStatusAnnouncer.registerInstance(this);
     }
 
     disconnectedCallback() {
@@ -379,8 +373,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$posterContainerElement].removeEventListener(
           'keydown', this[$onKeydown]);
       this[$progressTracker].removeEventListener('progress', this[$onProgress]);
-
-      loadingStatusAnnouncer.unregisterInstance(this)
     }
 
     async updated(changedProperties: Map<string, any>) {
@@ -393,8 +385,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('alt')) {
         this[$defaultPosterElement].setAttribute(
-            'aria-label',
-            `${this[$ariaLabel]}. ${this[$ariaLabelCallToAction]}`);
+            'aria-label', this[$altDefaulted]);
       }
 
       if (changedProperties.has('reveal') || changedProperties.has('loading')) {
@@ -419,7 +410,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onClick] = () => {
-      if (this.reveal === RevealStrategy.MANUAL || this.reveal === RevealStrategy.AUTO) {
+      if (this.reveal === RevealStrategy.MANUAL ||
+          this.reveal === RevealStrategy.AUTO) {
         return;
       }
       this.dismissPoster();
@@ -535,6 +527,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         // Don't show the poster when switching models.
         this.showPoster();
       }
+      this[$updateStatus]('Loading');
       await super[$updateSource]();
     }
   }

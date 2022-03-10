@@ -36,16 +36,23 @@ export const blobCanvas = document.createElement('canvas');
 
 const $fallbackResizeHandler = Symbol('fallbackResizeHandler');
 const $defaultAriaLabel = Symbol('defaultAriaLabel');
+
 const $resizeObserver = Symbol('resizeObserver');
 const $clearModelTimeout = Symbol('clearModelTimeout');
 const $onContextLost = Symbol('onContextLost');
 const $loaded = Symbol('loaded');
+const $status = Symbol('status');
+const $onFocus = Symbol('onFocus');
+const $onBlur = Symbol('onBlur');
 
 export const $updateSize = Symbol('updateSize');
 export const $intersectionObserver = Symbol('intersectionObserver');
 export const $isElementInViewport = Symbol('isElementInViewport');
 export const $announceModelVisibility = Symbol('announceModelVisibility');
 export const $ariaLabel = Symbol('ariaLabel');
+export const $altDefaulted = Symbol('altDefaulted');
+export const $statusElement = Symbol('statusElement');
+export const $updateStatus = Symbol('updateStatus');
 export const $loadedTime = Symbol('loadedTime');
 export const $updateSource = Symbol('updateSource');
 export const $markLoaded = Symbol('markLoaded');
@@ -159,7 +166,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   @property({type: String}) src: string|null = null;
 
-  @property({type: Boolean, attribute: 'with-credentials'}) withCredentials: boolean = false;
+  @property({type: Boolean, attribute: 'with-credentials'})
+  withCredentials: boolean = false;
 
   protected[$isElementInViewport] = false;
   protected[$loaded] = false;
@@ -168,6 +176,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
   protected[$container]: HTMLDivElement;
   protected[$userInputElement]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
+  protected[$statusElement]: HTMLSpanElement;
+  protected[$status]: string;
   protected[$defaultAriaLabel]: string;
   protected[$clearModelTimeout]: number|null = null;
 
@@ -219,6 +229,8 @@ export default class ModelViewerElementBase extends UpdatingElement {
     this[$userInputElement] =
         shadowRoot.querySelector('.userInput') as HTMLDivElement;
     this[$canvas] = shadowRoot.querySelector('canvas') as HTMLCanvasElement;
+    this[$statusElement] =
+        shadowRoot.querySelector('#status') as HTMLSpanElement;
     this[$defaultAriaLabel] =
         this[$userInputElement].getAttribute('aria-label')!;
 
@@ -317,6 +329,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
       this[$intersectionObserver]!.observe(this);
     }
 
+    this.addEventListener('focus', this[$onFocus]);
+    this.addEventListener('blur', this[$onBlur]);
+
     const renderer = this[$renderer];
     renderer.addEventListener(
         'contextlost', this[$onContextLost] as (event: ThreeEvent) => void);
@@ -343,6 +358,9 @@ export default class ModelViewerElementBase extends UpdatingElement {
     if (HAS_INTERSECTION_OBSERVER) {
       this[$intersectionObserver]!.unobserve(this);
     }
+
+    this.removeEventListener('focus', this[$onFocus]);
+    this.removeEventListener('blur', this[$onBlur]);
 
     const renderer = this[$renderer];
     renderer.removeEventListener(
@@ -375,8 +393,7 @@ export default class ModelViewerElementBase extends UpdatingElement {
     }
 
     if (changedProperties.has('alt')) {
-      const ariaLabel = this.alt == null ? this[$defaultAriaLabel] : this.alt;
-      this[$userInputElement].setAttribute('aria-label', ariaLabel);
+      this[$userInputElement].setAttribute('aria-label', this[$ariaLabel]);
     }
 
     if (changedProperties.has('withCredentials')) {
@@ -464,6 +481,10 @@ export default class ModelViewerElementBase extends UpdatingElement {
   }
 
   get[$ariaLabel]() {
+    return this[$altDefaulted];
+  }
+
+  get[$altDefaulted]() {
     return (this.alt == null || this.alt === 'null') ? this[$defaultAriaLabel] :
                                                        this.alt;
   }
@@ -521,6 +542,24 @@ export default class ModelViewerElementBase extends UpdatingElement {
 
   [$onModelLoad]() {
   }
+
+  [$updateStatus](status: string) {
+    this[$status] = status;
+    const rootNode = this.getRootNode() as Document | ShadowRoot | null;
+    // Only change the aria-label if <model-viewer> is currently focused:
+    if (rootNode != null && rootNode.activeElement === this &&
+        this[$statusElement].textContent != status) {
+      this[$statusElement].textContent = status;
+    }
+  }
+
+  [$onFocus] = () => {
+    this[$statusElement].textContent = this[$status];
+  };
+
+  [$onBlur] = () => {
+    this[$statusElement].textContent = '';
+  };
 
   [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
