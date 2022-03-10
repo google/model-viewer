@@ -71,6 +71,8 @@ canvas.show {
  * @see https://github.com/h5bp/html5-boilerplate/blob/ceb4620c78fc82e13534fc44202a3f168754873f/dist/css/main.css#L122-L133 */
 .screen-reader-only {
   border: 0;
+  left: 0;
+  top: 0;
   clip: rect(0, 0, 0, 0);
   height: 1px;
   margin: -1px;
@@ -79,6 +81,7 @@ canvas.show {
   position: absolute;
   white-space: nowrap;
   width: 1px;
+  pointer-events: none;
 }
 
 .slot {
@@ -288,20 +291,20 @@ canvas.show {
 </style>
 <div class="container">
   <div class="userInput" tabindex="0" role="img"
-      aria-label="A depiction of a 3D model"
-      aria-live="polite">
+      aria-label="3D model">
       <div class="slot canvas">
         <slot name="canvas">
           <canvas></canvas>
         </slot>
       </div>
+      
   </div>
 
   <!-- NOTE(cdata): We need to wrap slots because browsers without ShadowDOM
         will have their <slot> elements removed by ShadyCSS -->
   <div class="slot poster">
     <slot name="poster">
-      <button type="button" id="default-poster" aria-hidden="true" aria-label="Activate to view in 3D!"></button>
+      <button type="button" id="default-poster" aria-hidden="true" aria-label="Loading 3D model"></button>
     </slot>
   </div>
 
@@ -309,7 +312,7 @@ canvas.show {
     <slot name="ar-button">
       <a id="default-ar-button" part="default-ar-button" class="fab"
           tabindex="2"
-          aria-label="View this 3D model up close">
+          aria-label="View in your space">
         ${ARGlyph}
       </a>
     </slot>
@@ -346,6 +349,9 @@ canvas.show {
       </slot>
     </div>
   </div>
+</div>
+<div class="screen-reader-only" role="region" aria-label="Live announcements">
+  <span id="status" role="status"></span>
 </div>`;
 
 export const makeTemplate = (shadowRoot: ShadowRoot) => {

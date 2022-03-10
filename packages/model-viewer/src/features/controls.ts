@@ -17,7 +17,7 @@ import {property} from 'lit-element';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $container, $hasTransitioned, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $container, $hasTransitioned, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
@@ -63,8 +63,7 @@ const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 
 export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
-export const INTERACTION_PROMPT =
-    'Use mouse, touch or arrow keys to control the camera!';
+export const INTERACTION_PROMPT = '. Use mouse, touch or arrow keys to move.';
 
 export interface CameraChangeDetails {
   source: ChangeSource;
@@ -470,6 +469,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           controls.disableInteraction();
           this[$deferInteractionPrompt]();
         }
+        this[$userInputElement].setAttribute('aria-label', this[$ariaLabel]);
       }
 
       if (changedProperties.has('disableZoom')) {
@@ -615,9 +615,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         if (this.loaded &&
             now > thresholdTime + this.interactionPromptThreshold) {
-          this[$userInputElement].setAttribute(
-              'aria-label', INTERACTION_PROMPT);
-
           this[$waitingToPromptUser] = false;
           this[$promptElementVisibleTime] = now;
 
@@ -673,39 +670,25 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$updateAria]() {
-      // NOTE(cdata): It is possible that we might want to record the
-      // last spherical when the label actually changed. Right now, the
-      // side-effect the current implementation is that we will only
-      // announce the first view change that occurs after the element
-      // becomes focused.
-      const {theta: lastTheta, phi: lastPhi} = this[$lastSpherical];
       const {theta, phi} =
           this[$controls]!.getCameraSpherical(this[$lastSpherical]);
 
-      const rootNode = this.getRootNode() as Document | ShadowRoot | null;
+      const azimuthalQuadrant =
+          (4 + Math.floor(((theta % TAU) + QUARTER_PI) / HALF_PI)) % 4;
 
-      // Only change the aria-label if <model-viewer> is currently focused:
-      if (rootNode != null && rootNode.activeElement === this) {
-        const lastAzimuthalQuadrant =
-            (4 + Math.floor(((lastTheta % TAU) + QUARTER_PI) / HALF_PI)) % 4;
-        const azimuthalQuadrant =
-            (4 + Math.floor(((theta % TAU) + QUARTER_PI) / HALF_PI)) % 4;
+      const polarTrient = Math.floor(phi / THIRD_PI);
 
-        const lastPolarTrient = Math.floor(lastPhi / THIRD_PI);
-        const polarTrient = Math.floor(phi / THIRD_PI);
+      const azimuthalQuadrantLabel =
+          AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
+      const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
 
-        if (azimuthalQuadrant !== lastAzimuthalQuadrant ||
-            polarTrient !== lastPolarTrient) {
-          const azimuthalQuadrantLabel =
-              AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
-          const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
+      this[$updateStatus](
+          `View from stage ${polarTrientLabel}${azimuthalQuadrantLabel}`);
+    }
 
-          const ariaLabel =
-              `View from stage ${polarTrientLabel}${azimuthalQuadrantLabel}`;
-
-          this[$userInputElement].setAttribute('aria-label', ariaLabel);
-        }
-      }
+    get[$ariaLabel]() {
+      return super[$ariaLabel] +
+          (this.cameraControls ? INTERACTION_PROMPT : '');
     }
 
     async[$onResize](event: any) {
@@ -746,23 +729,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$onFocus] = () => {
-      const input = this[$userInputElement];
-
       if (!isFinite(this[$focusedTime])) {
         this[$focusedTime] = performance.now();
       }
 
-      // NOTE(cdata): On every re-focus, we switch the aria-label back to
-      // the original, non-prompt label if appropriate. If the user has
+      // NOTE(cdata): On every re-focus, if the user has
       // already interacted, they no longer need to hear the prompt.
       // Otherwise, they will hear it again after the idle prompt threshold
       // has been crossed.
-      const ariaLabel = this[$ariaLabel];
-
-      if (input.getAttribute('aria-label') !== ariaLabel) {
-        input.setAttribute('aria-label', ariaLabel);
-      }
-
       if (this.interactionPrompt === InteractionPromptStrategy.WHEN_FOCUSED &&
           !this[$userHasInteracted]) {
         this[$waitingToPromptUser] = true;
