@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {LinearEncoding, MeshStandardMaterial, sRGBEncoding, Texture as ThreeTexture, TextureEncoding} from 'three';
+import {LinearEncoding, MeshStandardMaterial, sRGBEncoding, Texture as ThreeTexture, TextureEncoding, Vector2} from 'three';
 
 import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -21,9 +21,8 @@ import {TextureInfo as TextureInfoInterface} from './api.js';
 import {$threeTexture} from './image.js';
 import {Texture} from './texture.js';
 
-
-
 const $texture = Symbol('texture');
+const $transform = Symbol('transform');
 export const $materials = Symbol('materials');
 export const $usage = Symbol('usage');
 
@@ -36,11 +35,22 @@ export enum TextureUsage {
   Emissive,
 }
 
+interface TextureTransform {
+  rotation: number;
+  scale: Vector2;
+  offset: Vector2;
+}
+
 /**
  * TextureInfo facade implementation for Three.js materials
  */
 export class TextureInfo implements TextureInfoInterface {
   private[$texture]: Texture|null = null;
+  private[$transform]: TextureTransform = {
+    rotation: 0,
+    scale: new Vector2(1, 1),
+    offset: new Vector2(0, 0)
+  };
 
   // Holds a reference to the Three data that backs the material object.
   [$materials]: Set<MeshStandardMaterial>|null;
@@ -55,7 +65,7 @@ export class TextureInfo implements TextureInfoInterface {
       threeTexture: ThreeTexture|null, material: Set<MeshStandardMaterial>,
       gltf: GLTF, gltfTextureInfo: GLTFTextureInfo|null) {
     // Creates image, sampler, and texture if valid texture info is provided.
-    if (gltfTextureInfo) {
+    if (gltfTextureInfo && threeTexture) {
       const gltfTexture =
           gltf.textures ? gltf.textures[gltfTextureInfo.index] : null;
       const sampler = gltfTexture ?
@@ -64,6 +74,10 @@ export class TextureInfo implements TextureInfoInterface {
       const image = gltfTexture ?
           (gltf.images ? gltf.images[gltfTexture.source!] : null) :
           null;
+
+      this[$transform].rotation = threeTexture.rotation;
+      this[$transform].scale.copy(threeTexture.repeat);
+      this[$transform].offset.copy(threeTexture.offset);
 
       this[$texture] =
           new Texture(onUpdate, threeTexture, gltfTexture, sampler, image);
@@ -115,6 +129,9 @@ export class TextureInfo implements TextureInfoInterface {
     if (threeTexture) {
       // Updates the encoding for the texture, affects all references.
       threeTexture.encoding = encoding;
+      threeTexture.rotation = this[$transform].rotation;
+      threeTexture.repeat = this[$transform].scale;
+      threeTexture.offset = this[$transform].offset;
     }
     this.onUpdate();
   }
