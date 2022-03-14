@@ -76,7 +76,11 @@ export const reduceVertices = <T>(
 
             for (i = 0, l = vertices.length; i < l; i++) {
               vertex.copy(vertices[i]);
-              vertex.applyMatrix4(object.matrixWorld);
+              if (object.isSkinnedMesh) {
+                object.boneTransform(i, vertex);
+              } else {
+                vertex.applyMatrix4(object.matrixWorld);
+              }
               value = func(value, vertex);
             }
 
@@ -89,7 +93,11 @@ export const reduceVertices = <T>(
               for (i = 0, l = position.count; i < l; i++) {
                 vertex.fromBufferAttribute(position, i);
                 vertex.multiplyScalar(scale);
-                vertex.applyMatrix4(object.matrixWorld);
+                if (object.isSkinnedMesh) {
+                  object.boneTransform(i, vertex);
+                } else {
+                  vertex.applyMatrix4(object.matrixWorld);
+                }
 
                 value = func(value, vertex);
               }
