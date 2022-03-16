@@ -243,6 +243,8 @@ export declare interface ControlsInterface {
   touchAction: TouchAction;
   bounds: Bounds;
   interpolationDecay: number;
+  disableZoom: boolean;
+  enablePan: boolean;
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
@@ -342,6 +344,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Boolean, attribute: 'disable-zoom'})
     disableZoom: boolean = false;
 
+    @property({type: Boolean, attribute: 'enable-pan'})
+    enablePan: boolean = false;
+
     @property({type: Number, attribute: 'interpolation-decay'})
     interpolationDecay: number = DECAY_MILLISECONDS;
 
@@ -360,7 +365,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$waitingToPromptUser] = false;
 
     protected[$controls] = new SmoothControls(
-        this[$scene].camera as PerspectiveCamera, this[$userInputElement]);
+        this[$scene].camera as PerspectiveCamera, this[$userInputElement],
+        this[$scene]);
 
     protected[$lastSpherical] = new Spherical();
     protected[$jumpCamera] = false;
@@ -474,6 +480,13 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('disableZoom')) {
         controls.disableZoom = this.disableZoom;
+      }
+
+      if (changedProperties.has('enablePan')) {
+        controls.enablePan = this.enablePan;
+        this.oncontextmenu = this.enablePan ? function() {
+          return false;
+        } : null;
       }
 
       if (changedProperties.has('bounds')) {

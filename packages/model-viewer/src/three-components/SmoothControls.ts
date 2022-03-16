@@ -12,13 +12,15 @@
  * limitations under the License.
  */
 
-import {Euler, Event as ThreeEvent, EventDispatcher, PerspectiveCamera, Spherical} from 'three';
+import {Euler, Event as ThreeEvent, EventDispatcher, Matrix3, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {TouchAction} from '../features/controls.js';
 import {clamp} from '../utilities.js';
 
 import {Damper, SETTLING_TIME} from './Damper.js';
+import {ModelScene} from './ModelScene.js';
 
+const PAN_SENSITIVITY = 0.75;
 
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = null|((event: TouchEvent) => void);
@@ -127,6 +129,11 @@ export class SmoothControls extends EventDispatcher {
   private isUserChange = false;
   private isUserPointing = false;
 
+  // Pan state
+  public enablePan = true;
+  private panProjection = new Matrix3();
+  private panMetersPerPixel = 0;
+
   // Internal orbital position state
   private spherical = new Spherical();
   private goalSpherical = new Spherical();
@@ -147,7 +154,8 @@ export class SmoothControls extends EventDispatcher {
   private touchDecided = false;
 
   constructor(
-      readonly camera: PerspectiveCamera, readonly element: HTMLElement) {
+      readonly camera: PerspectiveCamera, readonly element: HTMLElement,
+      readonly scene: ModelScene) {
     super();
 
     this._options = Object.assign({}, DEFAULT_OPTIONS);
@@ -516,7 +524,11 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onMouseMove = (event: MouseEvent) => {
-    this.handleSinglePointerMove(event);
+    if (this.panMetersPerPixel > 0) {
+      this.movePan(event.clientX, event.clientY);
+    } else {
+      this.handleSinglePointerMove(event);
+    }
 
     if (event.cancelable) {
       event.preventDefault();
@@ -536,18 +548,29 @@ export class SmoothControls extends EventDispatcher {
   private touchModeZoom: TouchMode = (event) => {
     const {targetTouches} = event;
     if (this.lastTouches.length > 1 && targetTouches.length > 1) {
-      const lastTouchDistance =
-          this.twoTouchDistance(this.lastTouches[0], this.lastTouches[1]);
-      const touchDistance =
-          this.twoTouchDistance(targetTouches[0], targetTouches[1]);
-      const deltaZoom =
-          ZOOM_SENSITIVITY * (lastTouchDistance - touchDistance) / 10.0;
+      if (!this._disableZoom) {
+        const lastTouchDistance =
+            this.twoTouchDistance(this.lastTouches[0], this.lastTouches[1]);
+        const touchDistance =
+            this.twoTouchDistance(targetTouches[0], targetTouches[1]);
+        const deltaZoom =
+            ZOOM_SENSITIVITY * (lastTouchDistance - touchDistance) / 10.0;
 
-      this.userAdjustOrbit(0, 0, deltaZoom);
+        this.userAdjustOrbit(0, 0, deltaZoom);
+      }
+
+      if (this.enablePan && this.panMetersPerPixel > 0) {
+        const thisX =
+            0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
+        const thisY =
+            0.5 * (targetTouches[0].clientY + targetTouches[1].clientY);
+        this.movePan(thisX, thisY);
+      }
 
       this.lastTouches = targetTouches;
     }
   };
+
   private touchModeRotate: TouchMode = (event) => {
     const {targetTouches} = event;
     const {touchAction} = this._options;
@@ -586,6 +609,40 @@ export class SmoothControls extends EventDispatcher {
     this.userAdjustOrbit(deltaTheta, deltaPhi, 0);
   }
 
+  private initializePan() {
+    const {theta, phi, radius} = this.spherical;
+    const psi = theta - this.scene.yaw;
+    this.panMetersPerPixel = (PAN_SENSITIVITY * radius) /
+        this.element.getBoundingClientRect().height;
+    this.panProjection.set(
+        -Math.cos(psi),
+        -Math.cos(phi) * Math.sin(psi),
+        0,
+        0,
+        Math.sin(phi),
+        0,
+        Math.sin(psi),
+        -Math.cos(phi) * Math.cos(psi),
+        0);
+  }
+
+  private movePan(thisX: number, thisY: number) {
+    const {scene} = this;
+    const dxy = new Vector3(
+        thisX - this.lastPointerPosition.clientX,
+        thisY - this.lastPointerPosition.clientY,
+        0);
+    dxy.multiplyScalar(this.panMetersPerPixel);
+
+    this.lastPointerPosition.clientX = thisX;
+    this.lastPointerPosition.clientY = thisY;
+
+    const target = scene.getTarget();
+    target.add(dxy.applyMatrix3(this.panProjection));
+    scene.boundingBox.clampPoint(target, target);
+    scene.setTarget(target.x, target.y, target.z);
+  }
+
   private onPointerDown(fn: () => void) {
     if (!this.canInteract) {
       return;
@@ -600,6 +657,11 @@ export class SmoothControls extends EventDispatcher {
     this.onPointerDown(() => {
       self.addEventListener('mousemove', this.onMouseMove);
       self.addEventListener('mouseup', this.onMouseUp, {once: true});
+      if (this.enablePan &&
+          (event.button === 2 || event.ctrlKey || event.metaKey ||
+           event.shiftKey)) {
+        this.initializePan();
+      }
       this.handleSinglePointerDown(event);
     });
   };
@@ -628,11 +690,13 @@ export class SmoothControls extends EventDispatcher {
         this.handleSinglePointerDown(targetTouches[0]);
         break;
       case 2:
-        this.touchMode = this._disableZoom ||
-                (this.touchDecided && this.touchMode === null) ?
+        this.touchMode = (this.touchDecided && this.touchMode === null) ?
             null :
             this.touchModeZoom;
         this.touchDecided = true;
+        if (this.enablePan) {
+          this.initializePan();
+        }
         break;
     }
 
@@ -647,6 +711,7 @@ export class SmoothControls extends EventDispatcher {
 
   private onPointerUp() {
     this.element.style.cursor = 'grab';
+    this.panMetersPerPixel = 0;
 
     if (this.isUserPointing) {
       this.dispatchEvent(
