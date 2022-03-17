@@ -157,6 +157,13 @@ export const resolveDpr: () => number = (() => {
   // If true, implies that the user is conscious of the viewport scaling
   // relative to the device screen size.
   const HAS_META_VIEWPORT_TAG = (() => {
+    // Search result pages sometimes do not include a meta viewport tag even
+    // though they are certainly modern and work properly with devicePixelRatio.
+    if (document.documentElement.getAttribute('itemtype')
+            ?.includes('schema.org/SearchResultsPage')) {
+      return true;
+    }
+
     const metas = document.head != null ?
         Array.from(document.head.querySelectorAll('meta')) :
         [];
