@@ -33,6 +33,7 @@ const CUBE_GLTF_PATH = assetPath('models/cube.gltf');
 const MESH_PRIMITIVES_GLB_PATH = assetPath('models/MeshPrimitivesVariants.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
     assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
+const VASE_NO_MATERIALS_GLB_PATH = assetPath('models/VaseNoMaterials.glb');
 
 const findPrimitivesWithVariant = (model: Model, variantName: string) => {
   const result = new Array<any>();
@@ -66,6 +67,29 @@ suite('scene-graph/model/mesh-primitives', () => {
       expect(model.materials.length).to.equal(1);
       expect(model[$primitivesList][0][$initialMaterialIdx]).to.equal(0);
       expect(model.materials[0].name).to.equal('Default');
+    });
+  });
+
+  suite('Primitive with no material', () => {
+    let element: ModelViewerElement;
+    setup(async () => {
+      element = new ModelViewerElement();
+      element.src = VASE_NO_MATERIALS_GLB_PATH;
+      document.body.insertBefore(element, document.body.firstChild);
+      await waitForEvent(element, 'load');
+    });
+
+    teardown(() => {
+      document.body.removeChild(element);
+    });
+
+    test('has a no material', async () => {
+      const model = element.model!;
+
+      expect(model[$primitivesList].length).to.equal(1);
+      expect(model.materials.length).to.equal(0);
+      expect(model[$primitivesList][0][$initialMaterialIdx]).to.be.undefined;
+      expect(model.materials[0]).to.be.undefined;
     });
   });
 

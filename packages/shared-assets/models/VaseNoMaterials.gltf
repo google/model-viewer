@@ -1,0 +1,115 @@
+{
+  "asset": {
+    "generator": "glTF-Transform v2.0.5",
+    "version": "2.0"
+  },
+  "accessors": [
+    {
+      "type": "SCALAR",
+      "componentType": 5125,
+      "count": 300000,
+      "bufferView": 0,
+      "byteOffset": 0
+    },
+    {
+      "type": "VEC4",
+      "componentType": 5126,
+      "count": 300000,
+      "bufferView": 1,
+      "byteOffset": 0
+    },
+    {
+      "type": "VEC3",
+      "componentType": 5126,
+      "count": 300000,
+      "max": [
+        98.86202239990234,
+        155.01644897460938,
+        469.7169189453125
+      ],
+      "min": [
+        -74.6846923828125,
+        -8.631742477416992,
+        306.7392272949219
+      ],
+      "bufferView": 1,
+      "byteOffset": 16
+    },
+    {
+      "type": "VEC3",
+      "componentType": 5126,
+      "count": 300000,
+      "bufferView": 1,
+      "byteOffset": 28
+    },
+    {
+      "type": "VEC2",
+      "componentType": 5126,
+      "count": 300000,
+      "bufferView": 1,
+      "byteOffset": 40
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 1200000,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1200000,
+      "byteLength": 14400000,
+      "byteStride": 48,
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "VaseNoMaterials.bin",
+      "byteLength": 15600000
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 2,
+            "NORMAL": 3,
+            "TANGENT": 1,
+            "TEXCOORD_0": 4
+          },
+          "mode": 4,
+          "indices": 0
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "Vase indien",
+      "translation": [
+        -0.120887,
+        -0.731924,
+        -3.882281
+      ],
+      "scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "mesh": 0
+    }
+  ],
+  "scenes": [
+    {
+      "name": "Vase_indien.obj",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "scene": 0
+}
