@@ -148,7 +148,7 @@ export const cameraOrbitIntrinsics = (() => {
 })();
 
 const minCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
-  const radius = MINIMUM_RADIUS_RATIO * element[$scene].boundingRadius;
+  const radius = MINIMUM_RADIUS_RATIO * element[$scene].boundingSphere.radius;
 
   return {
     basis: [
@@ -678,7 +678,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
      * orbiting at the supplied radius.
      */
     [$updateCameraForRadius](radius: number) {
-      const maximumRadius = Math.max(this[$scene].boundingRadius, radius);
+      const maximumRadius =
+          Math.max(this[$scene].boundingSphere.radius, radius);
 
       const near = 0;
       const far = 2 * maximumRadius;

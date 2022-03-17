@@ -641,7 +641,7 @@ export class SmoothControls extends EventDispatcher {
 
     const target = scene.getTarget();
     target.add(dxy.applyMatrix3(this.panProjection));
-    scene.boundingBox.clampPoint(target, target);
+    scene.boundingSphere.clampPoint(target, target);
     scene.setTarget(target.x, target.y, target.z);
   }
 
@@ -659,10 +659,12 @@ export class SmoothControls extends EventDispatcher {
         const {cameraTarget} = scene.element;
         scene.element.cameraTarget = '';
         scene.element.cameraTarget = cameraTarget;
+        // Zoom all the way out.
         this.userAdjustOrbit(0, 0, 1);
       } else {
         scene.target.worldToLocal(hit.position);
         scene.setTarget(hit.position.x, hit.position.y, hit.position.z);
+        // Zoom in on the tapped point.
         this.userAdjustOrbit(0, 0, -5 * ZOOM_SENSITIVITY);
       }
     } else if (this.panMetersPerPixel > 0) {
@@ -671,18 +673,23 @@ export class SmoothControls extends EventDispatcher {
         return;
 
       scene.target.worldToLocal(hit.position);
-      const target = scene.getTarget();
+      const goalTarget = scene.getTarget();
       const {theta, phi} = this.spherical;
 
+      // Set target to surface hit point, except the target is still settling,
+      // so offset the goal accordingly so the transition is smooth even though
+      // this will drift the target slightly away from the hit point.
       const psi = theta - scene.yaw;
       const n = vector3.set(
           Math.sin(phi) * Math.sin(psi),
           Math.cos(phi),
           Math.sin(phi) * Math.cos(psi));
-      const dr = n.dot(hit.position.sub(target));
-      target.add(n.multiplyScalar(dr));
+      const dr = n.dot(hit.position.sub(goalTarget));
+      goalTarget.add(n.multiplyScalar(dr));
 
-      scene.setTarget(target.x, target.y, target.z);
+      scene.setTarget(goalTarget.x, goalTarget.y, goalTarget.z);
+      // Change the camera radius to match the change in target so that the
+      // camera itself does not move, unless it hits a radius bound.
       this.setOrbit(undefined, undefined, this.goalSpherical.radius - dr);
     }
   }
