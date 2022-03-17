@@ -12,15 +12,17 @@
  * limitations under the License.
  */
 
-import {Euler, Event as ThreeEvent, EventDispatcher, Matrix3, PerspectiveCamera, Spherical, Vector3} from 'three';
+import {Euler, Event as ThreeEvent, EventDispatcher, Matrix3, PerspectiveCamera, Spherical, Vector2, Vector3} from 'three';
 
-import {TouchAction} from '../features/controls.js';
+import {$panElement, TouchAction} from '../features/controls.js';
 import {clamp} from '../utilities.js';
 
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 
 const PAN_SENSITIVITY = 0.75;
+const TAP_DISTANCE = 2;
+const vector2 = new Vector2();
 
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = null|((event: TouchEvent) => void);
@@ -146,10 +148,8 @@ export class SmoothControls extends EventDispatcher {
 
   // Pointer state
   private touchMode: TouchMode = null;
-  private lastPointerPosition: Pointer = {
-    clientX: 0,
-    clientY: 0,
-  };
+  private lastPointerPosition: Pointer = {clientX: 0, clientY: 0};
+  private startPointerPosition: Pointer = {clientX: 0, clientY: 0};
   private lastTouches!: TouchList;
   private touchDecided = false;
 
@@ -610,6 +610,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private initializePan() {
+    (this.scene.element as any)[$panElement].style.opacity = 1;
     const {theta, phi, radius} = this.spherical;
     const psi = theta - this.scene.yaw;
     this.panMetersPerPixel = (PAN_SENSITIVITY * radius) /
@@ -641,6 +642,56 @@ export class SmoothControls extends EventDispatcher {
     target.add(dxy.applyMatrix3(this.panProjection));
     scene.boundingBox.clampPoint(target, target);
     scene.setTarget(target.x, target.y, target.z);
+  }
+
+  private recenter(pointer: Pointer) {
+    (this.scene.element as any)[$panElement].style.opacity = 0;
+    if (Math.abs(pointer.clientX - this.startPointerPosition.clientX) <
+            TAP_DISTANCE &&
+        Math.abs(pointer.clientY - this.startPointerPosition.clientY) <
+            TAP_DISTANCE) {
+      const hit = this.scene.positionAndNormalFromPoint(
+          this.scene.getNDC(pointer.clientX, pointer.clientY));
+      if (hit == null) {
+        const {cameraTarget} = this.scene.element;
+        this.scene.element.cameraTarget = '';
+        this.scene.element.cameraTarget = cameraTarget;
+        this.userAdjustOrbit(0, 0, 1);
+      } else {
+        this.scene.target.worldToLocal(hit.position);
+        this.scene.setTarget(hit.position.x, hit.position.y, hit.position.z);
+        this.userAdjustOrbit(0, 0, -5 * ZOOM_SENSITIVITY);
+      }
+    } else if (this.panMetersPerPixel > 0) {
+      const hit = this.scene.positionAndNormalFromPoint(vector2.set(0, 0));
+      if (hit == null)
+        return;
+      this.scene.target.worldToLocal(hit.position);
+      const target = this.scene.getTarget();
+      const {theta, phi, radius} = this.spherical;
+
+      const psi = theta - this.scene.yaw;
+      const sinPhiRadius = Math.sin(phi) * radius;
+      const vx = sinPhiRadius * Math.sin(psi);
+      const vy = Math.cos(phi) * radius;
+      const vz = sinPhiRadius * Math.cos(psi);
+      const vInv = 1.0 / Math.sqrt(vx * vx + vy * vy + vz * vz);
+      const nx = vx * vInv;
+      const ny = vy * vInv;
+      const nz = vz * vInv;
+
+      const dx = hit.position.x - target.x;
+      const dy = hit.position.y - target.y;
+      const dz = hit.position.z - target.z;
+
+      const dr = nx * dx + ny * dy + nz * dz;
+      target.x += dr * nx;
+      target.y += dr * ny;
+      target.z += dr * nz;
+      this.scene.setTarget(target.x, target.y, target.z);
+
+      this.goalSpherical.radius -= dr;
+    }
   }
 
   private onPointerDown(fn: () => void) {
@@ -706,6 +757,8 @@ export class SmoothControls extends EventDispatcher {
   private handleSinglePointerDown(pointer: Pointer) {
     this.lastPointerPosition.clientX = pointer.clientX;
     this.lastPointerPosition.clientY = pointer.clientY;
+    this.startPointerPosition.clientX = pointer.clientX;
+    this.startPointerPosition.clientY = pointer.clientY;
     this.element.style.cursor = 'grabbing';
   }
 
@@ -719,8 +772,9 @@ export class SmoothControls extends EventDispatcher {
     }
   }
 
-  private onMouseUp = (_event: MouseEvent) => {
+  private onMouseUp = (event: MouseEvent) => {
     self.removeEventListener('mousemove', this.onMouseMove);
+    this.recenter(event);
 
     this.onPointerUp();
   };
@@ -728,6 +782,9 @@ export class SmoothControls extends EventDispatcher {
   private onTouchEnd = (event: TouchEvent) => {
     if (event.targetTouches.length > 0 && this.touchMode !== null) {
       this.onTouchChange(event);
+    }
+    if (event.targetTouches.length === 0) {
+      this.recenter(event.changedTouches[0]);
     }
 
     this.onPointerUp();

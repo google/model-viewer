@@ -195,6 +195,7 @@ const TAU = 2.0 * Math.PI;
 
 export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
+export const $panElement = Symbol('panElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
@@ -357,6 +358,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$promptAnimatedContainer] =
         this.shadowRoot!.querySelector(
             '.interaction-prompt > .animated-container') as HTMLElement;
+    protected[$panElement] =
+        this.shadowRoot!.querySelector('.pan-target') as HTMLElement;
 
     protected[$focusedTime] = Infinity;
     protected[$lastPromptOffset] = 0;
