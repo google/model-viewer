@@ -23,6 +23,7 @@ import {ModelScene} from './ModelScene.js';
 const PAN_SENSITIVITY = 0.75;
 const TAP_DISTANCE = 2;
 const vector2 = new Vector2();
+const vector3 = new Vector3();
 
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = null|((event: TouchEvent) => void);
@@ -628,15 +629,15 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private movePan(thisX: number, thisY: number) {
-    const {scene} = this;
-    const dxy = new Vector3(
-        thisX - this.lastPointerPosition.clientX,
-        thisY - this.lastPointerPosition.clientY,
+    const {scene, lastPointerPosition} = this;
+    const dxy = vector3.set(
+        thisX - lastPointerPosition.clientX,
+        thisY - lastPointerPosition.clientY,
         0);
     dxy.multiplyScalar(this.panMetersPerPixel);
 
-    this.lastPointerPosition.clientX = thisX;
-    this.lastPointerPosition.clientY = thisY;
+    lastPointerPosition.clientX = thisX;
+    lastPointerPosition.clientY = thisY;
 
     const target = scene.getTarget();
     target.add(dxy.applyMatrix3(this.panProjection));
@@ -645,52 +646,44 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private recenter(pointer: Pointer) {
-    (this.scene.element as any)[$panElement].style.opacity = 0;
+    const {scene} = this;
+    (scene.element as any)[$panElement].style.opacity = 0;
     if (Math.abs(pointer.clientX - this.startPointerPosition.clientX) <
             TAP_DISTANCE &&
         Math.abs(pointer.clientY - this.startPointerPosition.clientY) <
             TAP_DISTANCE) {
-      const hit = this.scene.positionAndNormalFromPoint(
-          this.scene.getNDC(pointer.clientX, pointer.clientY));
+      const hit = scene.positionAndNormalFromPoint(
+          scene.getNDC(pointer.clientX, pointer.clientY));
+
       if (hit == null) {
-        const {cameraTarget} = this.scene.element;
-        this.scene.element.cameraTarget = '';
-        this.scene.element.cameraTarget = cameraTarget;
+        const {cameraTarget} = scene.element;
+        scene.element.cameraTarget = '';
+        scene.element.cameraTarget = cameraTarget;
         this.userAdjustOrbit(0, 0, 1);
       } else {
-        this.scene.target.worldToLocal(hit.position);
-        this.scene.setTarget(hit.position.x, hit.position.y, hit.position.z);
+        scene.target.worldToLocal(hit.position);
+        scene.setTarget(hit.position.x, hit.position.y, hit.position.z);
         this.userAdjustOrbit(0, 0, -5 * ZOOM_SENSITIVITY);
       }
     } else if (this.panMetersPerPixel > 0) {
-      const hit = this.scene.positionAndNormalFromPoint(vector2.set(0, 0));
+      const hit = scene.positionAndNormalFromPoint(vector2.set(0, 0));
       if (hit == null)
         return;
-      this.scene.target.worldToLocal(hit.position);
-      const target = this.scene.getTarget();
-      const {theta, phi, radius} = this.spherical;
 
-      const psi = theta - this.scene.yaw;
-      const sinPhiRadius = Math.sin(phi) * radius;
-      const vx = sinPhiRadius * Math.sin(psi);
-      const vy = Math.cos(phi) * radius;
-      const vz = sinPhiRadius * Math.cos(psi);
-      const vInv = 1.0 / Math.sqrt(vx * vx + vy * vy + vz * vz);
-      const nx = vx * vInv;
-      const ny = vy * vInv;
-      const nz = vz * vInv;
+      scene.target.worldToLocal(hit.position);
+      const target = scene.getTarget();
+      const {theta, phi} = this.spherical;
 
-      const dx = hit.position.x - target.x;
-      const dy = hit.position.y - target.y;
-      const dz = hit.position.z - target.z;
+      const psi = theta - scene.yaw;
+      const n = vector3.set(
+          Math.sin(phi) * Math.sin(psi),
+          Math.cos(phi),
+          Math.sin(phi) * Math.cos(psi));
+      const dr = n.dot(hit.position.sub(target));
+      target.add(n.multiplyScalar(dr));
 
-      const dr = nx * dx + ny * dy + nz * dz;
-      target.x += dr * nx;
-      target.y += dr * ny;
-      target.z += dr * nz;
-      this.scene.setTarget(target.x, target.y, target.z);
-
-      this.goalSpherical.radius -= dr;
+      scene.setTarget(target.x, target.y, target.z);
+      this.setOrbit(undefined, undefined, this.goalSpherical.radius - dr);
     }
   }
 
