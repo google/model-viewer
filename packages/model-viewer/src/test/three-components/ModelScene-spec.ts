@@ -16,7 +16,7 @@
 import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
-import {DEFAULT_FOV_DEG, ModelScene} from '../../three-components/ModelScene.js';
+import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
 
 
@@ -103,13 +103,15 @@ suite('ModelScene', () => {
     test('idealCameraDistance is set correctly', async () => {
       await scene.setObject(dummyMesh);
 
-      const halfFov = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
+      scene.framedFoVDeg = 35;
+      const halfFov = (scene.framedFoVDeg / 2) * Math.PI / 180;
       const expectedDistance = dummyRadius / Math.sin(halfFov);
       expect(scene.idealCameraDistance())
           .to.be.closeTo(expectedDistance, 0.0001);
     });
 
     test('idealAspect is set correctly', async () => {
+      scene.framedFoVDeg = 35;
       await scene.setObject(dummyMesh);
 
       expect(scene.idealAspect).to.be.closeTo(1, 0.0001);

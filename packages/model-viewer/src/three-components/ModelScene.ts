@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Vector2, Vector3, WebGLRenderer} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -45,8 +45,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Primary: 'primary',
   Secondary: 'secondary'
 };
-
-export const DEFAULT_FOV_DEG = 45;
 
 const view = new Vector3();
 const target = new Vector3();
@@ -84,10 +82,10 @@ export class ModelScene extends Scene {
   public modelContainer = new Object3D();
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();
+  public boundingSphere = new Sphere();
   public size = new Vector3();
   public idealAspect = 0;
-  public framedFoVDeg = DEFAULT_FOV_DEG;
-  public boundingRadius = 0;
+  public framedFoVDeg = 0;
 
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
@@ -197,7 +195,7 @@ export class ModelScene extends Scene {
     if (this.externalRenderer != null) {
       const framingInfo = await this.externalRenderer.load(progressCallback);
 
-      this.boundingRadius = framingInfo.framedRadius;
+      this.boundingSphere.radius = framingInfo.framedRadius;
       this.idealAspect = framingInfo.fieldOfViewAspect;
 
       this.dispatchEvent({type: 'model-load', url: this.url});
@@ -335,7 +333,7 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Calculates the boundingRadius and idealAspect that allows the 3D
+   * Calculates the boundingSphere and idealAspect that allows the 3D
    * object to be framed tightly in a 2D window of any aspect ratio without
    * clipping at any camera orbit. The camera's center target point can be
    * optionally specified. If no center is specified, it defaults to the center
@@ -344,17 +342,19 @@ export class ModelScene extends Scene {
    */
   async updateFraming() {
     this.target.remove(this.modelContainer);
+    const {center} = this.boundingSphere;
 
-    let center = this.boundingBox.getCenter(new Vector3());
     if (this.tightBounds === true) {
       await this.element.requestUpdate('cameraTarget');
-      center = this.getTarget();
+      center.copy(this.getTarget());
+    } else {
+      this.boundingBox.getCenter(center);
     }
 
     const radiusSquared = (value: number, vertex: Vector3): number => {
       return Math.max(value, center!.distanceToSquared(vertex));
     };
-    this.boundingRadius =
+    this.boundingSphere.radius =
         Math.sqrt(reduceVertices(this.modelContainer, radiusSquared, 0));
 
     const horizontalTanFov = (value: number, vertex: Vector3): number => {
@@ -372,7 +372,7 @@ export class ModelScene extends Scene {
 
   idealCameraDistance(): number {
     const halfFovRad = (this.framedFoVDeg / 2) * Math.PI / 180;
-    return this.boundingRadius / Math.sin(halfFovRad);
+    return this.boundingSphere.radius / Math.sin(halfFovRad);
   }
 
   /**
@@ -444,7 +444,7 @@ export class ModelScene extends Scene {
     const goal = this.goalTarget;
     const target = this.target.position;
     if (!goal.equals(target)) {
-      const normalization = this.boundingRadius / 10;
+      const normalization = this.boundingSphere.radius / 10;
       let {x, y, z} = target;
       x = this.targetDamperX.update(x, goal.x, delta, normalization);
       y = this.targetDamperY.update(y, goal.y, delta, normalization);
@@ -540,11 +540,12 @@ export class ModelScene extends Scene {
 
     if (name != null) {
       animationClip = this.animationsByName.get(name);
-      
+
       if (animationClip == null) {
         const parsedAnimationIndex = parseInt(name);
 
-        if (!isNaN(parsedAnimationIndex) && parsedAnimationIndex >= 0 && parsedAnimationIndex < animations.length) {
+        if (!isNaN(parsedAnimationIndex) && parsedAnimationIndex >= 0 &&
+            parsedAnimationIndex < animations.length) {
           animationClip = animations[parsedAnimationIndex];
         }
       }

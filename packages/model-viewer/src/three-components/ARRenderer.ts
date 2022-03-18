@@ -688,7 +688,8 @@ export class ARRenderer extends EventDispatcher {
 
   private moveScene(delta: number) {
     const scene = this.presentedScene!;
-    const {position, yaw, boundingRadius} = scene;
+    const {position, yaw} = scene;
+    const boundingRadius = scene.boundingSphere.radius;
     const goal = this.goalPosition;
     const oldScale = scene.scale.x;
     const box = this.placementBox!;
