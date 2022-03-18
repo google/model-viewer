@@ -22,8 +22,8 @@ import {$correlatedObjects} from '../../../features/scene-graph/three-dom-elemen
 import {$scene} from '../../../model-viewer-base.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
-import {timePasses, waitForEvent} from '../../../utilities.js';
-import {assetPath, loadThreeGLTF} from '../../helpers.js';
+import {waitForEvent} from '../../../utilities.js';
+import {assetPath, loadThreeGLTF, rafPasses} from '../../helpers.js';
 
 
 
@@ -319,6 +319,8 @@ suite('scene-graph/model', () => {
         test('materialFromPoint returns material', async () => {
           await loadModel(ASTRONAUT_GLB_PATH);
 
+          await rafPasses();
+
           const material = element.materialFromPoint(
               element[$scene].width / 2, element[$scene].height / 2)!;
 
@@ -329,7 +331,7 @@ suite('scene-graph/model', () => {
             'materialFromPoint returns null when intersect fails', async () => {
               await loadModel(ASTRONAUT_GLB_PATH);
 
-              await timePasses(1000);
+              await rafPasses();
 
               const material = element.materialFromPoint(
                   element[$scene].width, element[$scene].height)!;
