@@ -46,8 +46,6 @@ export const IlluminationRole: {[index: string]: IlluminationRole} = {
   Secondary: 'secondary'
 };
 
-export const DEFAULT_FOV_DEG = 45;
-
 const view = new Vector3();
 const target = new Vector3();
 const normalWorld = new Vector3();
@@ -87,7 +85,7 @@ export class ModelScene extends Scene {
   public boundingSphere = new Sphere();
   public size = new Vector3();
   public idealAspect = 0;
-  public framedFoVDeg = DEFAULT_FOV_DEG;
+  public framedFoVDeg = 0;
 
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;

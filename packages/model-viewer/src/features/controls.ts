@@ -22,11 +22,9 @@ import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
 import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
-import {DEFAULT_FOV_DEG} from '../three-components/ModelScene.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {timeline} from '../utilities/animation.js';
-
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -52,6 +50,11 @@ const fade = timeline(0, [
   {frames: 1, value: 0},
   {frames: 6, value: 0}
 ]);
+
+export const DEFAULT_FOV_DEG = 30;
+export const OLD_DEFAULT_FOV_DEG = 45;
+const DEFAULT_MIN_FOV_DEG = 12;
+const OLD_DEFAULT_MIN_FOV_DEG = 25;
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
@@ -106,25 +109,22 @@ export const TouchAction: {[index: string]: TouchAction} = {
   NONE: 'none'
 };
 
-export const fieldOfViewIntrinsics = () => {
-  return {
-    basis:
-        [degreesToRadians(numberNode(DEFAULT_FOV_DEG, 'deg')) as
-         NumberNode<'rad'>],
-    keywords: {auto: [null]}
-  };
-};
+export const fieldOfViewIntrinsics =
+    (element: ModelViewerElementBase&ControlsInterface) => {
+      const fov = element.enablePan ? DEFAULT_FOV_DEG : OLD_DEFAULT_FOV_DEG;
 
-const minFieldOfViewIntrinsics = {
-  basis: [degreesToRadians(numberNode(25, 'deg')) as NumberNode<'rad'>],
-  keywords: {auto: [null]}
-};
+      return {
+        basis: [degreesToRadians(numberNode(fov, 'deg')) as NumberNode<'rad'>],
+        keywords: {auto: [null]}
+      };
+    };
 
-const maxFieldOfViewIntrinsics = () => {
+const minFieldOfViewIntrinsics = (element: ModelViewerElementBase&
+                                  ControlsInterface) => {
+  const fov = element.enablePan ? DEFAULT_MIN_FOV_DEG : OLD_DEFAULT_MIN_FOV_DEG;
+
   return {
-    basis:
-        [degreesToRadians(numberNode(DEFAULT_FOV_DEG, 'deg')) as
-         NumberNode<'rad'>],
+    basis: [degreesToRadians(numberNode(fov, 'deg')) as NumberNode<'rad'>],
     keywords: {auto: [null]}
   };
 };
@@ -147,18 +147,20 @@ export const cameraOrbitIntrinsics = (() => {
   };
 })();
 
-const minCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
-  const radius = MINIMUM_RADIUS_RATIO * element[$scene].boundingSphere.radius;
+const minCameraOrbitIntrinsics =
+    (element: ModelViewerElementBase&ControlsInterface) => {
+      const radius = MINIMUM_RADIUS_RATIO *
+          element[$scene].boundingSphere.radius * (element.enablePan ? 2 : 1);
 
-  return {
-    basis: [
-      numberNode(-Infinity, 'rad'),
-      numberNode(Math.PI / 8, 'rad'),
-      numberNode(radius, 'm')
-    ],
-    keywords: {auto: [null, null, null]}
-  };
-};
+      return {
+        basis: [
+          numberNode(-Infinity, 'rad'),
+          numberNode(Math.PI / 8, 'rad'),
+          numberNode(radius, 'm')
+        ],
+        keywords: {auto: [null, null, null]}
+      };
+    };
 
 const maxCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
   const orbitIntrinsics = cameraOrbitIntrinsics(element);
@@ -314,10 +316,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         {type: String, attribute: 'min-field-of-view', hasChanged: () => true})
     minFieldOfView: string = 'auto';
 
-    @style({
-      intrinsics: maxFieldOfViewIntrinsics,
-      updateHandler: $syncMaxFieldOfView
-    })
+    @style(
+        {intrinsics: fieldOfViewIntrinsics, updateHandler: $syncMaxFieldOfView})
     @property(
         {type: String, attribute: 'max-field-of-view', hasChanged: () => true})
     maxFieldOfView: string = 'auto';
@@ -717,13 +717,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       // compare the before and after to calculate the proper zoom.
       super[$onResize](event);
 
-      const newFramedFoV = scene.adjustedFoV(scene.framedFoVDeg);
-      const zoom = controls.getFieldOfView() / oldFramedFoV;
+      const fovRatio = scene.adjustedFoV(scene.framedFoVDeg) / oldFramedFoV;
+      const fov =
+          controls.getFieldOfView() * (isFinite(fovRatio) ? fovRatio : 1);
 
       controls.updateAspect(this[$scene].aspect);
 
       await this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
-      this[$controls].setFieldOfView(newFramedFoV * zoom);
+      this[$controls].setFieldOfView(fov);
 
       this.jumpCameraToGoal();
     }
