@@ -15,6 +15,9 @@
 
 import {PerspectiveCamera, Vector3} from 'three';
 
+import {$controls} from '../../features/controls.js';
+import {$userInputElement} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ChangeSource, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {waitForEvent} from '../../utilities.js';
 import {dispatchSyntheticEvent} from '../helpers.js';
@@ -40,23 +43,25 @@ export const settleControls = (controls: SmoothControls) =>
 suite('SmoothControls', () => {
   let controls: SmoothControls;
   let camera: PerspectiveCamera;
+  let modelViewer: ModelViewerElement;
   let element: HTMLDivElement;
 
   setup(() => {
-    element = document.createElement<'div'>('div');
-    camera = new PerspectiveCamera();
-    controls = new SmoothControls(camera, element);
+    modelViewer = new ModelViewerElement();
+    element = modelViewer[$userInputElement];
+    controls = (modelViewer as any)[$controls];
+    camera = controls.camera;
 
-    element.style.height = '100px';
+    modelViewer.style.height = '100px';
     element.tabIndex = 0;
 
-    document.body.insertBefore(element, document.body.firstChild);
+    document.body.insertBefore(modelViewer, document.body.firstChild);
 
     controls.enableInteraction();
   });
 
   teardown(() => {
-    document.body.removeChild(element);
+    document.body.removeChild(modelViewer);
 
     controls.disableInteraction();
   });

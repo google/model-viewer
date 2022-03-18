@@ -257,6 +257,27 @@ canvas.show {
   transform-origin: bottom right;
 }
 
+.slot.pan-target {
+  display: block;
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  background-color: transparent;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#default-pan-target {
+  width: 6px;
+  height: 6px;
+  border-radius: 6px;
+  border: 1px solid white;
+  box-shadow: 0px 0px 2px 1px rgba(0, 0, 0, 0.8);
+}
+
 .slot.default {
   pointer-events: none;
 }
@@ -315,6 +336,13 @@ canvas.show {
           aria-label="View in your space">
         ${ARGlyph}
       </a>
+    </slot>
+  </div>
+
+  <div class="slot pan-target">
+    <slot name="pan-target">
+      <div id="default-pan-target">      
+      </div>
     </slot>
   </div>
 

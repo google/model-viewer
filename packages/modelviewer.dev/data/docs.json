@@ -430,6 +430,14 @@
         ]
       },
       {
+        "name": "enable-pan",
+        "htmlName": "enablePan",
+        "description": "Enable panning interactions using two-finger touch, or dragging with right-click or modifier keys. Pan is limited to the bounding sphere of the model. Tapping on the model focuses on that point, while tapping off the model zooms back to the original framing. When panning, the center point is shown visually (and can be suppressed/changed using the <a href=\"#entrydocs-stagingandcameras-slots-panTarget\">pan-target</a> slot) and when the pan gesture ends, the camera is focused on that model point (if there was a surface under the dot), so that the camera doesn't orbit around a random point in space. Note this attribute also changes the camera defaults: field-of-view will default to 30 degrees (minimum 12 degrees) and the minimum radius is twice the bounding radius to keep the camera from entering the object.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#panning\">Related example</a>"
+        ]
+      },
+      {
         "name": "touch-action",
         "htmlName": "touch-action",
         "description": "Akin to the CSS touch-action property (which does not work due to some iOS bugs), the default 'pan-y' allows touch users to vertically scroll the <span class=\"attribute\">&lt;model-viewer&gt;</span> element, but can interact if their gesture starts horizontal. Legacy behavior can be achieved with 'none', where all scrolling is prevented, while 'pan-x' is the opposite of 'pan-y'. The normal CSS default 'auto' is not allowed here, as this can be achieved by not including the <span class='attribute'>camera-controls</span> attribute.",
@@ -699,6 +707,11 @@
         "name": "interaction-prompt",
         "htmlName": "interactionPrompt",
         "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"interaction-prompt\"</span>, this element will replace the default hand icon which wiggles back and forth with the model until the user interacts."
+      },
+      {
+        "name": "pan-target",
+        "htmlName": "panTarget",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"pan-target\"</span>, this element will replace the small default circle that appears when the user is panning to indicate the camera's target."
       }
     ]
   },
