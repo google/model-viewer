@@ -28,7 +28,7 @@ import {waitForEvent} from '../utils/test_utils.js';
 const TEXTURE_CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
 const CUBES_GLTF_PATH = '../base/shared-assets/models/cubes.gltf';
 const TRIANGLE_GLTF_PATH = '../base/shared-assets/models/Triangle.gltf';
-const VASE_NO_TRIANGLE_GLTF_PATH = '../base/shared-assets/models/VaseNoMaterials.gltf';
+const VASE_NO_MATERIALS_GLB_PATH = '../base/shared-assets/models/VaseNoMaterials.glb';
 const TEXTURE_PATH = 'base/shared-assets/models/ORM.png';
 
 async function checkUpload(
@@ -78,7 +78,7 @@ describe('material panel test', () => {
 
   describe('Given a model without any materials', () => {
     beforeEach(async () => {
-      reduxStore.dispatch(dispatchGltfUrl(VASE_NO_TRIANGLE_GLTF_PATH));
+      reduxStore.dispatch(dispatchGltfUrl(VASE_NO_MATERIALS_GLB_PATH));
       await preview.loadComplete;
       await panel.updateComplete;
     });
