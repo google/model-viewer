@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -26,7 +26,8 @@ import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
-
+const MAX_SHADOW_THICKNESS = 1e-4;
+const MIN_SHADOW_SIZE = 1e-2;
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string;
@@ -90,6 +91,7 @@ export class ModelScene extends Scene {
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
+  public bakedShadows = Array<Mesh>();
 
   public exposure = 1;
   public canScale = true;
@@ -316,17 +318,44 @@ export class ModelScene extends Scene {
     this.queueRender();
   }
 
+  findBakedShadows(group: Object3D) {
+    const boundingBox = new Box3();
+
+    group.traverse((object: Object3D) => {
+      const mesh = object as Mesh;
+      if (mesh.isMesh) {
+        const material = mesh.material as Material;
+        if (!(material as any).isMeshBasicMaterial) {
+          return;
+        }
+        if (!material.transparent) {
+          return;
+        }
+        boundingBox.setFromObject(mesh);
+        const size = boundingBox.getSize(vector3);
+        const minDim = Math.min(size.x, size.y, size.z);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        if (minDim > MAX_SHADOW_THICKNESS || maxDim < MIN_SHADOW_SIZE) {
+          return;
+        }
+        this.bakedShadows.push(mesh);
+      }
+    });
+  }
+
   updateBoundingBox() {
     this.target.remove(this.modelContainer);
+
+    this.boundingBox.setFromObject(this.modelContainer);
+    this.findBakedShadows(this.modelContainer);
 
     if (this.tightBounds === true) {
       const bound = (box: Box3, vertex: Vector3): Box3 => {
         return box.expandByPoint(vertex);
       };
       this.boundingBox = reduceVertices(this.modelContainer, bound, new Box3());
-    } else {
-      this.boundingBox.setFromObject(this.modelContainer);
     }
+
     this.boundingBox.getSize(this.size);
 
     this.target.add(this.modelContainer);
