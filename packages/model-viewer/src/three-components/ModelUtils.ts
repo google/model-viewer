@@ -63,7 +63,7 @@ export const reduceVertices = <T>(
     T => {
       let value = initialValue;
       const vertex = new Vector3();
-      model.traverse((object: any) => {
+      model.traverseVisible((object: any) => {
         let i, l;
 
         object.updateWorldMatrix(false, false);

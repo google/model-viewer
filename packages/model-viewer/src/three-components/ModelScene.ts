@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -323,37 +323,45 @@ export class ModelScene extends Scene {
 
     group.traverse((object: Object3D) => {
       const mesh = object as Mesh;
-      if (mesh.isMesh) {
-        const material = mesh.material as Material;
-        if (!(material as any).isMeshBasicMaterial) {
-          return;
-        }
-        if (!material.transparent) {
-          return;
-        }
-        boundingBox.setFromObject(mesh);
-        const size = boundingBox.getSize(vector3);
-        const minDim = Math.min(size.x, size.y, size.z);
-        const maxDim = Math.max(size.x, size.y, size.z);
-        if (minDim > MAX_SHADOW_THICKNESS || maxDim < MIN_SHADOW_SIZE) {
-          return;
-        }
-        this.bakedShadows.push(mesh);
+      if (!mesh.isMesh) {
+        return;
       }
+      const material = mesh.material as Material;
+      if (!(material as any).isMeshBasicMaterial || !material.transparent) {
+        return;
+      }
+      boundingBox.setFromObject(mesh);
+      const size = boundingBox.getSize(vector3);
+      const minDim = Math.min(size.x, size.y, size.z);
+      const maxDim = Math.max(size.x, size.y, size.z);
+      if (minDim > MAX_SHADOW_THICKNESS || maxDim < MIN_SHADOW_SIZE) {
+        return;
+      }
+      this.bakedShadows.push(mesh);
     });
   }
 
   updateBoundingBox() {
     this.target.remove(this.modelContainer);
 
-    this.boundingBox.setFromObject(this.modelContainer);
     this.findBakedShadows(this.modelContainer);
 
     if (this.tightBounds === true) {
       const bound = (box: Box3, vertex: Vector3): Box3 => {
         return box.expandByPoint(vertex);
       };
+      this.setBakedShadowVisibility(false);
       this.boundingBox = reduceVertices(this.modelContainer, bound, new Box3());
+      // If there's nothing but the baked shadow, then it's not a baked shadow.
+      if (this.boundingBox.isEmpty()) {
+        this.setBakedShadowVisibility(true);
+        this.bakedShadows = [];
+        this.boundingBox =
+            reduceVertices(this.modelContainer, bound, new Box3());
+      }
+      this.setBakedShadowVisibility();
+    } else {
+      this.boundingBox.setFromObject(this.modelContainer);
     }
 
     this.boundingBox.getSize(this.size);
@@ -371,6 +379,7 @@ export class ModelScene extends Scene {
    */
   async updateFraming() {
     this.target.remove(this.modelContainer);
+    this.setBakedShadowVisibility(false);
     const {center} = this.boundingSphere;
 
     if (this.tightBounds === true) {
@@ -396,7 +405,14 @@ export class ModelScene extends Scene {
         reduceVertices(this.modelContainer, horizontalTanFov, 0) /
         Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
 
+    this.setBakedShadowVisibility();
     this.target.add(this.modelContainer);
+  }
+
+  setBakedShadowVisibility(visible: boolean = this.shadowIntensity <= 0) {
+    for (const shadow of this.bakedShadows) {
+      shadow.visible = visible;
+    }
   }
 
   idealCameraDistance(): number {
@@ -658,6 +674,7 @@ export class ModelScene extends Scene {
     if (this._currentGLTF == null) {
       return;
     }
+    this.setBakedShadowVisibility();
     if (shadowIntensity <= 0 && this.shadow == null) {
       return;
     }
