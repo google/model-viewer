@@ -560,7 +560,7 @@ export class SmoothControls extends EventDispatcher {
         this.userAdjustOrbit(0, 0, deltaZoom);
       }
 
-      if (this.enablePan && this.panMetersPerPixel > 0) {
+      if (this.panMetersPerPixel > 0) {
         const thisX =
             0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
         const thisY =
@@ -646,6 +646,9 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private recenter(pointer: Pointer) {
+    if (!this.enablePan) {
+      return;
+    }
     const {scene} = this;
     (scene.element as any)[$panElement].style.opacity = 0;
     if (Math.abs(pointer.clientX - this.startPointerPosition.clientX) <

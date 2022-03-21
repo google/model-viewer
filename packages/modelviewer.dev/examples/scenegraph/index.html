@@ -427,14 +427,14 @@ modelViewerTexture.addEventListener("load", () => {
   </div>
 </model-viewer>
 <script type="module">
-const modelViewerTexture = document.querySelector("model-viewer#helmet");
+const modelViewerTexture1 = document.querySelector("model-viewer#helmet");
 
-modelViewerTexture.addEventListener("load", () => {
+modelViewerTexture1.addEventListener("load", () => {
 
-  const material = modelViewerTexture.model.materials[0];
+  const material = modelViewerTexture1.model.materials[0];
 
   const createAndApplyTexture = async (channel, event) => {
-    const texture = await modelViewerTexture.createTexture(event.target.value);
+    const texture = await modelViewerTexture1.createTexture(event.target.value);
     if (channel.includes('base') || channel.includes('metallic')) {
       material.pbrMetallicRoughness[channel].setTexture(texture);
     } else {
@@ -481,7 +481,7 @@ modelViewerTexture.addEventListener("load", () => {
           </div>
           <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
             <template>
-<model-viewer id="pickMaterial" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF-Binary/Buggy.glb" ar ar-modes="webxr scene-viewer" scale="0.001 0.001 0.001" alt="A Material Picking Example">
+<model-viewer id="pickMaterial" shadow-intensity="1" camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF-Binary/Buggy.glb" ar ar-modes="webxr scene-viewer" scale="0.001 0.001 0.001" alt="A Material Picking Example">
 </model-viewer>
 <script type="module">
 const modelViewer = document.querySelector("model-viewer#pickMaterial");

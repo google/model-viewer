@@ -338,6 +338,7 @@ export class ModelScene extends Scene {
         return;
       }
       this.bakedShadows.push(mesh);
+      mesh.userData.shadow = true;
     });
   }
 
@@ -726,12 +727,8 @@ export class ModelScene extends Scene {
     this.raycaster.setFromCamera(ndcPosition, this.getCamera());
     const hits = this.raycaster.intersectObject(object, true);
 
-    if (hits.length === 0) {
-      return null;
-    }
-
-    const hit = hits[0];
-    if (hit.face == null) {
+    const hit = hits.find((hit) => !hit.object.userData.shadow);
+    if (hit == null || hit.face == null) {
       return null;
     }
 

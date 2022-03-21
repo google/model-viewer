@@ -91,6 +91,7 @@ export class Shadow extends Object3D {
       side: BackSide,
     });
     this.floor = new Mesh(plane, shadowMaterial);
+    this.floor.userData.shadow = true;
     camera.add(this.floor);
 
     // the plane onto which to blur the texture
