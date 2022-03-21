@@ -38,6 +38,7 @@ export declare interface EnvironmentInterface {
   shadowIntensity: number;
   shadowSoftness: number;
   exposure: number;
+  hasBakedShadow(): boolean;
 }
 
 export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -103,6 +104,10 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$shouldAttemptPreload]()) {
         this[$updateEnvironment]();
       }
+    }
+
+    hasBakedShadow(): boolean {
+      return this[$scene].bakedShadows.length > 0;
     }
 
     [$onModelLoad]() {

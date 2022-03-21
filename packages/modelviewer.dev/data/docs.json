@@ -823,6 +823,13 @@
         }
       }
     ],
+    "Methods": [
+      {
+        "name": "hasBakedShadow()",
+        "htmlName": "hasBakedShadow",
+        "description": "Returns true if a baked-in shadow plane appears to be part of this model. These planes are removed from framing calculations and are only rendered if shadow-intensity is zero, to avoid multiple shadows interacting."
+      }
+    ],
     "Events": [
       {
         "name": "environment-change",
