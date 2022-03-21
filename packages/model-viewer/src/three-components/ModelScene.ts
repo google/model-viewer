@@ -26,8 +26,7 @@ import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
-const MAX_SHADOW_THICKNESS = 1e-4;
-const MIN_SHADOW_SIZE = 1e-2;
+const MIN_SHADOW_RATIO = 100;
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string;
@@ -334,7 +333,7 @@ export class ModelScene extends Scene {
       const size = boundingBox.getSize(vector3);
       const minDim = Math.min(size.x, size.y, size.z);
       const maxDim = Math.max(size.x, size.y, size.z);
-      if (minDim > MAX_SHADOW_THICKNESS || maxDim < MIN_SHADOW_SIZE) {
+      if (maxDim < MIN_SHADOW_RATIO * minDim) {
         return;
       }
       this.bakedShadows.push(mesh);
