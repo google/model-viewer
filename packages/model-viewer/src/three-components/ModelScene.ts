@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Matrix3, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -26,7 +26,7 @@ import {Hotspot} from './Hotspot.js';
 import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
-
+const MIN_SHADOW_RATIO = 100;
 
 export interface ModelLoadEvent extends ThreeEvent {
   url: string;
@@ -90,6 +90,7 @@ export class ModelScene extends Scene {
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
+  public bakedShadows = Array<Mesh>();
 
   public exposure = 1;
   public canScale = true;
@@ -316,17 +317,53 @@ export class ModelScene extends Scene {
     this.queueRender();
   }
 
+  findBakedShadows(group: Object3D) {
+    const boundingBox = new Box3();
+
+    group.traverse((object: Object3D) => {
+      const mesh = object as Mesh;
+      if (!mesh.isMesh) {
+        return;
+      }
+      const material = mesh.material as Material;
+      if (!(material as any).isMeshBasicMaterial || !material.transparent) {
+        return;
+      }
+      boundingBox.setFromObject(mesh);
+      const size = boundingBox.getSize(vector3);
+      const minDim = Math.min(size.x, size.y, size.z);
+      const maxDim = Math.max(size.x, size.y, size.z);
+      if (maxDim < MIN_SHADOW_RATIO * minDim) {
+        return;
+      }
+      this.bakedShadows.push(mesh);
+      mesh.userData.shadow = true;
+    });
+  }
+
   updateBoundingBox() {
     this.target.remove(this.modelContainer);
+
+    this.findBakedShadows(this.modelContainer);
 
     if (this.tightBounds === true) {
       const bound = (box: Box3, vertex: Vector3): Box3 => {
         return box.expandByPoint(vertex);
       };
+      this.setBakedShadowVisibility(false);
       this.boundingBox = reduceVertices(this.modelContainer, bound, new Box3());
+      // If there's nothing but the baked shadow, then it's not a baked shadow.
+      if (this.boundingBox.isEmpty()) {
+        this.setBakedShadowVisibility(true);
+        this.bakedShadows = [];
+        this.boundingBox =
+            reduceVertices(this.modelContainer, bound, new Box3());
+      }
+      this.setBakedShadowVisibility();
     } else {
       this.boundingBox.setFromObject(this.modelContainer);
     }
+
     this.boundingBox.getSize(this.size);
 
     this.target.add(this.modelContainer);
@@ -342,6 +379,7 @@ export class ModelScene extends Scene {
    */
   async updateFraming() {
     this.target.remove(this.modelContainer);
+    this.setBakedShadowVisibility(false);
     const {center} = this.boundingSphere;
 
     if (this.tightBounds === true) {
@@ -367,7 +405,14 @@ export class ModelScene extends Scene {
         reduceVertices(this.modelContainer, horizontalTanFov, 0) /
         Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
 
+    this.setBakedShadowVisibility();
     this.target.add(this.modelContainer);
+  }
+
+  setBakedShadowVisibility(visible: boolean = this.shadowIntensity <= 0) {
+    for (const shadow of this.bakedShadows) {
+      shadow.visible = visible;
+    }
   }
 
   idealCameraDistance(): number {
@@ -629,6 +674,7 @@ export class ModelScene extends Scene {
     if (this._currentGLTF == null) {
       return;
     }
+    this.setBakedShadowVisibility();
     if (shadowIntensity <= 0 && this.shadow == null) {
       return;
     }
@@ -680,12 +726,8 @@ export class ModelScene extends Scene {
     this.raycaster.setFromCamera(ndcPosition, this.getCamera());
     const hits = this.raycaster.intersectObject(object, true);
 
-    if (hits.length === 0) {
-      return null;
-    }
-
-    const hit = hits[0];
-    if (hit.face == null) {
+    const hit = hits.find((hit) => !hit.object.userData.shadow);
+    if (hit == null || hit.face == null) {
       return null;
     }
 
