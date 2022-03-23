@@ -90,17 +90,18 @@
           </div>
           <example-snippet stamp-to="controlSpeed" highlight-as="html">
             <template>
-<model-viewer id="change-speed-demo" camera-controls autoplay animation-name="Dance" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
-<script>
-(() => {
+<model-viewer id="change-speed-demo" camera-controls animation-name="Dance" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
+<script type="module">
   const modelViewer = document.querySelector('#change-speed-demo');
-  const speeds = [1, 2, 0.5, -1, 0];
+  const speeds = [1, 2, 0.5, -1];
 
   let i = 0;
-  self.setInterval(() => {
+  const play = () => {
     modelViewer.timeScale = speeds[i++%speeds.length];
-  }, 3000.0);
-})();
+    modelViewer.play({repetitions: 1});
+  };
+  modelViewer.addEventListener('load', play);
+  modelViewer.addEventListener('finished', play);
 </script>
             </template>
           </example-snippet>

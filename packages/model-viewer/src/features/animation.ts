@@ -66,7 +66,6 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       });
       this[$scene].subscribeMixerEvent('finished', () => {
         this[$paused] = true;
-        this[$changeAnimation]();
         this.dispatchEvent(new CustomEvent('finished'));
       });
     }

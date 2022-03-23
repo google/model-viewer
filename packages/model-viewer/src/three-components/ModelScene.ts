@@ -608,9 +608,14 @@ export class ModelScene extends Scene {
 
       if ((this.element as any).paused) {
         this.mixer.stopAllAction();
-      } else if (
-          lastAnimationAction != null && action !== lastAnimationAction) {
-        action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
+      } else {
+        action.paused = false;
+        if (lastAnimationAction != null && action !== lastAnimationAction) {
+          action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
+        } else if (this.animationTimeScale > 0) {
+          // This is a workaround for what I believe is a three.js bug.
+          this.animationTime = 0;
+        }
       }
 
       action.setLoop(loopMode, repetitionCount);
