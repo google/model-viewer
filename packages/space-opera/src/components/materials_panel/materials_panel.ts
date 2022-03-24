@@ -912,7 +912,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   revertAlphaFactor() {
-    this.alphaCutoffSlider.value =
+    this.alphaFactorSlider.value =
         this.getOriginalMaterial().pbrMetallicRoughness.baseColorFactor[3];
     this.onAlphaFactorChange();
   }
