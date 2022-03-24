@@ -321,7 +321,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
-      enableTransparency(material, alphaMode !== 'OPAQUE');
+      enableTransparency(material, alphaMode === 'BLEND');
       this[$applyAlphaCutoff]();
       material.needsUpdate = true;
     }
