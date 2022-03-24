@@ -73,8 +73,7 @@ export const styles: CSSResult = css`.EditingMaterial {
   width: calc(100% - 40px);
 }
 
-#alpha-mode-picker,
-#alpha-cutoff-label {
+.TopMargin {
   margin-top: 10px;
 }
 
