@@ -143,9 +143,9 @@
       {
         "name": "minimumRenderScale",
         "htmlName": "minimumRenderScale",
-        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Turn off this effect by setting to 1.",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Monitor its behavior with the <a href=\"./#entrydocs-loading-events-renderScale\">render-scale</a> event. Turn off this effect by setting to 1.",
         "links": [
-          "<a href=\"../examples/loading/#dracoSupport\">Static property usage example</a>"
+          "<a href=\"../examples/loading/#renderScale\">Dynamic Scaling Example</a>"
         ],
         "default": {
           "default": "0.5",
@@ -233,6 +233,14 @@
         "name": "progress",
         "htmlName": "progress",
         "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress."
+      },
+      {
+        "name": "render-scale",
+        "htmlName": "renderScale",
+        "description": "This event fires when the element is attached to the DOM and whenever the rendered DPR (device pixel ratio) changes, which is generally due to our renderer scaling its resolution to maintain frame rate. The event.detail contains the reportedDpr (window.devicePixelRatio), our renderedDpr (<= reportedDpr), minimumDpr (based on <a href=\"./#entrydocs-loading-staticProperties-minimumRenderScale\">minimumRenderScale</a>), reason ('GPU throttling' or 'No meta viewport tag'), and pixelWidth/pixelHeight (rendered resolution of the element). Everything except the size is identical for all elements on the page since the renderer is shared.",
+        "links": [
+          "<a href=\"../examples/loading/#renderScale\">Dynamic Scaling Example</a>"
+        ]
       }
     ],
     "Parts": [
