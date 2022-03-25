@@ -145,7 +145,7 @@
         "htmlName": "minimumRenderScale",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Monitor its behavior with the <a href=\"./#entrydocs-loading-events-renderScale\">render-scale</a> event. Turn off this effect by setting to 1.",
         "links": [
-          "<a href=\"../examples/loading/#renderScale\">Dynamic Scaling</a>"
+          "<a href=\"../examples/loading/#renderScale\">Dynamic Scaling Example</a>"
         ],
         "default": {
           "default": "0.5",
