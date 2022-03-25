@@ -393,17 +393,55 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimize
     </div>
 
     <div class="sample">
-      <div id="noModel" class="demo"></div>
+      <div id="renderScale" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">With no model</h2>
-            <h4>There's nothing to show, but also no error.</h4>
+            <h2 class="demo-title">Dynamic scaling</h2>
+            <h4>Our renderer automatically scales resolution to maintain frame rate. This behavior can be monitored and controlled.</h4>
           </div>
-          <example-snippet stamp-to="noModel" highlight-as="html">
+          <example-snippet stamp-to="renderScale" highlight-as="html">
             <template>
-<model-viewer alt="An invalid model" src="i-do-not-exist.glb">
+<model-viewer id="scale" alt="A 3D model of a toy car" camera-controls auto-rotate src="../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb" ar ar-modes="webxr scene-viewer quick-look">
+  Reported DPR: <span id="reportedDpr"></span><br/>
+  Rendered DPR: <span id="renderedDpr"></span><br/>
+  Minimum DPR: <span id="minimumDpr"></span><br/>
+  Rendered width (pixels): <span id="pixelWidth"></span><br/>
+  Rendered height (pixels): <span id="pixelHeight"></span><br/>
+  Reason for scaling: <span id="reason"></span><br/>
+  Minimum scale: <span id="min-scale-value">0.5</span><br/>
+  <input id="min-scale" type="range" min="0.25" max="1" step="0.01" value="0.5" />
 </model-viewer>
+
+<script>
+  const reportedDpr = document.querySelector('#reportedDpr');
+  const renderedDpr = document.querySelector('#renderedDpr');
+  const minimumDpr = document.querySelector('#minimumDpr');
+  const pixelWidth = document.querySelector('#pixelWidth');
+  const pixelHeight = document.querySelector('#pixelHeight');
+  const reason = document.querySelector('#reason');
+
+  // This must be registered before the element loads to catch the initial event.
+  document.querySelector('#scale').addEventListener('render-scale', (event) => {
+    reportedDpr.textContent = event.detail.reportedDpr;
+    renderedDpr.textContent = event.detail.renderedDpr;
+    minimumDpr.textContent = event.detail.minimumDpr;
+    pixelWidth.textContent = event.detail.pixelWidth;
+    pixelHeight.textContent = event.detail.pixelHeight;
+    reason.textContent = event.detail.reason;
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const minScale = document.querySelector('#min-scale-value');
+    // The static API must be queried after the element loads.
+    const ModelViewerStatic = customElements.get('model-viewer');
+
+    document.querySelector('#min-scale').addEventListener('input', (event) => {
+      ModelViewerStatic.minimumRenderScale = event.target.value;
+      minScale.textContent = event.target.value;
+    });
+  }, {once: true});
+</script>
             </template>
           </example-snippet>
         </div>

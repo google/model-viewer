@@ -48,8 +48,8 @@
         "name": "USDZ Model"
       },
       {
-        "htmlId": "noModel",
-        "name": "No Model"
+        "htmlId": "renderScale",
+        "name": "Dynamic Scaling"
       },
       {
         "htmlId": "cyclingModels",

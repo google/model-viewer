@@ -256,7 +256,26 @@ export class Renderer extends EventDispatcher {
       style.width = `${width}px`;
       style.height = `${height}px`;
       scene.queueRender();
+      this.dispatchRenderScale(scene);
     }
+  }
+
+  dispatchRenderScale(scene: ModelScene) {
+    const scale = this.scaleFactor;
+    const renderedDpr = this.dpr * scale;
+    const reason = scale < 1                 ? 'GPU throttling' :
+        this.dpr !== window.devicePixelRatio ? 'No meta viewport tag' :
+                                               '';
+    scene.element.dispatchEvent(new CustomEvent('render-scale', {
+      detail: {
+        reportedDpr: window.devicePixelRatio,
+        renderedDpr: renderedDpr,
+        minimumDpr: this.dpr * SCALE_STEPS[this.lastStep],
+        pixelWidth: Math.ceil(scene.width * renderedDpr),
+        pixelHeight: Math.ceil(scene.height * renderedDpr),
+        reason: reason
+      }
+    }));
   }
 
   registerScene(scene: ModelScene) {
@@ -274,6 +293,8 @@ export class Renderer extends EventDispatcher {
       canvas.classList.add('show');
     }
     scene.queueRender();
+
+    this.dispatchRenderScale(scene);
 
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop(
