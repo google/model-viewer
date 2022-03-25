@@ -62,10 +62,10 @@ export const sequence =
     };
 
 /**
- * A Keyframe groups a target value, the number of frames to interpolate towards
+ * A Frame groups a target value, the number of frames to interpolate towards
  * that value and an optional easing funnction to use for interpolation.
  */
-export interface Keyframe {
+export interface Frame {
   value: number;
   frames: number;
   ease?: TimingFunction;
@@ -79,7 +79,7 @@ export interface Keyframe {
  * transition, so interpolated values will be computed for fractional frames.
  */
 export const timeline =
-    (initialValue: number, keyframes: Array<Keyframe>): TimingFunction => {
+    (initialValue: number, keyframes: Array<Frame>): TimingFunction => {
       const tracks: Array<TimingFunction> = [];
       const weights: Array<number> = [];
 

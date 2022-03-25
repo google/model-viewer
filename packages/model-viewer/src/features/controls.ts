@@ -24,7 +24,7 @@ import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/par
 import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
-import {timeline} from '../utilities/animation.js';
+import {Frame, timeline, TimingFunction} from '../utilities/animation.js';
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -34,7 +34,7 @@ import {timeline} from '../utilities/animation.js';
 const PROMPT_ANIMATION_TIME = 5000;
 
 // For timing purposes, a "frame" is a timing agnostic relative unit of time
-// and a "value" is a target value for the keyframe.
+// and a "value" is a target value for the Frame.
 const wiggle = timeline(0, [
   {frames: 5, value: -1},
   {frames: 1, value: -1},
@@ -79,11 +79,18 @@ export interface SphericalPosition {
   toString(): string;
 }
 
+export interface Position {
+  x: number;
+  y: number;
+}
+
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
 export type InteractionPromptStyle = 'basic'|'wiggle';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
 export type Bounds = 'tight'|'legacy';
+
+export type MotionFunction = () => Position[];
 
 export const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
@@ -258,6 +265,9 @@ export declare interface ControlsInterface {
   updateFraming(): Promise<void>;
   resetInteractionPrompt(): void;
   zoom(keyPresses: number): void;
+  interact(
+      duration: number, x0: Frame[], y0: Frame[], x1: Frame[],
+      y1: Frame[]): MotionFunction;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -558,6 +568,82 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.requestUpdate('minCameraOrbit');
       this.requestUpdate('maxCameraOrbit');
       await this.requestUpdate('cameraOrbit');
+    }
+
+    interact(
+        duration: number, x0: Frame[], y0: Frame[], x1: Frame[] = [],
+        y1: Frame[] = []): MotionFunction {
+      const inputElement = this[$userInputElement];
+      const CENTER = 0.5;
+
+      const xy = new Array<{x: TimingFunction, y: TimingFunction}>();
+      xy.push({x: timeline(CENTER, x0), y: timeline(CENTER, y0)});
+      const positions = [{x: 0, y: 0}];
+
+      if (x1.length > 0 && y1.length > 0) {
+        xy.push({x: timeline(CENTER, x1), y: timeline(CENTER, y1)});
+        positions.push({x: 0, y: 0});
+      }
+
+      const startTime = performance.now();
+      const {width, height} = this[$scene];
+
+      const dispatchTouches = (type: string) => {
+        const touches: Touch[] = [];
+        for (const [i, position] of positions.entries()) {
+          const x = width * position.x;
+          const y = height * position.y;
+          touches.push({
+            identifier: i,
+            target: inputElement,
+            clientX: x,
+            clientY: y,
+            screenX: 0,
+            screenY: 0,
+            pageX: 0,
+            pageY: 0,
+            radiusX: 1,
+            radiusY: 1,
+            rotationAngle: 0,
+            force: 1
+          });
+        }
+        const init = {
+          touches: type === 'touchend' ? [] : touches,
+          targetTouches: type === 'touchend' ? [] : touches,
+          changedTouches: touches,
+          altKey: true  // flag that this is not a user interaction
+        };
+        inputElement.dispatchEvent(new TouchEvent(type, init));
+      };
+
+      const moveTouches = () => {
+        const time = (performance.now() - startTime) / duration;
+        for (const [i, position] of positions.entries()) {
+          position.x = xy[i].x(time);
+          position.y = xy[i].y(time);
+        }
+
+        dispatchTouches('touchmove');
+
+        if (time < 1) {
+          requestAnimationFrame(moveTouches);
+        } else {
+          dispatchTouches('touchend');
+        }
+      };
+
+      dispatchTouches('touchstart');
+
+      requestAnimationFrame(moveTouches);
+
+      return () => {
+        const positionsCopy: Position[] = [];
+        for (const position of positions) {
+          positionsCopy.push({...position});
+        }
+        return positionsCopy;
+      };
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
