@@ -294,6 +294,65 @@
       </div>
     </div>	
 
+    <div class="sample">
+      <div id="customPrompt" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Create your own custom interaction prompts with one or two touch points.</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="customPrompt" highlight-as="html">
+            <template>
+<model-viewer id="prompt-demo" camera-controls enable-pan interaction-prompt="none" src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look">
+<div></div>
+</model-viewer>
+
+<script>
+  const modelViewerPrompt = document.querySelector("#prompt-demo");
+  let hasInteracted = false;
+
+  const finger0 = {
+    x: [
+      {frames: 5, value: 0.3},
+      {frames: 1, value: 0.3},
+      {frames: 8, value: 0.7},
+      {frames: 1, value: 0.7},
+      {frames: 5, value: 0.5},
+      {frames: 18, value: 0.5}
+    ],
+    y: [
+      {frames: 1, value: 0.6},
+      {frames: 2, value: 0.4},
+      {frames: 1, value: 0.5}
+    ]};
+
+  const prompt = () => {
+    if(!hasInteracted) {
+      modelViewerPrompt.interact(1000, finger0);
+      setTimeout(prompt, 3000);
+    }
+  };
+
+  modelViewerPrompt.addEventListener('load', () => {
+    setTimeout(prompt, 500);
+  }, {once: true});
+
+  interacted = () => {
+    hasInteracted = true;
+  };
+
+  modelViewerPrompt.addEventListener('touchstart', interacted, {once: true});
+  modelViewerPrompt.addEventListener('mousedown', interacted, {once: true});
+  modelViewerPrompt.addEventListener('keydown', interacted, {once: true});
+  modelViewerPrompt.addEventListener('wheel', interacted, {once: true});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
     <div class="footer">
       <ul>
         <li class="attribution">

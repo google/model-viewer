@@ -79,9 +79,9 @@ export interface SphericalPosition {
   toString(): string;
 }
 
-export interface Position {
-  x: number;
-  y: number;
+export interface Finger {
+  x: Frame[];
+  y: Frame[];
 }
 
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
@@ -89,8 +89,6 @@ export type InteractionPromptStyle = 'basic'|'wiggle';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
 export type Bounds = 'tight'|'legacy';
-
-export type MotionFunction = () => Position[];
 
 export const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
@@ -206,6 +204,7 @@ export const $controls = Symbol('controls');
 export const $promptElement = Symbol('promptElement');
 export const $panElement = Symbol('panElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
+export const $fingerAnimatedContainers = Symbol('fingerAnimatedContainers');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
@@ -265,9 +264,7 @@ export declare interface ControlsInterface {
   updateFraming(): Promise<void>;
   resetInteractionPrompt(): void;
   zoom(keyPresses: number): void;
-  interact(
-      duration: number, x0: Frame[], y0: Frame[], x1: Frame[],
-      y1: Frame[]): MotionFunction;
+  interact(duration: number, finger0: Finger, finger1: Finger): void;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -366,8 +363,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
     protected[$promptAnimatedContainer] =
-        this.shadowRoot!.querySelector(
-            '.interaction-prompt > .animated-container') as HTMLElement;
+        this.shadowRoot!.querySelector('#prompt') as HTMLElement;
+    protected[$fingerAnimatedContainers]: HTMLElement[] = [
+      this.shadowRoot!.querySelector('#finger0')!,
+      this.shadowRoot!.querySelector('#finger1')!
+    ];
     protected[$panElement] =
         this.shadowRoot!.querySelector('.pan-target') as HTMLElement;
 
@@ -517,12 +517,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-      if (changedProperties.has('interactionPromptStyle')) {
-        this[$promptElement].classList.toggle(
-            'wiggle',
-            this.interactionPromptStyle === InteractionPromptStyle.WIGGLE);
-      }
-
       if (changedProperties.has('interactionPolicy')) {
         const interactionPolicy = this.interactionPolicy;
         controls.applyOptions({interactionPolicy});
@@ -570,19 +564,19 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       await this.requestUpdate('cameraOrbit');
     }
 
-    interact(
-        duration: number, x0: Frame[], y0: Frame[], x1: Frame[] = [],
-        y1: Frame[] = []): MotionFunction {
+    interact(duration: number, finger0: Finger, finger1?: Finger) {
       const inputElement = this[$userInputElement];
+      const fingerElements = this[$fingerAnimatedContainers];
       const CENTER = 0.5;
 
       const xy = new Array<{x: TimingFunction, y: TimingFunction}>();
-      xy.push({x: timeline(CENTER, x0), y: timeline(CENTER, y0)});
-      const positions = [{x: 0, y: 0}];
+      xy.push({x: timeline(CENTER, finger0.x), y: timeline(CENTER, finger0.y)});
+      const positions = [{x: CENTER, y: CENTER}];
 
-      if (x1.length > 0 && y1.length > 0) {
-        xy.push({x: timeline(CENTER, x1), y: timeline(CENTER, y1)});
-        positions.push({x: 0, y: 0});
+      if (finger1 != null) {
+        xy.push(
+            {x: timeline(CENTER, finger1.x), y: timeline(CENTER, finger1.y)});
+        positions.push({x: CENTER, y: CENTER});
       }
 
       const startTime = performance.now();
@@ -591,22 +585,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const dispatchTouches = (type: string) => {
         const touches: Touch[] = [];
         for (const [i, position] of positions.entries()) {
-          const x = width * position.x;
-          const y = height * position.y;
-          touches.push({
+          touches.push(new Touch({
             identifier: i,
             target: inputElement,
-            clientX: x,
-            clientY: y,
-            screenX: 0,
-            screenY: 0,
-            pageX: 0,
-            pageY: 0,
-            radiusX: 1,
-            radiusY: 1,
-            rotationAngle: 0,
-            force: 1
-          });
+            clientX: width * position.x,
+            clientY: height * position.y
+          }));
+          const {style} = fingerElements[i];
+          style.transform =
+              `translateX(${position.x}%) translateY(${position.y}%)`;
+          if (type === 'touchstart') {
+            style.opacity = '1';
+          } else if (type === 'touchend') {
+            style.opacity = '0';
+          }
         }
         const init = {
           touches: type === 'touchend' ? [] : touches,
@@ -636,14 +628,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       dispatchTouches('touchstart');
 
       requestAnimationFrame(moveTouches);
-
-      return () => {
-        const positionsCopy: Position[] = [];
-        for (const position of positions) {
-          positionsCopy.push({...position});
-        }
-        return positionsCopy;
-      };
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
