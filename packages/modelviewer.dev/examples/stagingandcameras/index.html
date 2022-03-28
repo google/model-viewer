@@ -307,6 +307,7 @@
 <style>
   .dot{
     display: block;
+    position: absolute;
     width: 12px;
     height: 12px;
     border-radius: 50%;
@@ -314,7 +315,8 @@
   }
 </style>
 <model-viewer id="prompt-demo" camera-controls enable-pan interaction-prompt="none" src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look">
-<div class="dot" slot="finger0"></div>
+  <div class="dot" slot="finger0" style="transform: translateX(-50px);"></div>
+  <div class="dot" slot="finger1" style="transform: translateX(50px);"></div>
 </model-viewer>
 
 <script>
@@ -323,20 +325,30 @@
 
   const finger0 = {
     x: [
+      {frames: 1, value: 0.5},
+      {frames: 2, value: 0.6},
+      {frames: 2, value: 0.5},
+      {frames: 1, value: 0.5},
+    ],
+    y: [
       {frames: 2, value: 0.6},
       {frames: 2, value: 0.4},
       {frames: 2, value: 0.5}
-    ],
-    y: [
+    ]};
+
+  const finger1 = {
+    x: [
       {frames: 1, value: 0.5},
-      {frames: 2, value: 0.4},
+      {frames: 2, value: 0.7},
       {frames: 2, value: 0.5},
       {frames: 1, value: 0.5},
-    ]};
+    ],
+    y: finger0.y
+  };
 
   const prompt = () => {
     if(!hasInteracted) {
-      modelViewerPrompt.interact(3000, finger0);
+      modelViewerPrompt.interact(3000, finger0, finger1);
       setTimeout(prompt, 5000);
     }
   };
