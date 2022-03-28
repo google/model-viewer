@@ -135,7 +135,7 @@ export class SmoothControls extends EventDispatcher {
   // Pan state
   public enablePan = true;
   private panProjection = new Matrix3();
-  private panMetersPerPixel = 0;
+  private panPerPixel = 0;
 
   // Internal orbital position state
   private spherical = new Spherical();
@@ -525,7 +525,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onMouseMove = (event: MouseEvent) => {
-    if (this.panMetersPerPixel > 0) {
+    if (this.panPerPixel > 0) {
       this.movePan(event.clientX, event.clientY);
     } else {
       this.handleSinglePointerMove(event);
@@ -560,7 +560,7 @@ export class SmoothControls extends EventDispatcher {
         this.userAdjustOrbit(0, 0, deltaZoom);
       }
 
-      if (this.panMetersPerPixel > 0) {
+      if (this.panPerPixel > 0) {
         const thisX =
             0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
         const thisY =
@@ -612,10 +612,10 @@ export class SmoothControls extends EventDispatcher {
 
   private initializePan() {
     (this.scene.element as any)[$panElement].style.opacity = 1;
-    const {theta, phi, radius} = this.spherical;
+    const {theta, phi} = this.spherical;
     const psi = theta - this.scene.yaw;
-    this.panMetersPerPixel = (PAN_SENSITIVITY * radius) /
-        this.element.getBoundingClientRect().height;
+    this.panPerPixel =
+        PAN_SENSITIVITY / this.element.getBoundingClientRect().height;
     this.panProjection.set(
         -Math.cos(psi),
         -Math.cos(phi) * Math.sin(psi),
@@ -634,7 +634,8 @@ export class SmoothControls extends EventDispatcher {
         thisX - lastPointerPosition.clientX,
         thisY - lastPointerPosition.clientY,
         0);
-    dxy.multiplyScalar(this.panMetersPerPixel);
+    const metersPerPixel = this.spherical.radius * this.panPerPixel;
+    dxy.multiplyScalar(metersPerPixel);
 
     lastPointerPosition.clientX = thisX;
     lastPointerPosition.clientY = thisY;
@@ -670,7 +671,7 @@ export class SmoothControls extends EventDispatcher {
         // Zoom in on the tapped point.
         this.userAdjustOrbit(0, 0, -5 * ZOOM_SENSITIVITY);
       }
-    } else if (this.panMetersPerPixel > 0) {
+    } else if (this.panPerPixel > 0) {
       const hit = scene.positionAndNormalFromPoint(vector2.set(0, 0));
       if (hit == null)
         return;
@@ -767,7 +768,7 @@ export class SmoothControls extends EventDispatcher {
 
   private onPointerUp() {
     this.element.style.cursor = 'grab';
-    this.panMetersPerPixel = 0;
+    this.panPerPixel = 0;
 
     if (this.isUserPointing) {
       this.dispatchEvent(
