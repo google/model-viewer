@@ -581,8 +581,9 @@ export class SmoothControls extends EventDispatcher {
       const dx = Math.abs(clientX - this.lastPointerPosition.clientX);
       const dy = Math.abs(clientY - this.lastPointerPosition.clientY);
       // If motion is mostly vertical, assume scrolling is the intent.
-      if ((touchAction === 'pan-y' && dy > dx) ||
-          (touchAction === 'pan-x' && dx > dy)) {
+      if (!event.altKey &&
+          ((touchAction === 'pan-y' && dy > dx) ||
+           (touchAction === 'pan-x' && dx > dy))) {
         this.touchMode = null;
         return;
       }

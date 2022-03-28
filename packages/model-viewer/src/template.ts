@@ -201,14 +201,10 @@ canvas.show {
   pointer-events: none;
   align-items: center;
   justify-content: center;
-
-  opacity: 0;
-  will-change: opacity;
   overflow: hidden;
-  transition: opacity 0.3s;
 }
 
-.slot.interaction-prompt.visible {
+.slot.interaction-prompt> .animated-container.visible {
   opacity: 1;
 }
 

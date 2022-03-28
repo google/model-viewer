@@ -15,7 +15,7 @@
 
 import {Camera, Vector3} from 'three';
 
-import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, OLD_DEFAULT_FOV_DEG, SphericalPosition} from '../../features/controls.js';
+import {$controls, $promptAnimatedContainer, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, OLD_DEFAULT_FOV_DEG, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$canvas, $scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
@@ -507,7 +507,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.interactionPrompt = 'none';
           await timePasses(element.interactionPromptThreshold + 100);
 
-          const promptElement: HTMLElement = (element as any)[$promptElement];
+          const promptElement: HTMLElement =
+              (element as any)[$promptAnimatedContainer];
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
         });
@@ -516,7 +517,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.interactionPrompt = 'auto';
           await timePasses(element.interactionPromptThreshold + 100);
 
-          const promptElement: HTMLElement = (element as any)[$promptElement];
+          const promptElement: HTMLElement =
+              (element as any)[$promptAnimatedContainer];
           expect(promptElement.classList.contains('visible')).to.be.equal(true);
         });
 
@@ -525,7 +527,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.cameraControls = false;
           await timePasses(element.interactionPromptThreshold + 100);
 
-          const promptElement: HTMLElement = (element as any)[$promptElement];
+          const promptElement: HTMLElement =
+              (element as any)[$promptAnimatedContainer];
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
         });
@@ -534,7 +537,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           let promptElement: HTMLElement;
 
           setup(async () => {
-            promptElement = (element as any)[$promptElement];
+            promptElement = (element as any)[$promptAnimatedContainer];
             element.interactionPrompt = 'auto';
 
             await until(() => promptElement.classList.contains('visible'));
@@ -577,7 +580,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         setup(async () => {
           input = element[$userInputElement];
-          promptElement = (element as any)[$promptElement];
+          promptElement = (element as any)[$promptAnimatedContainer];
           statusElement = element[$statusElement];
           element.alt = 'A 3D model of a cube';
           element.cameraOrbit = '0 90deg auto';

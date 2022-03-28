@@ -201,7 +201,6 @@ const QUARTER_PI = HALF_PI / 2.0;
 const TAU = 2.0 * Math.PI;
 
 export const $controls = Symbol('controls');
-export const $promptElement = Symbol('promptElement');
 export const $panElement = Symbol('panElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
 export const $fingerAnimatedContainers = Symbol('fingerAnimatedContainers');
@@ -360,8 +359,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'bounds'}) bounds: Bounds = 'legacy';
 
-    protected[$promptElement] =
-        this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
     protected[$promptAnimatedContainer] =
         this.shadowRoot!.querySelector('#prompt') as HTMLElement;
     protected[$fingerAnimatedContainers]: HTMLElement[] = [
@@ -571,12 +568,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const xy = new Array<{x: TimingFunction, y: TimingFunction}>();
       xy.push({x: timeline(CENTER, finger0.x), y: timeline(CENTER, finger0.y)});
-      const positions = [{x: CENTER, y: CENTER}];
+      const positions = [{x: 0, y: 0}];
 
       if (finger1 != null) {
         xy.push(
             {x: timeline(CENTER, finger1.x), y: timeline(CENTER, finger1.y)});
-        positions.push({x: CENTER, y: CENTER});
+        positions.push({x: 0, y: 0});
       }
 
       const startTime = performance.now();
@@ -592,8 +589,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             clientY: height * position.y
           }));
           const {style} = fingerElements[i];
-          style.transform =
-              `translateX(${position.x}%) translateY(${position.y}%)`;
+          style.transform = `translateX(${width * position.x}px) translateY(${
+              height * position.y}px)`;
           if (type === 'touchstart') {
             style.opacity = '1';
           } else if (type === 'touchend') {
@@ -610,10 +607,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
 
       const moveTouches = () => {
-        const time = (performance.now() - startTime) / duration;
+        const time = Math.min(1, (performance.now() - startTime) / duration);
         for (const [i, position] of positions.entries()) {
-          position.x = xy[i].x(time);
-          position.y = xy[i].y(time);
+          position.x = xy[i].x(time) - CENTER;
+          position.y = xy[i].y(time) - CENTER;
         }
 
         dispatchTouches('touchmove');
@@ -704,7 +701,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$waitingToPromptUser] = false;
           this[$promptElementVisibleTime] = now;
 
-          this[$promptElement].classList.add('visible');
+          this[$promptAnimatedContainer].classList.add('visible');
         }
       }
 
@@ -739,7 +736,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$deferInteractionPrompt]() {
       // Effectively cancel the timer waiting for user interaction:
       this[$waitingToPromptUser] = false;
-      this[$promptElement].classList.remove('visible');
+      this[$promptAnimatedContainer].classList.remove('visible');
       this[$promptElementVisibleTime] = Infinity;
     }
 
@@ -837,7 +834,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$waitingToPromptUser] = false;
-      this[$promptElement].classList.remove('visible');
+      this[$promptAnimatedContainer].classList.remove('visible');
 
       this[$promptElementVisibleTime] = Infinity;
       this[$focusedTime] = Infinity;
