@@ -810,7 +810,11 @@ export class SmoothControls extends EventDispatcher {
       this.onTouchChange(event);
     }
     if (event.targetTouches.length === 0) {
-      this.recenter(event.changedTouches[0]);
+      if (this.panPerPixel > 0) {
+        this.resetRadius();
+      } else {
+        this.recenter(event.changedTouches[0]);
+      }
     }
 
     this.onPointerUp();
