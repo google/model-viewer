@@ -344,7 +344,6 @@
       poster="../../assets/SketchfabModels/ThorAndTheMidgardSerpent.webp"
       ar
       ar-modes="webxr scene-viewer quick-look"
-      oncontextmenu="return false;"
     >
   <button class="view-button" slot="hotspot-0" 
     data-position="-0.0569m 0.0969m -0.1398m" data-normal="-0.5829775m 0.2863482m -0.7603565m" 
@@ -409,14 +408,14 @@
 </model-viewer>
 
 <script type="module">
-  const modelViewer = document.querySelector("#hotspot-camera-view-demo");
+  const modelViewer1 = document.querySelector("#hotspot-camera-view-demo");
   const annotationClicked = (annotation) => {
     let dataset = annotation.dataset;
-    modelViewer.cameraTarget = dataset.target;
-    modelViewer.cameraOrbit = dataset.orbit;
+    modelViewer1.cameraTarget = dataset.target;
+    modelViewer1.cameraOrbit = dataset.orbit;
   }
 
-  modelViewer.querySelectorAll('button').forEach((hotspot) => {
+  modelViewer1.querySelectorAll('button').forEach((hotspot) => {
     console.log("hello hotspot", hotspot);
     hotspot.addEventListener('click', () => annotationClicked(hotspot));
   });
