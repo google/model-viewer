@@ -20,7 +20,7 @@ import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 
-const PAN_SENSITIVITY = 0.75;
+const PAN_SENSITIVITY = 0.018;
 const TAP_DISTANCE = 2;
 const vector2 = new Vector2();
 const vector3 = new Vector3();
@@ -614,8 +614,7 @@ export class SmoothControls extends EventDispatcher {
     (this.scene.element as any)[$panElement].style.opacity = 1;
     const {theta, phi} = this.spherical;
     const psi = theta - this.scene.yaw;
-    this.panPerPixel =
-        PAN_SENSITIVITY / this.element.getBoundingClientRect().height;
+    this.panPerPixel = PAN_SENSITIVITY / this.scene.height;
     this.panProjection.set(
         -Math.cos(psi),
         -Math.cos(phi) * Math.sin(psi),
@@ -634,7 +633,8 @@ export class SmoothControls extends EventDispatcher {
         thisX - lastPointerPosition.clientX,
         thisY - lastPointerPosition.clientY,
         0);
-    const metersPerPixel = this.spherical.radius * this.panPerPixel;
+    const metersPerPixel =
+        this.spherical.radius * Math.exp(this.logFov) * this.panPerPixel;
     dxy.multiplyScalar(metersPerPixel);
 
     lastPointerPosition.clientX = thisX;
