@@ -121,7 +121,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
         });
 
         test('has a current time close to the delay', () => {
-          expect(element.currentTime).to.be.closeTo(delaySeconds, 0.02);
+          expect(element.currentTime).to.be.closeTo(delaySeconds, 0.05);
         });
 
         test('changing currentTime triggers render', () => {
@@ -145,7 +145,7 @@ suite('ModelViewerElementBase with AnimationMixin', () => {
           });
 
           test('has a current time close to the delay', () => {
-            expect(element.currentTime).to.be.closeTo(delaySeconds, 0.02);
+            expect(element.currentTime).to.be.closeTo(delaySeconds, 0.05);
           });
         })
       });
