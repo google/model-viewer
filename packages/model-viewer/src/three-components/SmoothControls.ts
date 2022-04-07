@@ -669,8 +669,6 @@ export class SmoothControls extends EventDispatcher {
     } else {
       scene.target.worldToLocal(hit.position);
       scene.setTarget(hit.position.x, hit.position.y, hit.position.z);
-      // Zoom in on the tapped point.
-      this.userAdjustOrbit(0, 0, -5 * ZOOM_SENSITIVITY);
     }
   }
 
