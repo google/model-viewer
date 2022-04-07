@@ -647,6 +647,9 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private recenter(pointer: Pointer) {
+    const {scene} = this;
+    (scene.element as any)[$panElement].style.opacity = 0;
+
     if (!this.enablePan ||
         Math.abs(pointer.clientX - this.startPointerPosition.clientX) >
             TAP_DISTANCE ||
@@ -654,8 +657,6 @@ export class SmoothControls extends EventDispatcher {
             TAP_DISTANCE) {
       return;
     }
-    const {scene} = this;
-    (scene.element as any)[$panElement].style.opacity = 0;
 
     const hit = scene.positionAndNormalFromPoint(
         scene.getNDC(pointer.clientX, pointer.clientY));
@@ -673,15 +674,17 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private resetRadius() {
-    if (!this.enablePan || this.panPerPixel === 0) {
-      return;
-    }
     const {scene} = this;
     (scene.element as any)[$panElement].style.opacity = 0;
 
-    const hit = scene.positionAndNormalFromPoint(vector2.set(0, 0));
-    if (hit == null)
+    if (!this.enablePan || this.panPerPixel === 0) {
       return;
+    }
+
+    const hit = scene.positionAndNormalFromPoint(vector2.set(0, 0));
+    if (hit == null) {
+      return;
+    }
 
     scene.target.worldToLocal(hit.position);
     const goalTarget = scene.getTarget();
@@ -767,7 +770,7 @@ export class SmoothControls extends EventDispatcher {
             null :
             this.touchModeZoom;
         this.touchDecided = true;
-        if (this.enablePan) {
+        if (this.enablePan && this.touchMode != null) {
           this.initializePan();
           const x = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
           const y = 0.5 * (targetTouches[0].clientY + targetTouches[1].clientY);
