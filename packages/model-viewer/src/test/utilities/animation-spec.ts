@@ -60,10 +60,13 @@ suite('animation', () => {
 
   suite('timeline', () => {
     test('creates a timing function sequence from keyframes', () => {
-      const forwardBackward = timeline(0, [
-        {frames: 5, value: 100, ease: easeLinear},
-        {frames: 5, value: 0, ease: easeLinear}
-      ]);
+      const forwardBackward = timeline({
+        initialValue: 0,
+        keyframes: [
+          {frames: 5, value: 100, ease: easeLinear},
+          {frames: 5, value: 0, ease: easeLinear}
+        ]
+      });
       for (let i = 0; i < 10; ++i) {
         for (let i = 0; i < 10; ++i) {
           expect(forwardBackward(i / 10))

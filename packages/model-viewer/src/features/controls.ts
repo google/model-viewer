@@ -24,7 +24,7 @@ import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/par
 import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
-import {Frame, timeline, TimingFunction} from '../utilities/animation.js';
+import {Path, timeline, TimingFunction} from '../utilities/animation.js';
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -35,21 +35,27 @@ const PROMPT_ANIMATION_TIME = 5000;
 
 // For timing purposes, a "frame" is a timing agnostic relative unit of time
 // and a "value" is a target value for the Frame.
-const wiggle = timeline(0, [
-  {frames: 5, value: -1},
-  {frames: 1, value: -1},
-  {frames: 8, value: 1},
-  {frames: 1, value: 1},
-  {frames: 5, value: 0},
-  {frames: 18, value: 0}
-]);
+const wiggle = timeline({
+  initialValue: 0,
+  keyframes: [
+    {frames: 5, value: -1},
+    {frames: 1, value: -1},
+    {frames: 8, value: 1},
+    {frames: 1, value: 1},
+    {frames: 5, value: 0},
+    {frames: 18, value: 0}
+  ]
+});
 
-const fade = timeline(0, [
-  {frames: 1, value: 1},
-  {frames: 5, value: 1},
-  {frames: 1, value: 0},
-  {frames: 6, value: 0}
-]);
+const fade = timeline({
+  initialValue: 0,
+  keyframes: [
+    {frames: 1, value: 1},
+    {frames: 5, value: 1},
+    {frames: 1, value: 0},
+    {frames: 6, value: 0}
+  ]
+});
 
 export const DEFAULT_FOV_DEG = 30;
 export const OLD_DEFAULT_FOV_DEG = 45;
@@ -80,8 +86,8 @@ export interface SphericalPosition {
 }
 
 export interface Finger {
-  x: Frame[];
-  y: Frame[];
+  x: Path;
+  y: Path;
 }
 
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
@@ -567,13 +573,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const CENTER = 0.5;
 
       const xy = new Array<{x: TimingFunction, y: TimingFunction}>();
-      xy.push({x: timeline(CENTER, finger0.x), y: timeline(CENTER, finger0.y)});
-      const positions = [{x: 0, y: 0}];
+      xy.push({x: timeline(finger0.x), y: timeline(finger0.y)});
+      const positions = [{x: xy[0].x(0) - CENTER, y: xy[0].y(0) - CENTER}];
 
       if (finger1 != null) {
-        xy.push(
-            {x: timeline(CENTER, finger1.x), y: timeline(CENTER, finger1.y)});
-        positions.push({x: 0, y: 0});
+        xy.push({x: timeline(finger1.x), y: timeline(finger1.y)});
+        positions.push({x: xy[1].x(0) - CENTER, y: xy[1].y(0) - CENTER});
       }
 
       const startTime = performance.now();
