@@ -230,6 +230,7 @@ const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
 const $initialized = Symbol('initialized');
 const $maintainThetaPhi = Symbol('maintainThetaPhi');
+const $setInterpolationDecay = Symbol('setInterpolationDecay');
 
 const $syncCameraOrbit = Symbol('syncCameraOrbit');
 const $syncFieldOfView = Symbol('syncFieldOfView');
@@ -536,8 +537,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('interpolationDecay')) {
-        controls.setDamperDecayTime(this.interpolationDecay);
-        this[$scene].setTargetDamperDecayTime(this.interpolationDecay);
+        this[$setInterpolationDecay](this.interpolationDecay);
       }
 
       if (this[$jumpCamera] === true) {
@@ -570,15 +570,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     interact(duration: number, finger0: Finger, finger1?: Finger) {
       const inputElement = this[$userInputElement];
       const fingerElements = this[$fingerAnimatedContainers];
-      const CENTER = 0.5;
 
       const xy = new Array<{x: TimingFunction, y: TimingFunction}>();
       xy.push({x: timeline(finger0.x), y: timeline(finger0.y)});
-      const positions = [{x: xy[0].x(0) - CENTER, y: xy[0].y(0) - CENTER}];
+      const positions = [{x: xy[0].x(0), y: xy[0].y(0)}];
 
       if (finger1 != null) {
         xy.push({x: timeline(finger1.x), y: timeline(finger1.y)});
-        positions.push({x: xy[1].x(0) - CENTER, y: xy[1].y(0) - CENTER});
+        positions.push({x: xy[1].x(0), y: xy[1].y(0)});
       }
 
       const startTime = performance.now();
@@ -614,16 +613,17 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const moveTouches = () => {
         const time = Math.min(1, (performance.now() - startTime) / duration);
         for (const [i, position] of positions.entries()) {
-          position.x = xy[i].x(time) - CENTER;
-          position.y = xy[i].y(time) - CENTER;
+          position.x = xy[i].x(time);
+          position.y = xy[i].y(time);
         }
-
+        this[$setInterpolationDecay](0);
         dispatchTouches('touchmove');
 
         if (time < 1) {
           requestAnimationFrame(moveTouches);
         } else {
           dispatchTouches('touchend');
+          this[$setInterpolationDecay](this.interpolationDecay);
         }
       };
 
@@ -743,6 +743,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$waitingToPromptUser] = false;
       this[$promptAnimatedContainer].classList.remove('visible');
       this[$promptElementVisibleTime] = Infinity;
+    }
+
+    [$setInterpolationDecay](decay: number) {
+      this[$controls].setDamperDecayTime(decay);
+      this[$scene].setTargetDamperDecayTime(decay);
     }
 
     /**

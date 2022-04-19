@@ -191,17 +191,23 @@ canvas.show {
   opacity: 0;
 }
 
-.slot.interaction-prompt {
-  display: var(--interaction-prompt-display, flex);
+.centered {
+  align-items: center;
+  justify-content: center;
+}
+
+.cover {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
+}
+
+.slot.interaction-prompt {
+  display: var(--interaction-prompt-display, flex);
 }
 
 .slot.interaction-prompt> .animated-container.visible {
@@ -344,20 +350,21 @@ canvas.show {
     </slot>
   </div>
 
-  <div class="slot interaction-prompt">
+  <div class="slot interaction-prompt cover centered">
     <div id="prompt" class="animated-container">
       <slot name="interaction-prompt" aria-hidden="true">
         ${ControlsPrompt}
       </slot>
     </div>
-    <div id="finger0" class="animated-container">
-      <slot name="finger0" aria-hidden="true">
-      </slot>
-    </div>
-    <div id="finger1" class="animated-container">
-      <slot name="finger1" aria-hidden="true">
-      </slot>
-    </div>
+  </div>
+
+  <div id="finger0" class="animated-container cover">
+    <slot name="finger0" aria-hidden="true">
+    </slot>
+  </div>
+  <div id="finger1" class="animated-container cover">
+    <slot name="finger1" aria-hidden="true">
+    </slot>
   </div>
 
   <div class="slot default">
