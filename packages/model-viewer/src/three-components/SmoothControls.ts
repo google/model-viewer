@@ -20,7 +20,7 @@ import {clamp} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 
-const PAN_SENSITIVITY = 0.75;
+const PAN_SENSITIVITY = 0.018;
 const TAP_DISTANCE = 2;
 const vector2 = new Vector2();
 const vector3 = new Vector3();
@@ -614,8 +614,7 @@ export class SmoothControls extends EventDispatcher {
   private initializePan() {
     const {theta, phi} = this.spherical;
     const psi = theta - this.scene.yaw;
-    this.panPerPixel =
-        PAN_SENSITIVITY / this.element.getBoundingClientRect().height;
+    this.panPerPixel = PAN_SENSITIVITY / this.scene.height;
     this.panProjection.set(
         -Math.cos(psi),
         -Math.cos(phi) * Math.sin(psi),
@@ -634,7 +633,8 @@ export class SmoothControls extends EventDispatcher {
         thisX - lastPointerPosition.clientX,
         thisY - lastPointerPosition.clientY,
         0);
-    const metersPerPixel = this.spherical.radius * this.panPerPixel;
+    const metersPerPixel =
+        this.spherical.radius * Math.exp(this.logFov) * this.panPerPixel;
     dxy.multiplyScalar(metersPerPixel);
 
     lastPointerPosition.clientX = thisX;
@@ -647,6 +647,9 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private recenter(pointer: Pointer) {
+    const {scene} = this;
+    (scene.element as any)[$panElement].style.opacity = 0;
+
     if (!this.enablePan ||
         Math.abs(pointer.clientX - this.startPointerPosition.clientX) >
             TAP_DISTANCE ||
@@ -654,8 +657,6 @@ export class SmoothControls extends EventDispatcher {
             TAP_DISTANCE) {
       return;
     }
-    const {scene} = this;
-    (scene.element as any)[$panElement].style.opacity = 0;
 
     const hit = scene.positionAndNormalFromPoint(
         scene.getNDC(pointer.clientX, pointer.clientY));
@@ -669,21 +670,21 @@ export class SmoothControls extends EventDispatcher {
     } else {
       scene.target.worldToLocal(hit.position);
       scene.setTarget(hit.position.x, hit.position.y, hit.position.z);
-      // Zoom in on the tapped point.
-      this.userAdjustOrbit(0, 0, -5 * ZOOM_SENSITIVITY);
     }
   }
 
   private resetRadius() {
-    if (!this.enablePan || this.panPerPixel === 0) {
-      return;
-    }
     const {scene} = this;
     (scene.element as any)[$panElement].style.opacity = 0;
 
-    const hit = scene.positionAndNormalFromPoint(vector2.set(0, 0));
-    if (hit == null)
+    if (!this.enablePan || this.panPerPixel === 0) {
       return;
+    }
+
+    const hit = scene.positionAndNormalFromPoint(vector2.set(0, 0));
+    if (hit == null) {
+      return;
+    }
 
     scene.target.worldToLocal(hit.position);
     const goalTarget = scene.getTarget();
@@ -770,7 +771,7 @@ export class SmoothControls extends EventDispatcher {
             null :
             this.touchModeZoom;
         this.touchDecided = true;
-        if (this.enablePan) {
+        if (this.enablePan && this.touchMode != null) {
           this.initializePan();
           if (!event.altKey) {  // prompt, not user interaction
             (this.scene.element as any)[$panElement].style.opacity = 1;

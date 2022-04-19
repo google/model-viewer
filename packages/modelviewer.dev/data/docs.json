@@ -891,7 +891,7 @@
       {
         "name": "currentTime",
         "htmlName": "currentTime",
-        "description": "This property reports the current track time of the currently selected animation. If no animations are available, the value is always 0. This property can be set in order to seek along the timeline of the currently playing animation. For example, if you set it to 0, it will reset an animation to the beginning."
+        "description": "This property reports the current track time of the currently selected animation in seconds. If no animations are available, the value is always 0. This property can be set in order to seek along the timeline of the currently playing animation. For example, if you set it to 0, it will reset an animation to the beginning."
       },
       {
         "name": "timeScale",
@@ -901,7 +901,7 @@
       {
         "name": "duration",
         "htmlName": "duration",
-        "description": "This property is read-only. It returns the duration of the currently selected animation. If no animations are available, the value is always 0."
+        "description": "This property is read-only. It returns the duration of the currently selected animation in seconds. If no animations are available, the value is always 0."
       },
       {
         "name": "paused",

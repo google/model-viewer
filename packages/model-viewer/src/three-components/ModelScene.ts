@@ -612,7 +612,9 @@ export class ModelScene extends Scene {
         action.paused = false;
         if (lastAnimationAction != null && action !== lastAnimationAction) {
           action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
-        } else if (this.animationTimeScale > 0) {
+        } else if (
+            this.animationTimeScale > 0 &&
+            this.animationTime == this.duration) {
           // This is a workaround for what I believe is a three.js bug.
           this.animationTime = 0;
         }
