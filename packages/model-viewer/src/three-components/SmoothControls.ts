@@ -555,8 +555,8 @@ export class SmoothControls extends EventDispatcher {
             this.twoTouchDistance(this.lastTouches[0], this.lastTouches[1]);
         const touchDistance =
             this.twoTouchDistance(targetTouches[0], targetTouches[1]);
-        const deltaZoom =
-            ZOOM_SENSITIVITY * (lastTouchDistance - touchDistance) / 10.0;
+        const deltaZoom = ZOOM_SENSITIVITY *
+            (lastTouchDistance - touchDistance) * 50 / this.scene.height;
 
         this.userAdjustOrbit(0, 0, deltaZoom);
       }
