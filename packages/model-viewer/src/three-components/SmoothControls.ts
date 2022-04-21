@@ -125,11 +125,11 @@ export interface PointerChangeEvent extends ThreeEvent {
  */
 export class SmoothControls extends EventDispatcher {
   public sensitivity = 1;
+  public isUserChange = false;
 
   private _interactionEnabled: boolean = false;
   private _options: SmoothControlsOptions;
   private _disableZoom = false;
-  private isUserChange = false;
   private isUserPointing = false;
 
   // Pan state
@@ -496,15 +496,16 @@ export class SmoothControls extends EventDispatcher {
     this.adjustOrbit(
         deltaTheta * this.sensitivity, deltaPhi * this.sensitivity, deltaZoom);
 
-    this.isUserChange = true;
+    const source =
+        this.isUserChange ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
     // Always make sure that an initial event is triggered in case there is
     // contention between user interaction and imperative changes. This initial
     // event will give external observers that chance to observe that
     // interaction occurred at all:
-    this.dispatchEvent({type: 'change', source: ChangeSource.USER_INTERACTION});
+    this.dispatchEvent({type: 'change', source});
   }
 
-  // Wraps to bewteen -pi and pi
+  // Wraps to between -pi and pi
   private wrapAngle(radians: number): number {
     const normalized = (radians + Math.PI) / (2 * Math.PI);
     const wrapped = normalized - Math.floor(normalized);
@@ -718,6 +719,8 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onMouseDown = (event: MouseEvent) => {
+    this.isUserChange = true;
+    this.panPerPixel = 0;
     this.onPointerDown(() => {
       self.addEventListener('mousemove', this.onMouseMove);
       self.addEventListener('mouseup', this.onMouseUp, {once: true});
@@ -736,11 +739,13 @@ export class SmoothControls extends EventDispatcher {
   };
 
   private onTouchStart = (event: TouchEvent) => {
+    this.isUserChange = !event.altKey;  // flag set by interact() in controls.ts
     this.onPointerDown(() => {
       const {targetTouches, changedTouches, touches} = event;
       if (targetTouches.length === changedTouches.length) {
         this.touchMode = null;
         this.touchDecided = false;
+        this.panPerPixel = 0;
       }
 
       if (targetTouches.length === touches.length) {
@@ -831,52 +836,49 @@ export class SmoothControls extends EventDispatcher {
     if (!this.canInteract) {
       return;
     }
+    this.isUserChange = true;
 
     const deltaZoom = (event as WheelEvent).deltaY *
         ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY / 30;
     this.userAdjustOrbit(0, 0, deltaZoom);
 
-    if (event.cancelable) {
-      event.preventDefault();
-    }
+    event.preventDefault();
   };
 
   private onKeyDown = (event: KeyboardEvent) => {
     // We track if the key is actually one we respond to, so as not to
     // accidentally clober unrelated key inputs when the <model-viewer> has
     // focus.
-    let relevantKey = false;
+    let relevantKey = true;
+    const {isUserChange} = this;
+    this.isUserChange = true;
 
     switch (event.keyCode) {
       case KeyCode.PAGE_UP:
-        relevantKey = true;
         this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
         break;
       case KeyCode.PAGE_DOWN:
-        relevantKey = true;
         this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
         break;
       case KeyCode.UP:
-        relevantKey = true;
         this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.DOWN:
-        relevantKey = true;
         this.userAdjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.LEFT:
-        relevantKey = true;
         this.userAdjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
       case KeyCode.RIGHT:
-        relevantKey = true;
         this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
       default:
+        relevantKey = false;
+        this.isUserChange = isUserChange;
         break;
     }
 
-    if (relevantKey && event.cancelable) {
+    if (relevantKey) {
       event.preventDefault();
     }
   };

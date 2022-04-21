@@ -617,6 +617,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
 
       const moveTouches = () => {
+        // cancel interaction if user interacts
+        if (this[$controls].isUserChange) {
+          this[$setInterpolationDecay](this.interpolationDecay);
+          for (const fingerElement of this[$fingerAnimatedContainers]) {
+            fingerElement.style.opacity = '0';
+          }
+          return;
+        }
+
         const time = Math.min(1, (performance.now() - startTime) / duration);
         for (const [i, position] of positions.entries()) {
           position.x = xy[i].x(time);
