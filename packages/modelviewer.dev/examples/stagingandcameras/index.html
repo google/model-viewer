@@ -323,7 +323,9 @@
 
 <script>
   const modelViewerPrompt = document.querySelector("#prompt-demo");
-  let hasInteracted = false;
+  
+  const PROMT_MS = 3000;
+  const REPEAT_MS = 5000;
 
   const finger0 = {
     x: {
@@ -367,10 +369,12 @@
     }
   };
 
+  let hasInteracted = false;
+
   const prompt = () => {
-    if(!hasInteracted) {
-      modelViewerPrompt.interact(3000, finger0, finger1);
-      setTimeout(prompt, 5000);
+    if (!hasInteracted) {
+      modelViewerPrompt.interact(PROMT_MS, finger0, finger1);
+      setTimeout(prompt, REPEAT_MS);
     }
   };
 
@@ -378,14 +382,14 @@
     prompt();
   }, {once: true});
 
-  interacted = () => {
-    hasInteracted = true;
+  const interacted = (event) => {
+    if (event.detail.source === 'user-interaction') {
+      hasInteracted = true;
+      modelViewerPrompt.removeEventListener('camera-change', interacted);
+    }
   };
 
-  modelViewerPrompt.addEventListener('touchstart', interacted, {once: true});
-  modelViewerPrompt.addEventListener('mousedown', interacted, {once: true});
-  modelViewerPrompt.addEventListener('keydown', interacted, {once: true});
-  modelViewerPrompt.addEventListener('wheel', interacted, {once: true});
+  modelViewerPrompt.addEventListener('camera-change', interacted);
 </script>
             </template>
           </example-snippet>
