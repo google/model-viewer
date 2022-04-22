@@ -577,6 +577,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const inputElement = this[$userInputElement];
       const fingerElements = this[$fingerAnimatedContainers];
 
+      if (fingerElements[0].style.opacity === '1') {
+        console.warn(
+            'interact() failed because an existing interaction is running.')
+        return;
+      }
+
       const xy = new Array<{x: TimingFunction, y: TimingFunction}>();
       xy.push({x: timeline(finger0.x), y: timeline(finger0.y)});
       const positions = [{x: xy[0].x(0), y: xy[0].y(0)}];
@@ -586,7 +592,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         positions.push({x: xy[1].x(0), y: xy[1].y(0)});
       }
 
-      const startTime = performance.now();
+      let startTime = performance.now();
       const {width, height} = this[$scene];
 
       const dispatchTouches = (type: string) => {
@@ -639,8 +645,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         } else {
           dispatchTouches('touchend');
           this[$setInterpolationDecay](this.interpolationDecay);
+          document.removeEventListener('visibilitychange', onVisibilityChange);
         }
       };
+
+      const onVisibilityChange = () => {
+        let elapsed = 0;
+        if (document.visibilityState === 'hidden') {
+          elapsed = performance.now() - startTime;
+        } else {
+          startTime = performance.now() - elapsed;
+        }
+      };
+
+      document.addEventListener('visibilitychange', onVisibilityChange);
 
       dispatchTouches('touchstart');
 

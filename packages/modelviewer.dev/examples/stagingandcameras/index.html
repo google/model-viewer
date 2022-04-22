@@ -374,8 +374,8 @@
     }
   };
 
-  modelViewerPrompt.addEventListener('load', () => {
-    setTimeout(prompt, 500);
+  modelViewerPrompt.addEventListener('poster-dismissed', () => {
+    prompt();
   }, {once: true});
 
   interacted = () => {
