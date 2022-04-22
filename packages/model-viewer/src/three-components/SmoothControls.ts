@@ -326,8 +326,6 @@ export class SmoothControls extends EventDispatcher {
     this.goalSpherical.radius = nextRadius;
     this.goalSpherical.makeSafe();
 
-    this.isUserChange = false;
-
     return true;
   }
 

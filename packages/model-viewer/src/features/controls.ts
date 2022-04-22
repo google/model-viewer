@@ -672,13 +672,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
+      const controls = this[$controls];
       if (this[$maintainThetaPhi]) {
         const {theta, phi} = this.getCameraOrbit();
         style[0] = theta;
         style[1] = phi;
         this[$maintainThetaPhi] = false;
       }
-      this[$controls].setOrbit(style[0], style[1], style[2]);
+      controls.isUserChange = false;
+      controls.setOrbit(style[0], style[1], style[2]);
     }
 
     [$syncMinCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
@@ -727,6 +729,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
 
+      const controls = this[$controls];
+      const scene = this[$scene];
+
       const now = performance.now();
       if (this[$waitingToPromptUser]) {
         const thresholdTime =
@@ -745,7 +750,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (isFinite(this[$promptElementVisibleTime]) &&
           this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
-        const scene = this[$scene];
         const animationTime =
             ((now - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
             1;
@@ -761,14 +765,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$promptAnimatedContainer].style.transform =
               `translateX(${xOffset}px)`;
 
-          this[$controls].adjustOrbit(deltaTheta, 0, 0);
+          controls.isUserChange = false;
+          controls.adjustOrbit(deltaTheta, 0, 0);
 
           this[$lastPromptOffset] = offset;
         }
       }
 
-      this[$controls].update(time, delta);
-      this[$scene].updateTarget(delta);
+      controls.update(time, delta);
+      scene.updateTarget(delta);
     }
 
     [$deferInteractionPrompt]() {
