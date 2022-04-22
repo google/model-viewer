@@ -220,6 +220,11 @@
         "description": "Fired when a model is loaded. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the <span class='attribute'>src</span> attribute is changed."
       },
       {
+        "name": "poster-dismissed",
+        "htmlName": "posterDismissed",
+        "description": "Fires when the poster has fully transitioned away. Additional delay from the \"load\" event can be caused by the renderer compiling its shaders."
+      },
+      {
         "name": "preload",
         "htmlName": "preload",
         "description": "When <span class='attribute'>loading=\"eager\"</span> this event is fired when preloading is done."
@@ -227,7 +232,7 @@
       {
         "name": "model-visibility",
         "htmlName": "modelVisibility",
-        "description": "This event is fired when the visibility of the model changes. When the model is loaded, the element is in the viewport (assuming there is an IntersectionObserver), and the poster has been dismissed, this event will fire and event.detail.visible will be \"true\"."
+        "description": "This event is fired when the visibility of the model changes. When the model is loaded, the element is in the viewport (assuming there is an IntersectionObserver), this event will fire and event.detail.visible will be \"true\"."
       },
       {
         "name": "progress",
@@ -701,6 +706,14 @@
         "name": "zoom(keyPresses)",
         "htmlName": "zoom",
         "description": "Applies the default zoom behavior (a combination of radius and field of view change), mimicking keyboard or mouse wheel inputs. If keyPresses = 1.0, it will zoom in as much as a single keystroke; negative values zoom out."
+      },
+      {
+        "name": "interact(duration, finger0, finger1)",
+        "htmlName": "interact",
+        "description": "Create a synthetic touch interaction, ideal for creating custom interaction prompts. The duration (ms) and finger0 are required, while finger1 is optional and will create zoom/pan interactions instead of rotation if specified. Any user interaction will automatically cancel this motion and interact() cannot be called while a current synthetic interaction is playing. Each finger input is an object with x and y members, each of which has initialValue and keyframes members. The keyframes are an array of objects with frames and value members. The values are between 0 and 1, spanning the width/height of the element. The frames are a relative unit of time, where their sum is normalized to the duration. Each frame eases in and out between values. Visualize the touch points using the <a href=\"./#entrydocs-stagingandcameras-slots-finger\">finger0/finger1</a> slots.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#customPrompt\"><span class='attribute'>customPrompt</span> example</a>"
+        ]
       }
     ],
     "Events": [
@@ -715,6 +728,14 @@
         "name": "interaction-prompt",
         "htmlName": "interactionPrompt",
         "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"interaction-prompt\"</span>, this element will replace the default hand icon which wiggles back and forth with the model until the user interacts."
+      },
+      {
+        "name": "finger0/finger1",
+        "htmlName": "finger",
+        "description": "Use in combination with <a href=\"./#entrydocs-stagingandcameras-methods-interact\">interact()</a> to specify an HTML element to represent each moving touch point. By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"finger0\"</span>, this element will appear and move along the path specified in the finger0 input of the interact() method, and similarly for finger1. Empty by default.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#customPrompt\"><span class='attribute'>customPrompt</span> example</a>"
+        ]
       },
       {
         "name": "pan-target",
