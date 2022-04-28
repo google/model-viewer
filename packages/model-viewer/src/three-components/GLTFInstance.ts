@@ -141,13 +141,13 @@ export class GLTFInstance implements GLTF {
         materials.forEach(material => {
           // Explicitly dispose any textures assigned to this material
           for (const propertyName in material) {
-            const propertyValue = (material as any)[propertyName];
-            if (propertyValue instanceof Texture) {
-              const image = propertyValue.source.data;
+            const texture = (material as any)[propertyName];
+            if (texture instanceof Texture) {
+              const image = texture.source.data;
               if (image instanceof ImageBitmap) {
                 image.close();
               }
-              propertyValue.dispose();
+              texture.dispose();
             }
           }
           material.dispose();
