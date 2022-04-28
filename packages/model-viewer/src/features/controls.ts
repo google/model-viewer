@@ -274,7 +274,7 @@ export declare interface ControlsInterface {
   updateFraming(): Promise<void>;
   resetInteractionPrompt(): void;
   zoom(keyPresses: number): void;
-  interact(duration: number, finger0: Finger, finger1: Finger): void;
+  interact(duration: number, finger0: Finger, finger1?: Finger): void;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
