@@ -143,6 +143,10 @@ export class GLTFInstance implements GLTF {
           for (const propertyName in material) {
             const propertyValue = (material as any)[propertyName];
             if (propertyValue instanceof Texture) {
+              const image = propertyValue.source.data;
+              if (image instanceof ImageBitmap) {
+                image.close();
+              }
               propertyValue.dispose();
             }
           }
