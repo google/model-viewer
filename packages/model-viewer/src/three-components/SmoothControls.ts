@@ -592,16 +592,13 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private recenter(pointer: PointerEvent) {
-    const {scene} = this;
-    (scene.element as any)[$panElement].style.opacity = 0;
-
-    if (!this.enablePan ||
-        Math.abs(pointer.clientX - this.startPointerPosition.clientX) >
+    if (Math.abs(pointer.clientX - this.startPointerPosition.clientX) >
             TAP_DISTANCE ||
         Math.abs(pointer.clientY - this.startPointerPosition.clientY) >
             TAP_DISTANCE) {
       return;
     }
+    const {scene} = this;
 
     const hit = scene.positionAndNormalFromPoint(
         scene.getNDC(pointer.clientX, pointer.clientY));
@@ -620,11 +617,6 @@ export class SmoothControls extends EventDispatcher {
 
   private resetRadius() {
     const {scene} = this;
-    (scene.element as any)[$panElement].style.opacity = 0;
-
-    if (!this.enablePan || this.panPerPixel === 0) {
-      return;
-    }
 
     const hit = scene.positionAndNormalFromPoint(vector2.set(0, 0));
     if (hit == null) {
@@ -717,18 +709,20 @@ export class SmoothControls extends EventDispatcher {
       this.pointers.splice(index, 1);
     }
 
+    if (this.panPerPixel > 0) {
+      this.resetRadius();
+    }
     if (this.pointers.length === 0) {
       element.removeEventListener('pointermove', this.onPointerMove);
       element.removeEventListener('pointerup', this.onPointerUp);
-      if (this.panPerPixel > 0) {
-        this.resetRadius();
-      } else {
+      if (this.enablePan) {
         this.recenter(event);
       }
     } else if (this.touchMode !== null) {
       this.onTouchChange();
     }
 
+    (this.scene.element as any)[$panElement].style.opacity = 0;
     element.style.cursor = 'grab';
     this.panPerPixel = 0;
 
@@ -745,6 +739,9 @@ export class SmoothControls extends EventDispatcher {
           null :
           this.touchModeZoom;
       this.touchDecided = true;
+      this.lastSeparation =
+          this.twoTouchDistance(this.pointers[0], this.pointers[1]);
+
       if (this.enablePan && this.touchMode != null) {
         this.initializePan();
       }
