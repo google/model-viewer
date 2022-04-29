@@ -26,10 +26,12 @@ const vector2 = new Vector2();
 const vector3 = new Vector3();
 
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
-export type TouchMode = null|((event: TouchEvent) => void);
+export type TouchMode = null|((dx: number, dy: number) => void);
 
 export interface Pointer {
-  clientX: number, clientY: number,
+  clientX: number;
+  clientY: number;
+  id: number;
 }
 
 export interface SmoothControlsOptions {
@@ -102,7 +104,6 @@ export interface ChangeEvent extends ThreeEvent {
 
 export interface PointerChangeEvent extends ThreeEvent {
   type: 'pointer-change-start'|'pointer-change-end';
-  pointer: Pointer;
 }
 
 /**
@@ -149,9 +150,9 @@ export class SmoothControls extends EventDispatcher {
 
   // Pointer state
   private touchMode: TouchMode = null;
-  private lastPointerPosition: Pointer = {clientX: 0, clientY: 0};
-  private startPointerPosition: Pointer = {clientX: 0, clientY: 0};
-  private lastTouches!: TouchList;
+  private pointers: Pointer[] = [];
+  private startPointerPosition: Pointer = {clientX: 0, clientY: 0, id: -1};
+  private lastSeparation = 0;
   private touchDecided = false;
 
   constructor(
@@ -173,16 +174,13 @@ export class SmoothControls extends EventDispatcher {
   enableInteraction() {
     if (this._interactionEnabled === false) {
       const {element} = this;
-      element.addEventListener('mousedown', this.onMouseDown);
+      element.addEventListener('pointerdown', this.onPointerDown);
+      element.addEventListener('pointercancel', this.onPointerUp);
+
       if (!this._disableZoom) {
         element.addEventListener('wheel', this.onWheel);
       }
       element.addEventListener('keydown', this.onKeyDown);
-      element.addEventListener(
-          'touchstart', this.onTouchStart, {passive: true});
-      element.addEventListener('touchmove', this.onTouchMove, {passive: false});
-
-      element.addEventListener('touchend', this.onTouchEnd);
 
       this.element.style.cursor = 'grab';
       this._interactionEnabled = true;
@@ -195,17 +193,12 @@ export class SmoothControls extends EventDispatcher {
     if (this._interactionEnabled === true) {
       const {element} = this;
 
-      self.removeEventListener('mousemove', this.onMouseMove);
-      element.removeEventListener('mousedown', this.onMouseDown);
-      if (!this._disableZoom) {
-        element.removeEventListener('wheel', this.onWheel);
-      }
+      element.removeEventListener('pointerdown', this.onPointerDown);
+      element.removeEventListener('pointermove', this.onPointerMove);
+      element.removeEventListener('pointerup', this.onPointerUp);
+      element.removeEventListener('pointercancel', this.onPointerUp);
+      element.removeEventListener('wheel', this.onWheel);
       element.removeEventListener('keydown', this.onKeyDown);
-      element.removeEventListener('touchstart', this.onTouchStart);
-      element.removeEventListener('touchmove', this.onTouchMove);
-
-      self.removeEventListener('mouseup', this.onMouseUp);
-      element.removeEventListener('touchend', this.onTouchEnd);
 
       element.style.cursor = '';
       this.touchMode = null;
@@ -515,7 +508,7 @@ export class SmoothControls extends EventDispatcher {
     return 2 * Math.PI * pixelLength / this.element.clientHeight;
   }
 
-  private twoTouchDistance(touchOne: Touch, touchTwo: Touch): number {
+  private twoTouchDistance(touchOne: Pointer, touchTwo: Pointer): number {
     const {clientX: xOne, clientY: yOne} = touchOne;
     const {clientX: xTwo, clientY: yTwo} = touchTwo;
     const xDelta = xTwo - xOne;
@@ -524,87 +517,45 @@ export class SmoothControls extends EventDispatcher {
     return Math.sqrt(xDelta * xDelta + yDelta * yDelta);
   }
 
-  private onMouseMove = (event: MouseEvent) => {
+  private touchModeZoom: TouchMode = (dx: number, dy: number) => {
+    if (!this._disableZoom) {
+      const touchDistance =
+          this.twoTouchDistance(this.pointers[0], this.pointers[1]);
+      const deltaZoom =
+          ZOOM_SENSITIVITY * (this.lastSeparation - touchDistance) / 10.0;
+      this.lastSeparation = touchDistance;
+
+      this.userAdjustOrbit(0, 0, deltaZoom);
+    }
+
     if (this.panPerPixel > 0) {
-      this.movePan(event.clientX, event.clientY);
-    } else {
-      this.handleSinglePointerMove(event);
-    }
-
-    if (event.cancelable) {
-      event.preventDefault();
+      this.movePan(dx, dy);
     }
   };
 
-  private onTouchMove = (event: TouchEvent) => {
-    if (this.touchMode !== null) {
-      this.touchMode(event);
-
-      if (this.touchMode !== null && event.cancelable) {
-        event.preventDefault();
-      }
-    }
-  };
-
-  private touchModeZoom: TouchMode = (event) => {
-    const {targetTouches} = event;
-    if (this.lastTouches.length > 1 && targetTouches.length > 1) {
-      if (!this._disableZoom) {
-        const lastTouchDistance =
-            this.twoTouchDistance(this.lastTouches[0], this.lastTouches[1]);
-        const touchDistance =
-            this.twoTouchDistance(targetTouches[0], targetTouches[1]);
-        const deltaZoom =
-            ZOOM_SENSITIVITY * (lastTouchDistance - touchDistance) / 10.0;
-
-        this.userAdjustOrbit(0, 0, deltaZoom);
-      }
-
-      if (this.panPerPixel > 0) {
-        const thisX =
-            0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
-        const thisY =
-            0.5 * (targetTouches[0].clientY + targetTouches[1].clientY);
-        this.movePan(thisX, thisY);
-      }
-
-      this.lastTouches = targetTouches;
-    }
-  };
-
-  private touchModeRotate: TouchMode = (event) => {
-    const {targetTouches} = event;
+  private touchModeRotate: TouchMode = (dx: number, dy: number) => {
     const {touchAction} = this._options;
     if (!this.touchDecided && touchAction !== 'none') {
       this.touchDecided = true;
-      const {clientX, clientY} = targetTouches[0];
-      const dx = Math.abs(clientX - this.lastPointerPosition.clientX);
-      const dy = Math.abs(clientY - this.lastPointerPosition.clientY);
+      const dxMag = Math.abs(dx);
+      const dyMag = Math.abs(dy);
       // If motion is mostly vertical, assume scrolling is the intent.
-      if ((touchAction === 'pan-y' && dy > dx) ||
-          (touchAction === 'pan-x' && dx > dy)) {
+      if ((touchAction === 'pan-y' && dyMag > dxMag) ||
+          (touchAction === 'pan-x' && dxMag > dyMag)) {
         this.touchMode = null;
         return;
       }
     }
-    this.handleSinglePointerMove(targetTouches[0]);
-
-    this.lastTouches = targetTouches;
+    this.handleSinglePointerMove(dx, dy);
   };
 
-  private handleSinglePointerMove(pointer: Pointer) {
-    const {clientX, clientY} = pointer;
-    const deltaTheta = this.pixelLengthToSphericalAngle(
-        clientX - this.lastPointerPosition.clientX);
-    const deltaPhi = this.pixelLengthToSphericalAngle(
-        clientY - this.lastPointerPosition.clientY);
-
-    this.lastPointerPosition.clientX = clientX;
-    this.lastPointerPosition.clientY = clientY;
+  private handleSinglePointerMove(dx: number, dy: number) {
+    const deltaTheta = this.pixelLengthToSphericalAngle(dx);
+    const deltaPhi = this.pixelLengthToSphericalAngle(dy);
 
     if (this.isUserPointing === false) {
       this.isUserPointing = true;
-      this.dispatchEvent({type: 'pointer-change-start', pointer: {...pointer}});
+      this.dispatchEvent({type: 'pointer-change-start'});
     }
 
     this.userAdjustOrbit(deltaTheta, deltaPhi, 0);
@@ -627,18 +578,12 @@ export class SmoothControls extends EventDispatcher {
         0);
   }
 
-  private movePan(thisX: number, thisY: number) {
-    const {scene, lastPointerPosition} = this;
-    const dxy = vector3.set(
-        thisX - lastPointerPosition.clientX,
-        thisY - lastPointerPosition.clientY,
-        0);
+  private movePan(dx: number, dy: number) {
+    const {scene} = this;
+    const dxy = vector3.set(dx, dy, 0);
     const metersPerPixel =
         this.spherical.radius * Math.exp(this.logFov) * this.panPerPixel;
     dxy.multiplyScalar(metersPerPixel);
-
-    lastPointerPosition.clientX = thisX;
-    lastPointerPosition.clientY = thisY;
 
     const target = scene.getTarget();
     target.add(dxy.applyMatrix3(this.panProjection));
@@ -646,7 +591,7 @@ export class SmoothControls extends EventDispatcher {
     scene.setTarget(target.x, target.y, target.z);
   }
 
-  private recenter(pointer: Pointer) {
+  private recenter(pointer: PointerEvent) {
     const {scene} = this;
     (scene.element as any)[$panElement].style.opacity = 0;
 
@@ -707,119 +652,113 @@ export class SmoothControls extends EventDispatcher {
     this.setOrbit(undefined, undefined, this.goalSpherical.radius - dr);
   }
 
-  private onPointerDown(fn: () => void) {
-    if (!this.canInteract) {
+  private onPointerDown = (event: PointerEvent) => {
+    if (!this.canInteract || this.pointers.length > 2) {
       return;
     }
+    const {element} = this;
+
+    if (this.pointers.length === 0) {
+      element.addEventListener(
+          'pointermove', this.onPointerMove, {passive: false});
+      element.addEventListener('pointerup', this.onPointerUp);
+      this.touchMode = null;
+      this.touchDecided = false;
+      this.startPointerPosition.clientX = event.clientX;
+      this.startPointerPosition.clientY = event.clientY;
+    }
+
+    element.setPointerCapture(event.pointerId);
+    this.pointers.push(
+        {clientX: event.clientX, clientY: event.clientY, id: event.pointerId});
 
     this.isUserPointing = false;
 
-    fn();
-  }
-
-  private onMouseDown = (event: MouseEvent) => {
-    this.onPointerDown(() => {
-      self.addEventListener('mousemove', this.onMouseMove);
-      self.addEventListener('mouseup', this.onMouseUp, {once: true});
-      if (this.enablePan &&
-          (event.button === 2 || event.ctrlKey || event.metaKey ||
-           event.shiftKey)) {
-        this.initializePan();
-      }
-      this.lastPointerPosition.clientX = event.clientX;
-      this.lastPointerPosition.clientY = event.clientY;
-      this.startPointerPosition.clientX = event.clientX;
-      this.startPointerPosition.clientY = event.clientY;
-      this.element.style.cursor = 'grabbing';
-    });
-  };
-
-  private onTouchStart = (event: TouchEvent) => {
-    this.onPointerDown(() => {
-      const {targetTouches, changedTouches, touches} = event;
-      if (targetTouches.length === changedTouches.length) {
-        this.touchMode = null;
-        this.touchDecided = false;
-      }
-
-      if (targetTouches.length === touches.length) {
-        this.onTouchChange(event);
-      }
-    });
-  };
-
-  private onTouchChange(event: TouchEvent) {
-    const {targetTouches, changedTouches} = event;
-
-    switch (targetTouches.length) {
-      default:
-      case 1:
-        this.touchMode = this.touchModeRotate;
-        this.lastPointerPosition.clientX = targetTouches[0].clientX;
-        this.lastPointerPosition.clientY = targetTouches[0].clientY;
-        if (targetTouches[0].identifier ===
-            changedTouches[0].identifier) {  // finger down
-          this.startPointerPosition.clientX = targetTouches[0].clientX;
-          this.startPointerPosition.clientY = targetTouches[0].clientY;
-        } else {  // finger up
-          this.resetRadius();
-        }
-        break;
-      case 2:
-        this.touchMode = (this.touchDecided && this.touchMode === null) ?
-            null :
-            this.touchModeZoom;
-        this.touchDecided = true;
-        if (this.enablePan && this.touchMode != null) {
-          this.initializePan();
-          const x = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
-          const y = 0.5 * (targetTouches[0].clientY + targetTouches[1].clientY);
-          this.lastPointerPosition.clientX = x;
-          this.lastPointerPosition.clientY = y;
-          this.startPointerPosition.clientX = x;
-          this.startPointerPosition.clientY = y;
-        }
-        break;
-    }
-
-    this.lastTouches = targetTouches;
-  }
-
-  private onPointerUp() {
-    this.element.style.cursor = 'grab';
-    this.panPerPixel = 0;
-
-    if (this.isUserPointing) {
-      this.dispatchEvent(
-          {type: 'pointer-change-end', pointer: {...this.lastPointerPosition}});
-    }
-  }
-
-  private onMouseUp = (event: MouseEvent) => {
-    self.removeEventListener('mousemove', this.onMouseMove);
-    if (this.panPerPixel > 0) {
-      this.resetRadius();
+    if (event.pointerType === 'touch') {
+      this.onTouchChange();
     } else {
-      this.recenter(event);
+      this.onMouseDown(event);
     }
-
-    this.onPointerUp();
   };
 
-  private onTouchEnd = (event: TouchEvent) => {
-    if (event.targetTouches.length > 0 && this.touchMode !== null) {
-      this.onTouchChange(event);
+  private onPointerMove = (event: PointerEvent) => {
+    const pointer =
+        this.pointers.find((pointer) => pointer.id === event.pointerId);
+    if (pointer == null) {
+      return;
     }
-    if (event.targetTouches.length === 0) {
+
+    const numTouches = this.pointers.length;
+    const dx = (event.clientX - pointer.clientX) / numTouches;
+    const dy = (event.clientY - pointer.clientY) / numTouches;
+    pointer.clientX = event.clientX;
+    pointer.clientY = event.clientY;
+
+    if (event.pointerType === 'touch') {
+      if (this.touchMode !== null) {
+        this.touchMode(dx, dy);
+        event.preventDefault();
+      }
+    } else {
+      if (this.panPerPixel > 0) {
+        this.movePan(dx, dy);
+      } else {
+        this.handleSinglePointerMove(dx, dy);
+      }
+    }
+  };
+
+  private onPointerUp = (event: PointerEvent) => {
+    const {element} = this;
+
+    const index =
+        this.pointers.findIndex((pointer) => pointer.id === event.pointerId);
+    if (index !== -1) {
+      this.pointers.splice(index, 1);
+    }
+
+    if (this.pointers.length === 0) {
+      element.removeEventListener('pointermove', this.onPointerMove);
+      element.removeEventListener('pointerup', this.onPointerUp);
       if (this.panPerPixel > 0) {
         this.resetRadius();
       } else {
-        this.recenter(event.changedTouches[0]);
+        this.recenter(event);
       }
+    } else if (this.touchMode !== null) {
+      this.onTouchChange();
     }
 
-    this.onPointerUp();
+    element.style.cursor = 'grab';
+    this.panPerPixel = 0;
+
+    if (this.isUserPointing) {
+      this.dispatchEvent({type: 'pointer-change-end'});
+    }
   };
+
+  private onTouchChange() {
+    if (this.pointers.length === 1) {
+      this.touchMode = this.touchModeRotate;
+    } else {
+      this.touchMode = (this.touchDecided && this.touchMode === null) ?
+          null :
+          this.touchModeZoom;
+      this.touchDecided = true;
+      if (this.enablePan && this.touchMode != null) {
+        this.initializePan();
+      }
+    }
+  }
+
+  private onMouseDown(event: MouseEvent) {
+    if (this.enablePan &&
+        (event.button === 2 || event.ctrlKey || event.metaKey ||
+         event.shiftKey)) {
+      this.initializePan();
+    }
+    this.element.style.cursor = 'grabbing';
+  }
 
   private onWheel = (event: Event) => {
     if (!this.canInteract) {
