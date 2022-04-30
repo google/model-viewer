@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import {property} from 'lit-element';
-import {UpdatingElement} from 'lit-element/lib/updating-element';
+import {ReactiveElement} from 'lit';
+import {property} from 'lit/decorators.js';
 import {Event as ThreeEvent, Vector2, Vector3} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
@@ -129,7 +129,7 @@ export interface RendererInterface {
 /**
  * Definition for a basic <model-viewer> element.
  */
-export default class ModelViewerElementBase extends UpdatingElement {
+export default class ModelViewerElementBase extends ReactiveElement {
   static get is() {
     return 'model-viewer';
   }

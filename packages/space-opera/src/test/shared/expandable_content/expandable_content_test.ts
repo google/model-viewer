@@ -19,7 +19,7 @@
 import '../../../components/shared/expandable_content/expandable_section.js';
 import '../../../components/shared/expandable_content/expandable_tab.js';
 
-import {html, render} from 'lit-html';
+import {html, render} from 'lit';
 
 import {ExpandableSection} from '../../../components/shared/expandable_content/expandable_section.js';
 import {ExpandableTab} from '../../../components/shared/expandable_content/expandable_tab.js';

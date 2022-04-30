@@ -19,7 +19,8 @@ import '@material/mwc-button';
 
 // tslint:disable-next-line:enforce-name-casing JSZip is a class.
 import JSZip from 'jszip';
-import {css, customElement, html, internalProperty} from 'lit-element';
+import {css, html} from 'lit';
+import {customElement, state} from 'lit/decorators.js';
 
 import {BestPracticesState, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
 import {modelViewerTemplate, progressBar, scriptTemplate} from '../../best_practices/constants.js';
@@ -49,8 +50,8 @@ class GenericDownloadButton extends ConnectedLitElement {
         `;
   }
 
-  @internalProperty() buttonLabel = '';
-  @internalProperty() preparePayload?: () => Promise<Payload|null>;
+  @state() buttonLabel = '';
+  @state() preparePayload?: () => Promise<Payload|null>;
 
   // NOTE: Because this is async, it is possible for multiple downloads to be
   // kicked off at once. But this is unlikely, and each download has no

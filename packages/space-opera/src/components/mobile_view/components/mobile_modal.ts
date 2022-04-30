@@ -15,7 +15,8 @@
  *
  */
 
-import {customElement, html, internalProperty, property, query} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state, property, query} from 'lit/decorators.js';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
@@ -30,8 +31,8 @@ export class MobileModal extends ConnectedLitElement {
   static styles = openModalStyles;
 
   @property({type: Number}) pipeId = 0;
-  @internalProperty() isOpen: boolean = false;
-  @internalProperty() isNewQRCode = true;
+  @state() isOpen: boolean = false;
+  @state() isNewQRCode = true;
   @query('canvas#qr') canvasQR!: HTMLCanvasElement;
 
   get viewableSite(): string {
@@ -59,7 +60,7 @@ export class MobileModal extends ConnectedLitElement {
       <div>Mobile View</div>
     </div>
     <div class="modal-text">
-      Use the QR Code to open your edited model, environment image, and &ltmodel-viewer&gt snippet on a mobile device to test out AR features. 
+      Use the QR Code to open your edited model, environment image, and &ltmodel-viewer&gt snippet on a mobile device to test out AR features.
       After every subsequent change, click the "Refresh Mobile" button.
     </div>
     <canvas id="qr" style="display: block; margin-bottom: 90px;"></canvas>
@@ -71,7 +72,7 @@ export class MobileModal extends ConnectedLitElement {
     </div>
   </div>
   <div class="FileModalCancel">
-    <mwc-button unelevated icon="cancel" 
+    <mwc-button unelevated icon="cancel"
       @click=${this.close}>Close</mwc-button>
   </div>
 </paper-dialog>`;

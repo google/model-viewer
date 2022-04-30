@@ -15,7 +15,8 @@
  *
  */
 
-import {customElement, html, LitElement} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement} from 'lit/decorators.js';
 import {styles} from './styles.css.js';
 
 /**

@@ -18,7 +18,8 @@
 import '@polymer/paper-radio-button';
 import '@polymer/paper-radio-group';
 
-import {customElement, html, LitElement, property} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
 import {styles} from './radio_group.css.js';
 
 /**

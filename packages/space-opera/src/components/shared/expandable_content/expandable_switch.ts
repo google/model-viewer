@@ -19,7 +19,8 @@ import '@material/mwc-switch';
 import './expandable_section.js';
 import {Switch} from '@material/mwc-switch';
 
-import {customElement, html, LitElement, property} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
 
 import {styles} from './expandable_switch.css.js';
 
@@ -55,7 +56,7 @@ export class ExpandableSwitch extends LitElement {
 
   protected onChange(event: Event) {
     const checkbox = event.target as Switch;
-    this.open = checkbox.checked;
+    this.open = checkbox.selected;
   }
 }
 

@@ -20,7 +20,8 @@ import '../shared/dropdown/dropdown.js';
 import '../shared/checkbox/checkbox.js';
 import '@polymer/paper-item';
 
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
@@ -40,10 +41,10 @@ export class AnimationControls extends ConnectedLitElement {
   @query('me-checkbox#animation-autoplay') autoplayCheckbox!: CheckboxElement;
   @query('me-slider-with-input#scrubber') scrubber!: SliderWithInputElement;
   @query('me-section-row#time') timeElement!: SectionRow;
-  @internalProperty() animationNames: string[] = [];
-  @internalProperty() selectedAnimation: string|undefined = undefined;
-  @internalProperty() autoplay = false;
-  @internalProperty() clipLength = 0;
+  @state() animationNames: string[] = [];
+  @state() selectedAnimation: string|undefined = undefined;
+  @state() autoplay = false;
+  @state() clipLength = 0;
 
   stateChanged(state: State) {
     const config = getConfig(state);

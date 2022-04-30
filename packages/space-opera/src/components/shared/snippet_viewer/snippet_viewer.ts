@@ -18,8 +18,9 @@
 import '@material/mwc-button';
 declare function html_beautify(html: string): string;
 declare function css_beautify(css: string): string;
-import {css, customElement, html, LitElement, property, query} from 'lit-element';
-import {TemplateResult} from 'lit-html';
+import {css, html, LitElement} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
+import {TemplateResult} from 'lit';
 
 /**
  * Displays the inner text of an arbitrary TemplateResult.

@@ -17,12 +17,12 @@
 
 import '@google/model-viewer/lib/model-viewer';
 
-import {spread} from '@open-wc/lit-helpers';
-import {html, TemplateResult} from 'lit-html';
-import {ifDefined} from 'lit-html/directives/if-defined';
+import {html, TemplateResult} from 'lit';
+import {ifDefined} from 'lit/directives/if-defined.js';
 
 import {reduxStore} from '../../space_opera_base';
 import {rafPasses} from '../../test/utils/test_utils';
+import {spread} from '../utils/spread_directive';
 import {ArConfigState, ModelViewerConfig} from '../../types';
 import {getConfig, getOrbitString} from '../config/reducer';
 import {getModelViewer} from '../model_viewer_preview/reducer';
@@ -95,7 +95,7 @@ export function renderModelViewer(
     childElements?: Array<TemplateResult|HTMLElement>) {
   const skyboxImage =
       config.useEnvAsSkybox ? config.environmentImage : undefined;
-  return html`<model-viewer ...=${spread(extraAttributes)}
+  return html`<model-viewer ${spread(extraAttributes)}
         src=${config.src || ''}
         ?ar=${!!arConfig.ar}
         ar-modes=${ifDefined(arConfig.arModes)}

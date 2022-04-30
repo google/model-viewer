@@ -18,8 +18,9 @@
 import './color_map.js';
 import '../popup/popup.js';
 
-import {customElement, html, LitElement, property, query} from 'lit-element';
-import {styleMap} from 'lit-html/directives/style-map';
+import {html, LitElement} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
+import {styleMap} from 'lit/directives/style-map.js';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
 import {ColorMap} from './color_map.js';

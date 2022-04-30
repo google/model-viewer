@@ -18,7 +18,7 @@
 
 import '../../../components/shared/popup/popup.js';
 
-import {html, render} from 'lit-html';
+import {html, render} from 'lit';
 import {PopUp} from '../../../components/shared/popup/popup.js';
 
 describe('popup test', () => {

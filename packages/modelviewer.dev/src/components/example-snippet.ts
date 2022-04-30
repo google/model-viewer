@@ -15,8 +15,8 @@
 
 import 'prismjs';
 
-import {property} from 'lit-element';
-import {UpdatingElement} from 'lit-element/lib/updating-element.js';
+import {property} from 'lit/decorators.js';
+import {ReactiveElement} from 'lit';
 
 // Silence tsc since prismjs isn't a proper module
 declare var Prism: any;
@@ -59,7 +59,7 @@ export type RootNode = Document|ShadowRoot;
  *
  * @see https://github.com/PolymerElements/iron-demo-helpers/blob/master/demo-snippet.js
  */
-export class ExampleSnippet extends UpdatingElement {
+export class ExampleSnippet extends ReactiveElement {
   @property({type: Boolean, attribute: 'use-shadow-root'})
   useShadowRoot: boolean = false;
   @property({type: String, attribute: 'stamp-to'}) stampTo: string|null = null;

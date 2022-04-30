@@ -19,7 +19,8 @@
  * @fileoverview Inspector panel for GLTF/GLB files.
  */
 
-import {customElement, html, internalProperty} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state} from 'lit/decorators.js';
 
 import {State} from '../../types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
@@ -31,8 +32,8 @@ import {Thumbnail} from '../model_viewer_preview/types.js';
  */
 @customElement('me-inspector-panel')
 export class InspectorPanel extends ConnectedLitElement {
-  @internalProperty() gltfJsonstring?: string = '';
-  @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
+  @state() gltfJsonstring?: string = '';
+  @state() thumbnailsById = new Map<string, Thumbnail>();
 
   stateChanged(state: State) {
     if (!isLoaded(state)) {

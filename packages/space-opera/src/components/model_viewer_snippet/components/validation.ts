@@ -15,7 +15,8 @@
  *
  */
 
-import {customElement, html, internalProperty, LitElement, property, query} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, state, property, query} from 'lit/decorators.js';
 
 import {validationStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
@@ -31,8 +32,8 @@ import {GLTF} from '@google/model-viewer/lib/three-components/gltf-instance/gltf
 export class ValidationModal extends LitElement {
   static styles = [validationStyles];
 
-  @property() report: Report = {};
-  @internalProperty() isOpen: boolean = false;
+  @property({attribute: false}) report: Report = {};
+  @state() isOpen: boolean = false;
 
   open() {
     this.isOpen = true;
@@ -138,14 +139,14 @@ export class ValidationModal extends LitElement {
 export class Validation extends ConnectedLitElement {
   @query('me-validation-modal#validation-modal')
   validationModal!: ValidationModal;
-  @internalProperty() gltfUrl?: string;
-  @internalProperty() rootPath = '';
-  @internalProperty() fileMap = new Map<string, File>();
-  @internalProperty() originalGltf?: GLTF;
-  @internalProperty() report: Report = {};
+  @state() gltfUrl?: string;
+  @state() rootPath = '';
+  @state() fileMap = new Map<string, File>();
+  @state() originalGltf?: GLTF;
+  @state() report: Report = {};
 
-  @internalProperty() severityTitle: string = '';
-  @internalProperty() severityColor: string = '';
+  @state() severityTitle: string = '';
+  @state() severityColor: string = '';
 
   async stateChanged(state: State) {
     const {rootPath, originalGltf, gltfUrl, fileMap} = getModel(state);
@@ -228,7 +229,7 @@ export class Validation extends ConnectedLitElement {
     </me-validation-modal>
     ` :
                       html``}
-    
+
     `;
   }
 }

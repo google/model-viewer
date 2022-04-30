@@ -15,7 +15,7 @@
  *
  */
 
-import {html} from 'lit-element';
+import {html} from 'lit';
 import {getMobileModelViewer} from '../mobile_view/reducer';
 import {getModelViewer} from '../model_viewer_preview/reducer';
 

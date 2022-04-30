@@ -20,7 +20,8 @@
     "noErrorTruncation": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "skipLibCheck": true,
   },
   "include": [
     "./src/**/*.ts"
