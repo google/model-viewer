@@ -181,6 +181,9 @@ export class SmoothControls extends EventDispatcher {
         element.addEventListener('wheel', this.onWheel);
       }
       element.addEventListener('keydown', this.onKeyDown);
+      // This little beauty is to work around a WebKit bug that otherwise makes
+      // touch events randomly not cancelable.
+      element.addEventListener('touchmove', () => {}, {passive: false});
 
       this.element.style.cursor = 'grab';
       this._interactionEnabled = true;
@@ -533,6 +536,10 @@ export class SmoothControls extends EventDispatcher {
     }
   };
 
+  private disableScroll = (event: TouchEvent) => {
+    event.preventDefault();
+  };
+
   private touchModeRotate: TouchMode = (dx: number, dy: number) => {
     const {touchAction} = this._options;
     if (!this.touchDecided && touchAction !== 'none') {
@@ -544,6 +551,9 @@ export class SmoothControls extends EventDispatcher {
           (touchAction === 'pan-x' && dxMag > dyMag)) {
         this.touchMode = null;
         return;
+      } else {
+        this.element.addEventListener(
+            'touchmove', this.disableScroll, {passive: false});
       }
     }
     this.handleSinglePointerMove(dx, dy);
@@ -689,7 +699,6 @@ export class SmoothControls extends EventDispatcher {
     if (event.pointerType === 'touch') {
       if (this.touchMode !== null) {
         this.touchMode(dx, dy);
-        event.preventDefault();
       }
     } else {
       if (this.panPerPixel > 0) {
@@ -715,6 +724,7 @@ export class SmoothControls extends EventDispatcher {
     if (this.pointers.length === 0) {
       element.removeEventListener('pointermove', this.onPointerMove);
       element.removeEventListener('pointerup', this.onPointerUp);
+      element.removeEventListener('touchmove', this.disableScroll);
       if (this.enablePan) {
         this.recenter(event);
       }
@@ -739,6 +749,8 @@ export class SmoothControls extends EventDispatcher {
           null :
           this.touchModeZoom;
       this.touchDecided = true;
+      this.element.addEventListener(
+          'touchmove', this.disableScroll, {passive: false});
       this.lastSeparation =
           this.twoTouchDistance(this.pointers[0], this.pointers[1]);
 
