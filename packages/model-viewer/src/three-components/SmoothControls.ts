@@ -670,7 +670,10 @@ export class SmoothControls extends EventDispatcher {
       this.startPointerPosition.clientY = event.clientY;
     }
 
-    element.setPointerCapture(event.pointerId);
+    try {
+      element.setPointerCapture(event.pointerId);
+    } catch {
+    }
     this.pointers.push(
         {clientX: event.clientX, clientY: event.clientY, id: event.pointerId});
 
