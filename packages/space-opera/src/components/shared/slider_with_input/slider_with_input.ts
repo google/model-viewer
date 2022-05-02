@@ -19,7 +19,8 @@ import '@polymer/paper-slider';
 import '@material/mwc-textfield';
 
 import {PaperSliderElement} from '@polymer/paper-slider';
-import {customElement, html, LitElement, property, query} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 
 import {clamp} from '../../utils/reducer_utils.js';
 

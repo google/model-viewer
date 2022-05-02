@@ -16,7 +16,7 @@
  */
 
 
-import {css, CSSResult} from 'lit-element';
+import {css, CSSResult} from 'lit';
 export const styles: CSSResult = css`:host {
   border-radius: 4px;
   display: inline-flex;

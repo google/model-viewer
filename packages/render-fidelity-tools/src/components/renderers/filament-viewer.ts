@@ -14,7 +14,8 @@
  */
 
 import {Aabb, Camera, Camera$Fov, clearAssetCache, Engine, Entity, EntityManager, fetch, gltfio$AssetLoader, gltfio$FilamentAsset, IndirectLight, init, LightManager, LightManager$Type, Renderer, Scene, Skybox, SwapChain, View, View$BlendMode} from 'filament';
-import {css, customElement, html, LitElement, property} from 'lit-element';
+import {css, html, LitElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js'
 
 import {ScenarioConfig} from '../../common.js';
 

@@ -18,7 +18,7 @@
 
 import '../../../components/shared/tabs/tabs.js';
 
-import {html, render} from 'lit-html';
+import {html, render} from 'lit';
 
 import {Tabs} from '../../../components/shared/tabs/tabs.js';
 

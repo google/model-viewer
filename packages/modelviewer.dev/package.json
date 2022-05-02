@@ -25,7 +25,7 @@
     "@google/model-viewer": "^1.11.1",
     "@types/prismjs": "^1.16.6",
     "focus-visible": "^5.2.0",
-    "lit-element": "^2.5.1",
+    "lit": "^2.2.3",
     "prismjs": "^1.24.1",
     "simple-dropzone": "^0.8.1",
     "js-beautify": "^1.14.0",

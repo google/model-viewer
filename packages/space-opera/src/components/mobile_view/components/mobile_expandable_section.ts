@@ -15,7 +15,8 @@
  *
  */
 
-import {customElement, html, LitElement, property, query, TemplateResult} from 'lit-element';
+import {html, LitElement, TemplateResult} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 
 import {ArConfigState} from '../../../types';
 import {CheckboxElement} from '../../shared/checkbox/checkbox';
@@ -27,17 +28,17 @@ import {CheckboxElement} from '../../shared/checkbox/checkbox';
 export class MobileExpanadableSection extends LitElement {
   @property({type: Boolean}) isDeployed?: boolean;
   @property({type: Boolean}) isDeployable?: boolean;
-  @property({type: Function}) onInitialDeploy?: Function;
+  @property({attribute: false}) onInitialDeploy?: Function;
 
   @property({type: Boolean}) haveReceivedResponse?: boolean;
   @property({type: Boolean}) isSendingData?: boolean;
   @property({type: Boolean}) contentHasChanged?: boolean;
 
-  @property({type: Function}) openModal?: Function;
-  @property({type: Function}) postInfo?: Function;
+  @property({attribute: false}) openModal?: Function;
+  @property({attribute: false}) postInfo?: Function;
 
   @property({type: Boolean}) defaultToSceneViewer?: boolean;
-  @property({type: Function}) onSelectArMode?: Function;
+  @property({attribute: false}) onSelectArMode?: Function;
   @property() arConfig?: ArConfigState;
 
   @query('me-checkbox#ar') arCheckbox!: CheckboxElement;

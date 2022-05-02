@@ -23,7 +23,8 @@
 import '@material/mwc-icon-button';
 
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {modelViewerPreviewStyles} from '../../styles.css.js';
@@ -53,13 +54,13 @@ export class ModelViewerPreview extends ConnectedLitElement {
   static styles =
       [modelViewerPreviewStyles, hotspotStyles, arButtonCSS, progressBarCSS];
   @query('model-viewer') readonly modelViewer!: ModelViewerElement;
-  @internalProperty() config: ModelViewerConfig = {};
-  @internalProperty() hotspots: HotspotConfig[] = [];
-  @internalProperty() addHotspotMode = false;
-  @internalProperty() gltfUrl?: string;
-  @internalProperty() extraAttributes: any = {};
-  @internalProperty() refreshButtonIsReady: boolean = false;
-  @internalProperty() bestPractices?: BestPracticesState;
+  @state() config: ModelViewerConfig = {};
+  @state() hotspots: HotspotConfig[] = [];
+  @state() addHotspotMode = false;
+  @state() gltfUrl?: string;
+  @state() extraAttributes: any = {};
+  @state() refreshButtonIsReady: boolean = false;
+  @state() bestPractices?: BestPracticesState;
 
   // The loadComplete promise is a testing hook that resolves once all async
   // load-related operations have completed. Await this promise after causing a

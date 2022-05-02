@@ -16,7 +16,7 @@
  */
 
 
-import {css, CSSResult} from 'lit-element';
+import {css, CSSResult} from 'lit';
 export const styles: CSSResult = css`:host {
   font-family: Roboto;
   /* MATERIAL_COLOR_GOOGLE_GREY_300 */

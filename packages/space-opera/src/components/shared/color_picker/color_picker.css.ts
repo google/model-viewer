@@ -16,7 +16,7 @@
  */
 
 
-import {css, CSSResult} from 'lit-element';
+import {css, CSSResult} from 'lit';
 export const styles: CSSResult = css`:host {
   --me-swatch-size: 48px;
   --material-color-google-grey-800: #3c4043;

@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {property, UpdatingElement} from 'lit-element';
+import {property} from 'lit/decorators.js';
+import {ReactiveElement} from 'lit';
 
 import {style} from '../decorators.js';
 import {numberNode} from '../styles/parsers.js';
@@ -27,7 +28,7 @@ const fooIntrinsics = {
   keywords: {auto: [null, numberNode(200, '%')]}
 };
 
-class StyleableElement extends UpdatingElement {
+class StyleableElement extends ReactiveElement {
   @style({intrinsics: fooIntrinsics, updateHandler: $updateFoo})
   @property({type: String})
   foo: string = '200cm 1rad';

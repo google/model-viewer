@@ -21,7 +21,8 @@ import '../../shared/section_row/section_row.js';
 import '../../shared/slider_with_input/slider_with_input.js';
 import '../../shared/checkbox/checkbox.js';
 
-import {html, internalProperty, query} from 'lit-element';
+import {html} from 'lit';
+import {state, query} from 'lit/decorators.js';
 
 import {Limits} from '../../config/types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
@@ -35,7 +36,7 @@ import {styles} from './limits_base.css.js';
 export abstract class LimitsBase extends ConnectedLitElement {
   static styles = [styles];
 
-  @internalProperty() limitsProperty?: Limits;
+  @state() limitsProperty?: Limits;
 
   abstract get label(): string;
   abstract get minimumLabel(): string;

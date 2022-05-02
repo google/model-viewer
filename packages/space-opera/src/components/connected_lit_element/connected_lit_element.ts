@@ -17,7 +17,7 @@
 
 //@ts-ignore
 import {$CombinedState} from '@reduxjs/toolkit';
-import {LitElement} from 'lit-element';
+import {LitElement} from 'lit';
 import {connect} from 'pwa-helpers/connect-mixin';
 
 import {reduxStore} from '../../space_opera_base.js';

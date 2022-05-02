@@ -15,7 +15,7 @@
  *
  */
 
-import {css, CSSResult} from 'lit-element';
+import {css, CSSResult} from 'lit';
 
 export const modelViewerStyles: CSSResult = css`:not(:defined) > * {
   display: none;

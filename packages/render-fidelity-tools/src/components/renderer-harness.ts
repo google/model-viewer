@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {css, customElement, html, LitElement, property} from 'lit-element';
+import {css, html, LitElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js'
 
 import {ImageComparisonConfig, ScenarioConfig} from '../common.js';
 import {ConfigReader} from '../config-reader.js';

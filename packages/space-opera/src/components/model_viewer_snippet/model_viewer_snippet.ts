@@ -22,7 +22,8 @@ import '../mobile_view/open_mobile_view.js';
 import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
-import {customElement, html, internalProperty, property, query} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state, property, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {ArConfigState, BestPracticesState, ImageType, INITIAL_STATE, ModelViewerConfig, RelativeFilePathsState, State} from '../../types.js';
@@ -53,13 +54,13 @@ const DEFAULT_POSTER_HEIGHT =
 export class ExportPanel extends ConnectedLitElement {
   @property({type: Boolean}) header = false;
 
-  @internalProperty() config: ModelViewerConfig = {};
-  @internalProperty() arConfig: ArConfigState = {};
-  @internalProperty() hotspots: HotspotConfig[] = [];
-  @internalProperty() relativeFilePaths?: RelativeFilePathsState;
-  @internalProperty() gltfUrl?: string;
-  @internalProperty() extraAttributes: any = {};
-  @internalProperty() bestPractices?: BestPracticesState;
+  @state() config: ModelViewerConfig = {};
+  @state() arConfig: ArConfigState = {};
+  @state() hotspots: HotspotConfig[] = [];
+  @state() relativeFilePaths?: RelativeFilePathsState;
+  @state() gltfUrl?: string;
+  @state() extraAttributes: any = {};
+  @state() bestPractices?: BestPracticesState;
 
   @query('snippet-viewer') snippetViewer!: SnippetViewer;
   @query('me-export-zip-button') exportZipButton!: ExportZipButton;
@@ -108,8 +109,8 @@ export class ExportPanel extends ConnectedLitElement {
 
     if (this.header === true) {
       return html`
-<me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
-  .open=${true} .sticky=${false} 
+<me-expandable-tab tabName="&lt;model-viewer&gt; snippet"
+  .open=${true} .sticky=${false}
   .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
   <div slot="content">
     <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}>
@@ -120,8 +121,8 @@ export class ExportPanel extends ConnectedLitElement {
 
     // on import/export tab
     return html`
-<me-expandable-tab tabName="&lt;model-viewer&gt; snippet" 
-  .open=${true} .sticky=${false} 
+<me-expandable-tab tabName="&lt;model-viewer&gt; snippet"
+  .open=${true} .sticky=${false}
   .copyFunction=${this.snippetCopyToClipboard.bind(this)}>
   <div slot="content">
     <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}>

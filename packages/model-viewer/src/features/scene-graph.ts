@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {property} from 'lit-element';
+import {property} from 'lit/decorators.js';
 import {Euler, RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 

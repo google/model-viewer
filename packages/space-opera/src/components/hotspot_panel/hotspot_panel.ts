@@ -19,7 +19,8 @@ import '../shared/expandable_content/expandable_tab.js';
 import './hotspot_editor.js';
 import '@material/mwc-button';
 
-import {customElement, html, internalProperty} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';
@@ -31,8 +32,8 @@ import {HotspotConfig} from './types.js';
 /** Hotspot panel. */
 @customElement('me-hotspot-panel')
 export class HotspotPanel extends ConnectedLitElement {
-  @internalProperty() addHotspotMode = false;
-  @internalProperty() hotspots: HotspotConfig[] = [];
+  @state() addHotspotMode = false;
+  @state() hotspots: HotspotConfig[] = [];
 
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;
