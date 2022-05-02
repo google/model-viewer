@@ -536,6 +536,11 @@ export class SmoothControls extends EventDispatcher {
     }
   };
 
+  // We implement our own version of the browser's CSS touch-action, enforced by
+  // this function, because the iOS implementation of pan-y is bad and doesn't
+  // match Android. Specifically, even if a touch gesture begins by panning X,
+  // iOS will switch to scrolling as soon as the gesture moves in the Y, rather
+  // than staying in the same mode until the end of the gesture.
   private disableScroll = (event: TouchEvent) => {
     event.preventDefault();
   };
@@ -661,8 +666,7 @@ export class SmoothControls extends EventDispatcher {
     const {element} = this;
 
     if (this.pointers.length === 0) {
-      element.addEventListener(
-          'pointermove', this.onPointerMove, {passive: false});
+      element.addEventListener('pointermove', this.onPointerMove);
       element.addEventListener('pointerup', this.onPointerUp);
       this.touchMode = null;
       this.touchDecided = false;
