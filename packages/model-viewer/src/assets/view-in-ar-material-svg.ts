@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {html} from 'lit-html';
+import {html} from 'lit';
 
 export default html`
 <svg version="1.1" id="view_x5F_in_x5F_AR_x5F_icon"

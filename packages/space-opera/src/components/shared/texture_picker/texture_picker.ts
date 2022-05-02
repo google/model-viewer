@@ -18,7 +18,8 @@
 import '@material/mwc-button';
 import '../popup/popup.js';
 
-import {customElement, html, LitElement, property, query} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 
 import {fileModalStyles} from '../../../styles.css.js';
 import {createSafeObjectURL, SafeObjectUrl} from '../../utils/create_object_url.js';

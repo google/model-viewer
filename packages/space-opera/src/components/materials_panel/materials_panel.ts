@@ -38,7 +38,8 @@ import {AlphaMode} from '@google/model-viewer/lib/three-components/gltf-instance
 import {GLTF, TextureInfo as GLTFTextureInfo} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
 import {TextField} from '@material/mwc-textfield';
 import {PaperListboxElement} from '@polymer/paper-listbox';
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
 import {reduxStore} from '../../space_opera_base.js';
@@ -65,16 +66,16 @@ import {styles} from './materials_panel.css.js';
 export class MaterialPanel extends ConnectedLitElement {
   static styles = styles;
 
-  @internalProperty() thumbnailsById = new Map<string, Thumbnail>();
+  @state() thumbnailsById = new Map<string, Thumbnail>();
   private thumbnailUrls: string[] = [];
   private thumbnailIds: string[] = [];
   private originalMaterialFromCloneMap = new Map<number, number>();
 
-  @internalProperty() originalGltf?: GLTF;
+  @state() originalGltf?: GLTF;
 
-  @internalProperty() isNewModel: boolean = true;
-  @internalProperty() isTesting: boolean = false;
-  @internalProperty() isInterpolating: boolean = false;
+  @state() isNewModel: boolean = true;
+  @state() isTesting: boolean = false;
+  @state() isInterpolating: boolean = false;
 
   @query('#material-container') panel!: HTMLDivElement;
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;

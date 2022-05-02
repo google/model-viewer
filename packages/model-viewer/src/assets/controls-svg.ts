@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {html} from 'lit-html';
+import {html} from 'lit';
 
 export default html`
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="36">

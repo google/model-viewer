@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {UpdatingElement} from 'lit-element/lib/updating-element';
+import {ReactiveElement} from 'lit';
 import {EvaluatedStyle, Intrinsics, StyleEvaluator} from './styles/evaluators';
 import {parseExpressions, Unit} from './styles/parsers';
 import {StyleEffector} from './styles/style-effector';
@@ -21,7 +21,7 @@ import {StyleEffector} from './styles/style-effector';
 // An IntrinsicsFactory generates up-to-date intrinsics for a given ModelViewer
 // element instance when it is invoked.
 export type IntrinsicsFactory<T extends Intrinsics<Array<Unit>>,
-                                        U extends UpdatingElement> =
+                                        U extends ReactiveElement> =
     (element: U) => T;
 
 // When applying the @style decorator, it needs to be configured with
@@ -29,7 +29,7 @@ export type IntrinsicsFactory<T extends Intrinsics<Array<Unit>>,
 // values. Optionally, it can also be configured to observe environment effects,
 // which causes a StyleEffector to be created for the property.
 export interface StyleDecoratorConfig<T extends Intrinsics<Array<Unit>>,
-                                                U extends UpdatingElement> {
+                                                U extends ReactiveElement> {
   intrinsics: T|IntrinsicsFactory<T, U>;
   updateHandler: symbol;
   observeEffects?: boolean;
@@ -66,14 +66,14 @@ export interface StyleDecoratorConfig<T extends Intrinsics<Array<Unit>>,
  * static).
  */
 export const style =
-    <T extends Intrinsics<Array<Unit>>, U extends UpdatingElement>(
+    <T extends Intrinsics<Array<Unit>>, U extends ReactiveElement>(
         config: StyleDecoratorConfig<T, U>) => {
       const observeEffects: boolean = config.observeEffects || false;
       const getIntrinsics = config.intrinsics instanceof Function ?
           config.intrinsics :
           (() => config.intrinsics) as IntrinsicsFactory<T, U>;
 
-      return <U extends typeof UpdatingElement['prototype']>(
+      return <U extends typeof ReactiveElement['prototype']>(
                  proto: U, propertyName: string) => {
         const originalUpdated = (proto as any).updated;
         const originalConnectedCallback = proto.connectedCallback;
@@ -93,7 +93,7 @@ export const style =
           [$updateEvaluator]: {
             value: function() {
               const ast = parseExpressions(
-                  this[propertyName as keyof UpdatingElement] as string);
+                  this[propertyName as keyof ReactiveElement] as string);
               this[$styleEvaluator] =
                   new StyleEvaluator(ast, getIntrinsics(this));
 

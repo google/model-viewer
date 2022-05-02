@@ -25,7 +25,8 @@ import '../shared/section_row/section_row.js';
 import '../shared/draggable_input/draggable_input.js';
 import '../shared/checkbox/checkbox.js';
 
-import {customElement, html, internalProperty, property, query} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state, property, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {cameraSettingsStyles} from '../../styles.css.js';
@@ -91,7 +92,7 @@ export class CameraTargetInput extends ConnectedLitElement {
   @query('me-draggable-input#camera-target-z') zInput!: HTMLInputElement;
 
   @property({attribute: false}) change?: (newValue: Vector3D) => void;
-  @internalProperty() target?: Vector3D;
+  @state() target?: Vector3D;
 
   protected onInputChange(event: Event) {
     event.preventDefault();
@@ -137,7 +138,7 @@ export class CameraTargetInput extends ConnectedLitElement {
 export class CameraSettings extends ConnectedLitElement {
   static styles = cameraSettingsStyles;
 
-  @internalProperty() config: ModelViewerConfig = {};
+  @state() config: ModelViewerConfig = {};
 
   @query('me-camera-orbit-editor') cameraOrbitEditor!: CameraOrbitEditor;
   @query('me-camera-target-input') cameraTargetInput!: CameraTargetInput;
@@ -145,10 +146,11 @@ export class CameraSettings extends ConnectedLitElement {
 
   // Specifically overriding a super class method.
   // tslint:disable-next-line:enforce-name-casing
-  async _getUpdateComplete() {
-    await super._getUpdateComplete();
+  async getUpdateComplete() {
+    const noTrigger = await super.getUpdateComplete();
     await this.cameraOrbitEditor.updateComplete;
     await this.autoRotateCheckbox.updateComplete;
+    return noTrigger;
   }
 
   stateChanged(state: State) {

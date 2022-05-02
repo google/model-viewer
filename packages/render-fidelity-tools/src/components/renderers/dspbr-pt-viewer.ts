@@ -15,7 +15,8 @@
 
 // @ts-ignore
 import {PathtracingRenderer, PerspectiveCamera, Box3, Loader} from 'dspbr-pt';
-import {css, customElement, html, LitElement, property} from 'lit-element';
+import {css, html, LitElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js'
 import {ScenarioConfig} from '../../common.js';
 
 const $canvas = Symbol('canvas');
@@ -82,7 +83,7 @@ export class PathtracingViewer extends LitElement {
     this[$camera] = new PerspectiveCamera(45, this[$canvas]!.width/this[$canvas]!.height, 0.01, 1000);
     this[$renderer] = new PathtracingRenderer({ canvas: this[$canvas]!});
 
-    this[$renderer].pixelRatio = 1.0; 
+    this[$renderer].pixelRatio = 1.0;
     // this.renderer.iblRotation = 180.0;
     this[$renderer].exposure = 1.0;
     this[$renderer].maxBounces = 8;

@@ -39,7 +39,7 @@
     "filament": "1.12.2",
     "focus-visible": "^5.2.0",
     "http-server": "^0.12.3",
-    "lit-element": "^2.5.1",
+    "lit": "^2.2.3",
     "mkdirp": "^1.0.4",
     "pngjs": "^6.0.0",
     "puppeteer": "^10.1.0",

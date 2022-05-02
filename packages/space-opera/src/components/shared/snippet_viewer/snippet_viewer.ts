@@ -18,8 +18,9 @@
 import '@material/mwc-button';
 declare function html_beautify(html: string): string;
 declare function css_beautify(css: string): string;
-import {css, customElement, html, LitElement, property, query} from 'lit-element';
-import {TemplateResult} from 'lit-html';
+import {css, html, LitElement} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
+import {TemplateResult} from 'lit';
 
 /**
  * Displays the inner text of an arbitrary TemplateResult.
@@ -75,8 +76,10 @@ ${css_beautify(this.renderedStyle)}
   }
 
   get formattedHtml() {
-    // Removes LitElement render artifacts
-    let html = this.shadowTag.innerHTML.replace(/<!---->/g, '');
+    // Removes LitElement render artifacts e.g. <!--?lit$515089429$-->
+    let html = this.shadowTag.innerHTML.replace(/<!--.*-->/g, '');
+    // Removes empty lines that may result from the previous line
+    html = html.replace(/\n\s*\n/g, '');
     // Remove the ar-status runtime-added tag
     html = html.replace(/ar-status="[\w- ]+" */, '');
     // Remove redundant ="" for boolean attribs

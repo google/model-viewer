@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {html} from 'lit-html';
+import {html} from 'lit';
 
 export default html`
 <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000">

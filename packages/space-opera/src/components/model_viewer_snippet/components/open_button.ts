@@ -18,7 +18,8 @@
 import '@material/mwc-button';
 
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 import {SimpleDropzone} from 'simple-dropzone';
 
 import {dispatchConfig, dispatchEnvrionmentImage, getConfig} from '../../../components/config/reducer.js';
@@ -44,15 +45,15 @@ import {parseExtraAttributes, parseSnippet, parseSnippetAr} from './parsing.js';
 export class OpenModal extends ConnectedLitElement {
   static styles = openModalStyles;
 
-  @internalProperty() isOpen: boolean = false;
-  @internalProperty() config: ModelViewerConfig = {};
-  @internalProperty() arConfig: ArConfigState = {};
-  @internalProperty() errors: string[] = [];
-  @internalProperty() gltfUrl?: string;
-  @internalProperty() relativeFilePaths?: RelativeFilePathsState;
+  @state() isOpen: boolean = false;
+  @state() config: ModelViewerConfig = {};
+  @state() arConfig: ArConfigState = {};
+  @state() errors: string[] = [];
+  @state() gltfUrl?: string;
+  @state() relativeFilePaths?: RelativeFilePathsState;
   @query('snippet-viewer#snippet-input')
   private readonly snippetViewer!: SnippetViewer;
-  @internalProperty() extraAttributes: any = {};
+  @state() extraAttributes: any = {};
 
   stateChanged(state: State) {
     this.config = getConfig(state);
@@ -191,7 +192,7 @@ export class OpenModal extends ConnectedLitElement {
   <div class="FileModalCancel">
     <mwc-button unelevated icon="save_alt" class="SaveButton"
       @click=${this.saveAndClose}>Save</mwc-button>
-    <mwc-button unelevated icon="cancel" 
+    <mwc-button unelevated icon="cancel"
       @click=${this.close}>Cancel</mwc-button>
   </div>
 </paper-dialog>`;
@@ -205,7 +206,7 @@ export class OpenModal extends ConnectedLitElement {
 export class ImportCard extends LitElement {
   @query('me-open-modal#open-modal') openModal!: OpenModal;
   @query('input#file-input') fileInput!: HTMLInputElement;
-  @internalProperty() selectedDefaultOption: number = 0;
+  @state() selectedDefaultOption: number = 0;
   static styles = fileModalStyles;
 
   firstUpdated() {
@@ -347,7 +348,7 @@ export class ImportCard extends LitElement {
         <label for="file-input" class="FileInputLabel"/>
       </mwc-button>
       <input type="file" id="file-input" multiple/>
-      
+
     </div>
     <me-validation></me-validation>
     `;

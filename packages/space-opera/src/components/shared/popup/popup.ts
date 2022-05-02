@@ -15,7 +15,8 @@
  *
  */
 
-import {customElement, html, LitElement, property} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
 
 import {styles} from './popup.css.js';
 

@@ -15,7 +15,7 @@
  *
  */
 
-import {css, CSSResult} from 'lit-element';
+import {css, CSSResult} from 'lit';
 export const styles: CSSResult = css`
 :host {
   --me-theme-container-background: #2b2d30;

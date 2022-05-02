@@ -16,7 +16,7 @@
  */
 
 
-import {css, CSSResult} from 'lit-element';
+import {css, CSSResult} from 'lit';
 export const styles: CSSResult = css`:host {
   --material-color-google-blue-500: #4285f4;
   --material-color-google-grey-300: #dadce0;
