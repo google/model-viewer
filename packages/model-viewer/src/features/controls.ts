@@ -597,30 +597,27 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const {width, height} = this[$scene];
 
       const dispatchTouches = (type: string) => {
-        const touches: Touch[] = [];
         for (const [i, position] of positions.entries()) {
-          touches.push(new Touch({
-            identifier: i,
-            target: inputElement,
-            clientX: width * position.x,
-            clientY: height * position.y
-          }));
           const {style} = fingerElements[i];
           style.transform = `translateX(${width * position.x}px) translateY(${
               height * position.y}px)`;
-          if (type === 'touchstart') {
+          if (type === 'pointerdown') {
             style.opacity = '1';
-          } else if (type === 'touchend') {
+          } else if (type === 'pointerup') {
             style.opacity = '0';
           }
+
+          const init = {
+            pointerId: i,
+            pointerType: 'touch',
+            target: inputElement,
+            clientX: width * position.x,
+            clientY: height * position.y,
+            altKey: true  // flag that this is not a user interaction
+          } as PointerEventInit;
+
+          inputElement.dispatchEvent(new PointerEvent(type, init));
         }
-        const init = {
-          touches: type === 'touchend' ? [] : touches,
-          targetTouches: type === 'touchend' ? [] : touches,
-          changedTouches: touches,
-          altKey: true  // flag that this is not a user interaction
-        };
-        inputElement.dispatchEvent(new TouchEvent(type, init));
       };
 
       const moveTouches = () => {
@@ -639,12 +636,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           position.y = xy[i].y(time);
         }
         this[$setInterpolationDecay](0);
-        dispatchTouches('touchmove');
+        dispatchTouches('pointermove');
 
         if (time < 1) {
           requestAnimationFrame(moveTouches);
         } else {
-          dispatchTouches('touchend');
+          dispatchTouches('pointerup');
           this[$setInterpolationDecay](this.interpolationDecay);
           document.removeEventListener('visibilitychange', onVisibilityChange);
         }
@@ -661,7 +658,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       document.addEventListener('visibilitychange', onVisibilityChange);
 
-      dispatchTouches('touchstart');
+      dispatchTouches('pointerdown');
 
       requestAnimationFrame(moveTouches);
     }
