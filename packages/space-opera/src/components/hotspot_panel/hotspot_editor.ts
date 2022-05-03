@@ -19,7 +19,8 @@ import '../shared/expandable_content/expandable_tab.js';
 import '../shared/section_row/section_row.js';
 import '@material/mwc-icon-button';
 
-import {customElement, html, LitElement, property, PropertyValues, query} from 'lit-element';
+import {html, LitElement, PropertyValues} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 

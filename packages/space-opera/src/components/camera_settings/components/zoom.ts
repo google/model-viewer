@@ -15,7 +15,8 @@
  *
  */
 
-import {customElement, html, internalProperty} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../../space_opera_base.js';
 import {zoomStyles} from '../../../styles.css.js';
@@ -28,9 +29,9 @@ import {getModelViewer} from '../../model_viewer_preview/reducer.js';
 export class ZooomLimits extends ConnectedLitElement {
   static styles = zoomStyles;
 
-  @internalProperty() enabled = false;
-  @internalProperty() minRadius?: number = undefined;
-  @internalProperty() minFov?: number = undefined;
+  @state() enabled = false;
+  @state() minRadius?: number = undefined;
+  @state() minFov?: number = undefined;
 
   onToggle(event: Event) {
     this.enabled = (event.target as HTMLInputElement).checked;
@@ -66,7 +67,7 @@ export class ZooomLimits extends ConnectedLitElement {
     </me-checkbox>
     ${
         this.enabled ? html`
-      <mwc-button id="set-min-button" class="SetButton" unelevated 
+      <mwc-button id="set-min-button" class="SetButton" unelevated
       @click="${this.dispatchMin}">Set Min</mwc-button>
       <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
       @click="${this.dispatchResetMin}">Reset Min</mwc-button>

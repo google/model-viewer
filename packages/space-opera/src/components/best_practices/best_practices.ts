@@ -15,7 +15,8 @@
  *
  */
 
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 import {reduxStore} from '../../space_opera_base';
 import {BestPracticesState, State} from '../../types';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element';
@@ -27,7 +28,7 @@ import {dispatchSetARButton, dispatchSetARPrompt, dispatchSetProgressBar, getBes
  */
 @customElement('best-practices')
 export class BestPractices extends ConnectedLitElement {
-  @internalProperty() bestPractices?: BestPracticesState;
+  @state() bestPractices?: BestPracticesState;
 
   @query('me-checkbox#progress-bar') progressBarCheckbox!: CheckboxElement;
   @query('me-checkbox#ar-button') arButtonCheckbox!: CheckboxElement;
@@ -54,23 +55,23 @@ export class BestPractices extends ConnectedLitElement {
     return html`
     <div style="font-size: 14px; font-weight: 500; margin: 0px 0px 10px 0px;">
       Use Custom:
-    </div> 
-    <me-checkbox 
-      id="progress-bar" 
+    </div>
+    <me-checkbox
+      id="progress-bar"
       label="Progress Bar"
       ?checked="${this.bestPractices?.progressBar}"
       @change=${this.onProgressBarChange}
       >
     </me-checkbox>
-    <me-checkbox 
-      id="ar-button" 
+    <me-checkbox
+      id="ar-button"
       label="AR Button"
       ?checked="${this.bestPractices?.arButton}"
       @change=${this.onARButtonChange}
       >
     </me-checkbox>
-    <me-checkbox 
-      id="ar-prompt" 
+    <me-checkbox
+      id="ar-prompt"
       label="AR Prompt"
       ?checked="${this.bestPractices?.arPrompt}"
       @change=${this.onARPromptChange}

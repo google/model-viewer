@@ -16,11 +16,12 @@
  */
 
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
-import {spread} from '@open-wc/lit-helpers';
-import {customElement, html, internalProperty, LitElement, query} from 'lit-element';
-import {ifDefined} from 'lit-html/directives/if-defined';
+import {html, LitElement} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
+import {ifDefined} from 'lit/directives/if-defined.js';
 
 import {toastStyles} from '../../styles.css.js';
+import {spread} from '../utils/spread_directive';
 import {timePasses} from '../../test/utils/test_utils.js';
 import {ArConfigState, BestPracticesState, ModelViewerConfig, ModelViewerSnippetState} from '../../types.js';
 import {arButtonCSS, arPromptCSS, progressBarCSS} from '../best_practices/styles.css.js';
@@ -50,29 +51,29 @@ export class MobileView extends LitElement {
   ];
 
   @query('model-viewer') readonly modelViewer!: ModelViewerElement;
-  @internalProperty() modelViewerUrl: string = '';
-  @internalProperty() posterUrl: string = '';
-  @internalProperty() currentBlob?: Blob;
+  @state() modelViewerUrl: string = '';
+  @state() posterUrl: string = '';
+  @state() currentBlob?: Blob;
 
-  @internalProperty() editorUrls?: URLs;
+  @state() editorUrls?: URLs;
 
-  @internalProperty() config: ModelViewerConfig = {};
-  @internalProperty() arConfig: ArConfigState = {};
-  @internalProperty() extraAttributes: any = {};
-  @internalProperty() hotspots: HotspotConfig[] = [];
-  @internalProperty() bestPractices?: BestPracticesState;
-  @internalProperty() envImageUrl: string|undefined;
+  @state() config: ModelViewerConfig = {};
+  @state() arConfig: ArConfigState = {};
+  @state() extraAttributes: any = {};
+  @state() hotspots: HotspotConfig[] = [];
+  @state() bestPractices?: BestPracticesState;
+  @state() envImageUrl: string|undefined;
 
-  @internalProperty() pipeId = window.location.search.replace('?id=', '');
-  @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
+  @state() pipeId = window.location.search.replace('?id=', '');
+  @state() mobilePingUrl = getPingUrl(this.pipeId);
 
-  @internalProperty() toastClassName: string = '';
-  @internalProperty() toastBody: string = '';
+  @state() toastClassName: string = '';
+  @state() toastBody: string = '';
   @query('div#overlay') overlay?: HTMLElement;
 
-  @internalProperty() sessionId = getRandomInt(1e+20);
-  @internalProperty() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
-  @internalProperty() sessionOs = getMobileOperatingSystem();
+  @state() sessionId = getRandomInt(1e+20);
+  @state() sessionUrl = getSessionUrl(this.pipeId, this.sessionId);
+  @state() sessionOs = getMobileOperatingSystem();
 
   updateState(snippet: ModelViewerSnippetState, urls: URLs) {
     this.editorUrls = urls;
@@ -209,7 +210,7 @@ export class MobileView extends LitElement {
     <div id="overlay"></div>
     <div class="app">
       <div class="mvContainer">
-        <model-viewer ...=${spread(this.extraAttributes)}
+        <model-viewer ${spread(this.extraAttributes)}
           src=${this.modelViewerUrl}
           ?ar=${ifDefined(!!this.arConfig.ar)}
           ar-modes=${ifDefined(this.arConfig!.arModes)}

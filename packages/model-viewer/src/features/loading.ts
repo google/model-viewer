@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {property} from 'lit-element';
+import {property} from 'lit/decorators.js';
 
 import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $hasTransitioned, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';

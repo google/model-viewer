@@ -309,10 +309,10 @@ suite('SmoothControls', () => {
           test('orbits when pointing, even while blurred', () => {
             const originalPhi = controls.getCameraSpherical().phi;
 
-            dispatchSyntheticEvent(
-                element, 'mousedown', {clientX: 0, clientY: 10});
-            dispatchSyntheticEvent(
-                window, 'mousemove', {clientX: 0, clientY: 0});
+            element.dispatchEvent(new PointerEvent(
+                'pointerdown', {pointerId: 8, clientX: 0, clientY: 10}));
+            element.dispatchEvent(new PointerEvent(
+                'pointermove', {pointerId: 8, clientX: 0, clientY: 0}));
 
             settleControls(controls);
 

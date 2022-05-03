@@ -383,7 +383,8 @@ export class ModelScene extends Scene {
     const {center} = this.boundingSphere;
 
     if (this.tightBounds === true) {
-      await this.element.requestUpdate('cameraTarget');
+      this.element.requestUpdate('cameraTarget');
+      await this.element.updateComplete;
       center.copy(this.getTarget());
     } else {
       this.boundingBox.getCenter(center);

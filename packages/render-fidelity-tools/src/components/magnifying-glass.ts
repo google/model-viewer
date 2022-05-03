@@ -14,7 +14,8 @@
  */
 
 
-import {html, LitElement, property} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {property} from 'lit/decorators.js';
 
 import {Pixel} from '../common.js';
 import {ImageAccessor} from '../image-accessor.js';

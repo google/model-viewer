@@ -1,6 +1,7 @@
 // @ts-ignore
 import {GltfState, GltfView, ResourceLoader} from '@khronosgroup/gltf-viewer';
-import {css, customElement, html, LitElement, property} from 'lit-element';
+import {css, html, LitElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js'
 
 import {ScenarioConfig} from '../../common.js';
 

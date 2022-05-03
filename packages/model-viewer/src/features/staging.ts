@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {property} from 'lit-element';
+import {property} from 'lit/decorators.js';
 import {style} from '../decorators.js';
 import ModelViewerElementBase, {$hasTransitioned, $renderer, $scene, $tick} from '../model-viewer-base.js';
 import {degreesToRadians} from '../styles/conversions.js';

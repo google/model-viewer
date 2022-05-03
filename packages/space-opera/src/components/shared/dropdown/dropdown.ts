@@ -21,7 +21,8 @@ import '@polymer/paper-item';
 
 import {PaperDropdownMenuElement} from '@polymer/paper-dropdown-menu/paper-dropdown-menu';
 import {PaperListboxElement} from '@polymer/paper-listbox';
-import {customElement, html, LitElement, property, query} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 
 import {checkFinite} from '../../utils/reducer_utils.js';
 

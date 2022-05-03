@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {property} from 'lit-element';
+import {property} from 'lit/decorators.js';
 import {Event as ThreeEvent} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
 

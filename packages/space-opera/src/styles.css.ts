@@ -15,7 +15,7 @@
  *
  */
 
-import {css, CSSResult} from 'lit-element';
+import {css, CSSResult} from 'lit';
 
 export const cameraSettingsStyles: CSSResult = css`
 .SaveCameraButton,
@@ -67,10 +67,10 @@ input[type="file"] {
 }
 
 .FileInputLabel {
-  width: 100%; 
-  height: 100%; 
-  display: block; 
-  position: absolute; 
+  width: 100%;
+  height: 100%;
+  display: block;
+  position: absolute;
   cursor: pointer;
 }
 
@@ -291,7 +291,7 @@ export const toastStyles: CSSResult = css`
 }
 
 @-webkit-keyframes fadein {
-  from {bottom: 0; opacity: 0;} 
+  from {bottom: 0; opacity: 0;}
   to {bottom: 30px; opacity: 1;}
 }
 
@@ -301,7 +301,7 @@ export const toastStyles: CSSResult = css`
 }
 
 @-webkit-keyframes fadeout {
-  from {bottom: 30px; opacity: 1;} 
+  from {bottom: 30px; opacity: 1;}
   to {bottom: 0; opacity: 0;}
 }
 

@@ -18,7 +18,8 @@
 import '@material/mwc-checkbox';
 import {Checkbox} from '@material/mwc-checkbox';
 
-import {customElement, html, LitElement, property, query} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 
 import {styles} from './checkbox.css.js';
 
@@ -36,9 +37,10 @@ export class CheckboxElement extends LitElement {
 
   // Specifically overriding a super class method.
   // tslint:disable-next-line:enforce-name-casing
-  async _getUpdateComplete() {
-    await super._getUpdateComplete();
+  async getUpdateComplete() {
+    const noTrigger = await super.getUpdateComplete();
     await this.checkbox.updateComplete;
+    return noTrigger;
   }
 
   render() {

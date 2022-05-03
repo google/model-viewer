@@ -336,7 +336,7 @@
       camera-orbit="-8.142746deg 68.967deg 0.6179899m"
       camera-target="-0.003m 0.0722m 0.0391m"
       field-of-view="45deg"
-      min-field-of-view="45deg"
+      min-field-of-view="25deg"
       max-field-of-view="45deg"
       interpolation-decay="200"
       min-camera-orbit="auto auto 5%"
@@ -413,6 +413,7 @@
     let dataset = annotation.dataset;
     modelViewer1.cameraTarget = dataset.target;
     modelViewer1.cameraOrbit = dataset.orbit;
+    modelViewer1.fieldOfView = '45deg';
   }
 
   modelViewer1.querySelectorAll('button').forEach((hotspot) => {

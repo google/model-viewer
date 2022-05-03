@@ -16,7 +16,7 @@
  */
 
 
-import {css, CSSResult} from 'lit-element';
+import {css, CSSResult} from 'lit';
 export const styles: CSSResult = css`:host {
   --input-background: #3c4043;
   --input-font-color: #dadce0;
