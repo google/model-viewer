@@ -212,7 +212,8 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
                                     .then((preparedGLTF) => {
                                       progressCallback(0.9);
                                       return new GLTFInstance(preparedGLTF);
-                                    }).catch((reason => {
+                                    })
+                                    .catch((reason => {
                                       console.error(reason);
                                       return new GLTFInstance();
                                     }));
@@ -245,20 +246,9 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
 
     // Patch dispose so that we can properly account for instance use
     // in the caching layer:
-    clone.dispose = (() => {
-      const originalDispose = clone.dispose;
-      let disposed = false;
-
-      return () => {
-        if (disposed) {
-          return;
-        }
-
-        disposed = true;
-        originalDispose.apply(clone);
-        this[$evictionPolicy].release(url);
-      };
-    })();
+    clone.dispose = () => {
+      this[$evictionPolicy].release(url);
+    };
 
     return clone;
   }
