@@ -16,11 +16,11 @@
 import {Camera, Vector3} from 'three';
 
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, OLD_DEFAULT_FOV_DEG, SphericalPosition} from '../../features/controls.js';
-import ModelViewerElementBase, {$canvas, $scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
+import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor, step, timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
+import {assetPath, rafPasses, until} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
 
@@ -31,8 +31,10 @@ const DEFAULT_MAX_FOV = 45;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
-  dispatchSyntheticEvent(element, 'mousedown', {clientX: 0, clientY: 10});
-  dispatchSyntheticEvent(window, 'mousemove', {clientX: 0, clientY: 0});
+  element.dispatchEvent(
+      new PointerEvent('pointerdown', {pointerId: 8, clientX: 0, clientY: 10}));
+  element.dispatchEvent(
+      new PointerEvent('pointermove', {pointerId: 8, clientX: 0, clientY: 0}));
 };
 
 const expectSphericalsToBeEqual =
@@ -539,7 +541,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
             await until(() => promptElement.classList.contains('visible'));
 
-            interactWith(element[$canvas]);
+            interactWith(element[$userInputElement]);
 
             await until(
                 () => promptElement.classList.contains('visible') === false);
