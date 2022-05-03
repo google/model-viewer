@@ -779,6 +779,7 @@ export class SmoothControls extends EventDispatcher {
         (event.button === 2 || event.ctrlKey || event.metaKey ||
          event.shiftKey)) {
       this.initializePan();
+      (this.scene.element as any)[$panElement].style.opacity = 1;
     }
     this.element.style.cursor = 'grabbing';
   }

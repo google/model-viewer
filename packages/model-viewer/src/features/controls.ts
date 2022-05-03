@@ -608,7 +608,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           }
 
           const init = {
-            pointerId: i,
+            pointerId: i - 5678,  // help ensure uniqueness
             pointerType: 'touch',
             target: inputElement,
             clientX: width * position.x,
@@ -627,6 +627,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           for (const fingerElement of this[$fingerAnimatedContainers]) {
             fingerElement.style.opacity = '0';
           }
+          dispatchTouches('pointercancel');
           return;
         }
 
