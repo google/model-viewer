@@ -151,7 +151,7 @@ export class SmoothControls extends EventDispatcher {
   // Pointer state
   private touchMode: TouchMode = null;
   private pointers: Pointer[] = [];
-  private startPointerPosition: Pointer = {clientX: 0, clientY: 0, id: -1};
+  private startPointerPosition = {clientX: 0, clientY: 0};
   private lastSeparation = 0;
   private touchDecided = false;
 
@@ -184,6 +184,7 @@ export class SmoothControls extends EventDispatcher {
       // This little beauty is to work around a WebKit bug that otherwise makes
       // touch events randomly not cancelable.
       element.addEventListener('touchmove', () => {}, {passive: false});
+      element.addEventListener('contextmenu', this.onContext);
 
       this.element.style.cursor = 'grab';
       this._interactionEnabled = true;
@@ -202,6 +203,7 @@ export class SmoothControls extends EventDispatcher {
       element.removeEventListener('pointercancel', this.onPointerUp);
       element.removeEventListener('wheel', this.onWheel);
       element.removeEventListener('keydown', this.onKeyDown);
+      element.removeEventListener('contextmenu', this.onContext);
 
       element.style.cursor = '';
       this.touchMode = null;
@@ -217,6 +219,20 @@ export class SmoothControls extends EventDispatcher {
   get options() {
     return this._options;
   }
+
+  onContext = (event: MouseEvent) => {
+    if (this.enablePan) {
+      event.preventDefault();
+    } else {
+      for (const pointer of this.pointers) {
+        // Required because of a common browser bug where the context menu never
+        // fires a pointercancel event.
+        this.onPointerUp(new PointerEvent(
+            'pointercancel',
+            {...this.startPointerPosition, pointerId: pointer.id}));
+      }
+    }
+  };
 
   set disableZoom(disable: boolean) {
     if (this._disableZoom != disable) {

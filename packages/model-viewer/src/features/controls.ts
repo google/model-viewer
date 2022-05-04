@@ -190,10 +190,6 @@ export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
   };
 };
 
-const disableContextMenu = (event: MouseEvent) => {
-  event.preventDefault();
-};
-
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
 const QUARTER_PI = HALF_PI / 2.0;
@@ -491,11 +487,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('enablePan')) {
         controls.enablePan = this.enablePan;
-        if (this.enablePan) {
-          this.addEventListener('contextmenu', disableContextMenu);
-        } else {
-          this.removeEventListener('contextmenu', disableContextMenu);
-        }
       }
 
       if (changedProperties.has('bounds')) {
