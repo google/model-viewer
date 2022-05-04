@@ -22,6 +22,7 @@ import {ModelScene} from './ModelScene.js';
 
 const PAN_SENSITIVITY = 0.018;
 const TAP_DISTANCE = 2;
+const TAP_MS = 300;
 const vector2 = new Vector2();
 const vector3 = new Vector3();
 
@@ -152,6 +153,7 @@ export class SmoothControls extends EventDispatcher {
   private touchMode: TouchMode = null;
   private pointers: Pointer[] = [];
   private startPointerPosition: Pointer = {clientX: 0, clientY: 0, id: -1};
+  private startTime = 0;
   private lastSeparation = 0;
   private touchDecided = false;
 
@@ -606,7 +608,8 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private recenter(pointer: PointerEvent) {
-    if (Math.abs(pointer.clientX - this.startPointerPosition.clientX) >
+    if (performance.now() > this.startTime + TAP_MS ||
+        Math.abs(pointer.clientX - this.startPointerPosition.clientX) >
             TAP_DISTANCE ||
         Math.abs(pointer.clientY - this.startPointerPosition.clientY) >
             TAP_DISTANCE) {
@@ -671,6 +674,7 @@ export class SmoothControls extends EventDispatcher {
       this.touchDecided = false;
       this.startPointerPosition.clientX = event.clientX;
       this.startPointerPosition.clientY = event.clientY;
+      this.startTime = performance.now();
     }
 
     try {

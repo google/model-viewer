@@ -575,7 +575,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
       });
 
-      suite.only('synthetic interaction', () => {
+      suite('synthetic interaction', () => {
         const finger = {
           x: {
             initialValue: 0.6,
@@ -648,8 +648,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               await element.updateComplete;
               const target = element.getCameraTarget();
 
-              element.interact(50, finger, finger);
-              await timePasses(50);
+              // Long enough duration to not be considered a recentering tap.
+              element.interact(500, finger, finger);
+              await timePasses(500);
               await rafPasses();
 
               const newTarget = element.getCameraTarget();
