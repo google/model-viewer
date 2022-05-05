@@ -20,7 +20,8 @@ import '@material/mwc-textfield';
 import {Button} from '@material/mwc-button';
 import {Dialog} from '@material/mwc-dialog';
 import {TextField} from '@material/mwc-textfield';
-import {customElement, html, LitElement, property, query} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 
 
 
@@ -33,8 +34,8 @@ export class InputDialog extends LitElement {
   @property({type: Boolean}) openDialog = false;
   @property({type: Boolean}) modal = false;
   @property({type: String}) placeholder = 'Enter Value';
-  @property({type: Function}) OnOK = (_value: string) => {};
-  @property({type: Function})
+  @property({attribute: false}) OnOK = (_value: string) => {};
+  @property({attribute: false})
   onValidate = (_value: string) => {
     return {valid: true, validationMessage: ''};
   };

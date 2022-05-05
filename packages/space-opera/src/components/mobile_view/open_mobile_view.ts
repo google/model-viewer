@@ -15,7 +15,8 @@
  *
  */
 
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {openMobileViewStyles} from '../../styles.css.js';
@@ -42,27 +43,27 @@ const REFRESH_DELAY = 20000;  // 20s
 export class OpenMobileView extends ConnectedLitElement {
   static styles = openMobileViewStyles;
 
-  @internalProperty() pipeId = getRandomInt(1e+20);
+  @state() pipeId = getRandomInt(1e+20);
 
-  @internalProperty() isDeployed = false;
-  @internalProperty() isDeployable = false;
-  @internalProperty() isSendingData = false;
-  @internalProperty() contentHasChanged = false;
+  @state() isDeployed = false;
+  @state() isDeployable = false;
+  @state() isSendingData = false;
+  @state() contentHasChanged = false;
 
-  @internalProperty() urls: URLs = {gltf: '', env: ''};
-  @internalProperty() lastUrlsSent: URLs = {gltf: '', env: ''};
-  @internalProperty() snippet!: ModelViewerSnippetState;
-  @internalProperty() lastSnippetSent!: ModelViewerSnippetState;
-  @internalProperty() modelIsDirty = false;
+  @state() urls: URLs = {gltf: '', env: ''};
+  @state() lastUrlsSent: URLs = {gltf: '', env: ''};
+  @state() snippet!: ModelViewerSnippetState;
+  @state() lastSnippetSent!: ModelViewerSnippetState;
+  @state() modelIsDirty = false;
 
   @query('mobile-modal') mobileModal!: MobileModal;
-  @internalProperty() haveReceivedResponse: boolean = false;
+  @state() haveReceivedResponse: boolean = false;
 
-  @internalProperty() arConfig?: ArConfigState;
-  @internalProperty() defaultToSceneViewer: boolean = false;
+  @state() arConfig?: ArConfigState;
+  @state() defaultToSceneViewer: boolean = false;
 
-  @internalProperty() sessionList: MobileSession[] = [];
-  @internalProperty() mobilePingUrl = getPingUrl(this.pipeId);
+  @state() sessionList: MobileSession[] = [];
+  @state() mobilePingUrl = getPingUrl(this.pipeId);
 
   get canRefresh(): boolean {
     return this.isDeployed && this.haveReceivedResponse &&
@@ -311,8 +312,8 @@ export class OpenMobileView extends ConnectedLitElement {
 
   render() {
     return html`
-    <mobile-expandable-section 
-      .isDeployed=${this.isDeployed} 
+    <mobile-expandable-section
+      .isDeployed=${this.isDeployed}
       .isDeployable=${this.isDeployable}
       .onInitialDeploy=${this.onInitialDeploy.bind(this)}
       .haveReceivedResponse=${this.haveReceivedResponse}

@@ -70,8 +70,7 @@
   ],
   "dependencies": {
     "three": "^0.139.2",
-    "lit-element": "^2.5.1",
-    "lit-html": "^1.4.1"
+    "lit": "^2.2.3"
   },
   "devDependencies": {
     "@open-wc/karma-esm": "^4.0.0",
@@ -81,7 +80,7 @@
     "@types/chai": "^4.2.21",
     "@types/mocha": "^8.2.3",
     "@types/pngjs": "^6.0.1",
-    "@types/three": "^0.137.0",
+    "@types/three": "^0.139.0",
     "@ungap/event-target": "^0.2.2",
     "chai": "^4.3.4",
     "focus-visible": "^5.2.0",

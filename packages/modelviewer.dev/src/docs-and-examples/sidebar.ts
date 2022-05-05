@@ -279,11 +279,14 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
   for (const entry of everyEntry) {
     const id = entry.target.getAttribute('id')!;
     const sidebarName = `container-${id}-sidebar`;
+    const sidebarElement = document.querySelector(`h4[id=${sidebarName}`);
+    if (sidebarElement == null) {
+      return;
+    }
     if (id === maxName) {
-      document.querySelector(`h4[id=${sidebarName}`)!.classList.add('active');
+      sidebarElement.classList.add('active');
     } else {
-      document.querySelector(`h4[id=${sidebarName}`)!.classList.remove(
-          'active');
+      sidebarElement.classList.remove('active');
     }
   }
 }

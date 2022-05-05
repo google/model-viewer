@@ -23,7 +23,8 @@ import '../shared/checkbox/checkbox.js';
 import '@polymer/paper-item';
 import '@material/mwc-button';
 
-import {customElement, html, internalProperty, query} from 'lit-element';
+import {html} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {fileModalStyles, iblSelectorStyles} from '../../styles.css.js';
@@ -48,8 +49,8 @@ const ACCEPT_IMAGE_TYPE = IMAGE_MIME_TYPES.join(',') + ',.hdr';
 export class IblSelector extends ConnectedLitElement {
   static styles = [iblSelectorStyles, fileModalStyles];
 
-  @internalProperty() config: ModelViewerConfig = {};
-  @internalProperty() environmentImages: EnvironmentImage[] = [];
+  @state() config: ModelViewerConfig = {};
+  @state() environmentImages: EnvironmentImage[] = [];
 
   @query('me-slider-with-input#exposure')
   exposureSlider!: SliderWithInputElement;
@@ -63,12 +64,13 @@ export class IblSelector extends ConnectedLitElement {
 
   // Specifically overriding a super class method.
   // tslint:disable-next-line:enforce-name-casing
-  async _getUpdateComplete() {
-    await super._getUpdateComplete();
+  async getUpdateComplete() {
+    const noTrigger = await super.getUpdateComplete();
     await this.exposureSlider.updateComplete;
     await this.skyboxCheckbox.updateComplete;
     await this.shadowIntensitySlider.updateComplete;
     await this.shadowSoftnessSlider.updateComplete;
+    return noTrigger;
   }
 
   stateChanged(state: State) {
@@ -167,8 +169,8 @@ export class IblSelector extends ConnectedLitElement {
               value="${this.config.exposure ?? DEFAULT_EXPOSURE}">
             </me-slider-with-input>
           </me-section-row>
-          <me-checkbox 
-            id="skybox" 
+          <me-checkbox
+            id="skybox"
             label="Use Environment as Skybox"
             ?checked="${!!this.config.useEnvAsSkybox}"
             @change=${this.onUseEnvAsSkyboxChange}

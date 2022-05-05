@@ -15,7 +15,7 @@
  *
  */
 
-import {customElement, internalProperty} from 'lit-element';
+import {customElement, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../../space_opera_base.js';
 import {State} from '../../../types.js';
@@ -38,7 +38,7 @@ export const DEFAULT_MAX_YAW = 180;
 /** The Camera Settings panel. */
 @customElement('me-camera-yaw-limits')
 export class YawLimits extends LimitsBase {
-  @internalProperty() isDirtyCamera: boolean = false;
+  @state() isDirtyCamera: boolean = false;
 
   stateChanged(state: State) {
     this.isDirtyCamera = getIsDirtyCamera(state);

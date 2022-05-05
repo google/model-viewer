@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {property} from 'lit-element';
+import {property} from 'lit/decorators.js';
 import {Event as ThreeEvent, Texture} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $shouldAttemptPreload} from '../model-viewer-base.js';

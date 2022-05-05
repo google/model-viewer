@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {html, LitElement, property} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {property} from 'lit/decorators.js';
 
 import {Dimensions, GoldenConfig, ImageComparisonAnalysis, ScenarioRecord, toDecibel} from '../common.js';
 

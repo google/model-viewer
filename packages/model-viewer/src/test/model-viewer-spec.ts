@@ -42,7 +42,8 @@ const setupLighting =
 // TODO(sun765): this only test whether the screenshot
 // is colorless or not. Replace this with more robust
 // test in later pr.
-function testFidelity(screenshotContext: WebGLRenderingContext) {
+function testFidelity(screenshotContext: WebGLRenderingContext|
+                      WebGL2RenderingContext) {
   const width = screenshotContext.drawingBufferWidth;
   const height = screenshotContext.drawingBufferHeight;
 

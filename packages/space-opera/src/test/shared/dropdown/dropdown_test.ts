@@ -19,7 +19,7 @@
 import '../../../components/shared/dropdown/dropdown.js';
 import '@polymer/paper-item';
 
-import {html, render} from 'lit-html';
+import {html, render} from 'lit';
 
 import {Dropdown} from '../../../components/shared/dropdown/dropdown.js';
 

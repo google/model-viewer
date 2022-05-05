@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {property} from 'lit-element';
+import {property} from 'lit/decorators.js';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
@@ -188,10 +188,6 @@ export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
     ],
     keywords: {auto: [null, null, null]}
   };
-};
-
-const disableContextMenu = (event: MouseEvent) => {
-  event.preventDefault();
 };
 
 const HALF_PI = Math.PI / 2.0;
@@ -491,11 +487,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('enablePan')) {
         controls.enablePan = this.enablePan;
-        if (this.enablePan) {
-          this.addEventListener('contextmenu', disableContextMenu);
-        } else {
-          this.removeEventListener('contextmenu', disableContextMenu);
-        }
       }
 
       if (changedProperties.has('bounds')) {
@@ -563,7 +554,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.requestUpdate('fieldOfView');
       this.requestUpdate('minCameraOrbit');
       this.requestUpdate('maxCameraOrbit');
-      await this.requestUpdate('cameraOrbit');
+      this.requestUpdate('cameraOrbit');
+      await this.updateComplete;
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
@@ -729,7 +721,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       controls.updateAspect(this[$scene].aspect);
 
-      await this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
+      this.requestUpdate('maxFieldOfView', this.maxFieldOfView);
+      await this.updateComplete;
       this[$controls].setFieldOfView(fov);
 
       this.jumpCameraToGoal();

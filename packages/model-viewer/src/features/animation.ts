@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {property} from 'lit-element';
+import {property} from 'lit/decorators.js';
 import {LoopOnce, LoopPingPong, LoopRepeat} from 'three';
 
 import ModelViewerElementBase, {$hasTransitioned, $needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';

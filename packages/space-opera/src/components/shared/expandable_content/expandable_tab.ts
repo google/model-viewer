@@ -18,7 +18,8 @@
 import './expandable_section.js';
 import '@material/mwc-icon';
 
-import {customElement, html, LitElement, property} from 'lit-element';
+import {html, LitElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
 
 import {styles} from './expandable_tab.css.js';
 
@@ -32,7 +33,7 @@ export class ExpandableTab extends LitElement {
   @property({type: Boolean}) open = false;
   @property({type: Boolean}) enabled = true;
   @property({type: Boolean}) sticky? = false;
-  @property({type: Function}) copyFunction?: Function;
+  @property({attribute: false}) copyFunction?: Function;
 
   static styles = styles;
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {html, render} from 'lit-html';
+import {html, render} from 'lit';
 
 import CloseIcon from './assets/close-material-svg.js';
 import ControlsPrompt from './assets/controls-svg.js';
@@ -318,7 +318,7 @@ canvas.show {
           <canvas></canvas>
         </slot>
       </div>
-      
+
   </div>
 
   <!-- NOTE(cdata): We need to wrap slots because browsers without ShadowDOM
@@ -341,7 +341,7 @@ canvas.show {
 
   <div class="slot pan-target">
     <slot name="pan-target">
-      <div id="default-pan-target">      
+      <div id="default-pan-target">
       </div>
     </slot>
   </div>
@@ -365,7 +365,7 @@ canvas.show {
         </div>
       </slot>
     </div>
-    
+
     <div class="slot exit-webxr-ar-button">
       <slot name="exit-webxr-ar-button">
         <a id="default-exit-webxr-ar-button" part="default-exit-webxr-ar-button"
