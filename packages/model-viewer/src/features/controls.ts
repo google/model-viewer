@@ -661,7 +661,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$controls].update(time, delta);
-      this[$scene].updateTarget(delta);
+      if (this[$scene].updateTarget(delta)) {
+        // Update to $controls.isUserChange once customPrompt lands
+        this[$onChange]({type: 'change', source: ChangeSource.NONE})
+      }
     }
 
     [$deferInteractionPrompt]() {

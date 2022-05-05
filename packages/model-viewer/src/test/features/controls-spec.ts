@@ -214,6 +214,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
                      element[$scene].camera, element.getCameraTarget()))
               .to.be.equal(true);
         });
+
+        test('causes camera-change event to fire', async () => {
+          const cameraChangeDispatches = waitForEvent(element, 'camera-change');
+          element.cameraTarget = '3m 2m 1m';
+
+          await cameraChangeDispatches;
+        });
       });
 
       test('defaults FOV correctly', async () => {

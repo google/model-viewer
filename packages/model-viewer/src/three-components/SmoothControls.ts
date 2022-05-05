@@ -620,6 +620,8 @@ export class SmoothControls extends EventDispatcher {
     target.add(dxy.applyMatrix3(this.panProjection));
     scene.boundingSphere.clampPoint(target, target);
     scene.setTarget(target.x, target.y, target.z);
+
+    this.dispatchEvent({type: 'change', source: ChangeSource.USER_INTERACTION});
   }
 
   private recenter(pointer: PointerEvent) {
