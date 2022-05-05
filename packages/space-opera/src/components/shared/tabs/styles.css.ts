@@ -35,6 +35,7 @@ export const styles: CSSResult = css`:host {
   --mdc-tab-color-default: var(--me-theme-tab-default-color);
   --mdc-tab-text-label-color-default: var(--me-theme-tab-default-color);
   --mdc-tab-stacked-height: 100px;
+  --mdc-tab-min-width: 48px;
   background: var(--me-theme-container-background-color);
   display: flex;
   flex-direction: column;
@@ -65,4 +66,10 @@ export const styles: CSSResult = css`:host {
 ::slotted(span) {
   display: contents;
 }
+`;
+
+export const tabStyles: CSSResult = css`
+  .mdc-tab {
+    min-width: var(--mdc-tab-min-width, 48px);
+  }
 `;
