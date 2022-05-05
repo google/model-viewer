@@ -294,6 +294,110 @@
       </div>
     </div>	
 
+    <div class="sample">
+      <div id="customPrompt" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Create your own custom interaction prompts with one or two touch points.</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="customPrompt" highlight-as="html">
+            <template>
+<style>
+  .dot{
+    display: block;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    transform: translateX(-50%) translateY(-50%);
+    border-radius: 50%;
+    box-shadow: 0px 0px 10px 3px rgba(0, 0, 0, 0.7), 0px 0px 5px 1px rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+</style>
+<model-viewer id="prompt-demo" camera-controls enable-pan interaction-prompt="none" src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look">
+  <div class="dot" slot="finger0"></div>
+  <div class="dot" slot="finger1"></div>
+</model-viewer>
+
+<script>
+  const modelViewerPrompt = document.querySelector("#prompt-demo");
+  
+  const PROMT_MS = 3000;
+  const REPEAT_MS = 5000;
+
+  const finger0 = {
+    x: {
+      initialValue: 0.6,
+      keyframes: [
+        {frames: 1, value: 0.7},
+        {frames: 1, value: 0.5},
+        {frames: 1, value: 0.7},
+        {frames: 1, value: 0.6},
+      ]
+    },
+    y: {
+      initialValue: 0.45,
+      keyframes: [
+        {frames: 1, value: 0.4},
+        {frames: 1, value: 0.3},
+        {frames: 1, value: 0.4},
+        {frames: 1, value: 0.45},
+      ]
+    }
+  };
+
+  const finger1 = {
+    x: {
+      initialValue: 0.4,
+      keyframes: [
+        {frames: 1, value: 0.3},
+        {frames: 1, value: 0.1},
+        {frames: 1, value: 0.3},
+        {frames: 1, value: 0.4},
+      ]
+    },
+    y: {
+      initialValue: 0.55,
+      keyframes: [
+        {frames: 1, value: 0.6},
+        {frames: 1, value: 0.5},
+        {frames: 1, value: 0.6},
+        {frames: 1, value: 0.55},
+      ]
+    }
+  };
+
+  let hasInteracted = false;
+
+  const prompt = () => {
+    if (!hasInteracted) {
+      modelViewerPrompt.interact(PROMT_MS, finger0, finger1);
+      setTimeout(prompt, REPEAT_MS);
+    }
+  };
+
+  modelViewerPrompt.addEventListener('poster-dismissed', () => {
+    prompt();
+  }, {once: true});
+
+  const interacted = (event) => {
+    if (event.detail.source === 'user-interaction') {
+      hasInteracted = true;
+      modelViewerPrompt.removeEventListener('camera-change', interacted);
+    }
+  };
+
+  modelViewerPrompt.addEventListener('camera-change', interacted);
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
     <div class="footer">
       <ul>
         <li class="attribution">

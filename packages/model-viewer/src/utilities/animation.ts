@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {clamp} from '../utilities';
+
 // Adapted from https://gist.github.com/gre/1650294
 export const easeInOutQuad: TimingFunction = (t: number) =>
     t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -38,37 +40,34 @@ export const interpolate =
  */
 export const sequence =
     (tracks: Array<TimingFunction>, weights: Array<number>): TimingFunction => {
-      const totalWeight = weights.reduce((total, weight) => total + weight, 0);
-      const ratios: Array<number> = weights.map(weight => weight / totalWeight);
+      const cumulativeSum = ((sum: number) => (value: number) => sum += value);
+      const times = weights.map(cumulativeSum(0));
 
       return (time: number) => {
-        let start: number = 0;
-        let ratio: number = Infinity;
-        let track: TimingFunction = () => 0;
+        time = clamp(time, 0, 1);
+        time *= times[times.length - 1];
+        const i = times.findIndex((val) => val >= time);
 
-        for (let i = 0; i < ratios.length; ++i) {
-          ratio = ratios[i];
-          track = tracks[i];
+        const start = i < 1 ? 0 : times[i - 1];
+        const end = times[i];
 
-          if (time <= (start + ratio)) {
-            break;
-          }
-
-          start += ratio;
-        }
-
-        return track!((time - start) / ratio!);
+        return tracks[i]((time - start) / (end - start));
       }
     };
 
 /**
- * A Keyframe groups a target value, the number of frames to interpolate towards
+ * A Frame groups a target value, the number of frames to interpolate towards
  * that value and an optional easing funnction to use for interpolation.
  */
-export interface Keyframe {
+export interface Frame {
   value: number;
   frames: number;
   ease?: TimingFunction;
+}
+
+export interface Path {
+  initialValue: number;
+  keyframes: Frame[];
 }
 
 /**
@@ -78,23 +77,22 @@ export interface Keyframe {
  * frames. Frames are only used to indicate the relative length of each keyframe
  * transition, so interpolated values will be computed for fractional frames.
  */
-export const timeline =
-    (initialValue: number, keyframes: Array<Keyframe>): TimingFunction => {
-      const tracks: Array<TimingFunction> = [];
-      const weights: Array<number> = [];
+export const timeline = (path: Path): TimingFunction => {
+  const tracks: Array<TimingFunction> = [];
+  const weights: Array<number> = [];
 
-      let lastValue = initialValue;
+  let lastValue = path.initialValue;
 
-      for (let i = 0; i < keyframes.length; ++i) {
-        const keyframe = keyframes[i];
-        const {value, frames} = keyframe;
-        const ease = keyframe.ease || easeInOutQuad;
-        const track = interpolate(lastValue, value, ease);
+  for (let i = 0; i < path.keyframes.length; ++i) {
+    const keyframe = path.keyframes[i];
+    const {value, frames} = keyframe;
+    const ease = keyframe.ease || easeInOutQuad;
+    const track = interpolate(lastValue, value, ease);
 
-        tracks.push(track);
-        weights.push(frames);
-        lastValue = value;
-      }
+    tracks.push(track);
+    weights.push(frames);
+    lastValue = value;
+  }
 
-      return sequence(tracks, weights);
-    };
+  return sequence(tracks, weights);
+};
