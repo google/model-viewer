@@ -63,14 +63,15 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       }
       const mesh = node as Mesh;
       if (mesh.isMesh) {
+        const {geometry} = mesh;
         mesh.castShadow = true;
         if ((mesh as any).isSkinnedMesh) {
           // Akin to disablig frustum culling above, we have to also manually
           // disable the bounds to make raycasting correct for skinned meshes.
-          mesh.geometry.boundingSphere = nullSphere;
+          geometry.boundingSphere = nullSphere;
           // The bounding box is set in GLTFLoader by the accessor bounds, which
           // are not updated with animation.
-          mesh.geometry.boundingBox = null;
+          geometry.boundingBox = null;
         }
 
         const material = mesh.material as MeshStandardMaterial;
@@ -79,6 +80,23 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
         }
         // This makes shadows better for non-manifold meshes
         material.shadowSide = FrontSide;
+
+        // Fixes an edge case with unused extra UV-coords being incorrectly
+        // referenced by three.js; remove when
+        // https://github.com/mrdoob/three.js/pull/23974 is merged.
+        if (material.aoMap) {
+          const {gltf, threeObjectMap} = prepared[$correlatedSceneGraph]!;
+          const gltfRef = threeObjectMap.get(material);
+          if (gltf.materials != null && gltfRef != null &&
+              gltfRef.materials != null) {
+            const gltfMaterial = gltf.materials[gltfRef.materials];
+            if (gltfMaterial.occlusionTexture &&
+                gltfMaterial.occlusionTexture.texCoord === 0 &&
+                geometry.attributes.uv != null) {
+              geometry.setAttribute('uv2', geometry.attributes.uv);
+            }
+          }
+        }
       }
     });
 
