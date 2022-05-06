@@ -107,7 +107,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     hasBakedShadow(): boolean {
-      return this[$scene].bakedShadows.length > 0;
+      return this[$scene].bakedShadows.size > 0;
     }
 
     [$onModelLoad]() {
