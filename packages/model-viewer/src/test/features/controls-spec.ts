@@ -15,12 +15,12 @@
 
 import {Camera, Vector3} from 'three';
 
-import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, OLD_DEFAULT_FOV_DEG, SphericalPosition} from '../../features/controls.js';
+import {$controls, $promptAnimatedContainer, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, OLD_DEFAULT_FOV_DEG, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
-import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
+import {ChangeSource, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor, step, timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, rafPasses, until} from '../helpers.js';
+import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
 
@@ -509,7 +509,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.interactionPrompt = 'none';
           await timePasses(element.interactionPromptThreshold + 100);
 
-          const promptElement: HTMLElement = (element as any)[$promptElement];
+          const promptElement: HTMLElement =
+              (element as any)[$promptAnimatedContainer];
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
         });
@@ -518,7 +519,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.interactionPrompt = 'auto';
           await timePasses(element.interactionPromptThreshold + 100);
 
-          const promptElement: HTMLElement = (element as any)[$promptElement];
+          const promptElement: HTMLElement =
+              (element as any)[$promptAnimatedContainer];
           expect(promptElement.classList.contains('visible')).to.be.equal(true);
         });
 
@@ -527,7 +529,8 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.cameraControls = false;
           await timePasses(element.interactionPromptThreshold + 100);
 
-          const promptElement: HTMLElement = (element as any)[$promptElement];
+          const promptElement: HTMLElement =
+              (element as any)[$promptAnimatedContainer];
           expect(promptElement.classList.contains('visible'))
               .to.be.equal(false);
         });
@@ -536,7 +539,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           let promptElement: HTMLElement;
 
           setup(async () => {
-            promptElement = (element as any)[$promptElement];
+            promptElement = (element as any)[$promptAnimatedContainer];
             element.interactionPrompt = 'auto';
 
             await until(() => promptElement.classList.contains('visible'));
@@ -572,6 +575,130 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
       });
 
+      suite('synthetic interaction', () => {
+        const finger = {
+          x: {
+            initialValue: 0.6,
+            keyframes: [
+              {frames: 1, value: 0.7},
+              {frames: 1, value: 0.6},
+            ]
+          },
+          y: {
+            initialValue: 0.45,
+            keyframes: [
+              {frames: 1, value: 0.4},
+              {frames: 1, value: 0.45},
+            ]
+          }
+        };
+
+        test('one finger rotates', async () => {
+          const orbit = element.getCameraOrbit();
+
+          element.interact(50, finger);
+          await rafPasses();
+          await rafPasses();
+
+          const newOrbit = element.getCameraOrbit();
+          expect(newOrbit.theta).to.be.lessThan(orbit.theta, 'theta');
+          expect(newOrbit.phi).to.be.greaterThan(orbit.phi, 'phi');
+          expect(newOrbit.radius).to.eq(orbit.radius, 'radius');
+        });
+
+        test(
+            'return one finger to starting point returns camera to starting point',
+            async () => {
+              const orbit = element.getCameraOrbit();
+              element.interactionPrompt = 'none';
+              element.interpolationDecay = 0;
+
+              element.interact(50, finger);
+              await timePasses(50);
+              await rafPasses();
+              await rafPasses();
+
+              const newOrbit = element.getCameraOrbit();
+              expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
+              expect(newOrbit.phi).to.be.closeTo(orbit.phi, 0.001, 'phi');
+              expect(newOrbit.radius).to.eq(orbit.radius, 'radius');
+            });
+
+        test('two fingers pan', async () => {
+          element.enablePan = true;
+          element.cameraOrbit = '0deg 90deg auto';
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+          const target = element.getCameraTarget();
+
+          element.interact(50, finger, finger);
+          await rafPasses();
+          await rafPasses();
+
+          const newTarget = element.getCameraTarget();
+          expect(newTarget.x).to.be.lessThan(target.x, 'X');
+          expect(newTarget.y).to.be.lessThan(target.y, 'Y');
+          expect(newTarget.z).to.be.closeTo(target.z, 0.001, 'Z');
+        });
+
+        test(
+            'return two fingers to starting point returns target to starting point',
+            async () => {
+              element.enablePan = true;
+              await element.updateComplete;
+              const target = element.getCameraTarget();
+
+              // Long enough duration to not be considered a recentering tap.
+              element.interact(500, finger, finger);
+              await timePasses(500);
+              await rafPasses();
+
+              const newTarget = element.getCameraTarget();
+              expect(newTarget.x).to.be.closeTo(target.x, 0.001, 'X');
+              expect(newTarget.y).to.be.closeTo(target.y, 0.001, 'Y');
+              expect(newTarget.z).to.be.closeTo(target.z, 0.001, 'Z');
+            });
+
+        test('user interaction cancels synthetic interaction', async () => {
+          const orbit = element.getCameraOrbit();
+          element.interact(50, finger);
+          await rafPasses();
+          await rafPasses();
+
+          dispatchSyntheticEvent(element[$userInputElement], 'keydown', {
+            keyCode: KeyCode.PAGE_DOWN
+          });
+          await timePasses(50);
+          await rafPasses();
+
+          const newOrbit = element.getCameraOrbit();
+          expect(newOrbit.theta).to.be.not.closeTo(orbit.theta, 0.001, 'theta');
+          expect(newOrbit.phi).to.be.not.closeTo(orbit.phi, 0.001, 'phi');
+          expect(newOrbit.radius)
+              .to.be.not.closeTo(orbit.radius, 0.001, 'radius');
+        });
+
+        test('second interaction does not interupt the first', async () => {
+          element.enablePan = true;
+          await element.updateComplete;
+          const target = element.getCameraTarget();
+          const orbit = element.getCameraOrbit();
+
+          element.interact(50, finger, finger);
+          element.interact(50, finger);
+          await rafPasses();
+          await rafPasses();
+
+          const newTarget = element.getCameraTarget();
+          expect(newTarget.x).to.be.lessThan(target.x, 'X');
+          expect(newTarget.y).to.be.lessThan(target.y, 'Y');
+
+          const newOrbit = element.getCameraOrbit();
+          expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
+          expect(newOrbit.phi).to.be.closeTo(orbit.phi, 0.001, 'phi');
+        });
+      });
+
       suite('a11y', () => {
         let input: HTMLDivElement;
         let promptElement: HTMLElement;
@@ -579,7 +706,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
         setup(async () => {
           input = element[$userInputElement];
-          promptElement = (element as any)[$promptElement];
+          promptElement = (element as any)[$promptAnimatedContainer];
           statusElement = element[$statusElement];
           element.alt = 'A 3D model of a cube';
           element.cameraOrbit = '0 90deg auto';
