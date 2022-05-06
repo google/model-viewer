@@ -709,6 +709,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (!this[$renderer].arRenderer.isPresenting) {
         this[$scene].setTarget(x, y, z);
       }
+      this[$controls].isUserChange = false;
       this[$renderer].arRenderer.updateTarget();
     }
 
@@ -763,7 +764,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       controls.update(time, delta);
-      scene.updateTarget(delta);
+      if (scene.updateTarget(delta)) {
+        const source = controls.isUserChange ? ChangeSource.USER_INTERACTION :
+                                               ChangeSource.NONE;
+        this[$onChange]({type: 'change', source});
+      }
     }
 
     [$deferInteractionPrompt]() {

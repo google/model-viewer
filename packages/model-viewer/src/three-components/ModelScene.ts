@@ -486,7 +486,7 @@ export class ModelScene extends Scene {
    * This should be called every frame with the frame delta to cause the target
    * to transition to its set point.
    */
-  updateTarget(delta: number) {
+  updateTarget(delta: number): boolean {
     const goal = this.goalTarget;
     const target = this.target.position;
     if (!goal.equals(target)) {
@@ -498,6 +498,9 @@ export class ModelScene extends Scene {
       this.target.position.set(x, y, z);
       this.target.updateMatrixWorld();
       this.queueRender();
+      return true;
+    } else {
+      return false;
     }
   }
 
