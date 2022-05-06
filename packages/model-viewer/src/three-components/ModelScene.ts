@@ -273,6 +273,8 @@ export class ModelScene extends Scene {
     if (this.shadow != null) {
       this.shadow.setIntensity(0);
     }
+    this.bakedShadows.clear();
+
     const gltf = this._currentGLTF;
     // Remove all current children
     if (gltf != null) {
