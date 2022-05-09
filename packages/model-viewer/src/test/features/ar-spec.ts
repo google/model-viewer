@@ -139,6 +139,21 @@ suite('ModelViewerElementBase with ARMixin', () => {
           expect(url.hash).to.equal(
               '#custom=path-to-banner.html&allowsContentScaling=0');
         });
+
+        test('replicate src hash to usdz blob url', () => {
+          element.src = 'https://example.com/model.gltf#custom=path-to-banner.html';
+          element.arModes = 'webxr scene-viewer quick-look';
+
+          (element as any)[$openIOSARQuickLook]();
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.hash).to.equal(
+              '#custom=path-to-banner.html');
+        });
+        
       });
     });
 

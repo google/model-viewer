@@ -373,6 +373,15 @@ configuration or device capabilities');
       const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
       const modelUrl = new URL(objectURL, self.location.toString());
 
+      if(generateUsdz){
+        const location = self.location.toString();
+        const locationUrl = new URL(location);
+        const srcUrl =  new URL(this.src!, locationUrl);
+        if(srcUrl.hash){
+          modelUrl.hash = srcUrl.hash;
+        }
+      }
+
       if (this.arScale === 'fixed') {
         if (modelUrl.hash) {
           modelUrl.hash += '&';
