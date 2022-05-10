@@ -143,44 +143,38 @@ suite('ModelViewerElementBase with ARMixin', () => {
         test('replicate src hash to usdz blob url', async () => {
           element.src = assetPath('models/cube.gltf')+'#custom=path-to-banner.html';
           element.arModes = 'webxr scene-viewer quick-look';
-          
-          console.log('element.src:'+element.src);
-          console.log('element.arModes:'+element.arModes);
-          console.log('element.iosSrc:'+element.iosSrc);
-          console.log('intentUrls:'+intentUrls);
 
           await (element as any)[$openIOSARQuickLook]();
 
-          console.log('intentUrls:'+intentUrls);
-          console.log('intentUrls.length:'+intentUrls.length);
-          console.log('intentUrls[0]:'+intentUrls[0]);
-
           expect(intentUrls.length).to.be.equal(1);
 
           const url = new URL(intentUrls[0]);
 
+          expect(url.protocol).to.equal(
+              'blob:');
+
           expect(url.hash).to.equal(
               '#custom=path-to-banner.html');
- 
         });
 
-/*
-        test('replicate src hash to usdz blob url', async () => {
-          element.src = 'https://example.com/model.gltf#custom=path-to-banner.html';
-          console.log('element.src:'+element.src);
+        test('replicate src hash to usdz blob and set hash for fixed scale', async () => {
+          element.src = assetPath('models/cube.gltf')+'#custom=path-to-banner.html';
           element.arModes = 'webxr scene-viewer quick-look';
-          console.log('element.arModes:'+element.arModes);
+          element.arScale = 'fixed';
 
-          await(element as any)[$openIOSARQuickLook]();
+          await (element as any)[$openIOSARQuickLook]();
 
           expect(intentUrls.length).to.be.equal(1);
 
           const url = new URL(intentUrls[0]);
 
+          expect(url.protocol).to.equal(
+              'blob:');
+
           expect(url.hash).to.equal(
-              '#custom=path-to-banner.html');
+              '#custom=path-to-banner.html&allowsContentScaling=0');
         });
-*/
+
       });
     });
 
