@@ -784,6 +784,11 @@ export class SmoothControls extends EventDispatcher {
     if (this.pointers.length === 1) {
       this.touchMode = this.touchModeRotate;
     } else {
+      if (this._disableZoom) {
+        this.touchMode = null;
+        this.element.removeEventListener('touchmove', this.disableScroll);
+        return;
+      }
       this.touchMode = (this.touchDecided && this.touchMode === null) ?
           null :
           this.touchModeZoom;
