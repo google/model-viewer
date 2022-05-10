@@ -727,10 +727,12 @@ export class SmoothControls extends EventDispatcher {
     pointer.clientY = event.clientY;
 
     if (event.pointerType === 'touch') {
+      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
       if (this.touchMode !== null) {
         this.touchMode(dx, dy);
       }
     } else {
+      this.isUserChange = true;
       if (this.panPerPixel > 0) {
         this.movePan(dx, dy);
       } else {

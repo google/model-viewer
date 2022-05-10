@@ -208,6 +208,7 @@ const TAU = 2.0 * Math.PI;
 
 export const $controls = Symbol('controls');
 export const $panElement = Symbol('panElement');
+export const $promptElement = Symbol('promptElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
 export const $fingerAnimatedContainers = Symbol('fingerAnimatedContainers');
 
@@ -366,6 +367,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'bounds'}) bounds: Bounds = 'legacy';
 
+    protected[$promptElement] =
+        this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
     protected[$promptAnimatedContainer] =
         this.shadowRoot!.querySelector('#prompt') as HTMLElement;
     protected[$fingerAnimatedContainers]: HTMLElement[] = [
@@ -735,7 +738,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$waitingToPromptUser] = false;
           this[$promptElementVisibleTime] = now;
 
-          this[$promptAnimatedContainer].classList.add('visible');
+          this[$promptElement].classList.add('visible');
         }
       }
 
@@ -774,7 +777,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$deferInteractionPrompt]() {
       // Effectively cancel the timer waiting for user interaction:
       this[$waitingToPromptUser] = false;
-      this[$promptAnimatedContainer].classList.remove('visible');
+      this[$promptElement].classList.remove('visible');
       this[$promptElementVisibleTime] = Infinity;
     }
 
@@ -878,7 +881,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$waitingToPromptUser] = false;
-      this[$promptAnimatedContainer].classList.remove('visible');
+      this[$promptElement].classList.remove('visible');
 
       this[$promptElementVisibleTime] = Infinity;
       this[$focusedTime] = Infinity;
