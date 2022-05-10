@@ -207,9 +207,13 @@ canvas.show {
 
 .slot.interaction-prompt {
   display: var(--interaction-prompt-display, flex);
+  overflow: hidden;
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 0.3s;
 }
 
-.animated-container.visible {
+.slot.interaction-prompt.visible {
   opacity: 1;
 }
 

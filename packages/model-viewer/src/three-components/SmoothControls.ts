@@ -476,6 +476,13 @@ export class SmoothControls extends EventDispatcher {
         this.goalLogFov === this.logFov;
   }
 
+  private dispatchChange() {
+    const source =
+        this.isUserChange ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
+
+    this.dispatchEvent({type: 'change', source});
+  }
+
   private moveCamera() {
     // Derive the new camera position from the updated spherical:
     this.spherical.makeSafe();
@@ -488,10 +495,7 @@ export class SmoothControls extends EventDispatcher {
       this.camera.updateProjectionMatrix();
     }
 
-    const source =
-        this.isUserChange ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
-
-    this.dispatchEvent({type: 'change', source});
+    this.dispatchChange();
   }
 
   private get canInteract(): boolean {
@@ -508,13 +512,11 @@ export class SmoothControls extends EventDispatcher {
     this.adjustOrbit(
         deltaTheta * this.sensitivity, deltaPhi * this.sensitivity, deltaZoom);
 
-    const source =
-        this.isUserChange ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
     // Always make sure that an initial event is triggered in case there is
     // contention between user interaction and imperative changes. This initial
     // event will give external observers that chance to observe that
     // interaction occurred at all:
-    this.dispatchEvent({type: 'change', source});
+    this.dispatchChange();
   }
 
   // Wraps to between -pi and pi
@@ -622,7 +624,7 @@ export class SmoothControls extends EventDispatcher {
     scene.boundingSphere.clampPoint(target, target);
     scene.setTarget(target.x, target.y, target.z);
 
-    this.dispatchEvent({type: 'change', source: ChangeSource.USER_INTERACTION});
+    this.dispatchChange();
   }
 
   private recenter(pointer: PointerEvent) {
@@ -727,10 +729,12 @@ export class SmoothControls extends EventDispatcher {
     pointer.clientY = event.clientY;
 
     if (event.pointerType === 'touch') {
+      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
       if (this.touchMode !== null) {
         this.touchMode(dx, dy);
       }
     } else {
+      this.isUserChange = true;
       if (this.panPerPixel > 0) {
         this.movePan(dx, dy);
       } else {
