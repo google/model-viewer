@@ -140,11 +140,38 @@ suite('ModelViewerElementBase with ARMixin', () => {
               '#custom=path-to-banner.html&allowsContentScaling=0');
         });
 
-        test('replicate src hash to usdz blob url', () => {
-          element.src = 'https://example.com/model.gltf#custom=path-to-banner.html';
+        test('replicate src hash to usdz blob url', async () => {
+          element.src = assetPath('models/cube.gltf')+'#custom=path-to-banner.html';
           element.arModes = 'webxr scene-viewer quick-look';
+          
+          console.log('element.src:'+element.src);
+          console.log('element.arModes:'+element.arModes);
+          console.log('element.iosSrc:'+element.iosSrc);
+          console.log('intentUrls:'+intentUrls);
 
-          (element as any)[$openIOSARQuickLook]();
+          await (element as any)[$openIOSARQuickLook]();
+
+          console.log('intentUrls:'+intentUrls);
+          console.log('intentUrls.length:'+intentUrls.length);
+          console.log('intentUrls[0]:'+intentUrls[0]);
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.hash).to.equal(
+              '#custom=path-to-banner.html');
+ 
+        });
+
+/*
+        test('replicate src hash to usdz blob url', async () => {
+          element.src = 'https://example.com/model.gltf#custom=path-to-banner.html';
+          console.log('element.src:'+element.src);
+          element.arModes = 'webxr scene-viewer quick-look';
+          console.log('element.arModes:'+element.arModes);
+
+          await(element as any)[$openIOSARQuickLook]();
 
           expect(intentUrls.length).to.be.equal(1);
 
@@ -153,7 +180,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
           expect(url.hash).to.equal(
               '#custom=path-to-banner.html');
         });
-        
+*/
       });
     });
 
