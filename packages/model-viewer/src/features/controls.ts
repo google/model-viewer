@@ -24,7 +24,7 @@ import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/par
 import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
-import {timeline} from '../utilities/animation.js';
+import {Path, timeline, TimingFunction} from '../utilities/animation.js';
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -34,22 +34,28 @@ import {timeline} from '../utilities/animation.js';
 const PROMPT_ANIMATION_TIME = 5000;
 
 // For timing purposes, a "frame" is a timing agnostic relative unit of time
-// and a "value" is a target value for the keyframe.
-const wiggle = timeline(0, [
-  {frames: 5, value: -1},
-  {frames: 1, value: -1},
-  {frames: 8, value: 1},
-  {frames: 1, value: 1},
-  {frames: 5, value: 0},
-  {frames: 18, value: 0}
-]);
+// and a "value" is a target value for the Frame.
+const wiggle = timeline({
+  initialValue: 0,
+  keyframes: [
+    {frames: 5, value: -1},
+    {frames: 1, value: -1},
+    {frames: 8, value: 1},
+    {frames: 1, value: 1},
+    {frames: 5, value: 0},
+    {frames: 18, value: 0}
+  ]
+});
 
-const fade = timeline(0, [
-  {frames: 1, value: 1},
-  {frames: 5, value: 1},
-  {frames: 1, value: 0},
-  {frames: 6, value: 0}
-]);
+const fade = timeline({
+  initialValue: 0,
+  keyframes: [
+    {frames: 1, value: 1},
+    {frames: 5, value: 1},
+    {frames: 1, value: 0},
+    {frames: 6, value: 0}
+  ]
+});
 
 export const DEFAULT_FOV_DEG = 30;
 export const OLD_DEFAULT_FOV_DEG = 45;
@@ -77,6 +83,11 @@ export interface SphericalPosition {
   phi: number;    // polar angle from the y (up) axis.
   radius: number;
   toString(): string;
+}
+
+export interface Finger {
+  x: Path;
+  y: Path;
 }
 
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
@@ -190,19 +201,16 @@ export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
   };
 };
 
-const disableContextMenu = (event: MouseEvent) => {
-  event.preventDefault();
-};
-
 const HALF_PI = Math.PI / 2.0;
 const THIRD_PI = Math.PI / 3.0;
 const QUARTER_PI = HALF_PI / 2.0;
 const TAU = 2.0 * Math.PI;
 
 export const $controls = Symbol('controls');
-export const $promptElement = Symbol('promptElement');
 export const $panElement = Symbol('panElement');
+export const $promptElement = Symbol('promptElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
+export const $fingerAnimatedContainers = Symbol('fingerAnimatedContainers');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
@@ -223,6 +231,7 @@ const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
 const $initialized = Symbol('initialized');
 const $maintainThetaPhi = Symbol('maintainThetaPhi');
+const $setInterpolationDecay = Symbol('setInterpolationDecay');
 
 const $syncCameraOrbit = Symbol('syncCameraOrbit');
 const $syncFieldOfView = Symbol('syncFieldOfView');
@@ -262,6 +271,7 @@ export declare interface ControlsInterface {
   updateFraming(): Promise<void>;
   resetInteractionPrompt(): void;
   zoom(keyPresses: number): void;
+  interact(duration: number, finger0: Finger, finger1?: Finger): void;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -360,8 +370,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
     protected[$promptAnimatedContainer] =
-        this.shadowRoot!.querySelector(
-            '.interaction-prompt > .animated-container') as HTMLElement;
+        this.shadowRoot!.querySelector('#prompt') as HTMLElement;
+    protected[$fingerAnimatedContainers]: HTMLElement[] = [
+      this.shadowRoot!.querySelector('#finger0')!,
+      this.shadowRoot!.querySelector('#finger1')!
+    ];
     protected[$panElement] =
         this.shadowRoot!.querySelector('.pan-target') as HTMLElement;
 
@@ -491,11 +504,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('enablePan')) {
         controls.enablePan = this.enablePan;
-        if (this.enablePan) {
-          this.addEventListener('contextmenu', disableContextMenu);
-        } else {
-          this.removeEventListener('contextmenu', disableContextMenu);
-        }
       }
 
       if (changedProperties.has('bounds')) {
@@ -511,12 +519,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         } else {
           this[$deferInteractionPrompt]();
         }
-      }
-
-      if (changedProperties.has('interactionPromptStyle')) {
-        this[$promptElement].classList.toggle(
-            'wiggle',
-            this.interactionPromptStyle === InteractionPromptStyle.WIGGLE);
       }
 
       if (changedProperties.has('interactionPolicy')) {
@@ -535,8 +537,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('interpolationDecay')) {
-        controls.setDamperDecayTime(this.interpolationDecay);
-        this[$scene].setTargetDamperDecayTime(this.interpolationDecay);
+        this[$setInterpolationDecay](this.interpolationDecay);
       }
 
       if (this[$jumpCamera] === true) {
@@ -567,6 +568,96 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       await this.updateComplete;
     }
 
+    interact(duration: number, finger0: Finger, finger1?: Finger) {
+      const inputElement = this[$userInputElement];
+      const fingerElements = this[$fingerAnimatedContainers];
+
+      if (fingerElements[0].style.opacity === '1') {
+        console.warn(
+            'interact() failed because an existing interaction is running.')
+        return;
+      }
+
+      const xy = new Array<{x: TimingFunction, y: TimingFunction}>();
+      xy.push({x: timeline(finger0.x), y: timeline(finger0.y)});
+      const positions = [{x: xy[0].x(0), y: xy[0].y(0)}];
+
+      if (finger1 != null) {
+        xy.push({x: timeline(finger1.x), y: timeline(finger1.y)});
+        positions.push({x: xy[1].x(0), y: xy[1].y(0)});
+      }
+
+      let startTime = performance.now();
+      const {width, height} = this[$scene];
+
+      const dispatchTouches = (type: string) => {
+        for (const [i, position] of positions.entries()) {
+          const {style} = fingerElements[i];
+          style.transform = `translateX(${width * position.x}px) translateY(${
+              height * position.y}px)`;
+          if (type === 'pointerdown') {
+            style.opacity = '1';
+          } else if (type === 'pointerup') {
+            style.opacity = '0';
+          }
+
+          const init = {
+            pointerId: i - 5678,  // help ensure uniqueness
+            pointerType: 'touch',
+            target: inputElement,
+            clientX: width * position.x,
+            clientY: height * position.y,
+            altKey: true  // flag that this is not a user interaction
+          } as PointerEventInit;
+
+          inputElement.dispatchEvent(new PointerEvent(type, init));
+        }
+      };
+
+      const moveTouches = () => {
+        // cancel interaction if user interacts
+        if (this[$controls].isUserChange) {
+          this[$setInterpolationDecay](this.interpolationDecay);
+          for (const fingerElement of this[$fingerAnimatedContainers]) {
+            fingerElement.style.opacity = '0';
+          }
+          dispatchTouches('pointercancel');
+          return;
+        }
+
+        const time = Math.min(1, (performance.now() - startTime) / duration);
+        for (const [i, position] of positions.entries()) {
+          position.x = xy[i].x(time);
+          position.y = xy[i].y(time);
+        }
+        this[$setInterpolationDecay](0);
+        dispatchTouches('pointermove');
+
+        if (time < 1) {
+          requestAnimationFrame(moveTouches);
+        } else {
+          dispatchTouches('pointerup');
+          this[$setInterpolationDecay](this.interpolationDecay);
+          document.removeEventListener('visibilitychange', onVisibilityChange);
+        }
+      };
+
+      const onVisibilityChange = () => {
+        let elapsed = 0;
+        if (document.visibilityState === 'hidden') {
+          elapsed = performance.now() - startTime;
+        } else {
+          startTime = performance.now() - elapsed;
+        }
+      };
+
+      document.addEventListener('visibilitychange', onVisibilityChange);
+
+      dispatchTouches('pointerdown');
+
+      requestAnimationFrame(moveTouches);
+    }
+
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
       const scene = this[$scene];
       scene.framedFoVDeg = style[0] * 180 / Math.PI;
@@ -574,13 +665,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
+      const controls = this[$controls];
       if (this[$maintainThetaPhi]) {
         const {theta, phi} = this.getCameraOrbit();
         style[0] = theta;
         style[1] = phi;
         this[$maintainThetaPhi] = false;
       }
-      this[$controls].setOrbit(style[0], style[1], style[2]);
+      controls.isUserChange = false;
+      controls.setOrbit(style[0], style[1], style[2]);
     }
 
     [$syncMinCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
@@ -619,6 +712,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (!this[$renderer].arRenderer.isPresenting) {
         this[$scene].setTarget(x, y, z);
       }
+      this[$controls].isUserChange = false;
       this[$renderer].arRenderer.updateTarget();
     }
 
@@ -628,6 +722,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (this[$renderer].isPresenting || !this[$hasTransitioned]()) {
         return;
       }
+
+      const controls = this[$controls];
+      const scene = this[$scene];
 
       const now = performance.now();
       if (this[$waitingToPromptUser]) {
@@ -647,7 +744,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (isFinite(this[$promptElementVisibleTime]) &&
           this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
-        const scene = this[$scene];
         const animationTime =
             ((now - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
             1;
@@ -663,14 +759,19 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$promptAnimatedContainer].style.transform =
               `translateX(${xOffset}px)`;
 
-          this[$controls].adjustOrbit(deltaTheta, 0, 0);
+          controls.isUserChange = false;
+          controls.adjustOrbit(deltaTheta, 0, 0);
 
           this[$lastPromptOffset] = offset;
         }
       }
 
-      this[$controls].update(time, delta);
-      this[$scene].updateTarget(delta);
+      controls.update(time, delta);
+      if (scene.updateTarget(delta)) {
+        const source = controls.isUserChange ? ChangeSource.USER_INTERACTION :
+                                               ChangeSource.NONE;
+        this[$onChange]({type: 'change', source});
+      }
     }
 
     [$deferInteractionPrompt]() {
@@ -678,6 +779,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$waitingToPromptUser] = false;
       this[$promptElement].classList.remove('visible');
       this[$promptElementVisibleTime] = Infinity;
+    }
+
+    [$setInterpolationDecay](decay: number) {
+      this[$controls].setDamperDecayTime(decay);
+      this[$scene].setTargetDamperDecayTime(decay);
     }
 
     /**

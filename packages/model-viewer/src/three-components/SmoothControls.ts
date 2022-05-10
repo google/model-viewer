@@ -22,6 +22,7 @@ import {ModelScene} from './ModelScene.js';
 
 const PAN_SENSITIVITY = 0.018;
 const TAP_DISTANCE = 2;
+const TAP_MS = 300;
 const vector2 = new Vector2();
 const vector3 = new Vector3();
 
@@ -126,11 +127,11 @@ export interface PointerChangeEvent extends ThreeEvent {
  */
 export class SmoothControls extends EventDispatcher {
   public sensitivity = 1;
+  public isUserChange = false;
 
   private _interactionEnabled: boolean = false;
   private _options: SmoothControlsOptions;
   private _disableZoom = false;
-  private isUserChange = false;
   private isUserPointing = false;
 
   // Pan state
@@ -151,7 +152,8 @@ export class SmoothControls extends EventDispatcher {
   // Pointer state
   private touchMode: TouchMode = null;
   private pointers: Pointer[] = [];
-  private startPointerPosition: Pointer = {clientX: 0, clientY: 0, id: -1};
+  private startTime = 0;
+  private startPointerPosition = {clientX: 0, clientY: 0};
   private lastSeparation = 0;
   private touchDecided = false;
 
@@ -184,6 +186,7 @@ export class SmoothControls extends EventDispatcher {
       // This little beauty is to work around a WebKit bug that otherwise makes
       // touch events randomly not cancelable.
       element.addEventListener('touchmove', () => {}, {passive: false});
+      element.addEventListener('contextmenu', this.onContext);
 
       this.element.style.cursor = 'grab';
       this._interactionEnabled = true;
@@ -202,6 +205,7 @@ export class SmoothControls extends EventDispatcher {
       element.removeEventListener('pointercancel', this.onPointerUp);
       element.removeEventListener('wheel', this.onWheel);
       element.removeEventListener('keydown', this.onKeyDown);
+      element.removeEventListener('contextmenu', this.onContext);
 
       element.style.cursor = '';
       this.touchMode = null;
@@ -217,6 +221,20 @@ export class SmoothControls extends EventDispatcher {
   get options() {
     return this._options;
   }
+
+  onContext = (event: MouseEvent) => {
+    if (this.enablePan) {
+      event.preventDefault();
+    } else {
+      for (const pointer of this.pointers) {
+        // Required because of a common browser bug where the context menu never
+        // fires a pointercancel event.
+        this.onPointerUp(new PointerEvent(
+            'pointercancel',
+            {...this.startPointerPosition, pointerId: pointer.id}));
+      }
+    }
+  };
 
   set disableZoom(disable: boolean) {
     if (this._disableZoom != disable) {
@@ -321,8 +339,6 @@ export class SmoothControls extends EventDispatcher {
     this.goalSpherical.phi = nextPhi;
     this.goalSpherical.radius = nextRadius;
     this.goalSpherical.makeSafe();
-
-    this.isUserChange = false;
 
     return true;
   }
@@ -460,6 +476,13 @@ export class SmoothControls extends EventDispatcher {
         this.goalLogFov === this.logFov;
   }
 
+  private dispatchChange() {
+    const source =
+        this.isUserChange ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
+
+    this.dispatchEvent({type: 'change', source});
+  }
+
   private moveCamera() {
     // Derive the new camera position from the updated spherical:
     this.spherical.makeSafe();
@@ -472,10 +495,7 @@ export class SmoothControls extends EventDispatcher {
       this.camera.updateProjectionMatrix();
     }
 
-    const source =
-        this.isUserChange ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
-
-    this.dispatchEvent({type: 'change', source});
+    this.dispatchChange();
   }
 
   private get canInteract(): boolean {
@@ -492,15 +512,14 @@ export class SmoothControls extends EventDispatcher {
     this.adjustOrbit(
         deltaTheta * this.sensitivity, deltaPhi * this.sensitivity, deltaZoom);
 
-    this.isUserChange = true;
     // Always make sure that an initial event is triggered in case there is
     // contention between user interaction and imperative changes. This initial
     // event will give external observers that chance to observe that
     // interaction occurred at all:
-    this.dispatchEvent({type: 'change', source: ChangeSource.USER_INTERACTION});
+    this.dispatchChange();
   }
 
-  // Wraps to bewteen -pi and pi
+  // Wraps to between -pi and pi
   private wrapAngle(radians: number): number {
     const normalized = (radians + Math.PI) / (2 * Math.PI);
     const wrapped = normalized - Math.floor(normalized);
@@ -524,8 +543,8 @@ export class SmoothControls extends EventDispatcher {
     if (!this._disableZoom) {
       const touchDistance =
           this.twoTouchDistance(this.pointers[0], this.pointers[1]);
-      const deltaZoom =
-          ZOOM_SENSITIVITY * (this.lastSeparation - touchDistance) / 10.0;
+      const deltaZoom = ZOOM_SENSITIVITY *
+          (this.lastSeparation - touchDistance) * 50 / this.scene.height;
       this.lastSeparation = touchDistance;
 
       this.userAdjustOrbit(0, 0, deltaZoom);
@@ -552,8 +571,9 @@ export class SmoothControls extends EventDispatcher {
       const dxMag = Math.abs(dx);
       const dyMag = Math.abs(dy);
       // If motion is mostly vertical, assume scrolling is the intent.
-      if ((touchAction === 'pan-y' && dyMag > dxMag) ||
-          (touchAction === 'pan-x' && dxMag > dyMag)) {
+      if (this.isUserChange &&
+          ((touchAction === 'pan-y' && dyMag > dxMag) ||
+           (touchAction === 'pan-x' && dxMag > dyMag))) {
         this.touchMode = null;
         return;
       } else {
@@ -577,7 +597,6 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private initializePan() {
-    (this.scene.element as any)[$panElement].style.opacity = 1;
     const {theta, phi} = this.spherical;
     const psi = theta - this.scene.yaw;
     this.panPerPixel = PAN_SENSITIVITY / this.scene.height;
@@ -604,10 +623,13 @@ export class SmoothControls extends EventDispatcher {
     target.add(dxy.applyMatrix3(this.panProjection));
     scene.boundingSphere.clampPoint(target, target);
     scene.setTarget(target.x, target.y, target.z);
+
+    this.dispatchChange();
   }
 
   private recenter(pointer: PointerEvent) {
-    if (Math.abs(pointer.clientX - this.startPointerPosition.clientX) >
+    if (performance.now() > this.startTime + TAP_MS ||
+        Math.abs(pointer.clientX - this.startPointerPosition.clientX) >
             TAP_DISTANCE ||
         Math.abs(pointer.clientY - this.startPointerPosition.clientY) >
             TAP_DISTANCE) {
@@ -672,6 +694,7 @@ export class SmoothControls extends EventDispatcher {
       this.touchDecided = false;
       this.startPointerPosition.clientX = event.clientX;
       this.startPointerPosition.clientY = event.clientY;
+      this.startTime = performance.now();
     }
 
     try {
@@ -684,8 +707,10 @@ export class SmoothControls extends EventDispatcher {
     this.isUserPointing = false;
 
     if (event.pointerType === 'touch') {
-      this.onTouchChange();
+      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
+      this.onTouchChange(event);
     } else {
+      this.isUserChange = true;
       this.onMouseDown(event);
     }
   };
@@ -704,10 +729,12 @@ export class SmoothControls extends EventDispatcher {
     pointer.clientY = event.clientY;
 
     if (event.pointerType === 'touch') {
+      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
       if (this.touchMode !== null) {
         this.touchMode(dx, dy);
       }
     } else {
+      this.isUserChange = true;
       if (this.panPerPixel > 0) {
         this.movePan(dx, dy);
       } else {
@@ -725,7 +752,9 @@ export class SmoothControls extends EventDispatcher {
       this.pointers.splice(index, 1);
     }
 
-    if (this.panPerPixel > 0) {
+    // altKey indicates an interaction prompt; don't reset radius in this case
+    // as it will cause the camera to drift.
+    if (this.panPerPixel > 0 && !event.altKey) {
       this.resetRadius();
     }
     if (this.pointers.length === 0) {
@@ -736,7 +765,7 @@ export class SmoothControls extends EventDispatcher {
         this.recenter(event);
       }
     } else if (this.touchMode !== null) {
-      this.onTouchChange();
+      this.onTouchChange(event);
     }
 
     (this.scene.element as any)[$panElement].style.opacity = 0;
@@ -748,7 +777,7 @@ export class SmoothControls extends EventDispatcher {
     }
   };
 
-  private onTouchChange() {
+  private onTouchChange(event: PointerEvent) {
     if (this.pointers.length === 1) {
       this.touchMode = this.touchModeRotate;
     } else {
@@ -763,15 +792,20 @@ export class SmoothControls extends EventDispatcher {
 
       if (this.enablePan && this.touchMode != null) {
         this.initializePan();
+        if (!event.altKey) {  // user interaction, not prompt
+          (this.scene.element as any)[$panElement].style.opacity = 1;
+        }
       }
     }
   }
 
   private onMouseDown(event: MouseEvent) {
+    this.panPerPixel = 0;
     if (this.enablePan &&
         (event.button === 2 || event.ctrlKey || event.metaKey ||
          event.shiftKey)) {
       this.initializePan();
+      (this.scene.element as any)[$panElement].style.opacity = 1;
     }
     this.element.style.cursor = 'grabbing';
   }
@@ -780,52 +814,49 @@ export class SmoothControls extends EventDispatcher {
     if (!this.canInteract) {
       return;
     }
+    this.isUserChange = true;
 
     const deltaZoom = (event as WheelEvent).deltaY *
         ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY / 30;
     this.userAdjustOrbit(0, 0, deltaZoom);
 
-    if (event.cancelable) {
-      event.preventDefault();
-    }
+    event.preventDefault();
   };
 
   private onKeyDown = (event: KeyboardEvent) => {
     // We track if the key is actually one we respond to, so as not to
     // accidentally clober unrelated key inputs when the <model-viewer> has
     // focus.
-    let relevantKey = false;
+    let relevantKey = true;
+    const {isUserChange} = this;
+    this.isUserChange = true;
 
     switch (event.keyCode) {
       case KeyCode.PAGE_UP:
-        relevantKey = true;
         this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
         break;
       case KeyCode.PAGE_DOWN:
-        relevantKey = true;
         this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
         break;
       case KeyCode.UP:
-        relevantKey = true;
         this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.DOWN:
-        relevantKey = true;
         this.userAdjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
         break;
       case KeyCode.LEFT:
-        relevantKey = true;
         this.userAdjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
       case KeyCode.RIGHT:
-        relevantKey = true;
         this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
       default:
+        relevantKey = false;
+        this.isUserChange = isUserChange;
         break;
     }
 
-    if (relevantKey && event.cancelable) {
+    if (relevantKey) {
       event.preventDefault();
     }
   };

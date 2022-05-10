@@ -126,6 +126,10 @@
       {
         "htmlId": "turnSkybox",
         "name": "Turn Skybox"
+      },
+      {
+        "htmlId": "customPrompt",
+        "name": "Custom Prompt"
       }
     ]
   },

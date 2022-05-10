@@ -172,7 +172,13 @@ suite('ARRenderer', () => {
     arRenderer = Renderer.singleton.arRenderer;
   });
 
-  test('does not support presenting to AR on any browser', async () => {
+  teardown(() => {
+    if (element.parentNode != null) {
+      element.parentNode.removeChild(element);
+    }
+  });
+
+  test('supports presenting to AR only on Android', async () => {
     expect(await arRenderer.supportsPresentation()).to.be.equal(IS_ANDROID);
   });
 

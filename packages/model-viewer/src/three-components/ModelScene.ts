@@ -90,7 +90,7 @@ export class ModelScene extends Scene {
   public shadow: Shadow|null = null;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
-  public bakedShadows = Array<Mesh>();
+  public bakedShadows = new Set<Mesh>();
 
   public exposure = 1;
   public canScale = true;
@@ -273,6 +273,8 @@ export class ModelScene extends Scene {
     if (this.shadow != null) {
       this.shadow.setIntensity(0);
     }
+    this.bakedShadows.clear();
+
     const gltf = this._currentGLTF;
     // Remove all current children
     if (gltf != null) {
@@ -317,6 +319,18 @@ export class ModelScene extends Scene {
     this.queueRender();
   }
 
+  markBakedShadow(mesh: Mesh) {
+    mesh.userData.shadow = true;
+    this.bakedShadows.add(mesh);
+  }
+
+  unmarkBakedShadow(mesh: Mesh) {
+    mesh.userData.shadow = false;
+    mesh.visible = true;
+    this.bakedShadows.delete(mesh);
+    this.boundingBox.expandByObject(mesh);
+  }
+
   findBakedShadows(group: Object3D) {
     const boundingBox = new Box3();
 
@@ -326,7 +340,7 @@ export class ModelScene extends Scene {
         return;
       }
       const material = mesh.material as Material;
-      if (!(material as any).isMeshBasicMaterial || !material.transparent) {
+      if (!material.transparent) {
         return;
       }
       boundingBox.setFromObject(mesh);
@@ -336,9 +350,31 @@ export class ModelScene extends Scene {
       if (maxDim < MIN_SHADOW_RATIO * minDim) {
         return;
       }
-      this.bakedShadows.push(mesh);
-      mesh.userData.shadow = true;
+      this.markBakedShadow(mesh);
     });
+  }
+
+  checkBakedShadows() {
+    const {min, max} = this.boundingBox;
+    const shadowBox = new Box3();
+    this.boundingBox.getSize(this.size);
+
+    for (const mesh of this.bakedShadows) {
+      shadowBox.setFromObject(mesh);
+      if (shadowBox.min.y < min.y + this.size.y / MIN_SHADOW_RATIO &&
+          shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
+          shadowBox.min.z <= min.z && shadowBox.max.z >= max.z) {
+        // floor shadow
+        continue;
+      }
+      if (shadowBox.min.z < min.z + this.size.z / MIN_SHADOW_RATIO &&
+          shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
+          shadowBox.min.y <= min.y && shadowBox.max.y >= max.y) {
+        // wall shadow
+        continue;
+      }
+      this.unmarkBakedShadow(mesh);
+    }
   }
 
   updateBoundingBox() {
@@ -355,10 +391,11 @@ export class ModelScene extends Scene {
       // If there's nothing but the baked shadow, then it's not a baked shadow.
       if (this.boundingBox.isEmpty()) {
         this.setBakedShadowVisibility(true);
-        this.bakedShadows = [];
+        this.bakedShadows.forEach((mesh) => this.unmarkBakedShadow(mesh));
         this.boundingBox =
             reduceVertices(this.modelContainer, bound, new Box3());
       }
+      this.checkBakedShadows();
       this.setBakedShadowVisibility();
     } else {
       this.boundingBox.setFromObject(this.modelContainer);
@@ -486,7 +523,7 @@ export class ModelScene extends Scene {
    * This should be called every frame with the frame delta to cause the target
    * to transition to its set point.
    */
-  updateTarget(delta: number) {
+  updateTarget(delta: number): boolean {
     const goal = this.goalTarget;
     const target = this.target.position;
     if (!goal.equals(target)) {
@@ -498,6 +535,9 @@ export class ModelScene extends Scene {
       this.target.position.set(x, y, z);
       this.target.updateMatrixWorld();
       this.queueRender();
+      return true;
+    } else {
+      return false;
     }
   }
 
