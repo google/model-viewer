@@ -725,6 +725,9 @@ export class SmoothControls extends EventDispatcher {
     const numTouches = this.pointers.length;
     const dx = (event.clientX - pointer.clientX) / numTouches;
     const dy = (event.clientY - pointer.clientY) / numTouches;
+    if (dx === 0 && dy === 0) {
+      return;
+    }
     pointer.clientX = event.clientX;
     pointer.clientY = event.clientY;
 
@@ -781,6 +784,11 @@ export class SmoothControls extends EventDispatcher {
     if (this.pointers.length === 1) {
       this.touchMode = this.touchModeRotate;
     } else {
+      if (this._disableZoom) {
+        this.touchMode = null;
+        this.element.removeEventListener('touchmove', this.disableScroll);
+        return;
+      }
       this.touchMode = (this.touchDecided && this.touchMode === null) ?
           null :
           this.touchModeZoom;
