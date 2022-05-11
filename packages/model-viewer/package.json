@@ -80,7 +80,7 @@
     "@types/chai": "^4.2.21",
     "@types/mocha": "^8.2.3",
     "@types/pngjs": "^6.0.1",
-    "@types/three": "^0.140.0",
+    "@types/three": "^0.139.0",
     "@ungap/event-target": "^0.2.2",
     "chai": "^4.3.4",
     "focus-visible": "^5.2.0",
