@@ -139,6 +139,42 @@ suite('ModelViewerElementBase with ARMixin', () => {
           expect(url.hash).to.equal(
               '#custom=path-to-banner.html&allowsContentScaling=0');
         });
+
+        test('replicate src hash to usdz blob url', async () => {
+          element.src = assetPath('models/cube.gltf')+'#custom=path-to-banner.html';
+          element.arModes = 'webxr scene-viewer quick-look';
+
+          await (element as any)[$openIOSARQuickLook]();
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.protocol).to.equal(
+              'blob:');
+
+          expect(url.hash).to.equal(
+              '#custom=path-to-banner.html');
+        });
+
+        test('replicate src hash to usdz blob and set hash for fixed scale', async () => {
+          element.src = assetPath('models/cube.gltf')+'#custom=path-to-banner.html';
+          element.arModes = 'webxr scene-viewer quick-look';
+          element.arScale = 'fixed';
+
+          await (element as any)[$openIOSARQuickLook]();
+
+          expect(intentUrls.length).to.be.equal(1);
+
+          const url = new URL(intentUrls[0]);
+
+          expect(url.protocol).to.equal(
+              'blob:');
+
+          expect(url.hash).to.equal(
+              '#custom=path-to-banner.html&allowsContentScaling=0');
+        });
+
       });
     });
 
