@@ -14,7 +14,8 @@
  * limitations under the License.
  *
  */
-
+import 'js-beautify/js/lib/beautify-html.js';
+import 'js-beautify/js/lib/beautify-css.js';
 import { SnippetViewer } from '../../components/shared/snippet_viewer/snippet_viewer.js';
 import { html } from 'lit';
 
