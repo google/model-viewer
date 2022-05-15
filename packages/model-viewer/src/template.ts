@@ -306,7 +306,7 @@ canvas.show {
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: 16px;
+  top: env(safe-area-inset-top, 16px);
   right: 16px;
   width: 40px;
   height: 40px;
