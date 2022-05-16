@@ -208,6 +208,7 @@ const TAU = 2.0 * Math.PI;
 
 export const $controls = Symbol('controls');
 export const $panElement = Symbol('panElement');
+export const $promptElement = Symbol('promptElement');
 export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
 export const $fingerAnimatedContainers = Symbol('fingerAnimatedContainers');
 
@@ -230,7 +231,6 @@ const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
 const $initialized = Symbol('initialized');
 const $maintainThetaPhi = Symbol('maintainThetaPhi');
-const $setInterpolationDecay = Symbol('setInterpolationDecay');
 
 const $syncCameraOrbit = Symbol('syncCameraOrbit');
 const $syncFieldOfView = Symbol('syncFieldOfView');
@@ -366,6 +366,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'bounds'}) bounds: Bounds = 'legacy';
 
+    protected[$promptElement] =
+        this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
     protected[$promptAnimatedContainer] =
         this.shadowRoot!.querySelector('#prompt') as HTMLElement;
     protected[$fingerAnimatedContainers]: HTMLElement[] = [
@@ -474,6 +476,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       const controls = this[$controls];
+      const scene = this[$scene];
       const input = this[$userInputElement];
 
       if (changedProperties.has('cameraControls')) {
@@ -504,7 +507,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('bounds')) {
-        this[$scene].tightBounds = this.bounds === 'tight';
+        scene.tightBounds = this.bounds === 'tight';
       }
 
       if (changedProperties.has('interactionPrompt') ||
@@ -534,13 +537,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('interpolationDecay')) {
-        this[$setInterpolationDecay](this.interpolationDecay);
+        controls.setDamperDecayTime(this.interpolationDecay);
+        scene.setTargetDamperDecayTime(this.interpolationDecay);
       }
 
       if (this[$jumpCamera] === true) {
         Promise.resolve().then(() => {
           controls.jumpToGoal();
-          this[$scene].jumpToGoal();
+          scene.jumpToGoal();
           this[$jumpCamera] = false;
         });
       }
@@ -614,7 +618,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const moveTouches = () => {
         // cancel interaction if user interacts
         if (this[$controls].isUserChange) {
-          this[$setInterpolationDecay](this.interpolationDecay);
           for (const fingerElement of this[$fingerAnimatedContainers]) {
             fingerElement.style.opacity = '0';
           }
@@ -627,14 +630,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           position.x = xy[i].x(time);
           position.y = xy[i].y(time);
         }
-        this[$setInterpolationDecay](0);
         dispatchTouches('pointermove');
 
         if (time < 1) {
           requestAnimationFrame(moveTouches);
         } else {
           dispatchTouches('pointerup');
-          this[$setInterpolationDecay](this.interpolationDecay);
           document.removeEventListener('visibilitychange', onVisibilityChange);
         }
       };
@@ -735,7 +736,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$waitingToPromptUser] = false;
           this[$promptElementVisibleTime] = now;
 
-          this[$promptAnimatedContainer].classList.add('visible');
+          this[$promptElement].classList.add('visible');
         }
       }
 
@@ -774,13 +775,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$deferInteractionPrompt]() {
       // Effectively cancel the timer waiting for user interaction:
       this[$waitingToPromptUser] = false;
-      this[$promptAnimatedContainer].classList.remove('visible');
+      this[$promptElement].classList.remove('visible');
       this[$promptElementVisibleTime] = Infinity;
-    }
-
-    [$setInterpolationDecay](decay: number) {
-      this[$controls].setDamperDecayTime(decay);
-      this[$scene].setTargetDamperDecayTime(decay);
     }
 
     /**
@@ -878,7 +874,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$waitingToPromptUser] = false;
-      this[$promptAnimatedContainer].classList.remove('visible');
+      this[$promptElement].classList.remove('visible');
 
       this[$promptElementVisibleTime] = Infinity;
       this[$focusedTime] = Infinity;

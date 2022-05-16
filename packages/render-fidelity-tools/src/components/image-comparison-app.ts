@@ -17,7 +17,7 @@ import './analysis-view.js';
 import './rendering-scenario.js';
 
 import {html, LitElement} from 'lit';
-import {property} from 'lit/decorators';
+import {property} from 'lit/decorators.js';
 
 import {ImageComparisonConfig} from '../common.js';
 
