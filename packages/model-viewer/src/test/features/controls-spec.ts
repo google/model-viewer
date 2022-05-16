@@ -603,6 +603,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.interact(50, finger);
           await rafPasses();
           await rafPasses();
+          await rafPasses();
 
           const newOrbit = element.getCameraOrbit();
           expect(newOrbit.theta).to.be.lessThan(orbit.theta, 'theta');
