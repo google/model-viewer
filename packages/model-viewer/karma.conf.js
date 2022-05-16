@@ -41,6 +41,7 @@ module.exports = function(config) {
     restartOnFileChange: true,
 
     browserDisconnectTimeout: 300000,
+    browserDisconnectTolerance: 1,
     browserNoActivityTimeout: 360000,
     captureTimeout: 420000,
     concurrency: 10,
