@@ -24,5 +24,4 @@
   "include": [
     "./src/**/*.ts"
   ],
-  "exclude": []
 }

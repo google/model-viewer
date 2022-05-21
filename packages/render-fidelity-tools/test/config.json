@@ -27,6 +27,10 @@
       "name": "stellar",
       "description": "Dassault Systèmes STELLAR",
       "command": {}
+    },
+    {
+      "name": "rhodonite",
+      "description": "RhodoniteTS"
     }
   ],
   "scenarios": [

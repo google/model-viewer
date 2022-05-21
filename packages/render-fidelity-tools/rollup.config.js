@@ -61,6 +61,7 @@ const outputOptions = [
   buildTarget('./lib/components/renderers/filament-viewer.js', 'esm'),
   buildTarget('./lib/components/renderers/dspbr-pt-viewer.js', 'esm'),
   buildTarget('./lib/components/renderers/babylon-viewer.js', 'esm'),
+  buildTarget('./lib/components/renderers/rhodonite-viewer.js', 'esm'),
   buildTarget('./lib/components/renderers/gltf-sample-viewer.js', 'esm'),
   buildTarget('./lib/image-comparison-worker.js', 'iife')
 ];
