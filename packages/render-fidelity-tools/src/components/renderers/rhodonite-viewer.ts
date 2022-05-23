@@ -2,7 +2,7 @@
 import {css, customElement, html, LitElement, property} from 'lit-element';
 import {ScenarioConfig} from '../../common.js';
 // @ts-ignore
-import Rn from 'rhodonite/dist/esm/index.js';
+import Rn from '../../../node_modules/rhodonite/dist/esm/index.mjs';
 
 const $isRhodoniteInitDone = Symbol('isRhodoniteInitDone');
 const $updateSize = Symbol('updateSize');
@@ -56,12 +56,14 @@ export class RhodoniteViewer extends LitElement {
       const expressions = [];
 
       // camera
-      const cameraEntity = Rn.EntityHelper.createCameraControllerEntity();
+      const cameraEntity = Rn.EntityHelper.createCameraEntity();
       const cameraComponent = cameraEntity.getCamera();
-      cameraComponent.zNear = 0.1;
-      cameraComponent.zFar = 1000.0;
-      cameraComponent.setFovyAndChangeFocalLength(30.0);
-      cameraComponent.aspect = 1.0;
+      // cameraComponent.zNear = 0.1;
+      // cameraComponent.zFar = 1000.0;
+      // cameraComponent.setFovyAndChangeFilmSize(scenario.verticalFoV);
+      // cameraComponent.setFovyAndChangeFocalLength(scenario.verticalFoV);
+      cameraComponent.fovyInner = scenario.verticalFoV;
+      cameraComponent.aspect = scenario.dimensions.width / scenario.dimensions.height;
 
       // gltf
       const mainExpression = await Rn.GltfImporter.import(
@@ -83,6 +85,9 @@ export class RhodoniteViewer extends LitElement {
 
       // gamma correction (and super sampling)
       const mainRenderPass = mainExpression.renderPasses[0];
+      mainRenderPass.cameraComponent = cameraComponent;
+      Rn.CameraComponent.current = cameraComponent.componentSID;
+
       const gammaTargetFramebuffer =
         Rn.RenderableHelper.createTexturesForRenderTarget(scenario.dimensions.width, scenario.dimensions.height, 1, {});
       mainRenderPass.setFramebuffer(gammaTargetFramebuffer);
@@ -115,16 +120,59 @@ export class RhodoniteViewer extends LitElement {
       expressionPostEffect.addRenderPasses([gammaCorrectionRenderPass]);
 
       // cameraController
-      const mainCameraControllerComponent = cameraEntity.getCameraController();
-      const controller =
-        mainCameraControllerComponent.controller as Rn.OrbitCameraController;
-      controller.setTarget(mainRenderPass.sceneTopLevelGraphComponents[0].entity);
-      controller.setFixedDollyTrue(scenario.orbit.radius);
-      //controller.dolly = 0.5;
-      controller.rotX = scenario.orbit.theta;
-      controller.rotY = scenario.orbit.phi - 90;
-      cameraComponent.setFovyAndChangeFocalLength(scenario.verticalFoV);
+      // const mainCameraControllerComponent = cameraEntity.getCameraController();
+      // const controller = mainCameraControllerComponent.controller as Rn.OrbitCameraController;
+      // controller.setTarget(mainRenderPass.sceneTopLevelGraphComponents[0].entity);
+      // controller.setFixedDollyTrue(scenario.orbit.radius);
+      // controller.dolly = 0.5;
+      // controller.rotX = scenario.orbit.theta;
+      // controller.rotY = scenario.orbit.phi - 90;
 
+      // const sceneTopLevelGraphComponents = mainRenderPass.sceneTopLevelGraphComponents as Rn.SceneGraphComponent[]
+      // const rootGroup = sceneTopLevelGraphComponents![0].entity as Rn.ISceneGraphEntity
+      // const aabb = rootGroup.getSceneGraph().calcWorldAABB();
+      
+      // for (const sgc of mainRenderPass.sceneTopLevelGraphComponents) {
+      //   sgc.transform = Rn.Vector3.multiply(aabb.centerPoint, -1);
+      // }
+
+      // mainRenderPass.setViewport(Rn.Vector4.fromCopy4(0, 0, scenario.dimensions.width, scenario.dimensions.height));
+      Rn.MeshRendererComponent.isViewFrustumCullingEnabled = false;
+      const {target, orbit} = this.scenario!;
+
+      const center = [target.x, target.y, target.z];
+
+      const theta = (orbit.theta) * Math.PI / 180;
+      const phi = (orbit.phi) * Math.PI / 180;
+      const radiusSinPhi = orbit.radius * Math.sin(phi);
+      const eye = [
+        radiusSinPhi * Math.sin(theta) + target.x,
+        orbit.radius * Math.cos(phi) + target.y,
+        radiusSinPhi * Math.cos(theta) + target.z
+      ];
+      if (orbit.radius <= 0) {
+        center[0] = eye[0] - Math.sin(phi) * Math.sin(theta);
+        center[1] = eye[1] - Math.cos(phi);
+        center[2] = eye[2] - Math.sin(phi) * Math.cos(theta);
+      }
+      const up = [0, 1, 0];
+
+      // cameraEntity.translate = Rn.Vector3.fromCopyArray3(eye)
+      cameraEntity.getCamera().eyeInner = Rn.Vector3.fromCopyArray3(eye);
+      cameraEntity.getCamera().up = Rn.Vector3.fromCopyArray3(up);
+      cameraEntity.getCamera().directionInner = Rn.Vector3.fromCopyArray3(center);
+      // cameraEntity.getCamera().direction = Rn.Vector3.fromCopyArray3(center);
+      cameraEntity.getCamera().primitiveMode = true;
+      // cameraEntity.getCamera().setDirectionDirectly(Rn.Vector3.fromCopyArray3(center));
+
+      // const modelRadius = aabb.lengthCenterToCorner;
+      // const max = aabb.maxPoint;
+      // const min = aabb.minPoint;
+      // const modelRadius = Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
+      // const far = 2 * Math.max(modelRadius, orbit.radius);
+      // const near = far / 1000;
+      cameraComponent.zNear = 0.0001;
+      cameraComponent.zFar = 10000;
       // lighting
       // setIBL('./../../../assets/ibl/papermill');
       Rn.System.process(expressions);
