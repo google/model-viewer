@@ -1,6 +1,7 @@
 [
   {
     "Title": "Loading",
+    "htmlName": "loading",
     "Attributes": [
       {
         "name": "src",
@@ -293,6 +294,7 @@
   },
   {
     "Title": "Augmented Reality",
+    "htmlName": "augmentedreality",
     "Attributes": [
       {
         "name": "ar",
@@ -448,6 +450,7 @@
   },
   {
     "Title": "Staging & Cameras",
+    "htmlName": "stagingandcameras",
     "Attributes": [
       {
         "name": "camera-controls",
@@ -761,6 +764,7 @@
   },
   {
     "Title": "Annotations",
+    "htmlName": "annotations",
     "CSS": [
       {
         "name": "--min-hotspot-opacity",
@@ -808,7 +812,8 @@
     ]
   },
   {
-    "Title": "Lighting & Env",
+    "Title": "Lighting & Skybox",
+    "htmlName": "lightingandenv",
     "Attributes": [
       {
         "name": "skybox-image",
@@ -884,6 +889,7 @@
   },
   {
     "Title": "Animation",
+    "htmlName": "animation",
     "Attributes": [
       {
         "name": "animation-name",
@@ -984,7 +990,8 @@
     ]
   },
   {
-    "Title": "Scene Graph",
+    "Title": "Materials & Scene",
+    "htmlName": "scenegraph",
     "Attributes": [
       {
         "name": "variant-name",
