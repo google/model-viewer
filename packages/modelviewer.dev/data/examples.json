@@ -258,10 +258,6 @@
       {
         "htmlId": "exporter",
         "name": "Exporter"
-      },
-      {
-        "htmlId": "exporterWithOptions",
-        "name": "Exporter w/ Options"
       }
     ]
   }

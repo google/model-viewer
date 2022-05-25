@@ -668,47 +668,6 @@ enum MaxFilter {
       </div>
     </div>
 
-    <div class="sample">
-      <div id="exporterWithOptions" class="demo"></div>
-      <div class="content">
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">Exporter with options</h2>
-          </div>
-          <example-snippet stamp-to="exporterWithOptions" highlight-as="html">
-            <template>
-<model-viewer id="animated-model" src="../../shared-assets/models/Horse.glb" autoplay camera-controls alt="A 3D model of a horse galloping">
-  <div class="controls">
-    <button onclick="exportScene(true)">Export GLB</button>
-    <button onclick="exportScene(false)">Export GLTF</button>
-  </div>
-</model-viewer>
-<script>
-  async function exportScene(binary){
-    let options = {
-      binary: binary,
-      trs: true,
-      onlyVisible: true,
-      maxTextureSize: 256,
-      forcePowerOfTwoTextures: true,
-      includeCustomExtensions: false,
-      embedImages: true
-    };
-    let modelViewer = document.getElementById("animated-model");
-    const glTF = await modelViewer.exportScene(options);
-    var file = new File([glTF], binary ? "export.glb" : "export.gltf");
-    var link = document.createElement("a");
-    link.download =file.name;
-    link.href = URL.createObjectURL(file);
-    link.click();
-  }
-</script>
-            </template>
-          </example-snippet>
-        </div>
-      </div>
-    </div>
-
     <div class="footer">
       <ul>
         <li class="attribution">
