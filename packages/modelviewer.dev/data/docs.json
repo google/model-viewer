@@ -1038,10 +1038,15 @@
       {
         "name": "model",
         "htmlName": "model",
-        "description": "This object contains all the methods for the scene-graph API. See examples for usage.",
+        "description": "This object contains all the methods for the materials API. See examples for usage.",
         "links": [
-          "<a href=\"../examples/scenegraph/\">Related examples</a>"
+          "<a href=\"../examples/scenegraph/#pickMaterialExample\">API definition</a>"
         ]
+      },
+      {
+        "name": "originalGltfJson",
+        "htmlName": "originalGltfJson",
+        "description": "Returns a readonly copy of the GLTF JSON object as loaded. Changing this object has no affect on the scene and changes made through the materials API are not reflected here. This object is useful for reverting individual changes made through the materials API."
       }
     ],
     "Methods": [
@@ -1058,7 +1063,15 @@
         "htmlName": "materialFromPoint",
         "description": "Returns a material whose mesh primitive intersects with a ray created from the input pixel coordinates relative to the screen. Returns the material whose mesh is nearest the camera.",
         "links": [
-          "<a href=\"../examples/scenegraph/#pickMaterialExample\">Related examples</a>"
+          "<a href=\"../examples/scenegraph/#pickMaterialExample\">Material picking example</a>"
+        ]
+      },
+      {
+        "name": "createTexture(uri, type?)",
+        "htmlName": "createTexture",
+        "description": "Async method that returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The uri is required, but the type defaults to 'image/png', which only designates the export format for saving a GLB. The mimetypes 'image/jpeg' and 'image/webp' are also supported.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#createTexturesExample\">Create texture example</a>"
         ]
       }
     ],
