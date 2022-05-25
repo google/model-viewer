@@ -43,7 +43,9 @@
     "mkdirp": "^1.0.4",
     "pngjs": "^6.0.0",
     "puppeteer": "^10.1.0",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "three": "^0.140.2",
+    "three-gpu-pathtracer": "^0.0.3"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^19.0.0",
