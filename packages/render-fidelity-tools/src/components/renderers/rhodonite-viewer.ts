@@ -53,7 +53,7 @@ export class RhodoniteViewer extends LitElement {
       this[$updateSize]();
 
       // expressions
-      const expressions = [];
+      const expressions: Rn.Expression = [];
 
       // camera
       const cameraEntity = Rn.EntityHelper.createCameraEntity();
@@ -175,10 +175,15 @@ export class RhodoniteViewer extends LitElement {
       cameraComponent.zFar = 10000;
       // lighting
       // setIBL('./../../../assets/ibl/papermill');
-      Rn.System.process(expressions);
+
+      function draw() {
+        Rn.System.process(expressions);
+        requestAnimationFrame(draw)
+      }
 
       requestAnimationFrame(() => {
-      this.dispatchEvent(
+        draw();
+        this.dispatchEvent(
         // This notifies the framework that the model is visible and the
         // screenshot can be taken
         new CustomEvent('model-visibility', {detail: {visible: true}}));
