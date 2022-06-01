@@ -393,6 +393,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$jumpCamera] = false;
     protected[$initialized] = false;
     protected[$maintainThetaPhi] = false;
+    
+    protected[$onVisibilityChange]?: () => void;
 
     getCameraOrbit(): SphericalPosition {
       const {theta, phi, radius} = this[$lastSpherical];
