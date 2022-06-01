@@ -271,6 +271,7 @@ export declare interface ControlsInterface {
   resetInteractionPrompt(): void;
   zoom(keyPresses: number): void;
   interact(duration: number, finger0: Finger, finger1?: Finger): void;
+  cancelInteract(): void;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -618,10 +619,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const moveTouches = () => {
         // cancel interaction if user interacts
         if (this[$controls].isUserChange) {
-          for (const fingerElement of this[$fingerAnimatedContainers]) {
-            fingerElement.style.opacity = '0';
-          }
-          dispatchTouches('pointercancel');
+          this.pointerCancel();
+          document.removeEventListener('visibilitychange', onVisibilityChange);
           return;
         }
 
@@ -647,6 +646,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         } else {
           startTime = performance.now() - elapsed;
         }
+        if (fingerElements[0].style.opacity !== '1') {
+          document.removeEventListener('visibilitychange', onVisibilityChange);
+        }
       };
 
       document.addEventListener('visibilitychange', onVisibilityChange);
@@ -654,6 +656,27 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       dispatchTouches('pointerdown');
 
       requestAnimationFrame(moveTouches);
+    }
+    
+    cancelInteract(): void {
+      const fingerElements = this[$fingerAnimatedContainers];
+      if (fingerElements[0].style.opacity !== '1') {
+        return;
+      }
+      const inputElement = this[$userInputElement];
+      const {width, height} = this[$scene];
+      for (const [i, fingerElement] of fingerElements.entries()) {
+        fingerElement.style.opacity = '0';
+        const init = {
+          pointerId: i - 5678,  // help ensure uniqueness
+          pointerType: 'touch',
+          target: inputElement,
+          clientX: width * 0.5,
+          clientY: height * 0.5,
+          altKey: true  // flag that this is not a user interaction
+        } as PointerEventInit;
+        inputElement.dispatchEvent(new PointerEvent('pointercancel', init));
+      }
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
