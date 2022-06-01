@@ -220,6 +220,7 @@ const $onBlur = Symbol('onBlur');
 const $onFocus = Symbol('onFocus');
 const $onChange = Symbol('onChange');
 const $onPointerChange = Symbol('onPointerChange');
+const $onVisibilityChange = Symbol('onVisibilityChange');
 
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userHasInteracted = Symbol('userHasInteracted');
@@ -619,8 +620,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const moveTouches = () => {
         // cancel interaction if user interacts
         if (this[$controls].isUserChange) {
-          this.pointerCancel();
-          document.removeEventListener('visibilitychange', onVisibilityChange);
+          this.cancelInteract();
           return;
         }
 
@@ -635,23 +635,22 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           requestAnimationFrame(moveTouches);
         } else {
           dispatchTouches('pointerup');
-          document.removeEventListener('visibilitychange', onVisibilityChange);
+          if (this[$onVisibilityChange]) {
+            document.removeEventListener('visibilitychange', this[$onVisibilityChange]);
+            this[$onVisibilityChange] = undefined;
+          }
         }
       };
 
-      const onVisibilityChange = () => {
+      this[$onVisibilityChange] = () => {
         let elapsed = 0;
         if (document.visibilityState === 'hidden') {
           elapsed = performance.now() - startTime;
         } else {
           startTime = performance.now() - elapsed;
         }
-        if (fingerElements[0].style.opacity !== '1') {
-          document.removeEventListener('visibilitychange', onVisibilityChange);
-        }
       };
-
-      document.addEventListener('visibilitychange', onVisibilityChange);
+      document.addEventListener('visibilitychange', this[$onVisibilityChange]);
 
       dispatchTouches('pointerdown');
 
@@ -676,6 +675,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           altKey: true  // flag that this is not a user interaction
         } as PointerEventInit;
         inputElement.dispatchEvent(new PointerEvent('pointercancel', init));
+      }
+      if (this[$onVisibilityChange]) {
+        document.removeEventListener('visibilitychange', this[$onVisibilityChange]);
+        this[$onVisibilityChange] = undefined;
       }
     }
 
