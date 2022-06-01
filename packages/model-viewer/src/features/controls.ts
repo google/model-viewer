@@ -622,6 +622,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             fingerElement.style.opacity = '0';
           }
           dispatchTouches('pointercancel');
+          document.removeEventListener('visibilitychange', onVisibilityChange);
           return;
         }
 
