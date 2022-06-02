@@ -733,7 +733,7 @@
       {
         "name": "cancelInteract(time)",
         "htmlName": "cancelInteract",
-        "description": "Cancels the currently running interaction prompt. The optional time (number, from 0 to 1) can be used to move the currently interaction to a desired keyframe position.",
+        "description": "Cancels the currently running interaction prompt. The optional time (number, from 0 to 1) can be used to move the current interaction animation to a desired keyframe position.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#customPrompt\"><span class='attribute'>customPrompt</span> example</a>"
         ]
