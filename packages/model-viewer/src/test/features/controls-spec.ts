@@ -703,21 +703,17 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test('cancelInteract() cancels synthetic interaction', async () => {
-          element.enablePan = true;
-          await element.updateComplete;
-          const target = element.getCameraTarget();
           const orbit = element.getCameraOrbit();
 
-          element.interact(50, finger, finger);
+          element.interact(50, finger);
           element.cancelInteract();
           await rafPasses();
           await rafPasses();
 
-          const newTarget = element.getCameraTarget();
-          expect(newTarget).to.deep.equal(target, 'cameraTarget');
-          
           const newOrbit = element.getCameraOrbit();
-          expect(newOrbit).to.deep.equal(orbit, 'cameraOrbit');
+          expect(newOrbit.theta).to.eq(orbit.theta, 'theta');
+          expect(newOrbit.phi).to.eq(orbit.phi, 'phi');
+          expect(newOrbit.radius).to.eq(orbit.radius, 'radius');
         });
       });
 
