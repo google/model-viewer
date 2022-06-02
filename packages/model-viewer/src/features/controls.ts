@@ -272,7 +272,7 @@ export declare interface ControlsInterface {
   resetInteractionPrompt(): void;
   zoom(keyPresses: number): void;
   interact(duration: number, finger0: Finger, finger1?: Finger): void;
-  cancelInteract(): void;
+  cancelInteract(resetPosition?: boolean): void;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -393,8 +393,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$jumpCamera] = false;
     protected[$initialized] = false;
     protected[$maintainThetaPhi] = false;
-    
-    protected[$cancelInteract]?: () => void;
+
+    protected[$cancelInteract]?: (resetPosition: boolean) => void;
 
     getCameraOrbit(): SphericalPosition {
       const {theta, phi, radius} = this[$lastSpherical];
@@ -593,29 +593,33 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       let startTime = performance.now();
       const {width, height} = this[$scene];
 
-      const dispatchTouches = (type: string) => {
-        for (const [i, position] of positions.entries()) {
-          const {style} = fingerElements[i];
-          style.transform = `translateX(${width * position.x}px) translateY(${
-              height * position.y}px)`;
-          if (type === 'pointerdown') {
-            style.opacity = '1';
-          } else if (type === 'pointerup') {
-            style.opacity = '0';
-          }
+      const dispatchTouches =
+          (type: string, updateFingersPosition: boolean = true) => {
+            for (const [i, position] of positions.entries()) {
+              const {style} = fingerElements[i];
+              if (updateFingersPosition) {
+                style.transform =
+                    `translateX(${width * position.x}px) translateY(${
+                        height * position.y}px)`;
+              }
+              if (type === 'pointerdown') {
+                style.opacity = '1';
+              } else if (type !== 'pointermove') {
+                style.opacity = '0';
+              }
 
-          const init = {
-            pointerId: i - 5678,  // help ensure uniqueness
-            pointerType: 'touch',
-            target: inputElement,
-            clientX: width * position.x,
-            clientY: height * position.y,
-            altKey: true  // flag that this is not a user interaction
-          } as PointerEventInit;
+              const init = {
+                pointerId: i - 5678,  // help ensure uniqueness
+                pointerType: 'touch',
+                target: inputElement,
+                clientX: width * position.x,
+                clientY: height * position.y,
+                altKey: true  // flag that this is not a user interaction
+              } as PointerEventInit;
 
-          inputElement.dispatchEvent(new PointerEvent(type, init));
-        }
-      };
+              inputElement.dispatchEvent(new PointerEvent(type, init));
+            }
+          };
 
       let rafId: number|undefined;
       const moveTouches = () => {
@@ -624,7 +628,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this.cancelInteract();
           return;
         }
-        rafId = undefined;
 
         const time = Math.min(1, (performance.now() - startTime) / duration);
         for (const [i, position] of positions.entries()) {
@@ -636,6 +639,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (time < 1) {
           rafId = requestAnimationFrame(moveTouches);
         } else {
+          rafId = undefined;
           this.cancelInteract();
         }
       };
@@ -649,12 +653,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       };
       document.addEventListener('visibilitychange', onVisibilityChange);
-      this[$cancelInteract] = () => {
+      this[$cancelInteract] = (resetPosition: boolean) => {
         this[$cancelInteract] = undefined;
         if (rafId != null) {
           cancelAnimationFrame(rafId);
           rafId = undefined;
-          dispatchTouches('pointercancel');
+          const updateFingersPosition = !resetPosition;
+          if (resetPosition) {
+            for (const [i, position] of positions.entries()) {
+              position.x = xy[i].x(0);
+              position.y = xy[i].y(0);
+            }
+            dispatchTouches('pointermove', updateFingersPosition);
+          }
+          dispatchTouches('pointercancel', updateFingersPosition);
         } else {
           dispatchTouches('pointerup');
         }
@@ -665,11 +677,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       rafId = requestAnimationFrame(moveTouches);
     }
-    
-    cancelInteract(): void {
+
+    cancelInteract(resetPosition: boolean = false): void {
       const cancelInteract = this[$cancelInteract];
       if (cancelInteract != null) {
-        cancelInteract();
+        cancelInteract(resetPosition);
       }
     }
 
