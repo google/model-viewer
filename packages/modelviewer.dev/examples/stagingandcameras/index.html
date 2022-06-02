@@ -391,6 +391,12 @@
   };
 
   modelViewerPrompt.addEventListener('camera-change', interacted);
+
+  const cancelPrompt = (event) => {
+    modelViewerPrompt.cancelInteract();
+  };
+
+  document.addEventListener('scroll', cancelPrompt, {passive: true});
 </script>
             </template>
           </example-snippet>
