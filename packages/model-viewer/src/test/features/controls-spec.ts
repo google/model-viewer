@@ -713,8 +713,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           await rafPasses();
           await rafPasses();
 
-          expect(element.getCameraTarget()).to.deep.equal(target, 'cameraTarget');
-          expect(element.getCameraOrbit()).to.deep.equal(orbit, 'cameraOrbit');
+          const newTarget = element.getCameraTarget();
+          expect(newTarget).to.deep.equal(target, 'cameraTarget');
+          
+          const newOrbit = element.getCameraOrbit();
+          expect(newOrbit).to.deep.equal(orbit, 'cameraOrbit');
         });
       });
 
