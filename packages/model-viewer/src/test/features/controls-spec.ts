@@ -682,23 +682,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
               .to.be.not.closeTo(orbit.radius, 0.001, 'radius');
         });
 
-        test('user cancelInteract cancels synthetic interaction', async () => {
-          const orbit = element.getCameraOrbit();
-          element.interact(50, finger);
-          await rafPasses();
-          await rafPasses();
-
-          element.cancelInteract();
-          await timePasses(50);
-          await rafPasses();
-
-          const newOrbit = element.getCameraOrbit();
-          expect(newOrbit.theta).to.be.not.closeTo(orbit.theta, 0.001, 'theta');
-          expect(newOrbit.phi).to.be.not.closeTo(orbit.phi, 0.001, 'phi');
-          expect(newOrbit.radius)
-              .to.be.not.closeTo(orbit.radius, 0.001, 'radius');
-        });
-
         test('second interaction does not interupt the first', async () => {
           element.enablePan = true;
           await element.updateComplete;
@@ -707,6 +690,27 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
           element.interact(50, finger, finger);
           element.interact(50, finger);
+          await rafPasses();
+          await rafPasses();
+
+          const newTarget = element.getCameraTarget();
+          expect(newTarget.x).to.be.lessThan(target.x, 'X');
+          expect(newTarget.y).to.be.lessThan(target.y, 'Y');
+
+          const newOrbit = element.getCameraOrbit();
+          expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
+          expect(newOrbit.phi).to.be.closeTo(orbit.phi, 0.001, 'phi');
+        });
+
+        test('cancelInteract() cancels synthetic interaction', async () => {
+          element.enablePan = true;
+          await element.updateComplete;
+          const target = element.getCameraTarget();
+          const orbit = element.getCameraOrbit();
+
+          element.interact(50, finger);
+          element.cancelInteract();
+          element.interact(50, finger, finger);
           await rafPasses();
           await rafPasses();
 
