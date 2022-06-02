@@ -371,38 +371,34 @@
     }
   };
 
-  let timeoutId = null;
+  let promptTimeoutId = null;
 
   const prompt = () => {
-    cancelPrompt();
     modelViewerPrompt.interact(PROMT_DURATION_MS, finger0, finger1);
-    timeoutId = setTimeout(prompt, REPEAT_AFTER_MS);
+    promptAfter(REPEAT_AFTER_MS);
   };
 
-  const queuePrompt = () => {
-    cancelPrompt();
-    timeoutId = setTimeout(prompt, START_AFTER_MS);
-  };
+  const promptAfter = (ms) => {
+    promptTimeoutId && clearTimeout(promptTimeoutId);
+    promptTimeoutId = setTimeout(prompt, ms);
+  }
 
-  const cancelPrompt = () => {
-    // Move model to initial value of previous interact.
+  const startPrompt = () => {
+    // Move model to initial value (same as final value).
     modelViewerPrompt.cancelInteract(0);
-    if (timeoutId != null) {
-      clearTimeout(timeoutId);
-      timeoutId = null;
-    }
+    promptAfter(START_AFTER_MS);
   };
 
   modelViewerPrompt.addEventListener('poster-dismissed', () => {
-    queuePrompt();
-    document.addEventListener('scroll', queuePrompt, {passive: true});
+    startPrompt();
+    document.addEventListener('scroll', startPrompt, {passive: true});
   }, {once: true});
 
   const interacted = (event) => {
     if (event.detail.source === 'user-interaction') {
-      cancelPrompt();
+      promptTimeoutId && clearTimeout(promptTimeoutId);
       modelViewerPrompt.removeEventListener('camera-change', interacted);
-      document.removeEventListener('scroll', queuePrompt, {passive: true});
+      document.removeEventListener('scroll', startPrompt);
     }
   };
 
