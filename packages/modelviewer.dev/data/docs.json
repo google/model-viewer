@@ -729,6 +729,14 @@
         "links": [
           "<a href=\"../examples/stagingandcameras/#customPrompt\"><span class='attribute'>customPrompt</span> example</a>"
         ]
+      },
+      {
+        "name": "cancelInteract()",
+        "htmlName": "cancelInteract",
+        "description": "Cancels the currently running interaction prompt.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#customPrompt\"><span class='attribute'>customPrompt</span> example</a>"
+        ]
       }
     ],
     "Events": [
