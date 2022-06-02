@@ -663,8 +663,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
     
     cancelInteract(): void {
-      if (this[$cancelInteract] != null) {
-        this[$cancelInteract]();
+      const cancelInteract = this[$cancelInteract];
+      if (cancelInteract != null) {
+        cancelInteract();
       }
     }
 
