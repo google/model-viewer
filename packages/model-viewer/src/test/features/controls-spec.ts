@@ -708,19 +708,13 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           const target = element.getCameraTarget();
           const orbit = element.getCameraOrbit();
 
-          element.interact(50, finger);
-          element.cancelInteract();
           element.interact(50, finger, finger);
+          element.cancelInteract();
           await rafPasses();
           await rafPasses();
 
-          const newTarget = element.getCameraTarget();
-          expect(newTarget.x).to.be.lessThan(target.x, 'X');
-          expect(newTarget.y).to.be.lessThan(target.y, 'Y');
-
-          const newOrbit = element.getCameraOrbit();
-          expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
-          expect(newOrbit.phi).to.be.closeTo(orbit.phi, 0.001, 'phi');
+          expect(element.getCameraTarget()).to.deep.equal(target, 'cameraTarget');
+          expect(element.getCameraOrbit()).to.deep.equal(orbit, 'cameraOrbit');
         });
       });
 
