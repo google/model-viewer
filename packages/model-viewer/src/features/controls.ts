@@ -623,6 +623,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         // cancel interaction if user interacts
         if (this[$controls].isUserChange) {
           this.cancelInteract();
+          dispatchTouches('pointercancel');
           return;
         }
 
