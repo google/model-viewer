@@ -574,15 +574,13 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     interact(duration: number, finger0: Finger, finger1?: Finger) {
-      const inputElement = this[$userInputElement];
-      const fingerElements = this[$fingerAnimatedContainers];
-
       if (this[$cancelInteract]) {
         console.warn(
             'interact() failed because an existing interaction is running.')
         return;
       }
-
+      const inputElement = this[$userInputElement];
+      const fingerElements = this[$fingerAnimatedContainers];
       const xy = new Array<{x: TimingFunction, y: TimingFunction}>();
       xy.push({x: timeline(finger0.x), y: timeline(finger0.y)});
       const positions = [{x: xy[0].x(0), y: xy[0].y(0)}];
@@ -619,13 +617,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       };
 
+      let rafId: number|undefined;
       const moveTouches = () => {
         // cancel interaction if user interacts
         if (this[$controls].isUserChange) {
           this.cancelInteract();
-          dispatchTouches('pointercancel');
           return;
         }
+        rafId = undefined;
 
         const time = Math.min(1, (performance.now() - startTime) / duration);
         for (const [i, position] of positions.entries()) {
@@ -635,9 +634,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         dispatchTouches('pointermove');
 
         if (time < 1) {
-          requestAnimationFrame(moveTouches);
+          rafId = requestAnimationFrame(moveTouches);
         } else {
-          dispatchTouches('pointerup');
           this.cancelInteract();
         }
       };
@@ -652,15 +650,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
       document.addEventListener('visibilitychange', onVisibilityChange);
       this[$cancelInteract] = () => {
-        // This causes an earlier dispatch of 'pointerup' event.
-        startTime = 0;
-        document.removeEventListener('visibilitychange', onVisibilityChange);
         this[$cancelInteract] = undefined;
+        if (rafId != null) {
+          cancelAnimationFrame(rafId);
+          rafId = undefined;
+          dispatchTouches('pointercancel');
+        } else {
+          dispatchTouches('pointerup');
+        }
+        document.removeEventListener('visibilitychange', onVisibilityChange);
       };
 
       dispatchTouches('pointerdown');
 
-      requestAnimationFrame(moveTouches);
+      rafId = requestAnimationFrame(moveTouches);
     }
     
     cancelInteract(): void {
