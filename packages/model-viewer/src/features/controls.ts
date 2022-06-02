@@ -220,7 +220,7 @@ const $onBlur = Symbol('onBlur');
 const $onFocus = Symbol('onFocus');
 const $onChange = Symbol('onChange');
 const $onPointerChange = Symbol('onPointerChange');
-const $onVisibilityChange = Symbol('onVisibilityChange');
+const $cancelInteract = Symbol('cancelInteract');
 
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userHasInteracted = Symbol('userHasInteracted');
@@ -394,7 +394,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$initialized] = false;
     protected[$maintainThetaPhi] = false;
     
-    protected[$onVisibilityChange]?: () => void;
+    protected[$cancelInteract]?: () => void;
 
     getCameraOrbit(): SphericalPosition {
       const {theta, phi, radius} = this[$lastSpherical];
@@ -577,7 +577,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const inputElement = this[$userInputElement];
       const fingerElements = this[$fingerAnimatedContainers];
 
-      if (fingerElements[0].style.opacity === '1') {
+      if (this[$cancelInteract]) {
         console.warn(
             'interact() failed because an existing interaction is running.')
         return;
@@ -637,14 +637,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           requestAnimationFrame(moveTouches);
         } else {
           dispatchTouches('pointerup');
-          if (this[$onVisibilityChange]) {
-            document.removeEventListener('visibilitychange', this[$onVisibilityChange]);
-            this[$onVisibilityChange] = undefined;
-          }
+          this.cancelInteract();
         }
       };
 
-      this[$onVisibilityChange] = () => {
+      const onVisibilityChange = () => {
         let elapsed = 0;
         if (document.visibilityState === 'hidden') {
           elapsed = performance.now() - startTime;
@@ -652,7 +649,13 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           startTime = performance.now() - elapsed;
         }
       };
-      document.addEventListener('visibilitychange', this[$onVisibilityChange]);
+      document.addEventListener('visibilitychange', onVisibilityChange);
+      this[$cancelInteract] = () => {
+        // This causes an earlier dispatch of 'pointerup' event.
+        startTime = 0;
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+        this[$cancelInteract] = undefined;
+      };
 
       dispatchTouches('pointerdown');
 
@@ -660,27 +663,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
     
     cancelInteract(): void {
-      const fingerElements = this[$fingerAnimatedContainers];
-      if (fingerElements[0].style.opacity !== '1') {
-        return;
-      }
-      const inputElement = this[$userInputElement];
-      const {width, height} = this[$scene];
-      for (const [i, fingerElement] of fingerElements.entries()) {
-        fingerElement.style.opacity = '0';
-        const init = {
-          pointerId: i - 5678,  // help ensure uniqueness
-          pointerType: 'touch',
-          target: inputElement,
-          clientX: width * 0.5,
-          clientY: height * 0.5,
-          altKey: true  // flag that this is not a user interaction
-        } as PointerEventInit;
-        inputElement.dispatchEvent(new PointerEvent('pointercancel', init));
-      }
-      if (this[$onVisibilityChange]) {
-        document.removeEventListener('visibilitychange', this[$onVisibilityChange]);
-        this[$onVisibilityChange] = undefined;
+      if (this[$cancelInteract]) {
+        this[$cancelInteract]();
       }
     }
 
