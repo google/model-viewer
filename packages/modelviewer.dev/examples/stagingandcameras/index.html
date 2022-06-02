@@ -325,8 +325,9 @@
 <script>
   const modelViewerPrompt = document.querySelector("#prompt-demo");
   
-  const PROMT_MS = 3000;
-  const REPEAT_MS = 5000;
+  const PROMT_DURATION_MS = 3000;
+  const START_AFTER_MS = 1000;
+  const REPEAT_AFTER_MS = 5000;
 
   const finger0 = {
     x: {
@@ -370,33 +371,42 @@
     }
   };
 
-  let hasInteracted = false;
+  let timeoutId = null;
 
   const prompt = () => {
-    if (!hasInteracted) {
-      modelViewerPrompt.interact(PROMT_MS, finger0, finger1);
-      setTimeout(prompt, REPEAT_MS);
+    cancelPrompt();
+    modelViewerPrompt.interact(PROMT_DURATION_MS, finger0, finger1);
+    timeoutId = setTimeout(prompt, REPEAT_AFTER_MS);
+  };
+
+  const queuePrompt = () => {
+    cancelPrompt();
+    timeoutId = setTimeout(prompt, START_AFTER_MS);
+  };
+
+  const cancelPrompt = () => {
+    // Move model to initial value of previous interact.
+    modelViewerPrompt.cancelInteract(0);
+    if (timeoutId != null) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
     }
   };
 
   modelViewerPrompt.addEventListener('poster-dismissed', () => {
-    prompt();
+    queuePrompt();
+    document.addEventListener('scroll', queuePrompt, {passive: true});
   }, {once: true});
 
   const interacted = (event) => {
     if (event.detail.source === 'user-interaction') {
-      hasInteracted = true;
+      cancelPrompt();
       modelViewerPrompt.removeEventListener('camera-change', interacted);
+      document.removeEventListener('scroll', queuePrompt, {passive: true});
     }
   };
 
   modelViewerPrompt.addEventListener('camera-change', interacted);
-
-  const cancelPrompt = (event) => {
-    modelViewerPrompt.cancelInteract();
-  };
-
-  document.addEventListener('scroll', cancelPrompt, {passive: true});
 </script>
             </template>
           </example-snippet>
