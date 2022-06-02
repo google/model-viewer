@@ -597,8 +597,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         for (const [i, position] of positions.entries()) {
           const {style} = fingerElements[i];
           if (!keepFingersPosition) {
-            style.transform = `translateX(${width * position.x}px) translateY(${
-                height * position.y}px)`;
+            const tx = width * position.x;
+            const ty = height * position.y;
+            style.transform = `translateX(${tx}px) translateY(${ty}px)`;
           }
           if (type === 'pointerdown') {
             style.opacity = '1';
