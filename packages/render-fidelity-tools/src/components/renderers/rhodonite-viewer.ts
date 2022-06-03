@@ -63,7 +63,7 @@ export class RhodoniteViewer extends LitElement {
       // cameraComponent.setFovyAndChangeFilmSize(scenario.verticalFoV);
       // cameraComponent.setFovyAndChangeFocalLength(scenario.verticalFoV);
       cameraComponent.fovyInner = scenario.verticalFoV;
-      cameraComponent.aspect = scenario.dimensions.width / scenario.dimensions.height;
+      cameraComponent.aspectInner = scenario.dimensions.width / scenario.dimensions.height;
 
       // gltf
       const mainExpression = await Rn.GltfImporter.import(
@@ -128,9 +128,9 @@ export class RhodoniteViewer extends LitElement {
       // controller.rotX = scenario.orbit.theta;
       // controller.rotY = scenario.orbit.phi - 90;
 
-      // const sceneTopLevelGraphComponents = mainRenderPass.sceneTopLevelGraphComponents as Rn.SceneGraphComponent[]
-      // const rootGroup = sceneTopLevelGraphComponents![0].entity as Rn.ISceneGraphEntity
-      // const aabb = rootGroup.getSceneGraph().calcWorldAABB();
+      const sceneTopLevelGraphComponents = mainRenderPass.sceneTopLevelGraphComponents as Rn.SceneGraphComponent[]
+      const rootGroup = sceneTopLevelGraphComponents![0].entity as Rn.ISceneGraphEntity
+      const aabb = rootGroup.getSceneGraph().calcWorldAABB();
       
       // for (const sgc of mainRenderPass.sceneTopLevelGraphComponents) {
       //   sgc.transform = Rn.Vector3.multiply(aabb.centerPoint, -1);
@@ -165,14 +165,14 @@ export class RhodoniteViewer extends LitElement {
       cameraEntity.getCamera().primitiveMode = true;
       // cameraEntity.getCamera().setDirectionDirectly(Rn.Vector3.fromCopyArray3(center));
 
-      // const modelRadius = aabb.lengthCenterToCorner;
+      const modelRadius = aabb.lengthCenterToCorner;
       // const max = aabb.maxPoint;
       // const min = aabb.minPoint;
       // const modelRadius = Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
-      // const far = 2 * Math.max(modelRadius, orbit.radius);
-      // const near = far / 1000;
-      cameraComponent.zNear = 0.0001;
-      cameraComponent.zFar = 10000;
+      const far = 2 * Math.max(modelRadius, orbit.radius);
+      const near = far / 1000;
+      cameraComponent.zNearInner = near;
+      cameraComponent.zFarInner = far;
       // lighting
       // setIBL('./../../../assets/ibl/papermill');
 
