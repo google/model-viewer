@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>&lt;model-viewer&gt; Scene Graph Worklet</title>
+  <title>&lt;model-viewer&gt; Materials & Scene Examples</title>
   <meta charset="utf-8">
   <meta name="description" content="&lt;model-viewer&gt; scene graph examples">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -476,8 +476,12 @@ modelViewerTexture1.addEventListener("load", () => {
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">Pick a Material</h2>
-            <p>Demonstrates selecting a material with pointer input and changing its color. Note this also works in the WebXR AR mode. Also demonstrates the use of the scale attribute since this GLB was erroneously modeled in mm instead of meters.</p>
+            <h2 class="demo-title">Materials API</h2>
+            <p>The complete Materials interface is documented below, which is all accessible through the <a href="../../docs/index.html#entrydocs-scenegraph-properties-model">model property</a>.
+            The Materials API is designed to follow the <a href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#reference-material">glTF structure</a>, just as though you are navigating their JSON object. 
+            Only the materials and their children are exposed rather than the whole scene graph to keep the scope small for this high-level web component.
+            Not every glTF parameter is exposed, but more may be added in the future. Additionally, several methods have been added for useful operations.</p>
+            <p>This example demonstrates selecting a material with pointer input and changing its color. Note this also works in the WebXR AR mode. It also demonstrates the use of the scale attribute since this GLB was erroneously modeled in mm instead of meters.</p>
           </div>
           <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
             <template>
@@ -487,20 +491,143 @@ modelViewerTexture1.addEventListener("load", () => {
 const modelViewer = document.querySelector("model-viewer#pickMaterial");
 
 modelViewer.addEventListener("load", () => {
-
-  const changeColor = async (event) => {
-    let material = modelViewer.materialFromPoint(event.clientX, event.clientY);
-
-    if(material != null) {
+  const changeColor = (event) => {
+    const material = modelViewer.materialFromPoint(event.clientX, event.clientY);
+    if (material != null) {
       material.pbrMetallicRoughness.
         setBaseColorFactor([Math.random(), Math.random(), Math.random()]);
     }
-  }
+  };
 
   modelViewer.addEventListener("click", changeColor);
-
 });
+</script>
+<script>
+/**
+ * This is not an actual script, but an API declaration made prettier with JS syntax highlighting.
+*/
 
+interface Model {
+  /**
+    * An ordered set of unique Materials found in this model. The Materials
+    * correspond to the listing of materials in the glTF, with the possible
+    * addition of a default material at the end.
+    */
+  readonly materials: Material[];
+
+  // Returns the first material to whose name matches 'name'.
+  getMaterialByName(name: string): Material|null;
+}
+
+interface Material {
+  name: string;
+
+  // Returns the glTF index of this material.
+  readonly index: number;
+  readonly normalTexture: TextureInfo|null;
+  readonly occlusionTexture: TextureInfo|null;
+  readonly emissiveTexture: TextureInfo|null;
+  readonly emissiveFactor: RGB;
+  readonly pbrMetallicRoughness: PBRMetallicRoughness;
+
+  setEmissiveFactor(rgb: RGB): void;
+  setAlphaCutoff(cutoff: number): void;
+  getAlphaCutoff(): number;
+  setDoubleSided(doubleSided: boolean): void;
+  getDoubleSided(): boolean;
+  setAlphaMode(alphaMode: AlphaMode): void;
+  getAlphaMode(): AlphaMode;
+}
+
+interface PBRMetallicRoughness {
+  readonly baseColorFactor: RGBA;
+  readonly metallicFactor: number;
+  readonly roughnessFactor: number;
+  readonly baseColorTexture: TextureInfo|null;
+  readonly metallicRoughnessTexture: TextureInfo|null;
+  
+  setBaseColorFactor(rgba: RGBA): void;
+  setMetallicFactor(value: number): void;
+  setRoughnessFactor(value: number): void;
+}
+
+interface TextureInfo {
+  readonly texture: Texture|null;
+
+  /**
+   * Sets the texture, or removes it if argument is null. Note you cannot build
+   * your own Texture object, but must either use one from another TextureInfo,
+   * or create one with the createTexture method.
+   */
+  setTexture(texture: Texture|null): void;
+}
+
+interface Texture {
+  readonly name: string;
+  readonly sampler: Sampler;
+  readonly source: Image;
+}
+
+interface Sampler {
+  readonly name: string;
+  readonly minFilter: MinFilter;
+  readonly magFilter: MagFilter;
+  readonly wrapS: WrapMode;
+  readonly wrapT: WrapMode;
+
+  setMinFilter(filter: MinFilter): void;
+  setMagFilter(filter: MagFilter): void;
+  setWrapS(mode: WrapMode): void;
+  setWrapT(mode: WrapMode): void;
+}
+
+interface Image {
+  readonly name: string;
+
+  /**
+    * The type is 'external' if the image has a configured URI. Otherwise, it is
+    * considered to be 'embedded'. Note: this distinction is only implied by the
+    * glTF spec, and is made explicit here for convenience.
+    */
+  readonly type: 'embedded'|'external';
+
+  // The URI of the image, if it is external.
+  readonly uri?: string;
+
+  // The bufferView of the image, if it is embedded.
+  readonly bufferView?: number
+
+  /**
+    * A method to create an object URL of this image at the desired
+    * resolution. Especially useful for KTX2 textures which are GPU compressed,
+    * and so are unreadable on the CPU without a method like this.
+    */
+  createThumbnail(width: number, height: number): Promise<string>;
+}
+
+type RGBA = [number, number, number, number];
+type RGB = [number, number, number];
+type AlphaMode = 'OPAQUE'|'MASK'|'BLEND';
+
+enum WrapMode {
+  ClampToEdge = 33071,
+  MirroredRepeat = 33648,
+  Repeat = 10497,
+}
+
+enum MinFilter {
+  Nearest = 9728,
+  Linear = 9729,
+  NearestMipmapNearest = 9984,
+  LinearMipmapNearest = 9985,
+  NearestMipmapLinear = 9986,
+  LinearMipmapLinear = 9987,
+}
+
+enum MaxFilter {
+  Nearest = 9728,
+  Linear = 9729,
+}
 </script>
 </template>
           </example-snippet>
@@ -529,47 +656,6 @@ modelViewer.addEventListener("load", () => {
     let modelViewer = document.getElementById("static-model");
     const glTF = await modelViewer.exportScene();
     var file = new File([glTF], "export.glb");
-    var link = document.createElement("a");
-    link.download =file.name;
-    link.href = URL.createObjectURL(file);
-    link.click();
-  }
-</script>
-            </template>
-          </example-snippet>
-        </div>
-      </div>
-    </div>
-
-    <div class="sample">
-      <div id="exporterWithOptions" class="demo"></div>
-      <div class="content">
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">Exporter with options</h2>
-          </div>
-          <example-snippet stamp-to="exporterWithOptions" highlight-as="html">
-            <template>
-<model-viewer id="animated-model" src="../../shared-assets/models/Horse.glb" autoplay camera-controls alt="A 3D model of a horse galloping">
-  <div class="controls">
-    <button onclick="exportScene(true)">Export GLB</button>
-    <button onclick="exportScene(false)">Export GLTF</button>
-  </div>
-</model-viewer>
-<script>
-  async function exportScene(binary){
-    let options = {
-      binary: binary,
-      trs: true,
-      onlyVisible: true,
-      maxTextureSize: 256,
-      forcePowerOfTwoTextures: true,
-      includeCustomExtensions: false,
-      embedImages: true
-    };
-    let modelViewer = document.getElementById("animated-model");
-    const glTF = await modelViewer.exportScene(options);
-    var file = new File([glTF], binary ? "export.glb" : "export.gltf");
     var link = document.createElement("a");
     link.download =file.name;
     link.href = URL.createObjectURL(file);

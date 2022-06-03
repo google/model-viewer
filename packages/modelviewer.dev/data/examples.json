@@ -224,7 +224,7 @@
     ]
   },
   {
-    "name": "Scene Graph",
+    "name": "Materials & Scene",
     "htmlName": "scenegraph",
     "examples": [
       {
@@ -253,15 +253,11 @@
       },
       {
         "htmlId": "pickMaterialExample",
-        "name": "Pick a material"
+        "name": "Materials API"
       },
       {
         "htmlId": "exporter",
         "name": "Exporter"
-      },
-      {
-        "htmlId": "exporterWithOptions",
-        "name": "Exporter w/ Options"
       }
     ]
   }

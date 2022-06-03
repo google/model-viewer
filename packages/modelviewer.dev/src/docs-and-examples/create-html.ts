@@ -23,13 +23,15 @@ interface Entry {
 }
 
 interface Category {
-  Title: string, Attributes: Entry[], CSS: Entry[], Parts: Entry[],
-      Properties: Entry[], 'Static Properties': Entry[], Methods: Entry[],
-      'Static Methods': Entry[], Events: Entry[], Slots: Entry[],
+  Title: string, htmlName: string, Attributes: Entry[], CSS: Entry[],
+      Parts: Entry[], Properties: Entry[], 'Static Properties': Entry[],
+      Methods: Entry[], 'Static Methods': Entry[], Events: Entry[],
+      Slots: Entry[],
 }
 
 const CategoryConstant: Category = {
   Title: '',
+  htmlName: '',
   Attributes: [],
   CSS: [],
   Parts: [],
@@ -151,9 +153,9 @@ function createSidebarName(name: string): string {
 
 function createSidebar(category: Category) {
   const container = document.getElementById('sidebar-category-container');
-  const lowerCaseTitle = getLowerCaseTitle(category.Title);
+  const lowerCaseTitle = category.htmlName;
   let subcategories = Object.keys(category);
-  subcategories = subcategories.filter(k => k !== 'Title');
+  subcategories = subcategories.filter(k => k !== 'Title' && k !== 'htmlName');
 
   // Link category href (Loading) to first subcategory (Loading, Attributes)
   let lowerKey = '';
@@ -198,13 +200,11 @@ function createSidebar(category: Category) {
   }
 }
 
-function createTitle(title: string) {
-  const lowerCaseTitle = getLowerCaseTitle(title);
-  const titleContainer =
-      document.getElementById(lowerCaseTitle.concat('-docs'));
+function createTitle(title: string, htmlName: string) {
+  const titleContainer = document.getElementById(htmlName.concat('-docs'));
   titleContainer!.innerHTML += `
 <div class="header">
-  <h1 id=${lowerCaseTitle}>${title}</h1>
+  <h1 id=${htmlName}>${title}</h1>
 </div>`;
 }
 
@@ -217,10 +217,6 @@ export function getLowerCaseKey(key: string): string {
     default:
       return key.toLowerCase();
   }
-}
-
-function getLowerCaseTitle(title: string): string {
-  return title.replace('&', 'and').replace(/\s/g, '').toLowerCase();
 }
 
 function createDefaultTable(entry: Entry): string {
@@ -283,17 +279,15 @@ function createSubcategory(
     category: string,
     subcategory: string,
     pluralLowerCaseSubcategory: string) {
-  const lowerCaseCategory = getLowerCaseTitle(category);
-
-  const element = document.getElementById(lowerCaseCategory.concat('-docs'));
+  const element = document.getElementById(category.concat('-docs'));
   const subcategoryContainerId =
-      'docs-'.concat(lowerCaseCategory, '-', pluralLowerCaseSubcategory);
+      'docs-'.concat(category, '-', pluralLowerCaseSubcategory);
 
   const subcategoryContainer = `
 <div class=${pluralLowerCaseSubcategory.concat('-container')}>
   <div class='inner-content'>
     <div id=${subcategoryContainerId}>
-      <h3 id=${lowerCaseCategory.concat('-', pluralLowerCaseSubcategory)}>
+      <h3 id=${category.concat('-', pluralLowerCaseSubcategory)}>
         ${subcategory}
       </h3>
     </div>
@@ -305,11 +299,11 @@ function createSubcategory(
       document.getElementById(subcategoryContainerId);
   for (const entry of subcategoryArray) {
     innerSubcategoryContainer!.innerHTML +=
-        createEntry(entry, lowerCaseCategory, pluralLowerCaseSubcategory);
+        createEntry(entry, category, pluralLowerCaseSubcategory);
 
     if ('links' in entry) {
-      const linksId = 'links'.concat(
-          entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory);
+      const linksId =
+          'links'.concat(entry.htmlName, pluralLowerCaseSubcategory, category);
       const linksDiv = document.getElementById(linksId);
       for (const link of entry.links) {
         linksDiv!.innerHTML += `<div>${link}</div>`;
@@ -337,15 +331,13 @@ function createToggle() {
 
 export function convertJSONToHTML(json: any[]) {
   createToggle();
-  let header = '';
   for (const category of json) {
+    const {Title, htmlName} = category;
+    createTitle(Title, htmlName);
     for (const key in category) {
-      if (key === 'Title') {
-        header = category[key];
-        createTitle(category[key]);
-      } else {
+      if (key !== 'Title' && key !== 'htmlName') {
         const lowerCaseKey = getLowerCaseKey(key);
-        createSubcategory(category[key], header, key, lowerCaseKey);
+        createSubcategory(category[key], htmlName, key, lowerCaseKey);
       }
     }
     createSidebar(category);
