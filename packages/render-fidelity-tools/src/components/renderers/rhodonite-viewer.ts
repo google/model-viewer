@@ -55,6 +55,9 @@ export class RhodoniteViewer extends LitElement {
       // expressions
       const expressions: Rn.Expression = [];
 
+      const initialRenderPass = setupInitialExpression();
+      expressions.push(initialRenderPass);
+
       // camera
       const cameraEntity = Rn.EntityHelper.createCameraEntity();
       const cameraComponent = cameraEntity.getCamera();
@@ -76,8 +79,8 @@ export class RhodoniteViewer extends LitElement {
       expressions.push(mainExpression);
 
       // post effects
-      const expressionPostEffect = new Rn.Expression();
-      expressions.push(expressionPostEffect);
+      const expressionGammaEffect = new Rn.Expression();
+      expressions.push(expressionGammaEffect);
 
       // gamma correction (and super sampling)
       const mainRenderPass = mainExpression.renderPasses[0];
@@ -87,8 +90,8 @@ export class RhodoniteViewer extends LitElement {
       const gammaTargetFramebuffer =
         Rn.RenderableHelper.createTexturesForRenderTarget(scenario.dimensions.width, scenario.dimensions.height, 1, {});
       mainRenderPass.setFramebuffer(gammaTargetFramebuffer);
-      mainRenderPass.toClearColorBuffer = true;
-      mainRenderPass.toClearDepthBuffer = true;
+      mainRenderPass.toClearColorBuffer = false;
+      mainRenderPass.toClearDepthBuffer = false;
 
       const postEffectCameraEntity = createPostEffectCameraEntity();
       const postEffectCameraComponent = postEffectCameraEntity.getCamera();
@@ -113,7 +116,7 @@ export class RhodoniteViewer extends LitElement {
         gammaTargetFramebuffer.getColorAttachedRenderTargetTexture(0)
       );
 
-      expressionPostEffect.addRenderPasses([gammaCorrectionRenderPass]);
+      expressionGammaEffect.addRenderPasses([gammaCorrectionRenderPass]);
 
       const sceneTopLevelGraphComponents = mainRenderPass.sceneTopLevelGraphComponents as Rn.SceneGraphComponent[]
       const rootGroup = sceneTopLevelGraphComponents![0].entity as Rn.ISceneGraphEntity
@@ -186,6 +189,22 @@ export class RhodoniteViewer extends LitElement {
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
   }
+}
+
+function setupInitialExpression() {
+  const expression = new Rn.Expression();
+  expression.tryToSetUniqueName('Initial', true);
+  const initialRenderPass = new Rn.RenderPass();
+  initialRenderPass.clearColor = Rn.Vector4.fromCopyArray4([0.0, 0.0, 0.0, 0.0]);
+  initialRenderPass.toClearColorBuffer = false;
+  initialRenderPass.toClearDepthBuffer = true;
+  const initialRenderPassForFrameBuffer = new Rn.RenderPass();
+  initialRenderPassForFrameBuffer.clearColor = Rn.Vector4.fromCopyArray4([0.0, 0.0, 0.0, 0.0]);
+  initialRenderPassForFrameBuffer.toClearColorBuffer = true;
+  initialRenderPassForFrameBuffer.toClearDepthBuffer = true;
+  // initialRenderPassForFrameBuffer.setFramebuffer(getRnAppModel().getFramebufferTargetOfGammaMsaa()!)
+  expression.addRenderPasses([initialRenderPass, initialRenderPassForFrameBuffer]);
+  return expression;
 }
 
 function createPostEffectRenderPass(
