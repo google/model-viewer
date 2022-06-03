@@ -58,10 +58,6 @@ export class RhodoniteViewer extends LitElement {
       // camera
       const cameraEntity = Rn.EntityHelper.createCameraEntity();
       const cameraComponent = cameraEntity.getCamera();
-      // cameraComponent.zNear = 0.1;
-      // cameraComponent.zFar = 1000.0;
-      // cameraComponent.setFovyAndChangeFilmSize(scenario.verticalFoV);
-      // cameraComponent.setFovyAndChangeFocalLength(scenario.verticalFoV);
       cameraComponent.fovyInner = scenario.verticalFoV;
       cameraComponent.aspectInner = scenario.dimensions.width / scenario.dimensions.height;
 
@@ -119,24 +115,10 @@ export class RhodoniteViewer extends LitElement {
 
       expressionPostEffect.addRenderPasses([gammaCorrectionRenderPass]);
 
-      // cameraController
-      // const mainCameraControllerComponent = cameraEntity.getCameraController();
-      // const controller = mainCameraControllerComponent.controller as Rn.OrbitCameraController;
-      // controller.setTarget(mainRenderPass.sceneTopLevelGraphComponents[0].entity);
-      // controller.setFixedDollyTrue(scenario.orbit.radius);
-      // controller.dolly = 0.5;
-      // controller.rotX = scenario.orbit.theta;
-      // controller.rotY = scenario.orbit.phi - 90;
-
       const sceneTopLevelGraphComponents = mainRenderPass.sceneTopLevelGraphComponents as Rn.SceneGraphComponent[]
       const rootGroup = sceneTopLevelGraphComponents![0].entity as Rn.ISceneGraphEntity
       const aabb = rootGroup.getSceneGraph().calcWorldAABB();
       
-      // for (const sgc of mainRenderPass.sceneTopLevelGraphComponents) {
-      //   sgc.transform = Rn.Vector3.multiply(aabb.centerPoint, -1);
-      // }
-
-      // mainRenderPass.setViewport(Rn.Vector4.fromCopy4(0, 0, scenario.dimensions.width, scenario.dimensions.height));
       Rn.MeshRendererComponent.isViewFrustumCullingEnabled = false;
       const {target, orbit} = this.scenario!;
 
@@ -157,13 +139,10 @@ export class RhodoniteViewer extends LitElement {
       }
       const up = [0, 1, 0];
 
-      // cameraEntity.translate = Rn.Vector3.fromCopyArray3(eye)
       cameraEntity.getCamera().eyeInner = Rn.Vector3.fromCopyArray3(eye);
       cameraEntity.getCamera().up = Rn.Vector3.fromCopyArray3(up);
       cameraEntity.getCamera().directionInner = Rn.Vector3.fromCopyArray3(center);
-      // cameraEntity.getCamera().direction = Rn.Vector3.fromCopyArray3(center);
       cameraEntity.getCamera().primitiveMode = true;
-      // cameraEntity.getCamera().setDirectionDirectly(Rn.Vector3.fromCopyArray3(center));
 
       const modelRadius = aabb.lengthCenterToCorner;
       // const max = aabb.maxPoint;
@@ -173,8 +152,6 @@ export class RhodoniteViewer extends LitElement {
       const near = far / 1000;
       cameraComponent.zNearInner = near;
       cameraComponent.zFarInner = far;
-      // lighting
-      // setIBL('./../../../assets/ibl/papermill');
 
       function draw() {
         Rn.System.process(expressions);
@@ -206,35 +183,10 @@ export class RhodoniteViewer extends LitElement {
 
     Rn.System.resizeCanvas(width, height);
 
-    // /canvas.width = width;
-    //canvas.height = height;
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
   }
 }
-
-// function setIBL(baseUri: string) {
-//   const specularCubeTexture = new Rn.CubeTexture();
-//   specularCubeTexture.baseUriToLoad = baseUri + '/specular/specular';
-//   specularCubeTexture.isNamePosNeg = true;
-//   specularCubeTexture.hdriFormat = Rn.HdriFormat.RGBE_PNG;
-//   specularCubeTexture.mipmapLevelNumber = 10;
-
-//   const diffuseCubeTexture = new Rn.CubeTexture();
-//   diffuseCubeTexture.baseUriToLoad = baseUri + '/diffuse/diffuse';
-//   diffuseCubeTexture.hdriFormat = Rn.HdriFormat.RGBE_PNG;
-//   diffuseCubeTexture.mipmapLevelNumber = 1;
-//   diffuseCubeTexture.isNamePosNeg = true;
-
-//   const meshRendererComponents = Rn.ComponentRepository.getComponentsWithType(
-//     Rn.MeshRendererComponent
-//   ) as Rn.MeshRendererComponent[];
-//   for (let i = 0; i < meshRendererComponents.length; i++) {
-//     const meshRendererComponent = meshRendererComponents[i];
-//     meshRendererComponent.specularCubeMap = specularCubeTexture;
-//     meshRendererComponent.diffuseCubeMap = diffuseCubeTexture;
-//   }
-// }
 
 function createPostEffectRenderPass(
   material: Rn.Material,
