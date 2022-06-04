@@ -1,11 +1,33 @@
 {
   "renderers": [
     {
+      "name": "model-viewer",
+      "description": "<model-viewer>"
+    },
+    {
       "name": "filament",
       "description": "Filament",
       "scripts": {
         "setup": "prepare-ibl.sh"
       }
+    },
+    {
+      "name": "babylon",
+      "description": "Babylon"
+    },
+    {
+      "name": "gltf-sample-viewer",
+      "description": "gltf-sample-viewer"
+    },
+    {
+      "name": "dspbr-pt",
+      "description": "dspbr-pt"
+    },
+    {
+      "name": "stellar",
+      "description": "Dassault Systèmes STELLAR",
+      "command": {}
+    },
     {
       "name": "rhodonite",
       "description": "RhodoniteTS"
