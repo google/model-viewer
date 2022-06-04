@@ -50,11 +50,13 @@ export class RhodoniteViewer extends LitElement {
       // create Frame and Expressions
       const frame = new Rn.Frame();
 
+      const { framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference } = createRenderTargets(scenario.dimensions.width, scenario.dimensions.height);
+
       // Load glTF Expression
       const { cameraComponent, cameraEntity, mainRenderPass, gammaTargetFramebuffer } = await loadGltf(frame, scenario);
       
       // MSAA Resolve Expression
-      setupMsaaResolveExpression(frame, scenario.dimensions.width, scenario.dimensions.height);
+      setupMsaaResolveExpression(frame, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
 
       // Post GammaCorrection Expression
       setupGammaExpression(frame, gammaTargetFramebuffer);
@@ -239,34 +241,11 @@ function setupInitialExpression() {
   return expression;
 }
 
-function setupMsaaResolveExpression(frame: Rn.Frame, canvasWidth: number, canvasHeight: number) {
+function setupMsaaResolveExpression(frame: Rn.Frame, framebufferTargetOfGammaMsaa: Rn.FrameBuffer, framebufferTargetOfGammaResolve: Rn.FrameBuffer, framebufferTargetOfGammaResolveForReference: Rn.FrameBuffer) {
   const expressionForResolve = new Rn.Expression()
   expressionForResolve.tryToSetUniqueName('Resolve', true)
   const renderPassForResolve = new Rn.RenderPass()
   expressionForResolve.addRenderPasses([renderPassForResolve])
-
-  // MSAA depth
-  const framebufferTargetOfGammaMsaa = Rn.RenderableHelper.createTexturesForRenderTarget(canvasWidth, canvasHeight, 0, {
-    isMSAA: true,
-    sampleCountMSAA: 4,
-  })
-  framebufferTargetOfGammaMsaa.tryToSetUniqueName('FramebufferTargetOfGammaMsaa', true)
-  // getRnAppModel().setFramebufferTargetOfGammaMsaa(framebufferTargetOfGammaMsaa.objectUID)
-
-  // Resolve Color 1
-  const framebufferTargetOfGammaResolve = Rn.RenderableHelper.createTexturesForRenderTarget(canvasWidth, canvasHeight, 1, {
-    createDepthBuffer: true,
-  })
-  framebufferTargetOfGammaResolve.tryToSetUniqueName('FramebufferTargetOfGammaResolve', true)
-  // getRnAppModel().setFramebufferTargetOfGammaResolve(framebufferTargetOfGammaResolve.objectUID)
-
-  // Resolve Color 2
-  const framebufferTargetOfGammaResolveForReference = Rn.RenderableHelper.createTexturesForRenderTarget(canvasWidth, canvasHeight, 1, {
-    createDepthBuffer: false,
-    minFilter: Rn.TextureParameter.LinearMipmapLinear
-  })
-  framebufferTargetOfGammaResolveForReference.tryToSetUniqueName('FramebufferTargetOfGammaResolveForReference', true)
-  // getRnAppModel().setFramebufferTargetOfGammaResolveForReference(framebufferTargetOfGammaResolveForReference.objectUID)
 
   renderPassForResolve.toClearDepthBuffer = false
   renderPassForResolve.setFramebuffer(framebufferTargetOfGammaMsaa)
@@ -277,6 +256,29 @@ function setupMsaaResolveExpression(frame: Rn.Frame, canvasWidth: number, canvas
   frame.addExpression(expressionForResolve);
 
   return expressionForResolve;
+}
+
+function createRenderTargets(canvasWidth: number, canvasHeight: number) {
+  // MSAA depth
+  const framebufferTargetOfGammaMsaa = Rn.RenderableHelper.createTexturesForRenderTarget(canvasWidth, canvasHeight, 0, {
+    isMSAA: true,
+    sampleCountMSAA: 4,
+  });
+  framebufferTargetOfGammaMsaa.tryToSetUniqueName('FramebufferTargetOfGammaMsaa', true);
+
+  // Resolve Color 1
+  const framebufferTargetOfGammaResolve = Rn.RenderableHelper.createTexturesForRenderTarget(canvasWidth, canvasHeight, 1, {
+    createDepthBuffer: true,
+  });
+  framebufferTargetOfGammaResolve.tryToSetUniqueName('FramebufferTargetOfGammaResolve', true);
+
+  // Resolve Color 2
+  const framebufferTargetOfGammaResolveForReference = Rn.RenderableHelper.createTexturesForRenderTarget(canvasWidth, canvasHeight, 1, {
+    createDepthBuffer: false,
+    minFilter: Rn.TextureParameter.LinearMipmapLinear
+  });
+  framebufferTargetOfGammaResolveForReference.tryToSetUniqueName('FramebufferTargetOfGammaResolveForReference', true);
+  return { framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference };
 }
 
 function createPostEffectRenderPass(
