@@ -50,16 +50,17 @@ export class RhodoniteViewer extends LitElement {
       // create Frame and Expressions
       const frame = new Rn.Frame();
 
+      // create FrameBuffers
       const { framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference } = createRenderTargets(scenario.dimensions.width, scenario.dimensions.height);
 
       // Load glTF Expression
-      const { cameraComponent, cameraEntity, mainRenderPass, gammaTargetFramebuffer } = await loadGltf(frame, scenario);
+      const { cameraComponent, cameraEntity, mainRenderPass } = await loadGltf(frame, scenario, framebufferTargetOfGammaMsaa);
       
       // MSAA Resolve Expression
       setupMsaaResolveExpression(frame, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
 
       // Post GammaCorrection Expression
-      setupGammaExpression(frame, gammaTargetFramebuffer);
+      setupGammaExpression(frame, framebufferTargetOfGammaResolve);
 
       // setup IBL
       await setupIBL(scenario);
@@ -165,7 +166,7 @@ function setupCamera(mainRenderPass: any, scenario: ScenarioConfig, cameraEntity
   cameraComponent.zFarInner = far;
 }
 
-async function loadGltf(frame: Rn.Frame, scenario: ScenarioConfig) {
+async function loadGltf(frame: Rn.Frame, scenario: ScenarioConfig, framebufferTargetOfGammaMsaa: Rn.FrameBuffer) {
   const initialExpression = setupInitialExpression();
   frame.addExpression(initialExpression);
 
@@ -191,14 +192,13 @@ async function loadGltf(frame: Rn.Frame, scenario: ScenarioConfig) {
   mainRenderPass.cameraComponent = cameraComponent;
   Rn.CameraComponent.current = cameraComponent.componentSID;
 
-  const gammaTargetFramebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(scenario.dimensions.width, scenario.dimensions.height, 1, {});
-  mainRenderPass.setFramebuffer(gammaTargetFramebuffer);
+  mainRenderPass.setFramebuffer(framebufferTargetOfGammaMsaa);
   mainRenderPass.toClearColorBuffer = false;
   mainRenderPass.toClearDepthBuffer = false;
 
   frame.addExpression(mainExpression);
   
-  return { cameraComponent, cameraEntity, mainRenderPass, gammaTargetFramebuffer };
+  return { cameraComponent, cameraEntity, mainRenderPass };
 }
 
 function setupGammaExpression(frame: Rn.Frame, gammaTargetFramebuffer: Rn.FrameBuffer) {
