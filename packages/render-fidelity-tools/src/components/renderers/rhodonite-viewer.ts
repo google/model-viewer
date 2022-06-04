@@ -506,6 +506,19 @@ function attachIBLTextureToAllMeshComponents(diffuseCubeTexture: Rn.CubeTexture,
     meshRendererComponent.diffuseCubeMap = diffuseCubeTexture;
     meshRendererComponent.rotationOfCubeMap = Rn.MathUtil.degreeToRadian(rotation)
   }
+  const meshComponents = Rn.ComponentRepository.getComponentsWithType(Rn.MeshComponent) as Rn.MeshComponent[]
+  for (let i = 0; i < meshComponents.length; i++) {
+    const meshComponent = meshRendererComponents[i];
+    const mesh = meshComponent.mesh;
+    if (Rn.Is.exist(mesh)) {
+      for (let i=0; i<mesh.getPrimitiveNumber(); i++) {
+        const primitive = mesh.getPrimitiveAt(i);
+        primitive.material.setParameter(Rn.ShaderSemantics.InverseEnvironment, Rn.Scalar.fromCopyNumber(0));
+      }
+    }
+
+  }
+
 }
 
 function getEnvCubeTextureTypedArrays(prefilter: any) {
@@ -545,7 +558,8 @@ function setupBackgroundEnvCubeExpression(frame: Rn.Frame, prefilter: any, frame
   const spherePrimitive = new Rn.Sphere()
   const sphereMaterial = Rn.MaterialHelper.createEnvConstantMaterial();
   sphereMaterial.setParameter(Rn.ShaderSemantics.MakeOutputSrgb, 0);
-  sphereMaterial.setParameter(Rn.ShaderSemantics.envRotation, Rn.MathUtil.degreeToRadian(rotation))
+  sphereMaterial.setParameter(Rn.ShaderSemantics.envRotation, Rn.MathUtil.degreeToRadian(rotation));
+  sphereMaterial.setParameter(Rn.ShaderSemantics.InverseEnvironment, Rn.Scalar.fromCopyNumber(0));
 
   // environment Cube Texture
   const environmentCubeTexture = new Rn.CubeTexture()

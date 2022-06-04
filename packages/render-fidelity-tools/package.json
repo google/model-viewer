@@ -43,7 +43,7 @@
     "mkdirp": "^1.0.4",
     "pngjs": "^6.0.0",
     "puppeteer": "^10.1.0",
-    "rhodonite": "github:actnwit/RhodoniteTS#9100802077b03a28ee7cf4eacd37ac41f80a65b0",
+    "rhodonite": "github:actnwit/RhodoniteTS#28b248dd6b640497d751c089e3b33363485f59b1",
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
