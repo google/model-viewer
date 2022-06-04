@@ -47,7 +47,6 @@ export class RhodoniteViewer extends LitElement {
       // Update Size
       this[$updateSize]();
 
-      
       // create Frame and Expressions
       const frame = new Rn.Frame();
       
@@ -55,7 +54,7 @@ export class RhodoniteViewer extends LitElement {
       const { framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference } = createRenderTargets(scenario.dimensions.width, scenario.dimensions.height);
       
       // Load glTF Expression
-      const { cameraComponent, cameraEntity, mainRenderPass } = await loadGltf(frame, scenario, framebufferTargetOfGammaMsaa);
+      const { cameraComponent, cameraEntity, mainRenderPass, modelTransparentExpression } = await loadGltf(frame, scenario, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
       
       // setup IBL
       const prefilterObj = await setupIBL(scenario);
@@ -67,6 +66,8 @@ export class RhodoniteViewer extends LitElement {
       // MSAA Resolve Expression
       setupMsaaResolveExpression(frame, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
 
+      frame.addExpression(modelTransparentExpression);
+      
       // Post GammaCorrection Expression
       setupGammaExpression(frame, framebufferTargetOfGammaResolve);
 
@@ -173,8 +174,8 @@ function setupCamera(mainRenderPass: any, scenario: ScenarioConfig, cameraEntity
   cameraComponent.zFarInner = far;
 }
 
-async function loadGltf(frame: Rn.Frame, scenario: ScenarioConfig, framebufferTargetOfGammaMsaa: Rn.FrameBuffer) {
-  const initialExpression = setupInitialExpression();
+async function loadGltf(frame: Rn.Frame, scenario: ScenarioConfig, framebufferTargetOfGammaMsaa: Rn.FrameBuffer, framebufferTargetOfGammaResolve: Rn.FrameBuffer, framebufferTargetOfGammaResolveForReference: Rn.FrameBuffer) {
+  const initialExpression = setupInitialExpression(framebufferTargetOfGammaMsaa);
   frame.addExpression(initialExpression);
 
   // camera
@@ -184,7 +185,7 @@ async function loadGltf(frame: Rn.Frame, scenario: ScenarioConfig, framebufferTa
   cameraComponent.aspectInner = scenario.dimensions.width / scenario.dimensions.height;
 
   // gltf
-  const mainExpression = await Rn.GltfImporter.import(
+  const modelOpaqueExpression = await Rn.GltfImporter.import(
     scenario.model,
     {
       cameraComponent: cameraComponent,
@@ -195,17 +196,43 @@ async function loadGltf(frame: Rn.Frame, scenario: ScenarioConfig, framebufferTa
       ],
     }
   );
-  const mainRenderPass = mainExpression.renderPasses[0];
-  mainRenderPass.cameraComponent = cameraComponent;
+  const modelOpaquePass = modelOpaqueExpression.renderPasses[0];
+  modelOpaquePass.tryToSetUniqueName('modelOpaque', true);
+  modelOpaquePass.cameraComponent = cameraComponent;
   Rn.CameraComponent.current = cameraComponent.componentSID;
 
-  mainRenderPass.setFramebuffer(framebufferTargetOfGammaMsaa);
-  mainRenderPass.toClearColorBuffer = false;
-  mainRenderPass.toClearDepthBuffer = false;
+  modelOpaquePass.setFramebuffer(framebufferTargetOfGammaMsaa);
+  modelOpaquePass.toClearColorBuffer = false;
+  modelOpaquePass.toClearDepthBuffer = false;
+  modelOpaquePass.toRenderOpaquePrimitives = true;
+  modelOpaquePass.toRenderTransparentPrimitives = false;
 
-  frame.addExpression(mainExpression);
+  // Transparent
+  const modelTransparentExpression = modelOpaqueExpression.clone();
+  modelTransparentExpression.tryToSetUniqueName('modelTransparent', true);
+  const renderPassMainTranslucent = modelTransparentExpression.renderPasses[0];
+  renderPassMainTranslucent.toRenderOpaquePrimitives = false;
+  renderPassMainTranslucent.toRenderTransparentPrimitives = true;
+  renderPassMainTranslucent.toClearDepthBuffer = false;
+  renderPassMainTranslucent.setFramebuffer(framebufferTargetOfGammaMsaa);
+  renderPassMainTranslucent.setResolveFramebuffer(framebufferTargetOfGammaResolve);
+  for (const entity of renderPassMainTranslucent.entities) {
+    const meshComponent = entity.tryToGetMesh();
+    if (Rn.Is.exist(meshComponent)) {
+      const mesh = meshComponent.mesh;
+      if (Rn.Is.exist(mesh)) {
+        for (const primitive of mesh.primitives) {
+          primitive.material.setParameter(Rn.ShaderSemantics.BackBufferTextureSize, Rn.Vector2.fromCopy2(scenario.dimensions.width, scenario.dimensions.height));
+          primitive.material.setTextureParameter(
+            Rn.ShaderSemantics.BackBufferTexture, framebufferTargetOfGammaResolveForReference.getColorAttachedRenderTargetTexture(0));
+        }
+      }
+    }
+  }
+
+  frame.addExpression(modelOpaqueExpression);
   
-  return { cameraComponent, cameraEntity, mainRenderPass };
+  return { cameraComponent, cameraEntity, mainRenderPass: modelOpaquePass, modelTransparentExpression };
 }
 
 function setupGammaExpression(frame: Rn.Frame, gammaTargetFramebuffer: Rn.FrameBuffer) {
@@ -232,7 +259,7 @@ function setupGammaExpression(frame: Rn.Frame, gammaTargetFramebuffer: Rn.FrameB
   frame.addExpression(expressionGammaEffect);
 }
 
-function setupInitialExpression() {
+function setupInitialExpression(framebufferTargetOfGammaMsaa: Rn.FrameBuffer) {
   const expression = new Rn.Expression();
   expression.tryToSetUniqueName('Initial', true);
   const initialRenderPass = new Rn.RenderPass();
@@ -243,7 +270,7 @@ function setupInitialExpression() {
   initialRenderPassForFrameBuffer.clearColor = Rn.Vector4.fromCopyArray4([0.0, 0.0, 0.0, 0.0]);
   initialRenderPassForFrameBuffer.toClearColorBuffer = true;
   initialRenderPassForFrameBuffer.toClearDepthBuffer = true;
-  // initialRenderPassForFrameBuffer.setFramebuffer(getRnAppModel().getFramebufferTargetOfGammaMsaa()!)
+  initialRenderPassForFrameBuffer.setFramebuffer(framebufferTargetOfGammaMsaa)
   expression.addRenderPasses([initialRenderPass, initialRenderPassForFrameBuffer]);
   return expression;
 }
