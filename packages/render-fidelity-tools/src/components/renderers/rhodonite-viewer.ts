@@ -47,23 +47,28 @@ export class RhodoniteViewer extends LitElement {
       // Update Size
       this[$updateSize]();
 
+      
       // create Frame and Expressions
       const frame = new Rn.Frame();
-
+      
       // create FrameBuffers
       const { framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference } = createRenderTargets(scenario.dimensions.width, scenario.dimensions.height);
-
+      
       // Load glTF Expression
       const { cameraComponent, cameraEntity, mainRenderPass } = await loadGltf(frame, scenario, framebufferTargetOfGammaMsaa);
+      
+      // setup IBL
+      const prefilterObj = await setupIBL(scenario);
+      
+      if (Rn.Is.exist(prefilterObj)) {
+        setupBackgroundEnvCubeExpression(frame, prefilterObj, framebufferTargetOfGammaMsaa, mainRenderPass, scenario);
+      }
       
       // MSAA Resolve Expression
       setupMsaaResolveExpression(frame, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
 
       // Post GammaCorrection Expression
       setupGammaExpression(frame, framebufferTargetOfGammaResolve);
-
-      // setup IBL
-      await setupIBL(scenario);
 
       // setup camera
       setupCamera(mainRenderPass, scenario, cameraEntity, cameraComponent);
@@ -123,7 +128,9 @@ async function setupIBL(scenario: ScenarioConfig) {
   if (ext === 'hdr') {
     const prefilterObj = await prefilterFromUri(scenario.lighting);
     setupPrefilteredIBLTexture(prefilterObj);
+    return prefilterObj;
   }
+  return undefined;
 }
 
 function setupCamera(mainRenderPass: any, scenario: ScenarioConfig, cameraEntity: any, cameraComponent: any) {
@@ -390,7 +397,7 @@ async function prefilterFromUri(hdrFileUri: string) {
   return prefilter
 }
 
-export function setupPrefilteredIBLTexture(prefilter: any) {
+function setupPrefilteredIBLTexture(prefilter: any) {
   const specularCubeTexture = new Rn.CubeTexture()
   const specularTextureTypedArrayImages = getSpecularCubeTextureTypedArrays(prefilter)
   specularCubeTexture.mipmapLevelNumber = specularTextureTypedArrayImages.length
@@ -417,7 +424,7 @@ export function setupPrefilteredIBLTexture(prefilter: any) {
   return [diffuseCubeTexture, specularCubeTexture];
 }
 
-export function getSpecularCubeTextureTypedArrays(prefilter: any) {
+function getSpecularCubeTextureTypedArrays(prefilter: any) {
   const specularTextureTypedArrays = [];
   const mipCount = prefilter.pmrem_cubemap_mip_count();
 
@@ -437,7 +444,7 @@ export function getSpecularCubeTextureTypedArrays(prefilter: any) {
   return specularTextureTypedArrays;
 }
 
-export function getDiffuseCubeTextureTypedArrays(prefilter: any) {
+function getDiffuseCubeTextureTypedArrays(prefilter: any) {
   return [
     {
       posX: prefilter.irradiance_cubemap_texture_to_arrybuffer(glPrefiltering, glPrefiltering.TEXTURE_CUBE_MAP_POSITIVE_X),
@@ -462,11 +469,87 @@ export function getSpecularCubeTextureSize(prefilter: any, mipLevel: number) {
   return prefilter.pmrem_cubemap_texture_size(mipLevel)
 }
 
-export function attachIBLTextureToAllMeshComponents(diffuseCubeTexture: Rn.CubeTexture, specularCubeTexture: Rn.CubeTexture) {
+function attachIBLTextureToAllMeshComponents(diffuseCubeTexture: Rn.CubeTexture, specularCubeTexture: Rn.CubeTexture) {
   const meshRendererComponents = Rn.ComponentRepository.getComponentsWithType(Rn.MeshRendererComponent) as Rn.MeshRendererComponent[]
   for (let i = 0; i < meshRendererComponents.length; i++) {
     const meshRendererComponent = meshRendererComponents[i];
     meshRendererComponent.specularCubeMap = specularCubeTexture;
     meshRendererComponent.diffuseCubeMap = diffuseCubeTexture;
   }
+}
+
+function getEnvCubeTextureTypedArrays(prefilter: any) {
+  return [
+    {
+      posX: prefilter.hdr_cubemap_texture_to_arrybuffer(glPrefiltering, glPrefiltering.TEXTURE_CUBE_MAP_POSITIVE_X),
+      negX: prefilter.hdr_cubemap_texture_to_arrybuffer(glPrefiltering, glPrefiltering.TEXTURE_CUBE_MAP_NEGATIVE_X),
+      posY: prefilter.hdr_cubemap_texture_to_arrybuffer(glPrefiltering, glPrefiltering.TEXTURE_CUBE_MAP_POSITIVE_Y),
+      negY: prefilter.hdr_cubemap_texture_to_arrybuffer(glPrefiltering, glPrefiltering.TEXTURE_CUBE_MAP_NEGATIVE_Y),
+      posZ: prefilter.hdr_cubemap_texture_to_arrybuffer(glPrefiltering, glPrefiltering.TEXTURE_CUBE_MAP_POSITIVE_Z),
+      negZ: prefilter.hdr_cubemap_texture_to_arrybuffer(glPrefiltering, glPrefiltering.TEXTURE_CUBE_MAP_NEGATIVE_Z)
+    }
+  ]
+}
+
+function setPrefilteredEnvCubeTexture(cubeTexture: Rn.CubeTexture, sphereMaterial: Rn.Material, prefilter: unknown) {
+  const envCubeTextureTypedArrayImages = getEnvCubeTextureTypedArrays(prefilter)
+  const envCubeTextureSize = getEnvCubeTextureSize(prefilter)
+
+  cubeTexture.generateTextureFromTypedArrays(
+    envCubeTextureTypedArrayImages,
+    envCubeTextureSize,
+    envCubeTextureSize
+  )
+  cubeTexture.hdriFormat = Rn.HdriFormat.RGBE_PNG
+  sphereMaterial.setParameter(Rn.ShaderSemantics.EnvHdriFormat, Rn.HdriFormat.RGBE_PNG.index)
+}
+
+function setupBackgroundEnvCubeExpression(frame: Rn.Frame, prefilter: any, framebufferTargetOfGammaMsaa: Rn.FrameBuffer, mainRenderPass: Rn.RenderPass, scenario: ScenarioConfig) {
+  // create sphere
+  const sphereEntity = Rn.EntityHelper.createMeshEntity()
+  sphereEntity.tryToSetUniqueName('Sphere Env Cube', true)
+  sphereEntity.tryToSetTag({
+    tag: 'type',
+    value: 'background-assets',
+  })
+  const spherePrimitive = new Rn.Sphere()
+  const sphereMaterial = Rn.MaterialHelper.createEnvConstantMaterial();
+  sphereMaterial.setParameter(Rn.ShaderSemantics.MakeOutputSrgb, 0);
+
+  // environment Cube Texture
+  const environmentCubeTexture = new Rn.CubeTexture()
+  setPrefilteredEnvCubeTexture(environmentCubeTexture, sphereMaterial, prefilter)
+  sphereMaterial.setTextureParameter(Rn.ShaderSemantics.ColorEnvTexture, environmentCubeTexture)
+
+  // setup sphere
+  const sceneTopLevelGraphComponents = mainRenderPass.sceneTopLevelGraphComponents as Rn.SceneGraphComponent[];
+  const rootGroup = sceneTopLevelGraphComponents![0].entity as Rn.ISceneGraphEntity;
+  const aabb = rootGroup.getSceneGraph().calcWorldAABB();
+  spherePrimitive.generate({ radius: aabb.lengthCenterToCorner*1.0 , widthSegments: 40, heightSegments: 40, material: sphereMaterial })
+  const sphereMeshComponent = sphereEntity.getComponent(Rn.MeshComponent) as Rn.MeshComponent
+  const sphereMesh = new Rn.Mesh()
+  sphereMesh.addPrimitive(spherePrimitive)
+  sphereMeshComponent.setMesh(sphereMesh)
+  sphereEntity.translate = Rn.Vector3.fromCopy3(scenario.target.x, scenario.target.y, scenario.target.z);
+  sphereEntity.scale = Rn.Vector3.fromCopyArray3([-1, 1, 1])
+  if (!scenario.renderSkybox) {
+    sphereEntity.getSceneGraph().isVisible = false
+  }
+
+  const renderPass = new Rn.RenderPass()
+  renderPass.clearColor = Rn.Vector4.fromCopyArray4([0, 0, 0, 0])
+  renderPass.addEntities([sphereEntity])
+  // renderPass.cameraComponent = cameraComponent
+  renderPass.toClearDepthBuffer = false
+  renderPass.isDepthTest = true
+  renderPass.toClearColorBuffer = false
+  renderPass.setFramebuffer(framebufferTargetOfGammaMsaa)
+
+  const expression = new Rn.Expression()
+  expression.tryToSetUniqueName('EnvCube', true);
+  expression.addRenderPasses([renderPass])
+
+  frame.addExpression(expression);
+  // frame;
+  return expression
 }
