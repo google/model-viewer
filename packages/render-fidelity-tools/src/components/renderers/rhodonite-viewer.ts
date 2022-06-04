@@ -62,7 +62,7 @@ export class RhodoniteViewer extends LitElement {
       const { mainExpression, cameraComponent, cameraEntity } = await loadGltf(expressions, scenario);
 
       // Post GammaCorrection Expression
-      const { gammaCorrectionRenderPass, gammaTargetFramebuffer, expressionGammaEffect, mainRenderPass } = setupGammaExpression(expressions, mainExpression, cameraComponent, scenario);
+      const { gammaCorrectionRenderPass, expressionGammaEffect, mainRenderPass } = setupGammaExpression(expressions, mainExpression, cameraComponent, scenario);
 
       // MSAA Resolve Expression
       setupMsaaResolveExpression(scenario.dimensions.width, scenario.dimensions.height);
@@ -74,12 +74,6 @@ export class RhodoniteViewer extends LitElement {
         setupPrefilteredIBLTexture(prefilterObj);
       }
       
-      setTextureParameterForMeshComponents(
-        gammaCorrectionRenderPass.meshComponents!,
-        Rn.ShaderSemantics.BaseColorTexture,
-        gammaTargetFramebuffer.getColorAttachedRenderTargetTexture(0)
-      );
-
       expressionGammaEffect.addRenderPasses([gammaCorrectionRenderPass]);
 
       setupCamera(mainRenderPass, scenario, cameraEntity, cameraComponent);
@@ -213,7 +207,14 @@ function setupGammaExpression(expressions: Rn.Expression, mainExpression: any, c
     gammaCorrectionMaterial,
     postEffectCameraComponent
   );
-  return { gammaCorrectionRenderPass, gammaTargetFramebuffer, expressionGammaEffect, mainRenderPass };
+
+  setTextureParameterForMeshComponents(
+    gammaCorrectionRenderPass.meshComponents!,
+    Rn.ShaderSemantics.BaseColorTexture,
+    gammaTargetFramebuffer.getColorAttachedRenderTargetTexture(0)
+  );
+
+  return { gammaCorrectionRenderPass, expressionGammaEffect, mainRenderPass };
 }
 
 function setupInitialExpression() {
