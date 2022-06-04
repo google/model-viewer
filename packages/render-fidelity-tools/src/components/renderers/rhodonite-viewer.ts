@@ -44,6 +44,8 @@ export class RhodoniteViewer extends LitElement {
       // Rhodonite Initialization
       await this.initRhodonite();
 
+      const iblRotation = - 90 + scenario.orbit.theta;
+
       // Update Size
       this[$updateSize]();
 
@@ -57,10 +59,10 @@ export class RhodoniteViewer extends LitElement {
       const { cameraComponent, cameraEntity, mainRenderPass, modelTransparentExpression } = await loadGltf(frame, scenario, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
       
       // setup IBL
-      const prefilterObj = await setupIBL(scenario);
+      const prefilterObj = await setupIBL(scenario, iblRotation);
       
       if (Rn.Is.exist(prefilterObj)) {
-        setupBackgroundEnvCubeExpression(frame, prefilterObj, framebufferTargetOfGammaMsaa, mainRenderPass, scenario);
+        setupBackgroundEnvCubeExpression(frame, prefilterObj, framebufferTargetOfGammaMsaa, mainRenderPass, scenario, iblRotation);
       }
       
       // MSAA Resolve Expression
@@ -123,12 +125,12 @@ export class RhodoniteViewer extends LitElement {
   }
 }
 
-async function setupIBL(scenario: ScenarioConfig) {
+async function setupIBL(scenario: ScenarioConfig, rotation: number) {
   const split = scenario.lighting.split('.');
   const ext = split[split.length - 1];
   if (ext === 'hdr') {
     const prefilterObj = await prefilterFromUri(scenario.lighting);
-    setupPrefilteredIBLTexture(prefilterObj);
+    setupPrefilteredIBLTexture(prefilterObj, rotation);
     return prefilterObj;
   }
   return undefined;
@@ -424,7 +426,7 @@ async function prefilterFromUri(hdrFileUri: string) {
   return prefilter
 }
 
-function setupPrefilteredIBLTexture(prefilter: any) {
+function setupPrefilteredIBLTexture(prefilter: any, rotation: number) {
   const specularCubeTexture = new Rn.CubeTexture()
   const specularTextureTypedArrayImages = getSpecularCubeTextureTypedArrays(prefilter)
   specularCubeTexture.mipmapLevelNumber = specularTextureTypedArrayImages.length
@@ -446,7 +448,7 @@ function setupPrefilteredIBLTexture(prefilter: any) {
   )
   diffuseCubeTexture.hdriFormat = Rn.HdriFormat.RGBE_PNG;
 
-  attachIBLTextureToAllMeshComponents(diffuseCubeTexture, specularCubeTexture);
+  attachIBLTextureToAllMeshComponents(diffuseCubeTexture, specularCubeTexture, rotation);
 
   return [diffuseCubeTexture, specularCubeTexture];
 }
@@ -496,12 +498,13 @@ export function getSpecularCubeTextureSize(prefilter: any, mipLevel: number) {
   return prefilter.pmrem_cubemap_texture_size(mipLevel)
 }
 
-function attachIBLTextureToAllMeshComponents(diffuseCubeTexture: Rn.CubeTexture, specularCubeTexture: Rn.CubeTexture) {
+function attachIBLTextureToAllMeshComponents(diffuseCubeTexture: Rn.CubeTexture, specularCubeTexture: Rn.CubeTexture, rotation: number) {
   const meshRendererComponents = Rn.ComponentRepository.getComponentsWithType(Rn.MeshRendererComponent) as Rn.MeshRendererComponent[]
   for (let i = 0; i < meshRendererComponents.length; i++) {
     const meshRendererComponent = meshRendererComponents[i];
     meshRendererComponent.specularCubeMap = specularCubeTexture;
     meshRendererComponent.diffuseCubeMap = diffuseCubeTexture;
+    meshRendererComponent.rotationOfCubeMap = Rn.MathUtil.degreeToRadian(rotation)
   }
 }
 
@@ -531,7 +534,7 @@ function setPrefilteredEnvCubeTexture(cubeTexture: Rn.CubeTexture, sphereMateria
   sphereMaterial.setParameter(Rn.ShaderSemantics.EnvHdriFormat, Rn.HdriFormat.RGBE_PNG.index)
 }
 
-function setupBackgroundEnvCubeExpression(frame: Rn.Frame, prefilter: any, framebufferTargetOfGammaMsaa: Rn.FrameBuffer, mainRenderPass: Rn.RenderPass, scenario: ScenarioConfig) {
+function setupBackgroundEnvCubeExpression(frame: Rn.Frame, prefilter: any, framebufferTargetOfGammaMsaa: Rn.FrameBuffer, mainRenderPass: Rn.RenderPass, scenario: ScenarioConfig, rotation: number) {
   // create sphere
   const sphereEntity = Rn.EntityHelper.createMeshEntity()
   sphereEntity.tryToSetUniqueName('Sphere Env Cube', true)
@@ -542,6 +545,7 @@ function setupBackgroundEnvCubeExpression(frame: Rn.Frame, prefilter: any, frame
   const spherePrimitive = new Rn.Sphere()
   const sphereMaterial = Rn.MaterialHelper.createEnvConstantMaterial();
   sphereMaterial.setParameter(Rn.ShaderSemantics.MakeOutputSrgb, 0);
+  sphereMaterial.setParameter(Rn.ShaderSemantics.envRotation, Rn.MathUtil.degreeToRadian(rotation))
 
   // environment Cube Texture
   const environmentCubeTexture = new Rn.CubeTexture()
