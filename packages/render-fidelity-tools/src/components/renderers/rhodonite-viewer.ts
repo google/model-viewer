@@ -42,6 +42,7 @@ export class RhodoniteViewer extends LitElement {
     document.head.appendChild(script);
     script.onload = async () => {
       if (this[$isRhodoniteInitDone] === false) {
+        // Rhodonite Initialization
         this[$canvas] = this.shadowRoot!.querySelector('canvas');
         await Rn.System.init({
           approach: Rn.ProcessApproach.UniformWebGL2,
@@ -50,37 +51,19 @@ export class RhodoniteViewer extends LitElement {
         this[$isRhodoniteInitDone] === true;
       }
 
+      // Update Size
       this[$updateSize]();
 
-      // expressions
+      // Expressions
       const expressions: Rn.Expression = [];
 
-      const initialRenderPass = setupInitialExpression();
-      expressions.push(initialRenderPass);
+      // Load glTF Expression
+      const { mainExpression, cameraComponent, cameraEntity } = await loadGltf(expressions, scenario);
 
-      // camera
-      const cameraEntity = Rn.EntityHelper.createCameraEntity();
-      const cameraComponent = cameraEntity.getCamera();
-      cameraComponent.fovyInner = scenario.verticalFoV;
-      cameraComponent.aspectInner = scenario.dimensions.width / scenario.dimensions.height;
-
-      // gltf
-      const mainExpression = await Rn.GltfImporter.import(
-        scenario.model,
-        {
-          cameraComponent: cameraComponent,
-          defaultMaterialHelperArgumentArray: [
-            {
-              makeOutputSrgb: false,
-            },
-          ],
-        }
-      );
-      expressions.push(mainExpression);
-
-      // post effects
+      // Post GammaCorrection Expression
       const { gammaCorrectionRenderPass, gammaTargetFramebuffer, expressionGammaEffect, mainRenderPass } = setupGammaExpression(expressions, mainExpression, cameraComponent, scenario);
 
+      // MSAA Resolve Expression
       setupMsaaResolveExpression(scenario.dimensions.width, scenario.dimensions.height);
 
       const split = scenario.lighting.split('.');
@@ -98,58 +81,24 @@ export class RhodoniteViewer extends LitElement {
 
       expressionGammaEffect.addRenderPasses([gammaCorrectionRenderPass]);
 
-      const sceneTopLevelGraphComponents = mainRenderPass.sceneTopLevelGraphComponents as Rn.SceneGraphComponent[]
-      const rootGroup = sceneTopLevelGraphComponents![0].entity as Rn.ISceneGraphEntity
-      const aabb = rootGroup.getSceneGraph().calcWorldAABB();
-      
-      Rn.MeshRendererComponent.isViewFrustumCullingEnabled = false;
-      const {target, orbit} = this.scenario!;
+      setupCamera(mainRenderPass, scenario, cameraEntity, cameraComponent);
 
-      const center = [target.x, target.y, target.z];
+      this.draw(expressions);
+    }
+  }
 
-      const theta = (orbit.theta) * Math.PI / 180;
-      const phi = (orbit.phi) * Math.PI / 180;
-      const radiusSinPhi = orbit.radius * Math.sin(phi);
-      const eye = [
-        radiusSinPhi * Math.sin(theta) + target.x,
-        orbit.radius * Math.cos(phi) + target.y,
-        radiusSinPhi * Math.cos(theta) + target.z
-      ];
-      if (orbit.radius <= 0) {
-        center[0] = eye[0] - Math.sin(phi) * Math.sin(theta);
-        center[1] = eye[1] - Math.cos(phi);
-        center[2] = eye[2] - Math.sin(phi) * Math.cos(theta);
-      }
-      const up = [0, 1, 0];
-
-      cameraEntity.getCamera().eyeInner = Rn.Vector3.fromCopyArray3(eye);
-      cameraEntity.getCamera().up = Rn.Vector3.fromCopyArray3(up);
-      cameraEntity.getCamera().directionInner = Rn.Vector3.fromCopyArray3(center);
-      cameraEntity.getCamera().primitiveMode = true;
-
-      const modelRadius = aabb.lengthCenterToCorner;
-      // const max = aabb.maxPoint;
-      // const min = aabb.minPoint;
-      // const modelRadius = Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
-      const far = 2 * Math.max(modelRadius, orbit.radius);
-      const near = far / 1000;
-      cameraComponent.zNearInner = near;
-      cameraComponent.zFarInner = far;
-
+  private draw(expressions: Rn.Expression) {
+    requestAnimationFrame(() => {
       function draw() {
         Rn.System.process(expressions);
-        requestAnimationFrame(draw)
+        requestAnimationFrame(draw);
       }
-
-      requestAnimationFrame(() => {
-        draw();
-        this.dispatchEvent(
+      draw();
+      this.dispatchEvent(
         // This notifies the framework that the model is visible and the
         // screenshot can be taken
-        new CustomEvent('model-visibility', {detail: {visible: true}}));
-      });
-      
-    }
+        new CustomEvent('model-visibility', { detail: { visible: true } }));
+    });
   }
 
   private[$updateSize]() {
@@ -169,6 +118,72 @@ export class RhodoniteViewer extends LitElement {
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
   }
+}
+
+function setupCamera(mainRenderPass: any, scenario: ScenarioConfig, cameraEntity: any, cameraComponent: any) {
+  const sceneTopLevelGraphComponents = mainRenderPass.sceneTopLevelGraphComponents as Rn.SceneGraphComponent[];
+  const rootGroup = sceneTopLevelGraphComponents![0].entity as Rn.ISceneGraphEntity;
+  const aabb = rootGroup.getSceneGraph().calcWorldAABB();
+
+  Rn.MeshRendererComponent.isViewFrustumCullingEnabled = false;
+  const { target, orbit } = scenario!;
+
+  const center = [target.x, target.y, target.z];
+
+  const theta = (orbit.theta) * Math.PI / 180;
+  const phi = (orbit.phi) * Math.PI / 180;
+  const radiusSinPhi = orbit.radius * Math.sin(phi);
+  const eye = [
+    radiusSinPhi * Math.sin(theta) + target.x,
+    orbit.radius * Math.cos(phi) + target.y,
+    radiusSinPhi * Math.cos(theta) + target.z
+  ];
+  if (orbit.radius <= 0) {
+    center[0] = eye[0] - Math.sin(phi) * Math.sin(theta);
+    center[1] = eye[1] - Math.cos(phi);
+    center[2] = eye[2] - Math.sin(phi) * Math.cos(theta);
+  }
+  const up = [0, 1, 0];
+
+  cameraEntity.getCamera().eyeInner = Rn.Vector3.fromCopyArray3(eye);
+  cameraEntity.getCamera().up = Rn.Vector3.fromCopyArray3(up);
+  cameraEntity.getCamera().directionInner = Rn.Vector3.fromCopyArray3(center);
+  cameraEntity.getCamera().primitiveMode = true;
+
+  const modelRadius = aabb.lengthCenterToCorner;
+  // const max = aabb.maxPoint;
+  // const min = aabb.minPoint;
+  // const modelRadius = Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
+  const far = 2 * Math.max(modelRadius, orbit.radius);
+  const near = far / 1000;
+  cameraComponent.zNearInner = near;
+  cameraComponent.zFarInner = far;
+}
+
+async function loadGltf(expressions: Rn.Expression, scenario: ScenarioConfig) {
+  const initialRenderPass = setupInitialExpression();
+  expressions.push(initialRenderPass);
+
+  // camera
+  const cameraEntity = Rn.EntityHelper.createCameraEntity();
+  const cameraComponent = cameraEntity.getCamera();
+  cameraComponent.fovyInner = scenario.verticalFoV;
+  cameraComponent.aspectInner = scenario.dimensions.width / scenario.dimensions.height;
+
+  // gltf
+  const mainExpression = await Rn.GltfImporter.import(
+    scenario.model,
+    {
+      cameraComponent: cameraComponent,
+      defaultMaterialHelperArgumentArray: [
+        {
+          makeOutputSrgb: false,
+        },
+      ],
+    }
+  );
+  expressions.push(mainExpression);
+  return { mainExpression, cameraComponent, cameraEntity };
 }
 
 function setupGammaExpression(expressions: Rn.Expression, mainExpression: any, cameraComponent: any, scenario: ScenarioConfig) {
