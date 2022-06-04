@@ -41,52 +41,51 @@ export class RhodoniteViewer extends LitElement {
     script.src = "https://storage.googleapis.com/emadurandal-3d-public.appspot.com/rhodonite/vendor/ibl_prefiltering_wasm.js";
     document.head.appendChild(script);
     script.onload = async () => {
-      if (this[$isRhodoniteInitDone] === false) {
-        // Rhodonite Initialization
-        this[$canvas] = this.shadowRoot!.querySelector('canvas');
-        await Rn.System.init({
-          approach: Rn.ProcessApproach.UniformWebGL2,
-          canvas: this[$canvas] as HTMLCanvasElement,
-        });
-        this[$isRhodoniteInitDone] === true;
-      }
+      // Rhodonite Initialization
+      await this.initRhodonite();
 
       // Update Size
       this[$updateSize]();
 
-      // Expressions
+      // create Frame and Expressions
       const frame = new Rn.Frame();
       const expressions: Rn.Expression = [];
 
       // Load glTF Expression
-      const { mainExpression, cameraComponent, cameraEntity } = await loadGltf(expressions, scenario);
-
-      // Post GammaCorrection Expression
-      const { gammaCorrectionRenderPass, expressionGammaEffect, mainRenderPass } = setupGammaExpression(expressions, mainExpression, cameraComponent, scenario);
-
+      const { cameraComponent, cameraEntity, mainRenderPass, gammaTargetFramebuffer } = await loadGltf(expressions, scenario);
+      
       // MSAA Resolve Expression
       setupMsaaResolveExpression(scenario.dimensions.width, scenario.dimensions.height);
 
-      const split = scenario.lighting.split('.');
-      const ext = split[split.length - 1];
-      if (ext === 'hdr') {
-        const prefilterObj = await prefilterFromUri(scenario.lighting);
-        setupPrefilteredIBLTexture(prefilterObj);
-      }
-      
-      expressionGammaEffect.addRenderPasses([gammaCorrectionRenderPass]);
+      // Post GammaCorrection Expression
+      setupGammaExpression(expressions, gammaTargetFramebuffer);
 
+      // setup IBL
+      await setupIBL(scenario);
+
+      // setup camera
       setupCamera(mainRenderPass, scenario, cameraEntity, cameraComponent);
 
-      for(let exp of expressions) {
-        frame.addExpression(exp);
-      }
-
-      this.draw(frame);
+      // Draw
+      this.draw(frame, expressions);
     }
   }
 
-  private draw(frame: Rn.Frame) {
+  private async initRhodonite() {
+    if (this[$isRhodoniteInitDone] === false) {
+      this[$canvas] = this.shadowRoot!.querySelector('canvas');
+      await Rn.System.init({
+        approach: Rn.ProcessApproach.UniformWebGL2,
+        canvas: this[$canvas] as HTMLCanvasElement,
+      });
+      this[$isRhodoniteInitDone] === true;
+    }
+  }
+
+  private draw(frame: Rn.Frame, expressions: Rn.Expression[]) {
+    for(let exp of expressions) {
+      frame.addExpression(exp);
+    }
     requestAnimationFrame(() => {
       function draw() {
         Rn.System.process(frame);
@@ -116,6 +115,15 @@ export class RhodoniteViewer extends LitElement {
 
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
+  }
+}
+
+async function setupIBL(scenario: ScenarioConfig) {
+  const split = scenario.lighting.split('.');
+  const ext = split[split.length - 1];
+  if (ext === 'hdr') {
+    const prefilterObj = await prefilterFromUri(scenario.lighting);
+    setupPrefilteredIBLTexture(prefilterObj);
   }
 }
 
@@ -181,15 +189,6 @@ async function loadGltf(expressions: Rn.Expression, scenario: ScenarioConfig) {
       ],
     }
   );
-  expressions.push(mainExpression);
-  return { mainExpression, cameraComponent, cameraEntity };
-}
-
-function setupGammaExpression(expressions: Rn.Expression, mainExpression: any, cameraComponent: any, scenario: ScenarioConfig) {
-  const expressionGammaEffect = new Rn.Expression();
-  expressions.push(expressionGammaEffect);
-
-  // gamma correction (and super sampling)
   const mainRenderPass = mainExpression.renderPasses[0];
   mainRenderPass.cameraComponent = cameraComponent;
   Rn.CameraComponent.current = cameraComponent.componentSID;
@@ -198,7 +197,16 @@ function setupGammaExpression(expressions: Rn.Expression, mainExpression: any, c
   mainRenderPass.setFramebuffer(gammaTargetFramebuffer);
   mainRenderPass.toClearColorBuffer = false;
   mainRenderPass.toClearDepthBuffer = false;
+  
+  expressions.push(mainExpression);
+  return { cameraComponent, cameraEntity, mainRenderPass, gammaTargetFramebuffer };
+}
 
+function setupGammaExpression(expressions: Rn.Expression, gammaTargetFramebuffer: Rn.FrameBuffer) {
+  const expressionGammaEffect = new Rn.Expression();
+  expressions.push(expressionGammaEffect);
+
+  // gamma correction (and super sampling)
   const postEffectCameraEntity = createPostEffectCameraEntity();
   const postEffectCameraComponent = postEffectCameraEntity.getCamera();
 
@@ -213,8 +221,10 @@ function setupGammaExpression(expressions: Rn.Expression, mainExpression: any, c
     Rn.ShaderSemantics.BaseColorTexture,
     gammaTargetFramebuffer.getColorAttachedRenderTargetTexture(0)
   );
+  
+  expressionGammaEffect.addRenderPasses([gammaCorrectionRenderPass]);
 
-  return { gammaCorrectionRenderPass, expressionGammaEffect, mainRenderPass };
+  return;
 }
 
 function setupInitialExpression() {
