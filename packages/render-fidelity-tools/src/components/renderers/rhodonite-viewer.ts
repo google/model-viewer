@@ -79,29 +79,9 @@ export class RhodoniteViewer extends LitElement {
       expressions.push(mainExpression);
 
       // post effects
-      const expressionGammaEffect = new Rn.Expression();
-      expressions.push(expressionGammaEffect);
+      const { gammaCorrectionRenderPass, gammaTargetFramebuffer, expressionGammaEffect, mainRenderPass } = setupGammaExpression(expressions, mainExpression, cameraComponent, scenario);
 
-      // gamma correction (and super sampling)
-      const mainRenderPass = mainExpression.renderPasses[0];
-      mainRenderPass.cameraComponent = cameraComponent;
-      Rn.CameraComponent.current = cameraComponent.componentSID;
-
-      const gammaTargetFramebuffer =
-        Rn.RenderableHelper.createTexturesForRenderTarget(scenario.dimensions.width, scenario.dimensions.height, 1, {});
-      mainRenderPass.setFramebuffer(gammaTargetFramebuffer);
-      mainRenderPass.toClearColorBuffer = false;
-      mainRenderPass.toClearDepthBuffer = false;
-
-      const postEffectCameraEntity = createPostEffectCameraEntity();
-      const postEffectCameraComponent = postEffectCameraEntity.getCamera();
-
-      const gammaCorrectionMaterial =
-        Rn.MaterialHelper.createGammaCorrectionMaterial();
-      const gammaCorrectionRenderPass = createPostEffectRenderPass(
-        gammaCorrectionMaterial,
-        postEffectCameraComponent
-      );
+      setupMsaaResolveExpression(scenario.dimensions.width, scenario.dimensions.height);
 
       const split = scenario.lighting.split('.');
       const ext = split[split.length - 1];
@@ -191,6 +171,31 @@ export class RhodoniteViewer extends LitElement {
   }
 }
 
+function setupGammaExpression(expressions: Rn.Expression, mainExpression: any, cameraComponent: any, scenario: ScenarioConfig) {
+  const expressionGammaEffect = new Rn.Expression();
+  expressions.push(expressionGammaEffect);
+
+  // gamma correction (and super sampling)
+  const mainRenderPass = mainExpression.renderPasses[0];
+  mainRenderPass.cameraComponent = cameraComponent;
+  Rn.CameraComponent.current = cameraComponent.componentSID;
+
+  const gammaTargetFramebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(scenario.dimensions.width, scenario.dimensions.height, 1, {});
+  mainRenderPass.setFramebuffer(gammaTargetFramebuffer);
+  mainRenderPass.toClearColorBuffer = false;
+  mainRenderPass.toClearDepthBuffer = false;
+
+  const postEffectCameraEntity = createPostEffectCameraEntity();
+  const postEffectCameraComponent = postEffectCameraEntity.getCamera();
+
+  const gammaCorrectionMaterial = Rn.MaterialHelper.createGammaCorrectionMaterial();
+  const gammaCorrectionRenderPass = createPostEffectRenderPass(
+    gammaCorrectionMaterial,
+    postEffectCameraComponent
+  );
+  return { gammaCorrectionRenderPass, gammaTargetFramebuffer, expressionGammaEffect, mainRenderPass };
+}
+
 function setupInitialExpression() {
   const expression = new Rn.Expression();
   expression.tryToSetUniqueName('Initial', true);
@@ -205,6 +210,44 @@ function setupInitialExpression() {
   // initialRenderPassForFrameBuffer.setFramebuffer(getRnAppModel().getFramebufferTargetOfGammaMsaa()!)
   expression.addRenderPasses([initialRenderPass, initialRenderPassForFrameBuffer]);
   return expression;
+}
+
+function setupMsaaResolveExpression(canvasWidth: number, canvasHeight: number) {
+  const expressionForResolve = new Rn.Expression()
+  expressionForResolve.tryToSetUniqueName('Resolve', true)
+  const renderPassForResolve = new Rn.RenderPass()
+  expressionForResolve.addRenderPasses([renderPassForResolve])
+
+  // MSAA depth
+  const framebufferTargetOfGammaMsaa = Rn.RenderableHelper.createTexturesForRenderTarget(canvasWidth, canvasHeight, 0, {
+    isMSAA: true,
+    sampleCountMSAA: 4,
+  })
+  framebufferTargetOfGammaMsaa.tryToSetUniqueName('FramebufferTargetOfGammaMsaa', true)
+  // getRnAppModel().setFramebufferTargetOfGammaMsaa(framebufferTargetOfGammaMsaa.objectUID)
+
+  // Resolve Color 1
+  const framebufferTargetOfGammaResolve = Rn.RenderableHelper.createTexturesForRenderTarget(canvasWidth, canvasHeight, 1, {
+    createDepthBuffer: true,
+  })
+  framebufferTargetOfGammaResolve.tryToSetUniqueName('FramebufferTargetOfGammaResolve', true)
+  // getRnAppModel().setFramebufferTargetOfGammaResolve(framebufferTargetOfGammaResolve.objectUID)
+
+  // Resolve Color 2
+  const framebufferTargetOfGammaResolveForReference = Rn.RenderableHelper.createTexturesForRenderTarget(canvasWidth, canvasHeight, 1, {
+    createDepthBuffer: false,
+    minFilter: Rn.TextureParameter.LinearMipmapLinear
+  })
+  framebufferTargetOfGammaResolveForReference.tryToSetUniqueName('FramebufferTargetOfGammaResolveForReference', true)
+  // getRnAppModel().setFramebufferTargetOfGammaResolveForReference(framebufferTargetOfGammaResolveForReference.objectUID)
+
+  renderPassForResolve.toClearDepthBuffer = false
+  renderPassForResolve.setFramebuffer(framebufferTargetOfGammaMsaa)
+  renderPassForResolve.setResolveFramebuffer(framebufferTargetOfGammaResolve)
+  renderPassForResolve.setResolveFramebuffer2(framebufferTargetOfGammaResolveForReference)
+  // getRnAppModel().setResolveExpression(expressionForResolve.objectUID)
+
+  return expressionForResolve;
 }
 
 function createPostEffectRenderPass(
