@@ -55,6 +55,7 @@ export class RhodoniteViewer extends LitElement {
       this[$updateSize]();
 
       // Expressions
+      const frame = new Rn.Frame();
       const expressions: Rn.Expression = [];
 
       // Load glTF Expression
@@ -83,14 +84,18 @@ export class RhodoniteViewer extends LitElement {
 
       setupCamera(mainRenderPass, scenario, cameraEntity, cameraComponent);
 
-      this.draw(expressions);
+      for(let exp of expressions) {
+        frame.addExpression(exp);
+      }
+
+      this.draw(frame);
     }
   }
 
-  private draw(expressions: Rn.Expression) {
+  private draw(frame: Rn.Frame) {
     requestAnimationFrame(() => {
       function draw() {
-        Rn.System.process(expressions);
+        Rn.System.process(frame);
         requestAnimationFrame(draw);
       }
       draw();
