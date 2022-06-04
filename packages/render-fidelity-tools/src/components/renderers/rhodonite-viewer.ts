@@ -49,16 +49,15 @@ export class RhodoniteViewer extends LitElement {
 
       // create Frame and Expressions
       const frame = new Rn.Frame();
-      const expressions: Rn.Expression = [];
 
       // Load glTF Expression
-      const { cameraComponent, cameraEntity, mainRenderPass, gammaTargetFramebuffer } = await loadGltf(expressions, scenario);
+      const { cameraComponent, cameraEntity, mainRenderPass, gammaTargetFramebuffer } = await loadGltf(frame, scenario);
       
       // MSAA Resolve Expression
-      setupMsaaResolveExpression(scenario.dimensions.width, scenario.dimensions.height);
+      setupMsaaResolveExpression(frame, scenario.dimensions.width, scenario.dimensions.height);
 
       // Post GammaCorrection Expression
-      setupGammaExpression(expressions, gammaTargetFramebuffer);
+      setupGammaExpression(frame, gammaTargetFramebuffer);
 
       // setup IBL
       await setupIBL(scenario);
@@ -67,7 +66,7 @@ export class RhodoniteViewer extends LitElement {
       setupCamera(mainRenderPass, scenario, cameraEntity, cameraComponent);
 
       // Draw
-      this.draw(frame, expressions);
+      this.draw(frame);
     }
   }
 
@@ -82,10 +81,7 @@ export class RhodoniteViewer extends LitElement {
     }
   }
 
-  private draw(frame: Rn.Frame, expressions: Rn.Expression[]) {
-    for(let exp of expressions) {
-      frame.addExpression(exp);
-    }
+  private draw(frame: Rn.Frame) {
     requestAnimationFrame(() => {
       function draw() {
         Rn.System.process(frame);
@@ -167,9 +163,9 @@ function setupCamera(mainRenderPass: any, scenario: ScenarioConfig, cameraEntity
   cameraComponent.zFarInner = far;
 }
 
-async function loadGltf(expressions: Rn.Expression, scenario: ScenarioConfig) {
-  const initialRenderPass = setupInitialExpression();
-  expressions.push(initialRenderPass);
+async function loadGltf(frame: Rn.Frame, scenario: ScenarioConfig) {
+  const initialExpression = setupInitialExpression();
+  frame.addExpression(initialExpression);
 
   // camera
   const cameraEntity = Rn.EntityHelper.createCameraEntity();
@@ -197,14 +193,14 @@ async function loadGltf(expressions: Rn.Expression, scenario: ScenarioConfig) {
   mainRenderPass.setFramebuffer(gammaTargetFramebuffer);
   mainRenderPass.toClearColorBuffer = false;
   mainRenderPass.toClearDepthBuffer = false;
+
+  frame.addExpression(mainExpression);
   
-  expressions.push(mainExpression);
   return { cameraComponent, cameraEntity, mainRenderPass, gammaTargetFramebuffer };
 }
 
-function setupGammaExpression(expressions: Rn.Expression, gammaTargetFramebuffer: Rn.FrameBuffer) {
+function setupGammaExpression(frame: Rn.Frame, gammaTargetFramebuffer: Rn.FrameBuffer) {
   const expressionGammaEffect = new Rn.Expression();
-  expressions.push(expressionGammaEffect);
 
   // gamma correction (and super sampling)
   const postEffectCameraEntity = createPostEffectCameraEntity();
@@ -224,7 +220,7 @@ function setupGammaExpression(expressions: Rn.Expression, gammaTargetFramebuffer
   
   expressionGammaEffect.addRenderPasses([gammaCorrectionRenderPass]);
 
-  return;
+  frame.addExpression(expressionGammaEffect);
 }
 
 function setupInitialExpression() {
@@ -243,7 +239,7 @@ function setupInitialExpression() {
   return expression;
 }
 
-function setupMsaaResolveExpression(canvasWidth: number, canvasHeight: number) {
+function setupMsaaResolveExpression(frame: Rn.Frame, canvasWidth: number, canvasHeight: number) {
   const expressionForResolve = new Rn.Expression()
   expressionForResolve.tryToSetUniqueName('Resolve', true)
   const renderPassForResolve = new Rn.RenderPass()
@@ -277,6 +273,8 @@ function setupMsaaResolveExpression(canvasWidth: number, canvasHeight: number) {
   renderPassForResolve.setResolveFramebuffer(framebufferTargetOfGammaResolve)
   renderPassForResolve.setResolveFramebuffer2(framebufferTargetOfGammaResolveForReference)
   // getRnAppModel().setResolveExpression(expressionForResolve.objectUID)
+
+  frame.addExpression(expressionForResolve);
 
   return expressionForResolve;
 }
