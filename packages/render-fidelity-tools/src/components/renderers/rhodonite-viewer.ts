@@ -37,48 +37,43 @@ export class RhodoniteViewer extends LitElement {
   }
 
   private async[$updateScenario](scenario: ScenarioConfig) {
-    const script = document.createElement("script");
-    script.src = "https://storage.googleapis.com/emadurandal-3d-public.appspot.com/rhodonite/vendor/ibl_prefiltering_wasm.js";
-    document.head.appendChild(script);
-    script.onload = async () => {
-      // Rhodonite Initialization
-      await this.initRhodonite();
+    // Rhodonite Initialization
+    await this.initRhodonite();
 
-      const iblRotation = - 90 + scenario.orbit.theta;
+    const iblRotation = - 90 + scenario.orbit.theta;
 
-      // Update Size
-      this[$updateSize]();
+    // Update Size
+    this[$updateSize]();
 
-      // create Frame and Expressions
-      const frame = new Rn.Frame();
-      
-      // create FrameBuffers
-      const { framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference } = createRenderTargets(scenario.dimensions.width, scenario.dimensions.height);
-      
-      // Load glTF Expression
-      const { cameraComponent, cameraEntity, mainRenderPass, modelTransparentExpression } = await loadGltf(frame, scenario, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
-      
-      // setup IBL
-      const prefilterObj = await setupIBL(scenario, iblRotation);
-      
-      if (Rn.Is.exist(prefilterObj)) {
-        setupBackgroundEnvCubeExpression(frame, prefilterObj, framebufferTargetOfGammaMsaa, mainRenderPass, scenario, iblRotation);
-      }
-      
-      // MSAA Resolve Expression
-      setupMsaaResolveExpression(frame, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
-
-      frame.addExpression(modelTransparentExpression);
-      
-      // Post GammaCorrection Expression
-      setupGammaExpression(frame, framebufferTargetOfGammaResolve);
-
-      // setup camera
-      setupCamera(mainRenderPass, scenario, cameraEntity, cameraComponent);
-
-      // Draw
-      this.draw(frame);
+    // create Frame and Expressions
+    const frame = new Rn.Frame();
+    
+    // create FrameBuffers
+    const { framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference } = createRenderTargets(scenario.dimensions.width, scenario.dimensions.height);
+    
+    // Load glTF Expression
+    const { cameraComponent, cameraEntity, mainRenderPass, modelTransparentExpression } = await loadGltf(frame, scenario, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
+    
+    // setup IBL
+    const prefilterObj = await setupIBL(scenario, iblRotation);
+    
+    if (Rn.Is.exist(prefilterObj)) {
+      setupBackgroundEnvCubeExpression(frame, prefilterObj, framebufferTargetOfGammaMsaa, mainRenderPass, scenario, iblRotation);
     }
+    
+    // MSAA Resolve Expression
+    setupMsaaResolveExpression(frame, framebufferTargetOfGammaMsaa, framebufferTargetOfGammaResolve, framebufferTargetOfGammaResolveForReference);
+
+    frame.addExpression(modelTransparentExpression);
+    
+    // Post GammaCorrection Expression
+    setupGammaExpression(frame, framebufferTargetOfGammaResolve);
+
+    // setup camera
+    setupCamera(mainRenderPass, scenario, cameraEntity, cameraComponent);
+
+    // Draw
+    this.draw(frame);
   }
 
   private async initRhodonite() {
@@ -224,7 +219,6 @@ async function loadGltf(frame: Rn.Frame, scenario: ScenarioConfig, framebufferTa
       const mesh = meshComponent.mesh;
       if (Rn.Is.exist(mesh)) {
         for (const primitive of mesh.primitives) {
-          primitive.material.setParameter(Rn.ShaderSemantics.BackBufferTextureSize, Rn.Vector2.fromCopy2(scenario.dimensions.width, scenario.dimensions.height));
           primitive.material.setTextureParameter(
             Rn.ShaderSemantics.BackBufferTexture, framebufferTargetOfGammaResolveForReference.getColorAttachedRenderTargetTexture(0));
         }
