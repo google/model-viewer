@@ -361,7 +361,8 @@
       "exclude": [
         "model-viewer",
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
@@ -1087,7 +1088,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ],
       "renderSkybox": true
     },
@@ -1106,7 +1108,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ],
       "renderSkybox": true
     }
