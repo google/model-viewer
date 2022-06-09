@@ -73,7 +73,10 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
 
 // Constants
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
+const KEYBOARD_ORBIT_INCREMENT_SMALL = KEYBOARD_ORBIT_INCREMENT / 4; // Must be a multiple of KEYBOARD_ORBIT_INCREMENT so you can always get back to the same place
 const ZOOM_SENSITIVITY = 0.04;
+const PAN_INCREMENT_SMALL = 1;
+const PAN_INCREMENT =  PAN_INCREMENT_SMALL * 10; // A multiple of PAN_INCREMENT_SMALL. Set empirically so it feels about right
 
 export const KeyCode = {
   PAGE_UP: 33,
@@ -81,7 +84,22 @@ export const KeyCode = {
   LEFT: 37,
   UP: 38,
   RIGHT: 39,
-  DOWN: 40
+  DOWN: 40,
+  KEY_1: 49,
+  KEY_2: 50,
+  KEY_3: 51,
+  KEY_4: 52,
+  KEY_7: 55,
+  KEY_8: 56,
+  KEY_9: 57,
+  NP_KEY_1: 97,
+  NP_KEY_2: 98,
+  NP_KEY_3: 99,
+  NP_KEY_4: 100,
+  NP_KEY_7: 103,
+  NP_KEY_8: 104,
+  NP_KEY_9: 105,
+  SHIFT: 16
 };
 
 export type ChangeSource = 'user-interaction'|'none';
@@ -183,6 +201,7 @@ export class SmoothControls extends EventDispatcher {
         element.addEventListener('wheel', this.onWheel);
       }
       element.addEventListener('keydown', this.onKeyDown);
+      element.addEventListener('keyup', this.onKeyUp);
       // This little beauty is to work around a WebKit bug that otherwise makes
       // touch events randomly not cancelable.
       element.addEventListener('touchmove', () => {}, {passive: false});
@@ -205,6 +224,7 @@ export class SmoothControls extends EventDispatcher {
       element.removeEventListener('pointercancel', this.onPointerUp);
       element.removeEventListener('wheel', this.onWheel);
       element.removeEventListener('keydown', this.onKeyDown);
+      element.removeEventListener('keyup', this.onKeyUp);
       element.removeEventListener('contextmenu', this.onContext);
 
       element.style.cursor = '';
@@ -623,7 +643,6 @@ export class SmoothControls extends EventDispatcher {
     target.add(dxy.applyMatrix3(this.panProjection));
     scene.boundingSphere.clampPoint(target, target);
     scene.setTarget(target.x, target.y, target.z);
-
     this.dispatchChange();
   }
 
@@ -641,11 +660,17 @@ export class SmoothControls extends EventDispatcher {
         scene.getNDC(pointer.clientX, pointer.clientY));
 
     if (hit == null) {
-      const {cameraTarget} = scene.element;
-      scene.element.cameraTarget = '';
-      scene.element.cameraTarget = cameraTarget;
-      // Zoom all the way out.
-      this.userAdjustOrbit(0, 0, 1);
+      // 'This should probably be optional, but I don't know how to extend it to pass something into here
+
+      // No, don't move all the way out.
+      // If clicked on nothing then do nothing.
+      // Resetting on hit == null means you forfeit the position you were just in. If that position is intentional then you lose that intention.
+
+      // const {cameraTarget} = scene.element;
+      // scene.element.cameraTarget = '';
+      // scene.element.cameraTarget = cameraTarget;
+      // // Zoom all the way out.
+      // this.userAdjustOrbit(0, 0, 1);
     } else {
       scene.target.worldToLocal(hit.position);
       scene.setTarget(hit.position.x, hit.position.y, hit.position.z);
@@ -839,33 +864,168 @@ export class SmoothControls extends EventDispatcher {
     const {isUserChange} = this;
     this.isUserChange = true;
 
-    switch (event.keyCode) {
-      case KeyCode.PAGE_UP:
-        this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
-        break;
-      case KeyCode.PAGE_DOWN:
-        this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
-        break;
-      case KeyCode.UP:
-        this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
-        break;
-      case KeyCode.DOWN:
-        this.userAdjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
-        break;
-      case KeyCode.LEFT:
-        this.userAdjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
-        break;
-      case KeyCode.RIGHT:
-        this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
-        break;
-      default:
-        relevantKey = false;
-        this.isUserChange = isUserChange;
-        break;
+    /* Simple if() logic to catch modifier keys
+    * There is undoubtedly a nicer way of doing this
+    * Only considering modifiers of shift+ctrl, shift, ctrl and none.
+    * This maps to pan+small, pan, (orbit)small and (orbit)
+    * Pan key choice inspired by Blender
+    */
+    if (event.shiftKey && event.ctrlKey) {
+      (this.scene.element as any)[$panElement].style.opacity = 1;
+      relevantKey = this.panKeyCodeHandler(event, PAN_INCREMENT_SMALL, PAN_INCREMENT_SMALL);
+    } else if (event.shiftKey) {
+      (this.scene.element as any)[$panElement].style.opacity = 1;
+      relevantKey = this.panKeyCodeHandler(event, PAN_INCREMENT, PAN_INCREMENT);
+    } else if (event.ctrlKey) {
+      relevantKey = this.orbitZoomKeyCodeHandler(event, ZOOM_SENSITIVITY, KEYBOARD_ORBIT_INCREMENT_SMALL, isUserChange);
+    } else {
+      relevantKey = this.orbitZoomKeyCodeHandler(event, ZOOM_SENSITIVITY, KEYBOARD_ORBIT_INCREMENT, isUserChange);
     }
+     
+    // switch (event.keyCode) {
+    //   case KeyCode.PAGE_UP:
+    //     this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
+    //     break;
+    //   case KeyCode.PAGE_DOWN:
+    //     this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
+    //     break;
+    //   case KeyCode.UP:
+    //     this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
+    //     break;
+    //   case KeyCode.DOWN:
+    //     this.userAdjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
+    //     break;
+    //   case KeyCode.LEFT:
+    //     this.userAdjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
+    //     break;
+    //   case KeyCode.RIGHT:
+    //     this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
+    //     break;
+    //   default:
+    //     relevantKey = false;
+    //     this.isUserChange = isUserChange;
+    //     break;
+    // }
 
     if (relevantKey) {
       event.preventDefault();
     }
   };
+
+  private onKeyUp = (event: KeyboardEvent) => {
+    // console.log('In onKeyUp', event);
+    let opacity = 1;
+    // Only hide $panElement if shift key released (#16) or .shiftKey is false (although not sure if this second case ever gets hit when opacity == 1)
+    if (event.keyCode == KeyCode.SHIFT){
+      opacity = 0;
+      // console.log('Released shift');
+    } else if (!event.shiftKey) {
+      opacity = 0;
+      // console.log('Released something else');
+    }
+    (this.scene.element as any)[$panElement].style.opacity = opacity;
+  }
+
+  private orbitZoomKeyCodeHandler(event: KeyboardEvent, ZoomInc: number, OrbitInc: number, isUserChange: boolean) {
+    let swizzkey = true;
+    switch (event.keyCode) {
+      case KeyCode.PAGE_UP:
+        this.userAdjustOrbit(0, 0, ZoomInc);
+        break;
+      case KeyCode.PAGE_DOWN:
+        this.userAdjustOrbit(0, 0, -1 * ZoomInc);
+        break;
+      case KeyCode.UP:
+        this.userAdjustOrbit(0, -OrbitInc, 0);
+        break;
+      case KeyCode.DOWN:
+        this.userAdjustOrbit(0, OrbitInc, 0);
+        break;
+      case KeyCode.LEFT:
+        this.userAdjustOrbit(-OrbitInc, 0, 0);
+        break;
+      case KeyCode.RIGHT:
+        this.userAdjustOrbit(OrbitInc, 0, 0);
+        break;
+      case KeyCode.KEY_1:
+      case KeyCode.NP_KEY_1:
+          this.keyPressThetaSet(0);
+        break;
+      case KeyCode.KEY_2:
+      case KeyCode.NP_KEY_2:
+          this.keyPressThetaSet(Math.PI /2);
+        break;
+      case KeyCode.KEY_3:
+      case KeyCode.NP_KEY_4:        
+          this.keyPressThetaSet(Math.PI);
+        break;
+      case KeyCode.KEY_4:
+      case KeyCode.NP_KEY_4:
+          this.keyPressThetaSet(Math.PI * 1.5);
+        break;
+      case KeyCode.KEY_7:
+      case KeyCode.NP_KEY_7:
+          this.keyPressPhiSet(Math.PI *3 /4);
+        break;
+      case KeyCode.KEY_8:
+      case KeyCode.NP_KEY_8:
+          this.keyPressPhiSet(Math.PI /2);
+        break;
+      case KeyCode.KEY_9:
+      case KeyCode.NP_KEY_9:
+          this.keyPressPhiSet(Math.PI / 4);
+        break;   
+      default:
+        swizzkey = false;
+        this.isUserChange = isUserChange;
+        break;
+    }
+    return swizzkey;
+  }
+
+  private panKeyCodeHandler(event: KeyboardEvent, dx: number, dy:number) {
+    this.initializePan();
+    let swizzkey = true;
+    switch (event.keyCode) {
+      case KeyCode.PAGE_UP:
+        // Do nothing for this
+        // this.userAdjustOrbit(0, 0, ZoomInc);
+        break;
+      case KeyCode.PAGE_DOWN:
+        // Do nothing for this
+        // this.userAdjustOrbit(0, 0, -1 * ZoomInc);
+        break;
+      case KeyCode.UP:
+        this.movePan(0, -1 * dy); // This is the negative one so that the model appears to move as the arrow direction rather than the view moving
+        break;
+      case KeyCode.DOWN:
+        this.movePan(0, dy);
+        break;
+      case KeyCode.LEFT:
+        this.movePan(-1 * dx, 0);
+        break;
+      case KeyCode.RIGHT:
+        this.movePan(dx, 0);
+        break;
+      default:
+        swizzkey = false;
+        break;
+    }
+    return swizzkey;
+  }
+
+  // Adjust only the theta of the orbit
+  // (Effectively spinning around the target horizontally)
+  private keyPressThetaSet(newTheta: number) {
+    const {phi, radius} = this.goalSpherical;
+    this.setOrbit(newTheta, phi, radius);
+  }
+
+  // Adjust only the phi of the orbit
+  // (Effectively spinning around the target vertically)
+  private keyPressPhiSet(newPhi: number) {
+    const {theta, radius} = this.goalSpherical;
+    this.setOrbit(theta, newPhi, radius);
+  }
 }
+
