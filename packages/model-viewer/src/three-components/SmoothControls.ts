@@ -956,7 +956,7 @@ export class SmoothControls extends EventDispatcher {
           this.keyPressThetaSet(Math.PI /2);
         break;
       case KeyCode.KEY_3:
-      case KeyCode.NP_KEY_4:        
+      case KeyCode.NP_KEY_3:        
           this.keyPressThetaSet(Math.PI);
         break;
       case KeyCode.KEY_4:
