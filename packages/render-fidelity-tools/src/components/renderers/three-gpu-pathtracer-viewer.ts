@@ -14,7 +14,7 @@
  */
 
 import {PathTracingRenderer, PathTracingSceneGenerator, PhysicalPathTracingMaterial} from 'three-gpu-pathtracer';
-import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils} from 'three';
+import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3} from 'three';
 import {FullScreenQuad} from 'three/examples/jsm/postprocessing/Pass';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader';
@@ -112,22 +112,33 @@ export class ThreePathTracerViewer extends LitElement {
     renderer.setAnimationLoop(null);
     renderer.clear();
 
+    // load assets
+    const hdr = await new RGBELoader().loadAsync(lighting);
+    const gltf = await new GLTFLoader().loadAsync(model);
+    gltf.scene.updateMatrixWorld(true);
+
+    // scale the scene to avoid floating point issues
+    const box = new Box3();
+    box.setFromObject(gltf.scene);
+
+    const sphere = new Sphere();
+    box.getBoundingSphere(sphere);
+
+    const multiplier = 1 / sphere.radius;
+    gltf.scene.scale.multiplyScalar(multiplier);
+    gltf.scene.updateMatrixWorld(true);
+
     // update camera
     camera.position.setFromSphericalCoords(orbit.radius, MathUtils.DEG2RAD * orbit.phi, MathUtils.DEG2RAD * orbit.theta);
     camera.position.x += target.x;
     camera.position.y += target.y;
     camera.position.z += target.z;
-    camera.lookAt(target.x, target.y, target.z);
+    camera.position.multiplyScalar(multiplier);
     camera.fov = verticalFoV;
     camera.updateProjectionMatrix();
 
-    controls.target.set(target.x, target.y, target.z);
+    controls.target.set(target.x, target.y, target.z).multiplyScalar(multiplier);
     controls.update();
-
-    // load assets
-    const hdr = await new RGBELoader().loadAsync(lighting);
-    const gltf = await new GLTFLoader().loadAsync(model);
-    gltf.scene.updateMatrixWorld(true);
 
     // process assets
     const generator = new PathTracingSceneGenerator();
