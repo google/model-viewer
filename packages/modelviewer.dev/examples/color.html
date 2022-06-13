@@ -1,0 +1,490 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>glTF Color Accuracy</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Performance optimization for &lt;model-viewer&gt;">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+   <style>
+    html {
+      height:100%;
+    }
+
+    body {
+      height: 100%;
+      margin: 0;
+      background-color: #f7f7f7;
+      font-family: 'Rubik', sans-serif;
+      font-size: 16px;
+      line-height: 24px;
+      color: rgba(0,0,0,.87);
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    p {
+      max-width: 700px;
+      margin: 1em;
+      text-align: left;
+    }
+
+    model-viewer {
+      display: block;
+      width: 100vw;
+      height: 100vw;
+      max-width: 600px;
+      max-height: 600px;
+    }
+
+    model-viewer::part(default-progress-mask) {
+      display: none;
+    }
+
+    /* This keeps child nodes hidden while the element loads, except the poster */
+    :not(:defined) > :not(.poster) {
+      display: none;
+    }
+
+    :defined > .poster > .pre-prompt {
+      display: none;
+    }
+
+    /* This CSS should always be used at minimum for any slotted poster */
+    .poster {
+      display: flex;
+      justify-content: center;
+      align-items: center; 
+      height: 100%;
+      top: 0;
+      left: 0;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .icon-modelviewer-black {
+    background-image: url(../assets/ic_modelviewer.svg);
+    }
+    .icon-button {
+      margin-left: -4px;
+      margin-right: 8px;
+      width: 34px;
+      height: 34px;
+      background-size: 34px;
+    }
+    .inner-home {
+      display: flex;
+      align-items: center;
+      font-size: 1.1em;
+      text-decoration: none;
+    }
+    .home {
+      padding: 20px;
+      overflow: auto;
+      white-space: nowrap;
+    }
+    .lockup {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+      color: rgba(0,0,0,.87);
+    }
+    .attribute {
+      white-space: pre-wrap !important;
+      font-family: 'Roboto Mono', monospace;
+      color: black;
+    }
+    .attribute:hover {
+      text-decoration: underline;
+      color: #444444;
+    }
+  </style>
+</head>
+<body>
+  <div class="home lockup">
+    <a href="../" class="sidebar-mv inner-home">
+      <div class="icon-button icon-modelviewer-black inner-home"></div>
+      <div class="inner-home"><span class="attribute">&lt;model-viewer&gt;</span></div>
+    </a>
+  </div>
+  <div align="center">
+
+    <h2>Achieving Color-Accurate Presentation with glTF</h2>
+  
+    <p>Interactive 3D models are the next media type, following images and
+    video, and as such <code>&lt;model-viewer&gt;</code> and other renderers are
+    being used more often to display these 3D models in commercial settings,
+    museums, and many more. Both of these users have deep interest in ensuring
+    the presented pixels accurately represent the real object the model is based
+    on. As such, a quality assurance process is needed to ensure that both the
+    3D model itself has been designed accurately, and that the presentation of
+    that model is appropriate for realism. While your process may differ based
+    on your situation, this document is intended to give the background
+    necessary to set up a process and to set expectations.</p>
+
+    <p>Khronos' glTF is the first 3D model format to specify physically-based
+    rendering (PBR), meaning it contains material properties that define in
+    real-world units how light should be reflected & refracted in terms of
+    physics. This means renderers are free to innovate in GPU shaders to create
+    more and more accurate approximations of the underlying physics, because
+    glTF does not specify any single approximation. This also means that while
+    different renderers may make different tradeoffs of accuracy vs. speed you
+    can have confidence that your glTF will look consistent (though not
+    pixel-identical) even across unrelated codebases. We call glTF the JPEG of
+    3D because it is compressed for efficient web delivery and can be rendered
+    consistently by a large number viewers.</p>
+
+    <p>At first blush, it may appear that different glTF viewers are not
+    consistent, but this is generally not due to rendering differences, but to
+    default scene setup. Physically-based rendering means the scene takes
+    environment light as input just like a real camera does, so just like to get
+    a consistent photo, you need to not just have the same object, but also the
+    same lighting and camera settings. There is no standard for the default
+    settings of these viewers, so it is important to intentionally set them to
+    consistent values. This is precisely what we've done to show the state of <a
+    href="../fidelity">glTF rendering convergence</a> across a variety of
+    popular renderers.</p>
+
+    <h3>What is color accuracy?</h3>
+
+    <p>The goal of PBR is to create color-accurate images at frame rate as a
+    user interacts with the 3D model. Of course a renderer can only be as
+    accurate as the input 3D model, so a process to decide if the 3D model is in
+    fact accurately representing the real-world object it's based on is also
+    crucial, so any errors can be fixed. The most correct way to do this would
+    be to set up a photoshoot of the real object, capture the environment
+    lighting around it in its full dynamic range, record the camera settings and
+    position, then set up an identical rendered scene and compare the output
+    images. Unfortunately this tends to be prohibitively expensive.</p>
+
+    <p>Even in this idealized comparison scenario, there is a non-trivial issue:
+    what metric does one use to compare the images? Simple pixel comparison
+    metrics like PSNR tend to give too much weight to differences that are not
+    noticeable. Thus perceptual metrics are better, but also more arbitrary and
+    harder to define.</p>
+
+    <p>Since many products are designed with RGB material specs (like paint), a
+    common idea is to simply reflect this in the baseColor of the glTF. This can
+    be a good approach to color-accurate modeling, provided the RGB value is in
+    the proper color space. The glTF spec says the baseColor factor (normalized
+    between zero and one) is exactly the fraction of the given channel
+    (wavelength) of light reflected by the material. The baseColor texture is
+    the same, but put through the sRGB transfer function to extract linear
+    values first. It should not be assumed than a given paint swatch RGB value
+    is defined the same way.</p>
+
+    <p>When it comes to verifying that the render is color-accurate, the first
+    idea is often to check that the output rendered image has the same RGB pixel
+    values as the glTF baseColor (or the expected paint swatch RGB). <b>This is
+    a fundamentally incorrect expectation, as it negates the purpose of
+    physically-based rendering!</b> Details and examples follow to support this
+    assertion and to point the way towards a more useful verification scheme.</p>
+
+    <h3>What's wrong with the rendered color matching the baseColor?</h3>
+
+    <p>The most important thing to understand about PBR is that it accurately
+    represents the interplay between incident light and material properties,
+    of which there are several beyond just baseColor, the most important of
+    which are metalness and roughness. However, the rendered output for a given
+    pixel is only RGB, which means if it matched the baseColor RGB, then by
+    definition the incident light and other material properties could not in
+    any way affect the resulting image.</p>
+
+    <p>Let's start with a simple example: six spheres with uniform materials.
+    The top row are white (baseColor RGB: [1, 1, 1]), while the bottom row are
+    yellow (baseColor RGB: [1, 1, 0]). From left to right they are shiny metal
+    (metallness: 1, roughness: 0), shiny plastic (metalness: 0, roughness: 0),
+    and matte plastic (metallness: 0, roughness: 1). The left-most can be
+    thought of approximately as polished silver and gold.</p>
+
+    <model-viewer
+        id="first"
+        src="../assets/ShopifyModels/Chair.glb"
+        poster="../assets/ShopifyModels/ChairPoster.webp"
+        seamless-poster
+        camera-orbit="1.2195rad 1.362rad 100%"
+        environment-image="neutral"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        alt="3D model of a chair with footrest"
+      >
+    </model-viewer>
+
+    <p>Note how different materials with the same baseColor render differently.
+    Which pixels match the baseColor RGB? In fact, if you really want the
+    rendered pixels to match the baseColor RGB values, glTF has an extension
+    specifically for this: KHR_materials_unlit. This extension is not
+    physically-based, and so is appropriate for things like labels and 3D scans
+    that produce only RGB textures with all applied lighting baked in as part of
+    the capture process. This is how the above model looks with the unlit
+    extension:</p>
+
+    <model-viewer
+        id="first"
+        src="../assets/ShopifyModels/Chair.glb"
+        poster="../assets/ShopifyModels/ChairPoster.webp"
+        seamless-poster
+        camera-orbit="1.2195rad 1.362rad 100%"
+        environment-image="neutral"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        alt="3D model of a chair with footrest"
+      >
+    </model-viewer>
+
+    <p>Now that it's clear that lighting is important in making a 3D model look
+    realistic, the next common idea is to choose a nice uniformly neutral
+    lighting scenario to make the output RGB values "close to" the intended
+    baseColor. Well, it's easy to produce a uniform lighting environment, but
+    the results may be surprising for PBR:</p>
+
+    <model-viewer
+        id="first"
+        src="../assets/ShopifyModels/Chair.glb"
+        poster="../assets/ShopifyModels/ChairPoster.webp"
+        seamless-poster
+        camera-orbit="1.2195rad 1.362rad 100%"
+        environment-image="neutral"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        alt="3D model of a chair with footrest"
+      >
+    </model-viewer>
+
+    <p>Note this result is actually pretty close to the unlit result - there's
+    basically no discernable difference between shiny and matte or metal and
+    plastic. This is in fact accurate; if you really found a place with
+    perfectly uniform lighting, you wouldn't be able to tell the difference
+    between those objects either (assuming you could somehow also hide your own
+    reflection - you are also a part of your lighting environment). The reason
+    this looks so unreal is that it is nearly impossible to find an environment
+    like this. Real envrionments have texture, and the reflections of that
+    texture are what we use to understand shininess.</p>
+
+    <p>Next let's return to the original version, which uses
+    <code>&lt;model-viewer&gt;</code>'s "neutral" environment-image. The
+    lighting is intended to be even (from all sides), though not uniform, thus
+    providing enough texture to discern material types. It is purely grayscale,
+    thus not shifting the hues of the materials. This is as opposed to indoor
+    lighting which might skew yellow, outdoor that might skew blue, or sunsets
+    that might skew red. PBR will faithfully produce the colors a camera would
+    capture in these scenarios, which of course will look different than the
+    same object under neutral lighting.</p>
+
+    <model-viewer
+        id="first"
+        src="../assets/ShopifyModels/Chair.glb"
+        poster="../assets/ShopifyModels/ChairPoster.webp"
+        seamless-poster
+        camera-orbit="1.2195rad 1.362rad 100%"
+        environment-image="neutral"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        alt="3D model of a chair with footrest"
+      >
+    </model-viewer>
+
+    <p>Note that the top-right ball we might call paper-white: a perfect matte
+    reflector. However, despite the baseColor being [1, 1, 1], notice that the
+    rendered color varies from [] to [], never achieving pure white. Why is
+    this? Notice that the top-middle ball does have some reflections off its
+    shiny surface that are pure white. These specular reflections are in
+    addition to its diffuse reflection (which is all you get from a matte
+    surface), so if the diffuse reflection had already saturated our pixels, it
+    would be impossible to discern a shiny object from a matte one. Try
+    increasing the exposure slider to see the effect, which in photography is
+    referred to as overexposure.</p>
+
+    <p>You might notice that the effect appears to be nonuniform (despite
+    exposure being a linear light multiplier). You would be correct, and this is
+    caused by the nonlinear tone mapping step that happens last in the rendering
+    pipeline. Tone mapping is a complicated topic in its own right, but it is
+    vital to understanding PBR. Before we get into that, let's begin by
+    comparing the rendering and photography pipelines.</p>
+
+    <h3>How does rendering compare to photography?</h3>
+
+    <p>3D rendering, especially PBR, is designed to mimick photography, and
+    photography in turn is designed to mimick the human eye and brain. The brain
+    part is essential, as the goal of a realistic photo is to evoke the same
+    perception by looking at it as one would have looking at the original scene.
+    This is difficult as the light reflected by a printed photo or emitted by a
+    display is dramatically less intense and has less contrast than the real
+    world. Even HDR displays have orders of magnitude less contrast than your
+    eye sees on a normal outdoor day.</p>
+
+    <p>Thankfully, our brains do a lot of adjustment to our perception,
+    including correcting for contrast. This allows us to print photos with a
+    very compressed dynamic range while still giving the perception of e.g. a
+    real sunset. This compression of dynamic range we'll refer to as tone
+    mapping. In photography you can think of this as the conversion from the
+    camera's raw image (which tends to look washed out) to the final image. It
+    becomes even more important in modern photography with exposure stacking,
+    where a higher dynamic range raw image can be produced than the sensor is
+    capable of in a single shot.</p>
+
+    <p>insert pipeline image here</p>
+
+    <p>In 3D rendering, there is no sensor and computations are done in floating
+    point, which means the raw image is effectively full HDR, with even more
+    range than is generally possible with exposure stacking. Looking at a
+    histogram of this raw image will often show a very long tail, representing
+    the small, shiny glints that are orders of magnitude more intense than the
+    rest of the scene. In order to maintain perception while compressing down to
+    SDR, a nonlinear tone mapping curve is used.</p>
+
+    <h3>How does tone mapping work?</h3>
+
+    <p>Tone mapping is a general term, which can refer to basically any color
+    conversion function. Even separate operations that a photographer might
+    apply in post processing, such as gamma correction, saturation, contrast,
+    and even things like sepia can all be combined into a single resulting
+    function that here we're calling tone mapping. However, we are only
+    interested in hue-neutral functions here and those are the only type of
+    tone mapping functions we'll be discussing here. Therefore the focus will be
+    primarily on luma, or brightness.</p>
+
+    <p>The tone mapping function used by <code>&lt;model-viewer&gt;</code> is
+    ACES, which is a standard developed by the film industry and is widely used
+    for 3D rendering. Like most tone mapping curves, it is fairly linear in the
+    central focus of its contrast range, then asymptotes out to smoothly
+    compress the long tails of brights and darks into the required zero to one
+    output range, the idea being that humans percieve less difference between
+    over-bright and over-dark zones as compared to the bulk of the scene.
+    However, since some output range is reserved for these extra-bright
+    highlights, the range left over to represent the input range of matte
+    baseColors is also reduced somewhat. This is why the paper-white sphere does
+    not produce white pixels.</p>
+
+    <p>Sometimes when working with matte objects and trying to compare output
+    color to baseColor, this tone mapping compression will be noticed and
+    identified as the source of the apparent color discrepancy. The immediate
+    thought is usually, let's fix this by not applying tone mapping! The problem
+    is there is actually no such thing as "no tone mapping", since somehow the
+    unbounded input range must be coverted to the zero-to-one range that the
+    encoder expects. If this step is not done, the encoder simply clamps the
+    values, which amounts to a piecewise-linear tone mapping function with sharp
+    corners that introduce visual artifacts for shiny objects, as shown in the
+    example below.</p>
+
+    <model-viewer
+        id="first"
+        src="../assets/ShopifyModels/Chair.glb"
+        poster="../assets/ShopifyModels/ChairPoster.webp"
+        seamless-poster
+        camera-orbit="1.2195rad 1.362rad 100%"
+        environment-image="neutral"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        alt="3D model of a chair with footrest"
+      >
+    </model-viewer>
+
+    <p>This example highlights a second key element of good tone mapping
+    functions: desaturating overexposed colors. Look at the golden sphere
+    (lower-left) and compare to the previous version with ACES tone mapping
+    applied. The baseColor of a metal multiplies the incoming light, so a white
+    light on a golden sphere produces a yellow reflection (fully saturated
+    yellow, in this case of a fully saturated baseColor). With clamped tone
+    mapping, the highlight is indeed saturated yellow, but this does not look
+    perceptually right, even though you could make the argument it is physically
+    correct.</p>
+
+    <p>Good tone mapping curves like ACES not only compress the luma, but also
+    push colors toward white the brighter they are. This is why the highlights
+    on the golden sphere become white instead of yellow. This follows both the
+    behavior of camera sensors and our eyes when responding to overexposed
+    colored light. You can see this effect simply by looking at a candle's flame
+    or a spark, the brightest parts of which tend to look white despite their
+    color.</p>
+
+  </div>
+  <div style="margin-top:24px"></div>
+  <div class="footer">
+    <ul>
+      <li>
+        Chair, Mixer ©Copyright 2020 <a href="https://www.shopify.com/">Shopify
+          Inc.</a>, licensed under <a
+          href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>.
+      </li>
+    </ul>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div id='footer-links'></div>
+  </div>
+
+  <script type="module" src="./built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { initFooterLinks();})();
+  </script>
+
+  <script type="module">
+    const body = document.body;
+    let loaded = false;
+
+    const onInteraction = () => {
+      if (loaded === true) {
+        return;
+      }
+      loaded = true;
+
+      const modelViewer = document.createElement('script'); 
+      modelViewer.type = 'module';
+      modelViewer.src = '../node_modules/@google/model-viewer/dist/model-viewer.js'; 
+      body.appendChild(modelViewer);
+
+      const focusVisible = document.createElement('script');
+      focusVisible.src = '../node_modules/focus-visible/dist/focus-visible.js'; 
+      body.appendChild(focusVisible);
+    };
+
+    body.addEventListener('mouseover', onInteraction, {once:true});
+    body.addEventListener('touchmove', onInteraction, {once:true});
+    body.addEventListener('scroll', onInteraction, {once:true});
+    body.addEventListener('keydown', onInteraction, {once:true});
+
+    const onProgress = (event) => {
+      const progressBar = event.target.querySelector('.progress-bar');
+      const updatingBar = event.target.querySelector('.update-bar');
+      updatingBar.style.width = `${event.detail.totalProgress*100}%`;
+      if (event.detail.totalProgress == 1) {
+        progressBar.classList.add('hide');
+      }
+    };
+
+    document.querySelector('#first').addEventListener('progress', onProgress);
+    document.querySelector('#second').addEventListener('progress', onProgress);
+  </script>
+</body>
+</html>
