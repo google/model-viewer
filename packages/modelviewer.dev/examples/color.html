@@ -23,6 +23,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <script type='module' src='https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js'></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
     ga('create', 'UA-169901325-1', { 'storage': 'none' });
@@ -66,26 +67,9 @@
       display: none;
     }
 
-    /* This keeps child nodes hidden while the element loads, except the poster */
-    :not(:defined) > :not(.poster) {
+    /* This keeps child nodes hidden while the element loads */
+    :not(:defined) {
       display: none;
-    }
-
-    :defined > .poster > .pre-prompt {
-      display: none;
-    }
-
-    /* This CSS should always be used at minimum for any slotted poster */
-    .poster {
-      display: flex;
-      justify-content: center;
-      align-items: center; 
-      height: 100%;
-      top: 0;
-      left: 0;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
     }
 
     .icon-modelviewer-black {
@@ -224,16 +208,14 @@
     thought of approximately as polished silver and gold.</p>
 
     <model-viewer
-        id="first"
-        src="../assets/ShopifyModels/Chair.glb"
-        poster="../assets/ShopifyModels/ChairPoster.webp"
+        src="../../shared-assets/models/silver-gold.gltf"
+        enable-pan
         seamless-poster
-        camera-orbit="1.2195rad 1.362rad 100%"
-        environment-image="neutral"
+        skybox-image="../../shared-assets/environments/neutral.hdr"
         ar
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
-        alt="3D model of a chair with footrest"
+        alt="3D model of six example material spheres"
       >
     </model-viewer>
 
@@ -247,16 +229,12 @@
     extension:</p>
 
     <model-viewer
-        id="first"
-        src="../assets/ShopifyModels/Chair.glb"
-        poster="../assets/ShopifyModels/ChairPoster.webp"
+        src="../../shared-assets/models/silver-gold-unlit.gltf"
+        enable-pan
         seamless-poster
-        camera-orbit="1.2195rad 1.362rad 100%"
-        environment-image="neutral"
-        ar
-        ar-modes="webxr scene-viewer quick-look"
+        skybox-image="../../shared-assets/environments/neutral.hdr"
         camera-controls
-        alt="3D model of a chair with footrest"
+        alt="3D model of six example material spheres"
       >
     </model-viewer>
 
@@ -267,28 +245,34 @@
     the results may be surprising for PBR:</p>
 
     <model-viewer
-        id="first"
-        src="../assets/ShopifyModels/Chair.glb"
-        poster="../assets/ShopifyModels/ChairPoster.webp"
+        src="../../shared-assets/models/silver-gold.gltf"
+        enable-pan
         seamless-poster
-        camera-orbit="1.2195rad 1.362rad 100%"
-        environment-image="neutral"
-        ar
-        ar-modes="webxr scene-viewer quick-look"
+        skybox-image="../../shared-assets/environments/white_furnace.hdr"
         camera-controls
-        alt="3D model of a chair with footrest"
+        alt="3D model of six example material spheres"
       >
     </model-viewer>
 
-    <p>Note this result is actually pretty close to the unlit result - there's
-    basically no discernable difference between shiny and matte or metal and
-    plastic. This is in fact accurate; if you really found a place with
-    perfectly uniform lighting, you wouldn't be able to tell the difference
-    between those objects either (assuming you could somehow also hide your own
-    reflection - you are also a part of your lighting environment). The reason
-    this looks so unreal is that it is nearly impossible to find an environment
-    like this. Real envrionments have texture, and the reflections of that
-    texture are what we use to understand shininess.</p>
+    <p>It may look like the white spheres have vanished, but they're still
+    present - tilt the view and you can see them occluding the yellow spheres.
+    In fact they are just perfectly camouflaged. This scene is known as a
+    furnace test, which is used to check energy conservation of the renderer,
+    which ours passes. It can be shown with physics that under perfectly uniform
+    lighting, these white spheres should each uniformly reflect exactly the same
+    light as is incident from the environment, and hence be indistinguishable
+    from it.</p>
+
+    <p>Note this result with the yellow spheres is actually pretty close to the
+    unlit result - there's almost no discernable difference between shiny and
+    matte or metal and plastic. This is in fact accurate; if you really found a
+    place with perfectly uniform lighting, you wouldn't be able to tell the
+    difference between those materials either (assuming you could somehow also
+    hide your own reflection - you are also a part of your lighting
+    environment). The reason this looks so unreal is that it is nearly
+    impossible to find an environment like this. Real envrionments have texture,
+    and the reflections of that texture are what we use to understand
+    shininess.</p>
 
     <p>Next let's return to the original version, which uses
     <code>&lt;model-viewer&gt;</code>'s "neutral" environment-image. The
@@ -301,17 +285,16 @@
     same object under neutral lighting.</p>
 
     <model-viewer
-        id="first"
-        src="../assets/ShopifyModels/Chair.glb"
-        poster="../assets/ShopifyModels/ChairPoster.webp"
+        id="exposure"
+        src="../../shared-assets/models/silver-gold.gltf"
+        enable-pan
         seamless-poster
-        camera-orbit="1.2195rad 1.362rad 100%"
-        environment-image="neutral"
-        ar
-        ar-modes="webxr scene-viewer quick-look"
+        skybox-image="../../shared-assets/environments/neutral.hdr"
         camera-controls
-        alt="3D model of a chair with footrest"
+        alt="3D model of six example material spheres"
       >
+        <p>Exposure: <span id="exposure-value"></span><br/>
+        <input id="exposure" type="range" min="1" max="10" step="0.1" value="1" /></p>
     </model-viewer>
 
     <p>Note that the top-right ball we might call paper-white: a perfect matte
@@ -325,12 +308,13 @@
     increasing the exposure slider to see the effect, which in photography is
     referred to as overexposure.</p>
 
-    <p>You might notice that the effect appears to be nonuniform (despite
-    exposure being a linear light multiplier). You would be correct, and this is
-    caused by the nonlinear tone mapping step that happens last in the rendering
-    pipeline. Tone mapping is a complicated topic in its own right, but it is
-    vital to understanding PBR. Before we get into that, let's begin by
-    comparing the rendering and photography pipelines.</p>
+    <p>You might notice that exposure appears to affect the midrange values more
+    than the blacks and whites (despite exposure being a linear light
+    multiplier). You would be correct, and this is caused by the nonlinear tone
+    mapping step that happens last in the rendering pipeline. Tone mapping is a
+    complicated topic in its own right, but it is vital to understanding PBR.
+    Before we get into that, let's begin by comparing the rendering and
+    photography pipelines.</p>
 
     <h3>How does rendering compare to photography?</h3>
 
@@ -398,18 +382,15 @@
     example below.</p>
 
     <model-viewer
-        id="first"
-        src="../assets/ShopifyModels/Chair.glb"
-        poster="../assets/ShopifyModels/ChairPoster.webp"
-        seamless-poster
-        camera-orbit="1.2195rad 1.362rad 100%"
-        environment-image="neutral"
-        ar
-        ar-modes="webxr scene-viewer quick-look"
-        camera-controls
-        alt="3D model of a chair with footrest"
-      >
-    </model-viewer>
+    id="toneMapping"
+    src="../../shared-assets/models/silver-gold.gltf"
+    enable-pan
+    seamless-poster
+    skybox-image="../../shared-assets/environments/neutral.hdr"
+    camera-controls
+    alt="3D model of six example material spheres"
+  >
+</model-viewer>
 
     <p>This example highlights a second key element of good tone mapping
     functions: desaturating overexposed colors. Look at the golden sphere
@@ -450,41 +431,27 @@
   </script>
 
   <script type="module">
-    const body = document.body;
-    let loaded = false;
+    const expMV = document.querySelector("#exposure");
+    const exposureDisplay = document.querySelector("#exposure-value");
 
-    const onInteraction = () => {
-      if (loaded === true) {
-        return;
+    exposureDisplay.textContent = expMV.exposure;
+
+    document.querySelector('#exposure').addEventListener('input', (event) => {
+      expMV.exposure = Number(event.target.value);
+      exposureDisplay.textContent = mv.exposure;
+    });
+
+    const toneMV = document.querySelector("#toneMapping");
+    let threeRenderer;
+    for (let p = toneMV; p != null; p = Object.getPrototypeOf(p)) {
+      const privateAPI = Object.getOwnPropertySymbols(p);
+      const renderer = privateAPI.find((value)=>{console.log(value); return value.toString()=='Symbol(renderer)';});
+      if(renderer!=null){
+        threeRenderer = toneMV[renderer].threeRenderer;
+        break;
       }
-      loaded = true;
-
-      const modelViewer = document.createElement('script'); 
-      modelViewer.type = 'module';
-      modelViewer.src = '../node_modules/@google/model-viewer/dist/model-viewer.js'; 
-      body.appendChild(modelViewer);
-
-      const focusVisible = document.createElement('script');
-      focusVisible.src = '../node_modules/focus-visible/dist/focus-visible.js'; 
-      body.appendChild(focusVisible);
-    };
-
-    body.addEventListener('mouseover', onInteraction, {once:true});
-    body.addEventListener('touchmove', onInteraction, {once:true});
-    body.addEventListener('scroll', onInteraction, {once:true});
-    body.addEventListener('keydown', onInteraction, {once:true});
-
-    const onProgress = (event) => {
-      const progressBar = event.target.querySelector('.progress-bar');
-      const updatingBar = event.target.querySelector('.update-bar');
-      updatingBar.style.width = `${event.detail.totalProgress*100}%`;
-      if (event.detail.totalProgress == 1) {
-        progressBar.classList.add('hide');
-      }
-    };
-
-    document.querySelector('#first').addEventListener('progress', onProgress);
-    document.querySelector('#second').addEventListener('progress', onProgress);
+    }
+    console.log(threeRenderer);
   </script>
 </body>
 </html>
