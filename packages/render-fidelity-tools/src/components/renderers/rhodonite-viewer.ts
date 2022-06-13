@@ -40,7 +40,7 @@ export class RhodoniteViewer extends LitElement {
     // Rhodonite Initialization
     await this.initRhodonite();
 
-    const iblRotation = - 90 + scenario.orbit.theta;
+    const iblRotation = + 180;
 
     // Update Size
     this[$updateSize]();
@@ -85,6 +85,7 @@ export class RhodoniteViewer extends LitElement {
       });
       this[$isRhodoniteInitDone] === true;
     }
+    Rn.MeshRendererComponent.isDepthMaskTrueForTransparencies = true;
   }
 
   private draw(frame: Rn.Frame) {
@@ -165,8 +166,8 @@ function setupCamera(mainRenderPass: any, scenario: ScenarioConfig, cameraEntity
   // const max = aabb.maxPoint;
   // const min = aabb.minPoint;
   // const modelRadius = Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
-  const far = 2 * Math.max(modelRadius, orbit.radius);
-  const near = far / 1000;
+  const far = 6 * Math.max(modelRadius, orbit.radius);
+  const near = far / 100;
   cameraComponent.zNearInner = near;
   cameraComponent.zFarInner = far;
 }
@@ -239,6 +240,7 @@ function setupGammaExpression(frame: Rn.Frame, gammaTargetFramebuffer: Rn.FrameB
   const postEffectCameraComponent = postEffectCameraEntity.getCamera();
 
   const gammaCorrectionMaterial = Rn.MaterialHelper.createGammaCorrectionMaterial();
+  // gammaCorrectionMaterial.setParameter(Rn.ShaderSemantics.EnableLinearToSrgb, Rn.Scalar.fromCopyNumber(0));
   const gammaCorrectionRenderPass = createPostEffectRenderPass(
     gammaCorrectionMaterial,
     postEffectCameraComponent
@@ -498,11 +500,13 @@ function attachIBLTextureToAllMeshComponents(diffuseCubeTexture: Rn.CubeTexture,
     const meshRendererComponent = meshRendererComponents[i];
     meshRendererComponent.specularCubeMap = specularCubeTexture;
     meshRendererComponent.diffuseCubeMap = diffuseCubeTexture;
+    meshRendererComponent.diffuseCubeMapContribution = 0.5;
+    meshRendererComponent.specularCubeMapContribution = 0.5;
     meshRendererComponent.rotationOfCubeMap = Rn.MathUtil.degreeToRadian(rotation)
   }
   const meshComponents = Rn.ComponentRepository.getComponentsWithType(Rn.MeshComponent) as Rn.MeshComponent[]
   for (let i = 0; i < meshComponents.length; i++) {
-    const meshComponent = meshRendererComponents[i];
+    const meshComponent = meshComponents[i];
     const mesh = meshComponent.mesh;
     if (Rn.Is.exist(mesh)) {
       for (let i=0; i<mesh.getPrimitiveNumber(); i++) {
@@ -564,7 +568,7 @@ function setupBackgroundEnvCubeExpression(frame: Rn.Frame, prefilter: any, frame
   const sceneTopLevelGraphComponents = mainRenderPass.sceneTopLevelGraphComponents as Rn.SceneGraphComponent[];
   const rootGroup = sceneTopLevelGraphComponents![0].entity as Rn.ISceneGraphEntity;
   const aabb = rootGroup.getSceneGraph().calcWorldAABB();
-  spherePrimitive.generate({ radius: aabb.lengthCenterToCorner*1.0 , widthSegments: 40, heightSegments: 40, material: sphereMaterial })
+  spherePrimitive.generate({ radius: aabb.lengthCenterToCorner*6.0 , widthSegments: 40, heightSegments: 40, material: sphereMaterial })
   const sphereMeshComponent = sphereEntity.getComponent(Rn.MeshComponent) as Rn.MeshComponent
   const sphereMesh = new Rn.Mesh()
   sphereMesh.addPrimitive(spherePrimitive)

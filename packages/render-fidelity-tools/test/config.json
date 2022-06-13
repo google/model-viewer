@@ -76,7 +76,8 @@
         "y": 0.001
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "rhodonite"
       ]
     },
     {
@@ -90,7 +91,10 @@
       },
       "dimensions": {
         "height": 450
-      }
+      },
+      "exclude": [
+        "rhodonite"
+      ]
     },
     {
       "name": "khronos-MaterialsVariantsShoe",
@@ -229,7 +233,8 @@
         "radius": 2.45
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "rhodonite"
       ]
     },
     {
@@ -243,7 +248,10 @@
       },
       "dimensions": {
         "width": 1200
-      }
+      },
+      "exclude": [
+        "rhodonite"
+      ]
     },
     {
       "name": "khronos-Suzanne",
@@ -342,7 +350,8 @@
         "dspbr-pt",
         "stellar",
         "babylon",
-        "gltf-sample-viewer"
+        "gltf-sample-viewer",
+        "rhodonite"
       ],
       "renderSkybox": true
     },
@@ -446,7 +455,10 @@
       },
       "orbit": {
         "radius": 22.00
-      }
+      },
+      "exclude": [
+        "rhodonite"
+      ]
     },
     {
       "name": "khronos-SpecularTest",
@@ -533,7 +545,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
@@ -550,7 +563,8 @@
         "radius": 286
       },
       "exclude": [
-        "dspbr-pt"
+        "dspbr-pt",
+        "rhodonite"
       ]
     },
     {
@@ -580,7 +594,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
@@ -600,7 +615,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
@@ -653,7 +669,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
@@ -671,7 +688,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
@@ -685,7 +703,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
@@ -855,7 +874,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
