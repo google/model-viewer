@@ -343,7 +343,8 @@
         "dspbr-pt",
         "stellar",
         "babylon",
-        "gltf-sample-viewer"
+        "gltf-sample-viewer",
+        "three-gpu-pathtracer"
       ],
       "renderSkybox": true
     },
@@ -829,7 +830,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
