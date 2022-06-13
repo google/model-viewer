@@ -280,7 +280,8 @@
       "exclude": [
         "model-viewer",
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
