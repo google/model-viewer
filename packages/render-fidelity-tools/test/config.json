@@ -734,7 +734,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
