@@ -76,7 +76,7 @@ const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const KEYBOARD_ORBIT_INCREMENT_SMALL = KEYBOARD_ORBIT_INCREMENT / 4; // Must be a multiple of KEYBOARD_ORBIT_INCREMENT so you can always get back to the same place
 const ZOOM_SENSITIVITY = 0.04;
 const PAN_INCREMENT_SMALL = 1;
-const PAN_INCREMENT =  PAN_INCREMENT_SMALL * 10; // A multiple of PAN_INCREMENT_SMALL. Set empirically so it feels about right
+const PAN_INCREMENT = PAN_INCREMENT_SMALL * 10; // A multiple of PAN_INCREMENT_SMALL. Set empirically so it feels about right
 
 export const KeyCode = {
   PAGE_UP: 33,
@@ -85,20 +85,6 @@ export const KeyCode = {
   UP: 38,
   RIGHT: 39,
   DOWN: 40,
-  KEY_1: 49,
-  KEY_2: 50,
-  KEY_3: 51,
-  KEY_4: 52,
-  KEY_7: 55,
-  KEY_8: 56,
-  KEY_9: 57,
-  NP_KEY_1: 97,
-  NP_KEY_2: 98,
-  NP_KEY_3: 99,
-  NP_KEY_4: 100,
-  NP_KEY_7: 103,
-  NP_KEY_8: 104,
-  NP_KEY_9: 105,
   SHIFT: 16
 };
 
@@ -666,14 +652,16 @@ export class SmoothControls extends EventDispatcher {
       // If clicked on nothing then do nothing.
       // Resetting on hit == null means you forfeit the position you were just in. If that position is intentional then you lose that intention.
 
-      // const {cameraTarget} = scene.element;
-      // scene.element.cameraTarget = '';
-      // scene.element.cameraTarget = cameraTarget;
-      // // Zoom all the way out.
-      // this.userAdjustOrbit(0, 0, 1);
+      const {cameraTarget} = scene.element;
+      scene.element.cameraTarget = '';
+      scene.element.cameraTarget = cameraTarget;
+      // Zoom all the way out.
+      this.userAdjustOrbit(0, 0, 1);
+      console.log('In recenter');
     } else {
       scene.target.worldToLocal(hit.position);
       scene.setTarget(hit.position.x, hit.position.y, hit.position.z);
+      console.log('In recenter B');
     }
   }
 
@@ -881,7 +869,7 @@ export class SmoothControls extends EventDispatcher {
     } else {
       relevantKey = this.orbitZoomKeyCodeHandler(event, ZOOM_SENSITIVITY, KEYBOARD_ORBIT_INCREMENT, isUserChange);
     }
-     
+
     // switch (event.keyCode) {
     //   case KeyCode.PAGE_UP:
     //     this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
@@ -916,7 +904,7 @@ export class SmoothControls extends EventDispatcher {
     // console.log('In onKeyUp', event);
     let opacity = 1;
     // Only hide $panElement if shift key released (#16) or .shiftKey is false (although not sure if this second case ever gets hit when opacity == 1)
-    if (event.keyCode == KeyCode.SHIFT){
+    if (event.keyCode == KeyCode.SHIFT) {
       opacity = 0;
       // console.log('Released shift');
     } else if (!event.shiftKey) {
@@ -947,34 +935,6 @@ export class SmoothControls extends EventDispatcher {
       case KeyCode.RIGHT:
         this.userAdjustOrbit(OrbitInc, 0, 0);
         break;
-      case KeyCode.KEY_1:
-      case KeyCode.NP_KEY_1:
-          this.keyPressThetaSet(0);
-        break;
-      case KeyCode.KEY_2:
-      case KeyCode.NP_KEY_2:
-          this.keyPressThetaSet(Math.PI /2);
-        break;
-      case KeyCode.KEY_3:
-      case KeyCode.NP_KEY_3:        
-          this.keyPressThetaSet(Math.PI);
-        break;
-      case KeyCode.KEY_4:
-      case KeyCode.NP_KEY_4:
-          this.keyPressThetaSet(Math.PI * 1.5);
-        break;
-      case KeyCode.KEY_7:
-      case KeyCode.NP_KEY_7:
-          this.keyPressPhiSet(Math.PI *3 /4);
-        break;
-      case KeyCode.KEY_8:
-      case KeyCode.NP_KEY_8:
-          this.keyPressPhiSet(Math.PI /2);
-        break;
-      case KeyCode.KEY_9:
-      case KeyCode.NP_KEY_9:
-          this.keyPressPhiSet(Math.PI / 4);
-        break;   
       default:
         swizzkey = false;
         this.isUserChange = isUserChange;
@@ -987,14 +947,6 @@ export class SmoothControls extends EventDispatcher {
     this.initializePan();
     let swizzkey = true;
     switch (event.keyCode) {
-      case KeyCode.PAGE_UP:
-        // Do nothing for this
-        // this.userAdjustOrbit(0, 0, ZoomInc);
-        break;
-      case KeyCode.PAGE_DOWN:
-        // Do nothing for this
-        // this.userAdjustOrbit(0, 0, -1 * ZoomInc);
-        break;
       case KeyCode.UP:
         this.movePan(0, -1 * dy); // This is the negative one so that the model appears to move as the arrow direction rather than the view moving
         break;
@@ -1012,20 +964,6 @@ export class SmoothControls extends EventDispatcher {
         break;
     }
     return swizzkey;
-  }
-
-  // Adjust only the theta of the orbit
-  // (Effectively spinning around the target horizontally)
-  private keyPressThetaSet(newTheta: number) {
-    const {phi, radius} = this.goalSpherical;
-    this.setOrbit(newTheta, phi, radius);
-  }
-
-  // Adjust only the phi of the orbit
-  // (Effectively spinning around the target vertically)
-  private keyPressPhiSet(newPhi: number) {
-    const {theta, radius} = this.goalSpherical;
-    this.setOrbit(theta, newPhi, radius);
   }
 }
 
