@@ -271,7 +271,8 @@
       },
       "exclude": [
         "dspbr-pt",
-        "stellar"
+        "stellar",
+        "rhodonite"
       ]
     },
     {
@@ -298,7 +299,10 @@
       },
       "orbit": {
         "radius": 2
-      }
+      },
+      "exclude": [
+        "rhodonite"
+      ]
     },
     {
       "name": "khronos-Cube",
