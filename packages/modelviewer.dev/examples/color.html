@@ -382,15 +382,15 @@
     example below.</p>
 
     <model-viewer
-    id="toneMapping"
-    src="../../shared-assets/models/silver-gold.gltf"
-    enable-pan
-    seamless-poster
-    skybox-image="../../shared-assets/environments/neutral.hdr"
-    camera-controls
-    alt="3D model of six example material spheres"
-  >
-</model-viewer>
+        id="toneMapping"
+        src="../../shared-assets/models/silver-gold.gltf"
+        enable-pan
+        seamless-poster
+        skybox-image="../../shared-assets/environments/neutral.hdr"
+        camera-controls
+        alt="3D model of six example material spheres"
+      >
+    </model-viewer>
 
     <p>This example highlights a second key element of good tone mapping
     functions: desaturating overexposed colors. Look at the golden sphere
@@ -438,20 +438,33 @@
 
     document.querySelector('#exposure').addEventListener('input', (event) => {
       expMV.exposure = Number(event.target.value);
-      exposureDisplay.textContent = mv.exposure;
+      exposureDisplay.textContent = expMV.exposure;
     });
 
     const toneMV = document.querySelector("#toneMapping");
     let threeRenderer;
     for (let p = toneMV; p != null; p = Object.getPrototypeOf(p)) {
       const privateAPI = Object.getOwnPropertySymbols(p);
-      const renderer = privateAPI.find((value)=>{console.log(value); return value.toString()=='Symbol(renderer)';});
+      const renderer = privateAPI.find((value) => value.toString() == 'Symbol(renderer)');
       if(renderer!=null){
         threeRenderer = toneMV[renderer].threeRenderer;
         break;
       }
     }
-    console.log(threeRenderer);
+    threeRenderer.toneMapping = 1;
+    toneMV.exposure = 0.01
+
+    // toneMV.addEventListener('load', () => {
+    //   const {materials} = toneMV.model;
+    //   const privateAPI = Object.getOwnPropertySymbols(materials[0]);
+    //   const threeMaterials = privateAPI.find((value) => value.toString() == 'Symbol(correlatedObjects)');
+      
+    //   for(const material of materials){
+    //     for(const threeMaterial of material[threeMaterials]){
+    //       threeMaterial.toneMapped = false;
+    //     }
+    //   }
+    // });
   </script>
 </body>
 </html>
