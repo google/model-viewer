@@ -337,7 +337,7 @@
     where a higher dynamic range raw image can be produced than the sensor is
     capable of in a single shot.</p>
 
-    <p>insert pipeline image here</p>
+    <img src="../assets/Pipelines.png" style="height: 600px;"/>
 
     <p>In 3D rendering, there is no sensor and computations are done in floating
     point, which means the raw image is effectively full HDR, with even more
@@ -378,7 +378,7 @@
     unbounded input range must be coverted to the zero-to-one range that the
     encoder expects. If this step is not done, the encoder simply clamps the
     values, which amounts to a piecewise-linear tone mapping function with sharp
-    corners that introduce visual artifacts for shiny objects, as shown in the
+    corners that introduce perceptual errors for shiny objects, as shown in the
     example below.</p>
 
     <model-viewer
@@ -390,9 +390,18 @@
         camera-controls
         alt="3D model of six example material spheres"
       >
+      <label for="toneMapped">Tone Mapped: </label>
+      <input id="toneMapped" type="checkbox">
     </model-viewer>
 
-    <p>This example highlights a second key element of good tone mapping
+    <p>Note that once again the shiny and matte white plastic spheres are
+    indistinguishable, even without cranking up the exposure. Since half of the
+    matte white sphere is now rendering pure white, there is no headroom for
+    shiny highlights. Likewise, the top half of the sphere loses its 3D
+    appearance since the shading was removed by clamping the values. Tick the
+    checkbox to go back to ACES tone mapping for a quick comparison.</p>
+
+    <p>This example also highlights a second key element of good tone mapping
     functions: desaturating overexposed colors. Look at the golden sphere
     (lower-left) and compare to the previous version with ACES tone mapping
     applied. The baseColor of a metal multiplies the incoming light, so a white
@@ -409,6 +418,8 @@
     colored light. You can see this effect simply by looking at a candle's flame
     or a spark, the brightest parts of which tend to look white despite their
     color.</p>
+
+    <img src="../assets/ExposureFit.png" style="height: 600px;"/>
 
   </div>
   <div style="margin-top:24px"></div>
@@ -443,28 +454,45 @@
 
     const toneMV = document.querySelector("#toneMapping");
     let threeRenderer;
+    let scene;
     for (let p = toneMV; p != null; p = Object.getPrototypeOf(p)) {
       const privateAPI = Object.getOwnPropertySymbols(p);
       const renderer = privateAPI.find((value) => value.toString() == 'Symbol(renderer)');
-      if(renderer!=null){
+      const sceneSym = privateAPI.find((value) => value.toString() == 'Symbol(scene)');
+      if(renderer != null){
         threeRenderer = toneMV[renderer].threeRenderer;
+      }
+      if(sceneSym != null){
+        scene = toneMV[sceneSym];
+      }
+      if(threeRenderer != null && scene != null){
         break;
       }
     }
-    threeRenderer.toneMapping = 1;
-    toneMV.exposure = 0.01
+    // threeRenderer.toneMapping = 1;
+    // toneMV.exposure = 0.02;
 
-    // toneMV.addEventListener('load', () => {
-    //   const {materials} = toneMV.model;
-    //   const privateAPI = Object.getOwnPropertySymbols(materials[0]);
-    //   const threeMaterials = privateAPI.find((value) => value.toString() == 'Symbol(correlatedObjects)');
+    const makeToneMapped = (enabled) => {
+      const {materials} = toneMV.model;
+      const privateAPI = Object.getOwnPropertySymbols(materials[0]);
+      const threeMaterials = privateAPI.find((value) => value.toString() == 'Symbol(correlatedObjects)');
       
-    //   for(const material of materials){
-    //     for(const threeMaterial of material[threeMaterials]){
-    //       threeMaterial.toneMapped = false;
-    //     }
-    //   }
-    // });
+      for(const material of materials){
+        for(const threeMaterial of material[threeMaterials]){
+          threeMaterial.toneMapped = enabled;
+        }
+      }
+      scene.isDirty = true;
+    };
+
+    const checkbox = document.querySelector('#toneMapped');
+
+    toneMV.addEventListener('load', () => {
+      makeToneMapped(false);
+      checkbox.addEventListener('change', () => {
+        makeToneMapped(checkbox.checked);
+      });
+    });
   </script>
 </body>
 </html>
