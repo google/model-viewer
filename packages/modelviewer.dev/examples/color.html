@@ -200,7 +200,7 @@
     accurate as the input 3D model, so a process to decide if the 3D model is in
     fact accurately representing the real-world object it's based on is also
     crucial, so any errors can be fixed. The most correct way to do this would
-    be to set up a photoshoot of the real object, capture the environment
+    be to set up a photo shoot of the real object, capture the environment
     lighting around it in its full dynamic range, record the camera settings and
     position, then set up an identical rendered scene and compare the output
     images. Unfortunately this tends to be prohibitively expensive.</p>
@@ -241,8 +241,8 @@
     <p>Let's start with a simple example: six spheres with uniform materials.
     The top row are white (baseColor RGB: [1, 1, 1]), while the bottom row are
     yellow (baseColor RGB: [1, 1, 0]). From left to right they are shiny metal
-    (metallness: 1, roughness: 0), shiny plastic (metalness: 0, roughness: 0),
-    and matte plastic (metallness: 0, roughness: 1). The left-most can be
+    (metalness: 1, roughness: 0), shiny plastic (metalness: 0, roughness: 0),
+    and matte plastic (metalness: 0, roughness: 1). The left-most can be
     thought of approximately as polished silver and gold.</p>
 
      <figure>
@@ -314,7 +314,7 @@
     difference between those materials either (assuming you could somehow also
     hide your own reflection - you are also a part of your lighting
     environment). The reason this looks so unreal is that it is nearly
-    impossible to find an environment like this. Real envrionments have texture,
+    impossible to find an environment like this. Real environments have texture,
     and the reflections of that texture are what we use to understand
     shininess.</p>
 
@@ -364,8 +364,8 @@
 
     <h3 id="photography">How does rendering compare to photography?</h3>
 
-    <p>3D rendering, especially PBR, is designed to mimick photography, and
-    photography in turn is designed to mimick the human eye and brain. The brain
+    <p>3D rendering, especially PBR, is designed to mimic photography, and
+    photography in turn is designed to mimic the human eye and brain. The brain
     part is essential, as the goal of a realistic photo is to evoke the same
     perception by looking at it as one would have looking at the original scene.
     This is difficult as the light reflected by a printed photo or emitted by a
@@ -412,7 +412,7 @@
     for 3D rendering. Like most tone mapping curves, it is fairly linear in the
     central focus of its contrast range, then asymptotes out to smoothly
     compress the long tails of brights and darks into the required zero to one
-    output range, the idea being that humans percieve less difference between
+    output range, the idea being that humans perceive less difference between
     over-bright and over-dark zones as compared to the bulk of the scene.
     However, since some output range is reserved for these extra-bright
     highlights, the range left over to represent the input range of matte
@@ -424,7 +424,7 @@
     identified as the source of the apparent color discrepancy. The immediate
     thought is usually, let's fix this by not applying tone mapping! The problem
     is there is actually no such thing as "no tone mapping", since somehow the
-    unbounded input range must be coverted to the zero-to-one range that the
+    unbounded input range must be converted to the zero-to-one range that the
     encoder expects. If this step is not done, the encoder simply clamps the
     values, which amounts to a piecewise-linear tone mapping function with sharp
     corners that introduce perceptual errors for shiny objects, as shown in the
@@ -509,13 +509,13 @@
 
     <h3 id="validate-render">How do we validate a glTF 3D render?</h3>
 
-    <p>Hopefully the preceeding discussion has convinced you that simply
+    <p>Hopefully the preceding discussion has convinced you that simply
     validating some rendered pixel color against the object's "correct" color is
     not a useful or valid process. If only it were so simple! Instead you need
     to look at your whole pipeline and consider what your end goals really
     are.</p>
 
-    <p>For the sake of measureability, let's consider the end goal to be
+    <p>For the sake of measurability, let's consider the end goal to be
     minimizing the return rate of products bought online where the shopper's
     primary visual cue is a 3D model (let's assume we're making a decent enough
     render that we're not destroying the purchasing rate). To succeed, we must
@@ -563,7 +563,7 @@
     as the perception of an actual human. Isolated pixel metrics are problematic
     because much of human perception is affected by the background and
     surroundings of the object. This is because our brains are effectively
-    trying to remove the effect of lighting and allow us to percieve the
+    trying to remove the effect of lighting and allow us to perceive the
     underlying material properties consistently. Our brains estimate what
     lighting to remove based on the background.</p>
 
@@ -571,7 +571,7 @@
     to get the most consistent <i>perception</i> of the product, its actual
     rendered pixels need to change color, ideally according the actual local
     lighting environment. This helps ensure that when our brain "corrects" for
-    the lighting, our preception returns to the real object's properties. Of
+    the lighting, our perception returns to the real object's properties. Of
     course this is only as good as the AR lighting estimation algorithms, but
     they are improving. Ideally, the same tone mapping and white balance that's
     applied to the camera's raw image should be used in the rendering pipeline
@@ -582,10 +582,10 @@
     href="https://en.wikipedia.org/wiki/The_dress">dress photo</a> which is
     actually a blue and black dress in an overexposed photo under yellow
     lighting. Even though the pixel colors are roughly purple and brown, more
-    than half of people correctly percieved the dress as blue and black, though
-    another 30% percieved it as white and gold. Obviously this kind of ambiguous
+    than half of people correctly perceived the dress as blue and black, though
+    another 30% perceived it as white and gold. Obviously this kind of ambiguous
     image is not desireable in a commerce setting, but it is useful for
-    undestanding how much the background of a photo, as well as viewer
+    understanding how much the background of a photo, as well as viewer
     expectations, affects its perception. The Scientific Explanations
     sections of that article is full of interesting insights.</p>
 
@@ -594,7 +594,7 @@
     <p>Generally speaking, part of the purpose of 3D rendering is to avoid the
     cost of photography, by making the entire process digital. The 3D model is
     costly for an artist to create, but it persists for creating many different
-    photoshoots and interactive experiences quickly. So how can this 3D model be
+    photo shoots and interactive experiences quickly. So how can this 3D model be
     verified as accurate to the physical product? Of course dimensions and shape
     can be measured (glTF is always in meters, so check your units), but we'll
     be focusing on material properties here, like baseColor and roughness.</p>
@@ -629,13 +629,13 @@
     environment. The sun will produce very high dynamic range, as well as
     colored lighting, which will help with detecting a variety of possible
     rendering problems. These scenarios will tend to bracket a wide variety of
-    real lighting situations that might be applied for a virtual photoshoot or
+    real lighting situations that might be applied for a virtual photo shoot or
     in AR, which should give confidence the asset can be reused broadly.</p>
 
     <p>Finally, all the usual caveats apply regarding colorspaces and
     differences between displays. The glTF format specifies the use of the sRGB
     colorspace internally, which is also the most common output format, but with
-    HDR displays becomming more common this is likely to become more complicated
+    HDR displays becoming more common this is likely to become more complicated
     soon.</p>
 
     <h3 id="takeaway">What's the takeaway?</h3>
