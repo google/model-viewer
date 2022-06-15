@@ -215,7 +215,6 @@
     <model-viewer
         src="../../shared-assets/models/silver-gold.gltf"
         enable-pan
-        seamless-poster
         skybox-image="../../shared-assets/environments/neutral.hdr"
         ar
         ar-modes="webxr scene-viewer quick-look"
@@ -236,7 +235,6 @@
     <model-viewer
         src="../../shared-assets/models/silver-gold-unlit.gltf"
         enable-pan
-        seamless-poster
         skybox-image="../../shared-assets/environments/neutral.hdr"
         camera-controls
         alt="3D model of six example material spheres"
@@ -252,7 +250,6 @@
     <model-viewer
         src="../../shared-assets/models/silver-gold.gltf"
         enable-pan
-        seamless-poster
         skybox-image="../../shared-assets/environments/white_furnace.hdr"
         camera-controls
         alt="3D model of six example material spheres"
@@ -293,7 +290,6 @@
         id="exposure"
         src="../../shared-assets/models/silver-gold.gltf"
         enable-pan
-        seamless-poster
         skybox-image="../../shared-assets/environments/neutral.hdr"
         camera-controls
         alt="3D model of six example material spheres"
@@ -390,7 +386,6 @@
         id="toneMapping"
         src="../../shared-assets/models/silver-gold.gltf"
         enable-pan
-        seamless-poster
         skybox-image="../../shared-assets/environments/neutral.hdr"
         camera-controls
         alt="3D model of six example material spheres"
@@ -457,7 +452,7 @@
     the level of ambient lighting around it, but this data is unlikely to be
     available.</p>
 
-    <h3>How do we accurately render a physical object with glTF?</h3>
+    <h3>How do we validate a glTF 3D render?</h3>
 
     <p>Hopefully the preceeding discussion has convinced you that simply
     validating some rendered pixel color against the object's "correct" color is
@@ -505,16 +500,108 @@
     rendering, the lighting is equally digital, so it is generally a better
     practice to keep the post-processing step simple (e.g. just ACES tone
     mapping) and adjust the environment image if necessary.</p>
+  
+    <h3>What role does perception play?</h3>
+
+    <p>As with photography, the goal is the viewer's perception of the image.
+    There is no mathematical metric that will represent human perception as well
+    as the perception of an actual human. Isolated pixel metrics are problematic
+    because much of human perception is affected by the background and
+    surroundings of the object. This is because our brains are effectively
+    trying to remove the effect of lighting and allow us to percieve the
+    underlying material properties consistently. Our brains estimate what
+    lighting to remove based on the background.</p>
+
+    <p>When rendering a product in AR using the camera image as the background,
+    to get the most consistent <i>perception</i> of the product, its actual
+    rendered pixels need to change color, ideally according the actual local
+    lighting environment. This helps ensure that when our brain "corrects" for
+    the lighting, our preception returns to the real object's properties. Of
+    course this is only as good as the AR lighting estimation algorithms, but
+    they are improving. Ideally, the same tone mapping and white balance that's
+    applied to the camera's raw image should be used in the rendering pipeline
+    as well. Unfortunately, it may be difficult to access this data.</p>
+
+    <p>Of course human perception is not uniform, which makes all of this even
+    more difficult. An excellent example is the famous <a
+    href="https://en.wikipedia.org/wiki/The_dress">dress photo</a> which is
+    actually a blue and black dress in an overexposed photo under yellow
+    lighting. Even though the pixel colors are roughly purple and brown, more
+    than half of people correctly percieved the dress as blue and black, though
+    another 30% percieved it as white and gold. Obviously this kind of ambiguous
+    image is not desireable in a commerce setting, but it is useful for
+    undestanding how much the background of a photo, as well as viewer
+    expectations, affects its perception. The Scientific Explanations
+    sections of that article is full of interesting insights.</p>
+
+    <h3>How do we validate a glTF model?</h3>
 
     <p>Generally speaking, part of the purpose of 3D rendering is to avoid the
     cost of photography, by making the entire process digital. The 3D model is
     costly for an artist to create, but it persists for creating many different
     photoshoots and interactive experiences quickly. So how can this 3D model be
-    verified as accurate to the physical product? It's not likely to be by
-    comparison to photography, as this would largely defeat the purpose of the
-    cost savings.</p>
+    verified as accurate to the physical product? Of course dimensions and shape
+    can be measured (glTF is always in meters, so check your units), but we'll
+    be focusing on material properties here, like baseColor and roughness.</p>
 
-    <p>Rather, </p>
+    <p>The most accurate way to choose material properties is to measure them,
+    since all glTF materials are defined in physical terms. However, these
+    measurements are difficult to make. There are products on the market that
+    will scan an inserted material swatch and fit these properties to it, and
+    hopefully these machines will become more common. Modern 3D scanning
+    algorithms can back out material properties, but these machine learning
+    systems are not perfect and are difficult to benchmark. Until these
+    technologies are further along, we may not have access to properly
+    measured material properties.</p>
+
+    <p>The most common workflow for creating materials is that a 3D artist
+    manually adjusts the properties until the render looks right. Ideally the
+    artist has the physical object on their desk and compares to their render,
+    thus focusing on perception rather than pixel values. However, <b>it is of
+    utmost importance that their authoring software is set up to render the same
+    way as the object will be presented to users.</b> This is because when the
+    render doesn't look right, it could be that either the materials or the
+    lighting needs to change. If the materials are measured one can safely focus
+    on changing the lighting, but if not, it is very helpful to have chosen a
+    fixed lighting environment ahead of time to remove that variable. Equally
+    important is that the tone mapping function used is consistent. If you're
+    not sure what is being used, it's probably inconsistent.</p>
+
+    <p>Ideally the artist should check the rendering of the model under a
+    variety of lighting environments. Certain types of lighting will tend to
+    hide or expose certain material property errors. At minimum, it's a good
+    idea to test with both a neutral indoor environment and with a sunny outdoor
+    environment. The sun will produce very high dynamic range, as well as
+    colored lighting, which will help with detecting a variety of possible
+    rendering problems. These scenarios will tend to bracket a wide variety of
+    real lighting situations that might be applied for a virtual photoshoot or
+    in AR, which should give confidence the asset can be reused broadly.</p>
+
+    <p>Finally, all the usual caveats apply regarding colorspaces and
+    differences between displays. The glTF format specifies the use of the sRGB
+    colorspace internally, which is also the most common output format, but with
+    HDR displays becomming more common this is likely to become more complicated
+    soon.</p>
+
+    <h3>What's the takeaway?</h3>
+
+    <p>Unfortunately there are no easy answers, as color and perception are
+    complex, even more so than physically-based rendering. Hopefully this
+    background gives a framework on which your authoring and validation
+    processes can be built. The most important thing to remember about PBR is
+    that the whole point is for the rendered colors to vary compared to the
+    material baseColor, which is what allows the demo below to be compellingly
+    realistic.</p>
+
+    <model-viewer
+        id="environments"
+        src="../assets/ShopifyModels/Mixer.glb"
+        skybox-image="../../shared-assets/environments/neutral.hdr"
+        enable-pan
+        camera-controls
+        alt="3D model of a blender"
+      >
+    </model-viewer>
 
   </div>
   <div style="margin-top:24px"></div>
@@ -588,6 +675,22 @@
         makeToneMapped(checkbox.checked);
       });
     });
+
+    const envMV = document.querySelector("#environments");
+    const envCycle = [
+      "../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
+      "../../shared-assets/environments/whipple_creek_regional_park_04_1k.hdr",
+      "../../shared-assets/environments/lebombo_1k.hdr",
+      "../../shared-assets/environments/aircraft_workshop_01_1k.hdr",
+      "../../shared-assets/environments/music_hall_01_1k.hdr",
+      "../../shared-assets/environments/pillars_1k.hdr",
+      "../../shared-assets/environments/neutral.hdr"
+    ];
+
+    setInterval(() => {
+      const cycleIndex = envCycle.indexOf(envMV.skyboxImage);
+      envMV.skyboxImage = envCycle[(cycleIndex + 1) % envCycle.length];
+    }, 3000);
   </script>
 </body>
 </html>
