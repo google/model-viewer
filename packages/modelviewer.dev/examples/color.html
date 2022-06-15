@@ -68,6 +68,11 @@
       max-width: 600px;
     }
 
+    figcaption {
+      font-style: italic;
+      max-width: 600px;
+    }
+
     model-viewer::part(default-progress-mask) {
       display: none;
     }
@@ -125,6 +130,34 @@
   <div align="center">
 
     <h2>Achieving Color-Accurate Presentation with glTF</h2>
+
+    <p>Table of Contents:</p>
+    <p>
+      <a href="#accuracy">What is color accuracy?</a><br/>
+      <a href="#matching">What's wrong with the rendered color matching the baseColor?</a><br/>
+      <a href="#photography">How does rendering compare to photography?</a><br/>
+      <a href="#tone-mapping">How does tone mapping work?</a><br/>
+      <a href="#validate-render">How do we validate a glTF 3D render?</a><br/>
+      <a href="#perception">What role does perception play?</a><br/>
+      <a href="#validate-gltf">How do we validate a glTF model?</a><br/>
+      <a href="#takeaway">What's the takeaway?</a><br/>
+    </p>
+
+    <figure>
+      <model-viewer
+          src="../assets/ShopifyModels/GeoPlanter.glb"
+          poster="../assets/ShopifyModels/GeoPlanter.webp"
+          style="--poster-color: transparent;"
+          environment-image="neutral"
+          shadow-intensity="1"
+          seamless-poster
+          enable-pan
+          camera-controls
+          alt="3D model of a cactus"
+        >
+      </model-viewer>
+      <figcaption>An example interactive 3D product visualization.</figcaption>
+    </figure>
   
     <p>Interactive 3D models are the next media type, following images and
     video, and as such <code>&lt;model-viewer&gt;</code> and other renderers are
@@ -160,7 +193,7 @@
     href="../fidelity">glTF rendering convergence</a> across a variety of
     popular renderers.</p>
 
-    <h3>What is color accuracy?</h3>
+    <h3 id="accuracy">What is color accuracy?</h3>
 
     <p>The goal of PBR is to create color-accurate images at frame rate as a
     user interacts with the 3D model. Of course a renderer can only be as
@@ -195,7 +228,7 @@
     physically-based rendering!</b> Details and examples follow to support this
     assertion and to point the way towards a more useful verification scheme.</p>
 
-    <h3>What's wrong with the rendered color matching the baseColor?</h3>
+    <h3 id="matching">What's wrong with the rendered color matching the baseColor?</h3>
 
     <p>The most important thing to understand about PBR is that it accurately
     represents the interplay between incident light and material properties,
@@ -212,7 +245,8 @@
     and matte plastic (metallness: 0, roughness: 1). The left-most can be
     thought of approximately as polished silver and gold.</p>
 
-    <model-viewer
+     <figure>
+      <model-viewer
         src="../../shared-assets/models/silver-gold.gltf"
         enable-pan
         skybox-image="../../shared-assets/environments/neutral.hdr"
@@ -221,7 +255,9 @@
         camera-controls
         alt="3D model of six example material spheres"
       >
-    </model-viewer>
+      </model-viewer>
+      <figcaption>A basic example of spheres with different uniform materials.</figcaption>
+    </figure>
 
     <p>Note how different materials with the same baseColor render differently.
     Which pixels match the baseColor RGB? In fact, if you really want the
@@ -232,14 +268,17 @@
     the capture process. This is how the above model looks with the unlit
     extension:</p>
 
-    <model-viewer
+     <figure>
+      <model-viewer
         src="../../shared-assets/models/silver-gold-unlit.gltf"
         enable-pan
         skybox-image="../../shared-assets/environments/neutral.hdr"
         camera-controls
         alt="3D model of six example material spheres"
       >
-    </model-viewer>
+      </model-viewer>
+      <figcaption>The same spheres as above using the glTF unlit extension.</figcaption>
+    </figure>
 
     <p>Now that it's clear that lighting is important in making a 3D model look
     realistic, the next common idea is to choose a nice uniformly neutral
@@ -247,14 +286,17 @@
     baseColor. Well, it's easy to produce a uniform lighting environment, but
     the results may be surprising for PBR:</p>
 
-    <model-viewer
+     <figure>
+      <model-viewer
         src="../../shared-assets/models/silver-gold.gltf"
         enable-pan
         skybox-image="../../shared-assets/environments/white_furnace.hdr"
         camera-controls
         alt="3D model of six example material spheres"
       >
-    </model-viewer>
+      </model-viewer>
+      <figcaption>Physically-based rendering with uniform lighting.</figcaption>
+    </figure>
 
     <p>It may look like the white spheres have vanished, but they're still
     present - tilt the view and you can see them occluding the yellow spheres.
@@ -286,7 +328,8 @@
     capture in these scenarios, which of course will look different than the
     same object under neutral lighting.</p>
 
-    <model-viewer
+     <figure>
+      <model-viewer
         id="exposure"
         src="../../shared-assets/models/silver-gold.gltf"
         enable-pan
@@ -296,18 +339,20 @@
       >
         <p>Exposure: <span id="exposure-value"></span><br/>
         <input id="exposure" type="range" min="1" max="10" step="0.1" value="1" /></p>
-    </model-viewer>
+      </model-viewer>
+      <figcaption>Back to the original example, but with an exposure slider.</figcaption>
+    </figure>
 
     <p>Note that the top-right ball we might call paper-white: a perfect matte
-    reflector. However, despite the baseColor being [1, 1, 1], notice that the
-    rendered color varies from [] to [], never achieving pure white. Why is
-    this? Notice that the top-middle ball does have some reflections off its
-    shiny surface that are pure white. These specular reflections are in
-    addition to its diffuse reflection (which is all you get from a matte
-    surface), so if the diffuse reflection had already saturated our pixels, it
-    would be impossible to discern a shiny object from a matte one. Try
-    increasing the exposure slider to see the effect, which in photography is
-    referred to as overexposure.</p>
+    reflector. However, despite the white baseColor (sRGB: [255, 255, 255]),
+    notice that the rendered color varies from [177, 177, 177] to [237, 237,
+    237], never achieving pure white. Why is this? Notice that the top-middle
+    ball does have some reflections off its shiny surface that are pure white.
+    These specular reflections are in addition to its diffuse reflection (which
+    is all you get from a matte surface), so if the diffuse reflection had
+    already saturated our pixels, it would be impossible to discern a shiny
+    object from a matte one. Try increasing the exposure slider to see the
+    effect, which in photography is referred to as overexposure.</p>
 
     <p>You might notice that exposure appears to affect the midrange values more
     than the blacks and whites (despite exposure being a linear light
@@ -317,7 +362,7 @@
     Before we get into that, let's begin by comparing the rendering and
     photography pipelines.</p>
 
-    <h3>How does rendering compare to photography?</h3>
+    <h3 id="photography">How does rendering compare to photography?</h3>
 
     <p>3D rendering, especially PBR, is designed to mimick photography, and
     photography in turn is designed to mimick the human eye and brain. The brain
@@ -338,7 +383,10 @@
     where a higher dynamic range raw image can be produced than the sensor is
     capable of in a single shot.</p>
 
-    <img src="../assets/Pipelines.png"/>
+    <figure>
+      <img src="../assets/Pipelines.png"/>
+      <figcaption>Comparison of photography and 3D rendering pipelines.</figcaption>
+    </figure>
 
     <p>In 3D rendering, there is no sensor and computations are done in floating
     point, which means the raw image is effectively full HDR, with even more
@@ -348,7 +396,7 @@
     rest of the scene. In order to maintain perception while compressing down to
     SDR, a nonlinear tone mapping curve is used.</p>
 
-    <h3>How does tone mapping work?</h3>
+    <h3 id="tone-mapping">How does tone mapping work?</h3>
 
     <p>Tone mapping is a general term, which can refer to basically any color
     conversion function. Even separate operations that a photographer might
@@ -382,7 +430,8 @@
     corners that introduce perceptual errors for shiny objects, as shown in the
     example below.</p>
 
-    <model-viewer
+     <figure>
+      <model-viewer
         id="toneMapping"
         src="../../shared-assets/models/silver-gold.gltf"
         enable-pan
@@ -392,7 +441,9 @@
       >
       <label for="toneMapped">Tone Mapped: </label>
       <input id="toneMapped" type="checkbox">
-    </model-viewer>
+      </model-viewer>
+      <figcaption>Toggle ACES tone mapping to see the difference it makes.</figcaption>
+    </figure>
 
     <p>Note that once again the shiny and matte white plastic spheres are
     indistinguishable, even without cranking up the exposure. Since half of the
@@ -429,7 +480,11 @@
     lighting, this can give semi-decent results, but it breaks down completely
     for shiny objects, as shown in the following example.</p>
 
-    <img src="../assets/ExposureFit.png"/>
+    <figure>
+      <img src="../assets/ExposureFit.png"/>
+      <figcaption>Image of the above spheres with no tone mapping and exposure
+      set to avoid clamping.</figcaption>
+    </figure>
 
     <p>The trouble is that the specular highlights are orders of magnitude
     brighter than the majority of the scene, so to fit them into the output
@@ -452,7 +507,7 @@
     the level of ambient lighting around it, but this data is unlikely to be
     available.</p>
 
-    <h3>How do we validate a glTF 3D render?</h3>
+    <h3 id="validate-render">How do we validate a glTF 3D render?</h3>
 
     <p>Hopefully the preceeding discussion has convinced you that simply
     validating some rendered pixel color against the object's "correct" color is
@@ -501,7 +556,7 @@
     practice to keep the post-processing step simple (e.g. just ACES tone
     mapping) and adjust the environment image if necessary.</p>
   
-    <h3>What role does perception play?</h3>
+    <h3 id="perception">What role does perception play?</h3>
 
     <p>As with photography, the goal is the viewer's perception of the image.
     There is no mathematical metric that will represent human perception as well
@@ -534,7 +589,7 @@
     expectations, affects its perception. The Scientific Explanations
     sections of that article is full of interesting insights.</p>
 
-    <h3>How do we validate a glTF model?</h3>
+    <h3 id="validate-gltf">How do we validate a glTF model?</h3>
 
     <p>Generally speaking, part of the purpose of 3D rendering is to avoid the
     cost of photography, by making the entire process digital. The 3D model is
@@ -583,7 +638,7 @@
     HDR displays becomming more common this is likely to become more complicated
     soon.</p>
 
-    <h3>What's the takeaway?</h3>
+    <h3 id="takeaway">What's the takeaway?</h3>
 
     <p>Unfortunately there are no easy answers, as color and perception are
     complex, even more so than physically-based rendering. Hopefully this
@@ -593,7 +648,8 @@
     material baseColor, which is what allows the demo below to be compellingly
     realistic.</p>
 
-    <model-viewer
+     <figure>
+      <model-viewer
         id="environments"
         src="../assets/ShopifyModels/Mixer.glb"
         skybox-image="../../shared-assets/environments/neutral.hdr"
@@ -601,7 +657,11 @@
         camera-controls
         alt="3D model of a blender"
       >
-    </model-viewer>
+      </model-viewer>
+      <figcaption>Note how much different the product's colors are in each
+      environment, yet how that is exactly what makes it appear
+      realistic.</figcaption>
+    </figure>
 
   </div>
   <div style="margin-top:24px"></div>
