@@ -63,6 +63,11 @@
       max-height: 600px;
     }
 
+    img {
+      width: 100vw;
+      max-width: 600px;
+    }
+
     model-viewer::part(default-progress-mask) {
       display: none;
     }
@@ -337,7 +342,7 @@
     where a higher dynamic range raw image can be produced than the sensor is
     capable of in a single shot.</p>
 
-    <img src="../assets/Pipelines.png" style="height: 600px;"/>
+    <img src="../assets/Pipelines.png"/>
 
     <p>In 3D rendering, there is no sensor and computations are done in floating
     point, which means the raw image is effectively full HDR, with even more
@@ -399,7 +404,11 @@
     matte white sphere is now rendering pure white, there is no headroom for
     shiny highlights. Likewise, the top half of the sphere loses its 3D
     appearance since the shading was removed by clamping the values. Tick the
-    checkbox to go back to ACES tone mapping for a quick comparison.</p>
+    checkbox to go back to ACES tone mapping for a quick comparison. Remember to
+    look away and back again after switching; another trick of human perception
+    is how dependent it is on anchoring. The yellow will look washed-out
+    immediately after switching from saturated yellow, but this perception fades
+    after looking around.</p>
 
     <p>This example also highlights a second key element of good tone mapping
     functions: desaturating overexposed colors. Look at the golden sphere
@@ -419,7 +428,93 @@
     or a spark, the brightest parts of which tend to look white despite their
     color.</p>
 
-    <img src="../assets/ExposureFit.png" style="height: 600px;"/>
+    <p>One final way to avoid tone mapping that is sometimes suggested is to
+    choose an exposure such that all pixels are inside the [0, 1] range, such
+    that value clamping is avoided. For matte objects with low dynamic range
+    lighting, this can give semi-decent results, but it breaks down completely
+    for shiny objects, as shown in the following example.</p>
+
+    <img src="../assets/ExposureFit.png"/>
+
+    <p>The trouble is that the specular highlights are orders of magnitude
+    brighter than the majority of the scene, so to fit them into the output
+    range requires the exposure to be lowered by more than a factor of 50. This
+    kills the brightness and contrast of the majority of the scene, because of
+    just a few small highlights. And this neutral environment does not have very
+    high dynamic range; if you were to use an outdoor environment that includes
+    the sun, the exposure would have to be so low that nearly the entire render
+    would be black.</p>
+
+    <p>Everything shown here is rendered to an 8-bit sRGB output, but HDR
+    displays and formats are getting more common. Might we be able to avoid tone
+    mapping by keeping the HDR of our raw image in an HDR output format? The
+    short answer is no, because HDR displays may be high dynamic range compared
+    to traditional SDR, but they are still orders of magnitude short of what our
+    eyes experience in the real world, so all the same reasons for tone mapping
+    still apply. However, it is important to note that the choice of tone
+    mapping function should be dependent on the output format. Ideally it would
+    even depend on the display's contrast ratio, its brightness settings, and
+    the level of ambient lighting around it, but this data is unlikely to be
+    available.</p>
+
+    <h3>How do we accurately render a physical object with glTF?</h3>
+
+    <p>Hopefully the preceeding discussion has convinced you that simply
+    validating some rendered pixel color against the object's "correct" color is
+    not a useful or valid process. If only it were so simple! Instead you need
+    to look at your whole pipeline and consider what your end goals really
+    are.</p>
+
+    <p>For the sake of measureability, let's consider the end goal to be
+    minimizing the return rate of products bought online where the shopper's
+    primary visual cue is a 3D model (let's assume we're making a decent enough
+    render that we're not destroying the purchasing rate). To succeed, we must
+    render images that the shopper perceives to be equivalent to their
+    perception of the actual product when it arrives. This is exactly the same
+    goal as a photograph of this product in a magazine or on a website.</p>
+
+    <p>There is a much longer history of product photography, so let's start
+    there. What does a product photographer's pipeline look like? Obviously they
+    vary, but the overall steps will tend to look like: 1) lighting setup, 2)
+    camera setup, 3) take the photos, 4) post-processing. Ideally, it is
+    possible to capture this lighting environment, convert the camera setup to
+    matrices and exposure, use the same post-processing, author the glTF
+    according to measured material properties, and output a render that will
+    match the photo quite well (especially with a path-traced renderer). </p>
+
+    <p>It is tempting to blame any observed discrepancies on the renderer,
+    especially real-time rasterizers, but in fact a lot of research has gone
+    into making them amazingly physically accurate and consistent, as you can
+    see in our <a href="../fidelity">fidelity comparisons</a>. Nearly always the
+    most serious errors are differences in lighting, materials, exposure, and
+    post-processing.</p>
+
+    <p>Let's consider for a moment what happens in the photography
+    post-processing step. Some things don't apply to rendering, like masking out
+    shadows to make them semi-transparent - a 3D renderer can do this
+    automatically. In addition to color-neutral tone mapping, sometimes the
+    colors are intentionally "corrected". Why? After all, if the measured light
+    from the actual scene is not correct, what is? Since 3D rendering is
+    happening completely automatically in real time, there is no way to make
+    manual bespoke color adjustments for each shot.</p>
+
+    <p>It may be that some of the post-processing color correction is simply a
+    matter of expediency. Before digital photography, to get the right look, the
+    lighting and scene had to be adjusted, which involves manual labor. Digital
+    post-processing can allow the lighting to be less precise. However in 3D
+    rendering, the lighting is equally digital, so it is generally a better
+    practice to keep the post-processing step simple (e.g. just ACES tone
+    mapping) and adjust the environment image if necessary.</p>
+
+    <p>Generally speaking, part of the purpose of 3D rendering is to avoid the
+    cost of photography, by making the entire process digital. The 3D model is
+    costly for an artist to create, but it persists for creating many different
+    photoshoots and interactive experiences quickly. So how can this 3D model be
+    verified as accurate to the physical product? It's not likely to be by
+    comparison to photography, as this would largely defeat the purpose of the
+    cost savings.</p>
+
+    <p>Rather, </p>
 
   </div>
   <div style="margin-top:24px"></div>
