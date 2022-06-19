@@ -73,11 +73,13 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
 
 // Constants
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
-const KEYBOARD_ORBIT_INCREMENT_SMALL = KEYBOARD_ORBIT_INCREMENT / 4; // Must be a multiple of KEYBOARD_ORBIT_INCREMENT so you can always get back to the same place
+// const KEYBOARD_ORBIT_INCREMENT_SMALL = KEYBOARD_ORBIT_INCREMENT / 4; // Must be a multiple of KEYBOARD_ORBIT_INCREMENT so you can always get back to the same place
 const ZOOM_SENSITIVITY = 0.04;
-const PAN_INCREMENT_SMALL = 1;
-const PAN_INCREMENT = PAN_INCREMENT_SMALL * 10; // A multiple of PAN_INCREMENT_SMALL. Set empirically so it feels about right
+const PAN_SCALE = 1;
+// const PAN_INCREMENT_SMALL = 1;
+// const PAN_INCREMENT = 1; // = PAN_INCREMENT_SMALL * 10; // A multiple of PAN_INCREMENT_SMALL. Set empirically so it feels about right
 
+// Replaced event.KeyCode with event.key so don't need these constants, but they defined as an export so have left them here
 export const KeyCode = {
   PAGE_UP: 33,
   PAGE_DOWN: 34,
@@ -124,6 +126,7 @@ export interface PointerChangeEvent extends ThreeEvent {
  *
  * Another notable difference compared to OrbitControls is that SmoothControls
  * does not currently support panning (but probably will in a future revision).
+ * //Probably need to change this comment
  *
  * Like OrbitControls, SmoothControls assumes that the orientation of the camera
  * has been set in terms of position, rotation and scale, so it is important to
@@ -140,6 +143,10 @@ export class SmoothControls extends EventDispatcher {
 
   // Pan state
   public enablePan = true;
+  public panKeyIncrement = 10;
+  public panKeyMultiplier = 10;
+  public orbitKeyMultipler = 4;
+  public panMouseMultiplier = 10;
   private panProjection = new Matrix3();
   private panPerPixel = 0;
 
@@ -160,6 +167,9 @@ export class SmoothControls extends EventDispatcher {
   private startPointerPosition = {clientX: 0, clientY: 0};
   private lastSeparation = 0;
   private touchDecided = false;
+  private previousStartTime = 0;
+  private panScale = 1;
+  
 
   constructor(
       readonly camera: PerspectiveCamera, readonly element: HTMLElement,
@@ -605,6 +615,7 @@ export class SmoothControls extends EventDispatcher {
   private initializePan() {
     const {theta, phi} = this.spherical;
     const psi = theta - this.scene.yaw;
+    
     this.panPerPixel = PAN_SENSITIVITY / this.scene.height;
     this.panProjection.set(
         -Math.cos(psi),
@@ -621,8 +632,9 @@ export class SmoothControls extends EventDispatcher {
   private movePan(dx: number, dy: number) {
     const {scene} = this;
     const dxy = vector3.set(dx, dy, 0);
+    // Scale metersPerPixel by panScale, which is set away from 1 only on ctrlKey press regardless of it the action is started by pointer or key
     const metersPerPixel =
-        this.spherical.radius * Math.exp(this.logFov) * this.panPerPixel;
+        this.spherical.radius * Math.exp(this.logFov) * (this.panPerPixel / this.panScale);
     dxy.multiplyScalar(metersPerPixel);
 
     const target = scene.getTarget();
@@ -646,22 +658,16 @@ export class SmoothControls extends EventDispatcher {
         scene.getNDC(pointer.clientX, pointer.clientY));
 
     if (hit == null) {
-      // 'This should probably be optional, but I don't know how to extend it to pass something into here
-
-      // No, don't move all the way out.
-      // If clicked on nothing then do nothing.
-      // Resetting on hit == null means you forfeit the position you were just in. If that position is intentional then you lose that intention.
-
       const {cameraTarget} = scene.element;
       scene.element.cameraTarget = '';
       scene.element.cameraTarget = cameraTarget;
       // Zoom all the way out.
+      // Note. Beware that if modelview.maxFOV is set to a value larger than to what auto would generate (say 90deg) you get very pronounced view changes.
+      // This seems to be because setFieldOfView in adjustOrbit is using a log change which means you push out to the maximum radius very quickly.
       this.userAdjustOrbit(0, 0, 1);
-      console.log('In recenter');
     } else {
       scene.target.worldToLocal(hit.position);
       scene.setTarget(hit.position.x, hit.position.y, hit.position.z);
-      console.log('In recenter B');
     }
   }
 
@@ -720,7 +726,7 @@ export class SmoothControls extends EventDispatcher {
     this.isUserPointing = false;
 
     if (event.pointerType === 'touch') {
-      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
+      this.isUserChange = !event.altKey;// set by interact() in controls.ts
       this.onTouchChange(event);
     } else {
       this.isUserChange = true;
@@ -745,7 +751,7 @@ export class SmoothControls extends EventDispatcher {
     pointer.clientY = event.clientY;
 
     if (event.pointerType === 'touch') {
-      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
+      this.isUserChange = !event.altKey;// set by interact() in controls.ts
       if (this.touchMode !== null) {
         this.touchMode(dx, dy);
       }
@@ -777,9 +783,19 @@ export class SmoothControls extends EventDispatcher {
       element.removeEventListener('pointermove', this.onPointerMove);
       element.removeEventListener('pointerup', this.onPointerUp);
       element.removeEventListener('touchmove', this.disableScroll);
-      if (this.enablePan) {
-        this.recenter(event);
+
+      /** Something for double click detection.
+       * Only fire the recenter event on double click. This prevents errant (single) click events (such as giving back focus to model-viewer) from changing the current view.
+       * If the time difference between now and the previous mouse click (not the current one, the one before that) is less than TAP_MS then call it a double click.
+      */
+      if (performance.now() - this.previousStartTime < TAP_MS) {
+        if (this.enablePan) {
+          this.recenter(event);
+        }
       }
+      // if (this.enablePan) {
+      //   this.recenter(event);
+      // }
     } else if (this.touchMode !== null) {
       this.onTouchChange(event);
     }
@@ -791,6 +807,12 @@ export class SmoothControls extends EventDispatcher {
     if (this.isUserPointing) {
       this.dispatchEvent({type: 'pointer-change-end'});
     }
+
+    // Swap the startTime of the current click into the previous click
+    this.previousStartTime = this.startTime;
+
+    // Reset panScale
+    this.panScale = 1;
   };
 
   private onTouchChange(event: PointerEvent) {
@@ -813,7 +835,7 @@ export class SmoothControls extends EventDispatcher {
 
       if (this.enablePan && this.touchMode != null) {
         this.initializePan();
-        if (!event.altKey) {  // user interaction, not prompt
+        if (!event.altKey) {// user interaction, not prompt
           (this.scene.element as any)[$panElement].style.opacity = 1;
         }
       }
@@ -822,9 +844,13 @@ export class SmoothControls extends EventDispatcher {
 
   private onMouseDown(event: MouseEvent) {
     this.panPerPixel = 0;
+    // if (this.enablePan &&
+    //     (event.button === 2 || event.ctrlKey || event.metaKey ||
+    //      event.shiftKey)) {
+
+    // Removed ctrl key from condition so that ctrl is not associated with panning
     if (this.enablePan &&
-        (event.button === 2 || event.ctrlKey || event.metaKey ||
-         event.shiftKey)) {
+        (event.button === 2 || event.metaKey || event.shiftKey)) {          
       this.initializePan();
       (this.scene.element as any)[$panElement].style.opacity = 1;
     }
@@ -852,118 +878,121 @@ export class SmoothControls extends EventDispatcher {
     const {isUserChange} = this;
     this.isUserChange = true;
 
-    /* Simple if() logic to catch modifier keys
-    * There is undoubtedly a nicer way of doing this
-    * Only considering modifiers of shift+ctrl, shift, ctrl and none.
-    * This maps to pan+small, pan, (orbit)small and (orbit)
-    * Pan key choice inspired by Blender
-    */
-    if (event.shiftKey && event.ctrlKey) {
+    /**
+     * Simple if() logic to catch modifier keys
+     *
+     * Only respond to a pan request if enablePan is true
+     * Only considering modifiers of (shift+ctrl) & enablePan, shift & enablePan, ctrl and none. 
+     * This maps to pan+small, pan, (orbit)small and (orbit)
+     * Pan key choice inspired by Blender
+     * If it is a pan event from keyboard then reset panScale to 1
+     * */
+
+     this.panScale = PAN_SCALE;
+
+    if (event.shiftKey && event.ctrlKey && this.enablePan) {
+      this.panScale = this.panKeyMultiplier;
       (this.scene.element as any)[$panElement].style.opacity = 1;
-      relevantKey = this.panKeyCodeHandler(event, PAN_INCREMENT_SMALL, PAN_INCREMENT_SMALL);
-    } else if (event.shiftKey) {
+      relevantKey = this.panKeyCodeHandler(event, this.panKeyIncrement, isUserChange);
+    } else if (event.shiftKey && this.enablePan) {
       (this.scene.element as any)[$panElement].style.opacity = 1;
-      relevantKey = this.panKeyCodeHandler(event, PAN_INCREMENT, PAN_INCREMENT);
+      relevantKey = this.panKeyCodeHandler(event, this.panKeyIncrement, isUserChange);
     } else if (event.ctrlKey) {
-      relevantKey = this.orbitZoomKeyCodeHandler(event, ZOOM_SENSITIVITY, KEYBOARD_ORBIT_INCREMENT_SMALL, isUserChange);
+      relevantKey = this.orbitZoomKeyCodeHandler(event, ZOOM_SENSITIVITY, KEYBOARD_ORBIT_INCREMENT / this.orbitKeyMultipler, isUserChange);
     } else {
       relevantKey = this.orbitZoomKeyCodeHandler(event, ZOOM_SENSITIVITY, KEYBOARD_ORBIT_INCREMENT, isUserChange);
     }
-
-    // switch (event.keyCode) {
-    //   case KeyCode.PAGE_UP:
-    //     this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
-    //     break;
-    //   case KeyCode.PAGE_DOWN:
-    //     this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
-    //     break;
-    //   case KeyCode.UP:
-    //     this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
-    //     break;
-    //   case KeyCode.DOWN:
-    //     this.userAdjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
-    //     break;
-    //   case KeyCode.LEFT:
-    //     this.userAdjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
-    //     break;
-    //   case KeyCode.RIGHT:
-    //     this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
-    //     break;
-    //   default:
-    //     relevantKey = false;
-    //     this.isUserChange = isUserChange;
-    //     break;
-    // }
+    
+    // As all panning is scaled by ctrl key need to set the pan mouse scale if ctrl pressed
+    // This must be done after the KeyDown events so that it doesn't affect the Key pan scaling
+    this.panScale = (event.ctrlKey || event.key == 'Control') ? this.panMouseMultiplier : PAN_SCALE
 
     if (relevantKey) {
       event.preventDefault();
     }
   };
 
+  /**
+   * Hide $panElement when the shift key or (when shift is a modifier) is the key that has "upped"
+   * Only testing shift key misses then case when shift is a modifier
+   * Always setting the opacity to 0 means $panElement winks on and off
+   * Reset panScale on every KeyUp event
+   * @param event The keyboard event for the .key and .shiftKey value
+   */
   private onKeyUp = (event: KeyboardEvent) => {
-    // console.log('In onKeyUp', event);
-    let opacity = 1;
-    // Only hide $panElement if shift key released (#16) or .shiftKey is false (although not sure if this second case ever gets hit when opacity == 1)
-    if (event.keyCode == KeyCode.SHIFT) {
-      opacity = 0;
-      // console.log('Released shift');
-    } else if (!event.shiftKey) {
-      opacity = 0;
-      // console.log('Released something else');
-    }
-    (this.scene.element as any)[$panElement].style.opacity = opacity;
+    (this.scene.element as any)[$panElement].style.opacity = (event.key == 'Shift' || !event.shiftKey) ? 0:1;
+    this.panScale = PAN_SCALE;
   }
 
+  /**
+   * Handles the orbit and Zoom key presses
+   * @param event The keyboard event for the .key value
+   * @param ZoomInc The zoom increment
+   * @param OrbitInc The orbit increment
+   * @param isUserChange Is this a user initiated event
+   * @returns boolean to indicate if the key event has been handled
+   */
   private orbitZoomKeyCodeHandler(event: KeyboardEvent, ZoomInc: number, OrbitInc: number, isUserChange: boolean) {
-    let swizzkey = true;
-    switch (event.keyCode) {
-      case KeyCode.PAGE_UP:
+    // releventKey as the return value is to get the condition back to the calling function as don't have pass by reference arguments in js
+    let relevantKey = true;
+    switch (event.key) {
+      case 'PageUp':
         this.userAdjustOrbit(0, 0, ZoomInc);
         break;
-      case KeyCode.PAGE_DOWN:
+      case 'PageDown':
         this.userAdjustOrbit(0, 0, -1 * ZoomInc);
         break;
-      case KeyCode.UP:
+      case 'ArrowUp':
         this.userAdjustOrbit(0, -OrbitInc, 0);
         break;
-      case KeyCode.DOWN:
+      case 'ArrowDown':
         this.userAdjustOrbit(0, OrbitInc, 0);
         break;
-      case KeyCode.LEFT:
+      case 'ArrowLeft':
         this.userAdjustOrbit(-OrbitInc, 0, 0);
         break;
-      case KeyCode.RIGHT:
+      case 'ArrowRight':
         this.userAdjustOrbit(OrbitInc, 0, 0);
         break;
       default:
-        swizzkey = false;
+        relevantKey = false;
         this.isUserChange = isUserChange;
         break;
     }
-    return swizzkey;
+
+    return relevantKey;
   }
 
-  private panKeyCodeHandler(event: KeyboardEvent, dx: number, dy:number) {
+ /**
+  * Handles the Pan key presses
+  * @param event The keyboard event for the .key value
+  * @param dxy The magnitude of the move
+  * @param isUserChange Is this a user initiated event
+  * @returns boolean to indicate if the key event has been handled
+  */
+    private panKeyCodeHandler(event: KeyboardEvent, dxy: number, isUserChange: boolean) {
     this.initializePan();
-    let swizzkey = true;
-    switch (event.keyCode) {
-      case KeyCode.UP:
-        this.movePan(0, -1 * dy); // This is the negative one so that the model appears to move as the arrow direction rather than the view moving
+    // releventKey as the return value is to get the condition back to the calling function as don't have pass by reference arguments in js
+    let relevantKey = true;
+    switch (event.key) {
+      case 'ArrowUp':
+        this.movePan(0, -1 * dxy); // This is the negative one so that the model appears to move as the arrow direction rather than the view moving
         break;
-      case KeyCode.DOWN:
-        this.movePan(0, dy);
+      case 'ArrowDown':
+        this.movePan(0, dxy);
         break;
-      case KeyCode.LEFT:
-        this.movePan(-1 * dx, 0);
+      case 'ArrowLeft':
+        this.movePan(-1 * dxy, 0);
         break;
-      case KeyCode.RIGHT:
-        this.movePan(dx, 0);
+      case 'ArrowRight':
+        this.movePan(dxy, 0);
         break;
       default:
-        swizzkey = false;
+        relevantKey = false;
+        this.isUserChange = isUserChange;
         break;
     }
-    return swizzkey;
+    return relevantKey;
   }
 }
 

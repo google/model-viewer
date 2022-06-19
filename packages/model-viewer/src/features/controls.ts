@@ -71,6 +71,11 @@ const MINIMUM_RADIUS_RATIO = 1.1;
 const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 
+const DEFAULT_PANKEYINCREMENT = 10;
+const DEFAULT_PANKEYMULTIPLIER = 10;
+const DEFAULT_PANMOUSEMULTIPLIER = 10;
+const DEFAULT_ORBITKEYMULTIPLIER = 8;
+
 export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
 export const INTERACTION_PROMPT = '. Use mouse, touch or arrow keys to move.';
 
@@ -361,6 +366,18 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Boolean, attribute: 'enable-pan'})
     enablePan: boolean = false;
 
+    @property({type: Number, attribute: 'pan-key-increment'})
+    panKeyIncrement: number = DEFAULT_PANKEYINCREMENT;
+
+    @property({type: Number, attribute: 'pan-key-multiplier'})
+    panKeyMultiplier: number = DEFAULT_PANKEYMULTIPLIER;
+
+    @property({type: Number, attribute: 'pan-mouse-multiplier'})
+    panMouseMultiplier: number = DEFAULT_PANMOUSEMULTIPLIER;
+
+    @property({type: Number, attribute: 'orbit-key-multipler'})
+    orbitKeyMultipler: number = DEFAULT_ORBITKEYMULTIPLIER;
+
     @property({type: Number, attribute: 'interpolation-decay'})
     interpolationDecay: number = DECAY_MILLISECONDS;
 
@@ -504,6 +521,26 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('enablePan')) {
         controls.enablePan = this.enablePan;
+      }
+
+      if (changedProperties.has('panKeyIncrement')) {
+        // Force this to be an integer >0 so that always moving in integer steps
+        controls.panKeyIncrement = Math.trunc(this.panKeyIncrement) <=0 ? 1 : Math.trunc(this.panKeyIncrement);
+      }
+
+      if (changedProperties.has('panKeyMultiplier')) {
+        // Force this to be an integer >0. It is used in a division so cannot be zero
+        controls.panKeyMultiplier = Math.trunc(this.panKeyMultiplier) <=0 ? 1 : Math.trunc(this.panKeyMultiplier);
+      }
+
+      if (changedProperties.has('panMouseMultiplier')) {
+        // Force this to be an integer >0. It is used in a division so cannot be zero
+        controls.panMouseMultiplier = Math.trunc(this.panMouseMultiplier) <=0 ? 1 : Math.trunc(this.panMouseMultiplier);
+      }   
+
+      if (changedProperties.has('orbitKeyMultipler')) {
+        // Force this to have a magnitude > 0.1 but can be either positive or negative
+        controls.orbitKeyMultipler = Math.abs(this.orbitKeyMultipler) <= 0.1 ? 0.1 : this.orbitKeyMultipler;
       }
 
       if (changedProperties.has('bounds')) {
