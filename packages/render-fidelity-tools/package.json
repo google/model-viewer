@@ -43,6 +43,7 @@
     "mkdirp": "^1.0.4",
     "pngjs": "^6.0.0",
     "puppeteer": "^10.1.0",
+    "rhodonite": "^0.8.5",
     "rimraf": "^3.0.2"
   },
   "devDependencies": {

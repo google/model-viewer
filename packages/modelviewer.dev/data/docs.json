@@ -1,6 +1,7 @@
 [
   {
     "Title": "Loading",
+    "htmlName": "loading",
     "Attributes": [
       {
         "name": "src",
@@ -199,6 +200,16 @@
         "name": "toDataURL(type, encoderOptions)",
         "htmlName": "toDataURL",
         "description": "Returns a screenshot of the current model render in the format specified by <i>type</i> (defaults to image/png). The screenshot is encoded as a data URL string. In formats that support a sliding scale of quality (such as image/jpeg and image/webp) you can also specify a value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i> defaults to 0.92 otherwise)."
+      },
+      {
+        "name": "registerRenderer(externalRenderer)",
+        "htmlName": "registerRenderer",
+        "description": "This method allows you to replace our entire rendering stack with your own for this element. The glTF-related portions of our API cease to function: ar, lighting, staging, animation, scene-graph. However, loading, camera, and annotations contiue to function normally. Note that you are now in charge of your own data, so you can load any type of file you choose, or even generate a scene from script.<br/><br/>The externalRenderer you provide must implement our <code>RendererInterface</code>, which consists of three functions: <br/><br/>- <code>load(progressCallback: (progress: number) => void): Promise&lt;FramingInfo&gt;</code><br/>- <code>render(camera: Camera): void</code><br/>- <code>resize(width: number, height: number): void</code> <br/><br/>The element will call your <code>load</code> method when it would normally load a glTF, lazily by default. Make sure to set the <code>src</code> to something (any string will do) to indicate this is not an empty element. Make sure to call our <code>progressCallback</code> occasionally, which will update our progress bar, and ensure you set a progress value of 1.0 when your pixels are ready to be shown. You must return us a <code>FramingInfo</code> object containing two numbers: <code>framedRadius</code> and <code>fieldOfViewAspect</code> to allow our camera to set its defaults. The <code>framedRadius</code> is the size of the bounding sphere and <code>fieldOfViewAspect</code> is the ideal element aspect ratio to frame the model (1.0 is a good default). <br/><br/>We will call your <code>render</code> method when the camera changes and pass you the <code>Camera</code> object containing <code>viewMatrix: Array&lt;number&gt;</code> and <code>projectionMatrix: Array&lt;number&gt;</code> as 4x4 matrices. Use this to update the rendered pixels in your <a href=\"./#entrydocs-loading-slots-canvas\">canvas slot element</a>. We will call your <code>resize</code> method when the element is resized so you can take coordinated action on your slotted canvas element."
+      },
+      {
+        "name": "unregisterRenderer()",
+        "htmlName": "unregisterRenderer",
+        "description": "Switches back to default rendering of a glTF/GLB src and stops calling any external renderer. Note you must manually remove your own slotted canavs element concurrently."
       }
     ],
     "Static Methods": [
@@ -273,11 +284,17 @@
         "name": "progress-bar",
         "htmlName": "progressBar",
         "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"progress-bar\"</span>, this element will replace the default progress bar, which is a thin bar at the top of the element. Use the progress event to update its style."
+      },
+      {
+        "name": "canvas",
+        "htmlName": "canvas",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"canvas\"</span>, this element will replace the default rendering canvas. This slot is intended only for use with an external renderer, provided with <a href=\"./#entrydocs-loading-methods-registerRenderer\">registerRenderer</a>. This can be any kind of element your renderer draws to, like a WebGL canvas, 2D canvas, or even a streaming video."
       }
     ]
   },
   {
     "Title": "Augmented Reality",
+    "htmlName": "augmentedreality",
     "Attributes": [
       {
         "name": "ar",
@@ -433,6 +450,7 @@
   },
   {
     "Title": "Staging & Cameras",
+    "htmlName": "stagingandcameras",
     "Attributes": [
       {
         "name": "camera-controls",
@@ -746,6 +764,7 @@
   },
   {
     "Title": "Annotations",
+    "htmlName": "annotations",
     "CSS": [
       {
         "name": "--min-hotspot-opacity",
@@ -793,7 +812,8 @@
     ]
   },
   {
-    "Title": "Lighting & Env",
+    "Title": "Lighting & Skybox",
+    "htmlName": "lightingandenv",
     "Attributes": [
       {
         "name": "skybox-image",
@@ -869,6 +889,7 @@
   },
   {
     "Title": "Animation",
+    "htmlName": "animation",
     "Attributes": [
       {
         "name": "animation-name",
@@ -969,7 +990,8 @@
     ]
   },
   {
-    "Title": "Scene Graph",
+    "Title": "Materials & Scene",
+    "htmlName": "scenegraph",
     "Attributes": [
       {
         "name": "variant-name",
@@ -1016,10 +1038,15 @@
       {
         "name": "model",
         "htmlName": "model",
-        "description": "This object contains all the methods for the scene-graph API. See examples for usage.",
+        "description": "This object contains all the methods for the materials API. See examples for usage.",
         "links": [
-          "<a href=\"../examples/scenegraph/\">Related examples</a>"
+          "<a href=\"../examples/scenegraph/#pickMaterialExample\">API definition</a>"
         ]
+      },
+      {
+        "name": "originalGltfJson",
+        "htmlName": "originalGltfJson",
+        "description": "Returns a readonly copy of the GLTF JSON object as loaded. Changing this object has no affect on the scene and changes made through the materials API are not reflected here. This object is useful for reverting individual changes made through the materials API."
       }
     ],
     "Methods": [
@@ -1036,7 +1063,15 @@
         "htmlName": "materialFromPoint",
         "description": "Returns a material whose mesh primitive intersects with a ray created from the input pixel coordinates relative to the screen. Returns the material whose mesh is nearest the camera.",
         "links": [
-          "<a href=\"../examples/scenegraph/#pickMaterialExample\">Related examples</a>"
+          "<a href=\"../examples/scenegraph/#pickMaterialExample\">Material picking example</a>"
+        ]
+      },
+      {
+        "name": "createTexture(uri, type?)",
+        "htmlName": "createTexture",
+        "description": "Async method that returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The uri is required, but the type defaults to 'image/png', which only designates the export format for saving a GLB. The mimetypes 'image/jpeg' and 'image/webp' are also supported.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#createTexturesExample\">Create texture example</a>"
         ]
       }
     ],
