@@ -4,9 +4,6 @@ on: [pull_request]
 
 jobs:
   minimal_test_run:
-    env:
-      USE_BROWSER_STACK: false
-
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
