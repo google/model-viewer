@@ -63,18 +63,6 @@ module.exports = function(config) {
     reporters: ['mocha'],
 
     mochaReporter: {output: 'autowatch'},
-
-    // Note setting --browsers on the command-line always overrides this list.
-    browsers: [
-      'ChromeHeadlessNoSandbox',
-    ],
-
-    customLaunchers: {
-      ChromeHeadlessNoSandbox: {
-        base: 'ChromeHeadless',
-        flags: ['--no-sandbox'],
-      }
-    },
   });
 
 
@@ -86,7 +74,7 @@ module.exports = function(config) {
     }
 
     const browserStackLaunchers = {
-      'Chrome (latest)': {
+      'Chrome': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
@@ -94,7 +82,7 @@ module.exports = function(config) {
         browser_version: 'latest',
         browserstack: {localIdentifier: 'chrome'}
       },
-      'Chrome (latest-1)': {
+      'ChromeLast': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
@@ -102,7 +90,7 @@ module.exports = function(config) {
         browser_version: 'latest-1',
         browserstack: {localIdentifier: 'chromeOld'}
       },
-      'Edge (latest)': {
+      'Edge': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
@@ -110,7 +98,7 @@ module.exports = function(config) {
         browser_version: 'latest',
         browserstack: {localIdentifier: 'edge'}
       },
-      'Edge (latest-1)': {
+      'EdgeLast': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
@@ -118,7 +106,7 @@ module.exports = function(config) {
         browser_version: 'latest-1',
         browserstack: {localIdentifier: 'edgeOld'}
       },
-      'Firefox (latest)': {
+      'Firefox': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
@@ -126,7 +114,7 @@ module.exports = function(config) {
         browser_version: 'latest',
         browserstack: {localIdentifier: 'Firefox'}
       },
-      'Firefox (latest-1)': {
+      'FirefoxLast': {
         base: 'BrowserStack',
         os: 'Windows',
         os_version: '10',
@@ -134,7 +122,7 @@ module.exports = function(config) {
         browser_version: 'latest-1',
         browserstack: {localIdentifier: 'FirefoxOld'}
       },
-      'Safari (latest)': {
+      'Safari': {
         base: 'BrowserStack',
         os: 'OS X',
         os_version: 'Catalina',
@@ -142,7 +130,7 @@ module.exports = function(config) {
         browser_version: 'latest',
         browserstack: {localIdentifier: 'Safari'}
       },
-      'iOS Safari (iOS 14)': {
+      'iOS14': {
         base: 'BrowserStack',
         os: 'iOS',
         os_version: '14',
@@ -151,7 +139,7 @@ module.exports = function(config) {
         real_mobile: 'true',
         browserstack: {localIdentifier: 'iOS14'}
       },
-      'iOS Safari (iOS 15)': {
+      'iOS15': {
         base: 'BrowserStack',
         os: 'iOS',
         os_version: '15',
@@ -160,7 +148,7 @@ module.exports = function(config) {
         real_mobile: 'true',
         browserstack: {localIdentifier: 'iOS15'}
       },
-      'Android (Huawei P30)': {
+      'Android': {
         base: 'BrowserStack',
         os: 'Android',
         os_version: '9.0',
@@ -170,6 +158,10 @@ module.exports = function(config) {
         browserstack: {localIdentifier: 'AndroidP30'}
       },
     };
+
+    const browserStackLauncher = {};
+    browserStackLauncher[process.env.BROWSER] =
+        browserStackLaunchers[process.env.BROWSER];
 
     config.set({
       browserStack: {
@@ -181,8 +173,22 @@ module.exports = function(config) {
 
       reporters: ['BrowserStack', 'mocha'],
 
-      customLaunchers: browserStackLaunchers,
-      browsers: [...config.browsers, ...Object.keys(browserStackLaunchers)],
+      customLaunchers: browserStackLauncher,
+      browsers: [process.env.BROWSER],
+    });
+  } else {
+    config.set({
+      // Note setting --browsers on the command-line always overrides this list.
+      browsers: [
+        'ChromeHeadlessNoSandbox',
+      ],
+
+      customLaunchers: {
+        ChromeHeadlessNoSandbox: {
+          base: 'ChromeHeadless',
+          flags: ['--no-sandbox'],
+        }
+      }
     });
   }
 };

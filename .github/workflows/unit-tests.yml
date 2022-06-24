@@ -4,9 +4,12 @@ on: [push]
 
 jobs:
   full_test_run:
+    strategy:
+      matrix:
+        browser: [Headless, Chrome, ChromeLast, Edge, EdgeLast, Firefox, FirefoxLast, Safari, iOS14, iOS15, Android]
 
     env:
-      USE_BROWSER_STACK: true
+      USE_BROWSER_STACK: ${{ matrix.browser != 'Headless' }}
 
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -44,6 +47,7 @@ jobs:
 
     - name: Unit tests
       env:
+        BROWSER: ${{ matrix.browser }}
         BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
         BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
         BROWSER_STACK_BUILD_NAME: ${{ format('{0} / {1}', github.ref, github.run_id) }}
