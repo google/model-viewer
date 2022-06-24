@@ -1,15 +1,16 @@
-name: Unit tests
+name: Unit tests (BrowserStack)
 
 on: [push]
 
 jobs:
   full_test_run:
     strategy:
+      fail-fast: false
       matrix:
         browser: [Headless, Chrome, ChromeLast, Edge, EdgeLast, Firefox, FirefoxLast, Safari, iOS14, iOS15, Android]
 
     env:
-      USE_BROWSER_STACK: ${{ matrix.browser != 'Headless' }}
+      USE_BROWSER_STACK: true
 
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -50,5 +51,5 @@ jobs:
         BROWSER: ${{ matrix.browser }}
         BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
         BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
-        BROWSER_STACK_BUILD_NAME: ${{ format('{0} / {1}', github.ref, github.run_id) }}
+        BROWSER_STACK_BUILD_NAME: ${{ format('{0} / {1} / {2}', github.ref, github.run_id, github.run_number) }}
       run: npm run test:ci

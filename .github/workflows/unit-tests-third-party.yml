@@ -1,13 +1,14 @@
-name: Unit tests (third-party PR)
+name: Unit tests (Chrome Linux)
 
 on: [pull_request]
 
 jobs:
   minimal_test_run:
+    env:
+      USE_BROWSER_STACK: false
+
     runs-on: ubuntu-latest
     timeout-minutes: 60
-
-    if: github.event.pull_request.base.repo.id != github.event.pull_request.head.repo.id
 
     steps:
     - uses: actions/checkout@v2
