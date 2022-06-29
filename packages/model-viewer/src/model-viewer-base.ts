@@ -518,10 +518,13 @@ export default class ModelViewerElementBase extends ReactiveElement {
    * Called on initialization and when the resize observer fires.
    */
   [$updateSize]({width, height}: {width: any, height: any}) {
+    width = Math.floor(parseFloat(width));
+    height = Math.floor(parseFloat(height));
+
     this[$container].style.width = `${width}px`;
     this[$container].style.height = `${height}px`;
 
-    this[$onResize]({width: parseFloat(width), height: parseFloat(height)});
+    this[$onResize]({width, height});
   }
 
   [$tick](_time: number, _delta: number) {

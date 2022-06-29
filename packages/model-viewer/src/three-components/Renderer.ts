@@ -204,13 +204,13 @@ export class Renderer extends EventDispatcher {
     this.dpr = dpr;
 
     if (this.canRender) {
-      this.threeRenderer.setSize(width * dpr, height * dpr, false);
+      this.threeRenderer.setSize(Math.floor(width * dpr), Math.floor(height * dpr), false);
     }
 
     // Expand the canvas size to make up for shrinking the viewport.
     const scale = this.scaleFactor;
-    const widthCSS = width / scale;
-    const heightCSS = height / scale;
+    const widthCSS = Math.floor(width / scale);
+    const heightCSS = Math.floor(height / scale);
     // The canvas element must by styled outside of three due to the offscreen
     // canvas not being directly stylable.
     this.canvas3D.style.width = `${widthCSS}px`;
@@ -221,8 +221,8 @@ export class Renderer extends EventDispatcher {
     // and only the portion that is shown is copied over.
     for (const scene of this.scenes) {
       const {canvas} = scene;
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
       canvas.style.width = `${widthCSS}px`;
       canvas.style.height = `${heightCSS}px`;
       scene.queueRender();
@@ -246,8 +246,8 @@ export class Renderer extends EventDispatcher {
     this.avgFrameDuration =
         (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
-    const width = this.width / scale;
-    const height = this.height / scale;
+    const width = Math.floor(this.width / scale);
+    const height = Math.floor(this.height / scale);
 
     this.canvas3D.style.width = `${width}px`;
     this.canvas3D.style.height = `${height}px`;
