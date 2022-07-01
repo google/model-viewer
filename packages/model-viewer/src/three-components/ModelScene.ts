@@ -340,7 +340,7 @@ export class ModelScene extends Scene {
         return;
       }
       const material = mesh.material as Material;
-      if (!material.transparent) {
+      if (!(material as any).isMeshBasicMaterial || !material.transparent) {
         return;
       }
       boundingBox.setFromObject(mesh);
