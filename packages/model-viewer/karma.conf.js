@@ -80,7 +80,8 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Chrome',
         browser_version: 'latest',
-        browserstack: {localIdentifier: 'chrome'}
+        browserstack: {localIdentifier: 'chrome'},
+        myID: 0
       },
       'ChromeLast': {
         base: 'BrowserStack',
@@ -88,7 +89,8 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Chrome',
         browser_version: 'latest-1',
-        browserstack: {localIdentifier: 'chromeOld'}
+        browserstack: {localIdentifier: 'chromeOld'},
+        myID: 1
       },
       'Edge': {
         base: 'BrowserStack',
@@ -96,7 +98,8 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Edge',
         browser_version: 'latest',
-        browserstack: {localIdentifier: 'edge'}
+        browserstack: {localIdentifier: 'edge'},
+        myID: 2
       },
       'EdgeLast': {
         base: 'BrowserStack',
@@ -104,7 +107,8 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Edge',
         browser_version: 'latest-1',
-        browserstack: {localIdentifier: 'edgeOld'}
+        browserstack: {localIdentifier: 'edgeOld'},
+        myID: 3
       },
       'Firefox': {
         base: 'BrowserStack',
@@ -112,7 +116,8 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Firefox',
         browser_version: 'latest',
-        browserstack: {localIdentifier: 'Firefox'}
+        browserstack: {localIdentifier: 'Firefox'},
+        myID: 4
       },
       'FirefoxLast': {
         base: 'BrowserStack',
@@ -120,7 +125,8 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Firefox',
         browser_version: 'latest-1',
-        browserstack: {localIdentifier: 'FirefoxOld'}
+        browserstack: {localIdentifier: 'FirefoxOld'},
+        myID: 5
       },
       'Safari': {
         base: 'BrowserStack',
@@ -128,7 +134,8 @@ module.exports = function(config) {
         os_version: 'Catalina',
         browser: 'safari',
         browser_version: 'latest',
-        browserstack: {localIdentifier: 'Safari'}
+        browserstack: {localIdentifier: 'Safari'},
+        myID: 6
       },
       'iOS14': {
         base: 'BrowserStack',
@@ -137,7 +144,8 @@ module.exports = function(config) {
         device: 'iPhone 11',
         browser: 'iPhone',
         real_mobile: 'true',
-        browserstack: {localIdentifier: 'iOS14'}
+        browserstack: {localIdentifier: 'iOS14'},
+        myID: 7
       },
       'iOS15': {
         base: 'BrowserStack',
@@ -146,7 +154,8 @@ module.exports = function(config) {
         device: 'iPhone 13',
         browser: 'iPhone',
         real_mobile: 'true',
-        browserstack: {localIdentifier: 'iOS15'}
+        browserstack: {localIdentifier: 'iOS15'},
+        myID: 8
       },
       'Android': {
         base: 'BrowserStack',
@@ -155,7 +164,8 @@ module.exports = function(config) {
         device: 'Huawei P30',
         browser: 'Android',
         real_mobile: 'true',
-        browserstack: {localIdentifier: 'AndroidP30'}
+        browserstack: {localIdentifier: 'AndroidP30'},
+        myID: 9
       },
     };
 
@@ -175,6 +185,7 @@ module.exports = function(config) {
 
       customLaunchers: browserStackLauncher,
       browsers: [process.env.BROWSER],
+      port: browserStackLauncher[process.env.BROWSER].myID * 100 + 9076
     });
   } else {
     config.set({
