@@ -291,6 +291,13 @@
               does not support animations yet). Also, this source can be either
               a .usdz or a .reality file.
             </p>
+            <p>
+              Additionally, <code>ar-scale="fixed"</code> is used to prevent the
+              user from scaling the object in AR, applying to all three AR
+              modes. The <code>xr-environment</code> attribute causes estimated
+              lighting to be used in the WebXR AR mode, rather than the lighting
+              from the 3D mode, but does not affect Quick Look or Scene Viewer.
+            </p>
           </div>
           <example-snippet stamp-to="ar" highlight-as="html">
             <template>
