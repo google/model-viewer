@@ -183,6 +183,7 @@ module.exports = function(config) {
 
       customLaunchers: browserStackLaunchers,
       browsers: [...config.browsers, ...Object.keys(browserStackLaunchers)],
+      concurrency: 3,
     });
   }
 };
