@@ -45,6 +45,7 @@ function testFidelity(screenshotContext: WebGLRenderingContext|
       screenshotContext.UNSIGNED_BYTE,
       pixels);
 
+  let transparentPixels = 0;
   let whitePixels = 0;
   let blackPixels = 0;
   for (let row = 0; row < height; row++) {
@@ -56,6 +57,10 @@ function testFidelity(screenshotContext: WebGLRenderingContext|
       const index = (height - row - 1) * width + col;
       const position = index * COMPONENTS_PER_PIXEL;
 
+      if (pixels[position + 3] != 255) {
+        transparentPixels++;
+        continue;
+      }
       for (let i = 0; i < 3; i++) {
         const colorComponent = pixels[position + i];
         if (colorComponent != 255) {
@@ -76,11 +81,12 @@ function testFidelity(screenshotContext: WebGLRenderingContext|
   }
 
   const imagePixelCount = width * height;
-  expect(whitePixels + blackPixels)
+  expect(whitePixels + blackPixels + transparentPixels)
       .to.be.below(
           imagePixelCount,
           `Image had ${whitePixels} white pixels and ${
-              blackPixels} black pixels.`);
+              blackPixels} black pixels and ${
+              transparentPixels} background pixels.`);
 };
 
 suite('ModelViewerElement', () => {
