@@ -164,7 +164,7 @@ module.exports = function(config) {
         base: 'BrowserStack',
         os: 'Android',
         os_version: '10.0',
-        device: 'Galaxy A11',
+        device: 'Samsung Galaxy A11',
         browser: 'Android',
         real_mobile: 'true',
         browserstack: {localIdentifier: 'AndroidP30'}
