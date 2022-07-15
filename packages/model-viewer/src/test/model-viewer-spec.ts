@@ -2,7 +2,7 @@ import {$renderer} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
 
-import {assetPath} from './helpers.js';
+import {assetPath, rafPasses} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const expect = chai.expect;
@@ -23,6 +23,7 @@ const setupLighting =
   modelViewer.src = assetPath('models/reflective-sphere.gltf');
 
   await posterDismissed;
+  await rafPasses();
 }
 
 // TODO(sun765): this only test whether the screenshot
