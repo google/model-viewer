@@ -2,7 +2,7 @@ import {$renderer} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
 
-import {assetPath} from './helpers.js';
+import {assetPath, rafPasses} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const expect = chai.expect;
@@ -12,31 +12,18 @@ const SUNRISE_LDR_PATH = 'environments/spruit_sunrise_1k_LDR.jpg';
 
 const COMPONENTS_PER_PIXEL = 4;
 
-const setupModelViewer = async (modelViewer: ModelViewerElement) => {
-  modelViewer.style.width = '100px';
-  modelViewer.style.height = '100px';
-
-  const modelLoaded = waitForEvent(modelViewer, 'load');
-
-  modelViewer.src = assetPath('models/reflective-sphere.gltf');
-
-  modelViewer.minCameraOrbit = 'auto auto 12m';
-  modelViewer.maxCameraOrbit = 'auto auto 12m';
-  modelViewer.cameraOrbit = '0deg 90deg 12m';
-  modelViewer.cameraTarget = '0m 0m 0m';
-  modelViewer.fieldOfView = '45deg';
-
-  await modelLoaded;
-};
-
 const setupLighting =
-    async (modelViewer: ModelViewerElement, lighting: string) => {
+    async (modelViewer: ModelViewerElement, lighting?: string) => {
   const posterDismissed = waitForEvent(modelViewer, 'poster-dismissed');
 
-  const lightingPath = assetPath(lighting);
-  modelViewer.environmentImage = lightingPath;
+  if (lighting) {
+    const lightingPath = assetPath(lighting);
+    modelViewer.environmentImage = lightingPath;
+  }
+  modelViewer.src = assetPath('models/reflective-sphere.gltf');
 
   await posterDismissed;
+  await rafPasses();
 }
 
 // TODO(sun765): this only test whether the screenshot
@@ -59,7 +46,9 @@ function testFidelity(screenshotContext: WebGLRenderingContext|
       screenshotContext.UNSIGNED_BYTE,
       pixels);
 
-  let colorlessPixelCountCanvas = 0;
+  let transparentPixels = 0;
+  let whitePixels = 0;
+  let blackPixels = 0;
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       let isWhite = true;
@@ -69,6 +58,10 @@ function testFidelity(screenshotContext: WebGLRenderingContext|
       const index = (height - row - 1) * width + col;
       const position = index * COMPONENTS_PER_PIXEL;
 
+      if (pixels[position + 3] != 255) {
+        transparentPixels++;
+        continue;
+      }
       for (let i = 0; i < 3; i++) {
         const colorComponent = pixels[position + i];
         if (colorComponent != 255) {
@@ -79,14 +72,22 @@ function testFidelity(screenshotContext: WebGLRenderingContext|
         }
       }
 
-      if (isWhite || isBlack) {
-        colorlessPixelCountCanvas++;
+      if (isWhite) {
+        whitePixels++;
+      }
+      if (isBlack) {
+        blackPixels++;
       }
     }
   }
 
   const imagePixelCount = width * height;
-  expect(colorlessPixelCountCanvas).to.be.below(imagePixelCount);
+  expect(whitePixels + blackPixels + transparentPixels)
+      .to.be.below(
+          imagePixelCount,
+          `Image had ${whitePixels} white pixels and ${
+              blackPixels} black pixels and ${
+              transparentPixels} background pixels.`);
 };
 
 suite('ModelViewerElement', () => {
@@ -111,7 +112,8 @@ suite('ModelViewerElement', () => {
 
     setup(async () => {
       element = new ModelViewerElement();
-      setupModelViewer(element);
+      element.style.width = '100px';
+      element.style.height = '100px';
       document.body.insertBefore(element, document.body.firstChild);
     });
 
@@ -122,7 +124,7 @@ suite('ModelViewerElement', () => {
     });
 
     test('Metal roughness sphere with generated lighting', async () => {
-      await waitForEvent(element, 'poster-dismissed');
+      await setupLighting(element);
       const screenshotContext = element[$renderer].threeRenderer.getContext();
       testFidelity(screenshotContext);
     });
