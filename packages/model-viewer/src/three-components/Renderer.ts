@@ -472,9 +472,9 @@ export class Renderer extends EventDispatcher {
       // We avoid using the Three.js PixelRatio and handle it ourselves here so
       // that we can do proper rounding and avoid white boundary pixels.
       const width = Math.min(
-          Math.ceil(scene.width * scaleFactor * dpr), this.canvas3D.width);
+          Math.floor(scene.width * scaleFactor * dpr), this.canvas3D.width);
       const height = Math.min(
-          Math.ceil(scene.height * scaleFactor * dpr), this.canvas3D.height);
+          Math.floor(scene.height * scaleFactor * dpr), this.canvas3D.height);
 
       scene.renderShadow(this.threeRenderer);
 
