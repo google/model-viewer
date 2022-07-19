@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-import '../types/webxr.js';
-
 import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 

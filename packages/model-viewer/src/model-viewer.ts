@@ -32,7 +32,6 @@ declare global {
   interface XRSessionInit {
     readonly domOverlay: {root: HTMLElement|null};
   }
-  interface XRRay {}
 }
 
 export const ModelViewerElement = AnnotationMixin(SceneGraphMixin(StagingMixin(
