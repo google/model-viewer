@@ -18,6 +18,7 @@ import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
+import {Constructor} from '../templates.js';
 
 
 const expect = chai.expect;

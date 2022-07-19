@@ -18,7 +18,7 @@ import ModelViewerElementBase, {$scene, $userInputElement} from '../../model-vie
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, rafPasses, until} from '../helpers.js';
-import {BasicSpecTemplate} from '../templates.js';
+import {BasicSpecTemplate, Constructor} from '../templates.js';
 
 const expect = chai.expect;
 const CUBE_GLB_PATH = assetPath('models/cube.gltf');
