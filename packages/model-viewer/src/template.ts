@@ -40,6 +40,7 @@ const templateResult = html`
 
 .container {
   position: relative;
+  overflow: hidden;
 }
 
 .userInput {
@@ -47,7 +48,6 @@ const templateResult = html`
   height: 100%;
   display: block;
   position: relative;
-  overflow: hidden;
 }
 
 canvas {

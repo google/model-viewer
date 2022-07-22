@@ -204,13 +204,13 @@ export class Renderer extends EventDispatcher {
     this.dpr = dpr;
 
     if (this.canRender) {
-      this.threeRenderer.setSize(Math.floor(width * dpr), Math.floor(height * dpr), false);
+      this.threeRenderer.setSize(Math.ceil(width * dpr), Math.ceil(height * dpr), false);
     }
 
     // Expand the canvas size to make up for shrinking the viewport.
     const scale = this.scaleFactor;
-    const widthCSS = Math.floor(width / scale);
-    const heightCSS = Math.floor(height / scale);
+    const widthCSS = Math.ceil(width / scale);
+    const heightCSS = Math.ceil(height / scale);
     // The canvas element must by styled outside of three due to the offscreen
     // canvas not being directly stylable.
     this.canvas3D.style.width = `${widthCSS}px`;
@@ -221,8 +221,8 @@ export class Renderer extends EventDispatcher {
     // and only the portion that is shown is copied over.
     for (const scene of this.scenes) {
       const {canvas} = scene;
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
+      canvas.width = Math.ceil(width * dpr);
+      canvas.height = Math.ceil(height * dpr);
       canvas.style.width = `${widthCSS}px`;
       canvas.style.height = `${heightCSS}px`;
       scene.queueRender();
@@ -246,8 +246,8 @@ export class Renderer extends EventDispatcher {
     this.avgFrameDuration =
         (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
 
-    const width = Math.floor(this.width / scale);
-    const height = Math.floor(this.height / scale);
+    const width = Math.ceil(this.width / scale);
+    const height = Math.ceil(this.height / scale);
 
     this.canvas3D.style.width = `${width}px`;
     this.canvas3D.style.height = `${height}px`;
@@ -283,8 +283,8 @@ export class Renderer extends EventDispatcher {
     const {canvas} = scene;
     const scale = this.scaleFactor;
 
-    canvas.width = Math.round(this.width * this.dpr);
-    canvas.height = Math.round(this.height * this.dpr);
+    canvas.width = Math.ceil(this.width * this.dpr);
+    canvas.height = Math.ceil(this.height * this.dpr);
 
     canvas.style.width = `${this.width / scale}px`;
     canvas.style.height = `${this.height / scale}px`;
@@ -472,9 +472,9 @@ export class Renderer extends EventDispatcher {
       // We avoid using the Three.js PixelRatio and handle it ourselves here so
       // that we can do proper rounding and avoid white boundary pixels.
       const width = Math.min(
-          Math.floor(scene.width * scaleFactor * dpr), this.canvas3D.width);
+          Math.ceil(scene.width * scaleFactor * dpr), this.canvas3D.width);
       const height = Math.min(
-          Math.floor(scene.height * scaleFactor * dpr), this.canvas3D.height);
+          Math.ceil(scene.height * scaleFactor * dpr), this.canvas3D.height);
 
       scene.renderShadow(this.threeRenderer);
 
@@ -482,7 +482,7 @@ export class Renderer extends EventDispatcher {
       // clearing the depth from a different buffer
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
-          0, Math.floor(this.height * dpr) - height, width, height);
+          0, Math.ceil(this.height * dpr) - height, width, height);
       this.threeRenderer.render(scene, scene.camera);
 
       if (this.multipleScenesVisible) {
