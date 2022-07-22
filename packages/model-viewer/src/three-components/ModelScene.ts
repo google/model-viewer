@@ -774,7 +774,8 @@ export class ModelScene extends Scene {
     this.raycaster.setFromCamera(ndcPosition, this.getCamera());
     const hits = this.raycaster.intersectObject(object, true);
 
-    const hit = hits.find((hit) => !hit.object.userData.shadow);
+    const hit =
+        hits.find((hit) => hit.object.visible && !hit.object.userData.shadow);
     if (hit == null || hit.face == null) {
       return null;
     }
