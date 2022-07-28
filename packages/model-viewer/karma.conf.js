@@ -19,7 +19,7 @@ module.exports = function(config) {
     basePath: '',
     plugins: [
       require.resolve('@open-wc/karma-esm'),
-      'karma-*',
+      'karma-browserstack-launcher',
     ],
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
@@ -39,6 +39,7 @@ module.exports = function(config) {
     ],
     autoWatchBatchDelay: 1000,
     restartOnFileChange: true,
+    hostname: 'bs-local.com',
 
     browserDisconnectTimeout: 300000,
     browserNoActivityTimeout: 360000,
@@ -137,19 +138,10 @@ module.exports = function(config) {
       'Safari (latest)': {
         base: 'BrowserStack',
         os: 'OS X',
-        os_version: 'Catalina',
+        os_version: 'Monterey',
         browser: 'safari',
         browser_version: 'latest',
         browserstack: {localIdentifier: 'Safari'}
-      },
-      'iOS Safari (iOS 14)': {
-        base: 'BrowserStack',
-        os: 'iOS',
-        os_version: '14',
-        device: 'iPhone 11',
-        browser: 'iPhone',
-        real_mobile: 'true',
-        browserstack: {localIdentifier: 'iOS14'}
       },
       'iOS Safari (iOS 15)': {
         base: 'BrowserStack',
@@ -176,14 +168,14 @@ module.exports = function(config) {
         idleTimeout: 600,
         name: '<model-viewer> Unit Tests',
         project: '<model-viewer>',
+        apiClientEndpoint: 'https://api.browserstack.com',
         build: process.env.BROWSER_STACK_BUILD_NAME
       },
 
-      reporters: ['BrowserStack', 'mocha'],
+      reporters: ['BrowserStack', 'mocha', 'dots'],
 
       customLaunchers: browserStackLaunchers,
       browsers: [...config.browsers, ...Object.keys(browserStackLaunchers)],
-      concurrency: 3,
     });
   }
 };
