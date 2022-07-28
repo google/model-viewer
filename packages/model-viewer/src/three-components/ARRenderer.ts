@@ -19,6 +19,7 @@ import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {ControlsInterface} from '../features/controls.js';
+import {$currentBackground, $currentEnvironmentMap} from '../features/environment.js';
 import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
@@ -86,8 +87,6 @@ export class ARRenderer extends EventDispatcher {
   private lastTick: number|null = null;
   private turntableRotation: number|null = null;
   private oldShadowIntensity: number|null = null;
-  private oldBackground: any = null;
-  private oldEnvironment: any = null;
   private frame: XRFrame|null = null;
   private initialHitSource: XRHitTestSource|null = null;
   private transientHitTestSource: XRTransientInputHitTestSource|null = null;
@@ -201,7 +200,6 @@ export class ARRenderer extends EventDispatcher {
         const scene = this.presentedScene!;
         scene.add(this.xrLight);
 
-        this.oldEnvironment = scene.environment;
         scene.environment = this.xrLight.environment;
       });
     }
@@ -228,7 +226,6 @@ export class ARRenderer extends EventDispatcher {
     this.goalYaw = scene.yaw;
     this.goalScale = 1;
 
-    this.oldBackground = scene.background;
     scene.background = null;
 
     this.oldShadowIntensity = scene.shadowIntensity;
@@ -331,10 +328,6 @@ export class ARRenderer extends EventDispatcher {
 
       if (this.xrLight != null) {
         scene.remove(this.xrLight);
-        if (this.oldEnvironment != null) {
-          scene.environment = this.oldEnvironment;
-          this.oldEnvironment = null;
-        }
         (this.xrLight as any).dispose();
         this.xrLight = null;
       }
@@ -350,10 +343,9 @@ export class ARRenderer extends EventDispatcher {
       if (intensity != null) {
         scene.setShadowIntensity(intensity);
       }
-      const background = this.oldBackground;
-      if (background != null) {
-        scene.background = background;
-      }
+      scene.setEnvironmentAndSkybox(
+          (element as any)[$currentEnvironmentMap],
+          (element as any)[$currentBackground]);
       const point = this.oldTarget;
       scene.setTarget(point.x, point.y, point.z);
       scene.xrCamera = null;
@@ -396,7 +388,6 @@ export class ARRenderer extends EventDispatcher {
     this.lastTick = null;
     this.turntableRotation = null;
     this.oldShadowIntensity = null;
-    this.oldBackground = null;
     this._presentedScene = null;
     this.frame = null;
     this.inputSource = null;
