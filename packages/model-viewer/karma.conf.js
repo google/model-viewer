@@ -153,11 +153,11 @@ module.exports = function(config) {
         real_mobile: 'true',
         browserstack: {localIdentifier: 'iOS15'}
       },
-      'Android 10 (Samsung)': {
+      'Android 11 (Samsung)': {
         base: 'BrowserStack',
         os: 'Android',
-        os_version: '10.0',
-        device: 'Samsung Galaxy A11',
+        os_version: '11.0',
+        device: 'Samsung Galaxy S21',
         browser: 'Android',
         real_mobile: 'true',
         browserstack: {localIdentifier: 'AndroidP30'}
