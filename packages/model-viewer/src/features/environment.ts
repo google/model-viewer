@@ -26,8 +26,8 @@ const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
 
-const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
-const $applyEnvironmentMap = Symbol('applyEnvironmentMap');
+export const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
+export const $currentBackground = Symbol('currentBackground');
 export const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 const $onPreload = Symbol('onPreload');
@@ -61,7 +61,8 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     })
     exposure: number = DEFAULT_EXPOSURE;
 
-    private[$currentEnvironmentMap]: Texture|null = null;
+    protected[$currentEnvironmentMap]: Texture|null = null;
+    protected[$currentBackground]: Texture|null = null;
 
     private[$cancelEnvironmentUpdate]: ((...args: any[]) => any)|null = null;
 
@@ -113,9 +114,8 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$onModelLoad]() {
       super[$onModelLoad]();
 
-      if (this[$currentEnvironmentMap] != null) {
-        this[$applyEnvironmentMap](this[$currentEnvironmentMap]);
-      }
+      this[$scene].setEnvironmentAndSkybox(
+          this[$currentEnvironmentMap], this[$currentBackground]);
     }
 
     async[$updateEnvironment]() {
@@ -145,38 +145,28 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
                   resolve(await texturesLoad);
                 });
 
+        if (this[$currentEnvironmentMap] !== environmentMap) {
+          this[$currentEnvironmentMap] = environmentMap;
+          this.dispatchEvent(new CustomEvent('environment-change'));
+        }
         if (skybox != null) {
           // When using the same environment and skybox, use the environment as
           // it gives HDR filtering.
-          this[$scene].background =
+          this[$currentBackground] =
               skybox.name === environmentMap.name ? environmentMap : skybox;
         } else {
-          this[$scene].background = null;
+          this[$currentBackground] = null;
         }
 
-        this[$applyEnvironmentMap](environmentMap);
+        this[$scene].setEnvironmentAndSkybox(
+            this[$currentEnvironmentMap], this[$currentBackground]);
         this[$scene].dispatchEvent({type: 'envmap-update'});
       } catch (errorOrPromise) {
         if (errorOrPromise instanceof Error) {
-          this[$applyEnvironmentMap](null);
+          this[$scene].setEnvironmentAndSkybox(null, null);
           throw errorOrPromise;
         }
       }
-    }
-
-    /**
-     * Sets the Model to use the provided environment map,
-     * or `null` if the Model should remove its' environment map.
-     */
-    private[$applyEnvironmentMap](environmentMap: Texture|null) {
-      if (this[$scene].environment === environmentMap) {
-        return;
-      }
-      this[$currentEnvironmentMap] = environmentMap;
-      this[$scene].environment = this[$currentEnvironmentMap];
-      this.dispatchEvent(new CustomEvent('environment-change'));
-
-      this[$needsRender]();
     }
   }
 
