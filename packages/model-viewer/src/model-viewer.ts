@@ -28,12 +28,6 @@ import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 // export {default as TextureUtils} from './three-components/TextureUtils';
 // export * from 'three';
 
-declare global {
-  interface XRSessionInit {
-    readonly domOverlay: {root: HTMLElement|null};
-  }
-}
-
 export const ModelViewerElement = AnnotationMixin(SceneGraphMixin(StagingMixin(
     EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
         FocusVisiblePolyfillMixin(ModelViewerElementBase)))))))));

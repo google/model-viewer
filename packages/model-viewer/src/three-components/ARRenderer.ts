@@ -130,7 +130,7 @@ export class ARRenderer extends EventDispatcher {
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay', 'light-estimation'],
-          domOverlay: {root: this.overlay}
+          domOverlay: this.overlay ? {root: this.overlay} : undefined
         });
 
     this.threeRenderer.xr.setReferenceSpaceType('local');

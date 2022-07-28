@@ -69,7 +69,7 @@
     "3d"
   ],
   "dependencies": {
-    "three": "^0.142.0",
+    "three": "^0.143.0",
     "lit": "^2.2.3"
   },
   "devDependencies": {
@@ -80,7 +80,7 @@
     "@types/chai": "^4.2.21",
     "@types/mocha": "^8.2.3",
     "@types/pngjs": "^6.0.1",
-    "@types/three": "^0.141.0",
+    "@types/three": "^0.143.0",
     "@ungap/event-target": "^0.2.2",
     "chai": "^4.3.4",
     "focus-visible": "^5.2.0",
