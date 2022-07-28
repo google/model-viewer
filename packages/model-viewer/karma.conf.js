@@ -19,6 +19,7 @@ module.exports = function(config) {
     basePath: '',
     plugins: [
       require.resolve('@open-wc/karma-esm'),
+      'karma-*',
       'karma-browserstack-launcher',
     ],
     frameworks: ['esm', 'mocha', 'chai'],
