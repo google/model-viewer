@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-import '../types/webxr.js';
-
 import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
@@ -132,7 +130,7 @@ export class ARRenderer extends EventDispatcher {
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay', 'light-estimation'],
-          domOverlay: {root: this.overlay}
+          domOverlay: this.overlay ? {root: this.overlay} : undefined
         });
 
     this.threeRenderer.xr.setReferenceSpaceType('local');
@@ -241,8 +239,9 @@ export class ARRenderer extends EventDispatcher {
         new XRRay(
             new DOMPoint(0, 0, 0),
             {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
-    currentSession.requestHitTestSource({space: viewerRefSpace, offsetRay: ray})
-        .then(hitTestSource => {
+    currentSession
+        .requestHitTestSource!
+        ({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
           this.initialHitSource = hitTestSource;
         });
 
@@ -420,7 +419,7 @@ export class ARRenderer extends EventDispatcher {
       view.requestViewportScale(Math.max(scale, MIN_VIEWPORT_SCALE));
     }
     const layer = this.currentSession!.renderState.baseLayer;
-    const viewport = layer!.getViewport(view);
+    const viewport = layer!.getViewport(view)!;
     this.threeRenderer.setViewport(
         viewport.x, viewport.y, viewport.width, viewport.height);
   }
@@ -458,14 +457,14 @@ export class ARRenderer extends EventDispatcher {
     session.addEventListener('selectstart', this.onSelectStart);
     session.addEventListener('selectend', this.onSelectEnd);
     session
-        .requestHitTestSourceForTransientInput({profile: 'generic-touchscreen'})
-        .then(hitTestSource => {
+        .requestHitTestSourceForTransientInput!
+        ({profile: 'generic-touchscreen'})!.then(hitTestSource => {
           this.transientHitTestSource = hitTestSource;
         });
   }
 
   private getTouchLocation(): Vector3|null {
-    const {axes} = this.inputSource!.gamepad;
+    const {axes} = this.inputSource!.gamepad!;
     let location = this.placementBox!.getExpandedHit(
         this.presentedScene!, axes[0], axes[1]);
     if (location != null) {
@@ -541,7 +540,7 @@ export class ARRenderer extends EventDispatcher {
 
     if (fingers.length === 1) {
       this.inputSource = (event as XRInputSourceEvent).inputSource;
-      const {axes} = this.inputSource!.gamepad;
+      const {axes} = this.inputSource!.gamepad!;
 
       const hitPosition = box.getHit(this.presentedScene!, axes[0], axes[1]);
       box.show = true;
@@ -573,8 +572,8 @@ export class ARRenderer extends EventDispatcher {
 
   private fingerPolar(fingers: XRTransientInputHitTestResult[]):
       {separation: number, deltaYaw: number} {
-    const fingerOne = fingers[0].inputSource.gamepad.axes;
-    const fingerTwo = fingers[1].inputSource.gamepad.axes;
+    const fingerOne = fingers[0].inputSource.gamepad!.axes;
+    const fingerTwo = fingers[1].inputSource.gamepad!.axes;
     const deltaX = fingerTwo[0] - fingerOne[0];
     const deltaY = fingerTwo[1] - fingerOne[1];
     const angle = Math.atan2(deltaY, deltaX);
@@ -634,7 +633,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     if (this.isRotating) {
-      const angle = this.inputSource!.gamepad.axes[0] * ROTATION_RATE;
+      const angle = this.inputSource!.gamepad!.axes[0] * ROTATION_RATE;
       this.goalYaw += angle - this.lastAngle;
       this.lastAngle = angle;
     } else if (this.isTranslating) {

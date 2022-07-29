@@ -23,6 +23,7 @@ import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
+import {Constructor} from '../templates.js';
 
 
 const expect = chai.expect;
@@ -30,6 +31,8 @@ const expect = chai.expect;
 class MockXRFrame implements XRFrame {
   constructor(public session: XRSession) {
   }
+
+  readonly predictedDisplayTime = 0;
 
   // We don't use nor test the returned XRPose other than its existence.
   getPose(_xrSpace: XRSpace, _frameOfRef: XRReferenceSpace) {
@@ -56,12 +59,14 @@ class MockXRFrame implements XRFrame {
       eye: {} as XREye,
       projectionMatrix: camera.projectionMatrix.elements as unknown as
           Float32Array,
-      viewMatrix: {} as Float32Array,
       transform: transform,
-      recommendedViewportScale: null,
       requestViewportScale: (_scale: number|null) => {}
     };
-    const viewerPos: XRViewerPose = {transform: transform, views: [view]};
+    const viewerPos: XRViewerPose = {
+      transform: transform,
+      views: [view],
+      emulatedPosition: false
+    };
 
     return viewerPos;
   }
@@ -100,13 +105,13 @@ suite('ARRenderer', () => {
             getViewport: () => {
               return {x: 0, y: 0, width: 320, height: 240} as XRViewport
             }
-          } as XRLayer
+          } as unknown as XRLayer
         } as XRRenderState;
 
         public hitTestSources: Set<XRHitTestSource> =
             new Set<XRHitTestSource>();
 
-        updateRenderState(_object: any) {
+        async updateRenderState(_object: any) {
         }
 
         requestFrameOfReference() {
@@ -149,6 +154,32 @@ suite('ARRenderer', () => {
 
         async end() {
           this.dispatchEvent(new CustomEvent('end'));
+        }
+
+        readonly environmentBlendMode = {} as XREnvironmentBlendMode;
+        readonly visibilityState = {} as XRVisibilityState;
+        async updateTargetFrameRate(_rate: number) {
+          return;
+        }
+        onend() {
+        }
+        oninputsourceschange() {
+        }
+        onselect() {
+        }
+        onselectstart() {
+        }
+        onselectend() {
+        }
+        onsqueeze() {
+        }
+        onsqueezestart() {
+        }
+        onsqueezeend() {
+        }
+        onvisibilitychange() {
+        }
+        onframeratechange() {
         }
       }
 
