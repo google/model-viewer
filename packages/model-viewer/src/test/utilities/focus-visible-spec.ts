@@ -17,7 +17,7 @@ import ModelViewerElementBase from '../../model-viewer-base.js';
 import {waitForEvent} from '../../utilities.js';
 import {FocusVisiblePolyfillMixin} from '../../utilities/focus-visible.js';
 import {assetPath} from '../helpers.js';
-import {BasicSpecTemplate} from '../templates.js';
+import {BasicSpecTemplate, Constructor} from '../templates.js';
 
 const expect = chai.expect;
 
