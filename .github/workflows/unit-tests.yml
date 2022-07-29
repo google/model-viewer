@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [Chrome, ChromeLast, Edge, EdgeLast, Firefox, FirefoxLast, Safari, iOS14, iOS15, Android]
+        browser: [Chrome, ChromeLast, Edge, EdgeLast, Firefox, FirefoxLast, Safari, iOS15, Android]
 
     env:
       USE_BROWSER_STACK: true

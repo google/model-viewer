@@ -139,16 +139,6 @@ module.exports = function(config) {
         browserstack: {localIdentifier: 'Safari'},
         myID: 6
       },
-      'iOS14': {
-        base: 'BrowserStack',
-        os: 'iOS',
-        os_version: '14',
-        device: 'iPhone 11',
-        browser: 'iPhone',
-        real_mobile: 'true',
-        browserstack: {localIdentifier: 'iOS14'},
-        myID: 7
-      },
       'iOS15': {
         base: 'BrowserStack',
         os: 'iOS',
