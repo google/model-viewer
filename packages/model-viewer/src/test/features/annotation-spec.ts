@@ -21,7 +21,7 @@ import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {timePasses, waitForEvent} from '../../utilities';
 import {assetPath, rafPasses} from '../helpers';
-import {BasicSpecTemplate} from '../templates';
+import {BasicSpecTemplate, Constructor} from '../templates';
 
 const expect = chai.expect;
 
@@ -49,10 +49,11 @@ const closeToVector3 = (a: Vector3D, b: Vector3) => {
   expect(a.z).to.be.closeTo(b.z, delta);
 };
 
-const withinRange = (a: Vector2D, start: number, finish: number) => {
-  expect(a.u).to.be.within(start, finish);
-  expect(a.v).to.be.within(start, finish);
-}
+const withinRange =
+    (a: Vector2D, start: number, finish: number) => {
+      expect(a.u).to.be.within(start, finish);
+      expect(a.v).to.be.within(start, finish);
+    }
 
 suite('ModelViewerElementBase with AnnotationMixin', () => {
   let nextId = 0;
@@ -213,7 +214,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       const {position, normal, uv} = hitResult!;
       closeToVector3(position, new Vector3(0, 0, 0.5));
       closeToVector3(normal, new Vector3(0, 0, 1));
-      if(uv != null){
+      if (uv != null) {
         withinRange(uv, 0, 1);
       }
     });
@@ -227,7 +228,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       const {position, normal, uv} = hitResult!;
       closeToVector3(position, new Vector3(0.5, 0, 0));
       closeToVector3(normal, new Vector3(1, 0, 0));
-      if(uv != null){
+      if (uv != null) {
         withinRange(uv, 0, 1);
       }
     });
