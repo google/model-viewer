@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -489,6 +489,15 @@ export class ModelScene extends Scene {
     return {width: this.width, height: this.height};
   }
 
+  setEnvironmentAndSkybox(environment: Texture|null, skybox: Texture|null) {
+    if (this.element[$renderer].arRenderer.presentedScene === this) {
+      return;
+    }
+    this.environment = environment;
+    this.background = skybox;
+    this.queueRender();
+  }
+
   /**
    * Sets the point in model coordinates the model should orbit/pivot around.
    */
@@ -774,7 +783,8 @@ export class ModelScene extends Scene {
     this.raycaster.setFromCamera(ndcPosition, this.getCamera());
     const hits = this.raycaster.intersectObject(object, true);
 
-    const hit = hits.find((hit) => !hit.object.userData.shadow);
+    const hit =
+        hits.find((hit) => hit.object.visible && !hit.object.userData.shadow);
     if (hit == null || hit.face == null) {
       return null;
     }

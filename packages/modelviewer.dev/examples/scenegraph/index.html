@@ -336,6 +336,8 @@ modelViewerParameters.addEventListener("load", (ev) => {
 </model-viewer>
 <script type="module">
 const modelViewerTexture = document.querySelector("model-viewer#duck");
+const textureName = document.querySelector('#texture-name');
+const imageName = document.querySelector('#image-name');
 
 modelViewerTexture.addEventListener("load", () => {
 
@@ -345,6 +347,9 @@ modelViewerTexture.addEventListener("load", () => {
     if (event.target.value == "None") {
       // Clears the texture.
       material[channel].setTexture(null);
+      // Display the names values
+      textureName.innerText = "None";
+      imageName.innerText = "None";
     } else if (event.target.value) {
       // Creates a new texture.
       const texture = await modelViewerTexture.createTexture(event.target.value);
@@ -353,8 +358,8 @@ modelViewerTexture.addEventListener("load", () => {
       // Applies the new texture to the specified channel.
       material[channel].setTexture(texture);
       // Display the names values
-      document.querySelector('#texture-name').innerText = texture.name;
-      document.querySelector('#image-name').innerText = texture.source.name;
+      textureName.innerText = texture.name;
+      imageName.innerText = texture.source.name;
     }
   }
 

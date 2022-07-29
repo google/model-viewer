@@ -160,8 +160,8 @@ module.exports = function(config) {
       'Android': {
         base: 'BrowserStack',
         os: 'Android',
-        os_version: '9.0',
-        device: 'Huawei P30',
+        os_version: '10.0',
+        device: 'Samsung Galaxy A11',
         browser: 'Android',
         real_mobile: 'true',
         browserstack: {localIdentifier: 'AndroidP30'},
