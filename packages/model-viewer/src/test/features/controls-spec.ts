@@ -15,7 +15,7 @@
 
 import {Camera, Vector3} from 'three';
 
-import {$controls, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, INTERACTION_PROMPT, OLD_DEFAULT_FOV_DEG, SphericalPosition} from '../../features/controls.js';
+import {$controls, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
@@ -25,9 +25,6 @@ import {BasicSpecTemplate} from '../templates.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
-const DEFAULT_FOV = 45;
-const DEFAULT_MIN_FOV = 25;
-const DEFAULT_MAX_FOV = 45;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
@@ -224,14 +221,15 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       });
 
       test('defaults FOV correctly', async () => {
-        expect(element.getFieldOfView()).to.be.closeTo(DEFAULT_FOV, 0.00001);
+        expect(element.getFieldOfView())
+            .to.be.closeTo(DEFAULT_FOV_DEG, 0.00001);
       });
 
       test('defaults FOV limits correctly', async () => {
         expect(element.getMinimumFieldOfView())
-            .to.be.closeTo(DEFAULT_MIN_FOV, 0.00001);
+            .to.be.closeTo(DEFAULT_MIN_FOV_DEG, 0.00001);
         expect(element.getMaximumFieldOfView())
-            .to.be.closeTo(DEFAULT_MAX_FOV, 0.00001);
+            .to.be.closeTo(DEFAULT_FOV_DEG, 0.00001);
       });
 
       test('can independently adjust FOV', async () => {
@@ -249,7 +247,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       test('changes FOV basis when aspect ratio changes', async () => {
         const fov = element.getFieldOfView();
-        expect(fov).to.be.closeTo(DEFAULT_MAX_FOV, .001);
+        expect(fov).to.be.closeTo(DEFAULT_FOV_DEG, .001);
         element.setAttribute('style', 'width: 200px; height: 300px');
         await rafPasses();
         await rafPasses();
@@ -333,7 +331,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           await timePasses();
           settleControls(controls);
           expect(element.getFieldOfView())
-              .to.be.closeTo(OLD_DEFAULT_FOV_DEG, 0.001);
+              .to.be.closeTo(DEFAULT_FOV_DEG, 0.001);
         });
 
         test('jumps to maxCameraOrbit when outside', async () => {

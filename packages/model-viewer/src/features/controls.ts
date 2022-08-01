@@ -58,15 +58,13 @@ const fade = timeline({
 });
 
 export const DEFAULT_FOV_DEG = 30;
-export const OLD_DEFAULT_FOV_DEG = 45;
-const DEFAULT_MIN_FOV_DEG = 12;
-const OLD_DEFAULT_MIN_FOV_DEG = 25;
+export const DEFAULT_MIN_FOV_DEG = 12;
 
 export const DEFAULT_CAMERA_ORBIT = '0deg 75deg 105%';
 const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
 
-const MINIMUM_RADIUS_RATIO = 1.1;
+const MINIMUM_RADIUS_RATIO = 2.2;
 
 const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
 const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
@@ -120,22 +118,20 @@ export const TouchAction: {[index: string]: TouchAction} = {
   NONE: 'none'
 };
 
-export const fieldOfViewIntrinsics =
-    (element: ModelViewerElementBase&ControlsInterface) => {
-      const fov = element.enablePan ? DEFAULT_FOV_DEG : OLD_DEFAULT_FOV_DEG;
-
-      return {
-        basis: [degreesToRadians(numberNode(fov, 'deg')) as NumberNode<'rad'>],
-        keywords: {auto: [null]}
-      };
-    };
-
-const minFieldOfViewIntrinsics = (element: ModelViewerElementBase&
-                                  ControlsInterface) => {
-  const fov = element.enablePan ? DEFAULT_MIN_FOV_DEG : OLD_DEFAULT_MIN_FOV_DEG;
-
+export const fieldOfViewIntrinsics = () => {
   return {
-    basis: [degreesToRadians(numberNode(fov, 'deg')) as NumberNode<'rad'>],
+    basis:
+        [degreesToRadians(numberNode(DEFAULT_FOV_DEG, 'deg')) as
+         NumberNode<'rad'>],
+    keywords: {auto: [null]}
+  };
+};
+
+const minFieldOfViewIntrinsics = () => {
+  return {
+    basis:
+        [degreesToRadians(numberNode(DEFAULT_MIN_FOV_DEG, 'deg')) as
+         NumberNode<'rad'>],
     keywords: {auto: [null]}
   };
 };
@@ -158,20 +154,19 @@ export const cameraOrbitIntrinsics = (() => {
   };
 })();
 
-const minCameraOrbitIntrinsics =
-    (element: ModelViewerElementBase&ControlsInterface) => {
-      const radius = MINIMUM_RADIUS_RATIO *
-          element[$scene].boundingSphere.radius * (element.enablePan ? 2 : 1);
+const minCameraOrbitIntrinsics = (element: ModelViewerElementBase&
+                                  ControlsInterface) => {
+  const radius = MINIMUM_RADIUS_RATIO * element[$scene].boundingSphere.radius;
 
-      return {
-        basis: [
-          numberNode(-Infinity, 'rad'),
-          numberNode(Math.PI / 8, 'rad'),
-          numberNode(radius, 'm')
-        ],
-        keywords: {auto: [null, null, null]}
-      };
-    };
+  return {
+    basis: [
+      numberNode(-Infinity, 'rad'),
+      numberNode(Math.PI / 8, 'rad'),
+      numberNode(radius, 'm')
+    ],
+    keywords: {auto: [null, null, null]}
+  };
+};
 
 const maxCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
   const orbitIntrinsics = cameraOrbitIntrinsics(element);
