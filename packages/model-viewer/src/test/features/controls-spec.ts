@@ -280,7 +280,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       suite('getCameraOrbit', () => {
         setup(async () => {
-          element.cameraOrbit = `1rad 1rad 1.5m`;
+          element.cameraOrbit = `1rad 1rad 2.5m`;
           await timePasses();
           settleControls(controls);
         });
@@ -298,11 +298,11 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
           const orbit = element.getCameraOrbit();
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
-              .to.equal(`1rad 0.5rad 1.5m`);
+              .to.equal(`1rad 0.5rad 2.5m`);
         });
 
         test('jumpCameraToGoal updates instantly', async () => {
-          const cameraOrbit = `0.5rad 1.5rad 1.2m`;
+          const cameraOrbit = `0.5rad 1.5rad 2.2m`;
           element.cameraOrbit = cameraOrbit;
           const fieldOfView = 30;
           element.fieldOfView = `${fieldOfView}deg`;
@@ -321,7 +321,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
 
       suite('min/max extents', () => {
         setup(async () => {
-          element.cameraOrbit = `0deg 90deg 1.5m`;
+          element.cameraOrbit = `0deg 90deg 2.5m`;
           await timePasses();
           settleControls(controls);
         });
@@ -335,7 +335,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test('jumps to maxCameraOrbit when outside', async () => {
-          element.maxCameraOrbit = `-2rad 1rad 1m`;
+          element.maxCameraOrbit = `-2rad 1rad 2m`;
           await timePasses();
           const orbit = element.getCameraOrbit();
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
@@ -343,7 +343,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
         });
 
         test('jumps to minCameraOrbit when outside', async () => {
-          element.minCameraOrbit = `2rad 2rad 2m`;
+          element.minCameraOrbit = `2rad 2rad 3m`;
           await timePasses();
           const orbit = element.getCameraOrbit();
           expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
@@ -478,7 +478,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
       test(
           'with zero radius, sets far plane to contain the model', async () => {
             const maxRadius = 0;
+            element.minCameraOrbit = `auto auto ${maxRadius}m`;
             element.maxCameraOrbit = `auto auto ${maxRadius}m`;
+            element.jumpCameraToGoal();
             await timePasses();
 
             const cameraDistance = element[$scene].camera.position.distanceTo(
