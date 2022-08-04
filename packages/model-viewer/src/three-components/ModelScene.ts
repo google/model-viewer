@@ -94,7 +94,6 @@ export class ModelScene extends Scene {
 
   public exposure = 1;
   public canScale = true;
-  public tightBounds = false;
 
   private isDirty = false;
 
@@ -382,24 +381,19 @@ export class ModelScene extends Scene {
 
     this.findBakedShadows(this.modelContainer);
 
-    if (this.tightBounds === true) {
-      const bound = (box: Box3, vertex: Vector3): Box3 => {
-        return box.expandByPoint(vertex);
-      };
-      this.setBakedShadowVisibility(false);
+    const bound = (box: Box3, vertex: Vector3): Box3 => {
+      return box.expandByPoint(vertex);
+    };
+    this.setBakedShadowVisibility(false);
+    this.boundingBox = reduceVertices(this.modelContainer, bound, new Box3());
+    // If there's nothing but the baked shadow, then it's not a baked shadow.
+    if (this.boundingBox.isEmpty()) {
+      this.setBakedShadowVisibility(true);
+      this.bakedShadows.forEach((mesh) => this.unmarkBakedShadow(mesh));
       this.boundingBox = reduceVertices(this.modelContainer, bound, new Box3());
-      // If there's nothing but the baked shadow, then it's not a baked shadow.
-      if (this.boundingBox.isEmpty()) {
-        this.setBakedShadowVisibility(true);
-        this.bakedShadows.forEach((mesh) => this.unmarkBakedShadow(mesh));
-        this.boundingBox =
-            reduceVertices(this.modelContainer, bound, new Box3());
-      }
-      this.checkBakedShadows();
-      this.setBakedShadowVisibility();
-    } else {
-      this.boundingBox.setFromObject(this.modelContainer);
     }
+    this.checkBakedShadows();
+    this.setBakedShadowVisibility();
 
     this.boundingBox.getSize(this.size);
 
@@ -419,13 +413,9 @@ export class ModelScene extends Scene {
     this.setBakedShadowVisibility(false);
     const {center} = this.boundingSphere;
 
-    if (this.tightBounds === true) {
-      this.element.requestUpdate('cameraTarget');
-      await this.element.updateComplete;
-      center.copy(this.getTarget());
-    } else {
-      this.boundingBox.getCenter(center);
-    }
+    this.element.requestUpdate('cameraTarget');
+    await this.element.updateComplete;
+    center.copy(this.getTarget());
 
     const radiusSquared = (value: number, vertex: Vector3): number => {
       return Math.max(value, center!.distanceToSquared(vertex));
