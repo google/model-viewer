@@ -40,7 +40,6 @@ module.exports = function(config) {
     ],
     autoWatchBatchDelay: 1000,
     restartOnFileChange: true,
-    hostname: 'bs-local.com',
 
     browserDisconnectTimeout: 300000,
     browserNoActivityTimeout: 360000,
