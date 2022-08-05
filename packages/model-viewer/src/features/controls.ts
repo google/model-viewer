@@ -90,7 +90,6 @@ export interface Finger {
 
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
 export type InteractionPromptStyle = 'basic'|'wiggle';
-export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
 
 export const InteractionPromptStrategy:
@@ -105,11 +104,6 @@ export const InteractionPromptStyle:
       BASIC: 'basic',
       WIGGLE: 'wiggle'
     };
-
-export const InteractionPolicy: {[index: string]: InteractionPolicy} = {
-  ALWAYS_ALLOW: 'always-allow',
-  WHEN_FOCUSED: 'allow-when-focused'
-};
 
 export const TouchAction: {[index: string]: TouchAction} = {
   PAN_Y: 'pan-y',
@@ -246,7 +240,6 @@ export declare interface ControlsInterface {
   maxFieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
   interactionPromptStyle: InteractionPromptStyle;
-  interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
   orbitSensitivity: number;
   touchAction: TouchAction;
@@ -338,9 +331,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: String, attribute: 'interaction-prompt'})
     interactionPrompt: InteractionPromptStrategy =
         InteractionPromptStrategy.AUTO;
-
-    @property({type: String, attribute: 'interaction-policy'})
-    interactionPolicy: InteractionPolicy = InteractionPolicy.ALWAYS_ALLOW;
 
     @property({type: Number, attribute: 'orbit-sensitivity'})
     orbitSensitivity: number = 1;
@@ -506,11 +496,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         } else {
           this[$deferInteractionPrompt]();
         }
-      }
-
-      if (changedProperties.has('interactionPolicy')) {
-        const interactionPolicy = this.interactionPolicy;
-        controls.applyOptions({interactionPolicy});
       }
 
       if (changedProperties.has('touchAction')) {

@@ -253,178 +253,125 @@ suite('SmoothControls', () => {
         });
       });
 
-      suite('interaction policy', () => {
-        suite('allow-when-focused', () => {
-          setup(() => {
-            controls.applyOptions({interactionPolicy: 'allow-when-focused'});
-            settleControls(controls);
-          });
+      suite('interaction', () => {
+        test('orbits when pointing, even while blurred', () => {
+          const originalPhi = controls.getCameraSpherical().phi;
 
-          test('does not zoom when scrolling while blurred', () => {
-            const radius = controls.getCameraSpherical().radius;
-            expect(controls.getFieldOfView())
-                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
+          element.dispatchEvent(new PointerEvent(
+              'pointerdown', {pointerId: 8, clientX: 0, clientY: 10}));
+          element.dispatchEvent(new PointerEvent(
+              'pointermove', {pointerId: 8, clientX: 0, clientY: 0}));
 
-            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
+          settleControls(controls);
 
-            settleControls(controls);
-
-            expect(controls.getCameraSpherical().radius).to.be.equal(radius);
-            expect(controls.getFieldOfView())
-                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
-          });
-
-          test('does not orbit when pointing while blurred', () => {
-            const originalPhi = controls.getCameraSpherical().phi;
-
-            dispatchSyntheticEvent(
-                element, 'mousedown', {clientX: 0, clientY: 10});
-            dispatchSyntheticEvent(
-                window, 'mousemove', {clientX: 0, clientY: 0});
-
-            expect(controls.getCameraSpherical().phi).to.be.equal(originalPhi);
-          });
-
-          test('does zoom when scrolling while focused', () => {
-            expect(controls.getFieldOfView())
-                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
-
-            element.focus();
-
-            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
-
-            settleControls(controls);
-
-            expect(controls.getFieldOfView())
-                .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
-          });
+          expect(controls.getCameraSpherical().phi)
+              .to.be.greaterThan(originalPhi);
         });
 
-        suite('always-allow', () => {
-          setup(() => {
-            controls.applyOptions({interactionPolicy: 'always-allow'});
-            settleControls(controls);
+        test('zooms when scrolling, even while blurred', () => {
+          expect(controls.getFieldOfView())
+              .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
+
+          dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
+
+          settleControls(controls);
+
+          expect(controls.getFieldOfView())
+              .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
+        });
+      });
+
+      suite('events', () => {
+        test('dispatches "change" on user interaction', () => {
+          let didCall = false;
+          let changeSource;
+
+          controls.addEventListener('change', ({source}) => {
+            didCall = true;
+            changeSource = source;
           });
 
-          test('orbits when pointing, even while blurred', () => {
-            const originalPhi = controls.getCameraSpherical().phi;
+          dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+          settleControls(controls);
 
-            element.dispatchEvent(new PointerEvent(
-                'pointerdown', {pointerId: 8, clientX: 0, clientY: 10}));
-            element.dispatchEvent(new PointerEvent(
-                'pointermove', {pointerId: 8, clientX: 0, clientY: 0}));
-
-            settleControls(controls);
-
-            expect(controls.getCameraSpherical().phi)
-                .to.be.greaterThan(originalPhi);
-          });
-
-          test('zooms when scrolling, even while blurred', () => {
-            expect(controls.getFieldOfView())
-                .to.be.closeTo(DEFAULT_OPTIONS.maximumFieldOfView!, 0.00001);
-
-            dispatchSyntheticEvent(element, 'wheel', {deltaY: -1});
-
-            settleControls(controls);
-
-            expect(controls.getFieldOfView())
-                .to.be.lessThan(DEFAULT_OPTIONS.maximumFieldOfView!);
-          });
+          expect(didCall).to.be.true;
+          expect(changeSource).to.equal(USER_INTERACTION_CHANGE_SOURCE);
         });
 
-        suite('events', () => {
-          test('dispatches "change" on user interaction', () => {
-            let didCall = false;
-            let changeSource;
+        test('dispatches "change" on direct orbit change', () => {
+          let didCall = false;
+          let changeSource;
 
-            controls.addEventListener('change', ({source}) => {
-              didCall = true;
-              changeSource = source;
-            });
+          controls.addEventListener('change', ({source}) => {
+            didCall = true;
+            changeSource = source;
+          });
 
+          controls.setOrbit(33, 33, 33);
+          settleControls(controls);
+
+          expect(didCall).to.be.true;
+          expect(changeSource).to.equal(DEFAULT_INTERACTION_CHANGE_SOURCE);
+        });
+
+        test('sends "user-interaction" multiple times', () => {
+          const expectedSources = [
+            USER_INTERACTION_CHANGE_SOURCE,
+            USER_INTERACTION_CHANGE_SOURCE,
+            USER_INTERACTION_CHANGE_SOURCE,
+            USER_INTERACTION_CHANGE_SOURCE,
+          ];
+          let changeSource: Array<string> = [];
+
+          controls.addEventListener('change', ({source}) => {
+            changeSource.push(source);
+          });
+
+          dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+
+          expect(changeSource).to.eql(expectedSources);
+        });
+
+        test('does not send "user-interaction" after setOrbit', () => {
+          const expectedSources = [
+            USER_INTERACTION_CHANGE_SOURCE,
+            USER_INTERACTION_CHANGE_SOURCE,
+            USER_INTERACTION_CHANGE_SOURCE,
+            DEFAULT_INTERACTION_CHANGE_SOURCE,
+            DEFAULT_INTERACTION_CHANGE_SOURCE,
+          ];
+          let changeSource: Array<string> = [];
+
+          controls.addEventListener('change', ({source}) => {
+            changeSource.push(source);
+          });
+
+          dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+
+          controls.isUserChange = false;
+          controls.setOrbit(3, 3, 3);
+
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+          controls.update(performance.now(), ONE_FRAME_DELTA);
+
+          expect(changeSource).to.eql(expectedSources);
+        });
+
+        suite('simultaneous user and imperative interaction', () => {
+          test('reports source as user interaction', async () => {
+            const eventDispatches = waitForEvent(controls, 'change');
+            controls.adjustOrbit(1, 1, 1);
             dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
             settleControls(controls);
 
-            expect(didCall).to.be.true;
-            expect(changeSource).to.equal(USER_INTERACTION_CHANGE_SOURCE);
-          });
-
-          test('dispatches "change" on direct orbit change', () => {
-            let didCall = false;
-            let changeSource;
-
-            controls.addEventListener('change', ({source}) => {
-              didCall = true;
-              changeSource = source;
-            });
-
-            controls.setOrbit(33, 33, 33);
-            settleControls(controls);
-
-            expect(didCall).to.be.true;
-            expect(changeSource).to.equal(DEFAULT_INTERACTION_CHANGE_SOURCE);
-          });
-
-          test('sends "user-interaction" multiple times', () => {
-            const expectedSources = [
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-            ];
-            let changeSource: Array<string> = [];
-
-            controls.addEventListener('change', ({source}) => {
-              changeSource.push(source);
-            });
-
-            dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-
-            expect(changeSource).to.eql(expectedSources);
-          });
-
-          test('does not send "user-interaction" after setOrbit', () => {
-            const expectedSources = [
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-              USER_INTERACTION_CHANGE_SOURCE,
-              DEFAULT_INTERACTION_CHANGE_SOURCE,
-              DEFAULT_INTERACTION_CHANGE_SOURCE,
-            ];
-            let changeSource: Array<string> = [];
-
-            controls.addEventListener('change', ({source}) => {
-              changeSource.push(source);
-            });
-
-            dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
-
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-
-            controls.isUserChange = false;
-            controls.setOrbit(3, 3, 3);
-
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-            controls.update(performance.now(), ONE_FRAME_DELTA);
-
-            expect(changeSource).to.eql(expectedSources);
-          });
-
-          suite('simultaneous user and imperative interaction', () => {
-            test('reports source as user interaction', async () => {
-              const eventDispatches = waitForEvent(controls, 'change');
-              controls.adjustOrbit(1, 1, 1);
-              dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
-              settleControls(controls);
-
-              const event: any = await eventDispatches;
-              expect(event.source).to.be.equal(ChangeSource.USER_INTERACTION);
-            });
+            const event: any = await eventDispatches;
+            expect(event.source).to.be.equal(ChangeSource.USER_INTERACTION);
           });
         });
       });
