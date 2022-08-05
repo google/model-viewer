@@ -245,7 +245,6 @@ export declare interface ControlsInterface {
   minFieldOfView: string;
   maxFieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
-  interactionPromptStyle: InteractionPromptStyle;
   interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
   orbitSensitivity: number;
@@ -330,10 +329,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: Number, attribute: 'interaction-prompt-threshold'})
     interactionPromptThreshold: number = DEFAULT_INTERACTION_PROMPT_THRESHOLD;
-
-    @property({type: String, attribute: 'interaction-prompt-style'})
-    interactionPromptStyle: InteractionPromptStyle =
-        InteractionPromptStyle.WIGGLE;
 
     @property({type: String, attribute: 'interaction-prompt'})
     interactionPrompt: InteractionPromptStrategy =
@@ -727,8 +722,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-      if (isFinite(this[$promptElementVisibleTime]) &&
-          this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
+      if (isFinite(this[$promptElementVisibleTime])) {
         const animationTime =
             ((now - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
             1;
