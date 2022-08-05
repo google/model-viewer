@@ -89,7 +89,6 @@ export interface Finger {
 }
 
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
-export type InteractionPromptStyle = 'basic'|'wiggle';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
 
@@ -98,12 +97,6 @@ export const InteractionPromptStrategy:
       AUTO: 'auto',
       WHEN_FOCUSED: 'when-focused',
       NONE: 'none'
-    };
-
-export const InteractionPromptStyle:
-    {[index: string]: InteractionPromptStyle} = {
-      BASIC: 'basic',
-      WIGGLE: 'wiggle'
     };
 
 export const InteractionPolicy: {[index: string]: InteractionPolicy} = {
@@ -245,7 +238,6 @@ export declare interface ControlsInterface {
   minFieldOfView: string;
   maxFieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
-  interactionPromptStyle: InteractionPromptStyle;
   interactionPolicy: InteractionPolicy;
   interactionPromptThreshold: number;
   orbitSensitivity: number;
@@ -330,10 +322,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: Number, attribute: 'interaction-prompt-threshold'})
     interactionPromptThreshold: number = DEFAULT_INTERACTION_PROMPT_THRESHOLD;
-
-    @property({type: String, attribute: 'interaction-prompt-style'})
-    interactionPromptStyle: InteractionPromptStyle =
-        InteractionPromptStyle.WIGGLE;
 
     @property({type: String, attribute: 'interaction-prompt'})
     interactionPrompt: InteractionPromptStrategy =
@@ -727,8 +715,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-      if (isFinite(this[$promptElementVisibleTime]) &&
-          this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
+      if (isFinite(this[$promptElementVisibleTime])) {
         const animationTime =
             ((now - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
             1;
