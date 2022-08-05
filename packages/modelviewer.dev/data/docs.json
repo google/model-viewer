@@ -523,13 +523,13 @@
       {
         "name": "interaction-prompt",
         "htmlName": "interactionPrompt",
-        "description": "Allows you to change the conditions under which the visual and audible interaction prompt will display. If set to \"auto\", the interaction prompt will be displayed as soon as the <span class='attribute'>interaction-prompt-threshold</span> (see below) time has elapsed (after the model is revealed). If set to \"when-focused\", the interaction prompt will only be activated if the element has first received focus. The interaction prompt will only display if <span class='attribute'>camera-controls</span> are enabled.",
+        "description": "Allows you to disable the visual and audible interaction prompt. If set to \"auto\", the interaction prompt will be displayed as soon as the <span class='attribute'>interaction-prompt-threshold</span> (see below) time has elapsed (after the model is revealed). The interaction prompt will only display if <span class='attribute'>camera-controls</span> are enabled.",
         "links": [
           "<a href=\"../examples/scenegraph/#changeColor\"><span class='attribute'>interaction-prompt=\"none\"</span> example</a>"
         ],
         "default": {
           "default": "auto",
-          "options": "auto, when-focused, none"
+          "options": "auto, none"
         }
       },
       {
