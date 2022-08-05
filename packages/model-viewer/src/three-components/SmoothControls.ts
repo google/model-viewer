@@ -52,8 +52,6 @@ export interface SmoothControlsOptions {
   minimumFieldOfView?: number;
   // The maximum camera field of view in degrees
   maximumFieldOfView?: number;
-  // Controls when interaction is allowed (always, or only when focused)
-  interactionPolicy?: InteractionPolicy;
   // Controls scrolling behavior
   touchAction?: TouchAction;
 }
@@ -67,7 +65,6 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   maximumAzimuthalAngle: Infinity,
   minimumFieldOfView: 10,
   maximumFieldOfView: 45,
-  interactionPolicy: 'always-allow',
   touchAction: 'pan-y'
 });
 
@@ -498,15 +495,6 @@ export class SmoothControls extends EventDispatcher {
     this.dispatchChange();
   }
 
-  private get canInteract(): boolean {
-    if (this._options.interactionPolicy == 'allow-when-focused') {
-      const rootNode = this.element.getRootNode() as Document | ShadowRoot;
-      return rootNode.activeElement === this.element;
-    }
-
-    return this._options.interactionPolicy === 'always-allow';
-  }
-
   private userAdjustOrbit(
       deltaTheta: number, deltaPhi: number, deltaZoom: number) {
     this.adjustOrbit(
@@ -682,7 +670,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onPointerDown = (event: PointerEvent) => {
-    if (!this.canInteract || this.pointers.length > 2) {
+    if (this.pointers.length > 2) {
       return;
     }
     const {element} = this;
@@ -819,9 +807,6 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onWheel = (event: Event) => {
-    if (!this.canInteract) {
-      return;
-    }
     this.isUserChange = true;
 
     const deltaZoom = (event as WheelEvent).deltaY *

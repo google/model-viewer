@@ -521,15 +521,6 @@
         }
       },
       {
-        "name": "interaction-policy",
-        "htmlName": "interactionPolicy",
-        "description": "Allows you to change whether the viewer requires focus before interacting with it. If set to \"allow-when-focused\", the user must focus on the viewer (click / tap) before being able to control it. If set to \"always-allow\", the user can control it even if the viewer is not the focused element on the page. Defaults to \"always-allow\".",
-        "default": {
-          "default": "always-allow",
-          "options": "allow-when-focused, always-allow"
-        }
-      },
-      {
         "name": "interaction-prompt",
         "htmlName": "interactionPrompt",
         "description": "Allows you to change the conditions under which the visual and audible interaction prompt will display. If set to \"auto\", the interaction prompt will be displayed as soon as the <span class='attribute'>interaction-prompt-threshold</span> (see below) time has elapsed (after the model is revealed). If set to \"when-focused\", the interaction prompt will only be activated if the element has first received focus. The interaction prompt will only display if <span class='attribute'>camera-controls</span> are enabled.",
