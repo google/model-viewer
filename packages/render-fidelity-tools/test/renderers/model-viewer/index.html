@@ -80,6 +80,8 @@
       modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
       const {x, y, z} = scenario.target;
       modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;
+      modelViewer.maxFieldOfView = `${scenario.verticalFoV}deg`;
+      modelViewer.minFieldOfView = `${scenario.verticalFoV}deg`;
       modelViewer.fieldOfView = `${scenario.verticalFoV}deg`;
     });
   </script>
