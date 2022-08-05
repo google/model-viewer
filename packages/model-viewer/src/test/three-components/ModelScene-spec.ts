@@ -94,7 +94,7 @@ suite('ModelScene', () => {
     test('idealCameraDistance is set correctly', async () => {
       await scene.setObject(dummyMesh);
 
-      scene.framedFoVDeg = 35;
+      scene.framedFoVDeg = 25;
       const halfFov = (scene.framedFoVDeg / 2) * Math.PI / 180;
       const expectedDistance = dummyRadius / Math.sin(halfFov);
       expect(scene.idealCameraDistance())
@@ -102,10 +102,10 @@ suite('ModelScene', () => {
     });
 
     test('idealAspect is set correctly', async () => {
-      scene.framedFoVDeg = 35;
+      scene.framedFoVDeg = 25;
       await scene.setObject(dummyMesh);
 
-      expect(scene.idealAspect).to.be.closeTo(1, 0.0001);
+      expect(scene.idealAspect).to.be.closeTo(1, 0.001);
     });
 
     test('cannot set the canvas smaller than 1x1', () => {
