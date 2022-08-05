@@ -17,17 +17,17 @@
 
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {html, LitElement} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 
 import {toastStyles} from '../../styles.css.js';
-import {spread} from '../utils/spread_directive';
 import {timePasses} from '../../test/utils/test_utils.js';
 import {ArConfigState, BestPracticesState, ModelViewerConfig, ModelViewerSnippetState} from '../../types.js';
 import {arButtonCSS, arPromptCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {HotspotConfig, toVector3D} from '../hotspot_panel/types.js';
 import {renderCommonChildElements} from '../model_viewer_preview/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
+import {spread} from '../utils/spread_directive';
 
 import {styles as mobileStyles} from './styles.css.js';
 import {EditorUpdates, MobilePacket, MobileSession, URLs} from './types.js';
@@ -123,8 +123,8 @@ export class MobileView extends LitElement {
     }
 
     const {environmentImage} = this.config;
-    this.envImageUrl =
-        environmentImage == null || environmentImage === 'neutral' ?
+    this.envImageUrl = environmentImage == null ||
+            environmentImage === 'neutral' || environmentImage === 'legacy' ?
         environmentImage :
         envToSession(this.pipeId, this.sessionId, updatedContent.envIsHdr);
 
