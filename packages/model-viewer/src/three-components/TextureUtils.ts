@@ -95,8 +95,8 @@ export default class TextureUtils extends EventDispatcher {
       Promise<EnvironmentMapAndSkybox> {
     const {progressTracker} = options;
 
-    const useAltEnvironment = environmentMapUrl === 'neutral';
-    if (useAltEnvironment === true) {
+    const useAltEnvironment = environmentMapUrl !== 'legacy';
+    if (environmentMapUrl === 'legacy' || environmentMapUrl === 'neutral') {
       environmentMapUrl = null;
     }
     environmentMapUrl = deserializeUrl(environmentMapUrl);
@@ -119,7 +119,7 @@ export default class TextureUtils extends EventDispatcher {
           this.loadEquirectFromUrl(skyboxUrl, progressTracker);
     } else {
       // Fallback to generating the environment map
-      environmentMapLoads = useAltEnvironment === true ?
+      environmentMapLoads = useAltEnvironment ?
           this.loadGeneratedEnvironmentMapAlt() :
           this.loadGeneratedEnvironmentMap();
     }
@@ -186,7 +186,7 @@ export default class TextureUtils extends EventDispatcher {
   private async loadGeneratedEnvironmentMap(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMap == null) {
       this.generatedEnvironmentMap =
-          this.GenerateEnvironmentMap(new EnvironmentScene(), 'default');
+          this.GenerateEnvironmentMap(new EnvironmentScene(), 'legacy');
     }
     return this.generatedEnvironmentMap;
   }
