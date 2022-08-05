@@ -102,7 +102,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
       test('applies a generated environment map on model', async function() {
-        expect(scene.environment!.name).to.be.eq('default');
+        expect(scene.environment!.name).to.be.eq('neutral');
       });
 
       test('changes the environment exactly once', async function() {
@@ -182,7 +182,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
       test('reapplies generated environment map on model', () => {
-        expect(scene.environment!.name).to.be.eq('default');
+        expect(scene.environment!.name).to.be.eq('neutral');
       });
     });
   });
@@ -261,7 +261,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
       test('reapplies generated environment map on model', async function() {
-        expect(scene.environment!.name).to.be.eq('default');
+        expect(scene.environment!.name).to.be.eq('neutral');
       });
     });
   });

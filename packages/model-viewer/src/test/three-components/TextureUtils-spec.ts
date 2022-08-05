@@ -158,11 +158,29 @@ suite('TextureUtils', () => {
   });
 
   suite('dynamically generating environment maps', () => {
-    test('creates a cubemap render target with PMREM', async () => {
+    test('creates a cubemap render target with PMREM by default', async () => {
       const environment =
           (await textureUtils.generateEnvironmentMapAndSkybox()).environmentMap;
 
-      expect(environment.name).to.be.eq('default');
+      expect(environment.name).to.be.eq('neutral');
+      expect(environment.mapping).to.be.eq(CubeReflectionMapping);
+    });
+
+    test('creates a cubemap render target with PMREM for neutral', async () => {
+      const environment =
+          (await textureUtils.generateEnvironmentMapAndSkybox(null, 'neutral'))
+              .environmentMap;
+
+      expect(environment.name).to.be.eq('neutral');
+      expect(environment.mapping).to.be.eq(CubeReflectionMapping);
+    });
+
+    test('creates a cubemap render target with PMREM for legacy', async () => {
+      const environment =
+          (await textureUtils.generateEnvironmentMapAndSkybox(null, 'legacy'))
+              .environmentMap;
+
+      expect(environment.name).to.be.eq('legacy');
       expect(environment.mapping).to.be.eq(CubeReflectionMapping);
     });
   });
