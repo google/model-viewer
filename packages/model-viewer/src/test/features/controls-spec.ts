@@ -686,68 +686,21 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           element.cameraOrbit = '0 90deg auto';
         });
 
-        suite('when configured for focus-based interaction prompting', () => {
-          setup(async () => {
-            element.interactionPrompt = 'when-focused';
-            await timePasses();
-          });
+        test('has initial aria-label set to alt before interaction', () => {
+          expect(input.getAttribute('aria-label')).to.include(element.alt);
+        });
 
-          test('has initial aria-label set to alt before interaction', () => {
-            expect(input.getAttribute('aria-label')).to.include(element.alt);
-          });
+        test('does not prompt if user already interacted', async () => {
+          input.focus();
 
-          test.skip('prompts user to interact when focused', async () => {
-            input.focus();
+          interactWith(input);
 
-            await until(
-                () => !!input.getAttribute('aria-label')
-                            ?.includes(INTERACTION_PROMPT));
+          await timePasses(element.interactionPromptThreshold + 100);
 
-            expect(promptElement.classList.contains('visible'))
-                .to.be.equal(true);
-          });
-
-          test.skip(
-              'does not prompt users to interact before a model is loaded',
-              async () => {
-                element.src = null;
-
-                input.focus();
-
-                await timePasses(element.interactionPromptThreshold + 100);
-                await rafPasses();
-
-                expect(promptElement.classList.contains('visible'))
-                    .to.be.equal(false);
-
-                input.blur();
-                // IE11 does not fire the blur handler without this wait.
-                await timePasses();
-
-                element.src = ASTRONAUT_GLB_PATH;
-                await waitForEvent(element, 'load');
-
-                input.focus();
-
-                await timePasses(element.interactionPromptThreshold + 100);
-                await rafPasses();
-
-                expect(promptElement.classList.contains('visible'))
-                    .to.be.equal(true);
-              });
-
-          test('does not prompt if user already interacted', async () => {
-            input.focus();
-
-            interactWith(input);
-
-            await timePasses(element.interactionPromptThreshold + 100);
-
-            expect(input.getAttribute('aria-label'))
-                .to.include(INTERACTION_PROMPT);
-            expect(promptElement.classList.contains('visible'))
-                .to.be.equal(false);
-          });
+          expect(input.getAttribute('aria-label'))
+              .to.include(INTERACTION_PROMPT);
+          expect(promptElement.classList.contains('visible'))
+              .to.be.equal(false);
         });
 
         test(
