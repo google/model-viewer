@@ -128,19 +128,17 @@ window.oscillate = function(min, max, period, time) {
           <div class="heading">
             <h2 class="demo-title">Showing the difference between our two baked-in lighting environments</h2>
             <h4>If no environment or skybox is specified, we have a baked-in
-            default scene that is faster to load. It is designed primarily for
-            frontward viewing, but there is also a baked-in neutral lighting
-            environment that is evenly lit on all sides, and can be activated by
-            setting 
-            <span class="attribute">environment-image="neutral"</span>. This
-            lighting has also been roughly calibrated to render colors at nearly
-            their baseColorMap RGB values. You may find the neutral lighting to
-            be more pleasing than the default when using auto-rotate, as shown
-            here, or when object does not have a clear front side.</h4>
+            default scene that is faster to load. It is designed as a neutral
+            lighting environment that is evenly lit on all sides, but there is
+            also a baked-in legacy lighting primarily for frontward viewing, and
+            can be activated by setting 
+            <span class="attribute">environment-image="legacy"</span>. Our
+            default neutral lighting has been roughly calibrated to render
+            colors at nearly their baseColorMap RGB values.</h4>
           </div>
           <example-snippet stamp-to="neutralLighting" highlight-as="html">
             <template>
-<model-viewer id="neutral-demo" camera-controls auto-rotate environment-image="neutral" alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
+<model-viewer id="neutral-demo" camera-controls auto-rotate alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
   <label for="neutral">Neutral Lighting: </label>
   <input id="neutral" type="checkbox" checked="true">
 </model-viewer>
@@ -150,7 +148,7 @@ window.oscillate = function(min, max, period, time) {
   const checkbox = document.querySelector('#neutral');
   
   checkbox.addEventListener('change',() => {
-    modelViewer.environmentImage = checkbox.checked ? 'neutral' : '';
+    modelViewer.environmentImage = checkbox.checked ? '' : 'legacy';
   });
 })();
 </script>
