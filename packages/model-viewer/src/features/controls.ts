@@ -89,7 +89,6 @@ export interface Finger {
 }
 
 export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
-export type InteractionPromptStyle = 'basic'|'wiggle';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
 
@@ -98,12 +97,6 @@ export const InteractionPromptStrategy:
       AUTO: 'auto',
       WHEN_FOCUSED: 'when-focused',
       NONE: 'none'
-    };
-
-export const InteractionPromptStyle:
-    {[index: string]: InteractionPromptStyle} = {
-      BASIC: 'basic',
-      WIGGLE: 'wiggle'
     };
 
 export const InteractionPolicy: {[index: string]: InteractionPolicy} = {
