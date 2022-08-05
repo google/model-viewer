@@ -88,13 +88,12 @@ export interface Finger {
   y: Path;
 }
 
-export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
+export type InteractionPromptStrategy = 'auto'|'none';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
 
 export const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
       AUTO: 'auto',
-      WHEN_FOCUSED: 'when-focused',
       NONE: 'none'
     };
 
@@ -197,8 +196,6 @@ const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCameraForRadius = Symbol('updateCameraForRadius');
 
-const $onBlur = Symbol('onBlur');
-const $onFocus = Symbol('onFocus');
 const $onChange = Symbol('onChange');
 const $onPointerChange = Symbol('onPointerChange');
 
@@ -206,7 +203,6 @@ const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userHasInteracted = Symbol('userHasInteracted');
 const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
 const $lastPromptOffset = Symbol('lastPromptOffset');
-const $focusedTime = Symbol('focusedTime');
 
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
@@ -346,7 +342,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$panElement] =
         this.shadowRoot!.querySelector('.pan-target') as HTMLElement;
 
-    protected[$focusedTime] = Infinity;
     protected[$lastPromptOffset] = 0;
     protected[$promptElementVisibleTime] = Infinity;
     protected[$userHasInteracted] = false;
@@ -446,7 +441,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const controls = this[$controls];
       const scene = this[$scene];
-      const input = this[$userInputElement];
 
       if (changedProperties.has('cameraControls')) {
         if (this.cameraControls) {
@@ -454,13 +448,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
             this[$waitingToPromptUser] = true;
           }
-
-          input.addEventListener('focus', this[$onFocus]);
-          input.addEventListener('blur', this[$onBlur]);
         } else {
-          input.removeEventListener('focus', this[$onFocus]);
-          input.removeEventListener('blur', this[$onBlur]);
-
           controls.disableInteraction();
           this[$deferInteractionPrompt]();
         }
@@ -686,13 +674,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const now = performance.now();
       if (this[$waitingToPromptUser]) {
-        const thresholdTime =
-            this.interactionPrompt === InteractionPromptStrategy.AUTO ?
-            this[$loadedTime] :
-            this[$focusedTime];
-
         if (this.loaded &&
-            now > thresholdTime + this.interactionPromptThreshold) {
+            now > this[$loadedTime] + this.interactionPromptThreshold) {
           this[$waitingToPromptUser] = false;
           this[$promptElementVisibleTime] = now;
 
@@ -811,33 +794,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.requestUpdate('cameraTarget', this.cameraTarget);
       this.jumpCameraToGoal();
     }
-
-    [$onFocus] = () => {
-      if (!isFinite(this[$focusedTime])) {
-        this[$focusedTime] = performance.now();
-      }
-
-      // NOTE(cdata): On every re-focus, if the user has
-      // already interacted, they no longer need to hear the prompt.
-      // Otherwise, they will hear it again after the idle prompt threshold
-      // has been crossed.
-      if (this.interactionPrompt === InteractionPromptStrategy.WHEN_FOCUSED &&
-          !this[$userHasInteracted]) {
-        this[$waitingToPromptUser] = true;
-      }
-    };
-
-    [$onBlur] = () => {
-      if (this.interactionPrompt !== InteractionPromptStrategy.WHEN_FOCUSED) {
-        return;
-      }
-
-      this[$waitingToPromptUser] = false;
-      this[$promptElement].classList.remove('visible');
-
-      this[$promptElementVisibleTime] = Infinity;
-      this[$focusedTime] = Infinity;
-    };
 
     [$onChange] = ({source}: ChangeEvent) => {
       this[$updateAria]();

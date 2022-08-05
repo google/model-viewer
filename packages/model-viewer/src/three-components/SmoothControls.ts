@@ -26,7 +26,6 @@ const TAP_MS = 300;
 const vector2 = new Vector2();
 const vector3 = new Vector3();
 
-export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = null|((dx: number, dy: number) => void);
 
 export interface Pointer {
