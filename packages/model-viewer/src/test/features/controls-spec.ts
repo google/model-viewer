@@ -546,19 +546,6 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
             expect(promptElement.classList.contains('visible')).to.be.true;
           });
         });
-
-        suite('when configured to be basic', () => {
-          setup(async () => {
-            element.interactionPromptStyle = 'basic';
-            await timePasses();
-          });
-
-          test('does not have a css animation', () => {
-            const computedStyle =
-                getComputedStyle((element as any)[$promptElement]);
-            expect(computedStyle.animationName).to.be.equal('none');
-          });
-        });
       });
 
       suite('synthetic interaction', () => {
