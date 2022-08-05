@@ -114,7 +114,8 @@ async function prepareZipArchive(
 
   // check if legal envrionment url
   if (config.environmentImage != null &&
-      config.environmentImage !== 'neutral') {
+      config.environmentImage !== 'neutral' &&
+      config.environmentImage !== 'legacy') {
     const response = await fetch(config.environmentImage);
     if (!response.ok) {
       throw new Error(`Failed to fetch url ${config.environmentImage}`);

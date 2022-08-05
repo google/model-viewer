@@ -24,7 +24,7 @@ import '@polymer/paper-item';
 import '@material/mwc-button';
 
 import {html} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {fileModalStyles, iblSelectorStyles} from '../../styles.css.js';
@@ -135,9 +135,9 @@ export class IblSelector extends ConnectedLitElement {
   // correct option from the dropdown.
   render() {
     const value = this.config.environmentImage;
-    const selectedIndex = value === 'neutral' ?
+    const selectedIndex = value == null ?
         0 :
-        value == null ?
+        value === 'legacy' ?
         1 :
         2 + this.environmentImages.findIndex((image) => image.uri === value);
     return html`
@@ -150,8 +150,8 @@ export class IblSelector extends ConnectedLitElement {
               selectedIndex=${selectedIndex}
               style="align-self: center; width: 70%;"
               @select=${this.onSelectEnvironmentImage}>
-              <paper-item value="neutral">Neutral</paper-item>
-              <paper-item>Default</paper-item>
+              <paper-item>Neutral</paper-item>
+              <paper-item value="legacy">Legacy</paper-item>
               ${
         this.environmentImages.map(
             environmentImage => html`<paper-item value=${

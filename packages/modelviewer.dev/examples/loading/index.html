@@ -64,7 +64,7 @@
     --poster-color: transparent;
   }
 </style>
-<model-viewer id="reveal" loading="eager" camera-controls auto-rotate poster="../../assets/poster-shishkebab.png" src="../../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab"></model-viewer>
+<model-viewer id="reveal" loading="eager" camera-controls auto-rotate poster="../../assets/poster-shishkebab.webp" src="../../shared-assets/models/shishkebab.glb" shadow-intensity="1" alt="A 3D model of a shishkebab"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -87,7 +87,7 @@
   }
 </style>
 <!-- use unique asset to ensure preloading -->
-<model-viewer id="interaction" camera-controls loading="eager" reveal="interaction" poster="../../assets/poster-sphere.png" src="../../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
+<model-viewer id="interaction" camera-controls loading="eager" reveal="interaction" poster="../../assets/poster-sphere.webp" src="../../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -112,7 +112,7 @@
     right: 0;
     top: 0;
     bottom: 0;
-    background-image: url("../../assets/poster-damagedhelmet.png");
+    background-image: url("../../assets/poster-damagedhelmet.webp");
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -467,7 +467,7 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimize
           </div>
           <example-snippet stamp-to="cyclingModels" highlight-as="html">
             <template>
-<model-viewer id="toggle-model" src="../../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" shadow-intensity="1" bounds="tight" camera-controls auto-rotate></model-viewer>
+<model-viewer id="toggle-model" src="../../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" shadow-intensity="1" camera-controls auto-rotate></model-viewer>
 <script>
     const models = ['shishkebab.glb', 'Astronaut.glb'];
     const toggleModel = document.querySelector('#toggle-model');
