@@ -92,7 +92,6 @@ export type InteractionPromptStrategy = 'auto'|'when-focused'|'none';
 export type InteractionPromptStyle = 'basic'|'wiggle';
 export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
-export type Bounds = 'tight'|'legacy';
 
 export const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
@@ -251,7 +250,6 @@ export declare interface ControlsInterface {
   interactionPromptThreshold: number;
   orbitSensitivity: number;
   touchAction: TouchAction;
-  bounds: Bounds;
   interpolationDecay: number;
   disableZoom: boolean;
   enablePan: boolean;
@@ -358,8 +356,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: Number, attribute: 'interpolation-decay'})
     interpolationDecay: number = DECAY_MILLISECONDS;
-
-    @property({type: String, attribute: 'bounds'}) bounds: Bounds = 'legacy';
 
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
@@ -499,10 +495,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('enablePan')) {
         controls.enablePan = this.enablePan;
-      }
-
-      if (changedProperties.has('bounds')) {
-        scene.tightBounds = this.bounds === 'tight';
       }
 
       if (changedProperties.has('interactionPrompt') ||
