@@ -202,7 +202,7 @@ suite('ModelViewerElementBase with ARMixin', () => {
       // possibly due to not serving over HTTPS (which disables WebXR)? However,
       // Browserstack is unstable without this hostname.
       test('shows the AR button if on a WebXR platform', () => {
-        expect(element.canActivateAR).to.be.equal(false);  // IS_ANDROID
+        expect(element.canActivateAR).to.be.equal(IS_ANDROID);
       });
     });
 
@@ -225,41 +225,16 @@ suite('ModelViewerElementBase with ARMixin', () => {
         }
       });
 
-      if (IS_IOS) {
-        suite('on iOS Safari', () => {
-          test('hides the AR button', () => {
-            expect(element.canActivateAR).to.be.equal(false);
-          });
-
-          suite('with an ios-src', () => {
-            setup(async () => {
-              element.iosSrc = assetPath('models/Astronaut.usdz');
-              await timePasses();
-            });
-
-            test('shows the AR button', () => {
-              expect(element.canActivateAR).to.be.equal(true);
-            });
-          });
+      suite('with an ios-src', () => {
+        setup(async () => {
+          element.iosSrc = assetPath('models/Astronaut.usdz');
+          await timePasses();
         });
-      } else if (!IS_ANDROID) {
-        suite('on browsers that do not support AR', () => {
-          test('hides the AR button', () => {
-            expect(element.canActivateAR).to.be.equal(false);
-          });
 
-          suite('with an ios-src', () => {
-            setup(async () => {
-              element.iosSrc = assetPath('models/Astronaut.usdz');
-              await timePasses();
-            });
-
-            test('still hides the AR button', () => {
-              expect(element.canActivateAR).to.be.equal(false);
-            });
-          });
+        test('shows the AR button', () => {
+          expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);
         });
-      }
+      });
     });
   });
 });
