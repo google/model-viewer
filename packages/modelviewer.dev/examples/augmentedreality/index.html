@@ -81,7 +81,7 @@
           </div>
           <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
-<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model carousel">
+<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.webp" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model carousel">
   
   <button slot="ar-button" id="ar-button">
     View in your space
@@ -98,19 +98,19 @@
   <div class="slider">
     <div class="slides">
       <button class="slide selected" onclick="switchSrc(this, 'Chair')"
-        style="background-image: url('../../assets/ShopifyModels/Chair.png');">
+        style="background-image: url('../../assets/ShopifyModels/Chair.webp');">
 
       <button class="slide" onclick="switchSrc(this, 'Mixer')"
-        style="background-image: url('../../assets/ShopifyModels/Mixer.png');">
+        style="background-image: url('../../assets/ShopifyModels/Mixer.webp');">
 
       <button class="slide" onclick="switchSrc(this, 'GeoPlanter')"
-        style="background-image: url('../../assets/ShopifyModels/GeoPlanter.png');">
+        style="background-image: url('../../assets/ShopifyModels/GeoPlanter.webp');">
       
       <button class="slide" onclick="switchSrc(this, 'ToyTrain')"
-        style="background-image: url('../../assets/ShopifyModels/ToyTrain.png');">
+        style="background-image: url('../../assets/ShopifyModels/ToyTrain.webp');">
       
       <button class="slide" onclick="switchSrc(this, 'Canoe')"
-        style="background-image: url('../../assets/ShopifyModels/Canoe.png');">    
+        style="background-image: url('../../assets/ShopifyModels/Canoe.webp');">    
     </div>
   </div>
 </model-viewer>
@@ -121,7 +121,7 @@
   window.switchSrc = (element, name) => {
     const base = "../../assets/ShopifyModels/" + name;
     modelViewer.src = base + '.glb';
-    modelViewer.poster = base + '.png';
+    modelViewer.poster = base + '.webp';
     const slides = document.querySelectorAll(".slide");
     slides.forEach((element) => {element.classList.remove("selected");});
     element.classList.add("selected");
@@ -146,7 +146,7 @@
   }
 
   #ar-button {
-    background-image: url(../../assets/ic_view_in_ar_new_googblue_48dp.png);
+    background-image: url(../../assets/ic_view_in_ar_new_googblue_48dp.webp);
     background-repeat: no-repeat;
     background-size: 20px 20px;
     background-position: 12px 50%;
