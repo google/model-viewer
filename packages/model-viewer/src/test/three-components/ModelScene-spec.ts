@@ -15,43 +15,33 @@
 
 import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
 
-import ModelViewerElementBase, {$canvas} from '../../model-viewer-base.js';
+import {$scene} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
-import {Constructor} from '../templates.js';
 
 
 const expect = chai.expect;
 
 suite('ModelScene', () => {
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement: Constructor<ModelViewerElementBase>;
-
-  let element: ModelViewerElementBase;
+  let element: ModelViewerElement;
   let scene: ModelScene;
   let dummyRadius: number;
   let dummyMesh: Mesh;
 
   setup(() => {
-    tagName = `model-viewer-modelscene-${nextId++}`;
-    ModelViewerElement = class extends ModelViewerElementBase {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
     // Set the radius of the sphere to 0.5 so that it's size is 1
     // for testing scaling.
     dummyRadius = 0.5;
     dummyMesh = new Mesh(new SphereBufferGeometry(dummyRadius, 32, 32));
     element = new ModelViewerElement();
-    scene = new ModelScene({
-      element: element,
-      canvas: element[$canvas],
-      width: 200,
-      height: 100,
-    });
+    scene = element[$scene];
+
+    document.body.insertBefore(element, document.body.firstChild);
+  });
+
+  teardown(() => {
+    document.body.removeChild(element);
   });
 
   suite('setModelSource', () => {
