@@ -171,8 +171,6 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
                 await timePasses();
 
-                element.src = HORSE_GLB_PATH;
-
                 let preloadEvent = null;
                 const onPreload = (event: CustomEvent) => {
                   if (event.detail.url === HORSE_GLB_PATH) {
@@ -180,6 +178,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                   }
                 };
                 element.addEventListener<any>('preload', onPreload);
+
+                element.src = HORSE_GLB_PATH;
 
                 await until(() => element.loaded);
 
