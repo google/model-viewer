@@ -96,7 +96,7 @@ export default class TextureUtils extends EventDispatcher {
     const {progressTracker} = options;
 
     const useAltEnvironment = environmentMapUrl !== 'legacy';
-    if (!useAltEnvironment) {
+    if (environmentMapUrl === 'legacy' || environmentMapUrl === 'neutral') {
       environmentMapUrl = null;
     }
     environmentMapUrl = deserializeUrl(environmentMapUrl);
