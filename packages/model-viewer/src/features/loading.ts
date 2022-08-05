@@ -20,7 +20,7 @@ import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
 
-export type RevealAttributeValue = 'auto'|'interaction'|'manual';
+export type RevealAttributeValue = 'auto'|'manual';
 export type LoadingAttributeValue = 'auto'|'lazy'|'eager';
 type DismissalSource = 'interaction';
 
@@ -34,12 +34,8 @@ const DEFAULT_DRACO_DECODER_LOCATION =
 const DEFAULT_KTX2_TRANSCODER_LOCATION =
     'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/';
 
-const SPACE_KEY = 32;
-const ENTER_KEY = 13;
-
 const RevealStrategy: {[index: string]: RevealAttributeValue} = {
   AUTO: 'auto',
-  INTERACTION: 'interaction',
   MANUAL: 'manual'
 };
 
@@ -69,8 +65,6 @@ const $onTransitionEnd = Symbol('onTransitionEnd');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
-const $onClick = Symbol('onClick');
-const $onKeydown = Symbol('onKeydown');
 const $onProgress = Symbol('onProgress');
 
 export declare interface LoadingInterface {
@@ -249,8 +243,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     /**
      * Displays the poster, hiding the 3D model. If this is called after the 3D
-     * model has been revealed, then it will behave as though
-     * reveal='interaction', being dismissed either by a user click or a call to
+     * model has been revealed, then it must be dismissed by a call to
      * dismissPoster().
      */
     showPoster() {
@@ -356,22 +349,12 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
 
-      // Fired when a user first clicks the model element. Used to
-      // change the visibility of a poster image, or start loading
-      // a model.
-      this[$posterContainerElement].addEventListener('click', this[$onClick]);
-      this[$posterContainerElement].addEventListener(
-          'keydown', this[$onKeydown]);
       this[$progressTracker].addEventListener('progress', this[$onProgress]);
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
 
-      this[$posterContainerElement].removeEventListener(
-          'click', this[$onClick]);
-      this[$posterContainerElement].removeEventListener(
-          'keydown', this[$onKeydown]);
       this[$progressTracker].removeEventListener('progress', this[$onProgress]);
     }
 
@@ -408,30 +391,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
     }
-
-    [$onClick] = () => {
-      if (this.reveal === RevealStrategy.MANUAL ||
-          this.reveal === RevealStrategy.AUTO) {
-        return;
-      }
-      this.dismissPoster();
-    };
-
-    [$onKeydown] = (event: KeyboardEvent) => {
-      if (this.reveal === RevealStrategy.MANUAL) {
-        return;
-      }
-      switch (event.keyCode) {
-        // NOTE(cdata): Links and buttons can typically be activated with
-        // both spacebar and enter to produce a synthetic click action
-        case SPACE_KEY:
-        case ENTER_KEY:
-          this.dismissPoster();
-          break;
-        default:
-          break;
-      }
-    };
 
     [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
