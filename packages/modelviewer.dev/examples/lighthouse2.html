@@ -250,7 +250,7 @@
         src="../assets/ShopifyModels/Chair.glb"
         poster="../assets/ShopifyModels/ChairPoster.webp"
         seamless-poster
-        reveal="interaction"
+        reveal="manual"
         camera-orbit="1.2195rad 1.362rad 100%"
         interaction-prompt-threshold="0"
         shadow-intensity="1"
@@ -288,7 +288,7 @@
     <p>It is still important to delay the loading of the 3D model, as including
     its load time in the lighthouse scores will tend to destroy them. As such
     the first <code>&lt;model-viewer&gt;</code> uses
-    <code>reveal="interaction"</code> and calls <code>dismissPoster()</code> to
+    <code>reveal="manual"</code> and calls <code>dismissPoster()</code> to
     cause loading to proceed. The second <code>&lt;model-viewer&gt;</code> does
     not require this as it lazy-loads by default since it is below the fold.</p>
 
