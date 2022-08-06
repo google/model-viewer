@@ -20,9 +20,8 @@ import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
 
-export type RevealAttributeValue = 'auto'|'interaction'|'manual';
+export type RevealAttributeValue = 'auto'|'manual';
 export type LoadingAttributeValue = 'auto'|'lazy'|'eager';
-type DismissalSource = 'interaction';
 
 export const POSTER_TRANSITION_TIME = 300;
 export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
@@ -34,12 +33,8 @@ const DEFAULT_DRACO_DECODER_LOCATION =
 const DEFAULT_KTX2_TRANSCODER_LOCATION =
     'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/';
 
-const SPACE_KEY = 32;
-const ENTER_KEY = 13;
-
 const RevealStrategy: {[index: string]: RevealAttributeValue} = {
   AUTO: 'auto',
-  INTERACTION: 'interaction',
   MANUAL: 'manual'
 };
 
@@ -49,17 +44,13 @@ const LoadingStrategy: {[index: string]: LoadingAttributeValue} = {
   EAGER: 'eager'
 };
 
-const PosterDismissalSource: {[index: string]: DismissalSource} = {
-  INTERACTION: 'interaction'
-};
-
 export const $defaultProgressBarElement = Symbol('defaultProgressBarElement');
 export const $defaultProgressMaskElement = Symbol('defaultProgressMaskElement');
 
 export const $posterContainerElement = Symbol('posterContainerElement');
 export const $defaultPosterElement = Symbol('defaultPosterElement');
 
-const $posterDismissalSource = Symbol('posterDismissalSource');
+const $shouldDismissPoster = Symbol('shouldDismissPoster');
 const $hidePoster = Symbol('hidePoster');
 const $modelIsRevealed = Symbol('modelIsRevealed');
 const $updateProgressBar = Symbol('updateProgressBar');
@@ -69,8 +60,6 @@ const $onTransitionEnd = Symbol('onTransitionEnd');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
-const $onClick = Symbol('onClick');
-const $onKeydown = Symbol('onKeydown');
 const $onProgress = Symbol('onProgress');
 
 export declare interface LoadingInterface {
@@ -242,15 +231,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (this[$sceneIsReady]()) {
         this[$hidePoster]();
       } else {
-        this[$posterDismissalSource] = PosterDismissalSource.INTERACTION;
+        this[$shouldDismissPoster] = true;
         this[$updateSource]();
       }
     }
 
     /**
      * Displays the poster, hiding the 3D model. If this is called after the 3D
-     * model has been revealed, then it will behave as though
-     * reveal='interaction', being dismissed either by a user click or a call to
+     * model has been revealed, then it must be dismissed by a call to
      * dismissPoster().
      */
     showPoster() {
@@ -280,7 +268,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     protected[$lastReportedProgress]: number = 0;
 
-    protected[$posterDismissalSource]: DismissalSource|null = null;
+    protected[$shouldDismissPoster] = false;
 
     // TODO: Add this to the shadow root as part of this mixin's
     // implementation:
@@ -356,22 +344,12 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
 
-      // Fired when a user first clicks the model element. Used to
-      // change the visibility of a poster image, or start loading
-      // a model.
-      this[$posterContainerElement].addEventListener('click', this[$onClick]);
-      this[$posterContainerElement].addEventListener(
-          'keydown', this[$onKeydown]);
       this[$progressTracker].addEventListener('progress', this[$onProgress]);
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
 
-      this[$posterContainerElement].removeEventListener(
-          'click', this[$onClick]);
-      this[$posterContainerElement].removeEventListener(
-          'keydown', this[$onKeydown]);
       this[$progressTracker].removeEventListener('progress', this[$onProgress]);
     }
 
@@ -409,30 +387,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$onClick] = () => {
-      if (this.reveal === RevealStrategy.MANUAL ||
-          this.reveal === RevealStrategy.AUTO) {
-        return;
-      }
-      this.dismissPoster();
-    };
-
-    [$onKeydown] = (event: KeyboardEvent) => {
-      if (this.reveal === RevealStrategy.MANUAL) {
-        return;
-      }
-      switch (event.keyCode) {
-        // NOTE(cdata): Links and buttons can typically be activated with
-        // both spacebar and enter to produce a synthetic click action
-        case SPACE_KEY:
-        case ENTER_KEY:
-          this.dismissPoster();
-          break;
-        default:
-          break;
-      }
-    };
-
     [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
       this[$lastReportedProgress] =
@@ -441,7 +395,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
         if (this[$sceneIsReady]() &&
-            (this[$posterDismissalSource] != null ||
+            (this[$shouldDismissPoster] ||
              this.reveal === RevealStrategy.AUTO)) {
           this[$hidePoster]();
         }
@@ -455,7 +409,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$shouldAttemptPreload](): boolean {
       return !!this.src &&
-          (this[$posterDismissalSource] != null ||
+          (this[$shouldDismissPoster] ||
            this.loading === LoadingStrategy.EAGER ||
            (this.reveal === RevealStrategy.AUTO && this[$isElementInViewport]));
     }
@@ -485,7 +439,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     [$hidePoster]() {
-      this[$posterDismissalSource] = null;
+      this[$shouldDismissPoster] = false;
       const posterContainerElement = this[$posterContainerElement];
 
       if (posterContainerElement.classList.contains('show')) {

@@ -8,10 +8,6 @@
         "name": "Display Poster"
       },
       {
-        "htmlId": "preload",
-        "name": "Preload"
-      },
-      {
         "htmlId": "customizeLoad",
         "name": "Customize Load"
       },

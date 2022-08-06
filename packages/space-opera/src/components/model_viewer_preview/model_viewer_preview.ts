@@ -24,7 +24,7 @@ import '@material/mwc-icon-button';
 
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {html} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {modelViewerPreviewStyles} from '../../styles.css.js';
@@ -93,17 +93,6 @@ export class ModelViewerPreview extends ConnectedLitElement {
         'https://unpkg.com/meshoptimizer/meshopt_decoder.js';
   }
 
-  private async onGltfUrlChanged() {
-    // Clear potential poster settings.
-    if (this.modelViewer.reveal === 'interaction' ||
-        this.modelViewer.reveal === 'manual') {
-      this.modelViewer.reveal = 'auto';
-    } else {
-      this.modelViewer.reveal = 'auto';
-    }
-    this.modelViewer.poster = this.config.poster || '';
-  }
-
   forcePost() {
     reduxStore.dispatch(dispatchSetForcePost(true));
   }
@@ -165,12 +154,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
   // Handle the case when the model is loaded for the first time.
   private async onModelLoaded() {
     reduxStore.dispatch(await dispatchModel());
-    // only update on poster reveal
-    if (this.modelViewer.reveal === 'interaction') {
-      await this.onGltfUrlChanged();
-    }
     if (this.modelViewer.availableAnimations.length > 0) {
-      reduxStore.dispatch(dispatchAutoplayEnabled(true));
+          reduxStore.dispatch(dispatchAutoplayEnabled(true));
     }
     const config = getConfig(reduxStore.getState());
     reduxStore.dispatch(dispatchConfig({...config}));
@@ -185,8 +170,8 @@ export class ModelViewerPreview extends ConnectedLitElement {
     const positionAndNormal = this.modelViewer.positionAndNormalFromPoint(
         event.clientX, event.clientY);
     if (!positionAndNormal) {
-      console.log('Click was not on model, no hotspot added.');
-      return;
+          console.log('Click was not on model, no hotspot added.');
+          return;
     }
     reduxStore.dispatch(dispatchAddHotspot({
       name: generateUniqueHotspotName(),
@@ -198,7 +183,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
   private onDragover(event: DragEvent) {
     if (!event.dataTransfer)
-      return;
+          return;
 
     event.stopPropagation();
     event.preventDefault();
@@ -209,25 +194,26 @@ export class ModelViewerPreview extends ConnectedLitElement {
     event.preventDefault();
 
     if (event.dataTransfer && event.dataTransfer.items[0].kind === 'file') {
-      const file = event.dataTransfer.items[0].getAsFile();
-      if (!file)
-        return;
-      if (file.name.match(/\.(glb|gltf)$/i)) {
-        const arrayBuffer = await file.arrayBuffer();
-        reduxStore.dispatch(dispatchSetModelName(file.name));
-        const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
-        reduxStore.dispatch(dispatchGltfUrl(url));
-        dispatchConfig(extractStagingConfig(this.config));
-        reduxStore.dispatch(dispatchCameraControlsEnabled(true));
-        reduxStore.dispatch(dispatchSetHotspots([]));
-      }
-      if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
-        const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
-        reduxStore.dispatch(
-            dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
-        reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
-        reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
-      }
+          const file = event.dataTransfer.items[0].getAsFile();
+          if (!file)
+            return;
+          if (file.name.match(/\.(glb|gltf)$/i)) {
+            const arrayBuffer = await file.arrayBuffer();
+            reduxStore.dispatch(dispatchSetModelName(file.name));
+            const url =
+                createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
+            reduxStore.dispatch(dispatchGltfUrl(url));
+            dispatchConfig(extractStagingConfig(this.config));
+            reduxStore.dispatch(dispatchCameraControlsEnabled(true));
+            reduxStore.dispatch(dispatchSetHotspots([]));
+          }
+          if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
+            const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
+            reduxStore.dispatch(
+                dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
+            reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
+            reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
+          }
     }
   }
 }

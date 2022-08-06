@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import {$defaultPosterElement, $posterContainerElement, LoadingInterface, LoadingMixin, POSTER_TRANSITION_TIME} from '../../features/loading.js';
+import {$defaultPosterElement, $posterContainerElement, LoadingInterface, LoadingMixin} from '../../features/loading.js';
 import ModelViewerElementBase, {$scene, $userInputElement} from '../../model-viewer-base.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent, pickShadowDescendant, rafPasses, until} from '../helpers.js';
+import {assetPath, pickShadowDescendant, rafPasses, until} from '../helpers.js';
 import {BasicSpecTemplate, Constructor} from '../templates.js';
 
 const expect = chai.expect;
@@ -171,8 +171,6 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
 
                 await timePasses();
 
-                element.src = HORSE_GLB_PATH;
-
                 let preloadEvent = null;
                 const onPreload = (event: CustomEvent) => {
                   if (event.detail.url === HORSE_GLB_PATH) {
@@ -180,6 +178,8 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
                   }
                 };
                 element.addEventListener<any>('preload', onPreload);
+
+                element.src = HORSE_GLB_PATH;
 
                 await until(() => element.loaded);
 
@@ -209,52 +209,6 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
               const picked = pickShadowDescendant(element);
 
               expect(picked).to.be.equal(input);
-            });
-          });
-
-          suite('interaction', () => {
-            test('retains poster after loading', async () => {
-              element.loading = 'eager';
-              element.reveal = 'interaction';
-              element.src = CUBE_GLB_PATH;
-
-              await waitForEvent(element, 'load');
-              await timePasses(POSTER_TRANSITION_TIME + 100);
-
-              const input = element[$userInputElement];
-              const picked = pickShadowDescendant(element);
-
-              expect(picked).to.not.be.equal(input);
-            });
-
-            suite('when focused', () => {
-              test(
-                  'can hide the poster with keyboard interaction', async () => {
-                    element.loading = 'eager';
-                    element.reveal = 'interaction';
-                    element.src = CUBE_GLB_PATH;
-
-                    const posterElement =
-                        (element as any)[$defaultPosterElement];
-                    const inputElement = element[$userInputElement];
-
-                    await waitForEvent(element, 'load');
-
-                    // NOTE(cdata): Currently, Firefox does not forward focus
-                    // when delegatesFocus is true but focus is triggered
-                    // manually (e.g., with the .focus() method).
-                    posterElement.focus();
-
-                    expect(element.shadowRoot!.activeElement)
-                        .to.be.equal(posterElement);
-
-                    dispatchSyntheticEvent(
-                        posterElement, 'keydown', {keyCode: 13});
-
-                    await until(() => {
-                      return element.shadowRoot!.activeElement === inputElement;
-                    });
-                  });
             });
           });
 
@@ -342,7 +296,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             const posterContainer = (element as any)[$posterContainerElement];
             const inputElement = element[$userInputElement];
 
-            element.reveal = 'interaction';
+            element.reveal = 'manual';
             element.src = null;
 
             await timePasses();
@@ -358,7 +312,7 @@ suite('ModelViewerElementBase with LoadingMixin', () => {
             expect(element.shadowRoot!.activeElement)
                 .to.be.equal(posterElement);
 
-            dispatchSyntheticEvent(posterElement, 'keydown', {keyCode: 13});
+            element.dismissPoster();
 
             await until(() => {
               return element.shadowRoot!.activeElement === inputElement;

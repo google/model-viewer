@@ -72,29 +72,6 @@
     </div>
 
     <div class="sample">
-      <div id="preload" class="demo"></div>
-      <div class="content">
-        <div class="wrapper">
-          <div class="heading">
-            <h2 class="demo-title">Preload with poster and show model on interaction</h2>
-            <h4></h4>
-          </div>
-          <example-snippet stamp-to="preload" highlight-as="html">
-            <template>
-<style>
-  model-viewer#interaction {
-    --poster-color: transparent;
-  }
-</style>
-<!-- use unique asset to ensure preloading -->
-<model-viewer id="interaction" camera-controls loading="eager" reveal="interaction" poster="../../assets/poster-sphere.webp" src="../../shared-assets/models/reflective-sphere.gltf" alt="A 3D model of a reflective sphere"></model-viewer>
-            </template>
-          </example-snippet>
-        </div>
-      </div>
-    </div>
-
-    <div class="sample">
       <div id="customizeLoad" class="demo"></div>
       <div class="content">
         <div class="wrapper">
@@ -138,10 +115,15 @@
   }
 </style>
 <!-- use unique asset to ensure lazy loading -->
-<model-viewer id="lazy-load" camera-controls reveal="interaction" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet">
+<model-viewer id="lazy-load" camera-controls reveal="manual" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet">
   <div id="lazy-load-poster" slot="poster"></div>
   <div id="button-load" slot="poster">Load 3D Model</div>
 </model-viewer>
+
+<script>
+  document.querySelector('#button-load').addEventListener('click', 
+    () => document.querySelector('#lazy-load').dismissPoster());
+</script>
             </template>
           </example-snippet>
         </div>
@@ -172,17 +154,21 @@
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Cycling between posters</h2>
-            <h4></h4>
+            <h4>The model is shown when the element is clicked. Note that
+            camera-controls is not enabled here, so the model rotates on its
+            own, but is not interactive.</h4>
           </div>
           <example-snippet stamp-to="cyclingPosters" highlight-as="html">
             <template>
-<model-viewer id="toggle-poster" reveal="interaction" auto-rotate poster="../../assets/poster-astronaut2.png" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<model-viewer id="toggle-poster" reveal="manual" auto-rotate poster="../../assets/poster-astronaut2.png" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
 <script>
   const posters = ['poster-astronaut2.png', 'poster-astronaut3.png', 'poster-astronaut4.png'];
   const togglePoster = document.querySelector('#toggle-poster');
   let i = 0;
   setInterval(() =>
     togglePoster.setAttribute('poster', `../../assets/${posters[++i % 3]}`), 2000);
+  const modelViewer = document.querySelector('#toggle-poster');
+  modelViewer.addEventListener('click', () => modelViewer.dismissPoster());
 </script>
             </template>
           </example-snippet>
