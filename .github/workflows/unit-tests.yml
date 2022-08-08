@@ -42,6 +42,16 @@ jobs:
     - name: Build packages
       run: npm run build
 
+    - name: Wait for BrowserStack ready
+      uses: mydea/action-wait-for-api@v1
+      with:
+        url: "https://api.browserstack.com/automate/plan.json"
+        headers: '{"Authorization": "Basic " + Buffer.from(${{ secrets.BROWSER_STACK_USERNAME }} + ':' + ${{ secrets.BROWSER_STACK_ACCESS_KEY }}).toString('base64')}'
+        expected-response-field: "parallel_sessions_running"
+        expected-response-field-value: "0"
+        interval: "80"
+        timeout: "120"
+
     - name: Unit tests
       env:
         BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
