@@ -46,7 +46,7 @@ jobs:
       uses: mydea/action-wait-for-api@v1
       with:
         url: "https://api.browserstack.com/automate/plan.json"
-        headers: '{"Authorization": "Basic " + Buffer.from(${{ secrets.BROWSER_STACK_USERNAME }} + ":" + ${{ secrets.BROWSER_STACK_ACCESS_KEY }}).toString("base64")}'
+        headers: '{"Authorization": `Basic ${Buffer.from(${{ secrets.BROWSER_STACK_USERNAME }} + ":" + ${{ secrets.BROWSER_STACK_ACCESS_KEY }}).toString("base64")}`}'
         expected-response-field: "parallel_sessions_running"
         expected-response-field-value: "0"
         interval: "80"
