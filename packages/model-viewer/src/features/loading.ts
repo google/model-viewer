@@ -25,7 +25,6 @@ export type LoadingAttributeValue = 'auto'|'lazy'|'eager';
 
 export const POSTER_TRANSITION_TIME = 300;
 export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
-const PROGRESS_MASK_BASE_OPACITY = 0.2;
 
 const DEFAULT_DRACO_DECODER_LOCATION =
     'https://www.gstatic.com/draco/versioned/decoders/1.4.1/';
@@ -45,7 +44,6 @@ const LoadingStrategy: {[index: string]: LoadingAttributeValue} = {
 };
 
 export const $defaultProgressBarElement = Symbol('defaultProgressBarElement');
-export const $defaultProgressMaskElement = Symbol('defaultProgressMaskElement');
 
 export const $posterContainerElement = Symbol('posterContainerElement');
 export const $defaultPosterElement = Symbol('defaultPosterElement');
@@ -282,10 +280,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         this.shadowRoot!.querySelector('#default-progress-bar > .bar') as
         HTMLElement;
 
-    protected[$defaultProgressMaskElement]: HTMLElement =
-        this.shadowRoot!.querySelector('#default-progress-bar > .mask') as
-        HTMLElement;
-
     protected[$ariaLabelCallToAction] =
         this[$defaultPosterElement].getAttribute('aria-label');
 
@@ -293,9 +287,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       const parentNode = this[$defaultProgressBarElement].parentNode as Element;
 
       requestAnimationFrame(() => {
-        this[$defaultProgressMaskElement].style.opacity =
-            `${(1.0 - progress) * PROGRESS_MASK_BASE_OPACITY}`;
-
         this[$defaultProgressBarElement].style.transform =
             `scaleX(${progress})`;
 

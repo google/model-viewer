@@ -162,17 +162,6 @@ canvas.show {
   overflow: hidden;
 }
 
-#default-progress-bar > .mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--progress-mask, #fff);
-  transition: opacity 0.3s;
-  opacity: 0.2;
-}
-
 #default-progress-bar > .bar {
   position: absolute;
   top: 0;
@@ -376,7 +365,6 @@ canvas.show {
     <div class="slot progress-bar">
       <slot name="progress-bar">
         <div id="default-progress-bar" aria-hidden="true">
-          <div class="mask" part="default-progress-mask"></div>
           <div class="bar" part="default-progress-bar"></div>
         </div>
       </slot>
