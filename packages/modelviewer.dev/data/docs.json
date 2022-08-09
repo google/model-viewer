@@ -263,7 +263,7 @@
         "name": "default-progress-bar",
         "htmlName": "defaultProgressBar",
         "description": "Scope your CSS to <code>model-viewer::part(default-progress-bar)</code> to change the styling of our default progress bar without replacing it wholesale with a slot. Most common would be probably changing the background-color, height, width, and margins (avoid the transform property as that is how the progress is updated)."
-      },
+      }
     ],
     "Slots": [
       {
