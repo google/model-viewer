@@ -17,7 +17,6 @@ import {BackSide, BoxBufferGeometry, CubeCamera, CubeTexture, EquirectangularRef
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
-import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentScene from './EnvironmentScene.js';
 import EnvironmentSceneAlt from './EnvironmentSceneAlt.js';
@@ -25,10 +24,6 @@ import EnvironmentSceneAlt from './EnvironmentSceneAlt.js';
 export interface EnvironmentMapAndSkybox {
   environmentMap: Texture;
   skybox: Texture|null;
-}
-
-export interface EnvironmentGenerationConfig {
-  progressTracker?: ProgressTracker;
 }
 
 const GENERATED_SIGMA = 0.04;
@@ -91,10 +86,8 @@ export default class TextureUtils extends EventDispatcher {
    */
   async generateEnvironmentMapAndSkybox(
       skyboxUrl: string|null = null, environmentMapUrl: string|null = null,
-      options: EnvironmentGenerationConfig = {}):
+      progressCallback: (progress: number) => void = () => {}):
       Promise<EnvironmentMapAndSkybox> {
-    const {progressTracker} = options;
-
     const useAltEnvironment = environmentMapUrl !== 'legacy';
     if (environmentMapUrl === 'legacy' || environmentMapUrl === 'neutral') {
       environmentMapUrl = null;
@@ -106,17 +99,17 @@ export default class TextureUtils extends EventDispatcher {
 
     // If we have a skybox URL, attempt to load it as a cubemap
     if (!!skyboxUrl) {
-      skyboxLoads = this.loadEquirectFromUrl(skyboxUrl, progressTracker);
+      skyboxLoads = this.loadEquirectFromUrl(skyboxUrl, progressCallback);
     }
 
     if (!!environmentMapUrl) {
       // We have an available environment map URL
       environmentMapLoads =
-          this.loadEquirectFromUrl(environmentMapUrl, progressTracker);
+          this.loadEquirectFromUrl(environmentMapUrl, progressCallback);
     } else if (!!skyboxUrl) {
       // Fallback to deriving the environment map from an available skybox
       environmentMapLoads =
-          this.loadEquirectFromUrl(skyboxUrl, progressTracker);
+          this.loadEquirectFromUrl(skyboxUrl, progressCallback);
     } else {
       // Fallback to generating the environment map
       environmentMapLoads = useAltEnvironment ?
@@ -124,7 +117,7 @@ export default class TextureUtils extends EventDispatcher {
           this.loadGeneratedEnvironmentMap();
     }
 
-    let [environmentMap, skybox] =
+    const [environmentMap, skybox] =
         await Promise.all([environmentMapLoads, skyboxLoads]);
 
     if (environmentMap == null) {
@@ -138,10 +131,9 @@ export default class TextureUtils extends EventDispatcher {
    * Loads an equirect Texture from a given URL, for use as a skybox.
    */
   private async loadEquirectFromUrl(
-      url: string, progressTracker?: ProgressTracker): Promise<Texture> {
+      url: string,
+      progressCallback: (progress: number) => void): Promise<Texture> {
     if (!this.skyboxCache.has(url)) {
-      const progressCallback =
-          progressTracker ? progressTracker.beginActivity() : () => {};
       const skyboxMapLoads = this.load(url, progressCallback);
 
       this.skyboxCache.set(url, skyboxMapLoads);

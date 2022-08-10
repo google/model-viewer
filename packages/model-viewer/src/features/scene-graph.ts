@@ -204,8 +204,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$currentGLTF] = currentGLTF;
-      // TODO: remove this event, as it is synonymous with the load event.
-      this.dispatchEvent(new CustomEvent('scene-graph-ready'));
     }
 
     /** @export */
