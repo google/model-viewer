@@ -684,6 +684,7 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           statusElement = element[$statusElement];
           element.alt = 'A 3D model of a cube';
           element.cameraOrbit = '0 90deg auto';
+          await element.updateComplete;
         });
 
         test('has initial aria-label set to alt before interaction', () => {
