@@ -15,12 +15,14 @@
  */
 
 import {property} from 'lit/decorators.js';
+
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$hasTransitioned, $renderer, $scene, $tick} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$getModelIsVisible, $renderer, $scene, $tick} from '../model-viewer-base.js';
 import {degreesToRadians} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics} from '../styles/evaluators.js';
 import {numberNode, NumberNode} from '../styles/parsers.js';
 import {Constructor} from '../utilities.js';
+
 import {CameraChangeDetails} from './controls.js';
 
 
@@ -94,7 +96,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (!this.autoRotate || !this[$hasTransitioned]() ||
+      if (!this.autoRotate || !this[$getModelIsVisible]() ||
           this[$renderer].isPresenting) {
         return;
       }
