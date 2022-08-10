@@ -1038,16 +1038,6 @@
           "<a href=\"../examples/scenegraph/#createTexturesExample\">Create texture example</a>"
         ]
       }
-    ],
-    "Events": [
-      {
-        "name": "scene-graph-ready",
-        "htmlName": "sceneGraphReady",
-        "description": "THIS EVENT IS DEPRECATED, as it now fires at the same time as 'load', so please use that event instead.",
-        "links": [
-          "<a href=\"../examples/scenegraph/#changeMaterial\">Related examples</a>"
-        ]
-      }
     ]
   }
 ]

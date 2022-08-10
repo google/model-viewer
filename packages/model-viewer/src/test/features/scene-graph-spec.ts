@@ -257,7 +257,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     setup(async () => {
       element.src = ASTRONAUT_GLB_PATH;
 
-      await waitForEvent(element, 'scene-graph-ready');
+      await waitForEvent(element, 'load');
 
       material =
           (element[$scene].modelContainer.children[0].children[0].children[0] as
@@ -298,7 +298,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
         element.src = HORSE_GLB_PATH;
 
-        await waitForEvent(element, 'scene-graph-ready');
+        await waitForEvent(element, 'load');
 
         const nextColor =
             element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
@@ -309,7 +309,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
       test('allows the scene graph to be manipulated', async () => {
         element.src = HORSE_GLB_PATH;
 
-        await waitForEvent(element, 'scene-graph-ready');
+        await waitForEvent(element, 'load');
 
         await element.model!.materials[0]
             .pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]);
@@ -331,7 +331,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
       test('has a mapping for each primitive mesh', async () => {
         element.src = RIGGEDFIGURE_GLB_PATH;
 
-        await waitForEvent(element, 'scene-graph-ready');
+        await waitForEvent(element, 'load');
 
         const gltf = (element as any)[$currentGLTF] as ModelViewerGLTFInstance;
 
