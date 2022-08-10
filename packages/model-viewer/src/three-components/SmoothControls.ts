@@ -70,6 +70,7 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
 // Constants
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const ZOOM_SENSITIVITY = 0.04;
+//const panKeyIncrement = 10;
 
 export const KeyCode = {
   PAGE_UP: 33,
@@ -852,4 +853,37 @@ export class SmoothControls extends EventDispatcher {
       event.preventDefault();
     }
   };
+
+
+  // /**
+  // * Handles the Pan key presses
+  // * @param event The keyboard event for the .key value
+  // * @param dxy The magnitude of the move
+  // * @param isUserChange Is this a user initiated event
+  // * @returns boolean to indicate if the key event has been handled
+  // */
+  //  private panKeyCodeHandler(event: KeyboardEvent, dxy: number, isUserChange: boolean) {
+  //   this.initializePan();
+  //   // releventKey as the return value is to get the condition back to the calling function as don't have pass by reference arguments in js
+  //   let relevantKey = true;
+  //   switch (event.key) {
+  //     case 'ArrowUp':
+  //       this.movePan(0, -1 * dxy); // This is the negative one so that the model appears to move as the arrow direction rather than the view moving
+  //       break;
+  //     case 'ArrowDown':
+  //       this.movePan(0, dxy);
+  //       break;
+  //     case 'ArrowLeft':
+  //       this.movePan(-1 * dxy, 0);
+  //       break;
+  //     case 'ArrowRight':
+  //       this.movePan(dxy, 0);
+  //       break;
+  //     default:
+  //       relevantKey = false;
+  //       this.isUserChange = isUserChange;
+  //       break;
+  //   }
+  //   return relevantKey;
+  // }
 }
