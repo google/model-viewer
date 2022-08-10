@@ -22,7 +22,7 @@ import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {debounce, timePasses} from './utilities.js';
+import {clamp, debounce, timePasses} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -177,7 +177,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   protected[$userInputElement]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
   protected[$statusElement]: HTMLSpanElement;
-  protected[$status]: string;
+  protected[$status] = '';
   protected[$defaultAriaLabel]: string;
   protected[$clearModelTimeout]: number|null = null;
 
@@ -584,7 +584,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const source = this.src;
     try {
       await this[$scene].setSource(
-          source, (progress: number) => updateSourceProgress(progress * 0.95));
+          source,
+          (progress: number) =>
+              updateSourceProgress(clamp(progress, 0, 1) * 0.95));
 
       const detail = {url: source};
       this.dispatchEvent(new CustomEvent('preload', {detail}));
