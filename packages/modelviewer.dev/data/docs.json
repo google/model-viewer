@@ -30,7 +30,7 @@
       {
         "name": "poster",
         "htmlName": "poster",
-        "description": "Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render. If you use a <span class='attribute'>poster</span> with transparency, you may also want to set <span class='attribute'>--poster-color</span> to transparent so that the background shows through.",
+        "description": "Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render.",
         "links": [
           "<a href=\"../examples/loading\">Related examples</a>"
         ],
@@ -78,20 +78,6 @@
         "default": {
           "default": "false",
           "options": "true, false"
-        }
-      }
-    ],
-    "CSS": [
-      {
-        "name": "--poster-color",
-        "htmlName": "posterColor",
-        "description": "Sets the <span class='attribute'>background-color</span> of the  <span class='attribute'>poster</span> . You may wish to set this to transparent if you are using a seamless  <span class='attribute'>poster</span> with transparency (so that the background color of  <span class='attribute'>&lt;model-viewer&gt;</span> shows through).",
-        "links": [
-          "<a href=\"../examples/loading\">Related examples</a>"
-        ],
-        "default": {
-          "default": "#fff",
-          "options": "valid css background-color"
         }
       }
     ],
@@ -269,7 +255,7 @@
       {
         "name": "poster",
         "htmlName": "poster",
-        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white or the value of <span class='attribute'>--poster-color</span>. This <span class='attribute'>poster</span> is shown until the model is loaded and revealed.",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white. This <span class='attribute'>poster</span> is shown until the model is loaded and revealed.",
         "links": [
           "<a href=\"../examples/loading/#customizeLoad\"><span class='attribute'>poster</span> example</a>"
         ]

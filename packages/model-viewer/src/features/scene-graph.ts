@@ -209,7 +209,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     /** @export */
     async exportScene(options?: SceneExportOptions): Promise<Blob> {
       const scene = this[$scene];
-      return new Promise<Blob>(async (resolve) => {
+      return new Promise<Blob>(async (resolve, reject) => {
         // Defaults
         const opts = {
           binary: true,
@@ -240,13 +240,19 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                 .register(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
-        exporter.parse(scene.modelContainer.children[0], (gltf: object) => {
-          return resolve(
-              new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
-                type: opts.binary ? 'application/octet-stream' :
-                                    'application/json'
-              }));
-        }, opts);
+        exporter.parse(
+            scene.modelContainer.children[0],
+            (gltf: object) => {
+              return resolve(new Blob(
+                  [opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
+                    type: opts.binary ? 'application/octet-stream' :
+                                        'application/json'
+                  }));
+            },
+            () => {
+              return reject('glTF export failed');
+            },
+            opts);
 
         if (shadow != null) {
           shadow.visible = visible;
