@@ -129,7 +129,7 @@ suite('correlated-scene-graph', () => {
         const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
         const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
-        const scene = (SkeletonUtils as any).clone(threeGLTF.scene) as Group;
+        const scene = SkeletonUtils.clone(threeGLTF.scene) as Group;
         const scenes: Group[] = [scene];
 
         const cloneThreeGLTF: GLTF = {...threeGLTF, scene, scenes};
@@ -152,7 +152,7 @@ suite('correlated-scene-graph', () => {
         const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
         const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
-        const scene = (SkeletonUtils as any).clone(threeGLTF.scene) as Group;
+        const scene = SkeletonUtils.clone(threeGLTF.scene) as Group;
         const scenes: Group[] = [scene];
 
         const cloneThreeGLTF: GLTF = {...threeGLTF, scene, scenes};

@@ -184,7 +184,7 @@ suite('ModelViewerElementBase', () => {
         }, false);
 
         const errorEventDispatches = waitForEvent(element, 'error');
-        // We make a best effor to simulate the real scenario here, but
+        // We make a best effort to simulate the real scenario here, but
         // for some cases like headless Chrome WebGL might be disabled,
         // so we simulate the scenario.
         // @see https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.forceContextLoss

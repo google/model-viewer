@@ -311,7 +311,7 @@ export class Renderer extends EventDispatcher {
     this.scenes.delete(scene);
 
     if (this.canRender && this.scenes.size === 0) {
-      (this.threeRenderer.setAnimationLoop as any)(null);
+      this.threeRenderer.setAnimationLoop(null);
     }
 
     if (this.debugger != null) {
@@ -404,7 +404,7 @@ export class Renderer extends EventDispatcher {
     element[$tick](t, delta);
 
     const exposureIsNumber =
-        typeof exposure === 'number' && !(self as any).isNaN(exposure);
+        typeof exposure === 'number' && !Number.isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
   }
 
