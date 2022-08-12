@@ -15,13 +15,13 @@
 
 import {Texture} from 'three';
 
-import {BASE_OPACITY, EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
+import {BASE_OPACITY} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
-import {BasicSpecTemplate, Constructor} from '../templates.js';
 
 const expect = chai.expect;
 const ALT_BG_IMAGE_URL = assetPath('environments/white_furnace.hdr');
@@ -38,34 +38,20 @@ const waitForLoadAndEnvMap = (element: ModelViewerElementBase) => {
   return Promise.all([load, envMap]);
 };
 
-suite('ModelViewerElementBase with EnvironmentMixin', () => {
+suite('Environment', () => {
   suiteTeardown(() => {
     Renderer.resetSingleton();
   });
 
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement:
-      Constructor<ModelViewerElementBase&EnvironmentInterface>;
-  let element: ModelViewerElementBase&EnvironmentInterface;
+  let element: ModelViewerElement;
   let scene: ModelScene;
 
   setup(() => {
-    tagName = `model-viewer-environment-${nextId++}`;
-    ModelViewerElement = class extends EnvironmentMixin
-    (ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
     element = new ModelViewerElement();
     scene = element[$scene];
   });
 
   teardown(() => element.parentNode && element.parentNode.removeChild(element));
-
-  BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
   test('only generates an environment when in the render tree', async () => {
     let environmentChangeCount = 0;

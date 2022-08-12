@@ -15,17 +15,15 @@
 
 import {Mesh, MeshStandardMaterial} from 'three';
 
-import {$currentGLTF, SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
+import {$currentGLTF} from '../../features/scene-graph.js';
 import {$primitivesList} from '../../features/scene-graph/model.js';
 import {$initialMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {$scene} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
-import {BasicSpecTemplate, Constructor} from '../templates.js';
-
-
 
 const expect = chai.expect;
 
@@ -47,23 +45,10 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
                                scene.modelContainer.children[0];
 }
 
-suite('ModelViewerElementBase with SceneGraphMixin', () => {
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement:
-      Constructor<ModelViewerElementBase&SceneGraphInterface>;
-  let element: InstanceType<typeof ModelViewerElement>;
+suite('SceneGraph', () => {
+  let element: ModelViewerElement;
 
   setup(() => {
-    tagName = `model-viewer-scene-graph-${nextId++}`;
-    ModelViewerElement = class extends SceneGraphMixin
-    (ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
-
     element = new ModelViewerElement();
     document.body.insertBefore(element, document.body.firstChild);
   });
@@ -71,8 +56,6 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
   teardown(() => {
     document.body.removeChild(element);
   });
-
-  BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
   suite('scene export', () => {
     suite('with a loaded model', () => {

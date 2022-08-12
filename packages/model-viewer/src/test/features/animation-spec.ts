@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-import {AnimationMixin} from '../../features/animation.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {$scene} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
-import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 const NON_ANIMATED_GLB_PATH = assetPath('models/Astronaut.glb');
@@ -25,7 +24,7 @@ const ANIMATED_GLB_PATH = assetPath('models/RobotExpressive.glb');
 const ANIMATED_GLB_DUPLICATE_ANIMATION_NAMES_PATH =
     assetPath('models/DuplicateAnimationNames.glb');
 
-const animationIsPlaying = (element: any, animationName = null): boolean => {
+const animationIsPlaying = (element: any, animationName?: string): boolean => {
   const {currentAnimationAction} = element[$scene];
 
   if (currentAnimationAction != null &&
@@ -56,26 +55,10 @@ const animationWithIndexIsPlaying = (element: any, animationIndex = 0):
       return false;
     }
 
-suite('ModelViewerElementBase with AnimationMixin', () => {
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement: any;
-  let element: any;
-
-  setup(() => {
-    tagName = `model-viewer-animation-${nextId++}`;
-    ModelViewerElement = class extends AnimationMixin
-    (ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
-  });
-
-  BasicSpecTemplate(() => ModelViewerElement, () => tagName);
-
+suite('Animation', () => {
   suite('a model with animations', () => {
+    let element: ModelViewerElement;
+
     setup(async () => {
       element = new ModelViewerElement();
       element.src = ANIMATED_GLB_PATH;
