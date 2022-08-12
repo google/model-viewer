@@ -160,17 +160,7 @@ suite('ModelViewerElement', () => {
           // already visible.
           await rafPasses();
 
-          const hotspotObject2D =
-              scene.target.children[numSlots - 1] as Hotspot;
-
-          // const camera = element[$scene].camera;
-          // camera.position.z = 2;
-          // camera.updateMatrixWorld();
-          // element[$needsRender]();
-
-          // await waitForEvent(hotspot2, 'hotspot-visibility');
-
-          wrapper = hotspotObject2D.element;
+          wrapper = (scene.target.children[numSlots - 1] as Hotspot).element;
         });
 
         test('the hotspot is hidden', async () => {
@@ -195,14 +185,16 @@ suite('ModelViewerElement', () => {
     let height = 0;
 
     setup(async () => {
-      width = 300;
-      height = 150;
+      width = 200;
+      height = 300;
+      element.setAttribute('style', `width: ${width}px; height: ${height}px`);
       element.cameraOrbit = '0deg 90deg 2m';
       element.jumpCameraToGoal();
       await rafPasses();
     });
 
     test('gets expected hit result', async () => {
+      await rafPasses();
       const hitResult =
           element.positionAndNormalFromPoint(width / 2, height / 2);
       expect(hitResult).to.be.ok;
