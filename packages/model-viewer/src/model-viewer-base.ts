@@ -70,7 +70,6 @@ export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 export const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
 export const $sceneIsReady = Symbol('sceneIsReady');
-export const $hasTransitioned = Symbol('hasTransitioned');
 
 export interface Vector3D {
   x: number
@@ -500,10 +499,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
   // @see [$getLoaded]
   [$getModelIsVisible](): boolean {
     return this.loaded && this[$isElementInViewport];
-  }
-
-  [$hasTransitioned](): boolean {
-    return this.modelIsVisible;
   }
 
   [$shouldAttemptPreload](): boolean {

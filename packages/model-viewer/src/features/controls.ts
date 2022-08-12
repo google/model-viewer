@@ -17,7 +17,7 @@ import {property} from 'lit/decorators.js';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $container, $hasTransitioned, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $container, $getModelIsVisible, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
@@ -25,6 +25,7 @@ import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {Path, timeline, TimingFunction} from '../utilities/animation.js';
+
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -665,7 +666,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (this[$renderer].isPresenting || !this[$hasTransitioned]()) {
+      if (this[$renderer].isPresenting || !this[$getModelIsVisible]()) {
         return;
       }
 
