@@ -16,11 +16,9 @@
 
 import {Matrix3, Matrix4} from 'three';
 
-import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector3D, Vector3D, toVector2D, Vector2D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector2D, toVector3D, Vector2D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
-
-
 
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
@@ -34,7 +32,7 @@ const worldToModelNormal = new Matrix3();
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
   positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D, uv: Vector2D | null}|null
+      {position: Vector3D, normal: Vector3D, uv: Vector2D|null}|null
 }
 
 /**
@@ -127,15 +125,15 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     /**
-     * This method returns the model position, normal and texture coordinate 
-     * of the point on the mesh corresponding to the input pixel coordinates 
-     * given relative to the model-viewer element. The position and normal 
-     * are returned as strings in the format suitable for putting in a 
-     * hotspot's data-position and data-normal attributes. If the mesh is 
+     * This method returns the model position, normal and texture coordinate
+     * of the point on the mesh corresponding to the input pixel coordinates
+     * given relative to the model-viewer element. The position and normal
+     * are returned as strings in the format suitable for putting in a
+     * hotspot's data-position and data-normal attributes. If the mesh is
      * not hit, the result is null.
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
-        {position: Vector3D, normal: Vector3D, uv: Vector2D | null}|null {
+        {position: Vector3D, normal: Vector3D, uv: Vector2D|null}|null {
       const scene = this[$scene];
       const ndcPosition = scene.getNDC(pixelX, pixelY);
 
@@ -152,7 +150,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           toVector3D(hit.normal.applyNormalMatrix(worldToModelNormal));
 
       let uv = null;
-      if (hit.uv != null){
+      if (hit.uv != null) {
         uv = toVector2D(hit.uv);
       }
 
