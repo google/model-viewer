@@ -187,7 +187,7 @@ suite('Renderer with two scenes', () => {
       expect(otherScene.renderCount).to.be.equal(1, 'otherScene second render');
     });
 
-    test('uses the proper canvas when unregsitering scenes', () => {
+    test('uses the proper canvas when unregistering scenes', () => {
       renderer.render(performance.now());
 
       expect(renderer.canvas3D.classList.contains('show'))

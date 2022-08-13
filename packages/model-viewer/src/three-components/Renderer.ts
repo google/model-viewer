@@ -55,7 +55,7 @@ export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
  * of the WebGL canvas, and applies the texture on the registered canvas.
  *
  * In the future, can use ImageBitmapRenderingContext instead of
- * Canvas2DRenderingContext if supported for cheaper transfering of
+ * Canvas2DRenderingContext if supported for cheaper transferring of
  * the texture.
  */
 export class Renderer extends EventDispatcher {

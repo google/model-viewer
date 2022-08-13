@@ -592,7 +592,7 @@ suite('Controls', () => {
             await element.updateComplete;
             const target = element.getCameraTarget();
 
-            // Long enough duration to not be considered a recentering tap.
+            // Long enough duration to not be considered a re-centering tap.
             element.interact(500, finger, finger);
             await timePasses(500);
             await rafPasses();
@@ -622,7 +622,7 @@ suite('Controls', () => {
             .to.be.not.closeTo(orbit.radius, 0.001, 'radius');
       });
 
-      test('second interaction does not interupt the first', async () => {
+      test('second interaction does not interrupt the first', async () => {
         element.enablePan = true;
         await element.updateComplete;
         const target = element.getCameraTarget();

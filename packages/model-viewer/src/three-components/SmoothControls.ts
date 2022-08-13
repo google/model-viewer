@@ -817,7 +817,7 @@ export class SmoothControls extends EventDispatcher {
 
   private onKeyDown = (event: KeyboardEvent) => {
     // We track if the key is actually one we respond to, so as not to
-    // accidentally clober unrelated key inputs when the <model-viewer> has
+    // accidentally clobber unrelated key inputs when the <model-viewer> has
     // focus.
     let relevantKey = true;
     const {isUserChange} = this;

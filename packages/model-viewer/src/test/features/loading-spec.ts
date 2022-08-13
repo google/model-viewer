@@ -265,7 +265,7 @@ suite('Loading', () => {
         expect(picked).to.be.equal(input);
       });
 
-      test('when src is reset, poster is dismissable', async () => {
+      test('when src is reset, poster is dismissible', async () => {
         const posterElement = (element as any)[$defaultPosterElement];
         const posterContainer = (element as any)[$posterContainerElement];
         const inputElement = element[$userInputElement];
