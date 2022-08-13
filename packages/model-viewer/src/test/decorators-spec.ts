@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {property} from 'lit/decorators.js';
 import {ReactiveElement} from 'lit';
+import {property} from 'lit/decorators.js';
 
 import {style} from '../decorators.js';
 import {numberNode} from '../styles/parsers.js';
@@ -28,7 +28,7 @@ const fooIntrinsics = {
   keywords: {auto: [null, numberNode(200, '%')]}
 };
 
-class StyleableElement extends ReactiveElement {
+class StylableElement extends ReactiveElement {
   @style({intrinsics: fooIntrinsics, updateHandler: $updateFoo})
   @property({type: String})
   foo: string = '200cm 1rad';
@@ -44,13 +44,13 @@ suite('decorators', () => {
   suite('@style', () => {
     let instance = 0;
     let tagName: string;
-    let element: StyleableElement;
+    let element: StylableElement;
 
     setup(async () => {
-      tagName = `styleable-element-${instance++}`;
-      customElements.define(tagName, class extends StyleableElement {});
+      tagName = `stylable-element-${instance++}`;
+      customElements.define(tagName, class extends StylableElement {});
 
-      element = document.createElement(tagName) as StyleableElement;
+      element = document.createElement(tagName) as StylableElement;
       document.body.insertBefore(element, document.body.firstChild);
 
       await timePasses();

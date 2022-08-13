@@ -128,7 +128,7 @@ export const spy =
       }
 
       if (sourcePrototype == null) {
-        throw new Error(`Cannnot spy property "${property}" on ${object}`);
+        throw new Error(`Cannot spy property "${property}" on ${object}`);
       }
 
       const originalDescriptor =

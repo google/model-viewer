@@ -48,7 +48,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
 
     scene.traverse((node: Object3D) => {
       // Set a high renderOrder while we're here to ensure the model
-      // always renders on top of the skysphere
+      // always renders on top of the sky sphere
       node.renderOrder = 1000;
 
       // Three.js seems to cull some animated models incorrectly. Since we
@@ -66,7 +66,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
         const {geometry} = mesh;
         mesh.castShadow = true;
         if ((mesh as any).isSkinnedMesh) {
-          // Akin to disablig frustum culling above, we have to also manually
+          // Akin to disabling frustum culling above, we have to also manually
           // disable the bounds to make raycasting correct for skinned meshes.
           geometry.boundingSphere = nullSphere;
           // The bounding box is set in GLTFLoader by the accessor bounds, which
