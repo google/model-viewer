@@ -27,7 +27,7 @@ suite('FocusVisiblePolyfill', () => {
     element.tabIndex = 0;
     element.src = assetPath('models/cube.gltf');
     document.body.insertBefore(element, document.body.firstChild);
-    await waitForEvent(element, 'load');
+    await waitForEvent(element, 'poster-dismissed');
   });
 
   teardown(() => {

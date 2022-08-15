@@ -90,7 +90,7 @@ suite('Controls', () => {
       document.body.insertBefore(element, document.body.firstChild);
       element.src = assetPath('models/cube.gltf');
 
-      await waitForEvent(element, 'load');
+      await waitForEvent(element, 'poster-dismissed');
 
       settleControls(controls);
 
@@ -399,7 +399,7 @@ suite('Controls', () => {
       element.interactionPromptThreshold =
           100;  // Fairly low, to keep the test time down
 
-      await waitForEvent(element, 'load');
+      await waitForEvent(element, 'poster-dismissed');
     });
 
     teardown(() => {

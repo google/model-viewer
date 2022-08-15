@@ -33,7 +33,7 @@ const MODEL_URL = assetPath('models/reflective-sphere.gltf');
  * and has an environment map set that matches the passed in meta.
  */
 const waitForLoadAndEnvMap = (element: ModelViewerElementBase) => {
-  const load = waitForEvent(element, 'load');
+  const load = waitForEvent(element, 'poster-dismissed');
   const envMap = waitForEvent(element[$scene], 'envmap-update');
   return Promise.all([load, envMap]);
 };
@@ -101,7 +101,7 @@ suite('Environment', () => {
     setup(async () => {
       element.src = MODEL_URL;
       document.body.insertBefore(element, document.body.firstChild);
-      await waitForEvent(element, 'load');
+      await waitForEvent(element, 'poster-dismissed');
       scene.visible = true;
     });
 
@@ -128,7 +128,7 @@ suite('Environment', () => {
     setup(async () => {
       element.src = MODEL_URL;
       document.body.insertBefore(element, document.body.firstChild);
-      await waitForEvent(element, 'load');
+      await waitForEvent(element, 'poster-dismissed');
     });
 
     teardown(() => {

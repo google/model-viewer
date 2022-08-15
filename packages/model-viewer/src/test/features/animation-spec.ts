@@ -64,7 +64,7 @@ suite('Animation', () => {
       element.src = ANIMATED_GLB_PATH;
       document.body.insertBefore(element, document.body.firstChild);
 
-      await waitForEvent(element, 'load');
+      await waitForEvent(element, 'poster-dismissed');
     });
 
     teardown(() => {

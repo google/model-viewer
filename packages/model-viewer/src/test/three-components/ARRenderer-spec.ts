@@ -209,7 +209,7 @@ suite('ARRenderer', () => {
     let oldXRRay: any;
 
     setup(async () => {
-      const sourceLoads = waitForEvent(element, 'load');
+      const sourceLoads = waitForEvent(element, 'poster-dismissed');
       element.src = assetPath('models/Astronaut.glb');
       await sourceLoads;
       modelScene = element[$scene];

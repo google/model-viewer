@@ -33,9 +33,7 @@ suite('Staging', () => {
       element.src = ODD_SHAPE_GLB_PATH;
       document.body.insertBefore(element, document.body.firstChild);
 
-      await waitForEvent(element, 'load');
-      Object.defineProperty(
-          element, 'modelIsVisible', {value: true, writable: true});
+      await waitForEvent(element, 'poster-dismissed');
       await rafPasses();
     });
 

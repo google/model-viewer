@@ -85,7 +85,7 @@ suite('Loading', () => {
     suite('when a model src changes after loading', () => {
       setup(async () => {
         element.src = CUBE_GLB_PATH;
-        await waitForEvent(element, 'load');
+        await waitForEvent(element, 'poster-dismissed');
       });
 
       test('only dispatches load once per src change', async () => {

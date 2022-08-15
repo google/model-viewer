@@ -170,7 +170,7 @@ suite('AR', () => {
       element.arModes = 'webxr';
       element.src = assetPath('models/Astronaut.glb');
 
-      await waitForEvent(element, 'load');
+      await waitForEvent(element, 'poster-dismissed');
     });
 
     teardown(() => {
@@ -197,7 +197,7 @@ suite('AR', () => {
       element.ar = true;
       element.src = assetPath('models/Astronaut.glb');
 
-      await waitForEvent(element, 'load');
+      await waitForEvent(element, 'poster-dismissed');
     });
 
     teardown(() => {
