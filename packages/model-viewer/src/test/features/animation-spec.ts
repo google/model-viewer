@@ -91,7 +91,7 @@ suite('Animation', () => {
       });
 
       suite('when pause is invoked after a delay', () => {
-        const delaySeconds = 0.1;
+        const delaySeconds = 0.2;
         setup(async () => {
           await timePasses(1000 * delaySeconds);
           const animationsPause = waitForEvent(element, 'pause');
@@ -104,7 +104,7 @@ suite('Animation', () => {
         });
 
         test('has a current time close to the delay', () => {
-          expect(element.currentTime).to.be.closeTo(delaySeconds, 0.05);
+          expect(element.currentTime).to.be.closeTo(delaySeconds, 0.1);
         });
 
         test('changing currentTime triggers render', () => {
