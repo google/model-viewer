@@ -101,23 +101,5 @@ suite('scene-graph/texture', () => {
               .uuid;
       expect(uuidFromImageObject).to.be.equal(newUUID);
     });
-
-    test('Set a texture and then setURI', async () => {
-      const imageFromSetTexture = texture?.source[$threeTexture]?.image;
-      expect(imageFromSetTexture).to.not.be.null;
-
-      await element.model!.materials[0]
-          .pbrMetallicRoughness.baseColorTexture?.texture?.source
-          .setURI(assetPath(
-              'models/glTF-Sample-Models/2.0/CesiumMan/glTF/CesiumMan_img0.jpg'));
-
-      const imageFromSetURI =
-          element.model!.materials[0]
-              .pbrMetallicRoughness.baseColorTexture?.texture
-              ?.source[$threeTexture]
-              ?.image;
-
-      expect(imageFromSetURI).to.not.be.equal(imageFromSetTexture);
-    });
   });
 });

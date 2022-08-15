@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-import {ImageLoader, Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene, Texture as ThreeTexture, WebGLRenderTarget} from 'three';
+import {Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene, Texture as ThreeTexture, WebGLRenderTarget} from 'three';
 
 import {blobCanvas} from '../../model-viewer-base.js';
 import {Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Renderer} from '../../three-components/Renderer.js';
 
 import {Image as ImageInterface} from './api.js';
-import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
-
-const loader = new ImageLoader();
 const quadMaterial = new MeshBasicMaterial();
 const quad = new PlaneGeometry(2, 2);
 let adhocNum = 0;
@@ -75,20 +73,6 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
   set name(name: string) {
     (this[$sourceObject] as GLTFImage).name = name;
-  }
-
-  async setURI(uri: string): Promise<void> {
-    (this[$sourceObject] as GLTFImage).uri = uri;
-    (this[$sourceObject] as GLTFImage).name = uri.split('/').pop();
-
-    const image = await new Promise((resolve, reject) => {
-      loader.load(uri, resolve, undefined, reject);
-    });
-
-    const texture = this[$threeTexture]!;
-    texture.image = image;
-    texture.needsUpdate = true;
-    this[$onUpdate]();
   }
 
   async createThumbnail(width: number, height: number): Promise<string> {
