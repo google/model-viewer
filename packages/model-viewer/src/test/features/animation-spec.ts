@@ -19,6 +19,8 @@ import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
 
 const expect = chai.expect;
+
+const TOLERANCE_SEC = 0.1;
 const NON_ANIMATED_GLB_PATH = assetPath('models/Astronaut.glb');
 const ANIMATED_GLB_PATH = assetPath('models/RobotExpressive.glb');
 const ANIMATED_GLB_DUPLICATE_ANIMATION_NAMES_PATH =
@@ -104,7 +106,8 @@ suite('Animation', () => {
         });
 
         test('has a current time close to the delay', () => {
-          expect(element.currentTime).to.be.closeTo(delaySeconds, 0.1);
+          expect(element.currentTime)
+              .to.be.closeTo(delaySeconds, TOLERANCE_SEC);
         });
 
         test('changing currentTime triggers render', () => {
@@ -128,7 +131,8 @@ suite('Animation', () => {
           });
 
           test('has a current time close to the delay', () => {
-            expect(element.currentTime).to.be.closeTo(delaySeconds, 0.05);
+            expect(element.currentTime)
+                .to.be.closeTo(delaySeconds, TOLERANCE_SEC);
           });
         })
       });
