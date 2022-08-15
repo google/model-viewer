@@ -29,7 +29,7 @@ const templateResult = html`
   height: 150px;
 }
 
-/* NOTE: This ruleset is our integration surface area with the
+/* NOTE: This rule set is our integration surface area with the
  * :focus-visible polyfill.
  *
  * @see https://github.com/WICG/focus-visible/pull/196 */

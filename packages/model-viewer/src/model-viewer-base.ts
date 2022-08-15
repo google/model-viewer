@@ -310,7 +310,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
         threshold: 0,
       });
     } else {
-      // If there is no intersection obsever, then all models should be visible
+      // If there is no intersection observer, then all models should be visible
       // at all times:
       this[$isElementInViewport] = true;
     }

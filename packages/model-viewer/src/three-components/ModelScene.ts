@@ -646,7 +646,7 @@ export class ModelScene extends Scene {
       const action = this.mixer.clipAction(animationClip, this);
       this.currentAnimationAction = action;
 
-      if ((this.element as any).paused) {
+      if (this.element.paused) {
         this.mixer.stopAllAction();
       } else {
         action.paused = false;
@@ -692,8 +692,7 @@ export class ModelScene extends Scene {
   updateShadow() {
     const shadow = this.shadow;
     if (shadow != null) {
-      const side =
-          (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
+      const side = this.element.arPlacement === 'wall' ? 'back' : 'bottom';
       shadow.setScene(this, this.shadowSoftness, side);
       shadow.needsUpdate = true;
     }
@@ -727,8 +726,7 @@ export class ModelScene extends Scene {
     }
 
     if (this.shadow == null) {
-      const side =
-          (this.element as any).arPlacement === 'wall' ? 'back' : 'bottom';
+      const side = this.element.arPlacement === 'wall' ? 'back' : 'bottom';
       this.shadow = new Shadow(this, this.shadowSoftness, side);
     }
     this.shadow.setIntensity(shadowIntensity);

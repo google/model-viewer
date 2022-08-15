@@ -55,7 +55,7 @@ export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
  * of the WebGL canvas, and applies the texture on the registered canvas.
  *
  * In the future, can use ImageBitmapRenderingContext instead of
- * Canvas2DRenderingContext if supported for cheaper transfering of
+ * Canvas2DRenderingContext if supported for cheaper transferring of
  * the texture.
  */
 export class Renderer extends EventDispatcher {
@@ -311,7 +311,7 @@ export class Renderer extends EventDispatcher {
     this.scenes.delete(scene);
 
     if (this.canRender && this.scenes.size === 0) {
-      (this.threeRenderer.setAnimationLoop as any)(null);
+      this.threeRenderer.setAnimationLoop(null);
     }
 
     if (this.debugger != null) {
@@ -404,7 +404,7 @@ export class Renderer extends EventDispatcher {
     element[$tick](t, delta);
 
     const exposureIsNumber =
-        typeof exposure === 'number' && !(self as any).isNaN(exposure);
+        typeof exposure === 'number' && !Number.isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
   }
 

@@ -57,7 +57,7 @@ export const sequence =
 
 /**
  * A Frame groups a target value, the number of frames to interpolate towards
- * that value and an optional easing funnction to use for interpolation.
+ * that value and an optional easing function to use for interpolation.
  */
 export interface Frame {
   value: number;

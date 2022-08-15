@@ -53,7 +53,7 @@ const withinRange = (a: Vector2D, start: number, finish: number) => {
   expect(a.v).to.be.within(start, finish);
 };
 
-suite('ModelViewerElement', () => {
+suite('Annotation', () => {
   let element: ModelViewerElement;
   let scene: ModelScene;
 

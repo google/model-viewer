@@ -91,7 +91,7 @@ suite('CachingGLTFLoader', () => {
         loader[$evictionPolicy].evictionThreshold = naturalEvictionThreshold;
       });
 
-      test('deletinates them when they are fully released', async () => {
+      test('deletes them when they are fully released', async () => {
         const gltf = await loader.load(ASTRONAUT_GLB_PATH, element);
 
         expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.true;

@@ -70,6 +70,7 @@ export declare interface ARInterface {
   ar: boolean;
   arModes: string;
   arScale: string;
+  arPlacement: string;
   iosSrc: string|null;
   xrEnvironment: boolean;
   readonly canActivateAR: boolean;
@@ -373,11 +374,11 @@ configuration or device capabilities');
       const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
       const modelUrl = new URL(objectURL, self.location.toString());
 
-      if(generateUsdz){
+      if (generateUsdz) {
         const location = self.location.toString();
         const locationUrl = new URL(location);
-        const srcUrl =  new URL(this.src!, locationUrl);
-        if(srcUrl.hash){
+        const srcUrl = new URL(this.src!, locationUrl);
+        if (srcUrl.hash) {
           modelUrl.hash = srcUrl.hash;
         }
       }

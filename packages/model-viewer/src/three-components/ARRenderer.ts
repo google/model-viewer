@@ -135,9 +135,9 @@ export class ARRenderer extends EventDispatcher {
 
     this.threeRenderer.xr.setReferenceSpaceType('local');
 
-    await this.threeRenderer.xr.setSession(session as any);
+    await this.threeRenderer.xr.setSession(session);
 
-    (this.threeRenderer.xr as any).cameraAutoUpdate = false;
+    this.threeRenderer.xr.cameraAutoUpdate = false;
 
     return session;
   }

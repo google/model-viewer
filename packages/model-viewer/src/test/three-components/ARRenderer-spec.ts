@@ -16,15 +16,13 @@
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
 import {IS_ANDROID} from '../../constants.js';
-import {ControlsInterface, ControlsMixin} from '../../features/controls.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {$scene} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
-import {Constructor} from '../templates.js';
-
 
 const expect = chai.expect;
 
@@ -82,12 +80,7 @@ class MockXRFrame implements XRFrame {
 }
 
 suite('ARRenderer', () => {
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement: Constructor<ModelViewerElementBase&ControlsInterface>;
-
-  let element: ModelViewerElementBase&ControlsInterface;
-  ;
+  let element: ModelViewerElement;
   let arRenderer: ARRenderer;
   let xrSession: XRSession;
 
@@ -189,15 +182,6 @@ suite('ARRenderer', () => {
   };
 
   setup(() => {
-    tagName = `model-viewer-arrenderer-${nextId++}`;
-    ModelViewerElement = class extends ControlsMixin
-    (ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
-
     element = new ModelViewerElement();
     document.body.insertBefore(element, document.body.firstChild);
     arRenderer = Renderer.singleton.arRenderer;
@@ -225,7 +209,7 @@ suite('ARRenderer', () => {
     let oldXRRay: any;
 
     setup(async () => {
-      const sourceLoads = waitForEvent(element, 'load');
+      const sourceLoads = waitForEvent(element, 'poster-dismissed');
       element.src = assetPath('models/Astronaut.glb');
       await sourceLoads;
       modelScene = element[$scene];

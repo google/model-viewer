@@ -35,7 +35,7 @@ type ScrollObserverCallback = () => void;
  * instances of the class, and when the last ScrollObserver "disconnects", that
  * event listener is removed. This spares us from thrashing
  * the {add,remove}EventListener API (the binding cost of these methods has been
- * known to show up in performance anlyses) as well as potential memory leaks.
+ * known to show up in performance analyses) as well as potential memory leaks.
  */
 class ScrollObserver {
   private static[$notifyInstances]() {
