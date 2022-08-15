@@ -9,8 +9,8 @@
     "test:ci": "./scripts/ci-check-fidelity.sh",
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
-    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/dist/shader test/renderers/dspbr-pt/",
-    "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/dspbr-pt/shader ./test/renderers/filament/{cmgen,ktx}"
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi",
+    "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/filament/{cmgen,ktx}"
   },
   "contributors": [
     "Chris Joel <cdata@google.com>",
