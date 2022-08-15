@@ -33,7 +33,6 @@ const CUBES_GLB_PATH = assetPath('models/cubes.gltf');  // has variants
 const MESH_PRIMITIVES_GLB_PATH =
     assetPath('models/MeshPrimitivesVariants.glb');   // has variants
 const CUBE_GLB_PATH = assetPath('models/cube.gltf');  // has UV coords
-const SUNRISE_IMG_PATH = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 const RIGGEDFIGURE_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/RiggedFigure/glTF-Binary/RiggedFigure.glb');
 
@@ -258,18 +257,6 @@ suite('SceneGraph', () => {
           element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
 
       expect(color).to.be.eql([1, 0, 0, 1]);
-    });
-
-    test('image.setURI sets the appropriate texture', async () => {
-      await element.model!.materials[0]
-          .pbrMetallicRoughness.baseColorTexture!.texture!.source!.setURI(
-              SUNRISE_IMG_PATH);
-
-      const uri =
-          element.model!.materials[0]
-              .pbrMetallicRoughness.baseColorTexture!.texture!.source!.uri;
-
-      expect(uri).to.be.eql(SUNRISE_IMG_PATH);
     });
 
     suite('when the model changes', () => {
