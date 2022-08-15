@@ -39,9 +39,9 @@ const $textureLoader = Symbol('textureLoader');
 const $originalGltfJson = Symbol('originalGltfJson');
 
 interface SceneExportOptions {
-  binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
-      maxTextureSize?: number, forcePowerOfTwoTextures?: boolean,
-      includeCustomExtensions?: boolean,
+  binary?: boolean, trs?: boolean, onlyVisible?: boolean,
+      maxTextureSize?: number, includeCustomExtensions?: boolean,
+      forceIndices?: boolean
 }
 
 export interface SceneGraphInterface {
@@ -215,9 +215,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
           binary: true,
           onlyVisible: true,
           maxTextureSize: Infinity,
-          forcePowerOfTwoTextures: false,
           includeCustomExtensions: false,
-          embedImages: true
+          forceIndices: false
         } as GLTFExporterOptions;
 
         Object.assign(opts, options);
