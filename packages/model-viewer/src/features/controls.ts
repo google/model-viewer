@@ -321,7 +321,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     orbitSensitivity: number = 1;
 
     @property({type: String, attribute: 'touch-action'})
-    touchAction: TouchAction = TouchAction.PAN_Y;
+    touchAction: TouchAction = TouchAction.NONE;
 
     @property({type: Boolean, attribute: 'disable-zoom'})
     disableZoom: boolean = false;

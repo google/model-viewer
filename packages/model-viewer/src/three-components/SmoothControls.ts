@@ -64,7 +64,7 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   maximumAzimuthalAngle: Infinity,
   minimumFieldOfView: 10,
   maximumFieldOfView: 45,
-  touchAction: 'pan-y'
+  touchAction: 'none'
 });
 
 // Constants
