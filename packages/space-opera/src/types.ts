@@ -128,7 +128,7 @@ export const INITIAL_STATE: State = {
       poster: {height: 512, mimeType: 'image/webp'},
       hotspots: [],
       relativeFilePaths: {posterName: 'poster.webp'},
-      extraAttributes: {'enable-pan': ''},
+      extraAttributes: {},
     },
   },
 };
