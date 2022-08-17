@@ -569,7 +569,6 @@ suite('Controls', () => {
           });
 
       test('two fingers pan', async () => {
-        element.enablePan = true;
         element.cameraOrbit = '0deg 90deg auto';
         element.jumpCameraToGoal();
         await element.updateComplete;
@@ -585,11 +584,27 @@ suite('Controls', () => {
         expect(newTarget.z).to.be.closeTo(target.z, 0.001, 'Z');
       });
 
+      test('two fingers do not pan if disable-pan is set', async () => {
+        element.disablePan = true;
+        await element.updateComplete;
+        element.cameraOrbit = '0deg 90deg auto';
+        element.jumpCameraToGoal();
+        await element.updateComplete;
+        const target = element.getCameraTarget();
+
+        element.interact(50, finger, finger);
+        await rafPasses();
+        await rafPasses();
+
+        const newTarget = element.getCameraTarget();
+        expect(newTarget.x).to.be.eq(target.x, 'X');
+        expect(newTarget.y).to.be.eq(target.y, 'Y');
+        expect(newTarget.z).to.be.eq(target.z, 'Z');
+      });
+
       test(
           'return two fingers to starting point returns target to starting point',
           async () => {
-            element.enablePan = true;
-            await element.updateComplete;
             const target = element.getCameraTarget();
 
             // Long enough duration to not be considered a re-centering tap.
@@ -623,8 +638,6 @@ suite('Controls', () => {
       });
 
       test('second interaction does not interrupt the first', async () => {
-        element.enablePan = true;
-        await element.updateComplete;
         const target = element.getCameraTarget();
         const orbit = element.getCameraOrbit();
 

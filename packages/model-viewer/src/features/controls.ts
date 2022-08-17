@@ -234,7 +234,7 @@ export declare interface ControlsInterface {
   touchAction: TouchAction;
   interpolationDecay: number;
   disableZoom: boolean;
-  enablePan: boolean;
+  disablePan: boolean;
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
@@ -326,8 +326,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Boolean, attribute: 'disable-zoom'})
     disableZoom: boolean = false;
 
-    @property({type: Boolean, attribute: 'enable-pan'})
-    enablePan: boolean = false;
+    @property({type: Boolean, attribute: 'disable-pan'})
+    disablePan: boolean = false;
 
     @property({type: Number, attribute: 'interpolation-decay'})
     interpolationDecay: number = DECAY_MILLISECONDS;
@@ -460,8 +460,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         controls.disableZoom = this.disableZoom;
       }
 
-      if (changedProperties.has('enablePan')) {
-        controls.enablePan = this.enablePan;
+      if (changedProperties.has('disablePan')) {
+        controls.enablePan = !this.disablePan;
       }
 
       if (changedProperties.has('interactionPrompt') ||
