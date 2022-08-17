@@ -235,6 +235,7 @@ export declare interface ControlsInterface {
   interpolationDecay: number;
   disableZoom: boolean;
   disablePan: boolean;
+  disableTap: boolean;
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
@@ -328,6 +329,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: Boolean, attribute: 'disable-pan'})
     disablePan: boolean = false;
+
+    @property({type: Boolean, attribute: 'disable-tap'})
+    disableTap: boolean = false;
 
     @property({type: Number, attribute: 'interpolation-decay'})
     interpolationDecay: number = DECAY_MILLISECONDS;
@@ -462,6 +466,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('disablePan')) {
         controls.enablePan = !this.disablePan;
+      }
+
+      if (changedProperties.has('disableTap')) {
+        controls.enableTap = !this.disableTap;
       }
 
       if (changedProperties.has('interactionPrompt') ||
