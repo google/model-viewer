@@ -74,7 +74,6 @@ const ZOOM_SENSITIVITY = 0.04;
 // The move size on pan key event
 const PANKEYINCREMENT = 10;
 
-
 export const KeyCode = {
   PAGE_UP: 33,
   PAGE_DOWN: 34,
@@ -823,20 +822,14 @@ export class SmoothControls extends EventDispatcher {
     // We track if the key is actually one we respond to, so as not to
     // accidentally clober unrelated key inputs when the <model-viewer> has
     // focus.
-    let relevantKey = true;
     const {isUserChange} = this;
     this.isUserChange = true;
 
-    // Handle modifier key conditions of:
-    // Shift & enablePan == PAN
-    // else == ORBIT/ZOOM
-    relevantKey = (event.shiftKey && this.enablePan) ? this.panKeyCodeHandler(event, isUserChange) : this.orbitZoomKeyCodeHandler(event, isUserChange)
+    (event.shiftKey && this.enablePan) ?
+        this.panKeyCodeHandler(event, isUserChange) :
+        this.orbitZoomKeyCodeHandler(event, isUserChange)
 
-    if (relevantKey) {
-      event.preventDefault();
-    }
   };
-
 
 
   /**
@@ -846,8 +839,7 @@ export class SmoothControls extends EventDispatcher {
    * @param isUserChange Is this a user initiated event
    * @returns boolean to indicate if the key event has been handled
    */
-   private orbitZoomKeyCodeHandler(event: KeyboardEvent, isUserChange: boolean) {
-    // releventKey as the return value is to get the condition back to the calling function as don't have pass by reference arguments in js
+  private orbitZoomKeyCodeHandler(event: KeyboardEvent, isUserChange: boolean) {
     let relevantKey = true;
     switch (event.key) {
       case 'PageUp':
@@ -874,25 +866,27 @@ export class SmoothControls extends EventDispatcher {
         break;
     }
 
-    return relevantKey;
+    if (relevantKey) {
+      event.preventDefault();
+    }
   }
 
-
-
   /**
-  * Handles the Pan key presses
-  * Uses constants for the increment.
-  * @param event The keyboard event for the .key value
-  * @param isUserChange Is this a user initiated event
-  * @returns boolean to indicate if the key event has been handled
-  */
-   private panKeyCodeHandler(event: KeyboardEvent, isUserChange: boolean) {
+   * Handles the Pan key presses
+   * Uses constants for the increment.
+   * @param event The keyboard event for the .key value
+   * @param isUserChange Is this a user initiated event
+   * @returns boolean to indicate if the key event has been handled
+   */
+  private panKeyCodeHandler(event: KeyboardEvent, isUserChange: boolean) {
     this.initializePan();
-    // releventKey as the return value is to get the condition back to the calling function as don't have pass by reference arguments in js
     let relevantKey = true;
     switch (event.key) {
       case 'ArrowUp':
-        this.movePan(0, -1 * PANKEYINCREMENT); // This is the negative one so that the model appears to move as the arrow direction rather than the view moving
+        this.movePan(
+            0, -1 * PANKEYINCREMENT);  // This is the negative one so that the
+                                       // model appears to move as the arrow
+                                       // direction rather than the view moving
         break;
       case 'ArrowDown':
         this.movePan(0, PANKEYINCREMENT);
@@ -908,6 +902,9 @@ export class SmoothControls extends EventDispatcher {
         this.isUserChange = isUserChange;
         break;
     }
-    return relevantKey;
+
+    if (relevantKey) {
+      event.preventDefault();
+    }
   }
 }

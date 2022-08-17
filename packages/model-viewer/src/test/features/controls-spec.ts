@@ -18,7 +18,7 @@ import {Camera, Vector3} from 'three';
 import {$controls, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, ControlsMixin, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
-import {ChangeSource, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
+import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Constructor, step, timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
 import {BasicSpecTemplate} from '../templates.js';
@@ -639,9 +639,9 @@ suite('ModelViewerElementBase with ControlsMixin', () => {
           await rafPasses();
           await rafPasses();
 
-          dispatchSyntheticEvent(element[$userInputElement], 'keydown', {
-            keyCode: KeyCode.PAGE_DOWN
-          });
+          dispatchSyntheticEvent(
+              element[$userInputElement], 'keydown', {key: 'PageDown'});
+
           await timePasses(50);
           await rafPasses();
 

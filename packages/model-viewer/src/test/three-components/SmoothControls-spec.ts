@@ -18,7 +18,7 @@ import {PerspectiveCamera, Vector3} from 'three';
 import {$controls} from '../../features/controls.js';
 import {$userInputElement} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
-import {ChangeSource, DEFAULT_OPTIONS, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
+import {ChangeSource, DEFAULT_OPTIONS, SmoothControls} from '../../three-components/SmoothControls.js';
 import {waitForEvent} from '../../utilities.js';
 import {dispatchSyntheticEvent} from '../helpers.js';
 
@@ -147,7 +147,7 @@ suite('SmoothControls', () => {
 
       suite('global keyboard input', () => {
         test('does not change orbital position of camera', () => {
-          dispatchSyntheticEvent(window, 'keydown', {keyCode: KeyCode.UP});
+          dispatchSyntheticEvent(window, 'keydown', {key: 'ArrowUp'});
 
           settleControls(controls);
 
@@ -159,12 +159,24 @@ suite('SmoothControls', () => {
         test('changes orbital position of camera', () => {
           element.focus();
 
-          dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+          dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowUp'});
 
           settleControls(controls);
 
           expect(camera.position.z).to.not.be.equal(initialCameraPosition.z);
         });
+
+        test('changes pan position of camera', () => {
+          element.focus();
+
+          // This does not dispatch the shift key modifier as it is only dispatching the ArrowUp key
+          dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowUp'});
+
+          settleControls(controls);
+
+          expect(camera.position.z).to.not.be.equal(initialCameraPosition.z);
+        });
+
       });
     });
 
@@ -291,7 +303,7 @@ suite('SmoothControls', () => {
             changeSource = source;
           });
 
-          dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+          dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowUp'});
           settleControls(controls);
 
           expect(didCall).to.be.true;
@@ -327,7 +339,7 @@ suite('SmoothControls', () => {
             changeSource.push(source);
           });
 
-          dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+          dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowUp'});
           controls.update(performance.now(), ONE_FRAME_DELTA);
           controls.update(performance.now(), ONE_FRAME_DELTA);
           controls.update(performance.now(), ONE_FRAME_DELTA);
@@ -349,7 +361,7 @@ suite('SmoothControls', () => {
             changeSource.push(source);
           });
 
-          dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+          dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowUp'});
 
           controls.update(performance.now(), ONE_FRAME_DELTA);
           controls.update(performance.now(), ONE_FRAME_DELTA);
@@ -367,7 +379,7 @@ suite('SmoothControls', () => {
           test('reports source as user interaction', async () => {
             const eventDispatches = waitForEvent(controls, 'change');
             controls.adjustOrbit(1, 1, 1);
-            dispatchSyntheticEvent(element, 'keydown', {keyCode: KeyCode.UP});
+            dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowUp'});
             settleControls(controls);
 
             const event: any = await eventDispatches;
