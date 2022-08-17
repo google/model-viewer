@@ -438,7 +438,7 @@
       {
         "name": "disable-pan",
         "htmlName": "disablePan",
-        "description": "Disables panning interactions, which are enabled by default using two-finger touch, or dragging with right-click or modifier keys. By default, pan is limited to the bounding sphere of the model. Tapping on the model focuses on that point, while tapping off the model zooms back to the original framing. When panning, the center point is shown visually (and can be suppressed/changed using the <a href=\"#entrydocs-stagingandcameras-slots-panTarget\">pan-target</a> slot) and when the pan gesture ends, the camera is focused on that model point (if there was a surface under the dot), so that the camera doesn't orbit around a random point in space."
+        "description": "Disables panning interactions, which are enabled by default using two-finger touch, or dragging with right-click or modifier keys."
       },
       {
         "name": "disable-tap",

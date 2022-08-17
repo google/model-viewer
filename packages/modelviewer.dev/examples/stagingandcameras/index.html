@@ -187,12 +187,20 @@
           <div class="heading">
             <h2 class="demo-title">Disable Tap</h2>
             <p>Pan is enabled by default via two fingers on touch or using
-            right-click or any modifier key with mouse drag. Clicking on the
+            right-click or any modifier key with mouse drag. When panning, the
+            center point is shown visually (and can be suppressed/changed using
+            the <a
+            href="../../docs/index.html#entrydocs-stagingandcameras-slots-panTarget">pan-target</a>
+            slot) and when the pan gesture ends, the camera is focused on that
+            model point (if there was a surface under the dot), so that the
+            camera doesn't orbit around a random point in space. Clicking on the
             model focuses on that point, while clicking off the model returns to
-            the default center. There is a  <span
-            class="attribute">disable-pan</span> attribute to turn all of this
-            off, but here we demonstrate only turning off the click/tap
-            behaviors via the  <span class="attribute">disable-tap</span>
+            the default center.</p>
+
+            <p>There is a  <span class="attribute">disable-pan</span> attribute
+            to turn all of this off, but here we demonstrate only turning off
+            the click/tap behaviors via the  <span
+            class="attribute">disable-tap</span>
             attribute. Note that after panning and rotating the model, it can be
             very hard to get back to the original centering, so it's recommended
             to implement your own re-centering logic via  <span
