@@ -536,6 +536,23 @@ suite('Controls', () => {
         }
       };
 
+      const tap = (position: number) => {
+        return {
+          x: {
+            initialValue: position,
+            keyframes: [
+              {frames: 1, value: position},
+            ]
+          },
+          y: {
+            initialValue: position,
+            keyframes: [
+              {frames: 1, value: position},
+            ]
+          }
+        };
+      };
+
       test('one finger rotates', async () => {
         const orbit = element.getCameraOrbit();
 
@@ -569,7 +586,6 @@ suite('Controls', () => {
           });
 
       test('two fingers pan', async () => {
-        element.enablePan = true;
         element.cameraOrbit = '0deg 90deg auto';
         element.jumpCameraToGoal();
         await element.updateComplete;
@@ -585,11 +601,27 @@ suite('Controls', () => {
         expect(newTarget.z).to.be.closeTo(target.z, 0.001, 'Z');
       });
 
+      test('two fingers do not pan if disable-pan is set', async () => {
+        element.disablePan = true;
+        await element.updateComplete;
+        element.cameraOrbit = '0deg 90deg auto';
+        element.jumpCameraToGoal();
+        await element.updateComplete;
+        const target = element.getCameraTarget();
+
+        element.interact(50, finger, finger);
+        await rafPasses();
+        await rafPasses();
+
+        const newTarget = element.getCameraTarget();
+        expect(newTarget.x).to.be.eq(target.x, 'X');
+        expect(newTarget.y).to.be.eq(target.y, 'Y');
+        expect(newTarget.z).to.be.eq(target.z, 'Z');
+      });
+
       test(
           'return two fingers to starting point returns target to starting point',
           async () => {
-            element.enablePan = true;
-            await element.updateComplete;
             const target = element.getCameraTarget();
 
             // Long enough duration to not be considered a re-centering tap.
@@ -602,6 +634,55 @@ suite('Controls', () => {
             expect(newTarget.y).to.be.closeTo(target.y, 0.001, 'Y');
             expect(newTarget.z).to.be.closeTo(target.z, 0.001, 'Z');
           });
+
+      test('tap moves the model and re-centers', async () => {
+        element.cameraOrbit = '0deg 90deg auto';
+        element.jumpCameraToGoal();
+        await element.updateComplete;
+        const target = element.getCameraTarget();
+
+        // tap on the model
+        element.interact(5, tap(0.5));
+        await rafPasses();
+        element.jumpCameraToGoal();
+        await element.updateComplete;
+        await rafPasses();
+
+        const newTarget = element.getCameraTarget();
+        expect(newTarget.x).to.be.closeTo(target.x, 0.001, 'X');
+        expect(newTarget.y).to.be.closeTo(target.y, 0.001, 'Y');
+        expect(newTarget.z).to.be.greaterThan(target.z, 'Z');
+
+        // tap off the model
+        element.interact(5, tap(0));
+        await rafPasses();
+        element.jumpCameraToGoal();
+        await element.updateComplete;
+        await rafPasses();
+
+        const oldTarget = element.getCameraTarget();
+        expect(oldTarget.x).to.be.closeTo(target.x, 0.001, 'X recenter');
+        expect(oldTarget.y).to.be.closeTo(target.y, 0.001, 'Y recenter');
+        expect(oldTarget.z).to.be.closeTo(target.z, 0.001, 'Z recenter');
+      });
+
+      test('tap does not move the model with disable-tap is set', async () => {
+        element.disableTap = true;
+        await element.updateComplete;
+        element.cameraOrbit = '0deg 90deg auto';
+        element.jumpCameraToGoal();
+        await element.updateComplete;
+        const target = element.getCameraTarget();
+
+        element.interact(5, tap(0.5));
+        await rafPasses();
+        await rafPasses();
+
+        const newTarget = element.getCameraTarget();
+        expect(newTarget.x).to.be.eq(target.x, 'X');
+        expect(newTarget.y).to.be.eq(target.y, 'Y');
+        expect(newTarget.z).to.be.eq(target.z, 'Z');
+      });
 
       test('user interaction cancels synthetic interaction', async () => {
         const orbit = element.getCameraOrbit();
@@ -623,8 +704,6 @@ suite('Controls', () => {
       });
 
       test('second interaction does not interrupt the first', async () => {
-        element.enablePan = true;
-        await element.updateComplete;
         const target = element.getCameraTarget();
         const orbit = element.getCameraOrbit();
 

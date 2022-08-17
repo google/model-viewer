@@ -132,6 +132,7 @@ export class SmoothControls extends EventDispatcher {
 
   // Pan state
   public enablePan = true;
+  public enableTap = true;
   private panProjection = new Matrix3();
   private panPerPixel = 0;
 
@@ -751,7 +752,7 @@ export class SmoothControls extends EventDispatcher {
       element.removeEventListener('pointermove', this.onPointerMove);
       element.removeEventListener('pointerup', this.onPointerUp);
       element.removeEventListener('touchmove', this.disableScroll);
-      if (this.enablePan) {
+      if (this.enablePan && this.enableTap) {
         this.recenter(event);
       }
     } else if (this.touchMode !== null) {
