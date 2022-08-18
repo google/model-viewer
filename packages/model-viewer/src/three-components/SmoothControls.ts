@@ -828,7 +828,6 @@ export class SmoothControls extends EventDispatcher {
     (event.shiftKey && this.enablePan) ?
         this.panKeyCodeHandler(event, isUserChange) :
         this.orbitZoomKeyCodeHandler(event, isUserChange)
-
   };
 
 

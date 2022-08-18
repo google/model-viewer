@@ -165,17 +165,17 @@ suite('SmoothControls', () => {
           expect(camera.position.z).to.not.be.equal(initialCameraPosition.z);
         });
 
-        test('changes pan position of camera', () => {
+        test.only('changes pan position of camera', () => {
           element.focus();
           const initialCameraTarget = controls.scene.getTarget();
-          dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowLeft', shiftKey: true});
+          dispatchSyntheticEvent(
+              element, 'keydown', {key: 'ArrowLeft', shiftKey: true});
 
           settleControls(controls);
 
           const postCameraTarget = controls.scene.getTarget();
-          expect(Number(postCameraTarget.x)).to.be.greaterThan(Number(initialCameraTarget.x));
+          expect(postCameraTarget.x).to.be.greaterThan(initialCameraTarget.x);
         });
-
       });
     });
 
