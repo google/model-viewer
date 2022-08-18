@@ -19,7 +19,7 @@ import {$controls, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, C
 import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
-import {ChangeSource, KeyCode, SmoothControls} from '../../three-components/SmoothControls.js';
+import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {step, timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
 import {settleControls} from '../three-components/SmoothControls-spec.js';
@@ -709,9 +709,8 @@ suite('Controls', () => {
         await rafPasses();
         await rafPasses();
 
-        dispatchSyntheticEvent(element[$userInputElement], 'keydown', {
-          keyCode: KeyCode.PAGE_DOWN
-        });
+        dispatchSyntheticEvent(
+            element[$userInputElement], 'keydown', {key: 'PageDown'});
         await timePasses(50);
         await rafPasses();
 

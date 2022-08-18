@@ -52,8 +52,9 @@ export interface SyntheticEventProperties {
   clientX?: number;
   clientY?: number;
   deltaY?: number;
-  keyCode?: number;
-}
+  key?: string;
+  shiftKey?: boolean;
+  }
 
 /**
  * Dispatch a synthetic event on a given element with a given type, and
