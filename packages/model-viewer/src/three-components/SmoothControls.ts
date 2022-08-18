@@ -71,6 +71,9 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const ZOOM_SENSITIVITY = 0.04;
 
+// The move size on pan key event
+const PANKEYINCREMENT = 10;
+
 export const KeyCode = {
   PAGE_UP: 33,
   PAGE_DOWN: 34,
@@ -820,27 +823,41 @@ export class SmoothControls extends EventDispatcher {
     // We track if the key is actually one we respond to, so as not to
     // accidentally clobber unrelated key inputs when the <model-viewer> has
     // focus.
-    let relevantKey = true;
     const {isUserChange} = this;
     this.isUserChange = true;
 
-    switch (event.keyCode) {
-      case KeyCode.PAGE_UP:
+    (event.shiftKey && this.enablePan) ?
+        this.panKeyCodeHandler(event, isUserChange) :
+        this.orbitZoomKeyCodeHandler(event, isUserChange)
+  };
+
+
+  /**
+   * Handles the orbit and Zoom key presses
+   * Uses constants for the increment.
+   * @param event The keyboard event for the .key value
+   * @param isUserChange Is this a user initiated event
+   * @returns boolean to indicate if the key event has been handled
+   */
+  private orbitZoomKeyCodeHandler(event: KeyboardEvent, isUserChange: boolean) {
+    let relevantKey = true;
+    switch (event.key) {
+      case 'PageUp':
         this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
         break;
-      case KeyCode.PAGE_DOWN:
+      case 'PageDown':
         this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
         break;
-      case KeyCode.UP:
+      case 'ArrowUp':
         this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
         break;
-      case KeyCode.DOWN:
+      case 'ArrowDown':
         this.userAdjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
         break;
-      case KeyCode.LEFT:
+      case 'ArrowLeft':
         this.userAdjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
-      case KeyCode.RIGHT:
+      case 'ArrowRight':
         this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
       default:
@@ -852,5 +869,42 @@ export class SmoothControls extends EventDispatcher {
     if (relevantKey) {
       event.preventDefault();
     }
-  };
+  }
+
+  /**
+   * Handles the Pan key presses
+   * Uses constants for the increment.
+   * @param event The keyboard event for the .key value
+   * @param isUserChange Is this a user initiated event
+   * @returns boolean to indicate if the key event has been handled
+   */
+  private panKeyCodeHandler(event: KeyboardEvent, isUserChange: boolean) {
+    this.initializePan();
+    let relevantKey = true;
+    switch (event.key) {
+      case 'ArrowUp':
+        this.movePan(
+            0, -1 * PANKEYINCREMENT);  // This is the negative one so that the
+                                       // model appears to move as the arrow
+                                       // direction rather than the view moving
+        break;
+      case 'ArrowDown':
+        this.movePan(0, PANKEYINCREMENT);
+        break;
+      case 'ArrowLeft':
+        this.movePan(-1 * PANKEYINCREMENT, 0);
+        break;
+      case 'ArrowRight':
+        this.movePan(PANKEYINCREMENT, 0);
+        break;
+      default:
+        relevantKey = false;
+        this.isUserChange = isUserChange;
+        break;
+    }
+
+    if (relevantKey) {
+      event.preventDefault();
+    }
+  }
 }
