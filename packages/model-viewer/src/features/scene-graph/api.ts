@@ -317,12 +317,6 @@ export declare interface Image {
   readonly bufferView?: number
 
   /**
-   * Configure the URI of the image. If a URI is specified for an otherwise
-   * embedded image, the URI will take precedence over an embedded buffer.
-   */
-  setURI(uri: string): Promise<void>;
-
-  /**
    * A method to create an object URL of this image at the desired
    * resolution. Especially useful for KTX2 textures which are GPU compressed,
    * and so are unreadable on the CPU without a method like this.

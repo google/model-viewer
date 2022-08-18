@@ -28,7 +28,7 @@ const LOG_MAX_RESOLUTION = 9;
 const LOG_MIN_RESOLUTION = 6;
 // Animated models are not in general contained in their bounding box, as this
 // is calculated only for their resting pose. We create a cubic shadow volume
-// for animated models sized to their largest bounding box dimesion multiplied
+// for animated models sized to their largest bounding box dimension multiplied
 // by this scale factor.
 const ANIMATION_SCALING = 2;
 // Since hard shadows are not lightened by blurring and depth, set a lower

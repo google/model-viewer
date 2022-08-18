@@ -126,14 +126,16 @@ suite('Renderer with two scenes', () => {
     test('camera-orbit updates camera in external render method', async () => {
       const sceneVisible = waitForEvent(externalElement, 'poster-dismissed');
       externalElement[$isElementInViewport] = true;
+      await sceneVisible;
 
-      const time = performance.now()
+      const time = performance.now();
       renderer.render(time);
       const cameraY = externalCamera.viewMatrix[13];
       expect(cameraY).to.not.eq(0);
 
       externalElement.cameraOrbit = '45deg 45deg 1.6m';
-      await sceneVisible;
+      await externalElement.updateComplete;
+
       renderer.render(time + 1000);
 
       expect(externalCamera.viewMatrix[13]).to.not.eq(cameraY);
@@ -185,7 +187,7 @@ suite('Renderer with two scenes', () => {
       expect(otherScene.renderCount).to.be.equal(1, 'otherScene second render');
     });
 
-    test('uses the proper canvas when unregsitering scenes', () => {
+    test('uses the proper canvas when unregistering scenes', () => {
       renderer.render(performance.now());
 
       expect(renderer.canvas3D.classList.contains('show'))
@@ -198,6 +200,7 @@ suite('Renderer with two scenes', () => {
               true, 'otherScene canvas should be shown with multiple scenes.');
 
       renderer.unregisterScene(scene);
+      otherScene.queueRender();
       renderer.render(performance.now());
 
       expect(renderer.canvas3D.parentElement)
@@ -208,6 +211,21 @@ suite('Renderer with two scenes', () => {
           .to.be.eq(
               false,
               'otherScene canvas should not be shown when it is the only scene.');
+    });
+
+    test('when unregistering, does not re-render when not dirty', () => {
+      renderer.render(performance.now());
+      renderer.unregisterScene(scene);
+      renderer.render(performance.now());
+
+      expect(scene.renderCount)
+          .to.be.equal(1, 'scene should have rendered once');
+      expect(otherScene.renderCount)
+          .to.be.equal(1, 'otherScene should have rendered once');
+      expect(renderer.canvas3D.classList.contains('show'))
+          .to.be.eq(false, 'webgl canvas should still not be shown.');
+      expect(otherScene.canvas.classList.contains('show'))
+          .to.be.eq(true, 'otherScene canvas should still be shown.');
     });
 
     suite('when resizing', () => {

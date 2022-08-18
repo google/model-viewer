@@ -61,7 +61,7 @@ const compatibleMaterial = (material: Material|null) => {
 
 export default class GLTFExporterMaterialsVariantsExtension {
   writer: any;  // @TODO: Replace with GLTFWriter when GLTFExporter plugin TS
-                // declartion is ready
+                // declaration is ready
   name: string;
   variantNames: string[];
 

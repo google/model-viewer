@@ -64,7 +64,7 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   maximumAzimuthalAngle: Infinity,
   minimumFieldOfView: 10,
   maximumFieldOfView: 45,
-  touchAction: 'pan-y'
+  touchAction: 'none'
 });
 
 // Constants
@@ -135,6 +135,7 @@ export class SmoothControls extends EventDispatcher {
 
   // Pan state
   public enablePan = true;
+  public enableTap = true;
   private panProjection = new Matrix3();
   private panPerPixel = 0;
 
@@ -754,7 +755,7 @@ export class SmoothControls extends EventDispatcher {
       element.removeEventListener('pointermove', this.onPointerMove);
       element.removeEventListener('pointerup', this.onPointerUp);
       element.removeEventListener('touchmove', this.disableScroll);
-      if (this.enablePan) {
+      if (this.enablePan && this.enableTap) {
         this.recenter(event);
       }
     } else if (this.touchMode !== null) {
@@ -820,7 +821,7 @@ export class SmoothControls extends EventDispatcher {
 
   private onKeyDown = (event: KeyboardEvent) => {
     // We track if the key is actually one we respond to, so as not to
-    // accidentally clober unrelated key inputs when the <model-viewer> has
+    // accidentally clobber unrelated key inputs when the <model-viewer> has
     // focus.
     const {isUserChange} = this;
     this.isUserChange = true;

@@ -18,8 +18,7 @@ import {Event as ThreeEvent, Texture} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $shouldAttemptPreload} from '../model-viewer-base.js';
 import {PreloadEvent} from '../three-components/CachingGLTFLoader.js';
-import {EnvironmentMapAndSkybox} from '../three-components/TextureUtils.js';
-import {Constructor, deserializeUrl} from '../utilities.js';
+import {clamp, Constructor, deserializeUrl} from '../utilities.js';
 
 export const BASE_OPACITY = 0.5;
 const DEFAULT_SHADOW_INTENSITY = 0.0;
@@ -132,18 +131,15 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
 
+      const updateEnvProgress = this[$progressTracker].beginActivity();
+
       try {
         const {environmentMap, skybox} =
-            await new Promise<EnvironmentMapAndSkybox>(
-                async (resolve, reject) => {
-                  const texturesLoad =
-                      textureUtils.generateEnvironmentMapAndSkybox(
-                          deserializeUrl(skyboxImage),
-                          environmentImage,
-                          {progressTracker: this[$progressTracker]});
-                  this[$cancelEnvironmentUpdate] = () => reject(texturesLoad);
-                  resolve(await texturesLoad);
-                });
+            await textureUtils.generateEnvironmentMapAndSkybox(
+                deserializeUrl(skyboxImage),
+                environmentImage,
+                (progress: number) =>
+                    updateEnvProgress(clamp(progress, 0, 1) * 0.99));
 
         if (this[$currentEnvironmentMap] !== environmentMap) {
           this[$currentEnvironmentMap] = environmentMap;
@@ -166,6 +162,12 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$scene].setEnvironmentAndSkybox(null, null);
           throw errorOrPromise;
         }
+      } finally {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            updateEnvProgress(1.0);
+          });
+        });
       }
     }
   }

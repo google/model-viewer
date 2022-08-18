@@ -17,7 +17,7 @@ import {property} from 'lit/decorators.js';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $container, $hasTransitioned, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $container, $getModelIsVisible, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
@@ -25,6 +25,7 @@ import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
 import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {Path, timeline, TimingFunction} from '../utilities/animation.js';
+
 
 
 // NOTE(cdata): The following "animation" timing functions are deliberately
@@ -233,7 +234,8 @@ export declare interface ControlsInterface {
   touchAction: TouchAction;
   interpolationDecay: number;
   disableZoom: boolean;
-  enablePan: boolean;
+  disablePan: boolean;
+  disableTap: boolean;
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
@@ -320,13 +322,16 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     orbitSensitivity: number = 1;
 
     @property({type: String, attribute: 'touch-action'})
-    touchAction: TouchAction = TouchAction.PAN_Y;
+    touchAction: TouchAction = TouchAction.NONE;
 
     @property({type: Boolean, attribute: 'disable-zoom'})
     disableZoom: boolean = false;
 
-    @property({type: Boolean, attribute: 'enable-pan'})
-    enablePan: boolean = false;
+    @property({type: Boolean, attribute: 'disable-pan'})
+    disablePan: boolean = false;
+
+    @property({type: Boolean, attribute: 'disable-tap'})
+    disableTap: boolean = false;
 
     @property({type: Number, attribute: 'interpolation-decay'})
     interpolationDecay: number = DECAY_MILLISECONDS;
@@ -459,8 +464,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         controls.disableZoom = this.disableZoom;
       }
 
-      if (changedProperties.has('enablePan')) {
-        controls.enablePan = this.enablePan;
+      if (changedProperties.has('disablePan')) {
+        controls.enablePan = !this.disablePan;
+      }
+
+      if (changedProperties.has('disableTap')) {
+        controls.enableTap = !this.disableTap;
       }
 
       if (changedProperties.has('interactionPrompt') ||
@@ -665,7 +674,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
 
-      if (this[$renderer].isPresenting || !this[$hasTransitioned]()) {
+      if (this[$renderer].isPresenting || !this[$getModelIsVisible]()) {
         return;
       }
 

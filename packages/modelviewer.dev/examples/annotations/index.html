@@ -106,7 +106,7 @@
     display: none;
   }
 </style>
-<model-viewer id="hotspot-demo" ar ar-modes="webxr" camera-controls src="../../shared-assets/models/Astronaut.glb" style="--poster-color:#ffffff00;" alt="A 3D model of an astronaut.">
+<model-viewer id="hotspot-demo" ar ar-modes="webxr" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut.">
   <button slot="hotspot-visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
   <button slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
     <div id="annotation">This hotspot disappears completely</div>
@@ -189,7 +189,7 @@
     display: none;
   }
 </style>
-<model-viewer id="dimension-demo" ar ar-modes="webxr" ar-scale="fixed" camera-orbit="-30deg auto auto" max-camera-orbit="auto 100deg auto" shadow-intensity="1" camera-controls src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
+<model-viewer id="dimension-demo" ar ar-modes="webxr" ar-scale="fixed" camera-orbit="-30deg auto auto" max-camera-orbit="auto 100deg auto" shadow-intensity="1" camera-controls touch-action="pan-y" src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
   <button slot="hotspot-dot+X-Y+Z" class="dot" data-position="1 -1 1" data-normal="1 0 0"></button>
   <button slot="hotspot-dim+X-Y" class="dim" data-position="1 -1 0" data-normal="1 0 0"></button>
   <button slot="hotspot-dot+X-Y-Z" class="dot" data-position="1 -1 -1" data-normal="1 0 0"></button>
@@ -331,7 +331,6 @@
       src="../../assets/SketchfabModels/ThorAndTheMidgardSerpent.glb"
       alt="Thor and the Midgard Serpent"
       camera-controls
-      enable-pan
       touch-action="none"
       camera-orbit="-8.142746deg 68.967deg 0.6179899m"
       camera-target="-0.003m 0.0722m 0.0391m"

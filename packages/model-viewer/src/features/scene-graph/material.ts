@@ -121,7 +121,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
     const {
       normalTexture: gltfNormalTexture,
-      occlusionTexture: gltfOcculsionTexture,
+      occlusionTexture: gltfOcclusionTexture,
       emissiveTexture: gltfEmissiveTexture
     } = gltfMaterial;
 
@@ -143,7 +143,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         aoMap,
         correlatedMaterials,
         gltf,
-        gltfOcculsionTexture ? gltfOcculsionTexture : null,
+        gltfOcclusionTexture ? gltfOcclusionTexture : null,
     );
 
     this[$emissiveTexture] = new TextureInfo(

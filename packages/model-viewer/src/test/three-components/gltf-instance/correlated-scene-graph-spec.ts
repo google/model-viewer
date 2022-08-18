@@ -29,7 +29,7 @@ const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
     assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
-const TWOCYLENGINE_GLB_PATH = assetPath(
+const ENGINE_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Binary/2CylinderEngine.glb');
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
@@ -100,7 +100,7 @@ suite('correlated-scene-graph', () => {
     });
 
     test('has a mapping for each node in scene', async () => {
-      const threeGLTF = await loadThreeGLTF(TWOCYLENGINE_GLB_PATH);
+      const threeGLTF = await loadThreeGLTF(ENGINE_GLB_PATH);
       const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
       threeGLTF.scene.traverse(node => {
@@ -129,7 +129,7 @@ suite('correlated-scene-graph', () => {
         const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
         const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
-        const scene = (SkeletonUtils as any).clone(threeGLTF.scene) as Group;
+        const scene = SkeletonUtils.clone(threeGLTF.scene) as Group;
         const scenes: Group[] = [scene];
 
         const cloneThreeGLTF: GLTF = {...threeGLTF, scene, scenes};
@@ -152,7 +152,7 @@ suite('correlated-scene-graph', () => {
         const threeGLTF = await loadThreeGLTF(KHRONOS_TRIANGLE_GLB_PATH);
         const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
-        const scene = (SkeletonUtils as any).clone(threeGLTF.scene) as Group;
+        const scene = SkeletonUtils.clone(threeGLTF.scene) as Group;
         const scenes: Group[] = [scene];
 
         const cloneThreeGLTF: GLTF = {...threeGLTF, scene, scenes};

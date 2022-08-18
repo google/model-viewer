@@ -117,7 +117,7 @@
       },
       {
         "htmlId": "panning",
-        "name": "Panning"
+        "name": "Disable Tap"
       },
       {
         "htmlId": "turnSkybox",

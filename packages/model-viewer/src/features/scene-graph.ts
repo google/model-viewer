@@ -39,9 +39,9 @@ const $textureLoader = Symbol('textureLoader');
 const $originalGltfJson = Symbol('originalGltfJson');
 
 interface SceneExportOptions {
-  binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
-      maxTextureSize?: number, forcePowerOfTwoTextures?: boolean,
-      includeCustomExtensions?: boolean,
+  binary?: boolean, trs?: boolean, onlyVisible?: boolean,
+      maxTextureSize?: number, includeCustomExtensions?: boolean,
+      forceIndices?: boolean
 }
 
 export interface SceneGraphInterface {
@@ -204,22 +204,19 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$currentGLTF] = currentGLTF;
-      // TODO: remove this event, as it is synonymous with the load event.
-      this.dispatchEvent(new CustomEvent('scene-graph-ready'));
     }
 
     /** @export */
     async exportScene(options?: SceneExportOptions): Promise<Blob> {
       const scene = this[$scene];
-      return new Promise<Blob>(async (resolve) => {
+      return new Promise<Blob>(async (resolve, reject) => {
         // Defaults
         const opts = {
           binary: true,
           onlyVisible: true,
           maxTextureSize: Infinity,
-          forcePowerOfTwoTextures: false,
           includeCustomExtensions: false,
-          embedImages: true
+          forceIndices: false
         } as GLTFExporterOptions;
 
         Object.assign(opts, options);
@@ -242,13 +239,19 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                 .register(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
-        exporter.parse(scene.modelContainer.children[0], (gltf: object) => {
-          return resolve(
-              new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
-                type: opts.binary ? 'application/octet-stream' :
-                                    'application/json'
-              }));
-        }, opts);
+        exporter.parse(
+            scene.modelContainer.children[0],
+            (gltf: object) => {
+              return resolve(new Blob(
+                  [opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
+                    type: opts.binary ? 'application/octet-stream' :
+                                        'application/json'
+                  }));
+            },
+            () => {
+              return reject('glTF export failed');
+            },
+            opts);
 
         if (shadow != null) {
           shadow.visible = visible;

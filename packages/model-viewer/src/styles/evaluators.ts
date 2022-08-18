@@ -329,7 +329,7 @@ export class EnvEvaluator extends Evaluator<NumberNode> {
 
 
 const IS_MULTIPLICATION_RE = /[\*\/]/;
-const $evaluator = Symbol('evalutor');
+const $evaluator = Symbol('evaluator');
 
 /**
  * Evaluator for CSS-like calc() functions. Our implementation of calc()

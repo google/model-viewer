@@ -81,7 +81,7 @@
           </div>
           <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
-<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.webp" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model carousel">
+<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.webp" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" alt="A 3D model carousel">
   
   <button slot="ar-button" id="ar-button">
     View in your space
@@ -142,7 +142,6 @@
   model-viewer {
     background-color: #eee;
     overflow-x: hidden;
-    --poster-color: #eee;
   }
 
   #ar-button {
@@ -301,7 +300,7 @@
           </div>
           <example-snippet stamp-to="ar" highlight-as="html">
             <template>
-<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-scale="fixed" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz" xr-environment></model-viewer>
+<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-scale="fixed" camera-controls touch-action="pan-y" alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz" xr-environment></model-viewer>
             </template>
           </example-snippet>
 
@@ -319,7 +318,7 @@
           </div>
           <example-snippet stamp-to="sceneViewer" highlight-as="html">
             <template>
-<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
+<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" camera-controls touch-action="pan-y" alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
   <div id="error" class="hide">AR is not supported on this device</div>
 </model-viewer>
 <script>
@@ -366,7 +365,7 @@
           </div>
           <example-snippet stamp-to="wall" highlight-as="html">
             <template>
-<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of some wall art"></model-viewer>
+<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" alt="A 3D model of some wall art"></model-viewer>
             </template>
           </example-snippet>
 
@@ -385,7 +384,7 @@
           </div>
           <example-snippet stamp-to="customButton" highlight-as="html">
             <template>
-<model-viewer ar ar-modes="webxr scene-viewer quick-look" camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+<model-viewer ar ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
       👋 Activate AR
   </button>
@@ -397,8 +396,8 @@
               Since this slot will only appear on an AR enabled device screenshots are provided below. They compare the &lt;model-viewer&gt; default button in the bottom right and a custom button ("👋 Activate AR") in the top right of the viewport, with a custom style.
           </p>
   
-          <img class="eg-image" src="../../assets/eg-default-ar-button.jpg" alt="Image displaying the default <model-viewer> button of a box with slits cut out in the lower-right, next to the example astronaut model." />
-          <img class="eg-image" src="../../assets/eg-custom-ar-button.jpg" alt="Image displaying <model-viewer> with a custom button reading '👋 Activate AR'." / >
+          <img class="eg-image" src="../../assets/eg-default-ar-button.jpg" alt="Image displaying the default model-viewer button of a box with slits cut out in the lower-right, next to the example astronaut model." />
+          <img class="eg-image" src="../../assets/eg-custom-ar-button.jpg" alt="Image displaying model-viewer with a custom button reading '👋 Activate AR'." / >
         </div>
       </div>
     </div>
@@ -415,7 +414,7 @@
               <template>
 <div class="demo" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;">
   <span style="position: absolute; text-align: center; font-size: 100px; line-height: 100px; left: 50%; transform: translateX(-50%);">Background<br>is visible<br>through<br>transparent<br>objects.</span>
-  <model-viewer camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
+  <model-viewer camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
 </div>
               </template>
             </example-snippet>

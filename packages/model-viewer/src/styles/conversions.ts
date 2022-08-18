@@ -42,7 +42,7 @@ export const degreesToRadians =
     };
 
 /**
- * Ensures that a given number is expressed in degrees. If the number is alrady
+ * Ensures that a given number is expressed in degrees. If the number is already
  * in degrees, does nothing. If the value is in radians or has no specified
  * unit, converts it to degrees. If the value is not in radians or degrees, the
  * value is resolved as 0 degrees.

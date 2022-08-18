@@ -16,7 +16,7 @@
 import {property} from 'lit/decorators.js';
 import {LoopOnce, LoopPingPong, LoopRepeat} from 'three';
 
-import ModelViewerElementBase, {$hasTransitioned, $needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$getModelIsVisible, $needsRender, $onModelLoad, $renderer, $scene, $tick, $updateSource} from '../model-viewer-base.js';
 import {Constructor} from '../utilities.js';
 
 const MILLISECONDS_PER_SECOND = 1000.0
@@ -139,7 +139,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       super[$tick](_time, delta);
 
       if (this[$paused] ||
-          (!this[$hasTransitioned]() && !this[$renderer].isPresenting)) {
+          (!this[$getModelIsVisible]() && !this[$renderer].isPresenting)) {
         return;
       }
 

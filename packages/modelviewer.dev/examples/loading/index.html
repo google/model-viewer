@@ -59,12 +59,7 @@
           <example-snippet stamp-to="displayPoster" highlight-as="html">
 
             <template>
-<style>
-  model-viewer#reveal {
-    --poster-color: transparent;
-  }
-</style>
-<model-viewer id="reveal" loading="eager" camera-controls auto-rotate poster="../../assets/poster-shishkebab.webp" src="../../shared-assets/models/shishkebab.glb" shadow-intensity="1" alt="A 3D model of a shishkebab"></model-viewer>
+<model-viewer id="reveal" loading="eager" camera-controls touch-action="pan-y" auto-rotate poster="../../assets/poster-shishkebab.webp" src="../../shared-assets/models/shishkebab.glb" shadow-intensity="1" alt="A 3D model of a shishkebab"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -115,7 +110,7 @@
   }
 </style>
 <!-- use unique asset to ensure lazy loading -->
-<model-viewer id="lazy-load" camera-controls reveal="manual" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet">
+<model-viewer id="lazy-load" camera-controls touch-action="pan-y" reveal="manual" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet">
   <div id="lazy-load-poster" slot="poster"></div>
   <div id="button-load" slot="poster">Load 3D Model</div>
 </model-viewer>
@@ -187,7 +182,7 @@
           </div>
           <example-snippet stamp-to="gltfModel" highlight-as="html">
             <template>
-<model-viewer camera-controls alt="A 3D model of a sphere" src="../../shared-assets/models/reflective-sphere.gltf">
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of a sphere" src="../../shared-assets/models/reflective-sphere.gltf">
 </model-viewer>
             </template>
           </example-snippet>
@@ -233,7 +228,7 @@
           </div>
           <example-snippet stamp-to="dracoSupport" highlight-as="html">
             <template>
-<model-viewer camera-controls alt="A 3D model of an astronaut" src="../../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Draco/2CylinderEngine.gltf">
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of an astronaut" src="../../shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Draco/2CylinderEngine.gltf">
 </model-viewer>
             </template>
           </example-snippet>
@@ -309,7 +304,7 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
           </div>
           <example-snippet stamp-to="ktx2Support" highlight-as="html">
             <template>
-<model-viewer camera-controls alt="A 3D model of a fish" src="../../shared-assets/models/BarramundiFish.mixed.glb">
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of a fish" src="../../shared-assets/models/BarramundiFish.mixed.glb">
 </model-viewer>
             </template>
           </example-snippet>
@@ -335,7 +330,7 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
           </div>
           <example-snippet stamp-to="meshoptSupport" highlight-as="html">
             <template>
-<model-viewer camera-controls alt="A 3D model of a mechanical coffee mug contraption" src="../../shared-assets/models/coffeemat.glb">
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of a mechanical coffee mug contraption" src="../../shared-assets/models/coffeemat.glb">
 </model-viewer>
             </template>
           </example-snippet>
@@ -370,7 +365,7 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimize
           </div>
           <example-snippet stamp-to="usdzModel" highlight-as="html">
             <template>
-<model-viewer camera-controls alt="A 3D model of an astronaut" ar ios-src="../../shared-assets/models/Astronaut.usdz">
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of an astronaut" ar ios-src="../../shared-assets/models/Astronaut.usdz">
 </model-viewer>
             </template>
           </example-snippet>
@@ -397,7 +392,7 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimize
           </div>
           <example-snippet stamp-to="renderScale" highlight-as="html">
             <template>
-<model-viewer id="scale" alt="A 3D model of a toy car" camera-controls auto-rotate src="../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb" ar ar-modes="webxr scene-viewer quick-look">
+<model-viewer id="scale" alt="A 3D model of a toy car" camera-controls touch-action="pan-y" auto-rotate src="../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb" ar ar-modes="webxr scene-viewer quick-look">
   Reported DPR: <span id="reportedDpr"></span><br/>
   Rendered DPR: <span id="renderedDpr"></span><br/>
   Minimum DPR: <span id="minimumDpr"></span><br/>
@@ -453,7 +448,7 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimize
           </div>
           <example-snippet stamp-to="cyclingModels" highlight-as="html">
             <template>
-<model-viewer id="toggle-model" src="../../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" shadow-intensity="1" camera-controls auto-rotate></model-viewer>
+<model-viewer id="toggle-model" src="../../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" shadow-intensity="1" camera-controls touch-action="pan-y" auto-rotate></model-viewer>
 <script>
     const models = ['shishkebab.glb', 'Astronaut.glb'];
     const toggleModel = document.querySelector('#toggle-model');

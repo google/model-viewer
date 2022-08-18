@@ -15,17 +15,15 @@
 
 import {Mesh, MeshStandardMaterial} from 'three';
 
-import {$currentGLTF, SceneGraphInterface, SceneGraphMixin} from '../../features/scene-graph.js';
+import {$currentGLTF} from '../../features/scene-graph.js';
 import {$primitivesList} from '../../features/scene-graph/model.js';
 import {$initialMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {$scene} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
-import {BasicSpecTemplate, Constructor} from '../templates.js';
-
-
 
 const expect = chai.expect;
 
@@ -35,7 +33,6 @@ const CUBES_GLB_PATH = assetPath('models/cubes.gltf');  // has variants
 const MESH_PRIMITIVES_GLB_PATH =
     assetPath('models/MeshPrimitivesVariants.glb');   // has variants
 const CUBE_GLB_PATH = assetPath('models/cube.gltf');  // has UV coords
-const SUNRISE_IMG_PATH = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 const RIGGEDFIGURE_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/RiggedFigure/glTF-Binary/RiggedFigure.glb');
 
@@ -47,23 +44,10 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
                                scene.modelContainer.children[0];
 }
 
-suite('ModelViewerElementBase with SceneGraphMixin', () => {
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement:
-      Constructor<ModelViewerElementBase&SceneGraphInterface>;
-  let element: InstanceType<typeof ModelViewerElement>;
+suite('SceneGraph', () => {
+  let element: ModelViewerElement;
 
   setup(() => {
-    tagName = `model-viewer-scene-graph-${nextId++}`;
-    ModelViewerElement = class extends SceneGraphMixin
-    (ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
-
     element = new ModelViewerElement();
     document.body.insertBefore(element, document.body.firstChild);
   });
@@ -71,8 +55,6 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
   teardown(() => {
     document.body.removeChild(element);
   });
-
-  BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
   suite('scene export', () => {
     suite('with a loaded model', () => {
@@ -257,7 +239,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
     setup(async () => {
       element.src = ASTRONAUT_GLB_PATH;
 
-      await waitForEvent(element, 'scene-graph-ready');
+      await waitForEvent(element, 'load');
 
       material =
           (element[$scene].modelContainer.children[0].children[0].children[0] as
@@ -277,18 +259,6 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
       expect(color).to.be.eql([1, 0, 0, 1]);
     });
 
-    test('image.setURI sets the appropriate texture', async () => {
-      await element.model!.materials[0]
-          .pbrMetallicRoughness.baseColorTexture!.texture!.source!.setURI(
-              SUNRISE_IMG_PATH);
-
-      const uri =
-          element.model!.materials[0]
-              .pbrMetallicRoughness.baseColorTexture!.texture!.source!.uri;
-
-      expect(uri).to.be.eql(SUNRISE_IMG_PATH);
-    });
-
     suite('when the model changes', () => {
       test('updates when the model changes', async () => {
         const color =
@@ -298,7 +268,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
 
         element.src = HORSE_GLB_PATH;
 
-        await waitForEvent(element, 'scene-graph-ready');
+        await waitForEvent(element, 'load');
 
         const nextColor =
             element.model!.materials[0].pbrMetallicRoughness.baseColorFactor;
@@ -309,7 +279,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
       test('allows the scene graph to be manipulated', async () => {
         element.src = HORSE_GLB_PATH;
 
-        await waitForEvent(element, 'scene-graph-ready');
+        await waitForEvent(element, 'load');
 
         await element.model!.materials[0]
             .pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]);
@@ -331,7 +301,7 @@ suite('ModelViewerElementBase with SceneGraphMixin', () => {
       test('has a mapping for each primitive mesh', async () => {
         element.src = RIGGEDFIGURE_GLB_PATH;
 
-        await waitForEvent(element, 'scene-graph-ready');
+        await waitForEvent(element, 'load');
 
         const gltf = (element as any)[$currentGLTF] as ModelViewerGLTFInstance;
 

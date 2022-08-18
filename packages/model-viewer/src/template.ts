@@ -29,7 +29,7 @@ const templateResult = html`
   height: 150px;
 }
 
-/* NOTE: This ruleset is our integration surface area with the
+/* NOTE: This rule set is our integration surface area with the
  * :focus-visible polyfill.
  *
  * @see https://github.com/WICG/focus-visible/pull/196 */
@@ -116,17 +116,11 @@ canvas.show {
 
 .slot.poster {
   opacity: 0;
-  transition: opacity 0.3s 0.3s;
   background-color: inherit;
 }
 
 .slot.poster.show {
   opacity: 1;
-  transition: none;
-}
-
-.slot.poster.quick {
-  transition: none;
 }
 
 .slot.poster > * {
@@ -149,8 +143,7 @@ canvas.show {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: var(--poster-color, #fff);
-  background-image: var(--poster-image, none);
+  background-color: #fff0;
 }
 
 #default-progress-bar {
