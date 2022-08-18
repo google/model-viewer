@@ -173,7 +173,7 @@ suite('SmoothControls', () => {
           settleControls(controls);
 
           const postCameraTarget = controls.scene.getTarget();
-          expect(Number(postCameraTarget.x)).to.not.be.greaterThan(Number(initialCameraTarget.x));
+          expect(Number(postCameraTarget.x)).to.be.greaterThan(Number(initialCameraTarget.x));
         });
 
       });
