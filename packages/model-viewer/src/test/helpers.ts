@@ -53,6 +53,7 @@ export interface SyntheticEventProperties {
   clientY?: number;
   deltaY?: number;
   key?: string;
+  shiftKey?: boolean;
   }
 
 /**

@@ -158,7 +158,6 @@ suite('SmoothControls', () => {
       suite('local keyboard input', () => {
         test('changes orbital position of camera', () => {
           element.focus();
-
           dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowUp'});
 
           settleControls(controls);
@@ -168,13 +167,13 @@ suite('SmoothControls', () => {
 
         test('changes pan position of camera', () => {
           element.focus();
-
-          // This does not dispatch the shift key modifier as it is only dispatching the ArrowUp key
-          dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowUp'});
+          const initialCameraTarget = controls.scene.getTarget();
+          dispatchSyntheticEvent(element, 'keydown', {key: 'ArrowLeft', shiftKey: true});
 
           settleControls(controls);
 
-          expect(camera.position.z).to.not.be.equal(initialCameraPosition.z);
+          const postCameraTarget = controls.scene.getTarget();
+          expect(Number(postCameraTarget.x)).to.not.be.greaterThan(Number(initialCameraTarget.x));
         });
 
       });
