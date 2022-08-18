@@ -690,9 +690,8 @@ suite('Controls', () => {
         await rafPasses();
         await rafPasses();
 
-        dispatchSyntheticEvent(element[$userInputElement], 'keydown', {
-          keyCode: KeyCode.PAGE_DOWN
-        });
+        dispatchSyntheticEvent(
+            element[$userInputElement], 'keydown', {key: 'PageDown'});
         await timePasses(50);
         await rafPasses();
 

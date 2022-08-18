@@ -363,7 +363,7 @@ suite('SmoothControls', () => {
           controls.update(performance.now(), ONE_FRAME_DELTA);
           controls.update(performance.now(), ONE_FRAME_DELTA);
 
-          controls.isUserChange = false;
+          controls.changeSource = ChangeSource.NONE;
           controls.setOrbit(3, 3, 3);
 
           controls.update(performance.now(), ONE_FRAME_DELTA);
