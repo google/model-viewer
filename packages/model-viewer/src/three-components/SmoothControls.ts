@@ -72,7 +72,7 @@ const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const ZOOM_SENSITIVITY = 0.04;
 
 // The move size on pan key event
-const PANKEYINCREMENT = 10;
+const PAN_KEY_INCREMENT = 10;
 
 export const KeyCode = {
   PAGE_UP: 33,
@@ -83,11 +83,12 @@ export const KeyCode = {
   DOWN: 40
 };
 
-export type ChangeSource = 'user-interaction'|'none';
+export type ChangeSource = 'user-interaction'|'none'|'automatic';
 
 export const ChangeSource: {[index: string]: ChangeSource} = {
   USER_INTERACTION: 'user-interaction',
-  NONE: 'none'
+  NONE: 'none',
+  AUTOMATIC: 'automatic'
 };
 
 /**
@@ -126,7 +127,7 @@ export interface PointerChangeEvent extends ThreeEvent {
  */
 export class SmoothControls extends EventDispatcher {
   public sensitivity = 1;
-  public isUserChange = false;
+  public changeSource = ChangeSource.NONE;
 
   private _interactionEnabled: boolean = false;
   private _options: SmoothControlsOptions;
@@ -477,10 +478,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private dispatchChange() {
-    const source =
-        this.isUserChange ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
-
-    this.dispatchEvent({type: 'change', source});
+    this.dispatchEvent({type: 'change', source: this.changeSource});
   }
 
   private moveCamera() {
@@ -562,7 +560,7 @@ export class SmoothControls extends EventDispatcher {
       const dxMag = Math.abs(dx);
       const dyMag = Math.abs(dy);
       // If motion is mostly vertical, assume scrolling is the intent.
-      if (this.isUserChange &&
+      if (this.changeSource === ChangeSource.USER_INTERACTION &&
           ((touchAction === 'pan-y' && dyMag > dxMag) ||
            (touchAction === 'pan-x' && dxMag > dyMag))) {
         this.touchMode = null;
@@ -698,10 +696,12 @@ export class SmoothControls extends EventDispatcher {
     this.isUserPointing = false;
 
     if (event.pointerType === 'touch') {
-      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
+      this.changeSource = event.altKey ?  // set by interact() in controls.ts
+          ChangeSource.AUTOMATIC :
+          ChangeSource.USER_INTERACTION;
       this.onTouchChange(event);
     } else {
-      this.isUserChange = true;
+      this.changeSource = ChangeSource.USER_INTERACTION;
       this.onMouseDown(event);
     }
   };
@@ -723,12 +723,14 @@ export class SmoothControls extends EventDispatcher {
     pointer.clientY = event.clientY;
 
     if (event.pointerType === 'touch') {
-      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
+      this.changeSource = event.altKey ?  // set by interact() in controls.ts
+          ChangeSource.AUTOMATIC :
+          ChangeSource.USER_INTERACTION;
       if (this.touchMode !== null) {
         this.touchMode(dx, dy);
       }
     } else {
-      this.isUserChange = true;
+      this.changeSource = ChangeSource.USER_INTERACTION;
       if (this.panPerPixel > 0) {
         this.movePan(dx, dy);
       } else {
@@ -810,7 +812,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onWheel = (event: Event) => {
-    this.isUserChange = true;
+    this.changeSource = ChangeSource.USER_INTERACTION;
 
     const deltaZoom = (event as WheelEvent).deltaY *
         ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY / 30;
@@ -823,23 +825,27 @@ export class SmoothControls extends EventDispatcher {
     // We track if the key is actually one we respond to, so as not to
     // accidentally clobber unrelated key inputs when the <model-viewer> has
     // focus.
-    const {isUserChange} = this;
-    this.isUserChange = true;
+    const {changeSource} = this;
+    this.changeSource = ChangeSource.USER_INTERACTION;
 
-    (event.shiftKey && this.enablePan) ?
-        this.panKeyCodeHandler(event, isUserChange) :
-        this.orbitZoomKeyCodeHandler(event, isUserChange)
+    const relevantKey = (event.shiftKey && this.enablePan) ?
+        this.panKeyCodeHandler(event) :
+        this.orbitZoomKeyCodeHandler(event);
+
+    if (relevantKey) {
+      event.preventDefault();
+    } else {
+      this.changeSource = changeSource;
+    }
   };
-
 
   /**
    * Handles the orbit and Zoom key presses
    * Uses constants for the increment.
    * @param event The keyboard event for the .key value
-   * @param isUserChange Is this a user initiated event
    * @returns boolean to indicate if the key event has been handled
    */
-  private orbitZoomKeyCodeHandler(event: KeyboardEvent, isUserChange: boolean) {
+  private orbitZoomKeyCodeHandler(event: KeyboardEvent) {
     let relevantKey = true;
     switch (event.key) {
       case 'PageUp':
@@ -862,49 +868,41 @@ export class SmoothControls extends EventDispatcher {
         break;
       default:
         relevantKey = false;
-        this.isUserChange = isUserChange;
         break;
     }
-
-    if (relevantKey) {
-      event.preventDefault();
-    }
+    return relevantKey;
   }
 
   /**
    * Handles the Pan key presses
    * Uses constants for the increment.
    * @param event The keyboard event for the .key value
-   * @param isUserChange Is this a user initiated event
    * @returns boolean to indicate if the key event has been handled
    */
-  private panKeyCodeHandler(event: KeyboardEvent, isUserChange: boolean) {
+  private panKeyCodeHandler(event: KeyboardEvent) {
     this.initializePan();
     let relevantKey = true;
     switch (event.key) {
       case 'ArrowUp':
         this.movePan(
-            0, -1 * PANKEYINCREMENT);  // This is the negative one so that the
-                                       // model appears to move as the arrow
-                                       // direction rather than the view moving
+            0,
+            -1 * PAN_KEY_INCREMENT);  // This is the negative one so that the
+                                      // model appears to move as the arrow
+                                      // direction rather than the view moving
         break;
       case 'ArrowDown':
-        this.movePan(0, PANKEYINCREMENT);
+        this.movePan(0, PAN_KEY_INCREMENT);
         break;
       case 'ArrowLeft':
-        this.movePan(-1 * PANKEYINCREMENT, 0);
+        this.movePan(-1 * PAN_KEY_INCREMENT, 0);
         break;
       case 'ArrowRight':
-        this.movePan(PANKEYINCREMENT, 0);
+        this.movePan(PAN_KEY_INCREMENT, 0);
         break;
       default:
         relevantKey = false;
-        this.isUserChange = isUserChange;
         break;
     }
-
-    if (relevantKey) {
-      event.preventDefault();
-    }
+    return relevantKey;
   }
 }

@@ -573,12 +573,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
 
       const moveTouches = () => {
-        // cancel interaction if user interacts
-        if (this[$controls].isUserChange) {
+        // cancel interaction if something else moves the camera
+        const {changeSource} = this[$controls];
+        if (changeSource !== ChangeSource.AUTOMATIC) {
           for (const fingerElement of this[$fingerAnimatedContainers]) {
             fingerElement.style.opacity = '0';
           }
           dispatchTouches('pointercancel');
+          this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+              'interact-stopped', {detail: {source: changeSource}}));
           return;
         }
 
@@ -593,6 +596,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           requestAnimationFrame(moveTouches);
         } else {
           dispatchTouches('pointerup');
+          this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+              'interact-stopped', {detail: {source: changeSource}}));
           document.removeEventListener('visibilitychange', onVisibilityChange);
         }
       };
@@ -627,7 +632,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         style[1] = phi;
         this[$maintainThetaPhi] = false;
       }
-      controls.isUserChange = false;
+      controls.changeSource = ChangeSource.NONE;
       controls.setOrbit(style[0], style[1], style[2]);
     }
 
@@ -667,7 +672,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (!this[$renderer].arRenderer.isPresenting) {
         this[$scene].setTarget(x, y, z);
       }
-      this[$controls].isUserChange = false;
+      this[$controls].changeSource = ChangeSource.NONE;
       this[$renderer].arRenderer.updateTarget();
     }
 
@@ -708,7 +713,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           this[$promptAnimatedContainer].style.transform =
               `translateX(${xOffset}px)`;
 
-          controls.isUserChange = false;
+          controls.changeSource = ChangeSource.AUTOMATIC;
           controls.adjustOrbit(deltaTheta, 0, 0);
 
           this[$lastPromptOffset] = offset;
@@ -717,9 +722,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       controls.update(time, delta);
       if (scene.updateTarget(delta)) {
-        const source = controls.isUserChange ? ChangeSource.USER_INTERACTION :
-                                               ChangeSource.NONE;
-        this[$onChange]({type: 'change', source});
+        this[$onChange]({type: 'change', source: controls.changeSource});
       }
     }
 
