@@ -825,13 +825,17 @@ export class SmoothControls extends EventDispatcher {
     // We track if the key is actually one we respond to, so as not to
     // accidentally clobber unrelated key inputs when the <model-viewer> has
     // focus.
+    const {changeSource} = this;
+    this.changeSource = ChangeSource.USER_INTERACTION;
+
     const relevantKey = (event.shiftKey && this.enablePan) ?
         this.panKeyCodeHandler(event) :
-        this.orbitZoomKeyCodeHandler(event)
+        this.orbitZoomKeyCodeHandler(event);
 
     if (relevantKey) {
-      this.changeSource = ChangeSource.USER_INTERACTION;
       event.preventDefault();
+    } else {
+      this.changeSource = changeSource;
     }
   };
 
