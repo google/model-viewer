@@ -690,11 +690,16 @@ suite('Controls', () => {
         await rafPasses();
         await rafPasses();
 
-        dispatchSyntheticEvent(
-            element[$userInputElement], 'keydown', {key: 'PageDown'});
+        let changeSource = ChangeSource.AUTOMATIC;
+        element.addEventListener<any>(
+            'interact-stopped', ({detail: {source}}) => {
+              changeSource = source;
+            });
+        element.cameraOrbit = 'auto auto 70%';
         await timePasses(50);
         await rafPasses();
 
+        expect(changeSource).to.be.eq(ChangeSource.NONE);
         const newOrbit = element.getCameraOrbit();
         expect(newOrbit.theta).to.be.not.closeTo(orbit.theta, 0.001, 'theta');
         expect(newOrbit.phi).to.be.not.closeTo(orbit.phi, 0.001, 'phi');
@@ -708,11 +713,17 @@ suite('Controls', () => {
         await rafPasses();
         await rafPasses();
 
+        let changeSource = ChangeSource.AUTOMATIC;
+        element.addEventListener<any>(
+            'interact-stopped', ({detail: {source}}) => {
+              changeSource = source;
+            });
         dispatchSyntheticEvent(
             element[$userInputElement], 'keydown', {key: 'PageDown'});
         await timePasses(50);
         await rafPasses();
 
+        expect(changeSource).to.be.eq(ChangeSource.USER_INTERACTION);
         const newOrbit = element.getCameraOrbit();
         expect(newOrbit.theta).to.be.not.closeTo(orbit.theta, 0.001, 'theta');
         expect(newOrbit.phi).to.be.not.closeTo(orbit.phi, 0.001, 'phi');

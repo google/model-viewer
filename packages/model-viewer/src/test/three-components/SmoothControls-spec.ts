@@ -31,9 +31,6 @@ const HALF_PI = Math.PI / 2.0;
 const QUARTER_PI = HALF_PI / 2.0;
 const THREE_QUARTERS_PI = HALF_PI + QUARTER_PI;
 
-const USER_INTERACTION_CHANGE_SOURCE = 'user-interaction';
-const DEFAULT_INTERACTION_CHANGE_SOURCE = 'none';
-
 /**
  * Settle controls by performing 50 frames worth of updates
  */
@@ -304,7 +301,7 @@ suite('SmoothControls', () => {
           settleControls(controls);
 
           expect(didCall).to.be.true;
-          expect(changeSource).to.equal(USER_INTERACTION_CHANGE_SOURCE);
+          expect(changeSource).to.equal(ChangeSource.USER_INTERACTION);
         });
 
         test('dispatches "change" on direct orbit change', () => {
@@ -320,15 +317,15 @@ suite('SmoothControls', () => {
           settleControls(controls);
 
           expect(didCall).to.be.true;
-          expect(changeSource).to.equal(DEFAULT_INTERACTION_CHANGE_SOURCE);
+          expect(changeSource).to.equal(ChangeSource.NONE);
         });
 
         test('sends "user-interaction" multiple times', () => {
           const expectedSources = [
-            USER_INTERACTION_CHANGE_SOURCE,
-            USER_INTERACTION_CHANGE_SOURCE,
-            USER_INTERACTION_CHANGE_SOURCE,
-            USER_INTERACTION_CHANGE_SOURCE,
+            ChangeSource.USER_INTERACTION,
+            ChangeSource.USER_INTERACTION,
+            ChangeSource.USER_INTERACTION,
+            ChangeSource.USER_INTERACTION,
           ];
           let changeSource: Array<string> = [];
 
@@ -346,11 +343,11 @@ suite('SmoothControls', () => {
 
         test('does not send "user-interaction" after setOrbit', () => {
           const expectedSources = [
-            USER_INTERACTION_CHANGE_SOURCE,
-            USER_INTERACTION_CHANGE_SOURCE,
-            USER_INTERACTION_CHANGE_SOURCE,
-            DEFAULT_INTERACTION_CHANGE_SOURCE,
-            DEFAULT_INTERACTION_CHANGE_SOURCE,
+            ChangeSource.USER_INTERACTION,
+            ChangeSource.USER_INTERACTION,
+            ChangeSource.USER_INTERACTION,
+            ChangeSource.NONE,
+            ChangeSource.NONE,
           ];
           let changeSource: Array<string> = [];
 

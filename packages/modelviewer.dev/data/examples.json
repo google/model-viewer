@@ -152,7 +152,7 @@
     "htmlName": "lightingandenv",
     "examples": [
       {
-        "htmlId": "hdrSkyboyImage",
+        "htmlId": "hdrSkyboxImage",
         "name": "HDR skybox-image"
       },
       {
@@ -188,7 +188,7 @@
         "name": "LDR environment-image"
       },
       {
-        "htmlId": "skyboxAndEnvrionment",
+        "htmlId": "skyboxAndEnvironment",
         "name": "Skybox and Environment"
       }
     ]

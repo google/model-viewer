@@ -574,11 +574,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const moveTouches = () => {
         // cancel interaction if something else moves the camera
-        if (this[$controls].changeSource !== ChangeSource.AUTOMATIC) {
+        const {changeSource} = this[$controls];
+        if (changeSource !== ChangeSource.AUTOMATIC) {
           for (const fingerElement of this[$fingerAnimatedContainers]) {
             fingerElement.style.opacity = '0';
           }
           dispatchTouches('pointercancel');
+          this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+              'interact-stopped', {detail: {source: changeSource}}));
           return;
         }
 
@@ -593,6 +596,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           requestAnimationFrame(moveTouches);
         } else {
           dispatchTouches('pointerup');
+          this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+              'interact-stopped', {detail: {source: changeSource}}));
           document.removeEventListener('visibilitychange', onVisibilityChange);
         }
       };

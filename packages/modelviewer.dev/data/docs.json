@@ -184,12 +184,12 @@
       {
         "name": "registerRenderer(externalRenderer)",
         "htmlName": "registerRenderer",
-        "description": "This method allows you to replace our entire rendering stack with your own for this element. The glTF-related portions of our API cease to function: ar, lighting, staging, animation, scene-graph. However, loading, camera, and annotations contiue to function normally. Note that you are now in charge of your own data, so you can load any type of file you choose, or even generate a scene from script.<br/><br/>The externalRenderer you provide must implement our <code>RendererInterface</code>, which consists of three functions: <br/><br/>- <code>load(progressCallback: (progress: number) => void): Promise&lt;FramingInfo&gt;</code><br/>- <code>render(camera: Camera): void</code><br/>- <code>resize(width: number, height: number): void</code> <br/><br/>The element will call your <code>load</code> method when it would normally load a glTF, lazily by default. Make sure to set the <code>src</code> to something (any string will do) to indicate this is not an empty element. Make sure to call our <code>progressCallback</code> occasionally, which will update our progress bar, and ensure you set a progress value of 1.0 when your pixels are ready to be shown. You must return us a <code>FramingInfo</code> object containing two numbers: <code>framedRadius</code> and <code>fieldOfViewAspect</code> to allow our camera to set its defaults. The <code>framedRadius</code> is the size of the bounding sphere and <code>fieldOfViewAspect</code> is the ideal element aspect ratio to frame the model (1.0 is a good default). <br/><br/>We will call your <code>render</code> method when the camera changes and pass you the <code>Camera</code> object containing <code>viewMatrix: Array&lt;number&gt;</code> and <code>projectionMatrix: Array&lt;number&gt;</code> as 4x4 matrices. Use this to update the rendered pixels in your <a href=\"./#entrydocs-loading-slots-canvas\">canvas slot element</a>. We will call your <code>resize</code> method when the element is resized so you can take coordinated action on your slotted canvas element."
+        "description": "This method allows you to replace our entire rendering stack with your own for this element. The glTF-related portions of our API cease to function: ar, lighting, staging, animation, scene-graph. However, loading, camera, and annotations continue to function normally. Note that you are now in charge of your own data, so you can load any type of file you choose, or even generate a scene from script.<br/><br/>The externalRenderer you provide must implement our <code>RendererInterface</code>, which consists of three functions: <br/><br/>- <code>load(progressCallback: (progress: number) => void): Promise&lt;FramingInfo&gt;</code><br/>- <code>render(camera: Camera): void</code><br/>- <code>resize(width: number, height: number): void</code> <br/><br/>The element will call your <code>load</code> method when it would normally load a glTF, lazily by default. Make sure to set the <code>src</code> to something (any string will do) to indicate this is not an empty element. Make sure to call our <code>progressCallback</code> occasionally, which will update our progress bar, and ensure you set a progress value of 1.0 when your pixels are ready to be shown. You must return us a <code>FramingInfo</code> object containing two numbers: <code>framedRadius</code> and <code>fieldOfViewAspect</code> to allow our camera to set its defaults. The <code>framedRadius</code> is the size of the bounding sphere and <code>fieldOfViewAspect</code> is the ideal element aspect ratio to frame the model (1.0 is a good default). <br/><br/>We will call your <code>render</code> method when the camera changes and pass you the <code>Camera</code> object containing <code>viewMatrix: Array&lt;number&gt;</code> and <code>projectionMatrix: Array&lt;number&gt;</code> as 4x4 matrices. Use this to update the rendered pixels in your <a href=\"./#entrydocs-loading-slots-canvas\">canvas slot element</a>. We will call your <code>resize</code> method when the element is resized so you can take coordinated action on your slotted canvas element."
       },
       {
         "name": "unregisterRenderer()",
         "htmlName": "unregisterRenderer",
-        "description": "Switches back to default rendering of a glTF/GLB src and stops calling any external renderer. Note you must manually remove your own slotted canavs element concurrently."
+        "description": "Switches back to default rendering of a glTF/GLB src and stops calling any external renderer. Note you must manually remove your own slotted canvas element concurrently."
       }
     ],
     "Static Methods": [
@@ -318,7 +318,7 @@
       {
         "name": "ios-src",
         "htmlName": "iosSrc",
-        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari. The presence of this attribute will automatically enable the quick-look ar-mode, however it is no longer necessary. If instead the quick-look ar-mode is specified and ios-src is not specified, then we will generate a USDZ on the fly when the AR button is pressed. This means modifications via the scene-graph API will now be reflected in Quick Look. Hoowever, USDZ generation is not perfect, for instance animations are not yet supported, so in some cases supplying ios-src may give better results.",
+        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari. The presence of this attribute will automatically enable the quick-look ar-mode, however it is no longer necessary. If instead the quick-look ar-mode is specified and ios-src is not specified, then we will generate a USDZ on the fly when the AR button is pressed. This means modifications via the scene-graph API will now be reflected in Quick Look. However, USDZ generation is not perfect, for instance animations are not yet supported, so in some cases supplying ios-src may give better results.",
         "links": [
           "<a href=\"../examples/augmentedreality/#ar\"><span class='attribute'>ios-src</span> example</a>"
         ]
@@ -652,7 +652,7 @@
         "htmlName": "updateFraming",
         "description": "Recalculates the camera defaults in case the model has been changed, for instance by the orientation or scale attributes.",
         "links": [
-          "<a href=\"../examples/scenegraph/#tranforms\"><span class='attribute'>updateFraming</span> example</a>"
+          "<a href=\"../examples/scenegraph/#transforms\"><span class='attribute'>updateFraming</span> example</a>"
         ]
       },
       {
@@ -678,7 +678,7 @@
       {
         "name": "interact(duration, finger0, finger1)",
         "htmlName": "interact",
-        "description": "Creates a synthetic touch interaction, ideal for creating custom interaction prompts. The duration (ms) and finger0 are required, while finger1 is optional and will create zoom/pan interactions instead of rotation if specified. Any user interaction will automatically cancel this motion and interact() cannot be called while a current synthetic interaction is playing. Each finger input is an object with x and y members, each of which has initialValue and keyframes members. The keyframes are an array of objects with frames and value members. The values are between 0 and 1, spanning the width/height of the element. The frames are a relative unit of time, where their sum is normalized to the duration. Each frame eases in and out between values. Visualize the touch points using the <a href=\"./#entrydocs-stagingandcameras-slots-finger\">finger0/finger1</a> slots.",
+        "description": "Creates a synthetic touch interaction, ideal for creating custom interaction prompts. The duration (ms) and finger0 are required, while finger1 is optional and will create zoom/pan interactions instead of rotation if specified. Any other camera change will automatically cancel this motion and interact() cannot be called while a current synthetic interaction is playing. Each finger input is an object with x and y members, each of which has initialValue and keyframes members. The keyframes are an array of objects with frames and value members. The values are between 0 and 1, spanning the width/height of the element. The frames are a relative unit of time, where their sum is normalized to the duration. Each frame eases in and out between values. Visualize the touch points using the <a href=\"./#entrydocs-stagingandcameras-slots-finger\">finger0/finger1</a> slots.",
         "links": [
           "<a href=\"../examples/stagingandcameras/#customPrompt\"><span class='attribute'>customPrompt</span> example</a>"
         ]
@@ -688,7 +688,12 @@
       {
         "name": "camera-change",
         "htmlName": "cameraChange",
-        "description": "Fired when the camera position and/or field of view have changed. If the change occurred due to user interaction, the event.detail.source property will be set to \"user-interaction\"."
+        "description": "Fired when the camera position and/or field of view have changed. If the change occurred due to user interaction, the event.detail.source property will be set to \"user-interaction\". For the interaction-prompt or the interact() method, it will be set to \"automatic\". For other API camera changes, it is set to \"none\"."
+      },
+      {
+        "name": "interact-stopped",
+        "htmlName": "interactStopped",
+        "description": "Fired when the <a href=\"./#entrydocs-stagingandcameras-methods-interact\">interact()</a> motion stops. You can tell it completed by checking that event.detail.source is set to \"automatic\", while it was canceled early if the source is \"user-interaction\" or \"none\" (for JS camera changes)."
       }
     ],
     "Slots": [

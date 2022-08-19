@@ -72,7 +72,7 @@ const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const ZOOM_SENSITIVITY = 0.04;
 
 // The move size on pan key event
-const PANKEYINCREMENT = 10;
+const PAN_KEY_INCREMENT = 10;
 
 export const KeyCode = {
   PAGE_UP: 33,
@@ -885,18 +885,19 @@ export class SmoothControls extends EventDispatcher {
     switch (event.key) {
       case 'ArrowUp':
         this.movePan(
-            0, -1 * PANKEYINCREMENT);  // This is the negative one so that the
-                                       // model appears to move as the arrow
-                                       // direction rather than the view moving
+            0,
+            -1 * PAN_KEY_INCREMENT);  // This is the negative one so that the
+                                      // model appears to move as the arrow
+                                      // direction rather than the view moving
         break;
       case 'ArrowDown':
-        this.movePan(0, PANKEYINCREMENT);
+        this.movePan(0, PAN_KEY_INCREMENT);
         break;
       case 'ArrowLeft':
-        this.movePan(-1 * PANKEYINCREMENT, 0);
+        this.movePan(-1 * PAN_KEY_INCREMENT, 0);
         break;
       case 'ArrowRight':
-        this.movePan(PANKEYINCREMENT, 0);
+        this.movePan(PAN_KEY_INCREMENT, 0);
         break;
       default:
         relevantKey = false;
