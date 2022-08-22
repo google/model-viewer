@@ -157,7 +157,7 @@ suite('AR', () => {
         });
   });
 
-  suite('shows the AR button', () => {
+  suite.only('shows the AR button', () => {
     setup(async () => {
       element.ar = true;
       element.src = assetPath('models/Astronaut.glb');

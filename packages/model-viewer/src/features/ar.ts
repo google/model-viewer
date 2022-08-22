@@ -167,8 +167,6 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async update(changedProperties: Map<string, any>) {
-      super.update(changedProperties);
-
       if (changedProperties.has('arScale')) {
         this[$scene].canScale = this.arScale !== 'fixed';
       }
@@ -178,17 +176,17 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$needsRender]();
       }
 
-      if (!changedProperties.has('ar') && !changedProperties.has('arModes') &&
-          !changedProperties.has('src') && !changedProperties.has('iosSrc')) {
-        return;
-      }
-
       if (changedProperties.has('arModes')) {
         this[$arModes] = deserializeARModes(this.arModes);
       }
 
-      await this[$selectARMode]();
-      console.log(this[$arMode], this.canActivateAR);
+      if (changedProperties.has('ar') || changedProperties.has('arModes') ||
+          changedProperties.has('src') || changedProperties.has('iosSrc')) {
+        await this[$selectARMode]();
+        console.log(this[$arMode], this.canActivateAR);
+      }
+
+      super.update(changedProperties);
     }
 
     /**
