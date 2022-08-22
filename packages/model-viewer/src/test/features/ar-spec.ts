@@ -175,6 +175,7 @@ suite('AR', () => {
     test('with an ios-src on iOS', async () => {
       element.iosSrc = assetPath('models/Astronaut.usdz');
       await element.updateComplete;
+      console.log(element.canActivateAR, IS_ANDROID);
       expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);
     });
   });

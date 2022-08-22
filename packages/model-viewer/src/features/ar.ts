@@ -225,6 +225,7 @@ configuration or device capabilities');
               this[$arMode] = ARMode.WEBXR;
               break;
             }
+            console.log(this[$arMode]);
             if (value === 'scene-viewer' && IS_SCENEVIEWER_CANDIDATE &&
                 !isSceneViewerBlocked) {
               this[$arMode] = ARMode.SCENE_VIEWER;
