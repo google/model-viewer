@@ -188,6 +188,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       await this[$selectARMode]();
+      console.log(this[$arMode], this.canActivateAR);
     }
 
     /**
