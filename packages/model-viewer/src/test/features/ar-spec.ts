@@ -165,12 +165,6 @@ suite('AR', () => {
       await waitForEvent(element, 'poster-dismissed');
     });
 
-    teardown(() => {
-      if (element.parentNode != null) {
-        element.parentNode.removeChild(element);
-      }
-    });
-
     // This fails on Android when karma.conf has hostname: 'bs-local.com',
     // possibly due to not serving over HTTPS (which disables WebXR)? However,
     // Browserstack is unstable without this hostname.

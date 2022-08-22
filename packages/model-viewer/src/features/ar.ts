@@ -187,7 +187,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$arModes] = deserializeARModes(this.arModes);
       }
 
-      this[$selectARMode]();
+      await this[$selectARMode]();
     }
 
     /**
