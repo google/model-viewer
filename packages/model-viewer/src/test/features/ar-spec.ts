@@ -16,7 +16,7 @@
 import {IS_ANDROID, IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer} from '../../features/ar.js';
 import {ModelViewerElement} from '../../model-viewer.js';
-import {timePasses, waitForEvent} from '../../utilities.js';
+import {waitForEvent} from '../../utilities.js';
 import {assetPath, spy} from '../helpers.js';
 
 const expect = chai.expect;
@@ -209,7 +209,7 @@ suite('AR', () => {
     suite('with an ios-src', () => {
       setup(async () => {
         element.iosSrc = assetPath('models/Astronaut.usdz');
-        await timePasses();
+        await element.updateComplete;
       });
 
       test('shows the AR button', () => {
