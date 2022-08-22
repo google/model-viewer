@@ -220,6 +220,13 @@ configuration or device capabilities');
       if (this.ar) {
         if (this.src != null) {
           for (const value of this[$arModes]) {
+            console.log(
+                'value: ',
+                value,
+                ', candidate: ',
+                IS_WEBXR_AR_CANDIDATE,
+                ', blocked: ',
+                isWebXRBlocked);
             if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE && !isWebXRBlocked &&
                 await this[$renderer].arRenderer.supportsPresentation()) {
               this[$arMode] = ARMode.WEBXR;
