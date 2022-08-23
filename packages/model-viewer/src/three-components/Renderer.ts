@@ -330,6 +330,7 @@ export class Renderer extends EventDispatcher {
    * renderer's result into it.
    */
   private countVisibleScenes() {
+    const {canvas3D} = this;
     let visibleScenes = 0;
     let canvas3DScene = null;
     for (const scene of this.scenes) {
@@ -337,16 +338,22 @@ export class Renderer extends EventDispatcher {
       if (element.modelIsVisible && scene.externalRenderer == null) {
         ++visibleScenes;
       }
-      if (this.canvas3D.parentElement === scene.canvas.parentElement) {
+      if (canvas3D.parentElement === scene.canvas.parentElement) {
         canvas3DScene = scene;
       }
     }
     const multipleScenesVisible = visibleScenes > 1;
 
-    if (canvas3DScene != null && multipleScenesVisible &&
-        !this.multipleScenesVisible) {
-      const {width, height} = this.sceneSize(canvas3DScene);
-      this.copyPixels(canvas3DScene, width, height);
+    if (canvas3DScene != null) {
+      const newlyMultiple =
+          multipleScenesVisible && !this.multipleScenesVisible;
+      const disappearing = !canvas3DScene.element.modelIsVisible;
+      if (newlyMultiple || disappearing) {
+        const {width, height} = this.sceneSize(canvas3DScene);
+        this.copyPixels(canvas3DScene, width, height);
+        canvas3D.classList.remove('show');
+        canvas3D.parentElement!.removeChild(canvas3D);
+      }
     }
     this.multipleScenesVisible = multipleScenesVisible;
   }
@@ -493,10 +500,6 @@ export class Renderer extends EventDispatcher {
 
       scene.hasRendered();
       ++scene.renderCount;
-    }
-
-    if (this.multipleScenesVisible) {
-      canvas3D.classList.remove('show');
     }
   }
 
