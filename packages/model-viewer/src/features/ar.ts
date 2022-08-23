@@ -166,7 +166,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$arAnchor].removeEventListener('message', this[$onARTap]);
     }
 
-    async update(changedProperties: Map<string, any>) {
+    update(changedProperties: Map<string, any>) {
+      super.update(changedProperties);
+
       if (changedProperties.has('arScale')) {
         this[$scene].canScale = this.arScale !== 'fixed';
       }
@@ -182,11 +184,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('ar') || changedProperties.has('arModes') ||
           changedProperties.has('src') || changedProperties.has('iosSrc')) {
-        await this[$selectARMode]();
-        console.log(this[$arMode], this.canActivateAR);
+        this[$selectARMode]();
       }
-
-      super.update(changedProperties);
     }
 
     /**
@@ -219,13 +218,6 @@ configuration or device capabilities');
       if (this.ar) {
         if (this.src != null) {
           for (const value of this[$arModes]) {
-            console.log(
-                'value: ',
-                value,
-                ', candidate: ',
-                IS_WEBXR_AR_CANDIDATE,
-                ', blocked: ',
-                isWebXRBlocked);
             if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE && !isWebXRBlocked &&
                 await this[$renderer].arRenderer.supportsPresentation()) {
               arMode = ARMode.WEBXR;

@@ -157,27 +157,24 @@ suite('AR', () => {
         });
   });
 
-  suite.only('shows the AR button', () => {
+  suite('shows the AR button', () => {
     setup(async () => {
       element.ar = true;
       element.src = assetPath('models/Astronaut.glb');
 
       await waitForEvent(element, 'poster-dismissed');
-      console.log('setup complete');
     });
 
     // This fails on Android when karma.conf has hostname: 'bs-local.com',
     // possibly due to not serving over HTTPS (which disables WebXR)? However,
     // Browserstack is unstable without this hostname.
     test('if on a WebXR platform', () => {
-      console.log('xr: ', element.canActivateAR, IS_ANDROID);
       expect(element.canActivateAR).to.be.equal(IS_ANDROID);
     });
 
     test('with an ios-src on iOS', async () => {
       element.iosSrc = assetPath('models/Astronaut.usdz');
       await rafPasses();
-      console.log('ios: ', element.canActivateAR, IS_ANDROID);
       expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);
     });
   });
