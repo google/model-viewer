@@ -17,7 +17,7 @@ import {IS_ANDROID, IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer} from '../../features/ar.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {waitForEvent} from '../../utilities.js';
-import {assetPath, spy} from '../helpers.js';
+import {assetPath, rafPasses, spy} from '../helpers.js';
 
 const expect = chai.expect;
 
@@ -163,19 +163,21 @@ suite('AR', () => {
       element.src = assetPath('models/Astronaut.glb');
 
       await waitForEvent(element, 'poster-dismissed');
+      console.log('setup complete');
     });
 
     // This fails on Android when karma.conf has hostname: 'bs-local.com',
     // possibly due to not serving over HTTPS (which disables WebXR)? However,
     // Browserstack is unstable without this hostname.
     test('if on a WebXR platform', () => {
+      console.log('xr: ', element.canActivateAR, IS_ANDROID);
       expect(element.canActivateAR).to.be.equal(IS_ANDROID);
     });
 
     test('with an ios-src on iOS', async () => {
       element.iosSrc = assetPath('models/Astronaut.usdz');
-      await element.updateComplete;
-      console.log(element.canActivateAR, IS_ANDROID);
+      await rafPasses();
+      console.log('ios: ', element.canActivateAR, IS_ANDROID);
       expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);
     });
   });

@@ -215,7 +215,7 @@ configuration or device capabilities');
     }
 
     async[$selectARMode]() {
-      this[$arMode] = ARMode.NONE;
+      let arMode = ARMode.NONE;
       if (this.ar) {
         if (this.src != null) {
           for (const value of this[$arModes]) {
@@ -228,17 +228,16 @@ configuration or device capabilities');
                 isWebXRBlocked);
             if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE && !isWebXRBlocked &&
                 await this[$renderer].arRenderer.supportsPresentation()) {
-              this[$arMode] = ARMode.WEBXR;
+              arMode = ARMode.WEBXR;
               break;
             }
-            console.log(this[$arMode]);
             if (value === 'scene-viewer' && IS_SCENEVIEWER_CANDIDATE &&
                 !isSceneViewerBlocked) {
-              this[$arMode] = ARMode.SCENE_VIEWER;
+              arMode = ARMode.SCENE_VIEWER;
               break;
             }
             if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE) {
-              this[$arMode] = ARMode.QUICK_LOOK;
+              arMode = ARMode.QUICK_LOOK;
               break;
             }
           }
@@ -246,13 +245,13 @@ configuration or device capabilities');
 
         // The presence of ios-src overrides the absence of quick-look
         // ar-mode.
-        if (!this.canActivateAR && this.iosSrc != null &&
+        if (arMode === ARMode.NONE && this.iosSrc != null &&
             IS_AR_QUICKLOOK_CANDIDATE) {
-          this[$arMode] = ARMode.QUICK_LOOK;
+          arMode = ARMode.QUICK_LOOK;
         }
       }
 
-      if (this.canActivateAR) {
+      if (arMode !== ARMode.NONE) {
         this[$arButtonContainer].classList.add('enabled');
         this[$arButtonContainer].addEventListener(
             'click', this[$onARButtonContainerClick]);
@@ -267,6 +266,7 @@ configuration or device capabilities');
         this.dispatchEvent(
             new CustomEvent<ARStatusDetails>('ar-status', {detail: {status}}));
       }
+      this[$arMode] = arMode;
     }
 
     protected async[$enterARWithWebXR]() {
