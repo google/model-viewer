@@ -608,6 +608,11 @@
         "name": "turntableRotation",
         "htmlName": "turntableRotation",
         "description": "Returns the orientation of the model's turntable (turned by the <span class='attribute'>auto-rotate</span> setting) in radians counter-clockwise when looking down from above."
+      },
+      {
+        "name": "inputSensitivity",
+        "htmlName": "inputSensitivity",
+        "description": "Multiplier for all user inputs: mouse, touch, and keyboard. Allows for selectively fine control or to make custom interaction prompts move the model less compared to the fingers."
       }
     ],
     "Methods": [

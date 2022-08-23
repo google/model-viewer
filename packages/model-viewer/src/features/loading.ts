@@ -181,8 +181,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * An enumerable attribute describing under what conditions the
      * <model-viewer> should reveal a model to the viewer.
      *
-     * The default value is "auto". The only supported alternative values are
-     * "interaction" and "manual".
+     * The default value is "auto". The only supported alternative values is
+     * "manual".
      */
     @property({type: String})
     reveal: RevealAttributeValue = RevealStrategy.AUTO;

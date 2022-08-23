@@ -126,7 +126,8 @@ export interface PointerChangeEvent extends ThreeEvent {
  * ensure that the camera's matrixWorld is in sync before using SmoothControls.
  */
 export class SmoothControls extends EventDispatcher {
-  public sensitivity = 1;
+  public orbitSensitivity = 1;
+  public inputSensitivity = 1;
   public changeSource = ChangeSource.NONE;
 
   private _interactionEnabled: boolean = false;
@@ -499,7 +500,9 @@ export class SmoothControls extends EventDispatcher {
   private userAdjustOrbit(
       deltaTheta: number, deltaPhi: number, deltaZoom: number) {
     this.adjustOrbit(
-        deltaTheta * this.sensitivity, deltaPhi * this.sensitivity, deltaZoom);
+        deltaTheta * this.orbitSensitivity * this.inputSensitivity,
+        deltaPhi * this.orbitSensitivity * this.inputSensitivity,
+        deltaZoom * this.inputSensitivity);
 
     // Always make sure that an initial event is triggered in case there is
     // contention between user interaction and imperative changes. This initial
@@ -603,7 +606,7 @@ export class SmoothControls extends EventDispatcher {
 
   private movePan(dx: number, dy: number) {
     const {scene} = this;
-    const dxy = vector3.set(dx, dy, 0);
+    const dxy = vector3.set(dx, dy, 0).multiplyScalar(this.inputSensitivity);
     const metersPerPixel =
         this.spherical.radius * Math.exp(this.logFov) * this.panPerPixel;
     dxy.multiplyScalar(metersPerPixel);
