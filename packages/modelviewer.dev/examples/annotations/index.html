@@ -74,7 +74,7 @@
           <example-snippet stamp-to="addHotspots" highlight-as="html">
             <template>
 <style>
-  button{
+  .hotspot{
     display: block;
     width: 20px;
     height: 20px;
@@ -82,19 +82,20 @@
     border: none;
     background-color: blue;
     box-sizing: border-box;
+    pointer-events: none;
   }
 
-  button[slot="hotspot-hand"]{
+  .hotspot[slot="hotspot-hand"]{
     --min-hotspot-opacity: 0;
     background-color: red;
   }
 
-  button[slot="hotspot-foot"]:not([data-visible]) {
+  .hotspot[slot="hotspot-foot"]:not([data-visible]) {
     background-color: transparent;
     border: 3px solid blue;
   }
 
-  #annotation{
+  .annotation{
     background-color: #888888;
     position: absolute;
     transform: translate(10px, 10px);
@@ -107,12 +108,12 @@
   }
 </style>
 <model-viewer id="hotspot-demo" ar ar-modes="webxr" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut.">
-  <button slot="hotspot-visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
-  <button slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
-    <div id="annotation">This hotspot disappears completely</div>
+  <button class="hotspot" slot="hotspot-visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
+  <button class="hotspot" slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
+    <div class="annotation">This hotspot disappears completely</div>
   </button>
-  <button slot="hotspot-foot" data-position="0.16 0.1 0.17" data-normal="-0.07 0.97 0.23" data-visibility-attribute="visible"></button>
-  <div id="annotation">This annotation is fixed in screen-space</div>
+  <button class="hotspot" slot="hotspot-foot" data-position="0.16 0.1 0.17" data-normal="-0.07 0.97 0.23" data-visibility-attribute="visible"></button>
+  <div class="annotation">This annotation is fixed in screen-space</div>
 </model-viewer>
             </template>
           </example-snippet>
@@ -146,6 +147,7 @@
     left: 16px;
     max-width: unset;
     transform: unset;
+    pointer-events: auto;
   }
 
   .dot{
@@ -153,14 +155,19 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
+    border: none;
+    box-sizing: border-box;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     background: #fff;
+    pointer-events: none;
     --min-hotspot-opacity: 0;
   }
 
   .dim{
     background: #fff;
     border-radius: 4px;
+    border: none;
+    box-sizing: border-box;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
     color: rgba(0, 0, 0, 0.8);
     display: block;
@@ -174,6 +181,7 @@
     width: max-content;
     height: max-content;
     transform: translate3d(-50%, -50%, 0);
+    pointer-events: none;
     --min-hotspot-opacity: 0;
   }
 
@@ -234,7 +242,7 @@
   });
 
   modelViewer.addEventListener('load', () => {
-    const center = modelViewer.getCameraTarget();
+    const center = modelViewer.getBoundingBoxCenter();
     const size = modelViewer.getDimensions();
     const x2 = size.x / 2;
     const y2 = size.y / 2;
@@ -425,6 +433,8 @@
   .view-button {
       background: #fff;
       border-radius: 4px;
+      border: none;
+      box-sizing: border-box;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
       color: rgba(0, 0, 0, 0.8);
       display: block;
