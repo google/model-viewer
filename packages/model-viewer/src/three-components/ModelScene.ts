@@ -508,7 +508,7 @@ export class ModelScene extends Scene {
    * Gets the point in model coordinates the model should orbit/pivot around.
    */
   getTarget(): Vector3 {
-    return this.goalTarget.multiplyScalar(-1).clone();
+    return this.goalTarget.clone().multiplyScalar(-1);
   }
 
   /**
