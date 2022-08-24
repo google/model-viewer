@@ -322,6 +322,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const scene = this.presentedScene;
+    this._presentedScene = null;
     if (scene != null) {
       const {element} = scene;
 
@@ -387,7 +388,6 @@ export class ARRenderer extends EventDispatcher {
     this.lastTick = null;
     this.turntableRotation = null;
     this.oldShadowIntensity = null;
-    this._presentedScene = null;
     this.frame = null;
     this.inputSource = null;
     this.overlay = null;
