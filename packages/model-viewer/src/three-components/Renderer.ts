@@ -134,6 +134,7 @@ export class Renderer extends EventDispatcher {
 
     this.canvas3D = document.createElement('canvas');
     this.canvas3D.id = 'webgl-canvas';
+    this.canvas3D.classList.add('show');
 
     try {
       this.threeRenderer = new WebGLRenderer({
@@ -290,9 +291,6 @@ export class Renderer extends EventDispatcher {
     canvas.style.width = `${this.width / scale}px`;
     canvas.style.height = `${this.height / scale}px`;
 
-    if (this.multipleScenesVisible) {
-      canvas.classList.add('show');
-    }
     scene.queueRender();
 
     this.dispatchRenderScale(scene);
@@ -309,6 +307,10 @@ export class Renderer extends EventDispatcher {
 
   unregisterScene(scene: ModelScene) {
     this.scenes.delete(scene);
+
+    if (this.canvas3D.parentElement === scene.canvas.parentElement) {
+      scene.canvas.parentElement!.removeChild(this.canvas3D);
+    }
 
     if (this.canRender && this.scenes.size === 0) {
       this.threeRenderer.setAnimationLoop(null);
@@ -351,7 +353,6 @@ export class Renderer extends EventDispatcher {
       if (newlyMultiple || disappearing) {
         const {width, height} = this.sceneSize(canvas3DScene);
         this.copyPixels(canvas3DScene, width, height);
-        canvas3D.classList.remove('show');
         canvas3D.parentElement!.removeChild(canvas3D);
       }
     }
@@ -494,7 +495,6 @@ export class Renderer extends EventDispatcher {
         this.copyPixels(scene, width, height);
       } else {
         scene.canvas.parentElement!.appendChild(canvas3D);
-        canvas3D.classList.add('show');
         scene.canvas.classList.remove('show');
       }
 
