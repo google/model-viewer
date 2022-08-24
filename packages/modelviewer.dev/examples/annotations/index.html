@@ -242,7 +242,7 @@
   });
 
   modelViewer.addEventListener('load', () => {
-    const center = modelViewer.getCameraTarget();
+    const center = modelViewer.getBoundingBoxCenter();
     const size = modelViewer.getDimensions();
     const x2 = size.x / 2;
     const y2 = size.y / 2;

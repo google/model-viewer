@@ -14,6 +14,7 @@
  */
 
 import {property} from 'lit/decorators.js';
+import {Vector3} from 'three';
 
 import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
@@ -68,6 +69,7 @@ export declare interface LoadingInterface {
   dismissPoster(): void;
   showPoster(): void;
   getDimensions(): Vector3D;
+  getBoundingBoxCenter(): Vector3D;
 }
 
 export declare interface LoadingStaticInterface {
@@ -245,6 +247,10 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     getDimensions(): Vector3D {
       return toVector3D(this[$scene].size);
+    }
+
+    getBoundingBoxCenter(): Vector3D {
+      return toVector3D(this[$scene].boundingBox.getCenter(new Vector3()));
     }
 
     protected[$modelIsRevealed] = false;
