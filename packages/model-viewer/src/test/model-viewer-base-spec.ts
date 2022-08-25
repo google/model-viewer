@@ -158,7 +158,9 @@ suite('ModelViewerElementBase', () => {
       test('eventually dispatches an error event', async () => {
         const sourceErrors = waitForEvent(element, 'error');
         element.src = './does-not-exist.glb';
-        await sourceErrors;
+        const event = await sourceErrors;
+
+        expect((event as any).detail.type).to.be.eq('loadfailure');
       });
     });
 
