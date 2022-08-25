@@ -586,7 +586,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
       const detail = {url: source};
       this.dispatchEvent(new CustomEvent('preload', {detail}));
     } catch (error) {
-      this.dispatchEvent(new CustomEvent('error', {detail: error}));
+      this.dispatchEvent(new CustomEvent(
+          'error', {detail: {type: 'loadfailure', sourceError: error}}));
     } finally {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
