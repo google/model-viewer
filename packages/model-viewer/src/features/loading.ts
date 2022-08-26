@@ -323,6 +323,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
 
+      this.showPoster();
+
       this[$progressTracker].addEventListener('progress', this[$onProgress]);
     }
 
@@ -417,11 +419,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     async[$updateSource]() {
       if (this.generateSchema === true) {
         this[$scene].updateSchema(this.src);
-      }
-      if (this[$scene].currentGLTF == null || this.src == null ||
-          !this[$shouldAttemptPreload]()) {
-        // Don't show the poster when switching models.
-        this.showPoster();
       }
       this[$updateStatus]('Loading');
       await super[$updateSource]();

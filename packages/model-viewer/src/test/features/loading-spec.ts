@@ -272,6 +272,7 @@ suite('Loading', () => {
 
         element.reveal = 'manual';
         element.src = null;
+        element.showPoster();
 
         await timePasses();
 
