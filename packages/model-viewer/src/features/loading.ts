@@ -53,7 +53,6 @@ const $shouldDismissPoster = Symbol('shouldDismissPoster');
 const $hidePoster = Symbol('hidePoster');
 const $modelIsRevealed = Symbol('modelIsRevealed');
 const $updateProgressBar = Symbol('updateProgressBar');
-const $lastReportedProgress = Symbol('lastReportedProgress');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
@@ -255,8 +254,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     protected[$modelIsRevealed] = false;
 
-    protected[$lastReportedProgress]: number = 0;
-
     protected[$shouldDismissPoster] = false;
 
     // TODO: Add this to the shadow root as part of this mixin's
@@ -363,8 +360,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
-      this[$lastReportedProgress] =
-          Math.max(progress, this[$lastReportedProgress]);
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
@@ -420,7 +415,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateSource]() {
-      this[$lastReportedProgress] = 0;
       if (this.generateSchema === true) {
         this[$scene].updateSchema(this.src);
       }
