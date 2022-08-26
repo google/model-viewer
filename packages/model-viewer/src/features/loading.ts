@@ -16,7 +16,7 @@
 import {property} from 'lit/decorators.js';
 import {Vector3} from 'three';
 
-import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $isElementInViewport, $progressTracker, $scene, $shouldAttemptPreload, $updateSource, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
@@ -53,7 +53,6 @@ const $shouldDismissPoster = Symbol('shouldDismissPoster');
 const $hidePoster = Symbol('hidePoster');
 const $modelIsRevealed = Symbol('modelIsRevealed');
 const $updateProgressBar = Symbol('updateProgressBar');
-const $lastReportedProgress = Symbol('lastReportedProgress');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
@@ -63,7 +62,6 @@ export declare interface LoadingInterface {
   poster: string|null;
   reveal: RevealAttributeValue;
   loading: LoadingAttributeValue;
-  generateSchema: boolean;
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
@@ -202,20 +200,12 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     loading: LoadingAttributeValue = LoadingStrategy.AUTO;
 
     /**
-     * Generates a 3D model schema https://schema.org/3DModel associated with
-     * the loaded src and inserts it into the header of the page for search
-     * engines to crawl.
-     */
-    @property({type: Boolean, attribute: 'generate-schema'})
-    generateSchema = false;
-
-    /**
      * Dismisses the poster, causing the model to load and render if
      * necessary. This is currently effectively the same as interacting with
      * the poster via user input.
      */
     dismissPoster() {
-      if (this[$sceneIsReady]()) {
+      if (this.loaded) {
         this[$hidePoster]();
       } else {
         this[$shouldDismissPoster] = true;
@@ -254,8 +244,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     protected[$modelIsRevealed] = false;
-
-    protected[$lastReportedProgress]: number = 0;
 
     protected[$shouldDismissPoster] = false;
 
@@ -326,6 +314,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
 
+      this.showPoster();
+
       this[$progressTracker].addEventListener('progress', this[$onProgress]);
     }
 
@@ -351,24 +341,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('reveal') || changedProperties.has('loading')) {
         this[$updateSource]();
       }
-
-      if (changedProperties.has('generateSchema')) {
-        if (this.generateSchema === true) {
-          this[$scene].updateSchema(this.src);
-        } else {
-          this[$scene].updateSchema(null);
-        }
-      }
     }
 
     [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
-      this[$lastReportedProgress] =
-          Math.max(progress, this[$lastReportedProgress]);
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
-        if (this[$sceneIsReady]() &&
+        if (this.loaded &&
             (this[$shouldDismissPoster] ||
              this.reveal === RevealStrategy.AUTO)) {
           this[$hidePoster]();
@@ -386,12 +366,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           (this[$shouldDismissPoster] ||
            this.loading === LoadingStrategy.EAGER ||
            (this.reveal === RevealStrategy.AUTO && this[$isElementInViewport]));
-    }
-
-    [$sceneIsReady](): boolean {
-      const {src} = this;
-      return !!src && super[$sceneIsReady]() &&
-          this[$lastReportedProgress] === 1.0;
     }
 
     [$hidePoster]() {
@@ -423,20 +397,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$getModelIsVisible]() {
       return super[$getModelIsVisible]() && this[$modelIsRevealed];
-    }
-
-    async[$updateSource]() {
-      this[$lastReportedProgress] = 0;
-      if (this.generateSchema === true) {
-        this[$scene].updateSchema(this.src);
-      }
-      if (this[$scene].currentGLTF == null || this.src == null ||
-          !this[$shouldAttemptPreload]()) {
-        // Don't show the poster when switching models.
-        this.showPoster();
-      }
-      this[$updateStatus]('Loading');
-      await super[$updateSource]();
     }
   }
 
