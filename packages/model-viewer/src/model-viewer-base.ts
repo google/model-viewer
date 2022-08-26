@@ -69,7 +69,6 @@ export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 export const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
-export const $sceneIsReady = Symbol('sceneIsReady');
 
 export interface Vector3D {
   x: number
@@ -294,7 +293,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
             const oldVisibility = this.modelIsVisible;
             this[$isElementInViewport] = entry.isIntersecting;
             this[$announceModelVisibility](oldVisibility);
-            if (this[$isElementInViewport] && !this[$sceneIsReady]()) {
+            if (this[$isElementInViewport] && !this.loaded) {
               this[$updateSource]();
             }
           }
@@ -503,10 +502,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   [$shouldAttemptPreload](): boolean {
     return !!this.src && this[$isElementInViewport];
-  }
-
-  [$sceneIsReady](): boolean {
-    return this[$loaded];
   }
 
   /**

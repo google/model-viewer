@@ -16,7 +16,7 @@
 import {property} from 'lit/decorators.js';
 import {Vector3} from 'three';
 
-import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $isElementInViewport, $progressTracker, $scene, $shouldAttemptPreload, $updateSource, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
@@ -215,7 +215,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * the poster via user input.
      */
     dismissPoster() {
-      if (this[$sceneIsReady]()) {
+      if (this.loaded) {
         this[$hidePoster]();
       } else {
         this[$shouldDismissPoster] = true;
@@ -368,7 +368,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
-        if (this[$sceneIsReady]() &&
+        if (this.loaded &&
             (this[$shouldDismissPoster] ||
              this.reveal === RevealStrategy.AUTO)) {
           this[$hidePoster]();
@@ -386,12 +386,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           (this[$shouldDismissPoster] ||
            this.loading === LoadingStrategy.EAGER ||
            (this.reveal === RevealStrategy.AUTO && this[$isElementInViewport]));
-    }
-
-    [$sceneIsReady](): boolean {
-      const {src} = this;
-      return !!src && super[$sceneIsReady]() &&
-          this[$lastReportedProgress] === 1.0;
     }
 
     [$hidePoster]() {
