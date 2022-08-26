@@ -172,8 +172,12 @@ suite('Loading', () => {
     suite('reveal', () => {
       suite('auto', () => {
         test('hides poster when element loads', async () => {
-          element.loading = 'eager';
           element.src = CUBE_GLB_PATH;
+          const input = element[$userInputElement];
+
+          expect(pickShadowDescendant(element))
+              .to.be.not.equal(
+                  input, 'the poster should be shown until the model loads');
 
           await waitForEvent(
               element,
@@ -182,10 +186,14 @@ suite('Loading', () => {
 
           await rafPasses();
 
-          const input = element[$userInputElement];
-          const picked = pickShadowDescendant(element);
+          expect(pickShadowDescendant(element)).to.be.equal(input);
 
-          expect(picked).to.be.equal(input);
+          element.reveal = 'manual';
+          await element.updateComplete;
+          await rafPasses();
+
+          expect(pickShadowDescendant(element))
+              .to.be.equal(input, 'changing reveal should not show the poster');
         });
       });
 
