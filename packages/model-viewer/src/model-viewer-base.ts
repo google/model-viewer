@@ -167,6 +167,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
   @property({type: Boolean, attribute: 'with-credentials'})
   withCredentials: boolean = false;
 
+  /**
+   * Generates a 3D model schema https://schema.org/3DModel associated with
+   * the loaded src and inserts it into the header of the page for search
+   * engines to crawl.
+   */
+  @property({type: Boolean, attribute: 'generate-schema'})
+  generateSchema = false;
+
   protected[$isElementInViewport] = false;
   protected[$loaded] = false;
   protected[$loadedTime] = 0;
@@ -397,6 +405,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
     if (changedProperties.has('withCredentials')) {
       CachingGLTFLoader.withCredentials = this.withCredentials
     }
+
+    if (changedProperties.has('generateSchema')) {
+      if (this.generateSchema) {
+        this[$scene].updateSchema(this.src);
+      } else {
+        this[$scene].updateSchema(null);
+      }
+    }
   }
 
   /** @export */
@@ -570,6 +586,17 @@ export default class ModelViewerElementBase extends ReactiveElement {
     if (this.loaded || !this[$shouldAttemptPreload]()) {
       return;
     }
+
+    if (this.generateSchema) {
+      this[$scene].updateSchema(this.src);
+    }
+    this[$updateStatus]('Loading');
+    // If we are loading a new model, we need to stop the animation of
+    // the current one (if any is playing). Otherwise, we might lose
+    // the reference to the scene root and running actions start to
+    // throw exceptions and/or behave in unexpected ways:
+    this[$scene].stopAnimation();
+
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
     try {

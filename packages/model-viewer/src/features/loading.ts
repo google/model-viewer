@@ -16,7 +16,7 @@
 import {property} from 'lit/decorators.js';
 import {Vector3} from 'three';
 
-import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $isElementInViewport, $progressTracker, $scene, $shouldAttemptPreload, $updateSource, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $isElementInViewport, $progressTracker, $scene, $shouldAttemptPreload, $updateSource, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
@@ -62,7 +62,6 @@ export declare interface LoadingInterface {
   poster: string|null;
   reveal: RevealAttributeValue;
   loading: LoadingAttributeValue;
-  generateSchema: boolean;
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
@@ -199,14 +198,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     @property({type: String})
     loading: LoadingAttributeValue = LoadingStrategy.AUTO;
-
-    /**
-     * Generates a 3D model schema https://schema.org/3DModel associated with
-     * the loaded src and inserts it into the header of the page for search
-     * engines to crawl.
-     */
-    @property({type: Boolean, attribute: 'generate-schema'})
-    generateSchema = false;
 
     /**
      * Dismisses the poster, causing the model to load and render if
@@ -350,14 +341,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('reveal') || changedProperties.has('loading')) {
         this[$updateSource]();
       }
-
-      if (changedProperties.has('generateSchema')) {
-        if (this.generateSchema === true) {
-          this[$scene].updateSchema(this.src);
-        } else {
-          this[$scene].updateSchema(null);
-        }
-      }
     }
 
     [$onProgress] = (event: Event) => {
@@ -414,14 +397,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$getModelIsVisible]() {
       return super[$getModelIsVisible]() && this[$modelIsRevealed];
-    }
-
-    async[$updateSource]() {
-      if (this.generateSchema === true) {
-        this[$scene].updateSchema(this.src);
-      }
-      this[$updateStatus]('Loading');
-      await super[$updateSource]();
     }
   }
 
