@@ -203,31 +203,21 @@ export class Renderer extends EventDispatcher {
     this.width = width;
     this.height = height;
     this.dpr = dpr;
+    width = Math.ceil(width * dpr);
+    height = Math.ceil(height * dpr);
 
     if (this.canRender) {
-      this.threeRenderer.setSize(
-          Math.ceil(width * dpr), Math.ceil(height * dpr), false);
+      this.threeRenderer.setSize(width, height, false);
     }
-
-    // Expand the canvas size to make up for shrinking the viewport.
-    const scale = this.scaleFactor;
-    const widthCSS = Math.ceil(width / scale);
-    const heightCSS = Math.ceil(height / scale);
-    // The canvas element must by styled outside of three due to the offscreen
-    // canvas not being directly stylable.
-    this.canvas3D.style.width = `${widthCSS}px`;
-    this.canvas3D.style.height = `${heightCSS}px`;
 
     // Each scene's canvas must match the renderer size. In general they can be
     // larger than the element that contains them, but the overflow is hidden
     // and only the portion that is shown is copied over.
     for (const scene of this.scenes) {
       const {canvas} = scene;
-      canvas.width = Math.ceil(width * dpr);
-      canvas.height = Math.ceil(height * dpr);
-      canvas.style.width = `${widthCSS}px`;
-      canvas.style.height = `${heightCSS}px`;
-      scene.queueRender();
+      canvas.width = width;
+      canvas.height = height;
+      scene.forceRescale();
     }
   }
 
@@ -267,18 +257,8 @@ export class Renderer extends EventDispatcher {
 
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
-    const {canvas} = scene;
-    const scale = this.scaleFactor;
 
-    canvas.width = Math.ceil(this.width * this.dpr);
-    canvas.height = Math.ceil(this.height * this.dpr);
-
-    canvas.style.width = `${this.width / scale}px`;
-    canvas.style.height = `${this.height / scale}px`;
-
-    scene.queueRender();
-
-    this.dispatchRenderScale(scene);
+    scene.forceRescale();
 
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop(

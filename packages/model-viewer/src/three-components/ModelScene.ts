@@ -169,6 +169,11 @@ export class ModelScene extends Scene {
     this.isDirty = false;
   }
 
+  forceRescale() {
+    this.scaleStep = -1;
+    this.queueRender();
+  }
+
   /**
    * Pass in a THREE.Object3D to be controlled
    * by this model.
