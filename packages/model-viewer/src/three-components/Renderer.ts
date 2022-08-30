@@ -102,7 +102,8 @@ export class Renderer extends EventDispatcher {
   protected debugger: Debugger|null = null;
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
-  private lastTick: number;
+  private lastTick = performance.now();
+  private renderedLastFrame = false;
   private scaleStep = 0;
   private lastStep = DEFAULT_LAST_STEP;
   private avgFrameDuration =
@@ -169,8 +170,6 @@ export class Renderer extends EventDispatcher {
         'webglcontextrestored', this.onWebGLContextRestored);
 
     this.updateRendererSize();
-    this.lastTick = performance.now();
-    this.avgFrameDuration = 0;
   }
 
   /**
@@ -221,8 +220,14 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  private updateRendererScale() {
+  private updateRendererScale(delta: number) {
     const scaleStep = this.scaleStep;
+
+    this.avgFrameDuration += clamp(
+        DURATION_DECAY * (delta - this.avgFrameDuration),
+        -MAX_AVG_CHANGE_MS,
+        MAX_AVG_CHANGE_MS);
+
     if (this.avgFrameDuration > HIGH_FRAME_DURATION_MS) {
       ++this.scaleStep;
     } else if (
@@ -335,7 +340,6 @@ export class Renderer extends EventDispatcher {
         style.height = `${this.height}px`;
         this.dispatchRenderScale(scene);
         if (!this.multipleScenesVisible) {
-          this.scaleStep = 0;
           this.canvas3D.style.width = `${this.width}px`;
           this.canvas3D.style.height = `${this.height}px`;
         }
@@ -432,14 +436,12 @@ export class Renderer extends EventDispatcher {
       return;
     }
 
-    this.avgFrameDuration += clamp(
-        DURATION_DECAY * (delta - this.avgFrameDuration),
-        -MAX_AVG_CHANGE_MS,
-        MAX_AVG_CHANGE_MS);
-
     this.countVisibleScenes();
     this.updateRendererSize();
-    this.updateRendererScale();
+    if (this.renderedLastFrame) {
+      this.updateRendererScale(delta);
+      this.renderedLastFrame = false;
+    }
 
     const {canvas3D} = this;
 
@@ -503,6 +505,7 @@ export class Renderer extends EventDispatcher {
 
       scene.hasRendered();
       ++scene.renderCount;
+      this.renderedLastFrame = true;
     }
   }
 
