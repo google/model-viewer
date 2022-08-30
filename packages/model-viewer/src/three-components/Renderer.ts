@@ -102,7 +102,8 @@ export class Renderer extends EventDispatcher {
   protected debugger: Debugger|null = null;
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
-  private lastTick: number;
+  private lastTick = performance.now();
+  private renderedLastFrame = false;
   private scaleStep = 0;
   private lastStep = DEFAULT_LAST_STEP;
   private avgFrameDuration =
@@ -169,8 +170,6 @@ export class Renderer extends EventDispatcher {
         'webglcontextrestored', this.onWebGLContextRestored);
 
     this.updateRendererSize();
-    this.lastTick = performance.now();
-    this.avgFrameDuration = 0;
   }
 
   /**
@@ -203,36 +202,32 @@ export class Renderer extends EventDispatcher {
     this.width = width;
     this.height = height;
     this.dpr = dpr;
+    width = Math.ceil(width * dpr);
+    height = Math.ceil(height * dpr);
 
     if (this.canRender) {
-      this.threeRenderer.setSize(
-          Math.ceil(width * dpr), Math.ceil(height * dpr), false);
+      this.threeRenderer.setSize(width, height, false);
     }
-
-    // Expand the canvas size to make up for shrinking the viewport.
-    const scale = this.scaleFactor;
-    const widthCSS = Math.ceil(width / scale);
-    const heightCSS = Math.ceil(height / scale);
-    // The canvas element must by styled outside of three due to the offscreen
-    // canvas not being directly stylable.
-    this.canvas3D.style.width = `${widthCSS}px`;
-    this.canvas3D.style.height = `${heightCSS}px`;
 
     // Each scene's canvas must match the renderer size. In general they can be
     // larger than the element that contains them, but the overflow is hidden
     // and only the portion that is shown is copied over.
     for (const scene of this.scenes) {
       const {canvas} = scene;
-      canvas.width = Math.ceil(width * dpr);
-      canvas.height = Math.ceil(height * dpr);
-      canvas.style.width = `${widthCSS}px`;
-      canvas.style.height = `${heightCSS}px`;
-      scene.queueRender();
+      canvas.width = width;
+      canvas.height = height;
+      scene.forceRescale();
     }
   }
 
-  private updateRendererScale() {
+  private updateRendererScale(delta: number) {
     const scaleStep = this.scaleStep;
+
+    this.avgFrameDuration += clamp(
+        DURATION_DECAY * (delta - this.avgFrameDuration),
+        -MAX_AVG_CHANGE_MS,
+        MAX_AVG_CHANGE_MS);
+
     if (this.avgFrameDuration > HIGH_FRAME_DURATION_MS) {
       ++this.scaleStep;
     } else if (
@@ -241,29 +236,14 @@ export class Renderer extends EventDispatcher {
     }
     this.scaleStep = Math.min(this.scaleStep, this.lastStep);
 
-    if (scaleStep == this.scaleStep) {
-      return;
-    }
-    const scale = this.scaleFactor;
-    this.avgFrameDuration =
-        (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
-
-    const width = Math.ceil(this.width / scale);
-    const height = Math.ceil(this.height / scale);
-
-    this.canvas3D.style.width = `${width}px`;
-    this.canvas3D.style.height = `${height}px`;
-    for (const scene of this.scenes) {
-      const {style} = scene.canvas;
-      style.width = `${width}px`;
-      style.height = `${height}px`;
-      scene.queueRender();
-      this.dispatchRenderScale(scene);
+    if (scaleStep !== this.scaleStep) {
+      this.avgFrameDuration =
+          (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
     }
   }
 
   dispatchRenderScale(scene: ModelScene) {
-    const scale = this.scaleFactor;
+    const scale = SCALE_STEPS[scene.scaleStep];
     const renderedDpr = this.dpr * scale;
     const reason = scale < 1                 ? 'GPU throttling' :
         this.dpr !== window.devicePixelRatio ? 'No meta viewport tag' :
@@ -282,18 +262,8 @@ export class Renderer extends EventDispatcher {
 
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
-    const {canvas} = scene;
-    const scale = this.scaleFactor;
 
-    canvas.width = Math.ceil(this.width * this.dpr);
-    canvas.height = Math.ceil(this.height * this.dpr);
-
-    canvas.style.width = `${this.width / scale}px`;
-    canvas.style.height = `${this.height / scale}px`;
-
-    scene.queueRender();
-
-    this.dispatchRenderScale(scene);
+    scene.forceRescale();
 
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop(
@@ -359,8 +329,45 @@ export class Renderer extends EventDispatcher {
     this.multipleScenesVisible = multipleScenesVisible;
   }
 
+  private rescaleCanvas(scene: ModelScene): boolean {
+    const {style} = scene.canvas;
+    if (!scene.shouldRender()) {
+      // The first frame we stop rendering the scene (because it stops moving),
+      // trigger one extra render at full scale.
+      if (scene.scaleStep != 0) {
+        scene.scaleStep = 0;
+        style.width = `${this.width}px`;
+        style.height = `${this.height}px`;
+        this.dispatchRenderScale(scene);
+        if (!this.multipleScenesVisible) {
+          this.canvas3D.style.width = `${this.width}px`;
+          this.canvas3D.style.height = `${this.height}px`;
+        }
+      } else {
+        return true;  // Skip rendering
+      }
+    } else if (scene.scaleStep != this.scaleStep) {
+      // Update render scale
+      scene.scaleStep = this.scaleStep;
+      const scale = this.scaleFactor;
+
+      const width = Math.ceil(this.width / scale);
+      const height = Math.ceil(this.height / scale);
+
+      style.width = `${width}px`;
+      style.height = `${height}px`;
+      if (!this.multipleScenesVisible) {
+        this.canvas3D.style.width = `${width}px`;
+        this.canvas3D.style.height = `${height}px`;
+      }
+      this.dispatchRenderScale(scene);
+    }
+    return false;  // Perform rendering
+  }
+
   private sceneSize(scene: ModelScene) {
-    const {dpr, scaleFactor} = this;
+    const {dpr} = this;
+    const scaleFactor = SCALE_STEPS[scene.scaleStep];
     // We avoid using the Three.js PixelRatio and handle it ourselves here so
     // that we can do proper rounding and avoid white boundary pixels.
     const width = Math.min(
@@ -429,14 +436,12 @@ export class Renderer extends EventDispatcher {
       return;
     }
 
-    this.avgFrameDuration += clamp(
-        DURATION_DECAY * (delta - this.avgFrameDuration),
-        -MAX_AVG_CHANGE_MS,
-        MAX_AVG_CHANGE_MS);
-
     this.countVisibleScenes();
     this.updateRendererSize();
-    this.updateRendererScale();
+    if (this.renderedLastFrame) {
+      this.updateRendererScale(delta);
+      this.renderedLastFrame = false;
+    }
 
     const {canvas3D} = this;
 
@@ -449,7 +454,7 @@ export class Renderer extends EventDispatcher {
 
       this.preRender(scene, t, delta);
 
-      if (!scene.shouldRender()) {
+      if (this.rescaleCanvas(scene)) {
         continue;
       }
 
@@ -500,6 +505,7 @@ export class Renderer extends EventDispatcher {
 
       scene.hasRendered();
       ++scene.renderCount;
+      this.renderedLastFrame = true;
     }
   }
 

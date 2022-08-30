@@ -69,6 +69,7 @@ export class ModelScene extends Scene {
   public width = 1;
   public height = 1;
   public aspect = 1;
+  public scaleStep = 0;
   public renderCount = 0;
   public externalRenderer: RendererInterface|null = null;
 
@@ -166,6 +167,11 @@ export class ModelScene extends Scene {
 
   hasRendered() {
     this.isDirty = false;
+  }
+
+  forceRescale() {
+    this.scaleStep = -1;
+    this.queueRender();
   }
 
   /**
