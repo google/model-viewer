@@ -241,29 +241,14 @@ export class Renderer extends EventDispatcher {
     }
     this.scaleStep = Math.min(this.scaleStep, this.lastStep);
 
-    if (scaleStep == this.scaleStep) {
-      return;
-    }
-    const scale = this.scaleFactor;
-    this.avgFrameDuration =
-        (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
-
-    const width = Math.ceil(this.width / scale);
-    const height = Math.ceil(this.height / scale);
-
-    this.canvas3D.style.width = `${width}px`;
-    this.canvas3D.style.height = `${height}px`;
-    for (const scene of this.scenes) {
-      const {style} = scene.canvas;
-      style.width = `${width}px`;
-      style.height = `${height}px`;
-      scene.queueRender();
-      this.dispatchRenderScale(scene);
+    if (scaleStep !== this.scaleStep) {
+      this.avgFrameDuration =
+          (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
     }
   }
 
   dispatchRenderScale(scene: ModelScene) {
-    const scale = this.scaleFactor;
+    const scale = SCALE_STEPS[scene.scaleStep];
     const renderedDpr = this.dpr * scale;
     const reason = scale < 1                 ? 'GPU throttling' :
         this.dpr !== window.devicePixelRatio ? 'No meta viewport tag' :
@@ -359,8 +344,46 @@ export class Renderer extends EventDispatcher {
     this.multipleScenesVisible = multipleScenesVisible;
   }
 
+  private rescaleCanvas(scene: ModelScene): boolean {
+    const {style} = scene.canvas;
+    if (!scene.shouldRender()) {
+      // The first frame we stop rendering the scene (because it stops moving),
+      // trigger one extra render at full scale.
+      if (scene.scaleStep != 0) {
+        scene.scaleStep = 0;
+        style.width = `${this.width}px`;
+        style.height = `${this.height}px`;
+        this.dispatchRenderScale(scene);
+        if (!this.multipleScenesVisible) {
+          this.scaleStep = 0;
+          this.canvas3D.style.width = `${this.width}px`;
+          this.canvas3D.style.height = `${this.height}px`;
+        }
+      } else {
+        return true;  // Skip rendering
+      }
+    } else if (scene.scaleStep != this.scaleStep) {
+      // Update render scale
+      scene.scaleStep = this.scaleStep;
+      const scale = this.scaleFactor;
+
+      const width = Math.ceil(this.width / scale);
+      const height = Math.ceil(this.height / scale);
+
+      style.width = `${width}px`;
+      style.height = `${height}px`;
+      if (!this.multipleScenesVisible) {
+        this.canvas3D.style.width = `${width}px`;
+        this.canvas3D.style.height = `${height}px`;
+      }
+      this.dispatchRenderScale(scene);
+    }
+    return false;  // Perform rendering
+  }
+
   private sceneSize(scene: ModelScene) {
-    const {dpr, scaleFactor} = this;
+    const {dpr} = this;
+    const scaleFactor = SCALE_STEPS[scene.scaleStep];
     // We avoid using the Three.js PixelRatio and handle it ourselves here so
     // that we can do proper rounding and avoid white boundary pixels.
     const width = Math.min(
@@ -449,7 +472,7 @@ export class Renderer extends EventDispatcher {
 
       this.preRender(scene, t, delta);
 
-      if (!scene.shouldRender()) {
+      if (this.rescaleCanvas(scene)) {
         continue;
       }
 
