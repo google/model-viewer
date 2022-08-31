@@ -220,11 +220,15 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     showPoster() {
       const posterContainerElement = this[$posterContainerElement];
-      const defaultPosterElement = this[$defaultPosterElement];
+      if (posterContainerElement.classList.contains('show')) {
+        return;
+      }
+      posterContainerElement.classList.add('show');
+      this[$userInputElement].classList.remove('show');
 
+      const defaultPosterElement = this[$defaultPosterElement];
       defaultPosterElement.removeAttribute('tabindex');
       defaultPosterElement.removeAttribute('aria-hidden');
-      posterContainerElement.classList.add('show');
 
       const oldVisibility = this.modelIsVisible;
       this[$modelIsRevealed] = false;
@@ -371,13 +375,15 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$hidePoster]() {
       this[$shouldDismissPoster] = false;
       const posterContainerElement = this[$posterContainerElement];
-
-      if (posterContainerElement.classList.contains('show')) {
-        const oldVisibility = this.modelIsVisible;
-        this[$modelIsRevealed] = true;
-        this[$announceModelVisibility](oldVisibility);
-        posterContainerElement.classList.remove('show');
+      if (!posterContainerElement.classList.contains('show')) {
+        return;
       }
+      posterContainerElement.classList.remove('show');
+      this[$userInputElement].classList.add('show');
+
+      const oldVisibility = this.modelIsVisible;
+      this[$modelIsRevealed] = true;
+      this[$announceModelVisibility](oldVisibility);
 
       const root = this.getRootNode();
 
