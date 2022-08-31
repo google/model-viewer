@@ -137,6 +137,7 @@ export class PlacementBox extends Mesh {
   getExpandedHit(scene: ModelScene, screenX: number, screenY: number): Vector3
       |null {
     this.hitPlane.scale.set(1000, 1000, 1000);
+    this.hitPlane.updateMatrixWorld();
     const hitResult = this.getHit(scene, screenX, screenY);
     this.hitPlane.scale.set(1, 1, 1);
     return hitResult;
