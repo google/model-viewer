@@ -46,7 +46,7 @@ const templateResult = html`
 .userInput {
   width: 100%;
   height: 100%;
-  display: block;
+  display: none;
   position: relative;
 }
 
@@ -62,7 +62,7 @@ canvas {
   transform: translateZ(0);
 }
 
-canvas.show {
+.show {
   display: block;
 }
 
@@ -115,12 +115,12 @@ canvas.show {
 }
 
 .slot.poster {
-  opacity: 0;
+  display: none;
   background-color: inherit;
 }
 
 .slot.poster.show {
-  opacity: 1;
+  display: inherit;
 }
 
 .slot.poster > * {
