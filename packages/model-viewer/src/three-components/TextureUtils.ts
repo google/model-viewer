@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
@@ -199,7 +199,7 @@ export default class TextureUtils extends EventDispatcher {
   private blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
     if (this.blurMaterial == null) {
       this.blurMaterial = this.getBlurShader(MAX_SAMPLES);
-      const box = new BoxBufferGeometry();
+      const box = new BoxGeometry();
       const blurMesh = new Mesh(box, this.blurMaterial!);
       this.blurScene = new Scene();
       this.blurScene.add(blurMesh);

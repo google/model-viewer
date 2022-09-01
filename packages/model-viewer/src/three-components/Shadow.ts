@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, Box3, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneBufferGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
+import {BackSide, Box3, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
 import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
 import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
 import {lerp} from 'three/src/math/MathUtils.js';
@@ -83,7 +83,7 @@ export class Shadow extends Object3D {
     //   this.matrixWorld = this.camera.matrixWorld;
     // };
 
-    const plane = new PlaneBufferGeometry();
+    const plane = new PlaneGeometry();
     const shadowMaterial = new MeshBasicMaterial({
       // color: new Color(1, 0, 0),
       opacity: 1,
