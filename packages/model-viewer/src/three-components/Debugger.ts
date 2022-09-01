@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Mesh, OrthographicCamera, PlaneBufferGeometry, Scene, ShaderMaterial, Texture, WebGLRenderTarget} from 'three';
+import {Mesh, OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, Texture, WebGLRenderTarget} from 'three';
 
 import {Constructor} from '../utilities.js';
 
@@ -24,7 +24,7 @@ export interface ModelViewerRendererDebugDetails {
   renderer: Renderer;
   THREE: {
     ShaderMaterial: Constructor<ShaderMaterial>;
-    PlaneBufferGeometry: Constructor<PlaneBufferGeometry>;
+    PlaneGeometry: Constructor<PlaneGeometry>;
     OrthographicCamera: Constructor<OrthographicCamera>;
     WebGLRenderTarget: Constructor<WebGLRenderTarget>;
     Texture: Constructor<Texture>;
@@ -63,7 +63,7 @@ export class Debugger {
                 Texture,
                 Mesh,
                 Scene,
-                PlaneBufferGeometry,
+                PlaneGeometry,
                 OrthographicCamera,
                 WebGLRenderTarget
               }

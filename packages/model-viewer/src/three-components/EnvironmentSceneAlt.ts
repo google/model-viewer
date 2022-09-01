@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, Scene} from 'three';
+import {BackSide, BoxGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, Scene} from 'three';
 
 export default class EnvironmentSceneAlt extends Scene {
   constructor() {
@@ -21,7 +21,7 @@ export default class EnvironmentSceneAlt extends Scene {
 
     this.position.y = -3.5;
 
-    const geometry = new BoxBufferGeometry();
+    const geometry = new BoxGeometry();
     geometry.deleteAttribute('uv');
 
     const roomMaterial =

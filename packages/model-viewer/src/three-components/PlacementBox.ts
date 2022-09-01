@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Vector2, Vector3} from 'three';
+import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, MeshBasicMaterial, PlaneGeometry, Vector2, Vector3} from 'three';
 
 import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
@@ -100,7 +100,7 @@ export class PlacementBox extends Mesh {
     this.opacityDamper = new Damper();
 
     this.hitPlane =
-        new Mesh(new PlaneBufferGeometry(2 * (x + RADIUS), 2 * (y + RADIUS)));
+        new Mesh(new PlaneGeometry(2 * (x + RADIUS), 2 * (y + RADIUS)));
     this.hitPlane.visible = false;
     (this.hitPlane.material as Material).side = DoubleSide;
     this.add(this.hitPlane);

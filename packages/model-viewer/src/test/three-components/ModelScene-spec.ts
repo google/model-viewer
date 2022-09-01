@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Matrix4, Mesh, SphereBufferGeometry, Vector3} from 'three';
+import {Matrix4, Mesh, SphereGeometry, Vector3} from 'three';
 
 import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
@@ -33,7 +33,7 @@ suite('ModelScene', () => {
     // Set the radius of the sphere to 0.5 so that it's size is 1
     // for testing scaling.
     dummyRadius = 0.5;
-    dummyMesh = new Mesh(new SphereBufferGeometry(dummyRadius, 32, 32));
+    dummyMesh = new Mesh(new SphereGeometry(dummyRadius, 32, 32));
     element = new ModelViewerElement();
     scene = element[$scene];
 
