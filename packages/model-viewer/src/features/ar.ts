@@ -425,7 +425,7 @@ configuration or device capabilities');
       updateSourceProgress(0.2);
 
       const exporter = new USDZExporter();
-      const arraybuffer = await exporter.parse(scene.modelContainer);
+      const arraybuffer = await exporter.parse(scene.model);
       const blob = new Blob([arraybuffer], {
         type: 'model/vnd.usdz+zip',
       });

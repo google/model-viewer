@@ -40,8 +40,7 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
   // TODO: export is putting in an extra node layer, because the loader
   // gives us a Group, but if the exporter doesn't get a Scene, then it
   // wraps everything in an "AuxScene" node. Feels like a three.js bug.
-  return hasBeenExportedOnce ? scene.modelContainer.children[0].children[0] :
-                               scene.modelContainer.children[0];
+  return hasBeenExportedOnce ? scene.model.children[0] : scene.model;
 }
 
 suite('SceneGraph', () => {
@@ -57,6 +56,38 @@ suite('SceneGraph', () => {
   });
 
   suite('scene export', () => {
+    suite('transformations', () => {
+      test(
+          'setting scale before model loads produces expected dimensions',
+          async () => {
+            element.scale = '1 2 3';
+            element.src = CUBE_GLB_PATH;
+            await waitForEvent(element, 'load');
+
+            const dim = element.getDimensions();
+            expect(dim.x).to.be.eq(1, 'x');
+            expect(dim.y).to.be.eq(2, 'y');
+            expect(dim.z).to.be.eq(3, 'z');
+          });
+
+      test('exports and re-imports the rescaled model', async () => {
+        element.scale = '1 2 3';
+        element.src = CUBE_GLB_PATH;
+        await waitForEvent(element, 'load');
+        const exported = await element.exportScene({binary: true});
+        const url = URL.createObjectURL(exported);
+        element.scale = '1 1 1';
+        element.src = url;
+        await waitForEvent(element, 'load');
+        await rafPasses();
+
+        const dim = element.getDimensions();
+        expect(dim.x).to.be.eq(1, 'x');
+        expect(dim.y).to.be.eq(2, 'y');
+        expect(dim.z).to.be.eq(3, 'z');
+      });
+    });
+
     suite('with a loaded model', () => {
       setup(async () => {
         element.src = CUBES_GLB_PATH;
@@ -242,9 +273,8 @@ suite('SceneGraph', () => {
       await waitForEvent(element, 'load');
 
       material =
-          (element[$scene].modelContainer.children[0].children[0].children[0] as
-           Mesh)
-              .material as MeshStandardMaterial;
+          (element[$scene].model.children[0].children[0] as Mesh).material as
+          MeshStandardMaterial;
     });
 
     test('allows the scene graph to be manipulated', async () => {
@@ -290,8 +320,8 @@ suite('SceneGraph', () => {
         expect(color).to.be.eql([1, 0, 0, 1]);
 
         const newMaterial =
-            (element[$scene].modelContainer.children[0].children[0] as Mesh)
-                .material as MeshStandardMaterial;
+            (element[$scene].model.children[0] as Mesh).material as
+            MeshStandardMaterial;
 
         expect(newMaterial.color).to.include({r: 1, g: 0, b: 0});
       });

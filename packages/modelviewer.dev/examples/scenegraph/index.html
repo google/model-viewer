@@ -649,17 +649,17 @@ enum MaxFilter {
           </div>
           <example-snippet stamp-to="exporter" highlight-as="html">
             <template>
-<model-viewer id="static-model" src="../../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls touch-action="pan-y" alt="A 3D model of an astronaut">
+<model-viewer id="static-model" scale="1 3 3" src="../../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls touch-action="pan-y" alt="A 3D model of an astronaut">
   <div class="controls">
     <button onclick="exportGLB()">Export GLB</button>
   </div>
 </model-viewer>
 <script>
   async function exportGLB(){
-    let modelViewer = document.getElementById("static-model");
+    const modelViewer = document.getElementById("static-model");
     const glTF = await modelViewer.exportScene();
-    var file = new File([glTF], "export.glb");
-    var link = document.createElement("a");
+    const file = new File([glTF], "export.glb");
+    const link = document.createElement("a");
     link.download =file.name;
     link.href = URL.createObjectURL(file);
     link.click();
