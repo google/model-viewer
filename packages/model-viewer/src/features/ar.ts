@@ -411,9 +411,11 @@ configuration or device capabilities');
 
       await this[$triggerLoad]();
 
-      const scene = this[$scene];
+      const {model, shadow} = this[$scene];
+      if (model == null) {
+        return '';
+      }
 
-      const shadow = scene.shadow;
       let visible = false;
 
       // Remove shadow from export
@@ -425,7 +427,7 @@ configuration or device capabilities');
       updateSourceProgress(0.2);
 
       const exporter = new USDZExporter();
-      const arraybuffer = await exporter.parse(scene.modelContainer);
+      const arraybuffer = await exporter.parse(model);
       const blob = new Blob([arraybuffer], {
         type: 'model/vnd.usdz+zip',
       });

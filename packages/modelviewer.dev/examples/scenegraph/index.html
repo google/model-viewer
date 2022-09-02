@@ -656,10 +656,10 @@ enum MaxFilter {
 </model-viewer>
 <script>
   async function exportGLB(){
-    let modelViewer = document.getElementById("static-model");
+    const modelViewer = document.getElementById("static-model");
     const glTF = await modelViewer.exportScene();
-    var file = new File([glTF], "export.glb");
-    var link = document.createElement("a");
+    const file = new File([glTF], "export.glb");
+    const link = document.createElement("a");
     link.download =file.name;
     link.href = URL.createObjectURL(file);
     link.click();
