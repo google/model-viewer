@@ -19,6 +19,7 @@ const cleanup = require('rollup-plugin-cleanup');
 const {terser} = require('rollup-plugin-terser');
 const commonjs = require('@rollup/plugin-commonjs');
 const polyfill = require('rollup-plugin-polyfill');
+import dts from 'rollup-plugin-dts';
 
 const {NODE_ENV} = process.env;
 
@@ -64,61 +65,65 @@ if (NODE_ENV !== 'development') {
 
   // IE11 does not support modules, so they are removed here, as well as in a
   // dedicated unit test build which is needed for the same reason.
-  outputOptions.push(
-      {
-        input: './lib/model-viewer.js',
-        output: {
-          file: './dist/model-viewer-umd.js',
-          sourcemap: true,
-          format: 'umd',
-          name: 'ModelViewerElement'
-        },
-        watch: {
-          include: watchFiles,
-        },
-        plugins: pluginsIE11,
-        onwarn,
-      },
-  );
+  outputOptions.push({
+    input: './lib/model-viewer.js',
+    output: {
+      file: './dist/model-viewer-umd.js',
+      sourcemap: true,
+      format: 'umd',
+      name: 'ModelViewerElement'
+    },
+    watch: {
+      include: watchFiles,
+    },
+    plugins: pluginsIE11,
+    onwarn,
+  });
 
   plugins = [
     ...plugins,
     terser(),
   ];
 
-  outputOptions.push(
-      {
-        input: './dist/model-viewer.js',
-        output: {
-          file: './dist/model-viewer.min.js',
-          sourcemap: true,
-          format: 'esm',
-          name: 'ModelViewerElement'
-        },
-        watch: {
-          include: watchFiles,
-        },
-        plugins,
-        onwarn,
-      },
-  );
-
-  outputOptions.push(
-    {
-      input: './dist/model-viewer-umd.js',
-      output: {
-        file: './dist/model-viewer-umd.min.js',
-        sourcemap: true,
-        format: 'umd',
-        name: 'ModelViewerElement'
-      },
-      watch: {
-        include: watchFiles,
-      },
-      plugins,
-      onwarn,
+  outputOptions.push({
+    input: './dist/model-viewer.js',
+    output: {
+      file: './dist/model-viewer.min.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'ModelViewerElement'
     },
-);
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
+  });
+
+  outputOptions.push({
+    input: './dist/model-viewer-umd.js',
+    output: {
+      file: './dist/model-viewer-umd.min.js',
+      sourcemap: true,
+      format: 'umd',
+      name: 'ModelViewerElement'
+    },
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
+  });
+
+  outputOptions.push({
+    input: './lib/model-viewer.d.ts',
+    output: {
+      file: './dist/model-viewer.d.ts',
+      format: 'esm',
+      name: 'ModelViewerElement'
+    },
+    plugins: [dts()]
+  });
 }
 
 export default outputOptions;
