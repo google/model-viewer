@@ -58,7 +58,7 @@ suite('SceneGraph', () => {
   suite('scene export', () => {
     suite('transformations', () => {
       test(
-          'setting scale before model loads produces expected dimensions',
+          'setting scale before model loads has expected dimensions',
           async () => {
             element.scale = '1 2 3';
             element.src = CUBE_GLB_PATH;
@@ -69,6 +69,18 @@ suite('SceneGraph', () => {
             expect(dim.y).to.be.eq(2, 'y');
             expect(dim.z).to.be.eq(3, 'z');
           });
+
+      test('orientation is applied after scale', async () => {
+        element.orientation = '90deg 90deg 90deg';
+        element.scale = '1 2 3';
+        element.src = CUBE_GLB_PATH;
+        await waitForEvent(element, 'load');
+
+        const dim = element.getDimensions();
+        expect(dim.x).to.be.closeTo(1, 0.001, 'x');
+        expect(dim.y).to.be.closeTo(3, 0.001, 'y');
+        expect(dim.z).to.be.closeTo(2, 0.001, 'z');
+      });
 
       test('exports and re-imports the rescaled model', async () => {
         element.scale = '1 2 3';
@@ -85,6 +97,26 @@ suite('SceneGraph', () => {
         expect(dim.x).to.be.eq(1, 'x');
         expect(dim.y).to.be.eq(2, 'y');
         expect(dim.z).to.be.eq(3, 'z');
+      });
+
+      test('exports and re-imports the transformed model', async () => {
+        element.orientation = '90deg 90deg 90deg';
+        element.scale = '1 2 3';
+        element.src = CUBE_GLB_PATH;
+        await waitForEvent(element, 'load');
+        const exported = await element.exportScene({binary: true});
+        const url = URL.createObjectURL(exported);
+
+        element.orientation = '0deg 0deg 0deg';
+        element.scale = '1 1 1';
+        element.src = url;
+        await waitForEvent(element, 'load');
+        await rafPasses();
+
+        const dim = element.getDimensions();
+        expect(dim.x).to.be.closeTo(1, 0.001, 'x');
+        expect(dim.y).to.be.closeTo(3, 0.001, 'y');
+        expect(dim.z).to.be.closeTo(2, 0.001, 'z');
       });
     });
 
