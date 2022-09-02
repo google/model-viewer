@@ -105,6 +105,7 @@ export class ModelScene extends Scene {
   private targetDamperZ = new Damper();
 
   private _currentGLTF: ModelViewerGLTFInstance|null = null;
+  private _model: Object3D|null = null;
   private mixer: AnimationMixer;
   private cancelPendingSourceChange: (() => void)|null = null;
   private animationsByName: Map<string, AnimationClip> = new Map();
@@ -179,6 +180,7 @@ export class ModelScene extends Scene {
    */
   async setObject(model: Object3D) {
     this.reset();
+    this._model = model;
     this.target.add(model);
     await this.setupScene();
   }
@@ -242,6 +244,7 @@ export class ModelScene extends Scene {
     this._currentGLTF = gltf;
 
     if (gltf != null) {
+      this._model = gltf.scene;
       this.target.add(gltf.scene);
     }
 
@@ -280,6 +283,7 @@ export class ModelScene extends Scene {
     }
     this.bakedShadows.clear();
 
+    this._model = null;
     const gltf = this._currentGLTF;
     // Remove all current children
     if (gltf != null) {
@@ -383,6 +387,10 @@ export class ModelScene extends Scene {
   }
 
   applyTransform() {
+    const {model} = this;
+    if (model == null) {
+      return;
+    }
     const orientation = parseExpressions(this.element.orientation)[0]
                             .terms as [NumberNode, NumberNode, NumberNode];
 
@@ -390,16 +398,19 @@ export class ModelScene extends Scene {
     const pitch = normalizeUnit(orientation[1]).number;
     const yaw = normalizeUnit(orientation[2]).number;
 
-    this.model.quaternion.setFromEuler(new Euler(pitch, yaw, roll, 'YXZ'));
+    model.quaternion.setFromEuler(new Euler(pitch, yaw, roll, 'YXZ'));
 
     const scale = parseExpressions(this.element.scale)[0]
                       .terms as [NumberNode, NumberNode, NumberNode];
 
-    this.model.scale.set(scale[0].number, scale[1].number, scale[2].number);
+    model.scale.set(scale[0].number, scale[1].number, scale[2].number);
   }
 
   updateBoundingBox() {
     const {model} = this;
+    if (model == null) {
+      return;
+    }
     this.target.remove(model);
 
     this.findBakedShadows(model);
@@ -433,6 +444,9 @@ export class ModelScene extends Scene {
    */
   async updateFraming() {
     const {model} = this;
+    if (model == null) {
+      return;
+    }
     this.target.remove(model);
     this.setBakedShadowVisibility(false);
     const {center} = this.boundingSphere;
@@ -572,7 +586,7 @@ export class ModelScene extends Scene {
   }
 
   get model() {
-    return this.target.children[0];
+    return this._model;
   }
 
   /**

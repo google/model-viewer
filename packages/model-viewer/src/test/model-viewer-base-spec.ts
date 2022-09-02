@@ -37,11 +37,7 @@ const expectBlobDimensions =
   expect(img.height).to.be.equal(Math.round(height));
 };
 
-suite('ModelViewerElement', () => {
-  test('is not registered as a custom element by default', () => {
-    expect(customElements.get('model-viewer-base')).to.be.equal(undefined);
-  });
-
+suite('ModelViewerElementBase', () => {
   suite('with an element', () => {
     let element: ModelViewerElement;
     let input: HTMLDivElement;

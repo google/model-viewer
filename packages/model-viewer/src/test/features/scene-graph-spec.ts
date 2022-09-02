@@ -40,7 +40,7 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
   // TODO: export is putting in an extra node layer, because the loader
   // gives us a Group, but if the exporter doesn't get a Scene, then it
   // wraps everything in an "AuxScene" node. Feels like a three.js bug.
-  return hasBeenExportedOnce ? scene.model.children[0] : scene.model;
+  return hasBeenExportedOnce ? scene.model!.children[0] : scene.model!;
 }
 
 suite('SceneGraph', () => {
@@ -305,7 +305,7 @@ suite('SceneGraph', () => {
       await waitForEvent(element, 'load');
 
       material =
-          (element[$scene].model.children[0].children[0] as Mesh).material as
+          (element[$scene].model!.children[0].children[0] as Mesh).material as
           MeshStandardMaterial;
     });
 
@@ -352,7 +352,7 @@ suite('SceneGraph', () => {
         expect(color).to.be.eql([1, 0, 0, 1]);
 
         const newMaterial =
-            (element[$scene].model.children[0] as Mesh).material as
+            (element[$scene].model!.children[0] as Mesh).material as
             MeshStandardMaterial;
 
         expect(newMaterial.color).to.include({r: 1, g: 0, b: 0});
