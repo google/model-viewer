@@ -14,8 +14,9 @@
  */
 
 import {property} from 'lit/decorators.js';
+import {Vector3} from 'three';
 
-import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $isElementInViewport, $progressTracker, $scene, $sceneIsReady, $shouldAttemptPreload, $updateSource, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$altDefaulted, $announceModelVisibility, $getModelIsVisible, $isElementInViewport, $progressTracker, $scene, $shouldAttemptPreload, $updateSource, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {$loader, CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {Constructor, throttle} from '../utilities.js';
@@ -52,7 +53,6 @@ const $shouldDismissPoster = Symbol('shouldDismissPoster');
 const $hidePoster = Symbol('hidePoster');
 const $modelIsRevealed = Symbol('modelIsRevealed');
 const $updateProgressBar = Symbol('updateProgressBar');
-const $lastReportedProgress = Symbol('lastReportedProgress');
 
 const $ariaLabelCallToAction = Symbol('ariaLabelCallToAction');
 
@@ -62,12 +62,12 @@ export declare interface LoadingInterface {
   poster: string|null;
   reveal: RevealAttributeValue;
   loading: LoadingAttributeValue;
-  generateSchema: boolean;
   readonly loaded: boolean;
   readonly modelIsVisible: boolean;
   dismissPoster(): void;
   showPoster(): void;
   getDimensions(): Vector3D;
+  getBoundingBoxCenter(): Vector3D;
 }
 
 export declare interface LoadingStaticInterface {
@@ -181,8 +181,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * An enumerable attribute describing under what conditions the
      * <model-viewer> should reveal a model to the viewer.
      *
-     * The default value is "auto". The only supported alternative values are
-     * "interaction" and "manual".
+     * The default value is "auto". The only supported alternative values is
+     * "manual".
      */
     @property({type: String})
     reveal: RevealAttributeValue = RevealStrategy.AUTO;
@@ -200,20 +200,12 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     loading: LoadingAttributeValue = LoadingStrategy.AUTO;
 
     /**
-     * Generates a 3D model schema https://schema.org/3DModel associated with
-     * the loaded src and inserts it into the header of the page for search
-     * engines to crawl.
-     */
-    @property({type: Boolean, attribute: 'generate-schema'})
-    generateSchema = false;
-
-    /**
      * Dismisses the poster, causing the model to load and render if
      * necessary. This is currently effectively the same as interacting with
      * the poster via user input.
      */
     dismissPoster() {
-      if (this[$sceneIsReady]()) {
+      if (this.loaded) {
         this[$hidePoster]();
       } else {
         this[$shouldDismissPoster] = true;
@@ -228,11 +220,15 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     showPoster() {
       const posterContainerElement = this[$posterContainerElement];
-      const defaultPosterElement = this[$defaultPosterElement];
+      if (posterContainerElement.classList.contains('show')) {
+        return;
+      }
+      posterContainerElement.classList.add('show');
+      this[$userInputElement].classList.remove('show');
 
+      const defaultPosterElement = this[$defaultPosterElement];
       defaultPosterElement.removeAttribute('tabindex');
       defaultPosterElement.removeAttribute('aria-hidden');
-      posterContainerElement.classList.add('show');
 
       const oldVisibility = this.modelIsVisible;
       this[$modelIsRevealed] = false;
@@ -247,9 +243,11 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       return toVector3D(this[$scene].size);
     }
 
-    protected[$modelIsRevealed] = false;
+    getBoundingBoxCenter(): Vector3D {
+      return toVector3D(this[$scene].boundingBox.getCenter(new Vector3()));
+    }
 
-    protected[$lastReportedProgress]: number = 0;
+    protected[$modelIsRevealed] = false;
 
     protected[$shouldDismissPoster] = false;
 
@@ -320,6 +318,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
 
+      this.showPoster();
+
       this[$progressTracker].addEventListener('progress', this[$onProgress]);
     }
 
@@ -345,24 +345,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('reveal') || changedProperties.has('loading')) {
         this[$updateSource]();
       }
-
-      if (changedProperties.has('generateSchema')) {
-        if (this.generateSchema === true) {
-          this[$scene].updateSchema(this.src);
-        } else {
-          this[$scene].updateSchema(null);
-        }
-      }
     }
 
     [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
-      this[$lastReportedProgress] =
-          Math.max(progress, this[$lastReportedProgress]);
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
-        if (this[$sceneIsReady]() &&
+        if (this.loaded &&
             (this[$shouldDismissPoster] ||
              this.reveal === RevealStrategy.AUTO)) {
           this[$hidePoster]();
@@ -382,22 +372,18 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
            (this.reveal === RevealStrategy.AUTO && this[$isElementInViewport]));
     }
 
-    [$sceneIsReady](): boolean {
-      const {src} = this;
-      return !!src && super[$sceneIsReady]() &&
-          this[$lastReportedProgress] === 1.0;
-    }
-
     [$hidePoster]() {
       this[$shouldDismissPoster] = false;
       const posterContainerElement = this[$posterContainerElement];
-
-      if (posterContainerElement.classList.contains('show')) {
-        const oldVisibility = this.modelIsVisible;
-        this[$modelIsRevealed] = true;
-        this[$announceModelVisibility](oldVisibility);
-        posterContainerElement.classList.remove('show');
+      if (!posterContainerElement.classList.contains('show')) {
+        return;
       }
+      posterContainerElement.classList.remove('show');
+      this[$userInputElement].classList.add('show');
+
+      const oldVisibility = this.modelIsVisible;
+      this[$modelIsRevealed] = true;
+      this[$announceModelVisibility](oldVisibility);
 
       const root = this.getRootNode();
 
@@ -417,20 +403,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$getModelIsVisible]() {
       return super[$getModelIsVisible]() && this[$modelIsRevealed];
-    }
-
-    async[$updateSource]() {
-      this[$lastReportedProgress] = 0;
-      if (this.generateSchema === true) {
-        this[$scene].updateSchema(this.src);
-      }
-      if (this[$scene].currentGLTF == null || this.src == null ||
-          !this[$shouldAttemptPreload]()) {
-        // Don't show the poster when switching models.
-        this.showPoster();
-      }
-      this[$updateStatus]('Loading');
-      await super[$updateSource]();
     }
   }
 

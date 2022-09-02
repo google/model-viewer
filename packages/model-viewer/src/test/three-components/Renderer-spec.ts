@@ -190,9 +190,7 @@ suite('Renderer with two scenes', () => {
     test('uses the proper canvas when unregistering scenes', () => {
       renderer.render(performance.now());
 
-      expect(renderer.canvas3D.classList.contains('show'))
-          .to.be.eq(
-              false, 'webgl canvas should not be shown with multiple scenes.');
+      expect(renderer.canvas3D.parentElement).to.be.not.ok;
       expect(scene.canvas.classList.contains('show'))
           .to.be.eq(true, 'scene canvas should be shown with multiple scenes.');
       expect(otherScene.canvas.classList.contains('show'))
@@ -204,9 +202,9 @@ suite('Renderer with two scenes', () => {
       renderer.render(performance.now());
 
       expect(renderer.canvas3D.parentElement)
-          .to.be.eq(otherScene.canvas.parentElement);
-      expect(renderer.canvas3D.classList.contains('show'))
-          .to.be.eq(true, 'webgl canvas should be shown with single scene.');
+          .to.be.eq(
+              otherScene.canvas.parentElement,
+              'webgl canvas should be shown with single scene.');
       expect(otherScene.canvas.classList.contains('show'))
           .to.be.eq(
               false,
@@ -222,8 +220,7 @@ suite('Renderer with two scenes', () => {
           .to.be.equal(1, 'scene should have rendered once');
       expect(otherScene.renderCount)
           .to.be.equal(1, 'otherScene should have rendered once');
-      expect(renderer.canvas3D.classList.contains('show'))
-          .to.be.eq(false, 'webgl canvas should still not be shown.');
+      expect(renderer.canvas3D.parentElement).to.be.not.ok;
       expect(otherScene.canvas.classList.contains('show'))
           .to.be.eq(true, 'otherScene canvas should still be shown.');
     });

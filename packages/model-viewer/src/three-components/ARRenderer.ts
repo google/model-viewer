@@ -18,7 +18,7 @@ import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {ControlsInterface} from '../features/controls.js';
 import {$currentBackground, $currentEnvironmentMap} from '../features/environment.js';
-import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$onResize} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {Damper} from './Damper.js';
@@ -322,6 +322,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const scene = this.presentedScene;
+    this._presentedScene = null;
     if (scene != null) {
       const {element} = scene;
 
@@ -387,7 +388,6 @@ export class ARRenderer extends EventDispatcher {
     this.lastTick = null;
     this.turntableRotation = null;
     this.oldShadowIntensity = null;
-    this._presentedScene = null;
     this.frame = null;
     this.inputSource = null;
     this.overlay = null;
@@ -728,7 +728,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const scene = this.presentedScene;
-    if (pose == null || scene == null || !scene.element[$sceneIsReady]()) {
+    if (pose == null || scene == null || !scene.element.loaded) {
       this.threeRenderer.clear();
       return;
     }

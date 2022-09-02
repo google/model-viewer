@@ -14,12 +14,10 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {Euler, RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
+import {RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
-import {normalizeUnit} from '../styles/conversions.js';
-import {NumberNode, parseExpressions} from '../styles/parsers.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
@@ -153,26 +151,13 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('orientation') ||
           changedProperties.has('scale')) {
-        const {modelContainer} = this[$scene];
-
-        const orientation = parseExpressions(this.orientation)[0]
-                                .terms as [NumberNode, NumberNode, NumberNode];
-
-        const roll = normalizeUnit(orientation[0]).number;
-        const pitch = normalizeUnit(orientation[1]).number;
-        const yaw = normalizeUnit(orientation[2]).number;
-
-        modelContainer.quaternion.setFromEuler(
-            new Euler(pitch, yaw, roll, 'YXZ'));
-
-        const scale = parseExpressions(this.scale)[0]
-                          .terms as [NumberNode, NumberNode, NumberNode];
-
-        modelContainer.scale.set(
-            scale[0].number, scale[1].number, scale[2].number);
-
-        this[$scene].updateBoundingBox();
-        this[$scene].updateShadow();
+        if (!this.loaded) {
+          return;
+        }
+        const scene = this[$scene];
+        scene.applyTransform();
+        scene.updateBoundingBox();
+        scene.updateShadow();
         this[$renderer].arRenderer.onUpdateScene();
         this[$needsRender]();
       }
@@ -180,7 +165,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$onModelLoad]() {
       super[$onModelLoad]();
-
 
       const {currentGLTF} = this[$scene];
 
@@ -240,7 +224,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
         exporter.parse(
-            scene.modelContainer.children[0],
+            scene.model,
             (gltf: object) => {
               return resolve(new Blob(
                   [opts.binary ? gltf as Blob : JSON.stringify(gltf)], {

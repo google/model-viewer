@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, Float32BufferAttribute, FrontSide, Material, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Vector2, Vector3} from 'three';
+import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, MeshBasicMaterial, PlaneGeometry, Vector2, Vector3} from 'three';
 
 import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
@@ -93,15 +93,16 @@ export class PlacementBox extends Mesh {
 
     this.side = side;
     const material = this.material as MeshBasicMaterial;
-    material.side = FrontSide;
+    material.side = DoubleSide;
     material.transparent = true;
     material.opacity = 0;
     this.goalOpacity = 0;
     this.opacityDamper = new Damper();
 
     this.hitPlane =
-        new Mesh(new PlaneBufferGeometry(2 * (x + RADIUS), 2 * (y + RADIUS)));
+        new Mesh(new PlaneGeometry(2 * (x + RADIUS), 2 * (y + RADIUS)));
     this.hitPlane.visible = false;
+    (this.hitPlane.material as Material).side = DoubleSide;
     this.add(this.hitPlane);
 
     boundingBox.getCenter(this.position);
@@ -136,6 +137,7 @@ export class PlacementBox extends Mesh {
   getExpandedHit(scene: ModelScene, screenX: number, screenY: number): Vector3
       |null {
     this.hitPlane.scale.set(1000, 1000, 1000);
+    this.hitPlane.updateMatrixWorld();
     const hitResult = this.getHit(scene, screenX, screenY);
     this.hitPlane.scale.set(1, 1, 1);
     return hitResult;

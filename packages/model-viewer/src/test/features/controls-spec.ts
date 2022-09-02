@@ -696,6 +696,7 @@ suite('Controls', () => {
               changeSource = source;
             });
         element.cameraOrbit = 'auto auto 70%';
+        await element.updateComplete;
         await timePasses(50);
         await rafPasses();
 

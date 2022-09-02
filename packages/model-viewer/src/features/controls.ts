@@ -247,6 +247,7 @@ export declare interface ControlsInterface {
   resetInteractionPrompt(): void;
   zoom(keyPresses: number): void;
   interact(duration: number, finger0: Finger, finger1?: Finger): void;
+  inputSensitivity: number;
 }
 
 export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -360,6 +361,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$jumpCamera] = false;
     protected[$initialized] = false;
     protected[$maintainThetaPhi] = false;
+
+    get inputSensitivity(): number {
+      return this[$controls].inputSensitivity;
+    }
+
+    set inputSensitivity(value: number) {
+      this[$controls].inputSensitivity = value;
+    }
 
     getCameraOrbit(): SphericalPosition {
       const {theta, phi, radius} = this[$lastSpherical];
@@ -490,7 +499,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('orbitSensitivity')) {
-        controls.sensitivity = this.orbitSensitivity;
+        controls.orbitSensitivity = this.orbitSensitivity;
       }
 
       if (changedProperties.has('interpolationDecay')) {
