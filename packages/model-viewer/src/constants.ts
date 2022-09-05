@@ -85,3 +85,5 @@ declare global {
       webkit?: any;
     }
 }
+
+export const IS_WKWEBVIEW = Boolean(window.webkit && window.webkit.messageHandlers);
