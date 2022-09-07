@@ -34,8 +34,8 @@
     "dist/model-viewer-umd.min.js.map",
     "dist/model-viewer.d.ts"
   ],
-  "typings": "dist/model-viewer.d.ts",
-  "types": "dist/model-viewer.d.ts",
+  "typings": "lib/model-viewer.d.ts",
+  "types": "lib/model-viewer.d.ts",
   "scripts": {
     "clean": "rm -rf ./lib ./dist",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-samples.sh",
