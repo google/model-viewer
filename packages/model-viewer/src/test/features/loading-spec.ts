@@ -84,6 +84,8 @@ suite('Loading', () => {
   suite('load', () => {
     suite('when a model src changes after loading', () => {
       setup(async () => {
+        // The shadow is here to expose an earlier bug on unloading models.
+        element.shadowIntensity = 1;
         element.src = CUBE_GLB_PATH;
         await waitForEvent(element, 'poster-dismissed');
       });
@@ -119,6 +121,24 @@ suite('Loading', () => {
         expect(size.x).to.be.eq(1);
         expect(size.y).to.be.eq(1);
         expect(size.z).to.be.eq(1);
+      });
+
+      test('models are unloaded after src updates', async () => {
+        element.src = HORSE_GLB_PATH;
+        await waitForEvent(element, 'load');
+
+        const {shadow, model, target} = element[$scene];
+        const {children} = target;
+        expect(children.length).to.be.eq(2, 'horse');
+        expect(children).to.contain(shadow, 'horse shadow');
+        expect(children).to.contain(model, 'horse model');
+
+        element.src = CUBE_GLB_PATH;
+        await waitForEvent(element, 'load');
+        const {children: children2} = target;
+        expect(children2.length).to.be.eq(2, 'cube');
+        expect(children2).to.contain(shadow, 'cube shadow');
+        expect(children2).to.contain(element[$scene].model, 'cube model');
       });
 
       test('generates 3DModel schema', async () => {
