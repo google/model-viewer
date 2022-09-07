@@ -283,13 +283,14 @@ export class ModelScene extends Scene {
     }
     this.bakedShadows.clear();
 
-    this._model = null;
+    const {_model} = this;
+    if (_model != null) {
+      _model.removeFromParent();
+      this._model = null;
+    }
+
     const gltf = this._currentGLTF;
-    // Remove all current children
     if (gltf != null) {
-      for (const child of this.target.children) {
-        this.target.remove(child);
-      }
       gltf.dispose();
       this._currentGLTF = null;
     }
