@@ -36,7 +36,6 @@
   ],
   "typings": "dist/model-viewer.d.ts",
   "types": "dist/model-viewer.d.ts",
-  "type": "module",
   "scripts": {
     "clean": "rm -rf ./lib ./dist",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-samples.sh",
