@@ -421,7 +421,7 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimize
     reason.textContent = event.detail.reason;
   });
 
-  window.addEventListener('DOMContentLoaded', () => {
+  const setup = () => {
     const minScale = document.querySelector('#min-scale-value');
     // The static API must be queried after the element loads. Note that static properties affect all the <model-vieweer> elements on the page.
     const ModelViewerStatic = customElements.get('model-viewer');
@@ -430,7 +430,9 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimize
       ModelViewerStatic.minimumRenderScale = event.target.value;
       minScale.textContent = event.target.value;
     });
-  }, {once: true});
+  };
+
+  customElements.whenDefined('model-viewer').then(setup);
 </script>
             </template>
           </example-snippet>

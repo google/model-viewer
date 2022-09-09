@@ -39,9 +39,9 @@ export interface ContextLostEvent extends Event {
 
 // Between 0 and 1: larger means the average responds faster and is less smooth.
 const DURATION_DECAY = 0.2;
-const LOW_FRAME_DURATION_MS = 18;
-const HIGH_FRAME_DURATION_MS = 26;
-const MAX_AVG_CHANGE_MS = 2;
+const LOW_FRAME_DURATION_MS = 40;
+const HIGH_FRAME_DURATION_MS = 60;
+const MAX_AVG_CHANGE_MS = 5;
 const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
 const DEFAULT_LAST_STEP = 3;
 
