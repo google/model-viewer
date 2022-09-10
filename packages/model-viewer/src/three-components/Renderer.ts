@@ -172,6 +172,75 @@ export class Renderer extends EventDispatcher {
     this.updateRendererSize();
   }
 
+  registerScene(scene: ModelScene) {
+    this.scenes.add(scene);
+
+    scene.forceRescale();
+
+    if (this.canRender && this.scenes.size > 0) {
+      this.threeRenderer.setAnimationLoop(
+          (time: number, frame?: any) => this.render(time, frame));
+    }
+
+    if (this.debugger != null) {
+      this.debugger.addScene(scene);
+    }
+  }
+
+  unregisterScene(scene: ModelScene) {
+    this.scenes.delete(scene);
+
+    if (this.canvas3D.parentElement === scene.canvas.parentElement) {
+      scene.canvas.parentElement!.removeChild(this.canvas3D);
+    }
+
+    if (this.canRender && this.scenes.size === 0) {
+      this.threeRenderer.setAnimationLoop(null);
+    }
+
+    if (this.debugger != null) {
+      this.debugger.removeScene(scene);
+    }
+  }
+
+  displayCanvas(scene: ModelScene): HTMLCanvasElement {
+    return this.multipleScenesVisible ? scene.element[$canvas] : this.canvas3D;
+  }
+
+  /**
+   * The function enables an optimization, where when there is only a single
+   * <model-viewer> element, we can use the renderer's 3D canvas directly for
+   * display. Otherwise we need to use the element's 2D canvas and copy the
+   * renderer's result into it.
+   */
+  private countVisibleScenes() {
+    const {canvas3D} = this;
+    let visibleScenes = 0;
+    let canvas3DScene = null;
+    for (const scene of this.scenes) {
+      const {element} = scene;
+      if (element.modelIsVisible && scene.externalRenderer == null) {
+        ++visibleScenes;
+      }
+      if (canvas3D.parentElement === scene.canvas.parentElement) {
+        canvas3DScene = scene;
+      }
+    }
+    const multipleScenesVisible = visibleScenes > 1;
+
+    if (canvas3DScene != null) {
+      const newlyMultiple =
+          multipleScenesVisible && !this.multipleScenesVisible;
+      const disappearing = !canvas3DScene.element.modelIsVisible;
+      if (newlyMultiple || disappearing) {
+        const {width, height} = this.sceneSize(canvas3DScene);
+        this.copyPixels(canvas3DScene, width, height);
+        canvas3D.parentElement!.removeChild(canvas3D);
+      }
+    }
+    this.multipleScenesVisible = multipleScenesVisible;
+  }
+
   /**
    * Updates the renderer's size based on the largest scene and any changes to
    * device pixel ratio.
@@ -242,8 +311,35 @@ export class Renderer extends EventDispatcher {
     }
   }
 
-  dispatchRenderScale(scene: ModelScene) {
+  private shouldRender(scene: ModelScene): boolean {
+    if (!scene.shouldRender()) {
+      // The first frame we stop rendering the scene (because it stops moving),
+      // trigger one extra render at full scale.
+      if (scene.scaleStep != 0) {
+        scene.scaleStep = 0;
+        this.rescaleCanvas(scene);
+      } else {
+        return false;
+      }
+    } else if (scene.scaleStep != this.scaleStep) {
+      // Update render scale
+      scene.scaleStep = this.scaleStep;
+      this.rescaleCanvas(scene);
+    }
+    return true;
+  }
+
+  private rescaleCanvas(scene: ModelScene) {
     const scale = SCALE_STEPS[scene.scaleStep];
+    const width = Math.ceil(this.width / scale);
+    const height = Math.ceil(this.height / scale);
+
+    const {style} = scene.canvas;
+    style.width = `${width}px`;
+    style.height = `${height}px`;
+    this.canvas3D.style.width = `${width}px`;
+    this.canvas3D.style.height = `${height}px`;
+
     const renderedDpr = this.dpr * scale;
     const reason = scale < 1                 ? 'GPU throttling' :
         this.dpr !== window.devicePixelRatio ? 'No meta viewport tag' :
@@ -258,111 +354,6 @@ export class Renderer extends EventDispatcher {
         reason: reason
       }
     }));
-  }
-
-  registerScene(scene: ModelScene) {
-    this.scenes.add(scene);
-
-    scene.forceRescale();
-
-    if (this.canRender && this.scenes.size > 0) {
-      this.threeRenderer.setAnimationLoop(
-          (time: number, frame?: any) => this.render(time, frame));
-    }
-
-    if (this.debugger != null) {
-      this.debugger.addScene(scene);
-    }
-  }
-
-  unregisterScene(scene: ModelScene) {
-    this.scenes.delete(scene);
-
-    if (this.canvas3D.parentElement === scene.canvas.parentElement) {
-      scene.canvas.parentElement!.removeChild(this.canvas3D);
-    }
-
-    if (this.canRender && this.scenes.size === 0) {
-      this.threeRenderer.setAnimationLoop(null);
-    }
-
-    if (this.debugger != null) {
-      this.debugger.removeScene(scene);
-    }
-  }
-
-  displayCanvas(scene: ModelScene): HTMLCanvasElement {
-    return this.multipleScenesVisible ? scene.element[$canvas] : this.canvas3D;
-  }
-
-  /**
-   * The function enables an optimization, where when there is only a single
-   * <model-viewer> element, we can use the renderer's 3D canvas directly for
-   * display. Otherwise we need to use the element's 2D canvas and copy the
-   * renderer's result into it.
-   */
-  private countVisibleScenes() {
-    const {canvas3D} = this;
-    let visibleScenes = 0;
-    let canvas3DScene = null;
-    for (const scene of this.scenes) {
-      const {element} = scene;
-      if (element.modelIsVisible && scene.externalRenderer == null) {
-        ++visibleScenes;
-      }
-      if (canvas3D.parentElement === scene.canvas.parentElement) {
-        canvas3DScene = scene;
-      }
-    }
-    const multipleScenesVisible = visibleScenes > 1;
-
-    if (canvas3DScene != null) {
-      const newlyMultiple =
-          multipleScenesVisible && !this.multipleScenesVisible;
-      const disappearing = !canvas3DScene.element.modelIsVisible;
-      if (newlyMultiple || disappearing) {
-        const {width, height} = this.sceneSize(canvas3DScene);
-        this.copyPixels(canvas3DScene, width, height);
-        canvas3D.parentElement!.removeChild(canvas3D);
-      }
-    }
-    this.multipleScenesVisible = multipleScenesVisible;
-  }
-
-  private rescaleCanvas(scene: ModelScene): boolean {
-    const {style} = scene.canvas;
-    if (!scene.shouldRender()) {
-      // The first frame we stop rendering the scene (because it stops moving),
-      // trigger one extra render at full scale.
-      if (scene.scaleStep != 0) {
-        scene.scaleStep = 0;
-        style.width = `${this.width}px`;
-        style.height = `${this.height}px`;
-        this.dispatchRenderScale(scene);
-        if (!this.multipleScenesVisible) {
-          this.canvas3D.style.width = `${this.width}px`;
-          this.canvas3D.style.height = `${this.height}px`;
-        }
-      } else {
-        return true;  // Skip rendering
-      }
-    } else if (scene.scaleStep != this.scaleStep) {
-      // Update render scale
-      scene.scaleStep = this.scaleStep;
-      const scale = this.scaleFactor;
-
-      const width = Math.ceil(this.width / scale);
-      const height = Math.ceil(this.height / scale);
-
-      style.width = `${width}px`;
-      style.height = `${height}px`;
-      if (!this.multipleScenesVisible) {
-        this.canvas3D.style.width = `${width}px`;
-        this.canvas3D.style.height = `${height}px`;
-      }
-      this.dispatchRenderScale(scene);
-    }
-    return false;  // Perform rendering
   }
 
   private sceneSize(scene: ModelScene) {
@@ -454,7 +445,7 @@ export class Renderer extends EventDispatcher {
 
       this.preRender(scene, t, delta);
 
-      if (this.rescaleCanvas(scene)) {
+      if (!this.shouldRender(scene)) {
         continue;
       }
 
