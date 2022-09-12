@@ -573,24 +573,26 @@ export default class ModelViewerElementBase extends ReactiveElement {
    * attribute.
    */
   async[$updateSource]() {
-    if (this.loaded || !this[$shouldAttemptPreload]()) {
+    const scene = this[$scene];
+    if (this.loaded || !this[$shouldAttemptPreload]() ||
+        this.src === scene.url) {
       return;
     }
 
     if (this.generateSchema) {
-      this[$scene].updateSchema(this.src);
+      scene.updateSchema(this.src);
     }
     this[$updateStatus]('Loading');
     // If we are loading a new model, we need to stop the animation of
     // the current one (if any is playing). Otherwise, we might lose
     // the reference to the scene root and running actions start to
     // throw exceptions and/or behave in unexpected ways:
-    this[$scene].stopAnimation();
+    scene.stopAnimation();
 
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
     try {
-      const srcUpdated = this[$scene].setSource(
+      const srcUpdated = scene.setSource(
           source,
           (progress: number) =>
               updateSourceProgress(clamp(progress, 0, 1) * 0.95));
@@ -612,10 +614,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
           });
         });
       });
-
-
-      const detail = {url: source};
-      this.dispatchEvent(new CustomEvent('preload', {detail}));
     } catch (error) {
       this.dispatchEvent(new CustomEvent(
           'error', {detail: {type: 'loadfailure', sourceError: error}}));
