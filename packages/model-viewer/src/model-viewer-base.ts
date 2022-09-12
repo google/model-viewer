@@ -569,8 +569,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   /**
    * Parses the element for an appropriate source URL and
-   * sets the views to use the new model based off of the `preload`
-   * attribute.
+   * sets the views to use the new model based.
    */
   async[$updateSource]() {
     const scene = this[$scene];
