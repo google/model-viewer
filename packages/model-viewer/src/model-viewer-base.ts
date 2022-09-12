@@ -18,11 +18,12 @@ import {property} from 'lit/decorators.js';
 import {Event as ThreeEvent, Vector2, Vector3} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
+import {$updateEnvironment} from './features/environment.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {clamp, debounce, timePasses} from './utilities.js';
+import {clamp, debounce} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -256,17 +257,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
     // Create the underlying ModelScene.
     this[$scene] =
         new ModelScene({canvas: this[$canvas], element: this, width, height});
-
-    this[$scene].addEventListener('model-load', async (event) => {
-      this[$markLoaded]();
-      this[$onModelLoad]();
-
-      // Give loading async tasks a chance to complete.
-      await timePasses();
-
-      this.dispatchEvent(
-          new CustomEvent('load', {detail: {url: (event as any).url}}));
-    });
 
     // Update initial size on microtask timing so that subclasses have a
     // chance to initialize
@@ -600,10 +590,29 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
     try {
-      await this[$scene].setSource(
+      const srcUpdated = this[$scene].setSource(
           source,
           (progress: number) =>
               updateSourceProgress(clamp(progress, 0, 1) * 0.95));
+
+      const envUpdated = (this as any)[$updateEnvironment]();
+
+      await Promise.all([srcUpdated, envUpdated]);
+
+      this[$markLoaded]();
+      this[$onModelLoad]();
+
+      // Wait for shaders to compile and pixels to be drawn.
+      await new Promise<void>(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            this.dispatchEvent(
+                new CustomEvent('load', {detail: {url: source}}));
+            resolve();
+          });
+        });
+      });
+
 
       const detail = {url: source};
       this.dispatchEvent(new CustomEvent('preload', {detail}));
@@ -611,11 +620,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
       this.dispatchEvent(new CustomEvent(
           'error', {detail: {type: 'loadfailure', sourceError: error}}));
     } finally {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          updateSourceProgress(1.0);
-        });
-      });
+      updateSourceProgress(1.0);
     }
   }
 }
