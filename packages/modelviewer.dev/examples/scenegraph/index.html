@@ -83,7 +83,7 @@ button {
           </div>
           <example-snippet stamp-to="variants" highlight-as="html">
             <template>
-<model-viewer id="shoe" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a Shoe">
+<model-viewer id="shoe" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb" ar alt="A 3D model of a Shoe">
   <div class="controls">
     <div>Variant: <select id="variant"></select></div>
   </div>
@@ -140,7 +140,7 @@ select.addEventListener('input', (event) => {
           </div>
           <example-snippet stamp-to="transforms" highlight-as="html">
             <template>
-<model-viewer id="transform" orientation="20deg 0 0" shadow-intensity="1" camera-controls touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+<model-viewer id="transform" orientation="20deg 0 0" shadow-intensity="1" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <div class="controls">
     <div>Roll: <input id="roll" value="20" size="3" class="number"> degrees</div>
     <div>Pitch: <input id="pitch" value="0" size="3" class="number"> degrees</div>
@@ -215,7 +215,7 @@ z.addEventListener('input', () => {
           </div>
           <example-snippet stamp-to="changeColor" highlight-as="html">
             <template>
-<model-viewer id="color" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of an astronaut">
+<model-viewer id="color" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" ar alt="A 3D model of an astronaut">
   <div class="controls", id="color-controls">
     <button data-color="1,0,0,1">Red</button>
     <button data-color="0,1,0,1">Green</button>
@@ -259,7 +259,7 @@ document.querySelector('#color-controls').addEventListener('click', (event) => {
           </div>
           <example-snippet stamp-to="changeMaterial" highlight-as="html">
             <template>
-<model-viewer id="sphere" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a sphere">
+<model-viewer id="sphere" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" ar alt="A 3D model of a sphere">
   <div class="controls">
     <div>
       <p>Metalness: <span id="metalness-value"></span></p>
@@ -317,7 +317,7 @@ modelViewerParameters.addEventListener("load", (ev) => {
           </div>
           <example-snippet stamp-to="createTexturesExample" highlight-as="html">
             <template>
-<model-viewer id="duck" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a duck">
+<model-viewer id="duck" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar alt="A 3D model of a duck">
   <div class="controls">
       <p>Normals</p>
       <select id="normals2">
@@ -386,7 +386,7 @@ modelViewerTexture.addEventListener("load", () => {
           </div>
           <example-snippet stamp-to="swapTextures" highlight-as="html">
             <template>
-<model-viewer id="helmet" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D model of a helmet">
+<model-viewer id="helmet" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar alt="A 3D model of a helmet">
   <div class="controls">
     <div>
       <p>Diffuse</p>
