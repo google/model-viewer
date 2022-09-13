@@ -73,15 +73,14 @@
               achieved, as the AR session is still inside of the browser. This also removes the need to redownload the model.
             </p>
             <p>
-              Note that by specifically including <code>quick-look</code> in
-              <code>ar-modes</code>, but not specifying an <code>ios-src</code>,
+              Note that by not specifying an <code>ios-src</code>,
               the USDZ will instead be auto-generated when the user clicks the
               AR button on iOS to launch Quick Look. 
             </p>
           </div>
           <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
-<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.webp" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" alt="A 3D model carousel">
+<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.webp" shadow-intensity="1" ar camera-controls touch-action="pan-y" alt="A 3D model carousel">
   
   <button slot="ar-button" id="ar-button">
     View in your space
@@ -145,7 +144,7 @@
   }
 
   #ar-button {
-    background-image: url(../../assets/ic_view_in_ar_new_googblue_48dp.webp);
+    background-image: url(../../assets/ic_view_in_ar_new_googblue_48dp.png);
     background-repeat: no-repeat;
     background-size: 20px 20px;
     background-position: 12px 50%;
@@ -283,12 +282,11 @@
                 <code>xr-spatial-tracking</code></a> policy.
             </p>
             <p>
-              In this example an <code>ios-src</code> attribute is specified,
-              which enables Quick Look on iOS even if it is not specified in
-              <code>ar-modes</code>. This requires an extra download, but can be
-              useful if the auto-generated USDZ is not adequate (for instance it
-              does not support animations yet). Also, this source can be either
-              a .usdz or a .reality file.
+              In this example an <code>ios-src</code> attribute is specified.
+              This requires an extra download, but can be useful if the
+              auto-generated USDZ is not adequate (for instance it does not
+              support animations yet). Also, this source can be either a .usdz
+              or a .reality file.
             </p>
             <p>
               Additionally, <code>ar-scale="fixed"</code> is used to prevent the
@@ -365,7 +363,7 @@
           </div>
           <example-snippet stamp-to="wall" highlight-as="html">
             <template>
-<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" alt="A 3D model of some wall art"></model-viewer>
+<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" camera-controls touch-action="pan-y" alt="A 3D model of some wall art"></model-viewer>
             </template>
           </example-snippet>
 
@@ -384,7 +382,7 @@
           </div>
           <example-snippet stamp-to="customButton" highlight-as="html">
             <template>
-<model-viewer ar ar-modes="webxr scene-viewer quick-look" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+<model-viewer ar camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
       👋 Activate AR
   </button>
@@ -414,7 +412,7 @@
               <template>
 <div class="demo" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;">
   <span style="position: absolute; text-align: center; font-size: 100px; line-height: 100px; left: 50%; transform: translateX(-50%);">Background<br>is visible<br>through<br>transparent<br>objects.</span>
-  <model-viewer camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
+  <model-viewer camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb" ar alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
 </div>
               </template>
             </example-snippet>

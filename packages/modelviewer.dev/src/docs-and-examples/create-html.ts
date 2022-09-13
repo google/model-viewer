@@ -316,9 +316,6 @@ export function createExamplesHeader() {
   const outer = document.getElementById('toggle');
   outer!.innerHTML += `
 <h1 class="tab" onclick="toggleSidebar()">&#9776</h1>
-<div class="exampleHeader">
-  <h1>Examples</h1>
-</div>
 `;
 }
 
