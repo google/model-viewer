@@ -231,7 +231,7 @@ export class ARRenderer extends EventDispatcher {
 
     this.oldTarget.copy(scene.getTarget());
 
-    scene.addEventListener('model-load', this.onUpdateScene);
+    scene.element.addEventListener('load', this.onUpdateScene);
 
     const radians = HIT_ANGLE_DEG * Math.PI / 180;
     const ray = this.placeOnWall === true ?
@@ -350,7 +350,7 @@ export class ARRenderer extends EventDispatcher {
       scene.setTarget(point.x, point.y, point.z);
       scene.xrCamera = null;
 
-      scene.removeEventListener('model-load', this.onUpdateScene);
+      scene.element.removeEventListener('load', this.onUpdateScene);
       scene.orientHotspots(0);
       element.requestUpdate('cameraTarget');
       element.requestUpdate('maxCameraOrbit');

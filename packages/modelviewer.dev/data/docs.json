@@ -221,11 +221,6 @@
         "description": "Fires when the poster has fully transitioned away. Additional delay from the \"load\" event can be caused by the renderer compiling its shaders."
       },
       {
-        "name": "preload",
-        "htmlName": "preload",
-        "description": "When <span class='attribute'>loading=\"eager\"</span> this event is fired when preloading is done."
-      },
-      {
         "name": "model-visibility",
         "htmlName": "modelVisibility",
         "description": "This event is fired when the visibility of the model changes. When the model is loaded, the element is in the viewport (assuming there is an IntersectionObserver), this event will fire and event.detail.visible will be \"true\"."

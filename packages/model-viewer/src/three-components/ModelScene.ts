@@ -204,8 +204,6 @@ export class ModelScene extends Scene {
 
       this.boundingSphere.radius = framingInfo.framedRadius;
       this.idealAspect = framingInfo.fieldOfViewAspect;
-
-      this.dispatchEvent({type: 'model-load', url: this.url});
       return;
     }
 
@@ -272,7 +270,6 @@ export class ModelScene extends Scene {
 
     this.updateShadow();
     this.setShadowIntensity(this.shadowIntensity);
-    this.dispatchEvent({type: 'model-load', url: this.url});
   }
 
   reset() {

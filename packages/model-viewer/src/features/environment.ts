@@ -14,10 +14,9 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {Event as ThreeEvent, Texture} from 'three';
+import {Texture} from 'three';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene, $shouldAttemptPreload} from '../model-viewer-base.js';
-import {PreloadEvent} from '../three-components/CachingGLTFLoader.js';
+import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload} from '../model-viewer-base.js';
 import {clamp, Constructor, deserializeUrl} from '../utilities.js';
 
 export const BASE_OPACITY = 0.5;
@@ -29,7 +28,6 @@ export const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 export const $currentBackground = Symbol('currentBackground');
 export const $updateEnvironment = Symbol('updateEnvironment');
 const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
-const $onPreload = Symbol('onPreload');
 
 export declare interface EnvironmentInterface {
   environmentImage: string|null;
@@ -65,22 +63,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     private[$cancelEnvironmentUpdate]: ((...args: any[]) => any)|null = null;
 
-    private[$onPreload] = (event: ThreeEvent) => {
-      if ((event as PreloadEvent).element === this) {
-        this[$updateEnvironment]();
-      }
-    };
-
-    connectedCallback() {
-      super.connectedCallback();
-      this[$renderer].loader.addEventListener('preload', this[$onPreload]);
-    }
-
-    disconnectedCallback() {
-      super.disconnectedCallback();
-      this[$renderer].loader.removeEventListener('preload', this[$onPreload]);
-    }
-
     updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
 
@@ -110,13 +92,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$scene].bakedShadows.size > 0;
     }
 
-    [$onModelLoad]() {
-      super[$onModelLoad]();
-
-      this[$scene].setEnvironmentAndSkybox(
-          this[$currentEnvironmentMap], this[$currentBackground]);
-    }
-
     async[$updateEnvironment]() {
       const {skyboxImage, environmentImage} = this;
 
@@ -138,8 +113,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
             await textureUtils.generateEnvironmentMapAndSkybox(
                 deserializeUrl(skyboxImage),
                 environmentImage,
-                (progress: number) =>
-                    updateEnvProgress(clamp(progress, 0, 1) * 0.99));
+                (progress: number) => updateEnvProgress(clamp(progress, 0, 1)));
 
         if (this[$currentEnvironmentMap] !== environmentMap) {
           this[$currentEnvironmentMap] = environmentMap;
@@ -163,11 +137,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
           throw errorOrPromise;
         }
       } finally {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            updateEnvProgress(1.0);
-          });
-        });
+        updateEnvProgress(1.0);
       }
     }
   }

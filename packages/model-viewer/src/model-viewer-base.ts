@@ -18,11 +18,12 @@ import {property} from 'lit/decorators.js';
 import {Event as ThreeEvent, Vector2, Vector3} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
+import {$updateEnvironment} from './features/environment.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {clamp, debounce, timePasses} from './utilities.js';
+import {clamp, debounce} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -256,17 +257,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
     // Create the underlying ModelScene.
     this[$scene] =
         new ModelScene({canvas: this[$canvas], element: this, width, height});
-
-    this[$scene].addEventListener('model-load', async (event) => {
-      this[$markLoaded]();
-      this[$onModelLoad]();
-
-      // Give loading async tasks a chance to complete.
-      await timePasses();
-
-      this.dispatchEvent(
-          new CustomEvent('load', {detail: {url: (event as any).url}}));
-    });
 
     // Update initial size on microtask timing so that subclasses have a
     // chance to initialize
@@ -579,43 +569,55 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   /**
    * Parses the element for an appropriate source URL and
-   * sets the views to use the new model based off of the `preload`
-   * attribute.
+   * sets the views to use the new model based.
    */
   async[$updateSource]() {
-    if (this.loaded || !this[$shouldAttemptPreload]()) {
+    const scene = this[$scene];
+    if (this.loaded || !this[$shouldAttemptPreload]() ||
+        this.src === scene.url) {
       return;
     }
 
     if (this.generateSchema) {
-      this[$scene].updateSchema(this.src);
+      scene.updateSchema(this.src);
     }
     this[$updateStatus]('Loading');
     // If we are loading a new model, we need to stop the animation of
     // the current one (if any is playing). Otherwise, we might lose
     // the reference to the scene root and running actions start to
     // throw exceptions and/or behave in unexpected ways:
-    this[$scene].stopAnimation();
+    scene.stopAnimation();
 
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
     try {
-      await this[$scene].setSource(
+      const srcUpdated = scene.setSource(
           source,
           (progress: number) =>
               updateSourceProgress(clamp(progress, 0, 1) * 0.95));
 
-      const detail = {url: source};
-      this.dispatchEvent(new CustomEvent('preload', {detail}));
+      const envUpdated = (this as any)[$updateEnvironment]();
+
+      await Promise.all([srcUpdated, envUpdated]);
+
+      this[$markLoaded]();
+      this[$onModelLoad]();
+
+      // Wait for shaders to compile and pixels to be drawn.
+      await new Promise<void>(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            this.dispatchEvent(
+                new CustomEvent('load', {detail: {url: source}}));
+            resolve();
+          });
+        });
+      });
     } catch (error) {
       this.dispatchEvent(new CustomEvent(
           'error', {detail: {type: 'loadfailure', sourceError: error}}));
     } finally {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          updateSourceProgress(1.0);
-        });
-      });
+      updateSourceProgress(1.0);
     }
   }
 }

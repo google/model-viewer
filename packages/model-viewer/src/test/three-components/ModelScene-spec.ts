@@ -44,15 +44,6 @@ suite('ModelScene', () => {
     document.body.removeChild(element);
   });
 
-  suite('setModelSource', () => {
-    test('fires a model-load event when loaded', async function() {
-      let fired = false;
-      scene.addEventListener('model-load', () => fired = true);
-      await scene.setSource(assetPath('models/Astronaut.glb'));
-      expect(fired).to.be.ok;
-    });
-  });
-
   suite('with a model', () => {
     setup(async () => {
       await scene.setSource(assetPath('models/Astronaut.glb'));
