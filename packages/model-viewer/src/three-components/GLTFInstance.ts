@@ -144,7 +144,7 @@ export class GLTFInstance implements GLTF {
             const texture = (material as any)[propertyName];
             if (texture instanceof Texture) {
               const image = texture.source.data;
-              if (image instanceof ImageBitmap) {
+              if (image.close != null) {
                 image.close();
               }
               texture.dispose();
