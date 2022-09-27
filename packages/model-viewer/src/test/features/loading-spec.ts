@@ -26,10 +26,12 @@ const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 
 suite('Loading', () => {
   let element: ModelViewerElement;
+  let firstChild: ChildNode|null;
 
   setup(async () => {
     element = new ModelViewerElement();
-    document.body.insertBefore(element, document.body.firstChild);
+    firstChild = document.body.firstChild;
+    document.body.insertBefore(element, firstChild);
     element.poster = assetPath('../screenshot.png');
 
     // Wait at least a microtask for size calculations
@@ -42,6 +44,57 @@ suite('Loading', () => {
     if (element.parentNode != null) {
       element.parentNode.removeChild(element);
     }
+  });
+
+  suite('with a second element outside the viewport', () => {
+    let element2: ModelViewerElement;
+
+    setup(async () => {
+      element2 = new ModelViewerElement();
+      element2.loading = 'eager';
+      document.body.insertBefore(element2, firstChild);
+      element.style.height = '100vh';
+      element2.style.height = '100vh';
+      const load1 = waitForEvent(element, 'load');
+      const load2 = waitForEvent(element2, 'load');
+      element.src = CUBE_GLB_PATH;
+      element2.src = CUBE_GLB_PATH;
+      await Promise.all([load1, load2]);
+    });
+
+    teardown(() => {
+      if (element2.parentNode != null) {
+        element2.parentNode.removeChild(element2);
+      }
+    });
+
+    test('first element is visible', () => {
+      expect(element.modelIsVisible).to.be.true;
+    });
+
+    test('second element is not visible', () => {
+      expect(element2.modelIsVisible).to.be.false;
+    });
+
+    suite('scroll to second element', () => {
+      setup(() => {
+        element2.scrollIntoView();
+      });
+
+      test('first element is not visible', async () => {
+        await waitForEvent<CustomEvent>(
+            element,
+            'model-visibility',
+            event => event.detail.visible === false);
+      });
+
+      test('second element is visible', async () => {
+        await waitForEvent<CustomEvent>(
+            element2,
+            'model-visibility',
+            event => event.detail.visible === true);
+      });
+    });
   });
 
   test('creates a poster element that captures interactions', async () => {
