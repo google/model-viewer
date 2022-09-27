@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -176,6 +176,11 @@ export class Renderer extends EventDispatcher {
     this.scenes.add(scene);
 
     scene.forceRescale();
+
+    const size = new Vector2();
+    this.threeRenderer.getSize(size);
+    scene.canvas.width = size.x;
+    scene.canvas.height = size.y;
 
     if (this.canRender && this.scenes.size > 0) {
       this.threeRenderer.setAnimationLoop(
