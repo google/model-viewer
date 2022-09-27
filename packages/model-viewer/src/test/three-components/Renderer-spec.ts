@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
+import {Vector2} from 'three';
+
 import {$controls} from '../../features/controls.js';
-import {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene, Camera, RendererInterface} from '../../model-viewer-base.js';
+import {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scene, $updateSize, Camera, RendererInterface} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
@@ -224,6 +226,30 @@ suite('Renderer with two scenes', () => {
       expect(otherScene.canvas.classList.contains('show'))
           .to.be.eq(true, 'otherScene canvas should still be shown.');
     });
+
+    test(
+        'When registered, the scene canvas dimensions match the renderer size',
+        () => {
+          renderer.render(performance.now());
+          const oldSize = new Vector2();
+          renderer.threeRenderer.getSize(oldSize);
+          console.log(oldSize);
+
+          renderer.unregisterScene(scene);
+          otherScene.element[$updateSize]({width: 400, height: 200});
+          renderer.render(performance.now());
+
+          const size = new Vector2();
+          renderer.threeRenderer.getSize(size);
+          console.log(size);
+          expect(size.x).to.be.greaterThan(oldSize.width, 'renderer width');
+          expect(size.y).to.be.greaterThan(oldSize.height, 'renderer height');
+
+          renderer.registerScene(scene);
+          renderer.render(performance.now());
+          expect(scene.canvas.width).to.be.eq(size.x, 'canvas width');
+          expect(scene.canvas.height).to.be.eq(size.y, 'canvas height');
+        });
 
     suite('when resizing', () => {
       let originalDpr: number;
