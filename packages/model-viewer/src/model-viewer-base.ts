@@ -304,6 +304,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
         // model above the fold, but only when the animated model was completely
         // below. Setting this margin to zero fixed it.
         rootMargin: '0px',
+        // With zero threshold, an element adjacent to but not intersecting the
+        // viewport will be reported as intersecting, which will cause
+        // unnecessary rendering. Any slight positive threshold alleviates this.
         threshold: 0.00001,
       });
     } else {
