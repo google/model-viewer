@@ -16,7 +16,7 @@
 import {Vector3} from 'three';
 
 import {ModelViewerElement} from '../../model-viewer';
-import {$needsRender, $scene, Vector2D, Vector3D} from '../../model-viewer-base';
+import {$needsRender, $scene, toVector3D, Vector2D, Vector3D} from '../../model-viewer-base';
 import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {timePasses, waitForEvent} from '../../utilities';
@@ -94,6 +94,22 @@ suite('Annotation', () => {
 
     test('creates a corresponding slot', () => {
       expect(sceneContainsHotspot(scene, hotspot)).to.be.true;
+    });
+
+    test('querying it returns valid data', () => {
+      const hotspot = element.queryHotspot('hotspot-1');
+
+      expect(hotspot?.position.toString()).to.equal(toVector3D(new Vector3(1, 1, 1)).toString());
+      expect(hotspot?.normal.toString()).to.equal(toVector3D(new Vector3(0, 0, -1)).toString());
+      expect(hotspot?.facingCamera).to.be.true;
+
+      // Testing the screen space coordinate is contingent on lots of default values
+      // (canvas size, camera position and camera fov).
+      // Just test to see that it's valid.
+      expect(hotspot?.screenPosition?.u).to.satisfy(Number.isFinite);
+      expect(hotspot?.screenPosition?.v).to.satisfy(Number.isFinite);
+      expect(hotspot?.screenPosition?.u).to.satisfy(Number.isFinite);
+      expect(hotspot?.screenPosition?.v).to.satisfy(Number.isFinite);
     });
 
     suite('adding a second hotspot with the same name', () => {
