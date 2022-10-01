@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Matrix3, Matrix4, Vector2, Vector3} from 'three';
+import {Matrix3, Matrix4, Vector3} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector2D, toVector3D, Vector2D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
@@ -32,7 +32,7 @@ const worldToModelNormal = new Matrix3();
 export declare type HotspotData = {
   readonly position: Vector3D;
   readonly normal: Vector3D;
-  readonly screenPosition: Vector2D;
+  readonly screenPosition: Vector3D;
   readonly facingCamera: boolean;
 }
 
@@ -159,13 +159,14 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       vector.x = (vector.x * widthHalf) + widthHalf;
       vector.y = -(vector.y * heightHalf) + heightHalf;
 
-      const screenPosition = toVector2D(
-        new Vector2(
+      const screenPosition = toVector3D(
+        new Vector3(
           vector.x,
-          vector.y
+          vector.y,
+          vector.z
         ));
 
-      if (!Number.isFinite(screenPosition.u) || !Number.isFinite(screenPosition.v)) {
+      if (!Number.isFinite(screenPosition.x) || !Number.isFinite(screenPosition.y)) {
         return null;
       }
 
