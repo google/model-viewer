@@ -97,19 +97,19 @@ suite('Annotation', () => {
     });
 
     test('querying it returns valid data', () => {
-      const hotspot = element.queryHotspot('hotspot-1');
 
-      expect(hotspot?.position.toString()).to.equal(toVector3D(new Vector3(1, 1, 1)).toString());
-      expect(hotspot?.normal.toString()).to.equal(toVector3D(new Vector3(0, 0, -1)).toString());
-      expect(hotspot?.facingCamera).to.be.true;
+      // to test querying, place hotspot in the center and verify the screen position is 
+      // half the default width and height (300 x 150) with a depth value of ~1.
+      const defaultDimensions = { width: 300, height: 150 };
+      element.updateHotspot({ name: 'hotspot-1', position: `0m 0m 0m`});
 
-      // Testing the screen space coordinate is contingent on lots of default values
-      // (canvas size, camera position and camera fov).
-      // Just test to see that it's valid.
-      expect(hotspot?.screenPosition?.u).to.satisfy(Number.isFinite);
-      expect(hotspot?.screenPosition?.v).to.satisfy(Number.isFinite);
-      expect(hotspot?.screenPosition?.u).to.satisfy(Number.isFinite);
-      expect(hotspot?.screenPosition?.v).to.satisfy(Number.isFinite);
+      const hotspotData = element.queryHotspot('hotspot-1');
+
+      expect(hotspotData?.screenPosition.x).to.be.closeTo(defaultDimensions.width / 2, 0.0001);
+      expect(hotspotData?.screenPosition.y).to.be.closeTo(defaultDimensions.height / 2, 0.0001);
+      expect(hotspotData?.position.toString()).to.equal(toVector3D(new Vector3(0, 0, 0)).toString());
+      expect(hotspotData?.normal.toString()).to.equal(toVector3D(new Vector3(0, 0, -1)).toString());
+      expect(hotspotData?.facingCamera).to.be.true;
     });
 
     suite('adding a second hotspot with the same name', () => {
