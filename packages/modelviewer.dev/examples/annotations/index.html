@@ -321,6 +321,218 @@
     </div>
 
     <div class="sample">
+      <div id="overlays" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Custom Overlays. </span></h4>
+          <p>
+            Hotspots can be queried to build custom overlays in screen space.
+          </p>
+          <p>
+            For example, by using an SVG canvas and updating the line nodes we can draw rudimentary dimensions lines.
+            Note that this kind of extended functionality cannot support occlusion in the 3d scene as it is drawn on top.
+          </p>
+          <example-snippet stamp-to="overlays" highlight-as="html">
+            <template>
+<style>
+  .dimensionLineContainer{
+    pointer-events: none;
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%; 
+  }
+
+  .dimensionLine{
+    stroke: #16a5e6;
+    stroke-width: 2;
+    stroke-dasharray: 2
+  }
+
+  .dot{
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    background: #fff;
+    pointer-events: none;
+    --min-hotspot-opacity: 0;
+  }
+
+  .dim{
+    background: #fff;
+    border-radius: 4px;
+    border: none;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    color: rgba(0, 0, 0, 0.8);
+    display: block;
+    font-family: Futura, Helvetica Neue, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    max-width: 128px;
+    overflow-wrap: break-word;
+    padding: 0.5em 1em;
+    position: absolute;
+    width: max-content;
+    height: max-content;
+    transform: translate3d(-50%, -50%, 0);
+    pointer-events: none;
+    --min-hotspot-opacity: 0;
+  }
+
+  .show{
+    --min-hotspot-opacity: 1;
+  }
+
+  .hide{
+    display: none;
+  }
+  /* This keeps child nodes hidden while the element loads */
+  :not(:defined) > * {
+    display: none;
+  }
+  </style>
+  <model-viewer id="dimension-overlay-demo" ar ar-modes="webxr" ar-scale="fixed" camera-orbit="-30deg auto auto" max-camera-orbit="auto 100deg auto" shadow-intensity="1" camera-controls touch-action="pan-y" src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
+    <button slot="hotspot-dot+X-Y+Z" class="dot" data-position="1 -1 1" data-normal="1 0 0"></button>
+    <button slot="hotspot-dim+X-Y" class="dim" data-position="1 -1 0" data-normal="1 0 0"></button>
+    <button slot="hotspot-dot+X-Y-Z" class="dot" data-position="1 -1 -1" data-normal="1 0 0"></button>
+    <button slot="hotspot-dim+X-Z" class="dim" data-position="1 0 -1" data-normal="1 0 0"></button>
+    <button slot="hotspot-dot+X+Y-Z" class="dot show" data-position="1 1 -1" data-normal="0 1 0"></button>
+    <button slot="hotspot-dim+Y-Z" class="dim show" data-position="0 -1 -1" data-normal="0 1 0"></button>
+    <button slot="hotspot-dot-X+Y-Z" class="dot show" data-position="-1 1 -1" data-normal="0 1 0"></button>
+    <button slot="hotspot-dim-X-Z" class="dim" data-position="-1 0 -1" data-normal="-1 0 0"></button>
+    <button slot="hotspot-dot-X-Y-Z" class="dot" data-position="-1 -1 -1" data-normal="-1 0 0"></button>
+    <button slot="hotspot-dim-X-Y" class="dim" data-position="-1 -1 0" data-normal="-1 0 0"></button>
+    <button slot="hotspot-dot-X-Y+Z" class="dot" data-position="-1 -1 1" data-normal="-1 0 0"></button>
+    <svg xmlns="http://www.w3.org/2000/svg" class="dimensionLineContainer">
+      <line class="dimensionLine"></line>
+      <line class="dimensionLine"></line>
+      <line class="dimensionLine"></line>
+      <line class="dimensionLine"></line>
+      <line class="dimensionLine"></line>
+    </svg>
+  </model-viewer>
+    
+    
+<script type="module">
+  const modelViewer1 = document.querySelector('#dimension-overlay-demo');
+
+  modelViewer1.addEventListener('load', () => {
+    const center = modelViewer1.getBoundingBoxCenter();
+    const size = modelViewer1.getDimensions();
+    const x2 = size.x / 2;
+    const y2 = size.y / 2;
+    const z2 = size.z / 2;
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dot+X-Y+Z',
+      position: `${center.x + x2} ${center.y - y2} ${center.z + z2}`
+    });
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dim+X-Y',
+      position: `${center.x + x2} ${center.y - y2} ${center.z}`
+    });
+    modelViewer1.querySelector('button[slot="hotspot-dim+X-Y"]').textContent =
+        `${(size.z * 100).toFixed(0)} cm`;
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dot+X-Y-Z',
+      position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`
+    });
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dim+X-Z',
+      position: `${center.x + x2} ${center.y} ${center.z - z2}`
+    });
+    modelViewer1.querySelector('button[slot="hotspot-dim+X-Z"]').textContent =
+        `${(size.y * 100).toFixed(0)} cm`;
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dot+X+Y-Z',
+      position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`
+    });
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dim+Y-Z',
+      position: `${center.x} ${center.y + y2} ${center.z - z2}`
+    });
+    modelViewer1.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent =
+        `${(size.x * 100).toFixed(0)} cm`;
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dot-X+Y-Z',
+      position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`
+    });
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dim-X-Z',
+      position: `${center.x - x2} ${center.y} ${center.z - z2}`
+    });
+    modelViewer1.querySelector('button[slot="hotspot-dim-X-Z"]').textContent =
+        `${(size.y * 100).toFixed(0)} cm`;
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dot-X-Y-Z',
+      position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`
+    });
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dim-X-Y',
+      position: `${center.x - x2} ${center.y - y2} ${center.z}`
+    });
+    modelViewer1.querySelector('button[slot="hotspot-dim-X-Y"]').textContent =
+        `${(size.z * 100).toFixed(0)} cm`;
+
+    modelViewer1.updateHotspot({
+      name: 'hotspot-dot-X-Y+Z',
+      position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`
+    });
+  });
+
+  // update svg
+  function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
+    if (dotHotspot1 && dotHotspot1) {
+      svgLine.setAttribute('x1', dotHotspot1.screenPosition.x);
+      svgLine.setAttribute('y1', dotHotspot1.screenPosition.y);
+      svgLine.setAttribute('x2', dotHotspot2.screenPosition.x);
+      svgLine.setAttribute('y2', dotHotspot2.screenPosition.y);
+
+      // use provided optional hotspot to tie visibility of this svg line to
+      if (dimensionHotspot && !dimensionHotspot.facingCamera) {
+        svgLine.classList.add('hide');
+      }
+      else {
+        svgLine.classList.remove('hide');
+      }
+    }
+  }
+
+  const lines = modelViewer1.querySelectorAll('line');
+
+  // use requestAnimationFrame to update with renderer
+  const startSVGRenderLoop = () => {
+    drawLine(lines[0], modelViewer1.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer1.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer1.queryHotspot('hotspot-dim+X-Y'));
+    drawLine(lines[1], modelViewer1.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer1.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer1.queryHotspot('hotspot-dim+X-Z'));
+    drawLine(lines[2], modelViewer1.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer1.queryHotspot('hotspot-dot-X+Y-Z')); // always visible
+    drawLine(lines[3], modelViewer1.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer1.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer1.queryHotspot('hotspot-dim-X-Z'));
+    drawLine(lines[4], modelViewer1.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer1.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer1.queryHotspot('hotspot-dim-X-Y'));
+    requestAnimationFrame(startSVGRenderLoop);
+  };
+
+  startSVGRenderLoop();
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
       <div id="cameraViews" class="demo"></div>
       <div class="content">
         <div class="wrapper">
@@ -415,15 +627,15 @@
 </model-viewer>
 
 <script type="module">
-  const modelViewer1 = document.querySelector("#hotspot-camera-view-demo");
+  const modelViewer2 = document.querySelector("#hotspot-camera-view-demo");
   const annotationClicked = (annotation) => {
     let dataset = annotation.dataset;
-    modelViewer1.cameraTarget = dataset.target;
-    modelViewer1.cameraOrbit = dataset.orbit;
-    modelViewer1.fieldOfView = '45deg';
+    modelViewer2.cameraTarget = dataset.target;
+    modelViewer2.cameraOrbit = dataset.orbit;
+    modelViewer2.fieldOfView = '45deg';
   }
 
-  modelViewer1.querySelectorAll('button').forEach((hotspot) => {
+  modelViewer2.querySelectorAll('button').forEach((hotspot) => {
     hotspot.addEventListener('click', () => annotationClicked(hotspot));
   });
 </script>

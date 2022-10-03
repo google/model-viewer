@@ -755,6 +755,14 @@
         "description": "Updates the position and/or normal of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position and normal are given in the same string format as the hotspot attributes <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span>, which are also in the same format as the <span class='attribute'>camera-target</span> attribute."
       },
       {
+        "name": "queryHotspot(name)",
+        "htmlName": "queryHotspot",
+        "description": "Returns information about the current state of the hotspot corresponding to the hotspot name given as a read-only snapshot: The position, normal, screen (canvas) position and current visibility. The screen position is represented as a Vector3 with z as the OpenGL depth information. The function returns null if no hotspot is found.",
+        "links": [
+          "<a href=\"../examples/annotations/#overlays\"><span class='attribute'>custom overlays</span> example</a>"
+        ]
+      },
+      {
         "name": "positionAndNormalFromPoint(clientX, clientY)",
         "htmlName": "positionAndNormalFromPoint",
         "description": "Returns the world position, normal and texture coordinate of the point on the mesh corresponding to the input pixel coordinates given relative to the screen. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. The texture coordinate is returned as Vector2D, which has also a own toString() method. The function returns null if no object is hit.",
