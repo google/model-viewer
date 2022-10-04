@@ -397,6 +397,11 @@ configuration or device capabilities');
       if (generateUsdz) {
         anchor.setAttribute('download', 'model.usdz');
       }
+
+      // attach anchor to shadow DOM to ensure iOS16 ARQL banner click message event propagation 
+      anchor.style.display = 'none';
+      if(!anchor.isConnected) this.shadowRoot!.appendChild(anchor);
+
       console.log('Attempting to present in AR with Quick Look...');
       anchor.click();
       anchor.removeChild(img);
