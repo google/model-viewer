@@ -17,7 +17,7 @@ import {property} from 'lit/decorators.js';
 import {RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
@@ -139,14 +139,17 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('variantName')) {
-        const threeGLTF = this[$currentGLTF];
+        const updateVariantProgress = this[$progressTracker].beginActivity();
+        updateVariantProgress(0.1);
+        const model = this[$model];
         const {variantName} = this;
 
-        if (threeGLTF != null) {
-          await this[$model]![$switchVariant](variantName!);
+        if (model != null) {
+          await model[$switchVariant](variantName!);
           this[$needsRender]();
           this.dispatchEvent(new CustomEvent('variant-applied'));
         }
+        updateVariantProgress(1.0);
       }
 
       if (changedProperties.has('orientation') ||
