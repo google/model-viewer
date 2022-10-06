@@ -52,8 +52,8 @@ export class PrimitiveNode extends Node {
   [$materials] = new Map<number, Material>();
   // Maps variant index to material.
   private[$variantToMaterialMap] = new Map<number, Material>();
-  private[$initialMaterialIdx]: number;
-  private[$activeMaterialIdx]: number;
+  private[$initialMaterialIdx] = 0;
+  private[$activeMaterialIdx] = 0;
   private[$modelVariants]: Map<string, VariantData>;
 
   constructor(
@@ -143,14 +143,13 @@ export class PrimitiveNode extends Node {
     return this[$mesh];
   }
 
-  async setActiveMaterial(material: number):
-      Promise<ThreeMaterial|ThreeMaterial[]|null> {
+  async setActiveMaterial(material: number): Promise<ThreeMaterial|null> {
     const mvMaterial = this[$materials].get(material);
     if (mvMaterial != null) {
       this.mesh.material = await mvMaterial[$getLoadedMaterial]();
       this[$activeMaterialIdx] = material;
     }
-    return this.mesh.material;
+    return this.mesh.material as ThreeMaterial;
   }
 
   getActiveMaterial(): Material {
@@ -161,8 +160,7 @@ export class PrimitiveNode extends Node {
     return this[$materials].get(index);
   }
 
-  async enableVariant(name: string|
-                      null): Promise<ThreeMaterial|ThreeMaterial[]|null> {
+  async enableVariant(name: string|null): Promise<ThreeMaterial|null> {
     if (name == null) {
       return this.setActiveMaterial(this[$initialMaterialIdx]);
     }
@@ -173,8 +171,8 @@ export class PrimitiveNode extends Node {
     return null;
   }
 
-  private async enableVariantHelper(index: number|null):
-      Promise<ThreeMaterial|ThreeMaterial[]|null> {
+  private async enableVariantHelper(index: number|
+                                    null): Promise<ThreeMaterial|null> {
     if (this[$variantToMaterialMap] != null && index != null) {
       const material = this[$variantToMaterialMap].get(index);
       if (material != null) {
@@ -189,12 +187,14 @@ export class PrimitiveNode extends Node {
       return;
     }
     for (const index of this[$variantToMaterialMap].keys()) {
-      if (this.mesh.userData.variantMaterials.get(index).material != null) {
+      const variantMaterial = this.mesh.userData.variantMaterials.get(index) as
+          UserDataVariantMapping;
+      if (variantMaterial.material != null) {
         continue;
       }
       const threeMaterial = await this.enableVariantHelper(index);
       if (threeMaterial != null) {
-        this.mesh.userData.variantMaterials.get(index).material = threeMaterial;
+        variantMaterial.material = threeMaterial;
       }
     }
   }

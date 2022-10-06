@@ -29,6 +29,8 @@ import {Material, Mesh, Object3D} from 'three';
 
 import {VariantData} from '../../features/scene-graph/model';
 
+import {UserDataVariantMapping} from './VariantMaterialLoaderPlugin';
+
 
 
 /**
@@ -45,7 +47,7 @@ const compatibleObject = (object: Object3D) => {
       // Is this line costly?
       !!Array
             .from((object.userData.variantMaterials as
-                   Map<string, {material: Material | null}>)
+                   Map<number, UserDataVariantMapping>)
                       .values())
             .filter(m => compatibleMaterial(m.material));
 };
@@ -79,13 +81,14 @@ export default class GLTFExporterMaterialsVariantsExtension {
         if (!compatibleObject(o)) {
           return;
         }
-        const variantMaterials = o.userData.variantMaterials;
+        const variantMaterials =
+            o.userData.variantMaterials as Map<number, UserDataVariantMapping>;
         const variantDataMap =
             o.userData.variantData as Map<string, VariantData>;
         for (const [variantName, variantData] of variantDataMap) {
           const variantMaterial = variantMaterials.get(variantData.index);
           // Ignore unloaded variant materials
-          if (compatibleMaterial(variantMaterial.material)) {
+          if (variantMaterial && compatibleMaterial(variantMaterial.material)) {
             variantNameSet.add(variantName);
           }
         }
@@ -101,7 +104,8 @@ export default class GLTFExporterMaterialsVariantsExtension {
     }
 
     const userData = mesh.userData;
-    const variantMaterials = userData.variantMaterials;
+    const variantMaterials =
+        userData.variantMaterials as Map<number, UserDataVariantMapping>;
     const variantDataMap = userData.variantData as Map<string, VariantData>;
     const mappingTable　=
         new Map<number, {material: number, variants: number[]}>();
@@ -116,14 +120,13 @@ export default class GLTFExporterMaterialsVariantsExtension {
     }
 
     for (const variantData of variantDataMap.values()) {
-      const variantMaterialInstance =
-          variantMaterials.get(variantData.index).material;
-      if (!compatibleMaterial(variantMaterialInstance)) {
+      const variantInstance = variantMaterials.get(variantData.index);
+      if (!variantInstance || !compatibleMaterial(variantInstance.material)) {
         continue;
       }
 
       const materialIndex =
-          this.writer.processMaterial(variantMaterialInstance);
+          this.writer.processMaterial(variantInstance.material);
       if (!mappingTable.has(materialIndex)) {
         mappingTable.set(
             materialIndex, {material: materialIndex, variants: []});

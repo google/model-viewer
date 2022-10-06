@@ -26,8 +26,8 @@
  */
 
 import {Material as ThreeMaterial, Mesh} from 'three';
+import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader';
 import {GLTF, GLTFLoaderPlugin, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {GLTFReference} from "three/examples/jsm/loaders/GLTFLoader";
 
 
 export interface UserDataVariantMapping {
@@ -73,7 +73,8 @@ const ensureUniqueNames = (variantNames: string[]) => {
  * @param variantNames {Array<string>} Required to be unique names
  * @return {Map}
  */
-const mappingsArrayToTable = (extensionDef: any): Map<number, UserDataVariantMapping> => {
+const mappingsArrayToTable = (extensionDef:
+                                  any): Map<number, UserDataVariantMapping> => {
   const table = new Map<number, UserDataVariantMapping>();
   for (const mapping of extensionDef.mappings) {
     for (const variant of mapping.variants) {
@@ -120,9 +121,11 @@ export default class GLTFMaterialsVariantsExtension implements
           return;
         }
 
-        const association = parser.associations.get(mesh) as GLTFReference & {primitives: number};
+        const association = parser.associations.get(mesh) as GLTFReference &
+            {primitives: number};
 
-        if (association == null || association.meshes == null || association.primitives == null) {
+        if (association == null || association.meshes == null ||
+            association.primitives == null) {
           return;
         }
 
@@ -135,7 +138,8 @@ export default class GLTFMaterialsVariantsExtension implements
           return;
         }
 
-        mesh.userData.variantMaterials = mappingsArrayToTable(extensionsDef[this.name]);
+        mesh.userData.variantMaterials =
+            mappingsArrayToTable(extensionsDef[this.name]);
       });
     }
 
