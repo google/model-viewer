@@ -41,7 +41,7 @@
     "lit": "^2.2.3",
     "mkdirp": "^1.0.4",
     "pngjs": "^6.0.0",
-    "puppeteer": "^10.1.0",
+    "puppeteer": "^18.2.1",
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
