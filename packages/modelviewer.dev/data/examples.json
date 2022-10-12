@@ -142,10 +142,6 @@
         "name": "Dimensions"
       },
       {
-        "htmlId": "overlays",
-        "name": "Custom Overlays"
-      },
-      {
         "htmlId": "cameraViews",
         "name": "Camera Views"
       }
