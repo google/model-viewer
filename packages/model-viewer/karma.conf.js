@@ -153,6 +153,7 @@ module.exports = function(config) {
       browserStack: {
         idleTimeout: 600,
         startTunnel: false,
+        localIdentifier: test,
         name: '<model-viewer> Unit Tests',
         project: '<model-viewer>',
         apiClientEndpoint: 'https://api.browserstack.com',

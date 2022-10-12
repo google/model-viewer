@@ -22,7 +22,8 @@ jobs:
       uses: browserstack/github-actions/setup-local@master
       with:
         local-testing: start
-        local-identifier: random
+        local-identifier: test
+        local-logging-level: setup-logs
 
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
