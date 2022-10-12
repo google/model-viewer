@@ -103,7 +103,7 @@
     "rollup-plugin-dts": "^4.2.2",
     "rollup-plugin-polyfill": "^3.0.0",
     "rollup-plugin-terser": "^7.0.2",
-    "typescript": "4.3.5"
+    "typescript": "4.8.4"
   },
   "publishConfig": {
     "access": "public"

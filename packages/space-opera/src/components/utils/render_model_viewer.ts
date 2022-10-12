@@ -22,11 +22,11 @@ import {ifDefined} from 'lit/directives/if-defined.js';
 
 import {reduxStore} from '../../space_opera_base';
 import {rafPasses} from '../../test/utils/test_utils';
-import {spread} from '../utils/spread_directive';
 import {ArConfigState, ModelViewerConfig} from '../../types';
 import {getConfig, getOrbitString} from '../config/reducer';
 import {getModelViewer} from '../model_viewer_preview/reducer';
 import {getPosterConfig} from '../model_viewer_snippet/reducer';
+import {spread} from '../utils/spread_directive';
 
 /** Optional handlers for model-viewer events */
 export interface ModelViewerEventHandlers {
@@ -39,9 +39,14 @@ export interface ModelViewerEventHandlers {
   readonly error?: (details: CustomEvent) => void;
 }
 
+interface ModelViewerStatic extends CustomElementConstructor {
+  minimumRenderScale: number;
+}
+
 export async function createPoster() {
   const modelViewer = getModelViewer();
-  const ModelViewerElement = customElements.get('model-viewer');
+  const ModelViewerElement =
+      customElements.get('model-viewer') as ModelViewerStatic;
   const oldMinScale = ModelViewerElement.minimumRenderScale;
   ModelViewerElement.minimumRenderScale = 1;
 

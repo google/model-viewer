@@ -42,7 +42,7 @@ export function parseHotspotsFromSnippet(
         configs.push(config);
       }
     } catch (error) {
-      errorList?.push(error);
+      errorList?.push(error as Error);
     }
   }
   return configs;
