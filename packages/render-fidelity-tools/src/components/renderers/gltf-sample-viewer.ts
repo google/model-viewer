@@ -17,7 +17,7 @@ const $degToRadians = Symbol('degToRadians');
 @customElement('gltf-sample-viewer')
 export class GltfSampleViewer extends LitElement {
   @property({type: Object}) scenario: ScenarioConfig|null = null;
-  private[$canvas]: HTMLCanvasElement|null;
+  private[$canvas]: HTMLCanvasElement|null = null;
   private[$view]: GltfView;
   private[$state]: GltfState;
   private[$resourceLoader]: ResourceLoader;
