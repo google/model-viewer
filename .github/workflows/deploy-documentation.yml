@@ -11,8 +11,8 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
       with:
         node-version: '16.x'
 
@@ -22,7 +22,7 @@ jobs:
         echo "::set-output name=dir::$(npm config get cache)"
 
     - name: Cache npm packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{ steps.npm-cache.outputs.dir }}
         key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
