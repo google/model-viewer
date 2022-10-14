@@ -473,6 +473,70 @@ modelViewerTexture1.addEventListener("load", () => {
       </div>
     </div>
 
+    <div class="sample">
+      <div id="animatedTexturesExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Create animated textures</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+              mode. iOS Quick Look reflects these texture changes so long as the
+              USDZ is auto-generated.</p>
+          </div>
+          <example-snippet stamp-to="animatedTexturesExample" highlight-as="html">
+            <template>
+<model-viewer id="animated" camera-controls touch-action="pan-y" src="../../shared-assets/models/sphere.glb" ar alt="A 3D model of a duck">
+  <div class="controls">
+      <p>Texture Type</p>
+      <select id="type">
+        <option value="video">Video</option>
+        <option value="canvas">Canvas</option>
+        <option value="lottie">Lottie</option>
+      </select>
+    </div>
+    <video src="../../shared-assets/models/lottie-logo.mp4" autoplay loop muted style="visibility: hidden;"></video>
+    <canvas width="1500" height="1500" style="visibility: hidden;"></canvas>
+</model-viewer>
+<script type="module">
+const modelViewerAnimated = document.querySelector("model-viewer#animated");
+
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+ctx.font = "250px sans-serif";
+ctx.fillStyle = "#aaa";
+ctx.fillText('Canvas 2D!', 0, 750);
+
+modelViewerAnimated.addEventListener("load", () => {
+
+  const material = modelViewerAnimated.model.materials[0];
+  const {baseColorTexture} = material.pbrMetallicRoughness;
+
+  // const loader = new LottieLoader();
+	// loader.setQuality( 2 );
+  // const lottieTexture = loader.load("../../shared-assets/models/24017-lottie-logo-animation.json");
+  const videoTexture = modelViewerAnimated.createElementTexture(document.querySelector('video'));
+  const canvasTexture = modelViewerAnimated.createElementTexture(canvas);
+  baseColorTexture.setTexture(videoTexture);
+
+  document.querySelector('#type').addEventListener('input', (event) => {
+    console.log(event.target.value);
+    switch(event.target.value){
+      case "video":
+        baseColorTexture.setTexture(videoTexture);
+        break;
+      case "canvas":
+        baseColorTexture.setTexture(canvasTexture);
+        break;
+    }
+  });
+});
+
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
 
     <div class="sample">
       <div id="pickMaterialExample" class="demo"></div>

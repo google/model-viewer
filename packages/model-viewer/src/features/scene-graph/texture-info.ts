@@ -98,6 +98,8 @@ export class TextureInfo implements TextureInfoInterface {
     let encoding: TextureEncoding = sRGBEncoding;
     this[$texture] = texture;
 
+    console.log(texture);
+
     if (this[$materials]) {
       for (const material of this[$materials]!) {
         switch (this[$usage]) {

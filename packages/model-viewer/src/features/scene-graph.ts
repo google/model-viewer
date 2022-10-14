@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
+import {CanvasTexture, RepeatWrapping, sRGBEncoding, Texture, TextureLoader, VideoTexture} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
@@ -35,6 +35,7 @@ const $model = Symbol('model');
 const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
 const $textureLoader = Symbol('textureLoader');
 const $originalGltfJson = Symbol('originalGltfJson');
+const $buildTexture = Symbol('buildTexture');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean,
@@ -51,6 +52,8 @@ export interface SceneGraphInterface {
   readonly originalGltfJson: GLTF|null;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
   createTexture(uri: string, type?: string): Promise<ModelViewerTexture|null>;
+  createElementTexture(element: HTMLCanvasElement|
+                       HTMLVideoElement): ModelViewerTexture;
   /**
    * Intersects a ray with the scene and returns a list of materials who's
    * objects were intersected.
@@ -117,6 +120,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
     }
 
+    private[$buildTexture](texture: Texture): ModelViewerTexture {
+      // Applies glTF default settings.
+      texture.encoding = sRGBEncoding;
+      texture.wrapS = RepeatWrapping;
+      texture.wrapT = RepeatWrapping;
+      return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);
+    }
+
     async createTexture(uri: string, type: string = 'image/png'):
         Promise<ModelViewerTexture|null> {
       const currentGLTF = this[$currentGLTF];
@@ -125,14 +136,34 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (!currentGLTF || !texture) {
         return null;
       }
-      // Applies default settings.
-      texture.encoding = sRGBEncoding;
-      texture.wrapS = RepeatWrapping;
-      texture.wrapT = RepeatWrapping;
       texture.flipY = false;
       texture.userData.mimeType = type;
 
-      return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);
+      return this[$buildTexture](texture);
+    }
+
+    createElementTexture(element: HTMLCanvasElement|
+                         HTMLVideoElement): ModelViewerTexture {
+      let texture;
+      if (element instanceof HTMLVideoElement) {
+        texture = new VideoTexture(element);
+
+        if (element.requestVideoFrameCallback != null) {
+          const update = () => {
+            this[$needsRender]();
+            element.requestVideoFrameCallback(update);
+          };
+          element.requestVideoFrameCallback(update);
+        } else {
+          element.addEventListener('timeupdate', () => {
+            this[$needsRender]();
+          });
+        }
+      } else {
+        texture = new CanvasTexture(element);
+      }
+
+      return this[$buildTexture](texture);
     }
 
     async updated(changedProperties: Map<string, any>) {
