@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-import {LinearEncoding, MeshStandardMaterial, sRGBEncoding, Texture as ThreeTexture, TextureEncoding, Vector2} from 'three';
+import {LinearEncoding, MeshStandardMaterial, sRGBEncoding, Texture as ThreeTexture, TextureEncoding, Vector2, VideoTexture} from 'three';
 
 import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {TextureInfo as TextureInfoInterface} from './api.js';
 import {$threeTexture} from './image.js';
 import {Texture} from './texture.js';
+import {$correlatedObjects} from './three-dom-element.js';
 
 const $texture = Symbol('texture');
 const $transform = Symbol('transform');
@@ -98,7 +99,21 @@ export class TextureInfo implements TextureInfoInterface {
     let encoding: TextureEncoding = sRGBEncoding;
     this[$texture] = texture;
 
-    console.log(texture);
+    if (texture != null && texture[$correlatedObjects] != null) {
+      const [first] = texture[$correlatedObjects] as Set<VideoTexture>;
+      if (first.isVideoTexture) {
+        const element = first.image;
+        if (element.requestVideoFrameCallback != null) {
+          const update = () => {
+            this.onUpdate();
+            element.requestVideoFrameCallback(update);
+          };
+          element.requestVideoFrameCallback(update);
+        } else {
+          element.addEventListener('timeupdate', this.onUpdate);
+        }
+      }
+    }
 
     if (this[$materials]) {
       for (const material of this[$materials]!) {

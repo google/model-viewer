@@ -144,24 +144,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     createElementTexture(element: HTMLCanvasElement|
                          HTMLVideoElement): ModelViewerTexture {
-      let texture;
-      if (element instanceof HTMLVideoElement) {
-        texture = new VideoTexture(element);
-
-        if (element.requestVideoFrameCallback != null) {
-          const update = () => {
-            this[$needsRender]();
-            element.requestVideoFrameCallback(update);
-          };
-          element.requestVideoFrameCallback(update);
-        } else {
-          element.addEventListener('timeupdate', () => {
-            this[$needsRender]();
-          });
-        }
-      } else {
-        texture = new CanvasTexture(element);
-      }
+      const texture = element instanceof HTMLVideoElement ?
+          new VideoTexture(element) :
+          new CanvasTexture(element);
 
       return this[$buildTexture](texture);
     }
