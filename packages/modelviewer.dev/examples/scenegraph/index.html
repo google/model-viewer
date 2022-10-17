@@ -479,9 +479,10 @@ modelViewerTexture1.addEventListener("load", () => {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Create animated textures</h2>
-            <p>As above, you can change these values in AR, but only in WebXR
-              mode. iOS Quick Look reflects these texture changes so long as the
-              USDZ is auto-generated.</p>
+            <p>Though video textures are not part of the glTF spec yet, you can
+            create them and add them to your model after it loads. Video
+            elements, Canvas elements, and Lottie animations are all
+            supported.</p>
           </div>
           <example-snippet stamp-to="animatedTexturesExample" highlight-as="html">
             <template>
@@ -511,15 +512,12 @@ modelViewerAnimated.addEventListener("load", () => {
   const material = modelViewerAnimated.model.materials[0];
   const {baseColorTexture} = material.pbrMetallicRoughness;
 
-  // const loader = new LottieLoader();
-	// loader.setQuality( 2 );
-  // const lottieTexture = loader.load("../../shared-assets/models/24017-lottie-logo-animation.json");
   const videoTexture = modelViewerAnimated.createElementTexture(document.querySelector('video'));
   const canvasTexture = modelViewerAnimated.createElementTexture(canvas);
+  const lottieTexture = modelViewerAnimated.createLottieTexture("../../shared-assets/models/24017-lottie-logo-animation.json", 2);
   baseColorTexture.setTexture(videoTexture);
 
-  document.querySelector('#type').addEventListener('input', (event) => {
-    console.log(event.target.value);
+  document.querySelector('#type').addEventListener('input', async (event) => {
     switch(event.target.value){
       case "video":
         baseColorTexture.setTexture(videoTexture);
@@ -527,11 +525,16 @@ modelViewerAnimated.addEventListener("load", () => {
       case "canvas":
         baseColorTexture.setTexture(canvasTexture);
         break;
+      case "lottie":
+        baseColorTexture.setTexture(await lottieTexture);
+        break;
     }
   });
 });
 
 </script>
+<!-- Remove this with r146 and lazy-load it internally instead like the DRACO decoder -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/libs/lottie_canvas.js"></script>
             </template>
           </example-snippet>
         </div>

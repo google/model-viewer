@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {CanvasTexture, RepeatWrapping, sRGBEncoding, Texture, TextureLoader, VideoTexture} from 'three';
+import {CanvasTexture, RepeatWrapping, sRGBEncoding, Texture, VideoTexture} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
@@ -33,7 +33,6 @@ import {Texture as ModelViewerTexture} from './scene-graph/texture';
 export const $currentGLTF = Symbol('currentGLTF');
 const $model = Symbol('model');
 const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
-const $textureLoader = Symbol('textureLoader');
 const $originalGltfJson = Symbol('originalGltfJson');
 const $buildTexture = Symbol('buildTexture');
 
@@ -52,6 +51,8 @@ export interface SceneGraphInterface {
   readonly originalGltfJson: GLTF|null;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
   createTexture(uri: string, type?: string): Promise<ModelViewerTexture|null>;
+  createLottieTexture(uri: string, quality: number):
+      Promise<ModelViewerTexture|null>;
   createElementTexture(element: HTMLCanvasElement|
                        HTMLVideoElement): ModelViewerTexture;
   /**
@@ -73,7 +74,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
   class SceneGraphModelViewerElement extends ModelViewerElement {
     protected[$model]: Model|undefined = undefined;
     protected[$currentGLTF]: ModelViewerGLTFInstance|null = null;
-    private[$textureLoader] = new TextureLoader();
     private[$originalGltfJson]: GLTF|null = null;
 
     @property({type: String, attribute: 'variant-name'})
@@ -131,13 +131,24 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     async createTexture(uri: string, type: string = 'image/png'):
         Promise<ModelViewerTexture|null> {
       const currentGLTF = this[$currentGLTF];
-      const texture: Texture = await new Promise<Texture>(
-          (resolve) => this[$textureLoader].load(uri, resolve));
+      const {textureUtils} = this[$renderer];
+      const texture: Texture = await textureUtils!.loadImage(uri);
       if (!currentGLTF || !texture) {
         return null;
       }
-      texture.flipY = false;
       texture.userData.mimeType = type;
+
+      return this[$buildTexture](texture);
+    }
+
+    async createLottieTexture(uri: string, quality: number):
+        Promise<ModelViewerTexture|null> {
+      const currentGLTF = this[$currentGLTF];
+      const {textureUtils} = this[$renderer];
+      const texture: Texture = await textureUtils!.loadLottie(uri, quality);
+      if (!currentGLTF || !texture) {
+        return null;
+      }
 
       return this[$buildTexture](texture);
     }
