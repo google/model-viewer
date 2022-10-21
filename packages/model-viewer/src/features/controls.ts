@@ -90,12 +90,19 @@ export interface Finger {
 }
 
 export type InteractionPromptStrategy = 'auto'|'none';
+export type InteractionPromptStyle = 'basic'|'wiggle';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
 
 export const InteractionPromptStrategy:
     {[index: string]: InteractionPromptStrategy} = {
       AUTO: 'auto',
       NONE: 'none'
+    };
+
+export const InteractionPromptStyle:
+    {[index: string]: InteractionPromptStyle} = {
+      BASIC: 'basic',
+      WIGGLE: 'wiggle'
     };
 
 export const TouchAction: {[index: string]: TouchAction} = {
@@ -229,6 +236,7 @@ export declare interface ControlsInterface {
   minFieldOfView: string;
   maxFieldOfView: string;
   interactionPrompt: InteractionPromptStrategy;
+  interactionPromptStyle: InteractionPromptStyle;
   interactionPromptThreshold: number;
   orbitSensitivity: number;
   touchAction: TouchAction;
@@ -318,6 +326,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: String, attribute: 'interaction-prompt'})
     interactionPrompt: InteractionPromptStrategy =
         InteractionPromptStrategy.AUTO;
+
+    @property({type: String, attribute: 'interaction-prompt-style'})
+    interactionPromptStyle: InteractionPromptStyle =
+        InteractionPromptStyle.WIGGLE;
 
     @property({type: Number, attribute: 'orbit-sensitivity'})
     orbitSensitivity: number = 1;
@@ -706,7 +718,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-      if (isFinite(this[$promptElementVisibleTime])) {
+      if (isFinite(this[$promptElementVisibleTime]) &&
+          this.interactionPromptStyle === InteractionPromptStyle.WIGGLE) {
         const animationTime =
             ((now - this[$promptElementVisibleTime]) / PROMPT_ANIMATION_TIME) %
             1;

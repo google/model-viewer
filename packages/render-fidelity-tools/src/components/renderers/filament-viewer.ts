@@ -59,18 +59,18 @@ export class FilamentViewer extends LitElement {
   @property({type: Object}) scenario: ScenarioConfig|null = null;
 
   private[$rendering]: boolean = false;
-  private[$engine]: Engine;
-  private[$scene]: Scene;
-  private[$renderer]: Renderer;
-  private[$swapChain]: SwapChain;
-  private[$camera]: Camera;
-  private[$view]: View;
+  private[$engine]!: Engine;
+  private[$scene]!: Scene;
+  private[$renderer]!: Renderer;
+  private[$swapChain]!: SwapChain;
+  private[$camera]!: Camera;
+  private[$view]!: View;
 
-  private[$ibl]: IndirectLight|null;
-  private[$skybox]: Skybox|null;
-  private[$currentAsset]: gltfio$FilamentAsset|null;
-  private[$assetLoader]: gltfio$AssetLoader|null;
-  private[$directionalLight]: Entity|null;
+  private[$ibl]: IndirectLight|null = null;
+  private[$skybox]: Skybox|null = null;
+  private[$currentAsset]: gltfio$FilamentAsset|null = null;
+  private[$assetLoader]: gltfio$AssetLoader|null = null;
+  private[$directionalLight]: Entity|null = null;
 
   private[$canvas]: HTMLCanvasElement|null = null;
   private[$boundingBox]: Aabb = {min: [0, 0, 0], max: [0, 0, 0]};

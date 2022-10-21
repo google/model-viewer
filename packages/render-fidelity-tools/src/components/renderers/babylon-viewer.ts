@@ -33,9 +33,9 @@ const $degToRadians = Symbol('degToRadians');
 @customElement('babylon-viewer')
 export class BabylonViewer extends LitElement {
   @property({type: Object}) scenario: ScenarioConfig|null = null;
-  private[$canvas]: HTMLCanvasElement|null;
-  private[$engine]: Engine;
-  private[$scene]: Scene;
+  private[$canvas]: HTMLCanvasElement|null = null;
+  private[$engine]!: Engine;
+  private[$scene]!: Scene;
 
 
   updated(changedProperties: Map<string, any>) {
