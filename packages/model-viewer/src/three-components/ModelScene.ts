@@ -64,8 +64,7 @@ const ndc = new Vector2();
 export class ModelScene extends Scene {
   public element: ModelViewerElement;
   public canvas: HTMLCanvasElement;
-  public context: CanvasRenderingContext2D|ImageBitmapRenderingContext|null =
-      null;
+  public context: CanvasRenderingContext2D|null = null;
   public annotationRenderer = new CSS2DRenderer();
   public schemaElement = document.createElement('script');
   public width = 1;
@@ -150,7 +149,7 @@ export class ModelScene extends Scene {
    * there are more than one.
    */
   createContext() {
-    this.context = this.canvas.getContext('2d')!;
+    this.context = this.canvas.getContext('2d');
   }
 
   getCamera(): Camera {

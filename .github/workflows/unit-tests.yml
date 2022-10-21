@@ -12,6 +12,19 @@ jobs:
     timeout-minutes: 60
 
     steps:
+    - name: 'BrowserStack Env Setup'  # Invokes the setup-env action
+      uses: browserstack/github-actions/setup-env@master
+      with:
+        username: ${{ secrets.BROWSER_STACK_USERNAME }}
+        access-key: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
+
+    - name: 'BrowserStack Local Tunnel Setup'  # Invokes the setup-local action
+      uses: browserstack/github-actions/setup-local@master
+      with:
+        local-testing: start
+        local-identifier: test
+        local-logging-level: setup-logs
+
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
       with:
@@ -30,8 +43,9 @@ jobs:
       run: npm run build
 
     - name: Unit tests
-      env:
-        BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
-        BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
-        BROWSER_STACK_BUILD_NAME: ${{ format('{0} / {1}', github.ref, github.run_id) }}
       run: npm run test:ci
+
+    - name: 'BrowserStackLocal Stop'  # Terminating the BrowserStackLocal tunnel connection
+      uses: browserstack/github-actions/setup-local@master
+      with:
+        local-testing: stop

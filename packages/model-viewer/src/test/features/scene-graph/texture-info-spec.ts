@@ -27,6 +27,7 @@ suite('scene-graph/texture-info', () => {
     let element: ModelViewerElement;
     let emptyTextureInfo: TextureInfo;
     let baseTextureInfo: TextureInfo;
+
     setup(async () => {
       element = new ModelViewerElement();
       element.src = DUCK_GLB_PATH;

@@ -169,7 +169,7 @@ suite('AR', () => {
     // possibly due to not serving over HTTPS (which disables WebXR)? However,
     // Browserstack is unstable without this hostname.
     test('if on a WebXR platform', () => {
-      expect(element.canActivateAR).to.be.equal(IS_ANDROID);
+      expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);
     });
 
     test('with an ios-src on iOS', async () => {
