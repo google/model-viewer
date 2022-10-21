@@ -41,8 +41,8 @@ module.exports = function(config) {
     autoWatchBatchDelay: 1000,
     restartOnFileChange: true,
 
-    browserDisconnectTimeout: 300000,
-    browserNoActivityTimeout: 360000,
+    browserDisconnectTimeout: 600000,
+    browserNoActivityTimeout: 0,
     captureTimeout: 420000,
     concurrency: 10,
 
