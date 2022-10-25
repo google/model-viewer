@@ -1,0 +1,11 @@
+model-viewer {
+    position: relative;
+    height: 500px;
+    width: 500px;
+    background-color: #eee;
+}
+
+model-viewer>button {
+    position: absolute;
+    bottom: 16px;
+}
