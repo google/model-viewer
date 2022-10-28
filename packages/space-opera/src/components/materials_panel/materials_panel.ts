@@ -39,7 +39,7 @@ import {GLTF, TextureInfo as GLTFTextureInfo} from '@google/model-viewer/lib/thr
 import {TextField} from '@material/mwc-textfield';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {html} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
 import {reduxStore} from '../../space_opera_base.js';
@@ -219,9 +219,19 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   rgbToHex(rgba: RGBA|RGB): string {
-    const selectedColorRgb =
-        rgba.slice(0, 3).map((color: number) => Math.round(color * 255));
+    const selectedColorRgb = rgba.slice(0, 3).map(
+        (color: number) => Math.round(this.linearToSrgb(color) * 255));
     return color.rgbArrayToHex(selectedColorRgb);
+  }
+
+  linearToSrgb(val: number): number {
+    return (val < 0.0031308) ? val * 12.92 :
+                               1.055 * (Math.pow(val, 0.41666)) - 0.055;
+  }
+
+  srgbToLinear(val: number): number {
+    return (val < 0.04045) ? val * 0.0773993808 :
+                             Math.pow(val * 0.9478672986 + 0.0521327014, 2.4);
   }
 
   /* Interpolate base color as curr approaches duration */
@@ -610,9 +620,9 @@ export class MaterialPanel extends ConnectedLitElement {
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
     return [
-      selectedColor[0] / 255,
-      selectedColor[1] / 255,
-      selectedColor[2] / 255,
+      this.srgbToLinear(selectedColor[0] / 255),
+      this.srgbToLinear(selectedColor[1] / 255),
+      this.srgbToLinear(selectedColor[2] / 255),
       alphaFactor
     ];
   }
@@ -623,9 +633,9 @@ export class MaterialPanel extends ConnectedLitElement {
     // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
     // 0-1.
     return [
-      selectedColor[0] / 255,
-      selectedColor[1] / 255,
-      selectedColor[2] / 255
+      this.srgbToLinear(selectedColor[0] / 255),
+      this.srgbToLinear(selectedColor[1] / 255),
+      this.srgbToLinear(selectedColor[2] / 255)
     ];
   }
 

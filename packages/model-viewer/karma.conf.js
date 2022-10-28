@@ -41,8 +41,8 @@ module.exports = function(config) {
     autoWatchBatchDelay: 1000,
     restartOnFileChange: true,
 
-    browserDisconnectTimeout: 300000,
-    browserNoActivityTimeout: 360000,
+    browserDisconnectTimeout: 600000,
+    browserNoActivityTimeout: 0,
     captureTimeout: 420000,
     concurrency: 10,
 
@@ -80,12 +80,6 @@ module.exports = function(config) {
 
 
   if (process.env.USE_BROWSER_STACK) {
-    if (!process.env.BROWSER_STACK_USERNAME ||
-        !process.env.BROWSER_STACK_ACCESS_KEY) {
-      throw new Error(
-          'BROWSER_STACK_USERNAME and BROWSER_STACK_ACCESS_KEY must be set with USE_BROWSER_STACK');
-    }
-
     const browserStackLaunchers = {
       'Chrome (latest)': {
         base: 'BrowserStack',
@@ -93,7 +87,6 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Chrome',
         browser_version: 'latest',
-        browserstack: {localIdentifier: 'chrome'}
       },
       'Chrome (latest-1)': {
         base: 'BrowserStack',
@@ -101,7 +94,6 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Chrome',
         browser_version: 'latest-1',
-        browserstack: {localIdentifier: 'chromeOld'}
       },
       'Edge (latest)': {
         base: 'BrowserStack',
@@ -109,7 +101,6 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Edge',
         browser_version: 'latest',
-        browserstack: {localIdentifier: 'edge'}
       },
       'Edge (latest-1)': {
         base: 'BrowserStack',
@@ -117,7 +108,6 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Edge',
         browser_version: 'latest-1',
-        browserstack: {localIdentifier: 'edgeOld'}
       },
       'Firefox (latest)': {
         base: 'BrowserStack',
@@ -133,7 +123,6 @@ module.exports = function(config) {
         os_version: '10',
         browser: 'Firefox',
         browser_version: 'latest-1',
-        browserstack: {localIdentifier: 'FirefoxOld'}
       },
       'Safari (latest)': {
         base: 'BrowserStack',
@@ -141,7 +130,6 @@ module.exports = function(config) {
         os_version: 'Monterey',
         browser: 'safari',
         browser_version: 'latest',
-        browserstack: {localIdentifier: 'Safari'}
       },
       'iOS Safari (iOS 15)': {
         base: 'BrowserStack',
@@ -150,7 +138,6 @@ module.exports = function(config) {
         device: 'iPhone 13',
         browser: 'iPhone',
         real_mobile: 'true',
-        browserstack: {localIdentifier: 'iOS15'}
       },
       'Android 11 (Samsung)': {
         base: 'BrowserStack',
@@ -159,13 +146,14 @@ module.exports = function(config) {
         device: 'Samsung Galaxy S21',
         browser: 'Android',
         real_mobile: 'true',
-        browserstack: {localIdentifier: 'AndroidP30'}
       },
     };
 
     config.set({
       browserStack: {
         idleTimeout: 600,
+        startTunnel: false,
+        localIdentifier: 'test',
         name: '<model-viewer> Unit Tests',
         project: '<model-viewer>',
         apiClientEndpoint: 'https://api.browserstack.com',

@@ -49,6 +49,7 @@ const findPrimitivesWithVariant = (model: Model, variantName: string) => {
 suite('scene-graph/model/mesh-primitives', () => {
   suite('Primitive with default material', () => {
     let element: ModelViewerElement;
+
     setup(async () => {
       element = new ModelViewerElement();
       element.src = KHRONOS_TRIANGLE_GLB_PATH;
@@ -179,7 +180,7 @@ suite('scene-graph/model/mesh-primitives', () => {
     });
 
     test('Primitive count matches glTF file', async () => {
-      expect(model![$primitivesList].length).to.equal(3) ;
+      expect(model![$primitivesList].length).to.equal(3);
     });
 
     test('Primitives should have expected variant names', async () => {
@@ -199,8 +200,7 @@ suite('scene-graph/model/mesh-primitives', () => {
       let materials = new Array<MeshStandardMaterial>();
       for (const primitive of primitives) {
         materials.push(
-            await primitive.enableVariant('Inverse') as
-                MeshStandardMaterial);
+            await primitive.enableVariant('Inverse') as MeshStandardMaterial);
       }
 
       expect(materials).to.not.be.empty;
@@ -211,8 +211,7 @@ suite('scene-graph/model/mesh-primitives', () => {
       materials = new Array<MeshStandardMaterial>();
       for (const primitive of primitives) {
         materials.push(
-            await primitive.enableVariant('Normal') as
-                MeshStandardMaterial);
+            await primitive.enableVariant('Normal') as MeshStandardMaterial);
       }
 
       expect(materials.find((material: MeshStandardMaterial) => {
