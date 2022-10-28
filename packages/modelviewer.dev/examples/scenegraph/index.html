@@ -488,33 +488,35 @@ modelViewerTexture1.addEventListener("load", () => {
             <template>
 <model-viewer id="animated" camera-controls touch-action="pan-y" src="../../shared-assets/models/sphere.glb" ar alt="A 3D model of a duck">
   <div class="controls">
-      <p>Texture Type</p>
-      <select id="type">
-        <option value="video">Video</option>
-        <option value="canvas">Canvas</option>
-        <option value="lottie">Lottie</option>
-      </select>
-    </div>
-    <video src="../../shared-assets/models/lottie-logo.mp4" autoplay loop muted style="visibility: hidden;"></video>
-    <canvas width="1500" height="1500" style="visibility: hidden;"></canvas>
+    <p>Texture Type</p>
+    <select id="type">
+      <option value="video">Video</option>
+      <option value="canvas">Canvas</option>
+      <option value="lottie">Lottie</option>
+    </select>
+  </div>
 </model-viewer>
 <script type="module">
 const modelViewerAnimated = document.querySelector("model-viewer#animated");
 
-const canvas = document.querySelector('canvas');
+const videoTexture = modelViewerAnimated.createVideoTexture("../../shared-assets/models/lottie-logo.mp4");
+const canvasTexture = modelViewerAnimated.createCanvasTexture();
+const lottieTexture = modelViewerAnimated.createLottieTexture("../../shared-assets/models/24017-lottie-logo-animation.json", 2);
+
+const canvas = canvasTexture.source.element;
+canvas.width = 1600;
+canvas.height = 800;
 const ctx = canvas.getContext('2d');
 ctx.font = "250px sans-serif";
 ctx.fillStyle = "#aaa";
-ctx.fillText('Canvas 2D!', 0, 750);
+ctx.fillText('Canvas 2D!', 0, 400);
+canvasTexture.source.update();
 
 modelViewerAnimated.addEventListener("load", () => {
 
   const material = modelViewerAnimated.model.materials[0];
   const {baseColorTexture} = material.pbrMetallicRoughness;
 
-  const videoTexture = modelViewerAnimated.createElementTexture(document.querySelector('video'));
-  const canvasTexture = modelViewerAnimated.createElementTexture(canvas);
-  const lottieTexture = modelViewerAnimated.createLottieTexture("../../shared-assets/models/24017-lottie-logo-animation.json", 2);
   baseColorTexture.setTexture(videoTexture);
 
   document.querySelector('#type').addEventListener('input', async (event) => {
@@ -533,8 +535,6 @@ modelViewerAnimated.addEventListener("load", () => {
 });
 
 </script>
-<!-- Remove this with r146 and lazy-load it internally instead like the DRACO decoder -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/libs/lottie_canvas.js"></script>
             </template>
           </example-snippet>
         </div>

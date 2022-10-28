@@ -53,8 +53,8 @@ export interface SceneGraphInterface {
   createTexture(uri: string, type?: string): Promise<ModelViewerTexture|null>;
   createLottieTexture(uri: string, quality: number):
       Promise<ModelViewerTexture|null>;
-  createElementTexture(element: HTMLCanvasElement|
-                       HTMLVideoElement): ModelViewerTexture;
+  createVideoTexture(uri: string): ModelViewerTexture;
+  createCanvasTexture(): ModelViewerTexture;
   /**
    * Intersects a ray with the scene and returns a list of materials who's
    * objects were intersected.
@@ -129,35 +129,37 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async createTexture(uri: string, type: string = 'image/png'):
-        Promise<ModelViewerTexture|null> {
-      const currentGLTF = this[$currentGLTF];
+        Promise<ModelViewerTexture> {
       const {textureUtils} = this[$renderer];
-      const texture: Texture = await textureUtils!.loadImage(uri);
-      if (!currentGLTF || !texture) {
-        return null;
-      }
+      const texture = await textureUtils!.loadImage(uri);
+
       texture.userData.mimeType = type;
 
       return this[$buildTexture](texture);
     }
 
     async createLottieTexture(uri: string, quality: number):
-        Promise<ModelViewerTexture|null> {
-      const currentGLTF = this[$currentGLTF];
+        Promise<ModelViewerTexture> {
       const {textureUtils} = this[$renderer];
-      const texture: Texture = await textureUtils!.loadLottie(uri, quality);
-      if (!currentGLTF || !texture) {
-        return null;
-      }
+      const texture = await textureUtils!.loadLottie(uri, quality);
 
       return this[$buildTexture](texture);
     }
 
-    createElementTexture(element: HTMLCanvasElement|
-                         HTMLVideoElement): ModelViewerTexture {
-      const texture = element instanceof HTMLVideoElement ?
-          new VideoTexture(element) :
-          new CanvasTexture(element);
+    createVideoTexture(uri: string): ModelViewerTexture {
+      const video = document.createElement('video');
+      video.src = uri;
+      video.muted = true;
+      video.play();
+      video.loop = true;
+      const texture = new VideoTexture(video);
+
+      return this[$buildTexture](texture);
+    }
+
+    createCanvasTexture(): ModelViewerTexture {
+      const canvas = document.createElement('canvas');
+      const texture = new CanvasTexture(canvas);
 
       return this[$buildTexture](texture);
     }
