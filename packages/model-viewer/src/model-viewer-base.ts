@@ -368,7 +368,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     renderer.unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
-      this[$scene].reset();
+      this[$scene].dispose();
+      this[$clearModelTimeout] = null;
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
