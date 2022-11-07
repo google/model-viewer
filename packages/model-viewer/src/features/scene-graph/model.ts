@@ -91,7 +91,7 @@ export class Model implements ModelInterface {
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
     this[$threeScene] = threeGLTF.scene;
 
-    for (const [i, material] of gltf.materials!.entries()) {
+    for (const [i, material] of gltf.materials?.entries() ?? []) {
       const correlatedMaterial =
           gltfElementMap.get(material) as Set<MeshStandardMaterial>;
 

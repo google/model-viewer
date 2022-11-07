@@ -33,6 +33,7 @@ const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
     assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
 const CUBES_GLTF_PATH = assetPath('models/cubes.gltf');
+const VASE_NO_MATERIALS_GLB_PATH = assetPath('models/VaseNoMaterials.glb');
 
 suite('scene-graph/model', () => {
   suite('Model', () => {
@@ -80,6 +81,13 @@ suite('scene-graph/model', () => {
       });
 
       expect(collectedMaterials.size).to.be.equal(materials.size);
+    });
+
+    test('should have no materials given a model without any materials defined', async () => {
+      const threeGLTF = await loadThreeGLTF(VASE_NO_MATERIALS_GLB_PATH);
+      const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
+
+      expect(model.materials.length).to.be.eq(0);
     });
 
     suite('Model Variants', () => {

@@ -28,6 +28,7 @@ import {waitForEvent} from '../utils/test_utils.js';
 const TEXTURE_CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
 const CUBES_GLTF_PATH = '../base/shared-assets/models/cubes.gltf';
 const TRIANGLE_GLTF_PATH = '../base/shared-assets/models/Triangle.gltf';
+const VASE_NO_MATERIALS_GLB_PATH = '../base/shared-assets/models/VaseNoMaterials.glb';
 const TEXTURE_PATH = 'base/shared-assets/models/ORM.png';
 
 async function checkUpload(
@@ -75,20 +76,38 @@ describe('material panel test', () => {
     document.body.removeChild(preview);
   });
 
-  it('selector reflects materials in GLTF, including defaults where undefined',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       expect(panel.selectedBaseColor).toEqual([1, 0, 1, 1]);
-       expect(panel.selectedRoughnessFactor).toEqual(0.2);
-       expect(panel.selectedMetallicFactor).toEqual(1);
+  describe('Given a model without any materials', () => {
+    beforeEach(async () => {
+      reduxStore.dispatch(dispatchGltfUrl(VASE_NO_MATERIALS_GLB_PATH));
+      await preview.loadComplete;
+      await panel.updateComplete;
+    });
 
-       panel.selectedMaterialIndex = 1;
-       await panel.updateComplete;
-       expect(panel.selectedBaseColor).toEqual([1, 1, 0, 1]);
-       expect(panel.selectedRoughnessFactor).toEqual(1);
-       expect(panel.selectedMetallicFactor).toEqual(1);
-     });
+    it('should display a placeholder',  () => {
+      const placeholder = panel.shadowRoot?.getElementById('material-placeholder');
+      expect(placeholder!.style.display).not.toEqual('none');
+    });
+
+    it('should not show the material panel', () => {
+      const form = panel.shadowRoot?.getElementById('material-container');
+      expect(form!.style.display).toEqual('none');
+    });
+  });
+
+  it('selector reflects materials in GLTF, including defaults where undefined',
+   async () => {
+     panel.selectedMaterialIndex = 0;
+     await panel.updateComplete;
+     expect(panel.selectedBaseColor).toEqual([1, 0, 1, 1]);
+     expect(panel.selectedRoughnessFactor).toEqual(0.2);
+     expect(panel.selectedMetallicFactor).toEqual(1);
+
+     panel.selectedMaterialIndex = 1;
+     await panel.updateComplete;
+     expect(panel.selectedBaseColor).toEqual([1, 1, 0, 1]);
+     expect(panel.selectedRoughnessFactor).toEqual(1);
+     expect(panel.selectedMetallicFactor).toEqual(1);
+   });
 
   it('Model with variants has visible variant selector', async () => {
     reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));

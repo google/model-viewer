@@ -68,11 +68,11 @@ export class PrimitiveNode extends Node {
     // Captures the primitive's initial material.
     const materialMappings =
         threeObjectMap.get(mesh.material as ThreeMaterial)!;
-    if (materialMappings.materials != null) {
+    if (materialMappings?.materials != null) {
       this[$initialMaterialIdx] = this[$activeMaterialIdx] =
           materialMappings.materials;
     } else {
-      console.error(
+      console.warn(
           `Primitive (${mesh.name}) missing initial material reference.`);
     }
 

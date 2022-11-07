@@ -78,6 +78,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @state() isInterpolating: boolean = false;
 
   @query('#material-container') panel!: HTMLDivElement;
+  @query('#material-placeholder') placeholder!: HTMLDivElement;
   @query('me-color-picker#base-color-picker') baseColorPicker!: ColorPicker;
   @query('me-slider-with-input#roughness-factor')
   roughnessFactorSlider!: SliderWithInputElement;
@@ -539,10 +540,18 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   get selectedMaterialIndex(): number {
-    return this.selectableMaterials[this.materialSelector.selectedIndex].index;
+    if (!this.materialSelector) {
+      return 0;
+    }
+
+    return this.selectableMaterials[this.materialSelector.selectedIndex]?.index ?? 0;
   }
 
   set selectedMaterialIndex(index: number) {
+    if (!this.materialSelector) {
+      return;
+    }
+
     this.materialSelector.selectedIndex = index;
     this.onSelectMaterial();
   }
@@ -1137,6 +1146,10 @@ export class MaterialPanel extends ConnectedLitElement {
     `;
   }
 
+  get hasSelectableMaterials(): boolean {
+    return this.selectableMaterials?.length > 0;
+  }
+
   updateSelectableMaterials() {
     this.selectableMaterials = [];
     for (const material of getModelViewer()!.model!.materials) {
@@ -1163,7 +1176,11 @@ export class MaterialPanel extends ConnectedLitElement {
 
   render() {
     return html`
-    <div id="material-container" style="display: none">
+    <div>
+    <div id="material-placeholder" style="display: ${!this.hasSelectableMaterials ? 'block' : 'none'}">
+      <pre>No materials</pre>
+    </div>  
+    <div id="material-container" style="display: ${this.hasSelectableMaterials ? 'block' : 'none'}">
     ${this.renderVariantsTab()}
     ${this.renderEditVariantDialog()}
     ${this.renderCreateVariantDialog()}
@@ -1175,6 +1192,7 @@ export class MaterialPanel extends ConnectedLitElement {
     ${this.renderEmissiveTextureTab()}
     ${this.renderOcclusionTextureTab()}
     ${this.renderOtherTab()}
+    </div>
     </div>
     `;
   }
