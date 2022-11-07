@@ -64,7 +64,6 @@ const ndc = new Vector2();
 export class ModelScene extends Scene {
   public element: ModelViewerElement;
   public canvas: HTMLCanvasElement;
-  public context: CanvasRenderingContext2D|null = null;
   public annotationRenderer = new CSS2DRenderer();
   public schemaElement = document.createElement('script');
   public width = 1;
@@ -148,8 +147,8 @@ export class ModelScene extends Scene {
    * directly. This extra context is necessary to copy the renderings into when
    * there are more than one.
    */
-  createContext() {
-    this.context = this.canvas.getContext('2d');
+  get context() {
+    return this.canvas.getContext('2d');
   }
 
   getCamera(): Camera {

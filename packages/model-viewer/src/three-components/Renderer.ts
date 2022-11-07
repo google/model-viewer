@@ -374,14 +374,11 @@ export class Renderer extends EventDispatcher {
   }
 
   private copyPixels(scene: ModelScene, width: number, height: number) {
-    if (scene.context == null) {
-      scene.createContext();
-    }
-    const context2D = scene.context;
-    if (context2D == null) {
-      console.log('could not acquire 2d context');
-      return;
-    }
+    const context2D = scene.context!;
+    // if (context2D == null) {
+    //   console.log('could not acquire 2d context');
+    //   return;
+    // }
     context2D.clearRect(0, 0, width, height);
     context2D.drawImage(
         this.canvas3D, 0, 0, width, height, 0, 0, width, height);
