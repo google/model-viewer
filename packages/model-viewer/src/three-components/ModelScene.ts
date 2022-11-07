@@ -300,6 +300,14 @@ export class ModelScene extends Scene {
     this.mixer.uncacheRoot(this);
   }
 
+  dispose() {
+    this.reset();
+    if (this.shadow != null) {
+      this.shadow.dispose();
+      this.shadow = null;
+    }
+  }
+
   get currentGLTF() {
     return this._currentGLTF;
   }
