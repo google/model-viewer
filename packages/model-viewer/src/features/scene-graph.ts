@@ -31,10 +31,10 @@ import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
 export const $currentGLTF = Symbol('currentGLTF');
-const $model = Symbol('model');
+export const $originalGltfJson = Symbol('originalGltfJson');
+export const $model = Symbol('model');
 const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
 const $textureLoader = Symbol('textureLoader');
-const $originalGltfJson = Symbol('originalGltfJson');
 
 interface SceneExportOptions {
   binary?: boolean, trs?: boolean, onlyVisible?: boolean,

@@ -16,6 +16,7 @@
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
+import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {normalizeUnit} from '../styles/conversions.js';
@@ -235,6 +236,7 @@ export class ModelScene extends Scene {
       throw error;
     }
 
+    this.cancelPendingSourceChange = null;
     this.reset();
     this.url = url;
     this._currentGLTF = gltf;
@@ -305,6 +307,9 @@ export class ModelScene extends Scene {
       this.shadow.dispose();
       this.shadow = null;
     }
+    (this.element as any)[$currentGLTF] = null;
+    (this.element as any)[$originalGltfJson] = null;
+    (this.element as any)[$model] = null;
   }
 
   get currentGLTF() {
