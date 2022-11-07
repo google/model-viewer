@@ -37,6 +37,7 @@ const HDR_FILE_RE = /\.hdr(\.js)?$/;
 export default class TextureUtils extends EventDispatcher {
   private _ldrLoader: TextureLoader|null = null;
   private _hdrLoader: RGBELoader|null = null;
+  // TODO: need to lazy-load this like the DRACOLoader
   private _lottieLoader: LottieLoader|null = null;
 
   private generatedEnvironmentMap: Promise<CubeTexture>|null = null;
