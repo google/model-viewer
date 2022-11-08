@@ -31,9 +31,9 @@ import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
 export const $currentGLTF = Symbol('currentGLTF');
-const $model = Symbol('model');
+export const $originalGltfJson = Symbol('originalGltfJson');
+export const $model = Symbol('model');
 const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
-const $originalGltfJson = Symbol('originalGltfJson');
 const $buildTexture = Symbol('buildTexture');
 
 interface SceneExportOptions {

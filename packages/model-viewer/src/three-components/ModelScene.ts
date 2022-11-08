@@ -16,6 +16,7 @@
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
+import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {normalizeUnit} from '../styles/conversions.js';
@@ -64,7 +65,6 @@ const ndc = new Vector2();
 export class ModelScene extends Scene {
   public element: ModelViewerElement;
   public canvas: HTMLCanvasElement;
-  public context: CanvasRenderingContext2D|null = null;
   public annotationRenderer = new CSS2DRenderer();
   public schemaElement = document.createElement('script');
   public width = 1;
@@ -148,8 +148,8 @@ export class ModelScene extends Scene {
    * directly. This extra context is necessary to copy the renderings into when
    * there are more than one.
    */
-  createContext() {
-    this.context = this.canvas.getContext('2d');
+  get context() {
+    return this.canvas.getContext('2d');
   }
 
   getCamera(): Camera {
@@ -236,6 +236,7 @@ export class ModelScene extends Scene {
       throw error;
     }
 
+    this.cancelPendingSourceChange = null;
     this.reset();
     this.url = url;
     this._currentGLTF = gltf;
@@ -298,6 +299,17 @@ export class ModelScene extends Scene {
 
     this.mixer.stopAllAction();
     this.mixer.uncacheRoot(this);
+  }
+
+  dispose() {
+    this.reset();
+    if (this.shadow != null) {
+      this.shadow.dispose();
+      this.shadow = null;
+    }
+    (this.element as any)[$currentGLTF] = null;
+    (this.element as any)[$originalGltfJson] = null;
+    (this.element as any)[$model] = null;
   }
 
   get currentGLTF() {
