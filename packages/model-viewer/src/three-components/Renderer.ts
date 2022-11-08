@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer, EffectComposer, RenderPass} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -161,7 +159,9 @@ export class Renderer extends EventDispatcher {
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
 
-	  this.effectComposer = new EffectComposer( this.threeRenderer );
+	  this.effectComposer = new EffectComposer(this.threeRenderer);
+    this.renderPass = new RenderPass();
+    this.effectComposer.addPass(this.renderPass);
     } catch (error) {
       console.warn(error);
     }
@@ -425,8 +425,8 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !Number.isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 	
-	this.renderPass = new RenderPass(scene, scene.getCamera());
-	this.effectComposer.addPass(this.renderPass);
+    this.renderPass.scene = scene;
+    this.renderPass.camera = scene.getCamera();
   }
 
   render(t: number, frame?: XRFrame) {
@@ -501,7 +501,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
     //   this.threeRenderer.render(scene, scene.camera);
-	  this.effectComposer.render();
+	    this.effectComposer.render();
 
       if (this.multipleScenesVisible || scene.renderCount === 0) {
         this.copyPixels(scene, width, height);
