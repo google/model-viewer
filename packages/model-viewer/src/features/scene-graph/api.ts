@@ -104,7 +104,7 @@ export declare interface Material {
   readonly emissiveTexture: TextureInfo|null;
 
   readonly emissiveFactor: Readonly<RGB>;
-  setEmissiveFactor(rgb: RGB): void;
+  setEmissiveFactor(rgb: RGB|string): void;
   setAlphaCutoff(cutoff: number): void;
   getAlphaCutoff(): number;
   setDoubleSided(doubleSided: boolean): void;
@@ -182,7 +182,7 @@ export declare interface PBRMetallicRoughness {
   /**
    * Changes the base color factor of the material to the given value.
    */
-  setBaseColorFactor(rgba: RGBA): void;
+  setBaseColorFactor(rgba: RGBA|string): void;
 
   /**
    * Changes the metalness factor of the material to the given value.
