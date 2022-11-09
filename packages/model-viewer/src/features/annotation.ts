@@ -30,15 +30,15 @@ const worldToModel = new Matrix4();
 const worldToModelNormal = new Matrix3();
 
 export declare type HotspotData = {
-  readonly position: Vector3D;
-  readonly normal: Vector3D;
-  readonly screenPosition: Vector3D;
-  readonly facingCamera: boolean;
+  position: Vector3D,
+  normal: Vector3D,
+  canvasPosition: Vector3D,
+  facingCamera: boolean,
 }
 
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
-  queryHotspot(name: string): HotspotData | null;
+  queryHotspot(name: string): HotspotData|null;
   positionAndNormalFromPoint(pixelX: number, pixelY: number):
       {position: Vector3D, normal: Vector3D, uv: Vector2D|null}|null
 }
@@ -136,7 +136,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * This method returns in-scene data about a requested hotspot including
      * its position in screen (canvas) space and its current visibility.
      */
-    queryHotspot(name: string): HotspotData | null {
+    queryHotspot(name: string): HotspotData|null {
       const hotspot = this[$hotspotMap].get(name);
       if (hotspot == null) {
         return null;
@@ -159,18 +159,15 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       vector.x = (vector.x * widthHalf) + widthHalf;
       vector.y = -(vector.y * heightHalf) + heightHalf;
 
-      const screenPosition = toVector3D(
-        new Vector3(
-          vector.x,
-          vector.y,
-          vector.z
-        ));
+      const canvasPosition =
+          toVector3D(new Vector3(vector.x, vector.y, vector.z));
 
-      if (!Number.isFinite(screenPosition.x) || !Number.isFinite(screenPosition.y)) {
+      if (!Number.isFinite(canvasPosition.x) ||
+          !Number.isFinite(canvasPosition.y)) {
         return null;
       }
 
-      return {position, normal, screenPosition, facingCamera};
+      return {position, normal, canvasPosition, facingCamera};
     }
 
     /**

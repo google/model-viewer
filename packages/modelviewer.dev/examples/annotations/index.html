@@ -136,9 +136,10 @@
           <p>
             Hotspots can be queried to build custom overlays in screen space.
             For example, by using an SVG canvas and updating the line nodes we
-            can draw rudimentary dimensions lines. Note that this kind of
-            extended functionality cannot support occlusion in the 3D scene as
-            it is drawn on top.
+            can draw rudimentary dimension lines. Note that this kind of
+            extended functionality cannot support occlusion in the 3D scene, but
+            you can cause it to draw behind the model by setting its CSS z-index
+            to a negative value.
           </p>
           <p>
             By using WebXR mode, this markup works equally well in AR. Note that
@@ -279,10 +280,10 @@
     // update svg
     function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
       if (dotHotspot1 && dotHotspot1) {
-        svgLine.setAttribute('x1', dotHotspot1.screenPosition.x);
-        svgLine.setAttribute('y1', dotHotspot1.screenPosition.y);
-        svgLine.setAttribute('x2', dotHotspot2.screenPosition.x);
-        svgLine.setAttribute('y2', dotHotspot2.screenPosition.y);
+        svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
+        svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
+        svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
+        svgLine.setAttribute('y2', dotHotspot2.canvasPosition.y);
 
         // use provided optional hotspot to tie visibility of this svg line to
         if (dimensionHotspot && !dimensionHotspot.facingCamera) {
