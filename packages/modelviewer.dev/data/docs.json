@@ -766,7 +766,7 @@
       {
         "name": "queryHotspot(name)",
         "htmlName": "queryHotspot",
-        "description": "Returns information about the current state of the hotspot corresponding to the hotspot name given as a read-only snapshot: The position, normal, canvasPosition, and facingCamera. The canvas position is represented as a Vector3D with z as the OpenGL depth information. The function returns null if no hotspot is found.",
+        "description": "Returns information about the current state of the hotspot corresponding to the hotspot name as a snapshot: the position, normal, canvasPosition, and facingCamera. The canvas position is represented as a Vector3D with z as the OpenGL depth information. The function returns null if no hotspot is found.",
         "links": [
           "<a href=\"../examples/annotations/#dimensions\"><span class='attribute'>dimension lines</span> example</a>"
         ]

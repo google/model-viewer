@@ -30,8 +30,10 @@ const worldToModel = new Matrix4();
 const worldToModelNormal = new Matrix3();
 
 export declare type HotspotData = {
-  readonly position: Vector3D; readonly normal: Vector3D; readonly canvasPosition: Vector3D; readonly facingCamera:
-                                                                                                          boolean;
+  position: Vector3D,
+  normal: Vector3D,
+  canvasPosition: Vector3D,
+  facingCamera: boolean,
 }
 
 export declare interface AnnotationInterface {
