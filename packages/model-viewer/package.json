@@ -1,6 +1,6 @@
 {
   "name": "@google/model-viewer",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Easily display interactive 3D models on the web and in AR!",
   "repository": "https://github.com/google/model-viewer",
   "bugs": {
@@ -73,7 +73,7 @@
     "3d"
   ],
   "dependencies": {
-    "three": "^0.145.0",
+    "three": "^0.146.0",
     "lit": "^2.2.3"
   },
   "devDependencies": {
@@ -103,7 +103,8 @@
     "rollup-plugin-dts": "^4.2.2",
     "rollup-plugin-polyfill": "^3.0.0",
     "rollup-plugin-terser": "^7.0.2",
-    "typescript": "4.8.4"
+    "typescript": "4.8.4",
+    "lottie-web": "5.9.6"
   },
   "publishConfig": {
     "access": "public"

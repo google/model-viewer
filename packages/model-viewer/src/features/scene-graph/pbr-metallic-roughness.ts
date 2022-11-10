@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {MeshStandardMaterial} from 'three';
+import {Color, MeshStandardMaterial} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {PBRMetallicRoughness as DefaultedPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-defaulted.js';
@@ -105,14 +105,25 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     return this[$metallicRoughnessTexture];
   }
 
-  setBaseColorFactor(rgba: RGBA) {
+  setBaseColorFactor(rgba: RGBA|string) {
+    const color = new Color();
+    if (rgba instanceof Array) {
+      color.fromArray(rgba);
+    } else {
+      color.set(rgba).convertSRGBToLinear();
+    }
     for (const material of this[$threeMaterials]) {
-      material.color.fromArray(rgba);
-      material.opacity = (rgba)[3];
+      material.color.set(color);
+      if (rgba instanceof Array) {
+        material.opacity = (rgba)[3];
+      } else {
+        rgba = [0, 0, 0, material.opacity];
+        color.toArray(rgba);
+      }
     }
     const pbrMetallicRoughness =
         this[$sourceObject] as DefaultedPBRMetallicRoughness;
-    pbrMetallicRoughness.baseColorFactor = rgba;
+    pbrMetallicRoughness.baseColorFactor = rgba as RGBA;
     this[$onUpdate]();
   }
 

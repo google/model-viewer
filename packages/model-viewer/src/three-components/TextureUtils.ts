@@ -14,6 +14,7 @@
  */
 
 import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {LottieLoader} from 'three/examples/jsm/loaders/LottieLoader.js';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
@@ -32,11 +33,15 @@ const GENERATED_SIGMA = 0.04;
 const MAX_SAMPLES = 20;
 
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
-const ldrLoader = new TextureLoader();
-const hdrLoader = new RGBELoader();
-hdrLoader.setDataType(HalfFloatType);
 
 export default class TextureUtils extends EventDispatcher {
+  private _ldrLoader: TextureLoader|null = null;
+  private _hdrLoader: RGBELoader|null = null;
+  // TODO: need to lazy-load this like the DRACOLoader
+  private _lottieLoader: LottieLoader|null = null;
+  // private lottieLoaderUrl =
+  //     'https://cdn.jsdelivr.net/npm/three@0.144.0/examples/jsm/loaders/LottieLoader.js';
+
   private generatedEnvironmentMap: Promise<CubeTexture>|null = null;
   private generatedEnvironmentMapAlt: Promise<CubeTexture>|null = null;
 
@@ -49,12 +54,55 @@ export default class TextureUtils extends EventDispatcher {
     super();
   }
 
-  async load(
+  get ldrLoader(): TextureLoader {
+    if (this._ldrLoader == null) {
+      this._ldrLoader = new TextureLoader();
+    }
+    return this._ldrLoader;
+  }
+
+  get hdrLoader(): RGBELoader {
+    if (this._hdrLoader == null) {
+      this._hdrLoader = new RGBELoader();
+      this._hdrLoader.setDataType(HalfFloatType);
+    }
+    return this._hdrLoader;
+  }
+
+  async getLottieLoader(): Promise<LottieLoader> {
+    if (this._lottieLoader == null) {
+      // const {LottieLoader} = await import(this.lottieLoaderUrl);
+      this._lottieLoader = new LottieLoader();
+    }
+    return this._lottieLoader!;
+  }
+
+  async loadImage(url: string): Promise<Texture> {
+    const texture: Texture = await new Promise<Texture>(
+        (resolve, reject) =>
+            this.ldrLoader.load(url, resolve, () => {}, reject));
+    texture.name = url;
+    texture.flipY = false;
+
+    return texture;
+  }
+
+  async loadLottie(url: string, quality: number): Promise<Texture> {
+    const loader = await this.getLottieLoader();
+    loader.setQuality(quality);
+    const texture: Texture = await new Promise<Texture>(
+        (resolve, reject) => loader.load(url, resolve, () => {}, reject));
+    texture.name = url;
+
+    return texture;
+  }
+
+  async loadEquirect(
       url: string, progressCallback: (progress: number) => void = () => {}):
       Promise<Texture> {
     try {
       const isHDR: boolean = HDR_FILE_RE.test(url);
-      const loader = isHDR ? hdrLoader : ldrLoader;
+      const loader = isHDR ? this.hdrLoader : this.ldrLoader;
       const texture: Texture = await new Promise<Texture>(
           (resolve, reject) => loader.load(
               url, resolve, (event: {loaded: number, total: number}) => {
@@ -134,7 +182,7 @@ export default class TextureUtils extends EventDispatcher {
       url: string,
       progressCallback: (progress: number) => void): Promise<Texture> {
     if (!this.skyboxCache.has(url)) {
-      const skyboxMapLoads = this.load(url, progressCallback);
+      const skyboxMapLoads = this.loadEquirect(url, progressCallback);
 
       this.skyboxCache.set(url, skyboxMapLoads);
     }

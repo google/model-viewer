@@ -79,13 +79,13 @@ describe('material panel test', () => {
      async () => {
        panel.selectedMaterialIndex = 0;
        await panel.updateComplete;
-       expect(panel.selectedBaseColor).toEqual([1, 0, 1, 1]);
+       expect(panel.baseColorPicker.selectedColorHex).toEqual('#ff00ff');
        expect(panel.selectedRoughnessFactor).toEqual(0.2);
        expect(panel.selectedMetallicFactor).toEqual(1);
 
        panel.selectedMaterialIndex = 1;
        await panel.updateComplete;
-       expect(panel.selectedBaseColor).toEqual([1, 1, 0, 1]);
+       expect(panel.baseColorPicker.selectedColorHex).toEqual('#ffff00');
        expect(panel.selectedRoughnessFactor).toEqual(1);
        expect(panel.selectedMetallicFactor).toEqual(1);
      });

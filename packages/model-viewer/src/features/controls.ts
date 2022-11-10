@@ -603,6 +603,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           dispatchTouches('pointercancel');
           this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
               'interact-stopped', {detail: {source: changeSource}}));
+          document.removeEventListener('visibilitychange', onVisibilityChange);
           return;
         }
 

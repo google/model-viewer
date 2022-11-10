@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AnimationItem} from 'lottie-web';
+
 import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 
@@ -102,7 +104,7 @@ export declare interface Material {
   readonly emissiveTexture: TextureInfo|null;
 
   readonly emissiveFactor: Readonly<RGB>;
-  setEmissiveFactor(rgb: RGB): void;
+  setEmissiveFactor(rgb: RGB|string): void;
   setAlphaCutoff(cutoff: number): void;
   getAlphaCutoff(): number;
   setDoubleSided(doubleSided: boolean): void;
@@ -180,7 +182,7 @@ export declare interface PBRMetallicRoughness {
   /**
    * Changes the base color factor of the material to the given value.
    */
-  setBaseColorFactor(rgba: RGBA): void;
+  setBaseColorFactor(rgba: RGBA|string): void;
 
   /**
    * Changes the metalness factor of the material to the given value.
@@ -314,7 +316,17 @@ export declare interface Image {
   /**
    * The bufferView of the image, if it is embedded.
    */
-  readonly bufferView?: number
+  readonly bufferView?: number;
+
+  /**
+   * The backing HTML element, if this is a video or canvas texture.
+   */
+  readonly element?: HTMLVideoElement|HTMLCanvasElement;
+
+  /**
+   * The Lottie animation object, if this is a Lottie texture.
+   */
+  readonly animation?: AnimationItem;
 
   /**
    * A method to create an object URL of this image at the desired
@@ -322,6 +334,12 @@ export declare interface Image {
    * and so are unreadable on the CPU without a method like this.
    */
   createThumbnail(width: number, height: number): Promise<string>;
+
+  /**
+   * Only applies to canvas textures. Call when the content of the canvas has
+   * been updated and should be reflected in the model.
+   */
+  update(): void;
 }
 
 /**
