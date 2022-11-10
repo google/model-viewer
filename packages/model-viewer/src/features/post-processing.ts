@@ -18,7 +18,7 @@ import {Texture} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {clamp, Constructor, deserializeUrl} from '../utilities.js';
-import {BloomPass} from 'three';
+import {BloomPass} from 'three/examples/jsm/postprocessing/BloomPass';
 
 // make bunch of effects
 export const BLOOM_PASS = new BloomPass();

@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer, EffectComposer, RenderPass} from 'three';
+// @ts-nocheck
+import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
+import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
+import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -160,7 +162,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
 
 	  this.effectComposer = new EffectComposer(this.threeRenderer);
-    this.renderPass = new RenderPass();
+    this.renderPass = new RenderPass(null, null);
     this.effectComposer.addPass(this.renderPass);
     } catch (error) {
       console.warn(error);
