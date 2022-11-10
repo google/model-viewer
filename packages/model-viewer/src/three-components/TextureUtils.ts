@@ -39,8 +39,8 @@ export default class TextureUtils extends EventDispatcher {
   private _hdrLoader: RGBELoader|null = null;
   // TODO: need to lazy-load this like the DRACOLoader
   private _lottieLoader: LottieLoader|null = null;
-  private lottieLoaderUrl =
-      'https://cdn.jsdelivr.net/npm/three@0.144.0/examples/jsm/loaders/LottieLoader.js';
+  // private lottieLoaderUrl =
+  //     'https://cdn.jsdelivr.net/npm/three@0.144.0/examples/jsm/loaders/LottieLoader.js';
 
   private generatedEnvironmentMap: Promise<CubeTexture>|null = null;
   private generatedEnvironmentMapAlt: Promise<CubeTexture>|null = null;
@@ -71,7 +71,7 @@ export default class TextureUtils extends EventDispatcher {
 
   async getLottieLoader(): Promise<LottieLoader> {
     if (this._lottieLoader == null) {
-      const {LottieLoader} = await import(this.lottieLoaderUrl);
+      // const {LottieLoader} = await import(this.lottieLoaderUrl);
       this._lottieLoader = new LottieLoader();
     }
     return this._lottieLoader!;
