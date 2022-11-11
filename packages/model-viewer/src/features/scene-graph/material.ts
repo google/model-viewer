@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
+import {Color, DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
 
 import {AlphaMode, GLTF, Material as GLTFMaterial, RGB} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Material as DefaultedMaterial} from '../../three-components/gltf-instance/gltf-defaulted.js';
@@ -252,13 +252,20 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return variantData != null && this[$variantSet].has(variantData.index);
   }
 
-  setEmissiveFactor(rgb: RGB) {
+  setEmissiveFactor(rgb: RGB|string) {
     this[$ensureMaterialIsLoaded]();
+    const color = new Color();
+    if (rgb instanceof Array) {
+      color.fromArray(rgb);
+    } else {
+      color.set(rgb).convertSRGBToLinear();
+    }
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
-      material.emissive.fromArray(rgb);
+      material.emissive.set(color);
     }
-    (this[$sourceObject] as DefaultedMaterial).emissiveFactor = rgb;
+    (this[$sourceObject] as DefaultedMaterial).emissiveFactor =
+        color.toArray() as [number, number, number];
     this[$onUpdate]();
   }
 

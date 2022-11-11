@@ -207,8 +207,11 @@ z.addEventListener('input', () => {
           <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph</span></h4>
           <div class="heading">
             <h2 class="demo-title">Change Material Base Color</h2>
-            <p>This is an experimental feature, and the API is considered highly
-            unstable. Please try it out, but be prepared for it to change!</p>
+            <p>Note that color factors can be set two ways: [r, g, b, a] or a
+            CSS-style color string. For array input, the values are between 0
+            and 1 and represent a linear color space, identical to the glTF
+            spec. For string inputs, the values are internally converted from
+            the sRGB color space, so this is likely more user-friendly.</p>
             <p>As above, you can change these values in AR, but only in WebXR
             mode. iOS Quick Look does not reflect these color changes as USDZ
             does not appear to support colors multiplied onto textures.</p>
@@ -217,9 +220,9 @@ z.addEventListener('input', () => {
             <template>
 <model-viewer id="color" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" ar alt="A 3D model of an astronaut">
   <div class="controls", id="color-controls">
-    <button data-color="1,0,0,1">Red</button>
-    <button data-color="0,1,0,1">Green</button>
-    <button data-color="0,0,1,1">Blue</button>
+    <button data-color="#ff0000">Red</button>
+    <button data-color="#00ff00">Green</button>
+    <button data-color="#0000ff">Blue</button>
   </div>
 </model-viewer>
 <script>
@@ -227,17 +230,8 @@ const modelViewerColor = document.querySelector("model-viewer#color");
 
 document.querySelector('#color-controls').addEventListener('click', (event) => {
   const colorString = event.target.dataset.color;
-
-  if (!colorString) {
-    return;
-  }
-
-  const color = colorString.split(',')
-      .map(numberString => parseFloat(numberString));
-
-  console.log('Changing color to: ', color);
   const [material] = modelViewerColor.model.materials;
-  material.pbrMetallicRoughness.setBaseColorFactor(color);
+  material.pbrMetallicRoughness.setBaseColorFactor(colorString);
 });
 </script>
             </template>
@@ -533,7 +527,7 @@ interface Material {
   readonly emissiveFactor: RGB;
   readonly pbrMetallicRoughness: PBRMetallicRoughness;
 
-  setEmissiveFactor(rgb: RGB): void;
+  setEmissiveFactor(rgb: RGB|string): void;
   setAlphaCutoff(cutoff: number): void;
   getAlphaCutoff(): number;
   setDoubleSided(doubleSided: boolean): void;
@@ -549,7 +543,7 @@ interface PBRMetallicRoughness {
   readonly baseColorTexture: TextureInfo|null;
   readonly metallicRoughnessTexture: TextureInfo|null;
   
-  setBaseColorFactor(rgba: RGBA): void;
+  setBaseColorFactor(rgba: RGBA|string): void;
   setMetallicFactor(value: number): void;
   setRoughnessFactor(value: number): void;
 }
