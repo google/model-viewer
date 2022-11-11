@@ -1,3 +1,6 @@
+import {Data} from './data.js';
+import {DisplayCanvas} from './displaycanvas.js';
+
 const mv = document.querySelector('model-viewer');
 const nextButton = document.querySelector('#next');
 const backButton = document.querySelector('#back');
@@ -13,7 +16,7 @@ class App {
 
   async init() {
     // Generate Clock Texture
-    this.display_canvas = new DisplayCanvas(this);
+    this.display_canvas = new DisplayCanvas();
 
     // Parse data from interaction scripts
     const json_data = new Data();
@@ -21,7 +24,7 @@ class App {
         await json_data.getData('interaction_states.json');
     this.interaction_states = interaction_states_data.stages;
     this.callout_data = interaction_states_data.callouts[0];
-    this.interaction.calloutData = this.callout_data;
+    // this.interaction.calloutData = this.callout_data;
 
     // set up div to contain spin indicator
     const spinIndicator = document.getElementById('spin-icon-container');
@@ -32,34 +35,29 @@ class App {
     console.log('Setting states for ' + this.interaction_states.length);
     // TODO: JSInterface is the communication back to Android about button
     // states, etc. Replace this with communication to HTML/CSS.
-    JSInterface.setStateParameters(this.interaction_states.length, false);
-
-    const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
-    pmremGenerator.compileEquirectangularShader();
+    // JSInterface.setStateParameters(this.interaction_states.length, false);
 
     this.yellow_color = '0xe6ff7b';  // KHR_materials_unlit
 
     // Add Mixer Event Listener to run after animation is finished.
-    mv.addEventListener('finished', function(e) {
-      console.log(e.action._clip.name + ' - Complete');
+    mv.addEventListener('finished', function() {
+      console.log(mv.animationName + ' - Complete');
       console.log(this.loopFinished);
       let follow_up_anim = this.currentAnimClipState.followupAnimClipName[0];
       let reverse_follow_up_anim = this.currentAnimClipState ?
           this.currentAnimClipState.followupAnimReverseClipName[0] :
           null;
 
-      try {
-        if (e.action._clip.name != Object.keys(follow_up_anim)[0])
-          this.interaction.setRotationTo(this.currentState.freeRotate, 0);
-      } catch (err) {
-        console.log('No follow up animation in this state.');
-      }
+      // try {
+      //   if (mv.animationName != Object.keys(follow_up_anim)[0])
+      //   this.interaction.setRotationTo(this.currentState.freeRotate, 0);
+      // } catch (err) {
+      //   console.log('No follow up animation in this state.');
+      // }
 
       if (follow_up_anim &&
-          e.action._clip.name == this.currentAnimClipState.fbxClipName &&
+          mv.animationName == this.currentAnimClipState.fbxClipName &&
           !this.animReverse) {
-        e.action.reset();
-        e.action.stop();
         let follow_up_anim_key = Object.keys(follow_up_anim)[0];
         this.playAnimation(
             follow_up_anim_key,
@@ -72,10 +70,8 @@ class App {
         }.bind(this), 700);
       }
       if (reverse_follow_up_anim &&
-          e.action._clip.name == this.currentAnimClipState.fbxClipNameReverse &&
+          mv.animationName == this.currentAnimClipState.fbxClipNameReverse &&
           this.animReverse) {
-        e.action.reset();
-        e.action.stop();
         let reverse_follow_up_anim_key = Object.keys(reverse_follow_up_anim)[0];
         this.playAnimation(
             reverse_follow_up_anim_key,
@@ -84,14 +80,12 @@ class App {
             null,
             true);
       }
-      if (this.interactiveIntroAnim && e.action._clip.name == '_BandOff') {
-        e.action.reset();
-        e.action.stop();
+      if (this.interactiveIntroAnim && mv.animationName == '_BandOff') {
         this.playAnimation('_RSB_Press', false, true, null, true);
         this.interactiveIntroAnim = false;
       }
 
-      this.interaction.transitionSpeed = 0.1;
+      // this.interaction.transitionSpeed = 0.1;
     }.bind(this));
 
     let introFade = document.getElementById('intro-fade');
@@ -140,6 +134,15 @@ class App {
     return canvas;
   }
 
+  playAnimation(clipName, reverse, looping, startTime, follow_up) {
+    mv.animationName = clipName;
+    mv.timeScale = reverse ? -1 : 1;
+    if (startTime) {
+      mv.currentTime = startTime;
+    }
+    mv.play({repetitions: looping ? Infinity : 1});
+  }
+
   setSceneState(id, reverse = false) {
     // Get interaction_states json values and set them as const
     this.animReverse = reverse;
@@ -155,10 +158,10 @@ class App {
     const lottie_scale = this.currentState.lottieScale;
     const lottie_timeout = reverse ? this.currentState.lottieTimeoutReverse :
                                      this.currentState.lottieTimeout;
-    const pivot_object =
-        this.scene.getObjectByName(this.currentState.pivotTarget);
-    const prev_pivot_object =
-        this.scene.getObjectByName(this.currentAnimClipState.pivotTarget);
+    // const pivot_object =
+    //     this.scene.getObjectByName(this.currentState.pivotTarget);
+    // const prev_pivot_object =
+    //     this.scene.getObjectByName(this.currentAnimClipState.pivotTarget);
     const hide_web_view = this.currentState.hideWebView;
     const custom_display = this.currentState.customDisplay;
     const camera_near_clip = this.currentState.cameraNearClip;
@@ -175,115 +178,121 @@ class App {
 
     // if custom display is not null, replace watch face with custom display
     // texture
-    if (custom_display) {
-      let custom_texture = null;
-      if (custom_display.split('.').pop() == 'mp4') {
-        const video = document.createElement('video');
-        video.src = './textures/' + custom_display;
-        video.muted = true;
-        video.play();
-        video.loop = true;
-        custom_texture = new THREE.VideoTexture(video);
-      } else {
-        custom_texture =
-            new THREE.TextureLoader().load('./textures/' + custom_display);
-      }
+    // if (custom_display) {
+    //   let custom_texture = null;
+    //   if (custom_display.split('.').pop() == 'mp4') {
+    //     const video = document.createElement('video');
+    //     video.src = './textures/' + custom_display;
+    //     video.muted = true;
+    //     video.play();
+    //     video.loop = true;
+    //     custom_texture = new THREE.VideoTexture(video);
+    //   } else {
+    //     custom_texture =
+    //         new THREE.TextureLoader().load('./textures/' + custom_display);
+    //   }
 
-      custom_texture.flipY = false;
-      this.display_material.emissiveMap = custom_texture;
-    } else if (lottie_display) {
-      if (this.lottie_loader)
-        this.lottie_loader_animation.destroy();
-      this.lottie_loader = new LottieLoader();
-      this.lottie_loader.setQuality(2);
+    //   custom_texture.flipY = false;
+    //   this.display_material.emissiveMap = custom_texture;
+    // } else if (lottie_display) {
+    //   if (this.lottie_loader)
+    //     this.lottie_loader_animation.destroy();
+    //   this.lottie_loader = new LottieLoader();
+    //   this.lottie_loader.setQuality(2);
 
-      this.lottie_loader.load('./' + lottie_display, function(texture) {
-        texture.flipY = false;
-        this.display_material.emissiveMap = texture;
-        this.lottie_loader_animation = texture.animation;
-      }.bind(this));
-    } else {
-      if (this.lottie_loader)
-        this.lottie_loader_animation.destroy();
-      this.display_material.emissiveMap = this.display_texture;
-    }
+    //   this.lottie_loader.load('./' + lottie_display, function(texture) {
+    //     texture.flipY = false;
+    //     this.display_material.emissiveMap = texture;
+    //     this.lottie_loader_animation = texture.animation;
+    //   }.bind(this));
+    // } else {
+    //   if (this.lottie_loader)
+    //     this.lottie_loader_animation.destroy();
+    //   this.display_material.emissiveMap = this.display_texture;
+    // }
 
     // show callouts, if there are some, at the end of the transition animation
-    this.uicontrol.showDots = this.currentState.showDots;
-    this.uicontrol.showCallouts(this.currentState.showCallout, this.darkMode);
+    // this.uicontrol.showDots = this.currentState.showDots;
+    // this.uicontrol.showCallouts(this.currentState.showCallout,
+    // this.darkMode);
 
     let state;
     // Get target for camera at current state
-    for (state in this.interaction_states) {
-      const pivot = this.scene.getObjectByName(
-          this.interaction_states[state].pivotTarget);
-      pivot.rotation.set(0, 0, 0);
-    }
+    // for (state in this.interaction_states) {
+    //   const pivot = this.scene.getObjectByName(
+    //       this.interaction_states[state].pivotTarget);
+    //   pivot.rotation.set(0, 0, 0);
+    // }
 
     const looping = this.currentAnimClipState.looping;
     const start_time = reverse ? this.currentAnimClipState.startTimeReverse :
                                  this.currentAnimClipState.startTime;
 
-    this.interaction.transitionSpeed =
-        this.currentAnimClipState.transitionSpeed ?
-        this.currentAnimClipState.transitionSpeed :
-        0.1;
-    this.interaction.touchRotateMultiplier =
-        this.currentState.touchRotateMultiplier;
-    this.interaction.deviceRotateMultiplier =
-        this.currentState.deviceRotateMultiplier;
+    // this.interaction.transitionSpeed =
+    //     this.currentAnimClipState.transitionSpeed ?
+    //     this.currentAnimClipState.transitionSpeed :
+    //     0.1;
+    // this.interaction.touchRotateMultiplier =
+    //     this.currentState.touchRotateMultiplier;
+    // this.interaction.deviceRotateMultiplier =
+    //     this.currentState.deviceRotateMultiplier;
 
-    // Set the camera target to pivot from interaction states json, set camera
-    // controls, and play animation
-    this.interaction.setTarget(this.hrn, pivot_object);
-    this.interaction.setRotationTo(this.currentState.freeRotate, 0);
-    this.currentState.freeRotate ? this.interaction.addVelocity = true :
-                                   this.interaction.addVelocity = false;
+    // If previous animation has a time condition flag, play alternate animation
+    // based on where the previous animation was when the state is switched
+    var clip_name = this.currentAnimClipState.fbxClipName;
+
+    // // Set the camera target to pivot from interaction states json, set
+    // camera
+    // // controls, and play animation
+    // this.interaction.setTarget(this.hrn, pivot_object);
+    // this.interaction.setRotationTo(this.currentState.freeRotate, 0);
+    // this.currentState.freeRotate ? this.interaction.addVelocity = true :
+    //                                this.interaction.addVelocity = false;
     this.playAnimation(clip_name, reverse, looping, start_time, false);
 
 
-    JSInterface.updateText(
-        this.currentState.titleStringID, this.currentState.bodyStringID);
+    // JSInterface.updateText(
+    //     this.currentState.titleStringID, this.currentState.bodyStringID);
 
-    this.callout_w_dots =
-        this.currentState.showDots && this.currentState.showCallout != '';
-    JSInterface.setStateParameters(
-        this.interaction_states.length,
-        this.callout_w_dots ? false : this.currentState.showDots);
-    JSInterface.hideWebView(hide_web_view);
+    // this.callout_w_dots =
+    //     this.currentState.showDots && this.currentState.showCallout != '';
+    // JSInterface.setStateParameters(
+    //     this.interaction_states.length,
+    //     this.callout_w_dots ? false : this.currentState.showDots);
+    // JSInterface.hideWebView(hide_web_view);
 
-    // Set delay for next and skip buttons
-    if (this.currentState.showNextButtonDelay > 0) {
-      JSInterface.setButton(
-          'next', false, this.currentState.nextButtonTextOverride);
-      setTimeout(function() {
-        JSInterface.setButton(
-            'next',
-            this.currentState.showNextButton,
-            this.currentState.nextButtonTextOverride);
-      }.bind(this), this.currentState.showNextButtonDelay);
-    } else {
-      JSInterface.setButton(
-          'next',
-          this.currentState.showNextButton,
-          this.currentState.nextButtonTextOverride);
-    }
+    // // Set delay for next and skip buttons
+    // if (this.currentState.showNextButtonDelay > 0) {
+    //   JSInterface.setButton(
+    //       'next', false, this.currentState.nextButtonTextOverride);
+    //   setTimeout(function() {
+    //     JSInterface.setButton(
+    //         'next',
+    //         this.currentState.showNextButton,
+    //         this.currentState.nextButtonTextOverride);
+    //   }.bind(this), this.currentState.showNextButtonDelay);
+    // } else {
+    //   JSInterface.setButton(
+    //       'next',
+    //       this.currentState.showNextButton,
+    //       this.currentState.nextButtonTextOverride);
+    // }
 
-    if (this.currentState.showSkipButtonDelay > 0) {
-      JSInterface.setButton(
-          'skip', false, this.currentState.skipButtonTextOverride);
-      setTimeout(function() {
-        JSInterface.setButton(
-            'skip',
-            this.currentState.showSkipButton,
-            this.currentState.skipButtonTextOverride);
-      }.bind(this), this.currentState.showSkipButtonDelay);
-    } else {
-      JSInterface.setButton(
-          'skip',
-          this.currentState.showSkipButton,
-          this.currentState.skipButtonTextOverride);
-    }
+    // if (this.currentState.showSkipButtonDelay > 0) {
+    //   JSInterface.setButton(
+    //       'skip', false, this.currentState.skipButtonTextOverride);
+    //   setTimeout(function() {
+    //     JSInterface.setButton(
+    //         'skip',
+    //         this.currentState.showSkipButton,
+    //         this.currentState.skipButtonTextOverride);
+    //   }.bind(this), this.currentState.showSkipButtonDelay);
+    // } else {
+    //   JSInterface.setButton(
+    //       'skip',
+    //       this.currentState.showSkipButton,
+    //       this.currentState.skipButtonTextOverride);
+    // }
   }
 
   setSku(color) {
@@ -333,14 +342,22 @@ class App {
 
 const app = new App();
 
-mv.addEventListener('load', () => {
-  app.init();
+mv.addEventListener('load', async () => {
+  await app.init();
   let id = 0;
   app.setSceneState(id);
+
+  function setButtons(id) {
+    nextButton.disabled = id === app.interaction_states.length - 1;
+    backButton.disabled = id == 0;
+  }
+
   nextButton.addEventListener('click', () => {
     app.setSceneState(++id);
+    setButtons(id);
   });
   backButton.addEventListener('click', () => {
     app.setSceneState(--id, true);
+    setButtons(id);
   });
 });

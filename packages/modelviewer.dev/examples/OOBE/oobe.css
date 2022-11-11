@@ -1,11 +1,96 @@
 model-viewer {
-    position: relative;
-    height: 500px;
-    width: 500px;
-    background-color: #eee;
+  position: relative;
+  height: 500px;
+  width: 500px;
+  background-color: #eee;
 }
 
 model-viewer>button {
-    position: absolute;
-    bottom: 16px;
+  position: absolute;
+  bottom: 16px;
+}
+
+#debug-text {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  text-align: center;
+  z-index: 100;
+  display: block;
+}
+
+#intro-fade {
+  pointer-events: none;
+  background-color: #FFFFFF;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: fade;
+  text-align: center;
+}
+
+#spin-icon-container {
+  width: 100%;
+  height: 30px;
+  position: absolute;
+  bottom: 0;
+  justify-content: center;
+  display: none;
+}
+
+#spin-icon-container.fade {
+  animation: fadeout ease 1s;
+}
+
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+#lottie-animation {
+  width: 36%;
+  height: 36%;
+  position: absolute;
+  top: 32%;
+  left: 31%;
+  display: block;
+  text-align: center;
+}
+
+#lottie-animation-additive {
+  width: 18%;
+  height: 18%;
+  position: absolute;
+  top: 80%;
+  left: 40%;
+  display: block;
+  text-align: center;
+}
+
+#intro-fade.active {
+  animation-name: intro-fade-anim;
+  animation-delay: 0s;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+
+#intro-fade.disabled {
+  display: none;
+}
+
+@keyframes intro-fade-anim {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.0;
+  }
 }

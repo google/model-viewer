@@ -7,12 +7,12 @@
 <body>
     <model-viewer src='rohan.glb' environment-image="hero_packaging_90.hdr" camera-controls shadow-intensity='1' interaction-prompt='none'
         camera-target="0m 0m 0.2m" camera-orbit="auto auto 0.2m" min-camera-orbit="auto auto 0.1m" max-camera-orbit="auto auto 0.2m">
-        <button id="back" style="right: 0">Back</button>
-        <button id="next" style="left: 0">Next</button>
+        <div id="spin-icon-container"><img src="textures/3d-rotate.png" width="90" height="30"></div>
+        <div id="intro-fade"></div>
+        <button id="back" style="left: 0" disabled>Back</button>
+        <button id="next" style="right: 0">Next</button>
     </model-viewer>
 
-    <script type="module" src="displaycanvas.js"></script> 
-    <script type="module" src="data.js"></script> 
     <script type="module" src="oobe.js"></script> 
 </body>
 </html>
