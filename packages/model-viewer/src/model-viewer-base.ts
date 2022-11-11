@@ -409,6 +409,12 @@ export default class ModelViewerElementBase extends ReactiveElement {
     }
   }
 
+
+  /** @export */
+  getRenderer() { 
+    return this[$renderer];
+  }
+
   /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
     return this[$renderer]

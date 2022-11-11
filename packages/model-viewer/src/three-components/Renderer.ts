@@ -94,8 +94,8 @@ export class Renderer extends EventDispatcher {
 
   public threeRenderer!: WebGLRenderer;
   public canvas3D: HTMLCanvasElement;
-  public renderPass!: RenderPass;
-  public effectComposer!: EffectComposer;
+  public renderPass: RenderPass;
+  public effectComposer: EffectComposer;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
   public loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
@@ -161,9 +161,9 @@ export class Renderer extends EventDispatcher {
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
 
-	  this.effectComposer = new EffectComposer(this.threeRenderer);
-    this.renderPass = new RenderPass(null, null);
-    this.effectComposer.addPass(this.renderPass);
+	    this.effectComposer = new EffectComposer(this.threeRenderer);
+      this.renderPass = new RenderPass(null, null);
+      this.effectComposer.addPass(this.renderPass);
     } catch (error) {
       console.warn(error);
     }
@@ -289,6 +289,8 @@ export class Renderer extends EventDispatcher {
 
     if (this.canRender) {
       this.threeRenderer.setSize(width, height, false);
+      this.effectComposer.setPixelRatio(dpr);
+      this.effectComposer.setSize(width, height);
     }
 
     // Each scene's canvas must match the renderer size. In general they can be

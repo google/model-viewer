@@ -14,14 +14,15 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {Texture} from 'three';
+import {Texture, Vector2} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {clamp, Constructor, deserializeUrl} from '../utilities.js';
-import {BloomPass} from 'three/examples/jsm/postprocessing/BloomPass';
+import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { Renderer } from '../three-components/Renderer.js';
 
 // make bunch of effects
-export const BLOOM_PASS = new BloomPass();
+export const BLOOM_PASS = new UnrealBloomPass( new Vector2( 1920, 1080 ), 1.5, 0.4, 0.85);
 
 export declare interface PostProcessingInterface {
   bloomEffect: boolean;
@@ -35,10 +36,11 @@ export const PostProcessingMixin = <T extends Constructor<ModelViewerElementBase
 
     updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
-
+      // this is problematic currently, as the effectcomposer is a singleton and changes here affect all models, disregarding their original intent
       if (changedProperties.has('bloomEffect')) {
-        this.bloomEffect ? this[$renderer].effectComposer.addPass(BLOOM_PASS) : this[$renderer].effectComposer.removePass(BLOOM_PASS);
-        this[$needsRender]();
+        this.bloomEffect ? this[$renderer].effectComposer.addPass(BLOOM_PASS) : null;
+        // this.bloomEffect ? this[$renderer].effectComposer.addPass(BLOOM_PASS) : this[$renderer].effectComposer.removePass(BLOOM_PASS);
+        // this[$needsRender]();
       }
     }
   }

@@ -23,14 +23,15 @@ import {SceneGraphMixin} from './features/scene-graph.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
 import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
+import {PostProcessingMixin} from './features/post-processing.js';
 
 // Uncomment these lines to export PMREM textures in Glitch:
 // export {default as TextureUtils} from './three-components/TextureUtils';
 // export * from 'three';
 
-export const ModelViewerElement = AnnotationMixin(SceneGraphMixin(StagingMixin(
+export const ModelViewerElement = PostProcessingMixin(AnnotationMixin(SceneGraphMixin(StagingMixin(
     EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
-        FocusVisiblePolyfillMixin(ModelViewerElementBase)))))))));
+        FocusVisiblePolyfillMixin(ModelViewerElementBase))))))))));
 
 export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 
