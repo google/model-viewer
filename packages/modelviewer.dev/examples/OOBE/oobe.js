@@ -15,9 +15,6 @@ class App {
   }
 
   async init() {
-    // Generate Clock Texture
-    this.display_canvas = new DisplayCanvas();
-
     // Parse data from interaction scripts
     const json_data = new Data();
     const interaction_states_data =
@@ -38,6 +35,19 @@ class App {
     // JSInterface.setStateParameters(this.interaction_states.length, false);
 
     this.yellow_color = '0xe6ff7b';  // KHR_materials_unlit
+
+    this.display_material =
+        mv.model.getMaterialByName('rohan_anim:rohan_rig:DISPLAY_MAT');
+
+    this.canvas_texture = mv.createCanvasTexture();
+    // Generate Clock Texture
+    this.display_canvas = new DisplayCanvas(this.canvas_texture.source.element);
+    this.display_material.emissiveTexture.setTexture(this.canvas_texture);
+
+    let introFade = document.getElementById('intro-fade');
+    introFade.classList.add('active');
+
+    requestAnimationFrame(this.animate.bind(this));
 
     // Add Mixer Event Listener to run after animation is finished.
     mv.addEventListener('finished', function() {
@@ -87,9 +97,12 @@ class App {
 
       // this.interaction.transitionSpeed = 0.1;
     }.bind(this));
+  }
 
-    let introFade = document.getElementById('intro-fade');
-    introFade.classList.add('active');
+  animate() {
+    this.display_canvas.update();
+    this.canvas_texture.source.update();
+    requestAnimationFrame(this.animate.bind(this));
   }
 
   startAnimations(stateId) {
@@ -143,7 +156,7 @@ class App {
     mv.play({repetitions: looping ? Infinity : 1});
   }
 
-  setSceneState(id, reverse = false) {
+  async setSceneState(id, reverse = false) {
     // Get interaction_states json values and set them as const
     this.animReverse = reverse;
     this.currentState = this.interaction_states[id];
@@ -178,38 +191,19 @@ class App {
 
     // if custom display is not null, replace watch face with custom display
     // texture
-    // if (custom_display) {
-    //   let custom_texture = null;
-    //   if (custom_display.split('.').pop() == 'mp4') {
-    //     const video = document.createElement('video');
-    //     video.src = './textures/' + custom_display;
-    //     video.muted = true;
-    //     video.play();
-    //     video.loop = true;
-    //     custom_texture = new THREE.VideoTexture(video);
-    //   } else {
-    //     custom_texture =
-    //         new THREE.TextureLoader().load('./textures/' + custom_display);
-    //   }
-
-    //   custom_texture.flipY = false;
-    //   this.display_material.emissiveMap = custom_texture;
-    // } else if (lottie_display) {
-    //   if (this.lottie_loader)
-    //     this.lottie_loader_animation.destroy();
-    //   this.lottie_loader = new LottieLoader();
-    //   this.lottie_loader.setQuality(2);
-
-    //   this.lottie_loader.load('./' + lottie_display, function(texture) {
-    //     texture.flipY = false;
-    //     this.display_material.emissiveMap = texture;
-    //     this.lottie_loader_animation = texture.animation;
-    //   }.bind(this));
-    // } else {
-    //   if (this.lottie_loader)
-    //     this.lottie_loader_animation.destroy();
-    //   this.display_material.emissiveMap = this.display_texture;
-    // }
+    let custom_texture = this.canvas_texture;
+    if (custom_display) {
+      const url = './textures/' + custom_display;
+      if (custom_display.split('.').pop() == 'mp4') {
+        custom_texture = mv.createVideoTexture(url);
+      } else {
+        custom_texture = await mv.createTexture(url);
+      }
+    } else if (lottie_display) {
+      custom_texture =
+          await mv.createLottieTexture('./textures/' + lottie_display);
+    }
+    this.display_material.emissiveTexture.setTexture(custom_texture);
 
     // show callouts, if there are some, at the end of the transition animation
     // this.uicontrol.showDots = this.currentState.showDots;
