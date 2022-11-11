@@ -42,7 +42,11 @@ class App {
     this.canvas_texture = mv.createCanvasTexture();
     // Generate Clock Texture
     this.display_canvas = new DisplayCanvas(this.canvas_texture.source.element);
+
     this.display_material.emissiveTexture.setTexture(this.canvas_texture);
+    this.canvas_texture.source.update();
+
+    this.setSku(2);
 
     let introFade = document.getElementById('intro-fade');
     introFade.classList.add('active');
@@ -117,38 +121,9 @@ class App {
     window.enableSwiping = boolean(setting);
   }
 
-  // Create LED light object
-  createGlowCircle(size = 1, falloff = 0, color = 'white') {
-    // create a texture on canvas and apply it on material
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    const x = 64, y = 64,
-          // Radii of the black glow.
-        innerRadius = falloff, outerRadius = 80,
-          // Radius of the entire circle.
-        radius = 128;
-
-    canvas.width = radius;
-    canvas.height = radius;
-    const gradient =
-        ctx.createRadialGradient(x, y, innerRadius, x, y, outerRadius);
-    gradient.addColorStop(0, 'rgb(256,256,256)');
-    gradient.addColorStop(0.2, 'rgb(256,256,256)');
-    gradient.addColorStop(0.6, 'rgb(50,50,50)');
-    gradient.addColorStop(0.7, 'rgb(10,10,10)');
-    gradient.addColorStop(0.8, 'rgb(0,0,0)');
-
-    ctx.arc(x, y, radius, 0, 2 * Math.PI);
-
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
-    return canvas;
-  }
-
-  playAnimation(clipName, reverse, looping, startTime, follow_up) {
+  async playAnimation(clipName, reverse, looping, startTime, follow_up) {
     mv.animationName = clipName;
+    await mv.updateComplete;
     mv.timeScale = reverse ? -1 : 1;
     if (startTime) {
       mv.currentTime = startTime;
@@ -299,7 +274,7 @@ class App {
         bandColor = '#e3c49f';
         hourColor = '#ffd4b6';
         secondColor = '#e78e4e';
-        frameColor = null;
+        frameColor = '#bcbcbc';
         break;
       case 2:
         bandColor = '#b3b555';
@@ -329,8 +304,10 @@ class App {
         mv.model.getMaterialByName('rohan_anim:rohan_rig:BAND_MAT');
     const frameMaterial =
         mv.model.getMaterialByName('rohan_anim:rohan_rig:PUCK_MAT');
-    // Consider adding hex string support to setBaseColorFactor API.
-    // bandMaterial.pbrMetallicRoughness.setBaseColorFactor([1,1,1,1]);
+    bandMaterial.pbrMetallicRoughness.setBaseColorFactor(bandColor);
+    frameMaterial.pbrMetallicRoughness.setBaseColorFactor(frameColor);
+    this.display_canvas.hourColor = hourColor;
+    this.display_canvas.secondColor = secondColor;
   }
 }
 

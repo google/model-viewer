@@ -8,6 +8,8 @@ class DisplayCanvas {
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.date = new Date();
     this.initialDate = new Date('August 19, 1975 10:09:36');
+    this.secondColor = '#50cd9d';
+    this.hourColor = '#abffdf';
     this.startTime = performance.now();
     this.image = document.getElementById('complicationImage');
   }
@@ -94,9 +96,11 @@ class DisplayCanvas {
     this.drawHand(secHandLength, secHandWidth, this.secondAngle());
     this.drawHand(minHandLength, minHandWidth, this.minuteAngle());
     this.drawHand(hourHandLength, hourHandWidth, this.hourAngle());
-    this.drawHand(secHandLength, secHandWidth, this.secondAngle(), '#50cd9d');
+    this.drawHand(
+        secHandLength, secHandWidth, this.secondAngle(), this.secondColor);
     this.drawHand(minHandLength, minHandWidth, this.minuteAngle(), '#fff');
-    this.drawHand(hourHandLength, hourHandWidth, this.hourAngle(), '#abffdf');
+    this.drawHand(
+        hourHandLength, hourHandWidth, this.hourAngle(), this.hourColor);
     this.showCenterDial();
   }
 }
