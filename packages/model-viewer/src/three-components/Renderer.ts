@@ -173,10 +173,11 @@ export class Renderer extends EventDispatcher {
       this.effectComposer.addPass(this.renderPass);
       // const BLOOM_PASS = new UnrealBloomPass(new Vector2(1080, 1920), 1, 1, 0.9);
       const BLOOM_PASS = new EffectPass(null, new FXAAEffect(), new SSAOEffect(), new BloomEffect({
-        blendFunction: BlendFunction.SCREEN,
-        luminanceThreshold: 0.8,
-        luminanceSmoothing: 0.05,
-        intensity: 1,
+        blendFunction: BlendFunction.ADD,
+        mipmapBlur: true,
+        luminanceThreshold: 0.85,
+        luminanceSmoothing: 0.025,
+        intensity: 3,
         kernelSize: KernelSize.LARGE
       }), new ToneMappingEffect({mode: ToneMappingMode.OPTIMIZED_CINEON}));
       this.effectComposer.addPass(BLOOM_PASS);
