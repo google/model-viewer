@@ -120,7 +120,7 @@ export default class EnvironmentSceneAlt extends Scene {
 
   createAreaLightMaterial(intensity: number): MeshBasicMaterial {
     const material = new MeshBasicMaterial();
-    material.color.setScalar(intensity);
+    material.color.setScalar(intensity/10);
     return material;
   }
 }

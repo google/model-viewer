@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, Scene} from 'three';
+import {BackSide, BoxGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, AmbientLight, DirectionalLight, Scene} from 'three';
 
 export default class EnvironmentScene extends Scene {
   constructor() {
@@ -73,7 +73,6 @@ export default class EnvironmentScene extends Scene {
     box6.scale.set(3.875, 3.487, 2.986);
     this.add(box6);
 
-
     // -x right
     const light1 = new Mesh(geometry, this.createAreaLightMaterial(50));
     light1.position.set(-16.116, 14.37, 8.208);
@@ -113,7 +112,7 @@ export default class EnvironmentScene extends Scene {
 
   createAreaLightMaterial(intensity: number): MeshBasicMaterial {
     const material = new MeshBasicMaterial();
-    material.color.setScalar(intensity);
+    material.color.setScalar(intensity/10);
     return material;
   }
 }

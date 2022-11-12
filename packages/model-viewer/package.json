@@ -73,8 +73,9 @@
     "3d"
   ],
   "dependencies": {
-    "three": "^0.146.0",
-    "lit": "^2.2.3"
+    "lit": "^2.2.3",
+    "postprocessing": "^6.29.1",
+    "three": "^0.146.0"
   },
   "devDependencies": {
     "@open-wc/karma-esm": "^4.0.0",

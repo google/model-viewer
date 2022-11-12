@@ -12,10 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 // @ts-nocheck
 import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
-import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
-import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
+// import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
+// import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
+// import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import {EffectComposer, RenderPass, EffectPass, BloomEffect, BlendFunction, KernelSize, FXAAEffect, SSAOEffect, ToneMappingEffect, ToneMappingMode} from 'postprocessing';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -94,8 +97,8 @@ export class Renderer extends EventDispatcher {
 
   public threeRenderer!: WebGLRenderer;
   public canvas3D: HTMLCanvasElement;
-  public renderPass: RenderPass;
-  public effectComposer: EffectComposer;
+  public renderPass!: RenderPass;
+  public effectComposer!: EffectComposer;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
   public loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
@@ -145,18 +148,22 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
         alpha: true,
-        antialias: true,
+        antialias: false,
         powerPreference: options.powerPreference as WebGLPowerPreference,
-        preserveDrawingBuffer: true
+        preserveDrawingBuffer: true,
+        stencil: false,
+        depth: false
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = sRGBEncoding;
+      
       this.threeRenderer.physicallyCorrectLights = true;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 
       this.debugger = !!options.debug ? new Debugger(this) : null;
       this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
 
+      // this.threeRenderer.setClearColor(0x000000, 0.0);
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
@@ -164,6 +171,16 @@ export class Renderer extends EventDispatcher {
 	    this.effectComposer = new EffectComposer(this.threeRenderer);
       this.renderPass = new RenderPass(null, null);
       this.effectComposer.addPass(this.renderPass);
+      // const BLOOM_PASS = new UnrealBloomPass(new Vector2(1080, 1920), 1, 1, 0.9);
+      const BLOOM_PASS = new EffectPass(null, new FXAAEffect(), new SSAOEffect(), new BloomEffect({
+        blendFunction: BlendFunction.SCREEN,
+        luminanceThreshold: 0.8,
+        luminanceSmoothing: 0.05,
+        intensity: 1,
+        kernelSize: KernelSize.LARGE
+      }), new ToneMappingEffect({mode: ToneMappingMode.OPTIMIZED_CINEON}));
+      this.effectComposer.addPass(BLOOM_PASS);
+      
     } catch (error) {
       console.warn(error);
     }
@@ -289,8 +306,10 @@ export class Renderer extends EventDispatcher {
 
     if (this.canRender) {
       this.threeRenderer.setSize(width, height, false);
-      this.effectComposer.setPixelRatio(dpr);
-      this.effectComposer.setSize(width, height);
+      this.effectComposer.setSize(width, height, false);
+      this.renderPass.setSize(width, height);
+      this.effectComposer.passes[1].setSize(width, height);
+      // this.effectComposer.setSize(width, height);
     }
 
     // Each scene's canvas must match the renderer size. In general they can be
@@ -429,8 +448,12 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !Number.isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 	
-    this.renderPass.scene = scene;
-    this.renderPass.camera = scene.getCamera();
+    // this.renderPass.scene = scene;
+    // this.renderPass.camera = scene.getCamera();
+    for (const pass of this.effectComposer.passes) {
+      pass.mainScene = scene;
+      pass.mainCamera = scene.getCamera();
+    }
   }
 
   render(t: number, frame?: XRFrame) {
