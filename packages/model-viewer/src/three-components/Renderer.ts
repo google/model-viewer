@@ -13,12 +13,8 @@
  * limitations under the License.
  */
 
-// @ts-nocheck
 import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
-// import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
-// import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
-// import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import {EffectComposer, RenderPass, EffectPass, BloomEffect, BlendFunction, KernelSize, FXAAEffect, SSAOEffect, ToneMappingEffect, ToneMappingMode} from 'postprocessing';
+import { RenderPass, EffectComposer } from 'postprocessing';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -31,6 +27,7 @@ import {Debugger} from './Debugger.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
+import { CreateEffectComposer, RENDER_PASS } from './PPRenderPipeline.js';
 
 export interface RendererOptions {
   powerPreference: string;
@@ -168,20 +165,8 @@ export class Renderer extends EventDispatcher {
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
 
-	    this.effectComposer = new EffectComposer(this.threeRenderer);
-      this.renderPass = new RenderPass(null, null);
-      this.effectComposer.addPass(this.renderPass);
-      // const BLOOM_PASS = new UnrealBloomPass(new Vector2(1080, 1920), 1, 1, 0.9);
-      const BLOOM_PASS = new EffectPass(null, new FXAAEffect(), new SSAOEffect(), new BloomEffect({
-        blendFunction: BlendFunction.ADD,
-        mipmapBlur: true,
-        luminanceThreshold: 0.85,
-        luminanceSmoothing: 0.025,
-        intensity: 3,
-        kernelSize: KernelSize.LARGE
-      }), new ToneMappingEffect({mode: ToneMappingMode.OPTIMIZED_CINEON}));
-      this.effectComposer.addPass(BLOOM_PASS);
-      
+	    this.effectComposer = CreateEffectComposer(this.threeRenderer);
+      this.renderPass = RENDER_PASS;
     } catch (error) {
       console.warn(error);
     }
@@ -449,9 +434,8 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !Number.isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 	
-    // this.renderPass.scene = scene;
-    // this.renderPass.camera = scene.getCamera();
     for (const pass of this.effectComposer.passes) {
+      if (scene.hasOwnProperty(pass.name)) pass.enabled = scene[pass.name];
       pass.mainScene = scene;
       pass.mainCamera = scene.getCamera();
     }

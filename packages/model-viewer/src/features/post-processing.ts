@@ -12,25 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
 
 import {property} from 'lit/decorators.js';
 import {Texture, Vector2} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {clamp, Constructor, deserializeUrl} from '../utilities.js';
-import { EffectPass, BloomEffect, FXAAEffect, BlendFunction } from 'postprocessing';
-
-// make bunch of effects
-export const BLOOM_PASS = new EffectPass(null, new BloomEffect({
-  // blendFunction: BlendFunction.ADD,
-  luminanceThreshold: .9,
-  luminanceSmoothing: 0.025,
-  intensity: 3,
-}));
 
 export declare interface PostProcessingInterface {
   bloomEffect: boolean;
+  vignetteEffect: boolean;
+  ssaoEffect: boolean;
 }
 
 export const PostProcessingMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -38,15 +30,15 @@ export const PostProcessingMixin = <T extends Constructor<ModelViewerElementBase
   class PostProcessingModelViewerElement extends ModelViewerElement {
     @property({type: Boolean, attribute: 'bloom-effect'})
     bloomEffect: boolean = false;
+    @property({type: Boolean, attribute: 'vignette-effect'})
+    vignetteEffect: boolean = false;
+    @property({type: Boolean, attribute: 'ssao-effect'})
+    ssaoEffect: boolean = false;
 
     updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
-      // this is problematic currently, as the effectcomposer is a singleton and changes here affect all models, disregarding their original intent
-      if (changedProperties.has('bloomEffect')) {
-        // this.bloomEffect ? this[$renderer].effectComposer.addPass(BLOOM_PASS) : null;
-        // this.bloomEffect ? this[$renderer].effectComposer.addPass(BLOOM_PASS) : this[$renderer].effectComposer.removePass(BLOOM_PASS);
-        // this[$needsRender]();
-      }
+      // TODO: check if any of the properties were updated, then re-render
+      this[$needsRender]()
     }
   }
 
