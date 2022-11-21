@@ -1,13 +1,106 @@
+body {
+  background-color: #1c1d1e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Roboto', sans-serif;
+}
+
 model-viewer {
   position: relative;
   height: 500px;
   width: 500px;
-  background-color: #eee;
+  background-color: #1c1d1e;
 }
 
-model-viewer>button {
+#ui-buttons {
+  position: relative;
+  width: 500px;
+  margin: 25px 0px 0px 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+button {
+  background-color: #97d3b8;
+  color: #003619;
+  font-size: 14px;
+  padding: 15px 32px;
+  border: none;
+  border-radius: 9999px;
+  transition: 0.2s all;
   position: absolute;
-  bottom: 16px;
+}
+
+button:active {
+  background-color: #97d3b87c;
+}
+
+#dots {
+  display: flex;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  margin: 4px;
+  border-radius: 100%;
+  background-color: rgb(255, 255, 255, 0.4);
+  transition: 0.1s all;
+}
+
+.active-dot {
+  background-color: rgb(255, 255, 255, 1);
+}
+
+.inactive-dot {
+  background-color: rgb(255, 255, 255, 0.4);
+}
+
+#skip {
+  left: 10px;
+  visibility: hidden;;
+}
+
+#back {
+  left: 10px;
+}
+
+#next {
+  right: 10px;
+}
+
+#skip {
+  background-color: #1c1d1e;
+  color: #97d3b8;
+}
+
+#skip:active {
+  color: #97d3b83d;
+}
+
+#card {
+  color: white;
+  width: 500px;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-weight: 300;
+  font-size: 2.5rem;
+  margin-block-end: 1rem;
+}
+
+p {
+  font-weight: 300;
+  font-size: 1rem;
+}
+
+#complicationImage {
+  display: none;
 }
 
 #debug-text {
@@ -17,6 +110,27 @@ model-viewer>button {
   text-align: center;
   z-index: 100;
   display: block;
+}
+
+#mv-blur, #mv-border {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#mv-blur {
+  /* box-shadow: inset 0px 0px 50px #007efd; */
+  border: 10px solid #1c1d1e;
+  filter: blur(10px);
+  z-index: 999;
+}
+
+#mv-border {
+  border: 10px solid blue;
+  z-index: 1;
 }
 
 #intro-fade {
@@ -93,4 +207,20 @@ model-viewer>button {
   to {
     opacity: 0.0;
   }
+}
+
+@keyframes slide-in-animation {
+  from {
+    opacity: 0;
+    right: -500px;
+  }
+  to {
+    opacity: 1;
+    right: 0;
+  }
+}
+
+.run-slide-in-animation {
+  position: relative;
+  animation: slide-in-animation 1s ease;
 }

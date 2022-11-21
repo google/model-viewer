@@ -1,9 +1,11 @@
 import {Data} from './data.js';
 import {DisplayCanvas} from './displaycanvas.js';
+import * as JSInterface from './JSInterface.js';
 
 const mv = document.querySelector('model-viewer');
 const nextButton = document.querySelector('#next');
 const backButton = document.querySelector('#back');
+const skipButton = document.querySelector('#skip');
 
 class App {
   constructor() {
@@ -30,6 +32,7 @@ class App {
     }, false);
 
     console.log('Setting states for ' + this.interaction_states.length);
+    
     // TODO: JSInterface is the communication back to Android about button
     // states, etc. Replace this with communication to HTML/CSS.
     // JSInterface.setStateParameters(this.interaction_states.length, false);
@@ -135,6 +138,10 @@ class App {
     // Get interaction_states json values and set them as const
     this.animReverse = reverse;
     this.currentState = this.interaction_states[id];
+
+    console.log("Current state: " + this.currentState.name);
+    JSInterface.setStateParameters(this.currentState, this.callout_data);
+
     this.currentAnimClipState =
         reverse ? this.interaction_states[id + 1] : this.currentState;
     const lottie_animation_file = this.currentState.lottieAnimation;
@@ -218,50 +225,6 @@ class App {
     // this.currentState.freeRotate ? this.interaction.addVelocity = true :
     //                                this.interaction.addVelocity = false;
     this.playAnimation(clip_name, reverse, looping, start_time, false);
-
-
-    // JSInterface.updateText(
-    //     this.currentState.titleStringID, this.currentState.bodyStringID);
-
-    // this.callout_w_dots =
-    //     this.currentState.showDots && this.currentState.showCallout != '';
-    // JSInterface.setStateParameters(
-    //     this.interaction_states.length,
-    //     this.callout_w_dots ? false : this.currentState.showDots);
-    // JSInterface.hideWebView(hide_web_view);
-
-    // // Set delay for next and skip buttons
-    // if (this.currentState.showNextButtonDelay > 0) {
-    //   JSInterface.setButton(
-    //       'next', false, this.currentState.nextButtonTextOverride);
-    //   setTimeout(function() {
-    //     JSInterface.setButton(
-    //         'next',
-    //         this.currentState.showNextButton,
-    //         this.currentState.nextButtonTextOverride);
-    //   }.bind(this), this.currentState.showNextButtonDelay);
-    // } else {
-    //   JSInterface.setButton(
-    //       'next',
-    //       this.currentState.showNextButton,
-    //       this.currentState.nextButtonTextOverride);
-    // }
-
-    // if (this.currentState.showSkipButtonDelay > 0) {
-    //   JSInterface.setButton(
-    //       'skip', false, this.currentState.skipButtonTextOverride);
-    //   setTimeout(function() {
-    //     JSInterface.setButton(
-    //         'skip',
-    //         this.currentState.showSkipButton,
-    //         this.currentState.skipButtonTextOverride);
-    //   }.bind(this), this.currentState.showSkipButtonDelay);
-    // } else {
-    //   JSInterface.setButton(
-    //       'skip',
-    //       this.currentState.showSkipButton,
-    //       this.currentState.skipButtonTextOverride);
-    // }
   }
 
   setSku(color) {
@@ -318,10 +281,17 @@ mv.addEventListener('load', async () => {
   let id = 0;
   app.setSceneState(id);
 
+
   function setButtons(id) {
     nextButton.disabled = id === app.interaction_states.length - 1;
     backButton.disabled = id == 0;
   }
+
+  // TODO: How is skip different than next on dots steps?
+  skipButton.addEventListener('click', () => {
+    app.setSceneState(++id);
+    setButtons(id);
+  });
 
   nextButton.addEventListener('click', () => {
     app.setSceneState(++id);

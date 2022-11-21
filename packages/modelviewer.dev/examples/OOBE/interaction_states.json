@@ -555,7 +555,7 @@
       "showCallout": [],
       "showDots": false,
       "hideWebView": false,
-      "showSkipButton": false,
+      "showSkipButton": true,
       "skipButtonTextOverride": "Not Now",
       "showNextButton": true,
       "showSkipButtonDelay": 0,
