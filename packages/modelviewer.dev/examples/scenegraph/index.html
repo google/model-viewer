@@ -25,6 +25,14 @@
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
 
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../../node_modules/@google/model-viewer/dist/model-viewer.js"
+      }
+    }
+  </script>
+
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
@@ -494,17 +502,28 @@ modelViewerTexture1.addEventListener("load", () => {
 const modelViewerAnimated = document.querySelector("model-viewer#animated");
 
 const videoTexture = modelViewerAnimated.createVideoTexture("../../shared-assets/models/lottie-logo.mp4");
-const canvasTexture = modelViewerAnimated.createCanvasTexture();
-const lottieTexture = modelViewerAnimated.createLottieTexture("../../shared-assets/models/24017-lottie-logo-animation.json", 2);
+let canvasTexture = null;
+let lottieTexture = null;
 
-const canvas = canvasTexture.source.element;
-canvas.width = 1600;
-canvas.height = 800;
-const ctx = canvas.getContext('2d');
-ctx.font = "250px sans-serif";
-ctx.fillStyle = "#aaa";
-ctx.fillText('Canvas 2D!', 0, 400);
-canvasTexture.source.update();
+function getCanvasTexture() {
+  if(canvasTexture) return canvasTexture;
+  canvasTexture = modelViewerAnimated.createCanvasTexture();
+  const canvas = canvasTexture.source.element;
+  canvas.width = 1600;
+  canvas.height = 800;
+  const ctx = canvas.getContext('2d');
+  ctx.font = "250px sans-serif";
+  ctx.fillStyle = "#aaa";
+  ctx.fillText('Canvas 2D!', 0, 400);
+  canvasTexture.source.update();
+  return canvasTexture;
+}
+
+function getLottieTexture() {
+  if(lottieTexture) return lottieTexture;
+  lottieTexture = modelViewerAnimated.createLottieTexture("../../shared-assets/models/24017-lottie-logo-animation.json", 2);
+  return lottieTexture;
+}
 
 modelViewerAnimated.addEventListener("load", () => {
 
@@ -519,10 +538,10 @@ modelViewerAnimated.addEventListener("load", () => {
         baseColorTexture.setTexture(videoTexture);
         break;
       case "canvas":
-        baseColorTexture.setTexture(canvasTexture);
+        baseColorTexture.setTexture(getCanvasTexture());
         break;
       case "lottie":
-        baseColorTexture.setTexture(await lottieTexture);
+        baseColorTexture.setTexture(await getLottieTexture());
         break;
     }
   });

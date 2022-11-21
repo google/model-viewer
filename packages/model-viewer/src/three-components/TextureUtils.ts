@@ -14,7 +14,6 @@
  */
 
 import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
-import {LottieLoader} from 'three/examples/jsm/loaders/LottieLoader.js';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
@@ -37,10 +36,9 @@ const HDR_FILE_RE = /\.hdr(\.js)?$/;
 export default class TextureUtils extends EventDispatcher {
   private _ldrLoader: TextureLoader|null = null;
   private _hdrLoader: RGBELoader|null = null;
-  // TODO: need to lazy-load this like the DRACOLoader
-  private _lottieLoader: LottieLoader|null = null;
-  // private lottieLoaderUrl =
-  //     'https://cdn.jsdelivr.net/npm/three@0.144.0/examples/jsm/loaders/LottieLoader.js';
+  private _lottieLoader = null;
+  private lottieLoaderUrl =
+      'https://cdn.jsdelivr.net/npm/three@0.146.0/examples/jsm/loaders/LottieLoader.js';
 
   private generatedEnvironmentMap: Promise<CubeTexture>|null = null;
   private generatedEnvironmentMapAlt: Promise<CubeTexture>|null = null;
@@ -69,12 +67,12 @@ export default class TextureUtils extends EventDispatcher {
     return this._hdrLoader;
   }
 
-  async getLottieLoader(): Promise<LottieLoader> {
+  async getLottieLoader(): Promise<any> {
     if (this._lottieLoader == null) {
-      // const {LottieLoader} = await import(this.lottieLoaderUrl);
+      const {LottieLoader} = await import(this.lottieLoaderUrl);
       this._lottieLoader = new LottieLoader();
     }
-    return this._lottieLoader!;
+    return this._lottieLoader;
   }
 
   async loadImage(url: string): Promise<Texture> {

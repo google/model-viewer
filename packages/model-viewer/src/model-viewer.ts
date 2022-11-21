@@ -26,7 +26,7 @@ import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 
 // Uncomment these lines to export PMREM textures in Glitch:
 // export {default as TextureUtils} from './three-components/TextureUtils';
-// export * from 'three';
+export {CanvasTexture, FileLoader, Loader, NearestFilter} from 'three';
 
 export const ModelViewerElement = AnnotationMixin(SceneGraphMixin(StagingMixin(
     EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
