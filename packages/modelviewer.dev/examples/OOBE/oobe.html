@@ -1,18 +1,31 @@
 
 <html>
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap" rel="stylesheet">
     <link type="text/css" href="oobe.css" rel="stylesheet" />
     <script type='module' src='../../node_modules/@google/model-viewer/dist/model-viewer.js'></script>
 </head>
 <body>
+    <div id="card">
+        <img id="card-image" src="" alt="">
+        <h1 id="card-title">Title</h1>
+        <p id="card-body">Body</p>
+    </div>
     <model-viewer src='rohan.glb' environment-image="hero_packaging_90.hdr" camera-controls shadow-intensity='1' interaction-prompt='none'
         camera-target="0m 0m 0.2m" camera-orbit="auto auto 0.2m" min-camera-orbit="auto auto 0.1m" max-camera-orbit="auto auto 0.2m">
         <div id="spin-icon-container"><img src="textures/3d-rotate.png" width="90" height="30"></div>
         <div id="intro-fade"></div>
-        <button id="back" style="left: 0" disabled>Back</button>
-        <button id="next" style="right: 0">Next</button>
+        <div id="vignette"></div>
     </model-viewer>
-    <img id="complicationImage" src="textures/heart.png" width="384" height="384" style="display: none;"/>
+    <div id="ui-buttons">
+        <li id="dots"></li>
+        <button id="skip">Skip</button>
+        <button id="back" disabled>Back</button>
+        <button id="next">Next</button>
+    </div>
+    <img id="complicationImage" src="textures/heart.png" width="384" height="384"/>
 
     <script type="module" src="oobe.js"></script> 
 </body>
