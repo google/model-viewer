@@ -3,7 +3,7 @@
 // is only called once in oobe.js
 
 // TODO:
-// Blur (hard)
+// Blur (hard) - try putting in model-viewer el as child w/ z-layer
 // There are two carousels in the OOBE and they behave differently than each other. 
 // May need coordination w/ showdots and showcallouts; interaction_states.json needs to be modified
 
@@ -13,6 +13,7 @@ const COPY = copyData.copy;
 let prevTextId = 0;
 let currTextId = 0;
 
+const vignette = document.querySelector('#vignette');
 const card = document.querySelector('#card');
 const cardImg = document.querySelector('#card-image');
 const cardTitle = document.querySelector('#card-title');
