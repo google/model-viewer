@@ -594,9 +594,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
 
       const moveTouches = () => {
-        // cancel interaction if something else moves the camera
+        // Cancel interaction if something else moves the camera or input is
+        // removed from the DOM.
         const {changeSource} = this[$controls];
-        if (changeSource !== ChangeSource.AUTOMATIC) {
+        if (changeSource !== ChangeSource.AUTOMATIC || !inputElement.isConnected) {
           for (const fingerElement of this[$fingerAnimatedContainers]) {
             fingerElement.style.opacity = '0';
           }
