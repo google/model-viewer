@@ -51,7 +51,7 @@ export interface SceneGraphInterface {
   readonly originalGltfJson: GLTF|null;
   exportScene(options?: SceneExportOptions): Promise<Blob>;
   createTexture(uri: string, type?: string): Promise<ModelViewerTexture|null>;
-  createLottieTexture(uri: string, quality: number):
+  createLottieTexture(uri: string, quality?: number):
       Promise<ModelViewerTexture|null>;
   createVideoTexture(uri: string): ModelViewerTexture;
   createCanvasTexture(): ModelViewerTexture;
@@ -138,7 +138,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$buildTexture](texture);
     }
 
-    async createLottieTexture(uri: string, quality: number):
+    async createLottieTexture(uri: string, quality = 1):
         Promise<ModelViewerTexture> {
       const {textureUtils} = this[$renderer];
       const texture = await textureUtils!.loadLottie(uri, quality);

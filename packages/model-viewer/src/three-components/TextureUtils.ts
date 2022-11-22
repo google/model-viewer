@@ -34,11 +34,11 @@ const MAX_SAMPLES = 20;
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 
 export default class TextureUtils extends EventDispatcher {
+  public lottieLoaderUrl = '';
+
   private _ldrLoader: TextureLoader|null = null;
   private _hdrLoader: RGBELoader|null = null;
   private _lottieLoader = null;
-  private lottieLoaderUrl =
-      'https://cdn.jsdelivr.net/npm/three@0.146.0/examples/jsm/loaders/LottieLoader.js';
 
   private generatedEnvironmentMap: Promise<CubeTexture>|null = null;
   private generatedEnvironmentMapAlt: Promise<CubeTexture>|null = null;
