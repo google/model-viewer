@@ -32,11 +32,13 @@
       },
       {
         "id": 8,
+        "imageSrc": "https://fonts.gstatic.com/s/i/productlogos/fitbit/v1/192px.svg",
         "titleString": "Connect your Fitbit account",
         "bodyString": "After setting up your watch, open the Fitbit mobile app and connect your account to start personalizing fitness goals and tracking your progress on your new watch"
       },
       {
         "id": 13,
+        "imageSrc": "https://fonts.gstatic.com/s/i/productlogos/assistant/v10/192px.svg",
         "titleString": "Talk to your watch",
         "bodyString": "Set up Google Assistant, and use your voice to send texts, manage your day, and get quick answers"
       },

@@ -1,12 +1,3 @@
-// Commit message
-// Cleaned up UI: Separated HTML and CSS, loaded Roboto font, implemented button states, animations, JSInterface API that 
-// is only called once in oobe.js
-
-// TODO:
-// Blur (hard) - try putting in model-viewer el as child w/ z-layer
-// There are two carousels in the OOBE and they behave differently than each other. 
-// May need coordination w/ showdots and showcallouts; interaction_states.json needs to be modified
-
 import copyData from './title_body_data.json' assert {type: 'json'};
 
 const COPY = copyData.copy;
@@ -27,14 +18,13 @@ const backButton = document.querySelector('#back');
 function setStateParameters(state, calloutData) {
     console.log("Displaying UI for: " + state.name);
 
-
-    updateText(state.titleStringID, state.bodyStringID);
+    updateTextCard(state.titleStringID, state.bodyStringID);
     updateButtons(state);
     updateDots(state.showDots, calloutData);
 }
 
-// TODO: Show the correct text and image(?)
-function updateText(titleStringID, bodyStringID) {
+// Update text and image in the card
+function updateTextCard(titleStringID, bodyStringID) {
     prevTextId = currTextId;
     currTextId = titleStringID;
 
@@ -44,6 +34,14 @@ function updateText(titleStringID, bodyStringID) {
     
     let data = findDataById(titleStringID, COPY);
     if (data) {
+        // Update the image if available
+        if ('imageSrc'in data) {
+            cardImg.style.display = "block";
+            cardImg.src = data.imageSrc;
+        } else {
+            cardImg.style.display = "none";
+            cardImg.src = "";
+        }
         cardTitle.innerHTML = data.titleString;
         cardBody.innerHTML = data.bodyString;
     }
@@ -94,11 +92,9 @@ function updateButtons(state) {
 function toggleButton(buttonName, buttonState, buttonTextOverride) {
     if (buttonName == "next") {
         if (!buttonState) {
-            console.log("next button should disappear");
             nextButton.style.visibility = 'hidden';
         }
         else {
-            console.log("next button should re-appear");
             if (buttonTextOverride) { nextButton.innerHTML = buttonTextOverride; }
             nextButton.style.visibility = 'visible';
         }
@@ -106,12 +102,10 @@ function toggleButton(buttonName, buttonState, buttonTextOverride) {
 
     if (buttonName == "skip") {
         if (!buttonState) {
-            console.log("skip button should disappear");
             skipButton.style.visibility = 'hidden';
             backButton.style.visibility = 'visible';
         }
         else {
-            console.log("skip button should re-appear");
             if (buttonTextOverride) { skipButton.innerHTML = buttonTextOverride; }
             skipButton.style.visibility = 'visible';
             backButton.style.visibility = 'hidden';

@@ -88,12 +88,19 @@ button:active {
   height: 250px;
   display: flex;
   flex-direction: column;
+  margin: 25px 0px;
+}
+
+#card-image {
+  display: none;
+  width: 75px;
+  height: 75px;
 }
 
 h1 {
   font-weight: 300;
   font-size: 2.5rem;
-  margin-block-end: 1rem;
+  margin: 1rem 0; 
 }
 
 p {
