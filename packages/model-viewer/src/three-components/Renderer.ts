@@ -496,8 +496,10 @@ export class Renderer extends EventDispatcher {
       if (this.multipleScenesVisible || scene.renderCount === 0) {
         this.copyPixels(scene, width, height);
       } else {
-        scene.canvas.parentElement!.appendChild(canvas3D);
-        scene.canvas.classList.remove('show');
+        if (canvas3D.parentElement !== scene.canvas.parentElement) {
+          scene.canvas.parentElement!.appendChild(canvas3D);
+          scene.canvas.classList.remove('show');
+        }
       }
 
       scene.hasRendered();
