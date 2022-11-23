@@ -25,7 +25,7 @@
     "@actions/core": "^1.2.4",
     "@babylonjs/core": "^5.27.1",
     "@babylonjs/loaders": "^5.27.1",
-    "@google/model-viewer": "^2.1.0",
+    "@google/model-viewer": "^2.1.1",
     "@khronosgroup/gltf-viewer": "^1.0.9",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",

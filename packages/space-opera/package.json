@@ -34,7 +34,7 @@
     "Chris George <chrisgeorge@google.com>"
   ],
   "devDependencies": {
-    "@google/model-viewer": "^2.1.0",
+    "@google/model-viewer": "^2.1.1",
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-checkbox": "^0.25.3",
     "@material/mwc-dialog": "^0.25.3",
