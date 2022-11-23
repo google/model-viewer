@@ -648,6 +648,22 @@ suite('Controls', () => {
             expect(newTarget.z).to.be.closeTo(target.z, 0.001, 'Z');
           });
 
+      test(
+          'disconnecting the mv from DOM cancels the interaction.',
+          async () => {
+            let stopped = false;
+            element.addEventListener('interact-stopped', () => {
+              stopped = true;
+            }, {once: true});
+            element.interact(500, finger, finger);
+            await rafPasses();
+            expect(element.isConnected).to.be.true;
+            element.parentNode!.removeChild(element);
+            expect(element.isConnected).to.be.false;
+            await rafPasses();
+            expect(stopped).to.be.true;
+          });
+
       test('tap moves the model and re-centers', async () => {
         element.cameraOrbit = '0deg 90deg auto';
         element.jumpCameraToGoal();
