@@ -15,7 +15,7 @@
 
 import {Camera, Vector3} from 'three';
 
-import {$controls, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
@@ -527,6 +527,14 @@ suite('Controls', () => {
           const computedStyle =
               getComputedStyle((element as any)[$promptElement]);
           expect(computedStyle.animationName).to.be.equal('none');
+        });
+
+        test('becomes visible', async () => {
+          await until(
+              () => (element as any)[$promptElement].classList.contains(
+                  'visible'));
+          expect((element as any)[$promptAnimatedContainer].style.opacity)
+              .to.be.equal('1');
         });
       });
     });
