@@ -15,25 +15,41 @@
 
 import {property} from 'lit/decorators.js';
 import {Texture, Vector2} from 'three';
+import {EffectPass} from 'postprocessing';
 
 import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
 import {clamp, Constructor, deserializeUrl} from '../utilities.js';
+import { BLOOM_PASS, FXAA_PASS, OUTLINE_PASS, PIXELATE_PASS, SSAO_PASS } from '../three-components/PPRenderPipeline.js';
 
 export declare interface PostProcessingInterface {
-  bloomEffect: boolean;
-  vignetteEffect: boolean;
+  fxaaEffect: boolean
   ssaoEffect: boolean;
+  bloomEffect: boolean;
+  pixelateEffect: boolean;
+  outlineEffect: boolean;
 }
+
+export const EffectMap = new Map<string, EffectPass>([
+  ['fxaaEffect', FXAA_PASS],
+  ['ssaoEffect', SSAO_PASS],
+  ['bloomEffect', BLOOM_PASS],
+  ['outlineEffect', OUTLINE_PASS],
+  ['pixelateEffect', PIXELATE_PASS],
+]);
 
 export const PostProcessingMixin = <T extends Constructor<ModelViewerElementBase>>(
     ModelViewerElement: T): Constructor<PostProcessingInterface>&T => {
   class PostProcessingModelViewerElement extends ModelViewerElement {
-    @property({type: Boolean, attribute: 'bloom-effect'})
-    bloomEffect: boolean = false;
-    @property({type: Boolean, attribute: 'vignette-effect'})
-    vignetteEffect: boolean = false;
+    @property({type: Boolean, attribute: 'fxaa-effect'})
+    fxaaEffect: boolean = false;
     @property({type: Boolean, attribute: 'ssao-effect'})
     ssaoEffect: boolean = false;
+    @property({type: Boolean, attribute: 'bloom-effect'})
+    bloomEffect: boolean = false;
+    @property({type: Boolean, attribute: 'pixelate-effect'})
+    pixelateEffect: boolean = false;
+    @property({type: Boolean, attribute: 'outline-effect'})
+    outlineEffect: boolean = false;
 
     updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
