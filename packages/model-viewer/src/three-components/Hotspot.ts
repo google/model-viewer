@@ -33,6 +33,7 @@ export interface HotspotConfiguration {
   name: string;
   position?: string;
   normal?: string;
+  surface?: string;
 }
 
 /**

@@ -33,7 +33,6 @@ import './three-components/SmoothControls-spec.js';
 import './three-components/Damper-spec.js';
 import './three-components/TextureUtils-spec.js';
 import './three-components/CachingGLTFLoader-spec.js';
-import './three-components/ModelUtils-spec.js';
 import './three-components/Hotspot-spec.js';
 import './utilities/animation-spec.js';
 import './utilities/cache-eviction-policy-spec.js';

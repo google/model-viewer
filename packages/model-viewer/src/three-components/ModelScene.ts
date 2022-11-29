@@ -15,6 +15,8 @@
 
 import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+// @ts-ignore
+import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
 
 import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
@@ -26,7 +28,6 @@ import {resolveDpr} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
-import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
 const MIN_SHADOW_RATIO = 100;
@@ -835,6 +836,26 @@ export class ModelScene extends Scene {
         new Matrix3().getNormalMatrix(hit.object.matrixWorld));
 
     return {position: hit.point, normal: hit.face.normal, uv: hit.uv};
+  }
+
+  /**
+   * This method returns a dynamic hotspot ID string of the point on the mesh
+   * corresponding to the input pixel coordinates given relative to the
+   * model-viewer element. The ID string can be used in the data-surface
+   * attribute of the hotspot to make it follow this point on the surface even
+   * as the model animates. If the mesh is not hit, the result is null.
+   */
+  surfaceFromPoint(ndcPosition: Vector2, object: Object3D = this): string|null {
+    this.raycaster.setFromCamera(ndcPosition, this.getCamera());
+    const hits = this.raycaster.intersectObject(object, true);
+
+    const hit =
+        hits.find((hit) => hit.object.visible && !hit.object.userData.shadow);
+    if (hit == null || hit.face == null) {
+      return null;
+    }
+
+    return '';
   }
 
   /**
