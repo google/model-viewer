@@ -17,7 +17,7 @@ import {Mesh, MeshStandardMaterial} from 'three';
 
 import {$currentGLTF} from '../../features/scene-graph.js';
 import {$primitivesList} from '../../features/scene-graph/model.js';
-import {$initialMaterialIdx, PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
+import {PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js';
 import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
@@ -156,7 +156,7 @@ suite('SceneGraph', () => {
             // Finds the first primitive with material 0 assigned.
             for (const primitive of element.model![$primitivesList]) {
               if (primitive.variantInfo != null &&
-                  primitive[$initialMaterialIdx] == 0) {
+                  primitive.initialMaterialIdx == 0) {
                 primitiveNode = primitive;
                 return;
               }
@@ -225,7 +225,7 @@ suite('SceneGraph', () => {
                 // Finds the first primitive with material 0 assigned.
                 for (const primitive of element.model![$primitivesList]) {
                   if (primitive.variantInfo != null &&
-                      primitive[$initialMaterialIdx] == 0) {
+                      primitive.initialMaterialIdx == 0) {
                     primitiveNode = primitive;
                     return;
                   }

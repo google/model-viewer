@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Vector2, Vector3, WebGLRenderer} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Triangle, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 // @ts-ignore
 import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
@@ -811,6 +811,14 @@ export class ModelScene extends Scene {
     return raycaster;
   }
 
+  hitFromPoint(ndcPosition: Vector2, object: Object3D = this) {
+    this.raycaster.setFromCamera(ndcPosition, this.getCamera());
+    const hits = this.raycaster.intersectObject(object, true);
+
+    return hits.find(
+        (hit) => hit.object.visible && !hit.object.userData.shadow);
+  }
+
   /**
    * This method returns the world position, model-space normal and texture
    * coordinate of the point on the mesh corresponding to the input pixel
@@ -819,11 +827,7 @@ export class ModelScene extends Scene {
    */
   positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
       {position: Vector3, normal: Vector3, uv: Vector2|null}|null {
-    this.raycaster.setFromCamera(ndcPosition, this.getCamera());
-    const hits = this.raycaster.intersectObject(object, true);
-
-    const hit =
-        hits.find((hit) => hit.object.visible && !hit.object.userData.shadow);
+    const hit = this.hitFromPoint(ndcPosition, object);
     if (hit == null || hit.face == null) {
       return null;
     }
@@ -854,6 +858,17 @@ export class ModelScene extends Scene {
     if (hit == null || hit.face == null) {
       return null;
     }
+
+    const a = new Vector3();
+    const b = new Vector3();
+    const c = new Vector3();
+    const mesh = hit.object as any;
+    mesh.getUpdatedVertex(hit.face.a, a);
+    mesh.getUpdatedVertex(hit.face.b, b);
+    mesh.getUpdatedVertex(hit.face.c, c);
+    const tri = new Triangle(a, b, c);
+    const uvw = new Vector3();
+    tri.getBarycoord(hit.point, uvw);
 
     return '';
   }
