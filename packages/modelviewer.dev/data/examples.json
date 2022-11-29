@@ -256,5 +256,15 @@
         "name": "Exporter"
       }
     ]
-  }
+  },
+  {
+    "name": "PostProcessing Effects",
+    "htmlName": "postprocessing",
+    "examples": [
+      {
+        "htmlId": "effects",
+        "name": "Toggle Effects"
+      }
+    ]
+  } 
 ]

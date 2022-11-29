@@ -1,4 +1,4 @@
-import { EffectComposer, RenderPass, EffectPass, BloomEffect, BlendFunction, KernelSize, FXAAEffect, SSAOEffect, ToneMappingEffect, ToneMappingMode } from 'postprocessing';
+import { EffectComposer, RenderPass, EffectPass, BloomEffect, BlendFunction, KernelSize, FXAAEffect, SSAOEffect, PixelationEffect, OutlineEffect, ToneMappingEffect, ToneMappingMode } from 'postprocessing';
 import { WebGLRenderer } from 'three';
 
 export const RENDER_PASS = new RenderPass(null, null);
@@ -16,15 +16,31 @@ export const BLOOM_EFFECT = new BloomEffect({
     kernelSize: KernelSize.LARGE
 });
 
-export const TONEMAPPING_EFFECT = new ToneMappingEffect({mode: ToneMappingMode.OPTIMIZED_CINEON});
+export const PIXELATE_EFFECt = new PixelationEffect(6);
 
-export const POST_PROCESSING_PIPELINE = new EffectPass(null, FXAA_EFFECT, SSAO_EFFECT, BLOOM_EFFECT, TONEMAPPING_EFFECT);
-POST_PROCESSING_PIPELINE.name = "postProcessing";
-POST_PROCESSING_PIPELINE.enabled = false;
+export const OUTLINE_EFFECT = new OutlineEffect();
+// export const TONEMAPPING_EFFECT = new ToneMappingEffect({mode: ToneMappingMode.OPTIMIZED_CINEON});
+
+export const FXAA_PASS = new EffectPass(null, FXAA_EFFECT);
+export const SSAO_PASS = new EffectPass(null, SSAO_EFFECT);
+export const BLOOM_PASS = new EffectPass(null, BLOOM_EFFECT);
+export const OUTLINE_PASS = new EffectPass(null, OUTLINE_EFFECT);
+export const PIXELATE_PASS = new EffectPass(null, PIXELATE_EFFECt);
+
+FXAA_PASS.enabled = false;
+SSAO_PASS.enabled = false;
+BLOOM_PASS.enabled = false;
+OUTLINE_PASS.enabled = false;
+PIXELATE_PASS.enabled = false;
 
 export const CreateEffectComposer = (threeRenderer: WebGLRenderer) => {
     const effectComposer = new EffectComposer(threeRenderer);
 
     effectComposer.addPass(RENDER_PASS);
-    effectComposer.addPass(POST_PROCESSING_PIPELINE);
+    effectComposer.addPass(FXAA_PASS);
+    effectComposer.addPass(SSAO_PASS);
+    effectComposer.addPass(BLOOM_PASS);
+    effectComposer.addPass(OUTLINE_PASS);
+    effectComposer.addPass(PIXELATE_PASS);
+    // effectComposer.addPass(POST_PROCESSING_PIPELINE);
 };

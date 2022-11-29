@@ -1052,5 +1052,35 @@
         ]
       }
     ]
+  },
+  {
+    "Title": "PostProcessing Effects",
+    "htmlName": "postprocessing",
+    "Attributes": [
+      {
+        "name": "bloom-effect",
+        "htmlName": "bloomEffect",
+        "description": "Toggle the Bloom effect.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#effects\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "ssao-effect",
+        "htmlName": "ssaoEffect",
+        "description": "Toggle the SSAO effect.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#effects\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "pixelate-effect",
+        "htmlName": "pixelateEffect",
+        "description": "Toggle the Pixelate effect.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#effects\">Related examples</a>"
+        ]
+      },
+    ]
   }
 ]

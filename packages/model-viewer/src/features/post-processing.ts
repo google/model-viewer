@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-import {property} from 'lit/decorators.js';
-import {Texture, Vector2} from 'three';
-import {EffectPass} from 'postprocessing';
+import { property } from 'lit/decorators.js';
+import { EffectPass } from 'postprocessing';
 
-import ModelViewerElementBase, {$needsRender, $renderer} from '../model-viewer-base.js';
-import {clamp, Constructor, deserializeUrl} from '../utilities.js';
+import ModelViewerElementBase, { $needsRender } from '../model-viewer-base.js';
 import { BLOOM_PASS, FXAA_PASS, OUTLINE_PASS, PIXELATE_PASS, SSAO_PASS } from '../three-components/PPRenderPipeline.js';
+import { Constructor } from '../utilities.js';
 
 export declare interface PostProcessingInterface {
   fxaaEffect: boolean

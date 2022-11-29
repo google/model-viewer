@@ -28,6 +28,7 @@ import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.j
 import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
 import { CreateEffectComposer, RENDER_PASS } from './PPRenderPipeline.js';
+import { EffectMap } from '../features/post-processing.js';
 
 export interface RendererOptions {
   powerPreference: string;
@@ -145,7 +146,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
         alpha: true,
-        antialias: false,
+        antialias: true,
         powerPreference: options.powerPreference as WebGLPowerPreference,
         preserveDrawingBuffer: true,
         stencil: false,
@@ -160,7 +161,6 @@ export class Renderer extends EventDispatcher {
       this.debugger = !!options.debug ? new Debugger(this) : null;
       this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
 
-      // this.threeRenderer.setClearColor(0x000000, 0.0);
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
@@ -434,8 +434,10 @@ export class Renderer extends EventDispatcher {
         typeof exposure === 'number' && !Number.isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
 	
+    for (const [effectName, pass] of EffectMap.entries()) {
+      pass.enabled = scene[effectName];
+    }
     for (const pass of this.effectComposer.passes) {
-      if (scene.hasOwnProperty(pass.name)) pass.enabled = scene[pass.name];
       pass.mainScene = scene;
       pass.mainCamera = scene.getCamera();
     }
@@ -512,7 +514,6 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
-    //   this.threeRenderer.render(scene, scene.camera);
 	    this.effectComposer.render();
 
       if (this.multipleScenesVisible || scene.renderCount === 0) {

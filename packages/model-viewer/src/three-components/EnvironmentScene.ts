@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, AmbientLight, DirectionalLight, Scene} from 'three';
+import {BackSide, BoxGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, Scene} from 'three';
 
 export default class EnvironmentScene extends Scene {
   constructor() {
