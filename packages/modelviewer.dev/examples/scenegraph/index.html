@@ -253,14 +253,14 @@ document.querySelector('#color-controls').addEventListener('click', (event) => {
           </div>
           <example-snippet stamp-to="changeMaterial" highlight-as="html">
             <template>
-<model-viewer style="background: black;" id="sphere" debug camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/glTF-Sample-Models/2.0/EmissiveStrengthTest/glTF-Binary/EmissiveStrengthTest.glb" alt="A 3D model of a sphere" bloom-effect max-field-of-view="100deg">
+<model-viewer id="sphere" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" ar alt="A 3D model of a sphere">
   <div class="controls">
     <div>
       <p>Metalness: <span id="metalness-value"></span></p>
-      <input id="metalness" type="range" min="0" max="1" step="0.01" value="0" />
+      <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
     </div>
     <div>
-      <p>Emissive: <span id="roughness-value"></span></p>
+      <p>Roughness: <span id="roughness-value"></span></p>
       <input id="roughness" type="range" min="0" max="1" step="0.01" value="0" />
     </div>
   </div>
@@ -270,30 +270,26 @@ const modelViewerParameters = document.querySelector("model-viewer#sphere");
 
 modelViewerParameters.addEventListener("load", (ev) => {
 
-  // let material = modelViewerParameters.model.materials[0];
+  let material = modelViewerParameters.model.materials[0];
 
-  // let metalnessDisplay = document.querySelector("#metalness-value");
-  // let roughnessDisplay = document.querySelector("#roughness-value");
+  let metalnessDisplay = document.querySelector("#metalness-value");
+  let roughnessDisplay = document.querySelector("#roughness-value");
 
-  // metalnessDisplay.textContent = material.pbrMetallicRoughness.metallicFactor;
-  // roughnessDisplay.textContent = material.pbrMetallicRoughness.roughnessFactor;
+  metalnessDisplay.textContent = material.pbrMetallicRoughness.metallicFactor;
+  roughnessDisplay.textContent = material.pbrMetallicRoughness.roughnessFactor;
 
-  // // Defaults to gold
-  // material.pbrMetallicRoughness.setBaseColorFactor([0,0,1]);
-  // material.pbrMetallicRoughness.setMetallicFactor(0);
-  // material.pbrMetallicRoughness.setRoughnessFactor(1);
-  // material.setEmissiveFactor([0, 0, 1]);
-  // document.querySelector('#metalness').addEventListener('input', (event) => {
-  //   material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
-  //   metalnessDisplay.textContent = event.target.value;
-  // });
+  // Defaults to gold
+  material.pbrMetallicRoughness.setBaseColorFactor([0.7294, 0.5333, 0.0392]);
 
-  // document.querySelector('#roughness').addEventListener('input', (event) => {
-  //   //material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
-  //   // material.setEmissiveFactor([event.target.value, 0, event.target.value]);
-  //   //material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
-  //   roughnessDisplay.textContent = event.target.value * 5;
-  // });
+  document.querySelector('#metalness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
+    metalnessDisplay.textContent = event.target.value;
+  });
+
+  document.querySelector('#roughness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
+    roughnessDisplay.textContent = event.target.value;
+  });
 });
 </script>
             </template>

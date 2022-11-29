@@ -102,7 +102,7 @@ const outline = modelViewer.querySelector('#outline');
 const ssao = modelViewer.querySelector('#ssao');
 
 function toggleEffect(checkbox, property) {
-modelViewerPostprocessing[property] = checkbox.checked;
+    modelViewerPostprocessing[property] = checkbox.checked;
 }
 
 bloom.addEventListener('change', () => toggleEffect(bloom, 'bloomEffect'));
