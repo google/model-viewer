@@ -15,7 +15,7 @@
 
 import {Camera, Vector3} from 'three';
 
-import {$controls, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
 import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
@@ -528,6 +528,14 @@ suite('Controls', () => {
               getComputedStyle((element as any)[$promptElement]);
           expect(computedStyle.animationName).to.be.equal('none');
         });
+
+        test('becomes visible', async () => {
+          await until(
+              () => (element as any)[$promptElement].classList.contains(
+                  'visible'));
+          expect((element as any)[$promptAnimatedContainer].style.opacity)
+              .to.be.equal('1');
+        });
       });
     });
 
@@ -646,6 +654,22 @@ suite('Controls', () => {
             expect(newTarget.x).to.be.closeTo(target.x, 0.001, 'X');
             expect(newTarget.y).to.be.closeTo(target.y, 0.001, 'Y');
             expect(newTarget.z).to.be.closeTo(target.z, 0.001, 'Z');
+          });
+
+      test(
+          'disconnecting the mv from DOM cancels the interaction.',
+          async () => {
+            let stopped = false;
+            element.addEventListener('interact-stopped', () => {
+              stopped = true;
+            }, {once: true});
+            element.interact(500, finger, finger);
+            await rafPasses();
+            expect(element.isConnected).to.be.true;
+            element.parentNode!.removeChild(element);
+            expect(element.isConnected).to.be.false;
+            await rafPasses();
+            expect(stopped).to.be.true;
           });
 
       test('tap moves the model and re-centers', async () => {

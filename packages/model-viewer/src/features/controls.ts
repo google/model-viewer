@@ -504,6 +504,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
+      if (changedProperties.has('interactionPromptStyle')) {
+        this[$promptAnimatedContainer].style.opacity =
+            this.interactionPromptStyle == InteractionPromptStyle.BASIC ? '1' :
+                                                                          '0';
+      }
+
       if (changedProperties.has('touchAction')) {
         const touchAction = this.touchAction;
         controls.applyOptions({touchAction});
@@ -594,9 +600,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       };
 
       const moveTouches = () => {
-        // cancel interaction if something else moves the camera
+        // Cancel interaction if something else moves the camera or input is
+        // removed from the DOM.
         const {changeSource} = this[$controls];
-        if (changeSource !== ChangeSource.AUTOMATIC) {
+        if (changeSource !== ChangeSource.AUTOMATIC ||
+            !inputElement.isConnected) {
           for (const fingerElement of this[$fingerAnimatedContainers]) {
             fingerElement.style.opacity = '0';
           }
