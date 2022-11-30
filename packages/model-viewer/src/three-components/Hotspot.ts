@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Vector3} from 'three';
+import {Matrix3, Mesh, Vector3} from 'three';
 import {CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import {normalizeUnit} from '../styles/conversions.js';
@@ -36,12 +36,21 @@ export interface HotspotConfiguration {
   surface?: string;
 }
 
+const a = new Vector3();
+const b = new Vector3();
+const c = new Vector3();
+const mat = new Matrix3();
+
 /**
  * The Hotspot object is a reference-counted slot. If decrement() returns true,
  * it should be removed from the tree so it can be garbage-collected.
  */
 export class Hotspot extends CSS2DObject {
   public normal: Vector3 = new Vector3(0, 1, 0);
+  public surface?: string;
+  public mesh?: Mesh;
+  public tri?: Vector3;
+  public bary?: Vector3;
   private initialized = false;
   private referenceCount = 1;
   private pivot = document.createElement('div');
@@ -59,6 +68,7 @@ export class Hotspot extends CSS2DObject {
 
     this.updatePosition(config.position);
     this.updateNormal(config.normal);
+    this.surface = config.surface;
   }
 
   get facingCamera(): boolean {
@@ -125,9 +135,23 @@ export class Hotspot extends CSS2DObject {
       return;
     const normalNodes = parseExpressions(normal)[0].terms;
     for (let i = 0; i < 3; ++i) {
-      this.normal.setComponent(
-          i, normalizeUnit(normalNodes[i] as NumberNode<'m'>).number);
+      this.normal.setComponent(i, (normalNodes[i] as NumberNode).number);
     }
+  }
+
+  updateSurface() {
+    const {mesh, tri, bary} = this;
+    if (mesh == null || tri == null || bary == null) {
+      return;
+    }
+
+    (mesh as any).getUpdatedVertex(tri.x, a);
+    (mesh as any).getUpdatedVertex(tri.y, b);
+    (mesh as any).getUpdatedVertex(tri.z, c);
+    a.toArray(mat.elements, 0);
+    b.toArray(mat.elements, 3);
+    c.toArray(mat.elements, 6);
+    this.position.copy(bary).applyMatrix3(mat);
   }
 
   orient(radians: number) {

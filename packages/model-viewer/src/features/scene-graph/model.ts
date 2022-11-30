@@ -34,6 +34,8 @@ export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
 export const $materialFromPoint = Symbol('materialFromPoint');
+export const $nodeFromPoint = Symbol('nodeFromPoint');
+export const $nodeFromIndex = Symbol('nodeFromIndex');
 export const $variantData = Symbol('variantData');
 export const $availableVariants = Symbol('availableVariants');
 const $modelOnUpdate = Symbol('modelOnUpdate');
@@ -209,12 +211,21 @@ export class Model implements ModelInterface {
     return null;
   }
 
-  /**
-   * Intersects a ray with the Model and returns the first material whose
-   * object was intersected.
-   */
-  [$materialFromPoint](hit: Intersection<Object3D>): Material|null {
+  [$nodeFromIndex](mesh: number, primitive: number): PrimitiveNode|null {
     const found = this[$hierarchy].find((node: Node) => {
+      if (node instanceof PrimitiveNode) {
+        const {meshes, primitives} = node.mesh.userData.associations;
+        if (meshes == mesh && primitives == primitive) {
+          return true;
+        }
+      }
+      return false;
+    });
+    return found == null ? null : found as PrimitiveNode;
+  }
+
+  [$nodeFromPoint](hit: Intersection<Object3D>): PrimitiveNode {
+    return this[$hierarchy].find((node: Node) => {
       if (node instanceof PrimitiveNode) {
         const primitive = node as PrimitiveNode;
         if (primitive.mesh === hit.object) {
@@ -223,11 +234,14 @@ export class Model implements ModelInterface {
       }
       return false;
     }) as PrimitiveNode;
+  }
 
-    if (found == null) {
-      return null;
-    }
-    return found.getActiveMaterial();
+  /**
+   * Intersects a ray with the Model and returns the first material whose
+   * object was intersected.
+   */
+  [$materialFromPoint](hit: Intersection<Object3D>): Material {
+    return this[$nodeFromPoint](hit).getActiveMaterial();
   }
 
   /**

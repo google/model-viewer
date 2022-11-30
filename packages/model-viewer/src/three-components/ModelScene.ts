@@ -19,6 +19,7 @@ import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
 
 import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
+import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
 import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {normalizeUnit} from '../styles/conversions.js';
@@ -850,27 +851,33 @@ export class ModelScene extends Scene {
    * as the model animates. If the mesh is not hit, the result is null.
    */
   surfaceFromPoint(ndcPosition: Vector2, object: Object3D = this): string|null {
-    this.raycaster.setFromCamera(ndcPosition, this.getCamera());
-    const hits = this.raycaster.intersectObject(object, true);
+    const model = this.element.model;
+    if (model == null) {
+      return null;
+    }
 
-    const hit =
-        hits.find((hit) => hit.object.visible && !hit.object.userData.shadow);
+    const hit = this.hitFromPoint(ndcPosition, object);
     if (hit == null || hit.face == null) {
       return null;
     }
 
-    const a = new Vector3();
-    const b = new Vector3();
-    const c = new Vector3();
+    const node = model[$nodeFromPoint](hit);
+    const {meshes, primitives} = node.mesh.userData.associations;
+
+    const va = new Vector3();
+    const vb = new Vector3();
+    const vc = new Vector3();
+    const {a, b, c} = hit.face;
     const mesh = hit.object as any;
-    mesh.getUpdatedVertex(hit.face.a, a);
-    mesh.getUpdatedVertex(hit.face.b, b);
-    mesh.getUpdatedVertex(hit.face.c, c);
-    const tri = new Triangle(a, b, c);
+    mesh.getUpdatedVertex(a, va);
+    mesh.getUpdatedVertex(b, vb);
+    mesh.getUpdatedVertex(c, vc);
+    const tri = new Triangle(va, vb, vc);
     const uvw = new Vector3();
     tri.getBarycoord(hit.point, uvw);
 
-    return '';
+    return `${meshes} ${primitives} ${a} ${b} ${c} ${uvw.x.toFixed(3)} ${
+        uvw.y.toFixed(3)} ${uvw.z.toFixed(3)}`;
   }
 
   /**
@@ -904,10 +911,57 @@ export class ModelScene extends Scene {
   }
 
   /**
+   * Lazy initializer for surface hotspots - will only run once.
+   */
+  initializeSurface(hotspot: Hotspot) {
+    if (hotspot.surface != null && hotspot.mesh == null) {
+      const nodes = parseExpressions(hotspot.surface)[0].terms as NumberNode[];
+      const primitiveNode =
+          this.element.model![$nodeFromIndex](nodes[0].number, nodes[1].number);
+      const tri =
+          new Vector3(nodes[2].number, nodes[3].number, nodes[4].number);
+
+      if (primitiveNode == null) {
+        console.warn(
+            hotspot.surface +
+            ' does not match a node/primitive in this glTF! Skipping this hotspot.');
+        return;
+      }
+
+      const numVert = primitiveNode.mesh.geometry.attributes.position.count;
+      if (tri.x >= numVert || tri.y >= numVert || tri.z >= numVert) {
+        console.warn(
+            hotspot.surface +
+            ' vertex indices out of range in this glTF! Skipping this hotspot.');
+        return;
+      }
+
+      const bary =
+          new Vector3(nodes[5].number, nodes[6].number, nodes[7].number);
+      hotspot.mesh = primitiveNode.mesh;
+      hotspot.tri = tri;
+      hotspot.bary = bary;
+    }
+  }
+
+  /**
+   * Update positions of surface hotspots to follow model animation.
+   */
+  updateSurfaceHotspots() {
+    if (this.element.paused) {
+      return;
+    }
+    this.forHotspots((hotspot) => {
+      this.initializeSurface(hotspot);
+      hotspot.updateSurface();
+    });
+  }
+
+  /**
    * Update the CSS visibility of the hotspots based on whether their normals
    * point toward the camera.
    */
-  updateHotspots(viewerPosition: Vector3) {
+  updateHotspotsVisibility(viewerPosition: Vector3) {
     this.forHotspots((hotspot) => {
       view.copy(viewerPosition);
       target.setFromMatrixPosition(hotspot.matrixWorld);

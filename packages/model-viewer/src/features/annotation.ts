@@ -40,7 +40,8 @@ export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
   queryHotspot(name: string): HotspotData|null;
   positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D, uv: Vector2D|null}|null
+      {position: Vector3D, normal: Vector3D, uv: Vector2D|null}|null;
+  surfaceFromPoint(pixelX: number, pixelY: number): string|null;
 }
 
 /**
@@ -108,7 +109,8 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const camera = scene.getCamera();
 
       if (scene.shouldRender()) {
-        scene.updateHotspots(camera.position);
+        scene.updateSurfaceHotspots();
+        scene.updateHotspotsVisibility(camera.position);
         annotationRenderer.domElement.style.display = '';
         annotationRenderer.render(scene, camera);
       }
@@ -203,6 +205,20 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       return {position: position, normal: normal, uv: uv};
     }
 
+    /**
+     * This method returns a dynamic hotspot ID string of the point on the mesh
+     * corresponding to the input pixel coordinates given relative to the
+     * model-viewer element. The ID string can be used in the data-surface
+     * attribute of the hotspot to make it follow this point on the surface even
+     * as the model animates. If the mesh is not hit, the result is null.
+     */
+    surfaceFromPoint(pixelX: number, pixelY: number): string|null {
+      const scene = this[$scene];
+      const ndcPosition = scene.getNDC(pixelX, pixelY);
+
+      return scene.surfaceFromPoint(ndcPosition);
+    }
+
     private[$addHotspot](node: Node) {
       if (!(node instanceof HTMLElement &&
             node.slot.indexOf('hotspot') === 0)) {
@@ -218,6 +234,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           name: node.slot,
           position: node.dataset.position,
           normal: node.dataset.normal,
+          surface: node.dataset.surface,
         });
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].addHotspot(hotspot);
