@@ -154,7 +154,9 @@ export class Hotspot extends CSS2DObject {
     a.toArray(mat.elements, 0);
     b.toArray(mat.elements, 3);
     c.toArray(mat.elements, 6);
-    this.position.copy(bary).applyMatrix3(mat);
+    this.position.copy(bary).applyMatrix3(mat)
+    const target = this.parent!;
+    target.worldToLocal(mesh.localToWorld(this.position));
   }
 
   orient(radians: number) {

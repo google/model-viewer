@@ -874,7 +874,7 @@ export class ModelScene extends Scene {
     mesh.getUpdatedVertex(c, vc);
     const tri = new Triangle(va, vb, vc);
     const uvw = new Vector3();
-    tri.getBarycoord(hit.point, uvw);
+    tri.getBarycoord(mesh.worldToLocal(hit.point), uvw);
 
     return `${meshes} ${primitives} ${a} ${b} ${c} ${uvw.x.toFixed(3)} ${
         uvw.y.toFixed(3)} ${uvw.z.toFixed(3)}`;
