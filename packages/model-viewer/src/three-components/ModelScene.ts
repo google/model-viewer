@@ -948,12 +948,10 @@ export class ModelScene extends Scene {
    * Update positions of surface hotspots to follow model animation.
    */
   updateSurfaceHotspots() {
-    if (this.element.paused) {
-      return;
-    }
+    const forceUpdate = !this.element.paused;
     this.forHotspots((hotspot) => {
       this.initializeSurface(hotspot);
-      hotspot.updateSurface();
+      hotspot.updateSurface(forceUpdate);
     });
   }
 

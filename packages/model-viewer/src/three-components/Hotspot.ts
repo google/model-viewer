@@ -139,7 +139,10 @@ export class Hotspot extends CSS2DObject {
     }
   }
 
-  updateSurface() {
+  updateSurface(forceUpdate: boolean) {
+    if (!forceUpdate && this.initialized) {
+      return;
+    }
     const {mesh, tri, bary} = this;
     if (mesh == null || tri == null || bary == null) {
       return;
