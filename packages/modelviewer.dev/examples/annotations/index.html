@@ -122,6 +122,135 @@
     </div>
 
     <div class="sample">
+      <div id="animatedHotspots" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Animated Hotspots. </span></h4>
+          <p>
+            Hotspots can follow a point on the surface of an animated model by
+            specifying the data-surface attribute instead of world-space
+            position and normal. You can use the <a
+            href="../../docs/index.html#entrydocs-annotations-methods-surfaceFromPoint">surfaceFromPoint</a>
+            method to get this data-surface string, or even easier, just load
+            your model in our <a
+            href="https://modelviewer.dev/editor/">editor</a> and add the
+            hotspots there.
+          </p>
+          <p>
+            Hotspots can be queried to build custom overlays in screen space.
+            For example, by using an SVG canvas and updating the line nodes we
+            can draw label standoff lines.
+          </p>
+          <p>
+            By using WebXR mode, this markup works equally well in AR. Note that
+            because the text is not part of the 3D rendering it is easier to
+            read and more accessible. 
+          </p>
+          <example-snippet stamp-to="animatedHotspots" highlight-as="html">
+            <template>
+<model-viewer id="animation-demo" autoplay ar ar-modes="webxr" camera-orbit="90deg auto auto" shadow-intensity="1" camera-controls touch-action="pan-y" src="../../shared-assets/models/Horse.glb" alt="A 3D model of a horse galloping.">
+  <div slot="hotspot-nose" class="anchor" data-surface="0 0 228 113 111 0.217 0.341 0.442"></div>
+  <div slot="hotspot-hoof" class="anchor" data-surface="0 0 752 733 735 0.132 0.379 0.489"></div>
+  <div slot="hotspot-tail" class="anchor" data-surface="0 0 220 221 222 0.405 0.061 0.534"></div>
+  <svg id="lines" xmlns="http://www.w3.org/2000/svg" class="lineContainer">
+    <line class="line"></line>
+    <line class="line"></line>
+    <line class="line"></line>
+  </svg>
+
+  <div id="container">
+    <button id="nose" class="label">Nose</button>
+    <button id="hoof" class="label">Hoof</button>
+    <button id="tail" class="label">Tail</button>
+  </div>
+</model-viewer>
+
+<script type="module">
+  const modelViewer1 = document.querySelector('#animation-demo');
+  const baseRect = modelViewer1.getBoundingClientRect();
+  const noseRect = document.querySelector('#nose').getBoundingClientRect();
+  const hoofRect = document.querySelector('#hoof').getBoundingClientRect();
+  const tailRect = document.querySelector('#tail').getBoundingClientRect();
+  const lines = modelViewer1.querySelectorAll('line');
+
+  modelViewer1.addEventListener('load', () => {
+    // update svg
+    function drawLine(svgLine, name, rect) {
+      const hotspot = modelViewer1.queryHotspot('hotspot-' + name);
+      svgLine.setAttribute('x1', hotspot.canvasPosition.x);
+      svgLine.setAttribute('y1', hotspot.canvasPosition.y);
+      svgLine.setAttribute('x2', (rect.left + rect.right) / 2 - baseRect.left);
+      svgLine.setAttribute('y2', rect.top - baseRect.top);
+    }
+
+    // use requestAnimationFrame to update with renderer
+    const startSVGRenderLoop = () => {
+      drawLine(lines[0], 'nose', noseRect);
+      drawLine(lines[1], 'hoof', hoofRect);
+      drawLine(lines[2], 'tail', tailRect);
+      requestAnimationFrame(startSVGRenderLoop);
+    };
+
+    startSVGRenderLoop();
+  });
+</script>
+<style>
+  .anchor{
+    display: none;
+  }
+
+  .lineContainer{
+    pointer-events: none;
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%; 
+  }
+
+  .line{
+    stroke: #16a5e6;
+    stroke-width: 2;
+    stroke-dasharray: 2
+  }
+
+  #container{
+    position: absolute;
+    display: flex;
+    justify-content: space-evenly;
+    bottom: 8px;
+    left: 8px;
+    width: 100%;
+  }
+
+  .label{
+    background: #fff;
+    border-radius: 4px;
+    border: none;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    color: rgba(0, 0, 0, 0.8);
+    display: block;
+    font-family: Futura, Helvetica Neue, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    max-width: 128px;
+    padding: 0.5em 1em;
+    bottom: 10px;
+    pointer-events: none;
+  }
+
+  /* This keeps child nodes hidden while the element loads */
+  :not(:defined) > * {
+    display: none;
+  }
+</style>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
       <div id="dimensions" class="demo"></div>
       <div class="content">
         <div class="wrapper">
