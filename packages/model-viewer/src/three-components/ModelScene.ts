@@ -869,9 +869,9 @@ export class ModelScene extends Scene {
     const vc = new Vector3();
     const {a, b, c} = hit.face;
     const mesh = hit.object as any;
-    mesh.getUpdatedVertex(a, va);
-    mesh.getUpdatedVertex(b, vb);
-    mesh.getUpdatedVertex(c, vc);
+    mesh.getVertexPosition(a, va);
+    mesh.getVertexPosition(b, vb);
+    mesh.getVertexPosition(c, vc);
     const tri = new Triangle(va, vb, vc);
     const uvw = new Vector3();
     tri.getBarycoord(mesh.worldToLocal(hit.point), uvw);

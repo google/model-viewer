@@ -152,9 +152,9 @@ export class Hotspot extends CSS2DObject {
       return;
     }
 
-    (mesh as any).getUpdatedVertex(tri.x, a);
-    (mesh as any).getUpdatedVertex(tri.y, b);
-    (mesh as any).getUpdatedVertex(tri.z, c);
+    (mesh as any).getVertexPosition(tri.x, a);
+    (mesh as any).getVertexPosition(tri.y, b);
+    (mesh as any).getVertexPosition(tri.z, c);
 
     a.toArray(mat.elements, 0);
     b.toArray(mat.elements, 3);
