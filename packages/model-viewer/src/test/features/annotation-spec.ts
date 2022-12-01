@@ -239,5 +239,33 @@ suite('Annotation', () => {
         withinRange(uv, 0, 1);
       }
     });
+
+    test('returns a surface that shows and hides appropriately', async () => {
+      await rafPasses();
+      const surface = element.surfaceFromPoint(width / 2, height / 2);
+      expect(surface).to.be.ok;
+
+      const hotspot = document.createElement('div');
+      hotspot.setAttribute('slot', 'hotspot-1');
+      hotspot.setAttribute('data-surface', surface!);
+      element.appendChild(hotspot);
+
+      await rafPasses();
+
+      expect(sceneContainsHotspot(scene, hotspot)).to.be.true;
+
+      const numSlots = scene.target.children.length;
+      const wrapper = (scene.target.children[numSlots - 1] as Hotspot).element;
+
+      expect(wrapper.classList.contains('hide')).to.be.false;
+
+      element[$scene].yaw = Math.PI;
+      element[$scene].updateMatrixWorld();
+      element[$needsRender]();
+
+      await waitForEvent(hotspot, 'hotspot-visibility');
+
+      expect(wrapper.classList.contains('hide')).to.be.true;
+    });
   });
 });
