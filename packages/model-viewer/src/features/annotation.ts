@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Matrix3, Matrix4, Vector3} from 'three';
+import {Matrix4, Vector3} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector2D, toVector3D, Vector2D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
@@ -27,7 +27,6 @@ const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
 
 const worldToModel = new Matrix4();
-const worldToModelNormal = new Matrix3();
 
 export declare type HotspotData = {
   position: Vector3D,
@@ -192,10 +191,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       worldToModel.copy(scene.target.matrixWorld).invert();
       const position = toVector3D(hit.position.applyMatrix4(worldToModel));
-
-      worldToModelNormal.getNormalMatrix(worldToModel);
-      const normal =
-          toVector3D(hit.normal.applyNormalMatrix(worldToModelNormal));
+      const normal = toVector3D(hit.normal.transformDirection(worldToModel));
 
       let uv = null;
       if (hit.uv != null) {

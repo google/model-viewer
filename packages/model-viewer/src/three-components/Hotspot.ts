@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-import {Matrix3, Mesh, Vector3} from 'three';
+import {Matrix3, Mesh, Quaternion, Triangle, Vector3} from 'three';
 import {CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
+
+import {ModelScene} from './ModelScene.js';
 
 export interface HotspotVisibilityDetails {
   visible: boolean;
@@ -40,6 +42,8 @@ const a = new Vector3();
 const b = new Vector3();
 const c = new Vector3();
 const mat = new Matrix3();
+const triangle = new Triangle();
+const quat = new Quaternion();
 
 /**
  * The Hotspot object is a reference-counted slot. If decrement() returns true,
@@ -151,12 +155,19 @@ export class Hotspot extends CSS2DObject {
     (mesh as any).getUpdatedVertex(tri.x, a);
     (mesh as any).getUpdatedVertex(tri.y, b);
     (mesh as any).getUpdatedVertex(tri.z, c);
+
     a.toArray(mat.elements, 0);
     b.toArray(mat.elements, 3);
     c.toArray(mat.elements, 6);
-    this.position.copy(bary).applyMatrix3(mat)
+    this.position.copy(bary).applyMatrix3(mat);
     const target = this.parent!;
     target.worldToLocal(mesh.localToWorld(this.position));
+
+    triangle.set(a, b, c);
+    triangle.getNormal(this.normal).transformDirection(mesh.matrixWorld);
+    const scene = target.parent as ModelScene;
+    quat.setFromAxisAngle(a.set(0, 1, 0), -scene.yaw);
+    this.normal.applyQuaternion(quat);
   }
 
   orient(radians: number) {
