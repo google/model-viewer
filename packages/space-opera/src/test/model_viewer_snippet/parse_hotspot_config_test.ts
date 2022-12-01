@@ -78,20 +78,7 @@ snippet without position',
        expect(hotspots.length).toBe(0);
        expect(errorList.length).toBe(1);
        expect(errorList[0])
-           .toEqual(
-               new Error('No position found for hotspot at slot "hotspot-1"'));
-     });
-
-  it('returns an empty hotspot list and registers an error when given an invalid \
-snippet with malformed position',
-     () => {
-       const errorList: Error[] = [];
-       const snippet = `<model-viewer src='test.glb'>
-<div slot="hotspot-1" data-position="1m 2m"></div>
-</model-viewer>`;
-       const hotspots = parseHotspotsFromSnippet(snippet, errorList);
-       expect(hotspots.length).toBe(0);
-       expect(errorList.length).toBe(1);
-       expect(errorList[0]).toEqual(new Error('Invalid vector: \'1m 2m\''));
+           .toEqual(new Error(
+               'Only surface hotspots are supported: no surface for hotspot at slot "hotspot-1"'));
      });
 });

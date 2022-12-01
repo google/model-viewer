@@ -916,6 +916,10 @@ export class ModelScene extends Scene {
   initializeSurface(hotspot: Hotspot) {
     if (hotspot.surface != null && hotspot.mesh == null) {
       const nodes = parseExpressions(hotspot.surface)[0].terms as NumberNode[];
+      if (nodes.length != 8) {
+        console.warn(hotspot.surface + ' does not have exactly 8 numbers.');
+        return;
+      }
       const primitiveNode =
           this.element.model![$nodeFromIndex](nodes[0].number, nodes[1].number);
       const tri =
