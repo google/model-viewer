@@ -418,10 +418,17 @@ export class ARRenderer extends EventDispatcher {
       const scale = view.recommendedViewportScale;
       view.requestViewportScale(Math.max(scale, MIN_VIEWPORT_SCALE));
     }
-    const layer = this.currentSession!.renderState.baseLayer;
-    const viewport = layer!.getViewport(view)!;
-    this.threeRenderer.setViewport(
-        viewport.x, viewport.y, viewport.width, viewport.height);
+    const layer = xr.getBaseLayer();
+    if (layer instanceof XRProjectionLayer) {
+      const subimage = xr.getBinding().getViewSubImage(layer, view);
+      this.threeRenderer.setViewport(
+        subimage.viewport.x, subimage.viewport.y, subimage.viewport.width, subimage.viewport.height);
+
+    } else {
+      const viewport = layer!.getViewport(view)!;
+      this.threeRenderer.setViewport(
+          viewport.x, viewport.y, viewport.width, viewport.height);
+    }
   }
 
   private placeInitially() {
