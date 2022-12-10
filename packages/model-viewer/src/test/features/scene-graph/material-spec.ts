@@ -235,24 +235,22 @@ suite('scene-graph/material', () => {
       expect(element.model!.materials[2].getAlphaMode()).to.be.equal('MASK');
     });
   });
+
   suite('Material lazy loading', () => {
     let element: ModelViewerElement;
     let model: Model;
+
     setup(async () => {
       element = new ModelViewerElement();
-      await loadModel(CUBES_GLTF_PATH);
+      element.src = CUBES_GLTF_PATH;
+      document.body.insertBefore(element, document.body.firstChild);
+      await waitForEvent(element, 'load');
+      model = element.model as Model;
     });
 
     teardown(() => {
       document.body.removeChild(element);
     });
-
-    const loadModel = async (path: string) => {
-      element.src = path;
-      document.body.insertBefore(element, document.body.firstChild);
-      await waitForEvent(element, 'load');
-      model = element.model as Model;
-    };
 
     test('Accessing the name getter does not cause throw error.', async () => {
       expect(model.materials[2].name).to.equal('red');

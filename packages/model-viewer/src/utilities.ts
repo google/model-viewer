@@ -64,7 +64,7 @@ export const toFullUrl = (partialUrl: string): string => {
  * once within a given threshold of time in milliseconds.
  *
  * The throttled version of the function has a "flush" property that resets the
- * threshold for cases when immediate invokation is desired.
+ * threshold for cases when immediate invocation is desired.
  */
 export const throttle = (fn: (...args: Array<any>) => any, ms: number) => {
   let timer: number|null = null;
@@ -141,7 +141,7 @@ export const CAPPED_DEVICE_PIXEL_RATIO = 1;
  * The rationale is that this condition typically leads to a pathological
  * outcome on mobile devices. When the window dimensions are scaled up on a
  * device with a high DPR, we create a canvas that is much larger than
- * appropriate to accomodate for the pixel density if we naively use the
+ * appropriate to accommodate for the pixel density if we naively use the
  * reported DPR.
  *
  * This value needs to be measured in real time, as device pixel ratio can

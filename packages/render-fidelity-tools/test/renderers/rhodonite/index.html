@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>RhodoniteTS Fidelity Tests</title>
+
+  <style>
+  body { margin: 0; }
+  model-viewer { --progress-bar-color: transparent; }
+  </style>
+  </head>
+  <body>
+  <renderer-harness id="harness">
+  <span slot="title">RhodoniteTS-Viewer</span>
+  <rhodonite-viewer id="RhodoniteViewer" slot="renderer">
+  </rhodonite-viewer>
+  </renderer-harness>
+
+  <script type="module" src="../../../dist/renderer-harness.js"></script>
+  <script src="./ibl_prefiltering_wasm.js"></script>
+  <script src="https://www.gstatic.com/draco/v1/decoders/draco_decoder_gltf.js"></script>
+  <script src="../../../node_modules/@khronosgroup/gltf-viewer/dist/libs/libktx.js"></script>
+  <script type="module" src="../../../dist/rhodonite-viewer.js"></script>
+  <script>
+  harness.addEventListener('scenario-change', () => {
+    RhodoniteViewer.addEventListener('model-visibility', (event) => {
+    if (event.detail.visible) {
+        self.dispatchEvent(new CustomEvent('model-ready'));
+    }
+    }, { once: true });
+
+    RhodoniteViewer.scenario = harness.scenario;
+  });
+</script>
+</body>
+</html>

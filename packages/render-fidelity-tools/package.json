@@ -9,8 +9,8 @@
     "test:ci": "./scripts/ci-check-fidelity.sh",
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
-    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && cp -R node_modules/dspbr-pt/dist/shader test/renderers/dspbr-pt/",
-    "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/dspbr-pt/shader ./test/renderers/filament/{cmgen,ktx}"
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi",
+    "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/filament/{cmgen,ktx}"
   },
   "contributors": [
     "Chris Joel <cdata@google.com>",
@@ -23,9 +23,9 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.4",
-    "@babylonjs/core": "*5.0.0-alpha.31",
-    "@babylonjs/loaders": "*5.0.0-alpha.31",
-    "@google/model-viewer": "^1.12.0",
+    "@babylonjs/core": "^5.27.1",
+    "@babylonjs/loaders": "^5.27.1",
+    "@google/model-viewer": "^2.1.1",
     "@khronosgroup/gltf-viewer": "^1.0.9",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
@@ -33,27 +33,24 @@
     "@types/http-server": "^0.10.0",
     "@types/mkdirp": "^1.0.1",
     "@types/pngjs": "^3.4.0",
-    "@types/puppeteer": "^5.4.4",
+    "@types/puppeteer": "^5.4.6",
     "@types/rimraf": "^3.0.1",
-    "dspbr-pt": "^0.3.4",
     "filament": "1.12.2",
     "focus-visible": "^5.2.0",
-    "http-server": "^0.12.3",
+    "http-server": "^14.1.1",
     "lit": "^2.2.3",
     "mkdirp": "^1.0.4",
     "pngjs": "^6.0.0",
-    "puppeteer": "^10.1.0",
-    "rimraf": "^3.0.2",
-    "three": "^0.140.2",
-    "three-gpu-pathtracer": "^0.0.3"
+    "puppeteer": "^18.2.1",
+    "rimraf": "^3.0.2"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^19.0.0",
-    "@rollup/plugin-node-resolve": "^13.0.0",
-    "@rollup/plugin-replace": "^2.4.2",
+    "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-replace": "^4.0.0",
     "polymer-build": "^3.1.4",
-    "rollup": "^2.53.1",
+    "rollup": "^2.77.2",
     "rollup-plugin-external-globals": "^0.6.1",
-    "typescript": "4.3.5"
+    "typescript": "4.8.4"
   }
 }

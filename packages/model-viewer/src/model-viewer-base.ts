@@ -18,11 +18,12 @@ import {property} from 'lit/decorators.js';
 import {Event as ThreeEvent, Vector2, Vector3} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
+import {$updateEnvironment} from './features/environment.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
 import {ModelScene} from './three-components/ModelScene.js';
 import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
-import {debounce, timePasses} from './utilities.js';
+import {clamp, debounce} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
@@ -69,8 +70,6 @@ export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 export const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
-export const $sceneIsReady = Symbol('sceneIsReady');
-export const $hasTransitioned = Symbol('hasTransitioned');
 
 export interface Vector3D {
   x: number
@@ -169,6 +168,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
   @property({type: Boolean, attribute: 'with-credentials'})
   withCredentials: boolean = false;
 
+  /**
+   * Generates a 3D model schema https://schema.org/3DModel associated with
+   * the loaded src and inserts it into the header of the page for search
+   * engines to crawl.
+   */
+  @property({type: Boolean, attribute: 'generate-schema'})
+  generateSchema = false;
+
   protected[$isElementInViewport] = false;
   protected[$loaded] = false;
   protected[$loadedTime] = 0;
@@ -177,7 +184,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   protected[$userInputElement]: HTMLDivElement;
   protected[$canvas]: HTMLCanvasElement;
   protected[$statusElement]: HTMLSpanElement;
-  protected[$status]: string;
+  protected[$status] = '';
   protected[$defaultAriaLabel]: string;
   protected[$clearModelTimeout]: number|null = null;
 
@@ -251,17 +258,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
     this[$scene] =
         new ModelScene({canvas: this[$canvas], element: this, width, height});
 
-    this[$scene].addEventListener('model-load', async (event) => {
-      this[$markLoaded]();
-      this[$onModelLoad]();
-
-      // Give loading async tasks a chance to complete.
-      await timePasses();
-
-      this.dispatchEvent(
-          new CustomEvent('load', {detail: {url: (event as any).url}}));
-    });
-
     // Update initial size on microtask timing so that subclasses have a
     // chance to initialize
     Promise.resolve().then(() => {
@@ -295,7 +291,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
             const oldVisibility = this.modelIsVisible;
             this[$isElementInViewport] = entry.isIntersecting;
             this[$announceModelVisibility](oldVisibility);
-            if (this[$isElementInViewport] && !this[$sceneIsReady]()) {
+            if (this[$isElementInViewport] && !this.loaded) {
               this[$updateSource]();
             }
           }
@@ -308,10 +304,13 @@ export default class ModelViewerElementBase extends ReactiveElement {
         // model above the fold, but only when the animated model was completely
         // below. Setting this margin to zero fixed it.
         rootMargin: '0px',
-        threshold: 0,
+        // With zero threshold, an element adjacent to but not intersecting the
+        // viewport will be reported as intersecting, which will cause
+        // unnecessary rendering. Any slight positive threshold alleviates this.
+        threshold: 0.00001,
       });
     } else {
-      // If there is no intersection obsever, then all models should be visible
+      // If there is no intersection observer, then all models should be visible
       // at all times:
       this[$isElementInViewport] = true;
     }
@@ -369,7 +368,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     renderer.unregisterScene(this[$scene]);
 
     this[$clearModelTimeout] = self.setTimeout(() => {
-      this[$scene].reset();
+      this[$scene].dispose();
+      this[$clearModelTimeout] = null;
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
@@ -398,6 +398,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     if (changedProperties.has('withCredentials')) {
       CachingGLTFLoader.withCredentials = this.withCredentials
+    }
+
+    if (changedProperties.has('generateSchema')) {
+      if (this.generateSchema) {
+        this[$scene].updateSchema(this.src);
+      } else {
+        this[$scene].updateSchema(null);
+      }
     }
   }
 
@@ -502,16 +510,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     return this.loaded && this[$isElementInViewport];
   }
 
-  [$hasTransitioned](): boolean {
-    return this.modelIsVisible;
-  }
-
   [$shouldAttemptPreload](): boolean {
     return !!this.src && this[$isElementInViewport];
-  }
-
-  [$sceneIsReady](): boolean {
-    return this[$loaded];
   }
 
   /**
@@ -573,29 +573,55 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   /**
    * Parses the element for an appropriate source URL and
-   * sets the views to use the new model based off of the `preload`
-   * attribute.
+   * sets the views to use the new model based.
    */
   async[$updateSource]() {
-    if (this.loaded || !this[$shouldAttemptPreload]()) {
+    const scene = this[$scene];
+    if (this.loaded || !this[$shouldAttemptPreload]() ||
+        this.src === scene.url) {
       return;
     }
+
+    if (this.generateSchema) {
+      scene.updateSchema(this.src);
+    }
+    this[$updateStatus]('Loading');
+    // If we are loading a new model, we need to stop the animation of
+    // the current one (if any is playing). Otherwise, we might lose
+    // the reference to the scene root and running actions start to
+    // throw exceptions and/or behave in unexpected ways:
+    scene.stopAnimation();
+
     const updateSourceProgress = this[$progressTracker].beginActivity();
     const source = this.src;
     try {
-      await this[$scene].setSource(
-          source, (progress: number) => updateSourceProgress(progress * 0.95));
+      const srcUpdated = scene.setSource(
+          source,
+          (progress: number) =>
+              updateSourceProgress(clamp(progress, 0, 1) * 0.95));
 
-      const detail = {url: source};
-      this.dispatchEvent(new CustomEvent('preload', {detail}));
-    } catch (error) {
-      this.dispatchEvent(new CustomEvent('error', {detail: error}));
-    } finally {
-      requestAnimationFrame(() => {
+      const envUpdated = (this as any)[$updateEnvironment]();
+
+      await Promise.all([srcUpdated, envUpdated]);
+
+      this[$markLoaded]();
+      this[$onModelLoad]();
+
+      // Wait for shaders to compile and pixels to be drawn.
+      await new Promise<void>(resolve => {
         requestAnimationFrame(() => {
-          updateSourceProgress(1.0);
+          requestAnimationFrame(() => {
+            this.dispatchEvent(
+                new CustomEvent('load', {detail: {url: source}}));
+            resolve();
+          });
         });
       });
+    } catch (error) {
+      this.dispatchEvent(new CustomEvent(
+          'error', {detail: {type: 'loadfailure', sourceError: error}}));
+    } finally {
+      updateSourceProgress(1.0);
     }
   }
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, Box3, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneBufferGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
+import {BackSide, Box3, Material, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
 import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
 import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
 import {lerp} from 'three/src/math/MathUtils.js';
@@ -28,7 +28,7 @@ const LOG_MAX_RESOLUTION = 9;
 const LOG_MIN_RESOLUTION = 6;
 // Animated models are not in general contained in their bounding box, as this
 // is calculated only for their resting pose. We create a cubic shadow volume
-// for animated models sized to their largest bounding box dimesion multiplied
+// for animated models sized to their largest bounding box dimension multiplied
 // by this scale factor.
 const ANIMATION_SCALING = 2;
 // Since hard shadows are not lightened by blurring and depth, set a lower
@@ -83,7 +83,7 @@ export class Shadow extends Object3D {
     //   this.matrixWorld = this.camera.matrixWorld;
     // };
 
-    const plane = new PlaneBufferGeometry();
+    const plane = new PlaneGeometry();
     const shadowMaterial = new MeshBasicMaterial({
       // color: new Color(1, 0, 0),
       opacity: 1,
@@ -329,5 +329,21 @@ export class Shadow extends Object3D {
     renderer.render(blurPlane, camera);
 
     blurPlane.visible = false;
+  }
+
+  dispose() {
+    if (this.renderTarget != null) {
+      this.renderTarget.dispose();
+    }
+    if (this.renderTargetBlur != null) {
+      this.renderTargetBlur.dispose();
+    }
+    this.depthMaterial.dispose();
+    this.horizontalBlurMaterial.dispose();
+    this.verticalBlurMaterial.dispose();
+    (this.floor.material as Material).dispose();
+    this.floor.geometry.dispose();
+    this.blurPlane.geometry.dispose();
+    this.removeFromParent();
   }
 }

@@ -144,7 +144,7 @@ export class GLTFInstance implements GLTF {
             const texture = (material as any)[propertyName];
             if (texture instanceof Texture) {
               const image = texture.source.data;
-              if (image instanceof ImageBitmap) {
+              if (image.close != null) {
                 image.close();
               }
               texture.dispose();
@@ -164,7 +164,7 @@ export class GLTFInstance implements GLTF {
     const source = this[$preparedGLTF];
     // TODO(#195,#1003): We don't currently support multiple scenes, so we don't
     // bother cloning extra scenes for now:
-    const scene = (SkeletonUtils as any).clone(this.scene) as Group;
+    const scene = SkeletonUtils.clone(this.scene) as Group;
     cloneVariantMaterials(scene, this.scene);
     const scenes = [scene];
     const userData = source.userData ? {...source.userData} : {};

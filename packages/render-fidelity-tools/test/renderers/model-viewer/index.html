@@ -28,7 +28,6 @@
     body { margin: 0; }
     model-viewer { 
       --progress-bar-color: transparent;
-      --poster-color: rgba(255,255,255,0);
     }
   </style>
 </head>
@@ -80,6 +79,8 @@
       modelViewer.cameraOrbit = `${theta}deg ${phi}deg ${radius}m`;
       const {x, y, z} = scenario.target;
       modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;
+      modelViewer.maxFieldOfView = `${scenario.verticalFoV}deg`;
+      modelViewer.minFieldOfView = `${scenario.verticalFoV}deg`;
       modelViewer.fieldOfView = `${scenario.verticalFoV}deg`;
     });
   </script>

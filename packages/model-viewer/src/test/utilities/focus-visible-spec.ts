@@ -13,56 +13,34 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {waitForEvent} from '../../utilities.js';
-import {FocusVisiblePolyfillMixin} from '../../utilities/focus-visible.js';
 import {assetPath} from '../helpers.js';
-import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
-suite('ModelViewerElementBase with FocusVisiblePolyfillMixin', () => {
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement: Constructor<ModelViewerElementBase>;
-  let element: ModelViewerElementBase;
+suite('FocusVisiblePolyfill', () => {
+  let element: ModelViewerElement;
 
-  setup(() => {
-    tagName = `model-viewer-focus-visible-${nextId++}`;
-    ModelViewerElement = class extends
-    FocusVisiblePolyfillMixin<Constructor<ModelViewerElementBase>>(
-        ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
+  setup(async () => {
+    element = new ModelViewerElement();
+    element.tabIndex = 0;
+    element.src = assetPath('models/cube.gltf');
+    document.body.insertBefore(element, document.body.firstChild);
+    await waitForEvent(element, 'poster-dismissed');
   });
 
+  teardown(() => {
+    if (element.parentNode != null) {
+      element.parentNode.removeChild(element);
+    }
+  });
 
-  BasicSpecTemplate(() => ModelViewerElement, () => tagName);
+  test('typically does not show the focus ring when focused', async () => {
+    element.dispatchEvent(new CustomEvent('mousedown'));
+    element.focus();
 
-  suite('when polyfill is present', () => {
-    setup(async () => {
-      element = new ModelViewerElement();
-      element.tabIndex = 0;
-      element.src = assetPath('models/cube.gltf');
-      document.body.insertBefore(element, document.body.firstChild);
-      await waitForEvent(element, 'load');
-    });
-
-    teardown(() => {
-      if (element.parentNode != null) {
-        element.parentNode.removeChild(element);
-      }
-    });
-
-    test('typically does not show the focus ring when focused', async () => {
-      element.dispatchEvent(new CustomEvent('mousedown'));
-      element.focus();
-
-      expect(document.activeElement).to.be.equal(element);
-      expect(window.getComputedStyle(element).outlineStyle).to.be.equal('none');
-    });
+    expect(document.activeElement).to.be.equal(element);
+    expect(window.getComputedStyle(element).outlineStyle).to.be.equal('none');
   });
 });

@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-import '../types/webxr.js';
-
 import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {ControlsInterface} from '../features/controls.js';
-import ModelViewerElementBase, {$onResize, $sceneIsReady} from '../model-viewer-base.js';
+import {$currentBackground, $currentEnvironmentMap} from '../features/environment.js';
+import ModelViewerElementBase, {$onResize} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {Damper} from './Damper.js';
@@ -86,8 +85,6 @@ export class ARRenderer extends EventDispatcher {
   private lastTick: number|null = null;
   private turntableRotation: number|null = null;
   private oldShadowIntensity: number|null = null;
-  private oldBackground: any = null;
-  private oldEnvironment: any = null;
   private frame: XRFrame|null = null;
   private initialHitSource: XRHitTestSource|null = null;
   private transientHitTestSource: XRTransientInputHitTestSource|null = null;
@@ -133,14 +130,14 @@ export class ARRenderer extends EventDispatcher {
         await navigator.xr!.requestSession!('immersive-ar', {
           requiredFeatures: ['hit-test'],
           optionalFeatures: ['dom-overlay', 'light-estimation'],
-          domOverlay: {root: this.overlay}
+          domOverlay: this.overlay ? {root: this.overlay} : undefined
         });
 
     this.threeRenderer.xr.setReferenceSpaceType('local');
 
-    await this.threeRenderer.xr.setSession(session as any);
+    await this.threeRenderer.xr.setSession(session);
 
-    (this.threeRenderer.xr as any).cameraAutoUpdate = false;
+    this.threeRenderer.xr.cameraAutoUpdate = false;
 
     return session;
   }
@@ -201,7 +198,6 @@ export class ARRenderer extends EventDispatcher {
         const scene = this.presentedScene!;
         scene.add(this.xrLight);
 
-        this.oldEnvironment = scene.environment;
         scene.environment = this.xrLight.environment;
       });
     }
@@ -228,7 +224,6 @@ export class ARRenderer extends EventDispatcher {
     this.goalYaw = scene.yaw;
     this.goalScale = 1;
 
-    this.oldBackground = scene.background;
     scene.background = null;
 
     this.oldShadowIntensity = scene.shadowIntensity;
@@ -236,7 +231,7 @@ export class ARRenderer extends EventDispatcher {
 
     this.oldTarget.copy(scene.getTarget());
 
-    scene.addEventListener('model-load', this.onUpdateScene);
+    scene.element.addEventListener('load', this.onUpdateScene);
 
     const radians = HIT_ANGLE_DEG * Math.PI / 180;
     const ray = this.placeOnWall === true ?
@@ -244,8 +239,9 @@ export class ARRenderer extends EventDispatcher {
         new XRRay(
             new DOMPoint(0, 0, 0),
             {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
-    currentSession.requestHitTestSource({space: viewerRefSpace, offsetRay: ray})
-        .then(hitTestSource => {
+    currentSession
+        .requestHitTestSource!
+        ({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
           this.initialHitSource = hitTestSource;
         });
 
@@ -326,15 +322,12 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const scene = this.presentedScene;
+    this._presentedScene = null;
     if (scene != null) {
       const {element} = scene;
 
       if (this.xrLight != null) {
         scene.remove(this.xrLight);
-        if (this.oldEnvironment != null) {
-          scene.environment = this.oldEnvironment;
-          this.oldEnvironment = null;
-        }
         (this.xrLight as any).dispose();
         this.xrLight = null;
       }
@@ -350,15 +343,14 @@ export class ARRenderer extends EventDispatcher {
       if (intensity != null) {
         scene.setShadowIntensity(intensity);
       }
-      const background = this.oldBackground;
-      if (background != null) {
-        scene.background = background;
-      }
+      scene.setEnvironmentAndSkybox(
+          (element as any)[$currentEnvironmentMap],
+          (element as any)[$currentBackground]);
       const point = this.oldTarget;
       scene.setTarget(point.x, point.y, point.z);
       scene.xrCamera = null;
 
-      scene.removeEventListener('model-load', this.onUpdateScene);
+      scene.element.removeEventListener('load', this.onUpdateScene);
       scene.orientHotspots(0);
       element.requestUpdate('cameraTarget');
       element.requestUpdate('maxCameraOrbit');
@@ -396,8 +388,6 @@ export class ARRenderer extends EventDispatcher {
     this.lastTick = null;
     this.turntableRotation = null;
     this.oldShadowIntensity = null;
-    this.oldBackground = null;
-    this._presentedScene = null;
     this.frame = null;
     this.inputSource = null;
     this.overlay = null;
@@ -429,7 +419,7 @@ export class ARRenderer extends EventDispatcher {
       view.requestViewportScale(Math.max(scale, MIN_VIEWPORT_SCALE));
     }
     const layer = this.currentSession!.renderState.baseLayer;
-    const viewport = layer!.getViewport(view);
+    const viewport = layer!.getViewport(view)!;
     this.threeRenderer.setViewport(
         viewport.x, viewport.y, viewport.width, viewport.height);
   }
@@ -467,14 +457,14 @@ export class ARRenderer extends EventDispatcher {
     session.addEventListener('selectstart', this.onSelectStart);
     session.addEventListener('selectend', this.onSelectEnd);
     session
-        .requestHitTestSourceForTransientInput({profile: 'generic-touchscreen'})
-        .then(hitTestSource => {
+        .requestHitTestSourceForTransientInput!
+        ({profile: 'generic-touchscreen'})!.then(hitTestSource => {
           this.transientHitTestSource = hitTestSource;
         });
   }
 
   private getTouchLocation(): Vector3|null {
-    const {axes} = this.inputSource!.gamepad;
+    const {axes} = this.inputSource!.gamepad!;
     let location = this.placementBox!.getExpandedHit(
         this.presentedScene!, axes[0], axes[1]);
     if (location != null) {
@@ -550,7 +540,7 @@ export class ARRenderer extends EventDispatcher {
 
     if (fingers.length === 1) {
       this.inputSource = (event as XRInputSourceEvent).inputSource;
-      const {axes} = this.inputSource!.gamepad;
+      const {axes} = this.inputSource!.gamepad!;
 
       const hitPosition = box.getHit(this.presentedScene!, axes[0], axes[1]);
       box.show = true;
@@ -582,8 +572,8 @@ export class ARRenderer extends EventDispatcher {
 
   private fingerPolar(fingers: XRTransientInputHitTestResult[]):
       {separation: number, deltaYaw: number} {
-    const fingerOne = fingers[0].inputSource.gamepad.axes;
-    const fingerTwo = fingers[1].inputSource.gamepad.axes;
+    const fingerOne = fingers[0].inputSource.gamepad!.axes;
+    const fingerTwo = fingers[1].inputSource.gamepad!.axes;
     const deltaX = fingerTwo[0] - fingerOne[0];
     const deltaY = fingerTwo[1] - fingerOne[1];
     const angle = Math.atan2(deltaY, deltaX);
@@ -643,7 +633,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     if (this.isRotating) {
-      const angle = this.inputSource!.gamepad.axes[0] * ROTATION_RATE;
+      const angle = this.inputSource!.gamepad!.axes[0] * ROTATION_RATE;
       this.goalYaw += angle - this.lastAngle;
       this.lastAngle = angle;
     } else if (this.isTranslating) {
@@ -738,7 +728,7 @@ export class ARRenderer extends EventDispatcher {
     }
 
     const scene = this.presentedScene;
-    if (pose == null || scene == null || !scene.element[$sceneIsReady]()) {
+    if (pose == null || scene == null || !scene.element.loaded) {
       this.threeRenderer.clear();
       return;
     }

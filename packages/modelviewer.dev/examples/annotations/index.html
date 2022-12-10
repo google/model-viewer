@@ -74,7 +74,7 @@
           <example-snippet stamp-to="addHotspots" highlight-as="html">
             <template>
 <style>
-  button{
+  .hotspot{
     display: block;
     width: 20px;
     height: 20px;
@@ -82,19 +82,20 @@
     border: none;
     background-color: blue;
     box-sizing: border-box;
+    pointer-events: none;
   }
 
-  button[slot="hotspot-hand"]{
+  .hotspot[slot="hotspot-hand"]{
     --min-hotspot-opacity: 0;
     background-color: red;
   }
 
-  button[slot="hotspot-foot"]:not([data-visible]) {
+  .hotspot[slot="hotspot-foot"]:not([data-visible]) {
     background-color: transparent;
     border: 3px solid blue;
   }
 
-  #annotation{
+  .annotation{
     background-color: #888888;
     position: absolute;
     transform: translate(10px, 10px);
@@ -106,13 +107,13 @@
     display: none;
   }
 </style>
-<model-viewer id="hotspot-demo" ar ar-modes="webxr" camera-controls src="../../shared-assets/models/Astronaut.glb" style="--poster-color:#ffffff00;" alt="A 3D model of an astronaut.">
-  <button slot="hotspot-visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
-  <button slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
-    <div id="annotation">This hotspot disappears completely</div>
+<model-viewer id="hotspot-demo" ar ar-modes="webxr" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" poster="../../assets/poster-astronaut.webp" shadow-intensity="1" alt="A 3D model of an astronaut.">
+  <button class="hotspot" slot="hotspot-visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
+  <button class="hotspot" slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
+    <div class="annotation">This hotspot disappears completely</div>
   </button>
-  <button slot="hotspot-foot" data-position="0.16 0.1 0.17" data-normal="-0.07 0.97 0.23" data-visibility-attribute="visible"></button>
-  <div id="annotation">This annotation is fixed in screen-space</div>
+  <button class="hotspot" slot="hotspot-foot" data-position="0.16 0.1 0.17" data-normal="-0.07 0.97 0.23" data-visibility-attribute="visible"></button>
+  <div class="annotation">This annotation is fixed in screen-space</div>
 </model-viewer>
             </template>
           </example-snippet>
@@ -133,63 +134,21 @@
             &lt;model-viewer&gt; element.
           </p>
           <p>
+            Hotspots can be queried to build custom overlays in screen space.
+            For example, by using an SVG canvas and updating the line nodes we
+            can draw rudimentary dimension lines. Note that this kind of
+            extended functionality cannot support occlusion in the 3D scene, but
+            you can cause it to draw behind the model by setting its CSS z-index
+            to a negative value.
+          </p>
+          <p>
             By using WebXR mode, this markup works equally well in AR. Note that
             because the text is not part of the 3D rendering it is easier to
             read and more accessible. 
           </p>
           <example-snippet stamp-to="dimensions" highlight-as="html">
             <template>
-<style>
-  #controls {
-    position: absolute;
-    bottom: 16px;
-    left: 16px;
-    max-width: unset;
-    transform: unset;
-  }
-
-  .dot{
-    display: block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-    background: #fff;
-    --min-hotspot-opacity: 0;
-  }
-
-  .dim{
-    background: #fff;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-    color: rgba(0, 0, 0, 0.8);
-    display: block;
-    font-family: Futura, Helvetica Neue, sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    max-width: 128px;
-    overflow-wrap: break-word;
-    padding: 0.5em 1em;
-    position: absolute;
-    width: max-content;
-    height: max-content;
-    transform: translate3d(-50%, -50%, 0);
-    --min-hotspot-opacity: 0;
-  }
-
-  .show{
-    --min-hotspot-opacity: 1;
-  }
-
-  .hide{
-    display: none;
-  }
-  /* This keeps child nodes hidden while the element loads */
-  :not(:defined) > * {
-    display: none;
-  }
-</style>
-<model-viewer id="dimension-demo" ar ar-modes="webxr" ar-scale="fixed" camera-orbit="-30deg auto auto" max-camera-orbit="auto 100deg auto" shadow-intensity="1" camera-controls src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
+<model-viewer id="dimension-demo" ar ar-modes="webxr" ar-scale="fixed" camera-orbit="-30deg auto auto" max-camera-orbit="auto 100deg auto" shadow-intensity="1" camera-controls touch-action="pan-y" src="../../assets/ShopifyModels/Chair.glb" alt="A 3D model of an armchair.">
   <button slot="hotspot-dot+X-Y+Z" class="dot" data-position="1 -1 1" data-normal="1 0 0"></button>
   <button slot="hotspot-dim+X-Y" class="dim" data-position="1 -1 0" data-normal="1 0 0"></button>
   <button slot="hotspot-dot+X-Y-Z" class="dot" data-position="1 -1 -1" data-normal="1 0 0"></button>
@@ -201,6 +160,13 @@
   <button slot="hotspot-dot-X-Y-Z" class="dot" data-position="-1 -1 -1" data-normal="-1 0 0"></button>
   <button slot="hotspot-dim-X-Y" class="dim" data-position="-1 -1 0" data-normal="-1 0 0"></button>
   <button slot="hotspot-dot-X-Y+Z" class="dot" data-position="-1 -1 1" data-normal="-1 0 0"></button>
+  <svg id="lines" xmlns="http://www.w3.org/2000/svg" class="dimensionLineContainer">
+    <line class="dimensionLine"></line>
+    <line class="dimensionLine"></line>
+    <line class="dimensionLine"></line>
+    <line class="dimensionLine"></line>
+    <line class="dimensionLine"></line>
+  </svg>
 
   <div id="controls" class="dim">
     <label for="src">Product:</label>
@@ -223,18 +189,24 @@
   });
 
   const checkbox = modelViewer.querySelector('#show-dimensions');
+
+  function setVisibility(element) {
+    if (checkbox.checked) {
+      element.classList.remove('hide');
+    } else {
+      element.classList.add('hide');
+    }
+  }
+
   checkbox.addEventListener('change', () => {
+    setVisibility(modelViewer.querySelector('#lines'));
     modelViewer.querySelectorAll('button').forEach((hotspot) => {
-      if (checkbox.checked) {
-        hotspot.classList.remove('hide');
-      } else {
-        hotspot.classList.add('hide');
-      }
+      setVisibility(hotspot);
     });
   });
 
   modelViewer.addEventListener('load', () => {
-    const center = modelViewer.getCameraTarget();
+    const center = modelViewer.getBoundingBoxCenter();
     const size = modelViewer.getDimensions();
     const x2 = size.x / 2;
     const y2 = size.y / 2;
@@ -304,8 +276,111 @@
       name: 'hotspot-dot-X-Y+Z',
       position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`
     });
+
+    // update svg
+    function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
+      if (dotHotspot1 && dotHotspot1) {
+        svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
+        svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
+        svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
+        svgLine.setAttribute('y2', dotHotspot2.canvasPosition.y);
+
+        // use provided optional hotspot to tie visibility of this svg line to
+        if (dimensionHotspot && !dimensionHotspot.facingCamera) {
+          svgLine.classList.add('hide');
+        }
+        else {
+          svgLine.classList.remove('hide');
+        }
+      }
+    }
+
+    const lines = modelViewer.querySelectorAll('line');
+
+    // use requestAnimationFrame to update with renderer
+    const startSVGRenderLoop = () => {
+      drawLine(lines[0], modelViewer.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Y'));
+      drawLine(lines[1], modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Z'));
+      drawLine(lines[2], modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X+Y-Z')); // always visible
+      drawLine(lines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
+      drawLine(lines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
+      requestAnimationFrame(startSVGRenderLoop);
+    };
+
+    startSVGRenderLoop();
   });
 </script>
+<style>
+  #controls {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    max-width: unset;
+    transform: unset;
+    pointer-events: auto;
+  }
+
+  .dot{
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    background: #fff;
+    pointer-events: none;
+    --min-hotspot-opacity: 0;
+  }
+
+  .dim{
+    background: #fff;
+    border-radius: 4px;
+    border: none;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    color: rgba(0, 0, 0, 0.8);
+    display: block;
+    font-family: Futura, Helvetica Neue, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    max-width: 128px;
+    overflow-wrap: break-word;
+    padding: 0.5em 1em;
+    position: absolute;
+    width: max-content;
+    height: max-content;
+    transform: translate3d(-50%, -50%, 0);
+    pointer-events: none;
+    --min-hotspot-opacity: 0;
+  }
+
+  .dimensionLineContainer{
+    pointer-events: none;
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%; 
+  }
+
+  .dimensionLine{
+    stroke: #16a5e6;
+    stroke-width: 2;
+    stroke-dasharray: 2
+  }
+
+  .show{
+    --min-hotspot-opacity: 1;
+  }
+
+  .hide{
+    display: none;
+  }
+  /* This keeps child nodes hidden while the element loads */
+  :not(:defined) > * {
+    display: none;
+  }
+</style>
             </template>
           </example-snippet>
         </div>
@@ -331,7 +406,6 @@
       src="../../assets/SketchfabModels/ThorAndTheMidgardSerpent.glb"
       alt="Thor and the Midgard Serpent"
       camera-controls
-      enable-pan
       touch-action="none"
       camera-orbit="-8.142746deg 68.967deg 0.6179899m"
       camera-target="-0.003m 0.0722m 0.0391m"
@@ -343,7 +417,7 @@
       touch-action="none"
       poster="../../assets/SketchfabModels/ThorAndTheMidgardSerpent.webp"
       ar
-      ar-modes="webxr scene-viewer quick-look"
+     
     >
   <button class="view-button" slot="hotspot-0" 
     data-position="-0.0569m 0.0969m -0.1398m" data-normal="-0.5829775m 0.2863482m -0.7603565m" 
@@ -408,16 +482,15 @@
 </model-viewer>
 
 <script type="module">
-  const modelViewer1 = document.querySelector("#hotspot-camera-view-demo");
+  const modelViewer2 = document.querySelector("#hotspot-camera-view-demo");
   const annotationClicked = (annotation) => {
     let dataset = annotation.dataset;
-    modelViewer1.cameraTarget = dataset.target;
-    modelViewer1.cameraOrbit = dataset.orbit;
-    modelViewer1.fieldOfView = '45deg';
+    modelViewer2.cameraTarget = dataset.target;
+    modelViewer2.cameraOrbit = dataset.orbit;
+    modelViewer2.fieldOfView = '45deg';
   }
 
-  modelViewer1.querySelectorAll('button').forEach((hotspot) => {
-    console.log("hello hotspot", hotspot);
+  modelViewer2.querySelectorAll('button').forEach((hotspot) => {
     hotspot.addEventListener('click', () => annotationClicked(hotspot));
   });
 </script>
@@ -426,6 +499,8 @@
   .view-button {
       background: #fff;
       border-radius: 4px;
+      border: none;
+      box-sizing: border-box;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
       color: rgba(0, 0, 0, 0.8);
       display: block;

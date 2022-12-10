@@ -17,10 +17,10 @@
 // the appropriate flags. However, just because we have the API does not
 // guarantee that AR will work.
 export const HAS_WEBXR_DEVICE_API = navigator.xr != null &&
-    self.XRSession != null && navigator.xr.isSessionSupported != null;
+    (self as any).XRSession != null && navigator.xr.isSessionSupported != null;
 
-export const HAS_WEBXR_HIT_TEST_API =
-    HAS_WEBXR_DEVICE_API && self.XRSession!.prototype.requestHitTestSource;
+export const HAS_WEBXR_HIT_TEST_API = HAS_WEBXR_DEVICE_API &&
+    (self as any).XRSession.prototype.requestHitTestSource != null;
 
 export const HAS_RESIZE_OBSERVER = self.ResizeObserver != null;
 
@@ -61,14 +61,6 @@ export const IS_IOS =
     (/iPad|iPhone|iPod/.test(navigator.userAgent) && !(self as any).MSStream) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
-  const tempAnchor = document.createElement('a');
-
-  return Boolean(
-      tempAnchor.relList && tempAnchor.relList.supports &&
-      tempAnchor.relList.supports('ar'));
-})();
-
 // @see https://developer.chrome.com/multidevice/user-agent
 export const IS_SAFARI = /Safari\//.test(navigator.userAgent);
 export const IS_FIREFOX = /firefox/i.test(navigator.userAgent);
@@ -77,3 +69,30 @@ export const IS_IOS_CHROME = IS_IOS && /CriOS\//.test(navigator.userAgent);
 export const IS_IOS_SAFARI = IS_IOS && IS_SAFARI;
 
 export const IS_SCENEVIEWER_CANDIDATE = IS_ANDROID && !IS_FIREFOX && !IS_OCULUS;
+
+// Extend Window type with webkit property,
+// required to check if iOS is running within a WKWebView browser instance.
+declare global {
+    interface Window {
+      webkit?: any;
+    }
+}
+
+export const IS_WKWEBVIEW = Boolean(window.webkit && window.webkit.messageHandlers);
+
+// If running in iOS Safari proper, and not within a WKWebView component instance, check for ARQL feature support.
+// Otherwise, if running in a WKWebView instance, check for known ARQL compatible iOS browsers, including:
+// Chrome (CriOS), Edge (EdgiOS), Firefox (FxiOS), Google App (GSA), DuckDuckGo (DuckDuckGo).
+// All other iOS browsers / apps will fail by default.
+export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
+    if(IS_IOS){
+        if(!IS_WKWEBVIEW){            
+            const tempAnchor = document.createElement('a');
+            return Boolean(tempAnchor.relList && tempAnchor.relList.supports && tempAnchor.relList.supports('ar'));
+        } else {
+            return  Boolean(/CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(navigator.userAgent));
+        }
+    } else {
+        return false;
+    }
+})();

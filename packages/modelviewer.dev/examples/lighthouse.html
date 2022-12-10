@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title><code>&lt;model-viewer&gt;</code> Lighthouse Example</title>
+  <title>&lt;model-viewer&gt; Lighthouse Example</title>
   <meta charset="utf-8">
   <meta name="description" content="Performance optimization for &lt;model-viewer&gt;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -66,10 +66,6 @@
       height: 100vw;
       max-width: 600px;
       max-height: 600px;
-    }
-
-    model-viewer::part(default-progress-mask) {
-      display: none;
     }
 
     /* This keeps child nodes hidden while the element loads, except the poster */
@@ -253,13 +249,11 @@
         id="first"
         src="../assets/ShopifyModels/Chair.glb"
         poster="../assets/ShopifyModels/ChairPoster.webp"
-        seamless-poster
         camera-orbit="1.2195rad 1.362rad 100%"
-        environment-image="neutral"
         interaction-prompt-threshold="0"
         shadow-intensity="1"
         ar
-        ar-modes="webxr scene-viewer quick-look"
+       
         camera-controls
         alt="3D model of a chair with footrest"
       >
@@ -317,13 +311,11 @@
       id="second"
       src="../assets/ShopifyModels/Mixer.glb"
       poster="../assets/ShopifyModels/MixerPoster.webp"
-      seamless-poster
       camera-orbit="0.9677rad 1.2427rad 100%"
-      environment-image="neutral"
       interaction-prompt-threshold="0"
       shadow-intensity="1"
       ar
-      ar-modes="webxr scene-viewer quick-look"
+     
       camera-controls
       alt="3D model of a countertop mixer"
     >

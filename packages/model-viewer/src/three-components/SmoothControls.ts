@@ -26,7 +26,6 @@ const TAP_MS = 300;
 const vector2 = new Vector2();
 const vector3 = new Vector3();
 
-export type InteractionPolicy = 'always-allow'|'allow-when-focused';
 export type TouchMode = null|((dx: number, dy: number) => void);
 
 export interface Pointer {
@@ -52,8 +51,6 @@ export interface SmoothControlsOptions {
   minimumFieldOfView?: number;
   // The maximum camera field of view in degrees
   maximumFieldOfView?: number;
-  // Controls when interaction is allowed (always, or only when focused)
-  interactionPolicy?: InteractionPolicy;
   // Controls scrolling behavior
   touchAction?: TouchAction;
 }
@@ -67,13 +64,15 @@ export const DEFAULT_OPTIONS = Object.freeze<SmoothControlsOptions>({
   maximumAzimuthalAngle: Infinity,
   minimumFieldOfView: 10,
   maximumFieldOfView: 45,
-  interactionPolicy: 'always-allow',
-  touchAction: 'pan-y'
+  touchAction: 'none'
 });
 
 // Constants
 const KEYBOARD_ORBIT_INCREMENT = Math.PI / 8;
 const ZOOM_SENSITIVITY = 0.04;
+
+// The move size on pan key event
+const PAN_KEY_INCREMENT = 10;
 
 export const KeyCode = {
   PAGE_UP: 33,
@@ -84,11 +83,12 @@ export const KeyCode = {
   DOWN: 40
 };
 
-export type ChangeSource = 'user-interaction'|'none';
+export type ChangeSource = 'user-interaction'|'none'|'automatic';
 
 export const ChangeSource: {[index: string]: ChangeSource} = {
   USER_INTERACTION: 'user-interaction',
-  NONE: 'none'
+  NONE: 'none',
+  AUTOMATIC: 'automatic'
 };
 
 /**
@@ -126,8 +126,9 @@ export interface PointerChangeEvent extends ThreeEvent {
  * ensure that the camera's matrixWorld is in sync before using SmoothControls.
  */
 export class SmoothControls extends EventDispatcher {
-  public sensitivity = 1;
-  public isUserChange = false;
+  public orbitSensitivity = 1;
+  public inputSensitivity = 1;
+  public changeSource = ChangeSource.NONE;
 
   private _interactionEnabled: boolean = false;
   private _options: SmoothControlsOptions;
@@ -136,6 +137,7 @@ export class SmoothControls extends EventDispatcher {
 
   // Pan state
   public enablePan = true;
+  public enableTap = true;
   private panProjection = new Matrix3();
   private panPerPixel = 0;
 
@@ -477,10 +479,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private dispatchChange() {
-    const source =
-        this.isUserChange ? ChangeSource.USER_INTERACTION : ChangeSource.NONE;
-
-    this.dispatchEvent({type: 'change', source});
+    this.dispatchEvent({type: 'change', source: this.changeSource});
   }
 
   private moveCamera() {
@@ -498,19 +497,12 @@ export class SmoothControls extends EventDispatcher {
     this.dispatchChange();
   }
 
-  private get canInteract(): boolean {
-    if (this._options.interactionPolicy == 'allow-when-focused') {
-      const rootNode = this.element.getRootNode() as Document | ShadowRoot;
-      return rootNode.activeElement === this.element;
-    }
-
-    return this._options.interactionPolicy === 'always-allow';
-  }
-
   private userAdjustOrbit(
       deltaTheta: number, deltaPhi: number, deltaZoom: number) {
     this.adjustOrbit(
-        deltaTheta * this.sensitivity, deltaPhi * this.sensitivity, deltaZoom);
+        deltaTheta * this.orbitSensitivity * this.inputSensitivity,
+        deltaPhi * this.orbitSensitivity * this.inputSensitivity,
+        deltaZoom * this.inputSensitivity);
 
     // Always make sure that an initial event is triggered in case there is
     // contention between user interaction and imperative changes. This initial
@@ -571,7 +563,7 @@ export class SmoothControls extends EventDispatcher {
       const dxMag = Math.abs(dx);
       const dyMag = Math.abs(dy);
       // If motion is mostly vertical, assume scrolling is the intent.
-      if (this.isUserChange &&
+      if (this.changeSource === ChangeSource.USER_INTERACTION &&
           ((touchAction === 'pan-y' && dyMag > dxMag) ||
            (touchAction === 'pan-x' && dxMag > dyMag))) {
         this.touchMode = null;
@@ -614,7 +606,7 @@ export class SmoothControls extends EventDispatcher {
 
   private movePan(dx: number, dy: number) {
     const {scene} = this;
-    const dxy = vector3.set(dx, dy, 0);
+    const dxy = vector3.set(dx, dy, 0).multiplyScalar(this.inputSensitivity);
     const metersPerPixel =
         this.spherical.radius * Math.exp(this.logFov) * this.panPerPixel;
     dxy.multiplyScalar(metersPerPixel);
@@ -682,7 +674,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onPointerDown = (event: PointerEvent) => {
-    if (!this.canInteract || this.pointers.length > 2) {
+    if (this.pointers.length > 2) {
       return;
     }
     const {element} = this;
@@ -707,10 +699,12 @@ export class SmoothControls extends EventDispatcher {
     this.isUserPointing = false;
 
     if (event.pointerType === 'touch') {
-      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
+      this.changeSource = event.altKey ?  // set by interact() in controls.ts
+          ChangeSource.AUTOMATIC :
+          ChangeSource.USER_INTERACTION;
       this.onTouchChange(event);
     } else {
-      this.isUserChange = true;
+      this.changeSource = ChangeSource.USER_INTERACTION;
       this.onMouseDown(event);
     }
   };
@@ -732,12 +726,14 @@ export class SmoothControls extends EventDispatcher {
     pointer.clientY = event.clientY;
 
     if (event.pointerType === 'touch') {
-      this.isUserChange = !event.altKey;  // set by interact() in controls.ts
+      this.changeSource = event.altKey ?  // set by interact() in controls.ts
+          ChangeSource.AUTOMATIC :
+          ChangeSource.USER_INTERACTION;
       if (this.touchMode !== null) {
         this.touchMode(dx, dy);
       }
     } else {
-      this.isUserChange = true;
+      this.changeSource = ChangeSource.USER_INTERACTION;
       if (this.panPerPixel > 0) {
         this.movePan(dx, dy);
       } else {
@@ -764,7 +760,7 @@ export class SmoothControls extends EventDispatcher {
       element.removeEventListener('pointermove', this.onPointerMove);
       element.removeEventListener('pointerup', this.onPointerUp);
       element.removeEventListener('touchmove', this.disableScroll);
-      if (this.enablePan) {
+      if (this.enablePan && this.enableTap) {
         this.recenter(event);
       }
     } else if (this.touchMode !== null) {
@@ -819,10 +815,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private onWheel = (event: Event) => {
-    if (!this.canInteract) {
-      return;
-    }
-    this.isUserChange = true;
+    this.changeSource = ChangeSource.USER_INTERACTION;
 
     const deltaZoom = (event as WheelEvent).deltaY *
         ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY / 30;
@@ -833,39 +826,86 @@ export class SmoothControls extends EventDispatcher {
 
   private onKeyDown = (event: KeyboardEvent) => {
     // We track if the key is actually one we respond to, so as not to
-    // accidentally clober unrelated key inputs when the <model-viewer> has
+    // accidentally clobber unrelated key inputs when the <model-viewer> has
     // focus.
-    let relevantKey = true;
-    const {isUserChange} = this;
-    this.isUserChange = true;
+    const {changeSource} = this;
+    this.changeSource = ChangeSource.USER_INTERACTION;
 
-    switch (event.keyCode) {
-      case KeyCode.PAGE_UP:
+    const relevantKey = (event.shiftKey && this.enablePan) ?
+        this.panKeyCodeHandler(event) :
+        this.orbitZoomKeyCodeHandler(event);
+
+    if (relevantKey) {
+      event.preventDefault();
+    } else {
+      this.changeSource = changeSource;
+    }
+  };
+
+  /**
+   * Handles the orbit and Zoom key presses
+   * Uses constants for the increment.
+   * @param event The keyboard event for the .key value
+   * @returns boolean to indicate if the key event has been handled
+   */
+  private orbitZoomKeyCodeHandler(event: KeyboardEvent) {
+    let relevantKey = true;
+    switch (event.key) {
+      case 'PageUp':
         this.userAdjustOrbit(0, 0, ZOOM_SENSITIVITY);
         break;
-      case KeyCode.PAGE_DOWN:
+      case 'PageDown':
         this.userAdjustOrbit(0, 0, -1 * ZOOM_SENSITIVITY);
         break;
-      case KeyCode.UP:
+      case 'ArrowUp':
         this.userAdjustOrbit(0, -KEYBOARD_ORBIT_INCREMENT, 0);
         break;
-      case KeyCode.DOWN:
+      case 'ArrowDown':
         this.userAdjustOrbit(0, KEYBOARD_ORBIT_INCREMENT, 0);
         break;
-      case KeyCode.LEFT:
+      case 'ArrowLeft':
         this.userAdjustOrbit(-KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
-      case KeyCode.RIGHT:
+      case 'ArrowRight':
         this.userAdjustOrbit(KEYBOARD_ORBIT_INCREMENT, 0, 0);
         break;
       default:
         relevantKey = false;
-        this.isUserChange = isUserChange;
         break;
     }
+    return relevantKey;
+  }
 
-    if (relevantKey) {
-      event.preventDefault();
+  /**
+   * Handles the Pan key presses
+   * Uses constants for the increment.
+   * @param event The keyboard event for the .key value
+   * @returns boolean to indicate if the key event has been handled
+   */
+  private panKeyCodeHandler(event: KeyboardEvent) {
+    this.initializePan();
+    let relevantKey = true;
+    switch (event.key) {
+      case 'ArrowUp':
+        this.movePan(
+            0,
+            -1 * PAN_KEY_INCREMENT);  // This is the negative one so that the
+                                      // model appears to move as the arrow
+                                      // direction rather than the view moving
+        break;
+      case 'ArrowDown':
+        this.movePan(0, PAN_KEY_INCREMENT);
+        break;
+      case 'ArrowLeft':
+        this.movePan(-1 * PAN_KEY_INCREMENT, 0);
+        break;
+      case 'ArrowRight':
+        this.movePan(PAN_KEY_INCREMENT, 0);
+        break;
+      default:
+        relevantKey = false;
+        break;
     }
-  };
+    return relevantKey;
+  }
 }

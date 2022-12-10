@@ -73,15 +73,14 @@
               achieved, as the AR session is still inside of the browser. This also removes the need to redownload the model.
             </p>
             <p>
-              Note that by specifically including <code>quick-look</code> in
-              <code>ar-modes</code>, but not specifying an <code>ios-src</code>,
+              Note that by not specifying an <code>ios-src</code>,
               the USDZ will instead be auto-generated when the user clicks the
               AR button on iOS to launch Quick Look. 
             </p>
           </div>
           <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
-<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.png" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model carousel">
+<model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.webp" shadow-intensity="1" ar camera-controls touch-action="pan-y" alt="A 3D model carousel">
   
   <button slot="ar-button" id="ar-button">
     View in your space
@@ -98,19 +97,19 @@
   <div class="slider">
     <div class="slides">
       <button class="slide selected" onclick="switchSrc(this, 'Chair')"
-        style="background-image: url('../../assets/ShopifyModels/Chair.png');">
+        style="background-image: url('../../assets/ShopifyModels/Chair.webp');">
 
       <button class="slide" onclick="switchSrc(this, 'Mixer')"
-        style="background-image: url('../../assets/ShopifyModels/Mixer.png');">
+        style="background-image: url('../../assets/ShopifyModels/Mixer.webp');">
 
       <button class="slide" onclick="switchSrc(this, 'GeoPlanter')"
-        style="background-image: url('../../assets/ShopifyModels/GeoPlanter.png');">
+        style="background-image: url('../../assets/ShopifyModels/GeoPlanter.webp');">
       
       <button class="slide" onclick="switchSrc(this, 'ToyTrain')"
-        style="background-image: url('../../assets/ShopifyModels/ToyTrain.png');">
+        style="background-image: url('../../assets/ShopifyModels/ToyTrain.webp');">
       
       <button class="slide" onclick="switchSrc(this, 'Canoe')"
-        style="background-image: url('../../assets/ShopifyModels/Canoe.png');">    
+        style="background-image: url('../../assets/ShopifyModels/Canoe.webp');">    
     </div>
   </div>
 </model-viewer>
@@ -121,7 +120,7 @@
   window.switchSrc = (element, name) => {
     const base = "../../assets/ShopifyModels/" + name;
     modelViewer.src = base + '.glb';
-    modelViewer.poster = base + '.png';
+    modelViewer.poster = base + '.webp';
     const slides = document.querySelectorAll(".slide");
     slides.forEach((element) => {element.classList.remove("selected");});
     element.classList.add("selected");
@@ -142,7 +141,6 @@
   model-viewer {
     background-color: #eee;
     overflow-x: hidden;
-    --poster-color: #eee;
   }
 
   #ar-button {
@@ -284,17 +282,23 @@
                 <code>xr-spatial-tracking</code></a> policy.
             </p>
             <p>
-              In this example an <code>ios-src</code> attribute is specified,
-              which enables Quick Look on iOS even if it is not specified in
-              <code>ar-modes</code>. This requires an extra download, but can be
-              useful if the auto-generated USDZ is not adequate (for instance it
-              does not support animations yet). Also, this source can be either
-              a .usdz or a .reality file.
+              In this example an <code>ios-src</code> attribute is specified.
+              This requires an extra download, but can be useful if the
+              auto-generated USDZ is not adequate (for instance it does not
+              support animations yet). Also, this source can be either a .usdz
+              or a .reality file.
+            </p>
+            <p>
+              Additionally, <code>ar-scale="fixed"</code> is used to prevent the
+              user from scaling the object in AR, applying to all three AR
+              modes. The <code>xr-environment</code> attribute causes estimated
+              lighting to be used in the WebXR AR mode, rather than the lighting
+              from the 3D mode, but does not affect Quick Look or Scene Viewer.
             </p>
           </div>
           <example-snippet stamp-to="ar" highlight-as="html">
             <template>
-<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-scale="fixed" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz" xr-environment></model-viewer>
+<model-viewer src="../../shared-assets/models/Astronaut.glb" ar ar-scale="fixed" camera-controls touch-action="pan-y" alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr" ios-src="../../shared-assets/models/Astronaut.usdz" xr-environment></model-viewer>
             </template>
           </example-snippet>
 
@@ -312,7 +316,7 @@
           </div>
           <example-snippet stamp-to="sceneViewer" highlight-as="html">
             <template>
-<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" camera-controls alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
+<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer webxr" camera-controls touch-action="pan-y" alt="A 3D model of an astronaut" skybox-image="../../shared-assets/environments/aircraft_workshop_01_1k.hdr">
   <div id="error" class="hide">AR is not supported on this device</div>
 </model-viewer>
 <script>
@@ -359,7 +363,7 @@
           </div>
           <example-snippet stamp-to="wall" highlight-as="html">
             <template>
-<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of some wall art"></model-viewer>
+<model-viewer src="../../assets/boom_2_.glb" ar ar-placement="wall" camera-controls touch-action="pan-y" alt="A 3D model of some wall art"></model-viewer>
             </template>
           </example-snippet>
 
@@ -378,7 +382,7 @@
           </div>
           <example-snippet stamp-to="customButton" highlight-as="html">
             <template>
-<model-viewer ar ar-modes="webxr scene-viewer quick-look" camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+<model-viewer ar camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
       👋 Activate AR
   </button>
@@ -390,8 +394,8 @@
               Since this slot will only appear on an AR enabled device screenshots are provided below. They compare the &lt;model-viewer&gt; default button in the bottom right and a custom button ("👋 Activate AR") in the top right of the viewport, with a custom style.
           </p>
   
-          <img class="eg-image" src="../../assets/eg-default-ar-button.jpg" alt="Image displaying the default <model-viewer> button of a box with slits cut out in the lower-right, next to the example astronaut model." />
-          <img class="eg-image" src="../../assets/eg-custom-ar-button.jpg" alt="Image displaying <model-viewer> with a custom button reading '👋 Activate AR'." / >
+          <img class="eg-image" src="../../assets/eg-default-ar-button.jpg" alt="Image displaying the default model-viewer button of a box with slits cut out in the lower-right, next to the example astronaut model." />
+          <img class="eg-image" src="../../assets/eg-custom-ar-button.jpg" alt="Image displaying model-viewer with a custom button reading '👋 Activate AR'." / >
         </div>
       </div>
     </div>
@@ -408,7 +412,7 @@
               <template>
 <div class="demo" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;">
   <span style="position: absolute; text-align: center; font-size: 100px; line-height: 100px; left: 50%; transform: translateX(-50%);">Background<br>is visible<br>through<br>transparent<br>objects.</span>
-  <model-viewer camera-controls src="../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb" ar ar-modes="webxr scene-viewer quick-look" alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
+  <model-viewer camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/ToyCar/glTF-Binary/ToyCar.glb" ar alt="A 3D transparency test" style="background-color: unset;"></model-viewer>
 </div>
               </template>
             </example-snippet>

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import {Matrix3, Matrix4} from 'three';
+import {Matrix3, Matrix4, Vector3} from 'three';
 
-import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector3D, Vector3D, toVector2D, Vector2D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector2D, toVector3D, Vector2D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
-
-
 
 const $hotspotMap = Symbol('hotspotMap');
 const $mutationCallback = Symbol('mutationCallback');
@@ -31,10 +29,18 @@ const $removeHotspot = Symbol('removeHotspot');
 const worldToModel = new Matrix4();
 const worldToModelNormal = new Matrix3();
 
+export declare type HotspotData = {
+  position: Vector3D,
+  normal: Vector3D,
+  canvasPosition: Vector3D,
+  facingCamera: boolean,
+}
+
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
+  queryHotspot(name: string): HotspotData|null;
   positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D, uv: Vector2D | null}|null
+      {position: Vector3D, normal: Vector3D, uv: Vector2D|null}|null
 }
 
 /**
@@ -127,15 +133,53 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     /**
-     * This method returns the model position, normal and texture coordinate 
-     * of the point on the mesh corresponding to the input pixel coordinates 
-     * given relative to the model-viewer element. The position and normal 
-     * are returned as strings in the format suitable for putting in a 
-     * hotspot's data-position and data-normal attributes. If the mesh is 
+     * This method returns in-scene data about a requested hotspot including
+     * its position in screen (canvas) space and its current visibility.
+     */
+    queryHotspot(name: string): HotspotData|null {
+      const hotspot = this[$hotspotMap].get(name);
+      if (hotspot == null) {
+        return null;
+      }
+
+      const position = toVector3D(hotspot.position);
+      const normal = toVector3D(hotspot.normal);
+      const facingCamera = hotspot.facingCamera;
+
+      const scene = this[$scene];
+      const camera = scene.getCamera();
+      const vector = new Vector3();
+
+      vector.setFromMatrixPosition(hotspot.matrixWorld);
+      vector.project(camera);
+
+      const widthHalf = scene.width / 2;
+      const heightHalf = scene.height / 2;
+
+      vector.x = (vector.x * widthHalf) + widthHalf;
+      vector.y = -(vector.y * heightHalf) + heightHalf;
+
+      const canvasPosition =
+          toVector3D(new Vector3(vector.x, vector.y, vector.z));
+
+      if (!Number.isFinite(canvasPosition.x) ||
+          !Number.isFinite(canvasPosition.y)) {
+        return null;
+      }
+
+      return {position, normal, canvasPosition, facingCamera};
+    }
+
+    /**
+     * This method returns the model position, normal and texture coordinate
+     * of the point on the mesh corresponding to the input pixel coordinates
+     * given relative to the model-viewer element. The position and normal
+     * are returned as strings in the format suitable for putting in a
+     * hotspot's data-position and data-normal attributes. If the mesh is
      * not hit, the result is null.
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
-        {position: Vector3D, normal: Vector3D, uv: Vector2D | null}|null {
+        {position: Vector3D, normal: Vector3D, uv: Vector2D|null}|null {
       const scene = this[$scene];
       const ndcPosition = scene.getNDC(pixelX, pixelY);
 
@@ -152,7 +196,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           toVector3D(hit.normal.applyNormalMatrix(worldToModelNormal));
 
       let uv = null;
-      if (hit.uv != null){
+      if (hit.uv != null) {
         uv = toVector2D(hit.uv);
       }
 

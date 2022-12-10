@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxBufferGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
-import {ProgressTracker} from '../utilities/progress-tracker.js';
 
 import EnvironmentScene from './EnvironmentScene.js';
 import EnvironmentSceneAlt from './EnvironmentSceneAlt.js';
@@ -25,10 +24,6 @@ import EnvironmentSceneAlt from './EnvironmentSceneAlt.js';
 export interface EnvironmentMapAndSkybox {
   environmentMap: Texture;
   skybox: Texture|null;
-}
-
-export interface EnvironmentGenerationConfig {
-  progressTracker?: ProgressTracker;
 }
 
 const GENERATED_SIGMA = 0.04;
@@ -91,12 +86,10 @@ export default class TextureUtils extends EventDispatcher {
    */
   async generateEnvironmentMapAndSkybox(
       skyboxUrl: string|null = null, environmentMapUrl: string|null = null,
-      options: EnvironmentGenerationConfig = {}):
+      progressCallback: (progress: number) => void = () => {}):
       Promise<EnvironmentMapAndSkybox> {
-    const {progressTracker} = options;
-
-    const useAltEnvironment = environmentMapUrl === 'neutral';
-    if (useAltEnvironment === true) {
+    const useAltEnvironment = environmentMapUrl !== 'legacy';
+    if (environmentMapUrl === 'legacy' || environmentMapUrl === 'neutral') {
       environmentMapUrl = null;
     }
     environmentMapUrl = deserializeUrl(environmentMapUrl);
@@ -106,25 +99,25 @@ export default class TextureUtils extends EventDispatcher {
 
     // If we have a skybox URL, attempt to load it as a cubemap
     if (!!skyboxUrl) {
-      skyboxLoads = this.loadEquirectFromUrl(skyboxUrl, progressTracker);
+      skyboxLoads = this.loadEquirectFromUrl(skyboxUrl, progressCallback);
     }
 
     if (!!environmentMapUrl) {
       // We have an available environment map URL
       environmentMapLoads =
-          this.loadEquirectFromUrl(environmentMapUrl, progressTracker);
+          this.loadEquirectFromUrl(environmentMapUrl, progressCallback);
     } else if (!!skyboxUrl) {
       // Fallback to deriving the environment map from an available skybox
       environmentMapLoads =
-          this.loadEquirectFromUrl(skyboxUrl, progressTracker);
+          this.loadEquirectFromUrl(skyboxUrl, progressCallback);
     } else {
       // Fallback to generating the environment map
-      environmentMapLoads = useAltEnvironment === true ?
+      environmentMapLoads = useAltEnvironment ?
           this.loadGeneratedEnvironmentMapAlt() :
           this.loadGeneratedEnvironmentMap();
     }
 
-    let [environmentMap, skybox] =
+    const [environmentMap, skybox] =
         await Promise.all([environmentMapLoads, skyboxLoads]);
 
     if (environmentMap == null) {
@@ -138,10 +131,9 @@ export default class TextureUtils extends EventDispatcher {
    * Loads an equirect Texture from a given URL, for use as a skybox.
    */
   private async loadEquirectFromUrl(
-      url: string, progressTracker?: ProgressTracker): Promise<Texture> {
+      url: string,
+      progressCallback: (progress: number) => void): Promise<Texture> {
     if (!this.skyboxCache.has(url)) {
-      const progressCallback =
-          progressTracker ? progressTracker.beginActivity() : () => {};
       const skyboxMapLoads = this.load(url, progressCallback);
 
       this.skyboxCache.set(url, skyboxMapLoads);
@@ -186,7 +178,7 @@ export default class TextureUtils extends EventDispatcher {
   private async loadGeneratedEnvironmentMap(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMap == null) {
       this.generatedEnvironmentMap =
-          this.GenerateEnvironmentMap(new EnvironmentScene(), 'default');
+          this.GenerateEnvironmentMap(new EnvironmentScene(), 'legacy');
     }
     return this.generatedEnvironmentMap;
   }
@@ -207,7 +199,7 @@ export default class TextureUtils extends EventDispatcher {
   private blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {
     if (this.blurMaterial == null) {
       this.blurMaterial = this.getBlurShader(MAX_SAMPLES);
-      const box = new BoxBufferGeometry();
+      const box = new BoxGeometry();
       const blurMesh = new Mesh(box, this.blurMaterial!);
       this.blurScene = new Scene();
       this.blurScene.add(blurMesh);

@@ -52,8 +52,9 @@ export interface SyntheticEventProperties {
   clientX?: number;
   clientY?: number;
   deltaY?: number;
-  keyCode?: number;
-}
+  key?: string;
+  shiftKey?: boolean;
+  }
 
 /**
  * Dispatch a synthetic event on a given element with a given type, and
@@ -128,7 +129,7 @@ export const spy =
       }
 
       if (sourcePrototype == null) {
-        throw new Error(`Cannnot spy property "${property}" on ${object}`);
+        throw new Error(`Cannot spy property "${property}" on ${object}`);
       }
 
       const originalDescriptor =

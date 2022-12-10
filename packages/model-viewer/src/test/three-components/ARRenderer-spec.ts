@@ -16,20 +16,21 @@
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
 import {IS_ANDROID} from '../../constants.js';
-import {ControlsInterface, ControlsMixin} from '../../features/controls.js';
-import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {$scene} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
 
-
 const expect = chai.expect;
 
 class MockXRFrame implements XRFrame {
   constructor(public session: XRSession) {
   }
+
+  readonly predictedDisplayTime = 0;
 
   // We don't use nor test the returned XRPose other than its existence.
   getPose(_xrSpace: XRSpace, _frameOfRef: XRReferenceSpace) {
@@ -56,12 +57,14 @@ class MockXRFrame implements XRFrame {
       eye: {} as XREye,
       projectionMatrix: camera.projectionMatrix.elements as unknown as
           Float32Array,
-      viewMatrix: {} as Float32Array,
       transform: transform,
-      recommendedViewportScale: null,
       requestViewportScale: (_scale: number|null) => {}
     };
-    const viewerPos: XRViewerPose = {transform: transform, views: [view]};
+    const viewerPos: XRViewerPose = {
+      transform: transform,
+      views: [view],
+      emulatedPosition: false
+    };
 
     return viewerPos;
   }
@@ -77,12 +80,7 @@ class MockXRFrame implements XRFrame {
 }
 
 suite('ARRenderer', () => {
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement: Constructor<ModelViewerElementBase&ControlsInterface>;
-
-  let element: ModelViewerElementBase&ControlsInterface;
-  ;
+  let element: ModelViewerElement;
   let arRenderer: ARRenderer;
   let xrSession: XRSession;
 
@@ -100,13 +98,13 @@ suite('ARRenderer', () => {
             getViewport: () => {
               return {x: 0, y: 0, width: 320, height: 240} as XRViewport
             }
-          } as XRLayer
+          } as unknown as XRLayer
         } as XRRenderState;
 
         public hitTestSources: Set<XRHitTestSource> =
             new Set<XRHitTestSource>();
 
-        updateRenderState(_object: any) {
+        async updateRenderState(_object: any) {
         }
 
         requestFrameOfReference() {
@@ -150,6 +148,32 @@ suite('ARRenderer', () => {
         async end() {
           this.dispatchEvent(new CustomEvent('end'));
         }
+
+        readonly environmentBlendMode = {} as XREnvironmentBlendMode;
+        readonly visibilityState = {} as XRVisibilityState;
+        async updateTargetFrameRate(_rate: number) {
+          return;
+        }
+        onend() {
+        }
+        oninputsourceschange() {
+        }
+        onselect() {
+        }
+        onselectstart() {
+        }
+        onselectend() {
+        }
+        onsqueeze() {
+        }
+        onsqueezestart() {
+        }
+        onsqueezeend() {
+        }
+        onvisibilitychange() {
+        }
+        onframeratechange() {
+        }
       }
 
       xrSession = new FakeSession();
@@ -158,15 +182,6 @@ suite('ARRenderer', () => {
   };
 
   setup(() => {
-    tagName = `model-viewer-arrenderer-${nextId++}`;
-    ModelViewerElement = class extends ControlsMixin
-    (ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
-
     element = new ModelViewerElement();
     document.body.insertBefore(element, document.body.firstChild);
     arRenderer = Renderer.singleton.arRenderer;
@@ -178,6 +193,9 @@ suite('ARRenderer', () => {
     }
   });
 
+  // This fails on Android when karma.conf has hostname: 'bs-local.com',
+  // possibly due to not serving over HTTPS (which disables WebXR)? However,
+  // Browserstack is unstable without this hostname.
   test('supports presenting to AR only on Android', async () => {
     expect(await arRenderer.supportsPresentation()).to.be.equal(IS_ANDROID);
   });
@@ -191,7 +209,7 @@ suite('ARRenderer', () => {
     let oldXRRay: any;
 
     setup(async () => {
-      const sourceLoads = waitForEvent(element, 'load');
+      const sourceLoads = waitForEvent(element, 'poster-dismissed');
       element.src = assetPath('models/Astronaut.glb');
       await sourceLoads;
       modelScene = element[$scene];

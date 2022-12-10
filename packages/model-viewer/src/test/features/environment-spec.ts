@@ -15,13 +15,13 @@
 
 import {Texture} from 'three';
 
-import {BASE_OPACITY, EnvironmentInterface, EnvironmentMixin} from '../../features/environment.js';
+import {BASE_OPACITY} from '../../features/environment.js';
 import ModelViewerElementBase, {$scene} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
-import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 const ALT_BG_IMAGE_URL = assetPath('environments/white_furnace.hdr');
@@ -33,39 +33,25 @@ const MODEL_URL = assetPath('models/reflective-sphere.gltf');
  * and has an environment map set that matches the passed in meta.
  */
 const waitForLoadAndEnvMap = (element: ModelViewerElementBase) => {
-  const load = waitForEvent(element, 'load');
+  const load = waitForEvent(element, 'poster-dismissed');
   const envMap = waitForEvent(element[$scene], 'envmap-update');
   return Promise.all([load, envMap]);
 };
 
-suite('ModelViewerElementBase with EnvironmentMixin', () => {
+suite('Environment', () => {
   suiteTeardown(() => {
     Renderer.resetSingleton();
   });
 
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement:
-      Constructor<ModelViewerElementBase&EnvironmentInterface>;
-  let element: ModelViewerElementBase&EnvironmentInterface;
+  let element: ModelViewerElement;
   let scene: ModelScene;
 
   setup(() => {
-    tagName = `model-viewer-environment-${nextId++}`;
-    ModelViewerElement = class extends EnvironmentMixin
-    (ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
     element = new ModelViewerElement();
     scene = element[$scene];
   });
 
   teardown(() => element.parentNode && element.parentNode.removeChild(element));
-
-  BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
   test('only generates an environment when in the render tree', async () => {
     let environmentChangeCount = 0;
@@ -102,7 +88,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
       test('applies a generated environment map on model', async function() {
-        expect(scene.environment!.name).to.be.eq('default');
+        expect(scene.environment!.name).to.be.eq('neutral');
       });
 
       test('changes the environment exactly once', async function() {
@@ -115,7 +101,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     setup(async () => {
       element.src = MODEL_URL;
       document.body.insertBefore(element, document.body.firstChild);
-      await waitForEvent(element, 'load');
+      await waitForEvent(element, 'poster-dismissed');
       scene.visible = true;
     });
 
@@ -142,7 +128,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
     setup(async () => {
       element.src = MODEL_URL;
       document.body.insertBefore(element, document.body.firstChild);
-      await waitForEvent(element, 'load');
+      await waitForEvent(element, 'poster-dismissed');
     });
 
     teardown(() => {
@@ -182,7 +168,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
       test('reapplies generated environment map on model', () => {
-        expect(scene.environment!.name).to.be.eq('default');
+        expect(scene.environment!.name).to.be.eq('neutral');
       });
     });
   });
@@ -261,7 +247,7 @@ suite('ModelViewerElementBase with EnvironmentMixin', () => {
       });
 
       test('reapplies generated environment map on model', async function() {
-        expect(scene.environment!.name).to.be.eq('default');
+        expect(scene.environment!.name).to.be.eq('neutral');
       });
     });
   });

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -39,9 +39,9 @@ export interface ContextLostEvent extends Event {
 
 // Between 0 and 1: larger means the average responds faster and is less smooth.
 const DURATION_DECAY = 0.2;
-const LOW_FRAME_DURATION_MS = 18;
-const HIGH_FRAME_DURATION_MS = 26;
-const MAX_AVG_CHANGE_MS = 2;
+const LOW_FRAME_DURATION_MS = 40;
+const HIGH_FRAME_DURATION_MS = 60;
+const MAX_AVG_CHANGE_MS = 5;
 const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
 const DEFAULT_LAST_STEP = 3;
 
@@ -55,7 +55,7 @@ export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
  * of the WebGL canvas, and applies the texture on the registered canvas.
  *
  * In the future, can use ImageBitmapRenderingContext instead of
- * Canvas2DRenderingContext if supported for cheaper transfering of
+ * Canvas2DRenderingContext if supported for cheaper transferring of
  * the texture.
  */
 export class Renderer extends EventDispatcher {
@@ -102,7 +102,8 @@ export class Renderer extends EventDispatcher {
   protected debugger: Debugger|null = null;
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
-  private lastTick: number;
+  private lastTick = performance.now();
+  private renderedLastFrame = false;
   private scaleStep = 0;
   private lastStep = DEFAULT_LAST_STEP;
   private avgFrameDuration =
@@ -134,6 +135,7 @@ export class Renderer extends EventDispatcher {
 
     this.canvas3D = document.createElement('canvas');
     this.canvas3D.id = 'webgl-canvas';
+    this.canvas3D.classList.add('show');
 
     try {
       this.threeRenderer = new WebGLRenderer({
@@ -168,8 +170,80 @@ export class Renderer extends EventDispatcher {
         'webglcontextrestored', this.onWebGLContextRestored);
 
     this.updateRendererSize();
-    this.lastTick = performance.now();
-    this.avgFrameDuration = 0;
+  }
+
+  registerScene(scene: ModelScene) {
+    this.scenes.add(scene);
+
+    scene.forceRescale();
+
+    const size = new Vector2();
+    this.threeRenderer.getSize(size);
+    scene.canvas.width = size.x;
+    scene.canvas.height = size.y;
+
+    if (this.canRender && this.scenes.size > 0) {
+      this.threeRenderer.setAnimationLoop(
+          (time: number, frame?: any) => this.render(time, frame));
+    }
+
+    if (this.debugger != null) {
+      this.debugger.addScene(scene);
+    }
+  }
+
+  unregisterScene(scene: ModelScene) {
+    this.scenes.delete(scene);
+
+    if (this.canvas3D.parentElement === scene.canvas.parentElement) {
+      scene.canvas.parentElement!.removeChild(this.canvas3D);
+    }
+
+    if (this.canRender && this.scenes.size === 0) {
+      this.threeRenderer.setAnimationLoop(null);
+    }
+
+    if (this.debugger != null) {
+      this.debugger.removeScene(scene);
+    }
+  }
+
+  displayCanvas(scene: ModelScene): HTMLCanvasElement {
+    return this.multipleScenesVisible ? scene.element[$canvas] : this.canvas3D;
+  }
+
+  /**
+   * The function enables an optimization, where when there is only a single
+   * <model-viewer> element, we can use the renderer's 3D canvas directly for
+   * display. Otherwise we need to use the element's 2D canvas and copy the
+   * renderer's result into it.
+   */
+  private countVisibleScenes() {
+    const {canvas3D} = this;
+    let visibleScenes = 0;
+    let canvas3DScene = null;
+    for (const scene of this.scenes) {
+      const {element} = scene;
+      if (element.modelIsVisible && scene.externalRenderer == null) {
+        ++visibleScenes;
+      }
+      if (canvas3D.parentElement === scene.canvas.parentElement) {
+        canvas3DScene = scene;
+      }
+    }
+    const multipleScenesVisible = visibleScenes > 1;
+
+    if (canvas3DScene != null) {
+      const newlyMultiple =
+          multipleScenesVisible && !this.multipleScenesVisible;
+      const disappearing = !canvas3DScene.element.modelIsVisible;
+      if (newlyMultiple || disappearing) {
+        const {width, height} = this.sceneSize(canvas3DScene);
+        this.copyPixels(canvas3DScene, width, height);
+        canvas3D.parentElement!.removeChild(canvas3D);
+      }
+    }
+    this.multipleScenesVisible = multipleScenesVisible;
   }
 
   /**
@@ -202,35 +276,32 @@ export class Renderer extends EventDispatcher {
     this.width = width;
     this.height = height;
     this.dpr = dpr;
+    width = Math.ceil(width * dpr);
+    height = Math.ceil(height * dpr);
 
     if (this.canRender) {
-      this.threeRenderer.setSize(width * dpr, height * dpr, false);
+      this.threeRenderer.setSize(width, height, false);
     }
-
-    // Expand the canvas size to make up for shrinking the viewport.
-    const scale = this.scaleFactor;
-    const widthCSS = width / scale;
-    const heightCSS = height / scale;
-    // The canvas element must by styled outside of three due to the offscreen
-    // canvas not being directly stylable.
-    this.canvas3D.style.width = `${widthCSS}px`;
-    this.canvas3D.style.height = `${heightCSS}px`;
 
     // Each scene's canvas must match the renderer size. In general they can be
     // larger than the element that contains them, but the overflow is hidden
     // and only the portion that is shown is copied over.
     for (const scene of this.scenes) {
       const {canvas} = scene;
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      canvas.style.width = `${widthCSS}px`;
-      canvas.style.height = `${heightCSS}px`;
-      scene.queueRender();
+      canvas.width = width;
+      canvas.height = height;
+      scene.forceRescale();
     }
   }
 
-  private updateRendererScale() {
+  private updateRendererScale(delta: number) {
     const scaleStep = this.scaleStep;
+
+    this.avgFrameDuration += clamp(
+        DURATION_DECAY * (delta - this.avgFrameDuration),
+        -MAX_AVG_CHANGE_MS,
+        MAX_AVG_CHANGE_MS);
+
     if (this.avgFrameDuration > HIGH_FRAME_DURATION_MS) {
       ++this.scaleStep;
     } else if (
@@ -239,29 +310,41 @@ export class Renderer extends EventDispatcher {
     }
     this.scaleStep = Math.min(this.scaleStep, this.lastStep);
 
-    if (scaleStep == this.scaleStep) {
-      return;
-    }
-    const scale = this.scaleFactor;
-    this.avgFrameDuration =
-        (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
-
-    const width = this.width / scale;
-    const height = this.height / scale;
-
-    this.canvas3D.style.width = `${width}px`;
-    this.canvas3D.style.height = `${height}px`;
-    for (const scene of this.scenes) {
-      const {style} = scene.canvas;
-      style.width = `${width}px`;
-      style.height = `${height}px`;
-      scene.queueRender();
-      this.dispatchRenderScale(scene);
+    if (scaleStep !== this.scaleStep) {
+      this.avgFrameDuration =
+          (HIGH_FRAME_DURATION_MS + LOW_FRAME_DURATION_MS) / 2;
     }
   }
 
-  dispatchRenderScale(scene: ModelScene) {
-    const scale = this.scaleFactor;
+  private shouldRender(scene: ModelScene): boolean {
+    if (!scene.shouldRender()) {
+      // The first frame we stop rendering the scene (because it stops moving),
+      // trigger one extra render at full scale.
+      if (scene.scaleStep != 0) {
+        scene.scaleStep = 0;
+        this.rescaleCanvas(scene);
+      } else {
+        return false;
+      }
+    } else if (scene.scaleStep != this.scaleStep) {
+      // Update render scale
+      scene.scaleStep = this.scaleStep;
+      this.rescaleCanvas(scene);
+    }
+    return true;
+  }
+
+  private rescaleCanvas(scene: ModelScene) {
+    const scale = SCALE_STEPS[scene.scaleStep];
+    const width = Math.ceil(this.width / scale);
+    const height = Math.ceil(this.height / scale);
+
+    const {style} = scene.canvas;
+    style.width = `${width}px`;
+    style.height = `${height}px`;
+    this.canvas3D.style.width = `${width}px`;
+    this.canvas3D.style.height = `${height}px`;
+
     const renderedDpr = this.dpr * scale;
     const reason = scale < 1                 ? 'GPU throttling' :
         this.dpr !== window.devicePixelRatio ? 'No meta viewport tag' :
@@ -278,97 +361,28 @@ export class Renderer extends EventDispatcher {
     }));
   }
 
-  registerScene(scene: ModelScene) {
-    this.scenes.add(scene);
-    const {canvas} = scene;
-    const scale = this.scaleFactor;
-
-    canvas.width = Math.round(this.width * this.dpr);
-    canvas.height = Math.round(this.height * this.dpr);
-
-    canvas.style.width = `${this.width / scale}px`;
-    canvas.style.height = `${this.height / scale}px`;
-
-    if (this.multipleScenesVisible) {
-      canvas.classList.add('show');
-    }
-    scene.queueRender();
-
-    this.dispatchRenderScale(scene);
-
-    if (this.canRender && this.scenes.size > 0) {
-      this.threeRenderer.setAnimationLoop(
-          (time: number, frame?: any) => this.render(time, frame));
-    }
-
-    if (this.debugger != null) {
-      this.debugger.addScene(scene);
-    }
+  private sceneSize(scene: ModelScene) {
+    const {dpr} = this;
+    const scaleFactor = SCALE_STEPS[scene.scaleStep];
+    // We avoid using the Three.js PixelRatio and handle it ourselves here so
+    // that we can do proper rounding and avoid white boundary pixels.
+    const width = Math.min(
+        Math.ceil(scene.width * scaleFactor * dpr), this.canvas3D.width);
+    const height = Math.min(
+        Math.ceil(scene.height * scaleFactor * dpr), this.canvas3D.height);
+    return {width, height};
   }
 
-  unregisterScene(scene: ModelScene) {
-    this.scenes.delete(scene);
-
-    if (this.canRender && this.scenes.size === 0) {
-      (this.threeRenderer.setAnimationLoop as any)(null);
-    }
-
-    if (this.debugger != null) {
-      this.debugger.removeScene(scene);
-    }
-  }
-
-  displayCanvas(scene: ModelScene): HTMLCanvasElement {
-    return this.multipleScenesVisible ? scene.element[$canvas] : this.canvas3D;
-  }
-
-  /**
-   * The function enables an optimization, where when there is only a single
-   * <model-viewer> element, we can use the renderer's 3D canvas directly for
-   * display. Otherwise we need to use the element's 2D canvas and copy the
-   * renderer's result into it.
-   */
-  private selectCanvas() {
-    let visibleScenes = 0;
-    let visibleCanvas = null;
-    for (const scene of this.scenes) {
-      const {element} = scene;
-      if (element.modelIsVisible && scene.externalRenderer == null) {
-        ++visibleScenes;
-        visibleCanvas = scene.canvas;
-      }
-    }
-    if (visibleCanvas == null) {
+  private copyPixels(scene: ModelScene, width: number, height: number) {
+    const context2D = scene.context;
+    if (context2D == null) {
+      console.log('could not acquire 2d context');
       return;
     }
-    const multipleScenesVisible = visibleScenes > 1;
-    const {canvas3D} = this;
-
-    if (multipleScenesVisible === this.multipleScenesVisible &&
-        (multipleScenesVisible ||
-         canvas3D.parentElement === visibleCanvas.parentElement)) {
-      return;
-    }
-    this.multipleScenesVisible = multipleScenesVisible;
-
-    if (multipleScenesVisible) {
-      canvas3D.classList.remove('show');
-    }
-    for (const scene of this.scenes) {
-      if (scene.externalRenderer != null) {
-        continue;
-      }
-      const canvas = scene.element[$canvas];
-      if (multipleScenesVisible) {
-        canvas.classList.add('show');
-        scene.queueRender();
-      } else if (scene.canvas === visibleCanvas) {
-        scene.canvas.parentElement!.appendChild(canvas3D);
-        canvas3D.classList.add('show');
-        canvas.classList.remove('show');
-        scene.queueRender();
-      }
-    }
+    context2D.clearRect(0, 0, width, height);
+    context2D.drawImage(
+        this.canvas3D, 0, 0, width, height, 0, 0, width, height);
+    scene.canvas.classList.add('show');
   }
 
   /**
@@ -402,7 +416,7 @@ export class Renderer extends EventDispatcher {
     element[$tick](t, delta);
 
     const exposureIsNumber =
-        typeof exposure === 'number' && !(self as any).isNaN(exposure);
+        typeof exposure === 'number' && !Number.isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
   }
 
@@ -419,26 +433,25 @@ export class Renderer extends EventDispatcher {
       return;
     }
 
-    this.avgFrameDuration += clamp(
-        DURATION_DECAY * (delta - this.avgFrameDuration),
-        -MAX_AVG_CHANGE_MS,
-        MAX_AVG_CHANGE_MS);
-
-    this.selectCanvas();
+    this.countVisibleScenes();
     this.updateRendererSize();
-    this.updateRendererScale();
+    if (this.renderedLastFrame) {
+      this.updateRendererScale(delta);
+      this.renderedLastFrame = false;
+    }
 
-    const {dpr, scaleFactor} = this;
+    const {canvas3D} = this;
 
     for (const scene of this.orderedScenes()) {
       const {element} = scene;
-      if (!element.modelIsVisible && scene.renderCount > 0) {
+      if (!element.loaded ||
+          (!element.modelIsVisible && scene.renderCount > 0)) {
         continue;
       }
 
       this.preRender(scene, t, delta);
 
-      if (!scene.shouldRender()) {
+      if (!this.shouldRender(scene)) {
         continue;
       }
 
@@ -469,12 +482,7 @@ export class Renderer extends EventDispatcher {
         }
       }
 
-      // We avoid using the Three.js PixelRatio and handle it ourselves here so
-      // that we can do proper rounding and avoid white boundary pixels.
-      const width = Math.min(
-          Math.ceil(scene.width * scaleFactor * dpr), this.canvas3D.width);
-      const height = Math.min(
-          Math.ceil(scene.height * scaleFactor * dpr), this.canvas3D.height);
+      const {width, height} = this.sceneSize(scene);
 
       scene.renderShadow(this.threeRenderer);
 
@@ -482,23 +490,21 @@ export class Renderer extends EventDispatcher {
       // clearing the depth from a different buffer
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
-          0, Math.floor(this.height * dpr) - height, width, height);
+          0, Math.ceil(this.height * this.dpr) - height, width, height);
       this.threeRenderer.render(scene, scene.camera);
 
-      if (this.multipleScenesVisible) {
-        if (scene.context == null) {
-          scene.createContext();
+      if (this.multipleScenesVisible || scene.renderCount === 0) {
+        this.copyPixels(scene, width, height);
+      } else {
+        if (canvas3D.parentElement !== scene.canvas.parentElement) {
+          scene.canvas.parentElement!.appendChild(canvas3D);
+          scene.canvas.classList.remove('show');
         }
-        const context2D = scene.context as CanvasRenderingContext2D;
-        context2D.clearRect(0, 0, width, height);
-        context2D.drawImage(
-            this.canvas3D, 0, 0, width, height, 0, 0, width, height);
       }
 
       scene.hasRendered();
-      if (element.loaded) {
-        ++scene.renderCount;
-      }
+      ++scene.renderCount;
+      this.renderedLastFrame = true;
     }
   }
 

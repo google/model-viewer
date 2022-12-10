@@ -12,23 +12,23 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - name: 'BrowserStack Env Setup'  # Invokes the setup-env action
+      uses: browserstack/github-actions/setup-env@master
       with:
-        node-version: '12.x'
+        username: ${{ secrets.BROWSER_STACK_USERNAME }}
+        access-key: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
 
-    - name: Get npm cache directory
-      id: npm-cache
-      run: |
-        echo "::set-output name=dir::$(npm config get cache)"
-
-    - name: Cache npm packages
-      uses: actions/cache@v2
+    - name: 'BrowserStack Local Tunnel Setup'  # Invokes the setup-local action
+      uses: browserstack/github-actions/setup-local@master
       with:
-        path: ${{ steps.npm-cache.outputs.dir }}
-        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-npm-
+        local-testing: start
+        local-identifier: test
+        local-logging-level: setup-logs
+
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
 
     - name: NPM install
       run: npm ci
@@ -43,8 +43,9 @@ jobs:
       run: npm run build
 
     - name: Unit tests
-      env:
-        BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
-        BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
-        BROWSER_STACK_BUILD_NAME: ${{ format('{0} / {1}', github.ref, github.run_id) }}
       run: npm run test:ci
+
+    - name: 'BrowserStackLocal Stop'  # Terminating the BrowserStackLocal tunnel connection
+      uses: browserstack/github-actions/setup-local@master
+      with:
+        local-testing: stop

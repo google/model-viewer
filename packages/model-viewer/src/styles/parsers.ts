@@ -85,7 +85,7 @@ interface ParseResult<T extends ASTNode> {
  *  - functions (top-level and nested)
  *  - calc() arithmetic operators
  *  - numbers with units
- *  - hexidecimal-encoded colors in 3, 6 or 8 digit form
+ *  - hexadecimal-encoded colors in 3, 6 or 8 digit form
  *  - idents
  *
  * All syntax is intended to match the parsing rules and semantics of the actual
@@ -134,7 +134,7 @@ export const parseExpressions = (() => {
 /**
  * Parse a single expression. For the purposes of our supported syntax, an
  * expression is the set of semantically meaningful terms that appear before the
- * next comma, or between the parens of a function invokation.
+ * next comma, or between the parens of a function invocation.
  */
 const parseExpression = (() => {
   const IS_IDENT_RE = /^(\-\-|[a-z\u0240-\uffff])/i;
@@ -255,7 +255,7 @@ const parseNumber = (() => {
 
 
 /**
- * Parses a hexidecimal-encoded color in 3, 6 or 8 digit form.
+ * Parses a hexadecimal-encoded color in 3, 6 or 8 digit form.
  */
 const parseHex = (() => {
   // TODO(cdata): right now we don't actually enforce the number of digits
@@ -277,7 +277,7 @@ const parseHex = (() => {
 
 
 /**
- * Parses arguments passed to a function invokation (e.g., the expressions
+ * Parses arguments passed to a function invocation (e.g., the expressions
  * within a matched set of parens).
  */
 const parseFunctionArguments =

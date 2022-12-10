@@ -41,7 +41,7 @@ export const FocusVisiblePolyfillMixin =
           (instance: MixableBaseClass): EndPolyfillCoordinationCallback => {
             // If there is no shadow root, there is no need to coordinate with
             // the polyfill. If we already coordinated with the polyfill, we can
-            // skip subsequent invokcations:
+            // skip subsequent invocations:
             if (instance.shadowRoot == null ||
                 instance.hasAttribute('data-js-focus-visible')) {
               return () => {};

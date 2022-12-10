@@ -55,7 +55,7 @@
           </div>
           <example-snippet stamp-to="enableInteraction" highlight-as="html">
             <template>
-<model-viewer camera-controls src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -72,7 +72,7 @@
           </div>
           <example-snippet stamp-to="cameraOrbit" highlight-as="html">
             <template>
-<model-viewer camera-controls camera-orbit="45deg 55deg 2.5m" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" camera-orbit="45deg 55deg 4m" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -89,7 +89,7 @@
           </div>
           <example-snippet stamp-to="orbitAndScroll" highlight-as="html">
             <template>
-<model-viewer camera-controls camera-orbit="calc(-1.5rad + env(window-scroll-y) * 4rad) calc(0deg + env(window-scroll-y) * 180deg) calc(3m - env(window-scroll-y) * 1.5m)" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" camera-orbit="calc(-1.5rad + env(window-scroll-y) * 4rad) calc(0deg + env(window-scroll-y) * 180deg) calc(5m - env(window-scroll-y) * 10m)" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -106,7 +106,7 @@
           </div>
           <example-snippet stamp-to="disableZoom" highlight-as="html">
             <template>
-<model-viewer camera-controls disable-zoom src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" disable-zoom src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -156,7 +156,7 @@
           </div>
           <example-snippet stamp-to="defaultTarget" highlight-as="html">
             <template>
-<model-viewer camera-controls auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -173,7 +173,7 @@
           </div>
           <example-snippet stamp-to="cameraTarget" highlight-as="html">
             <template>
-<model-viewer camera-controls camera-target="0m 0m 0m" auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" camera-target="0m 0m 0m" auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -185,13 +185,31 @@
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">Pan and focus</h2>
-            <p>Enables two-finger pan on touch or using right-click or any modifier key with mouse drag. 
-              Clicking on the model focuses on that point, while clicking off the model returns to the default center.</p>
+            <h2 class="demo-title">Disable Tap</h2>
+            <p>Pan is enabled by default via two fingers on touch or using
+            right-click or any modifier key with mouse drag. When panning, the
+            center point is shown visually (and can be suppressed/changed using
+            the <a
+            href="../../docs/index.html#entrydocs-stagingandcameras-slots-panTarget">pan-target</a>
+            slot) and when the pan gesture ends, the camera is focused on that
+            model point (if there was a surface under the dot), so that the
+            camera doesn't orbit around a random point in space. Clicking on the
+            model focuses on that point, while clicking off the model returns to
+            the default center.</p>
+
+            <p>There is a  <span class="attribute">disable-pan</span> attribute
+            to turn all of this off, but here we demonstrate only turning off
+            the click/tap behaviors via the  <span
+            class="attribute">disable-tap</span>
+            attribute. Note that after panning and rotating the model, it can be
+            very hard to get back to the original centering, so it's recommended
+            to implement your own re-centering logic via  <span
+            class="attribute">camera-target</span>
+              if you decide to go this route.</p>
           </div>
           <example-snippet stamp-to="panning" highlight-as="html">
             <template>
-<model-viewer id="pan-demo" enable-pan auto-rotate shadow-intensity="1" camera-controls src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum"></model-viewer>
+<model-viewer id="pan-demo" disable-tap auto-rotate shadow-intensity="1" camera-controls touch-action="pan-y" src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -215,7 +233,7 @@
           </div>
           <example-snippet stamp-to="turnSkybox" highlight-as="html">
             <template>
-<model-viewer id="envlight-demo" camera-controls oncontextmenu="return false;" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a damaged helmet"></model-viewer>
+<model-viewer id="envlight-demo" camera-controls touch-action="pan-y" disable-pan oncontextmenu="return false;" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"  skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a damaged helmet"></model-viewer>
 
 <script type="module">
   const modelViewer = document.querySelector("#envlight-demo");
@@ -317,7 +335,7 @@
     background-color: rgba(0, 0, 0, 0.7);
   }
 </style>
-<model-viewer id="prompt-demo" camera-controls enable-pan interaction-prompt="none" src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look">
+<model-viewer id="prompt-demo" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" shadow-intensity="1" ar>
   <div class="dot" slot="finger0"></div>
   <div class="dot" slot="finger1"></div>
 </model-viewer>

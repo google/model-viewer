@@ -39,7 +39,7 @@ import {GLTF, TextureInfo as GLTFTextureInfo} from '@google/model-viewer/lib/thr
 import {TextField} from '@material/mwc-textfield';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {html} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 import * as color from 'ts-closure-library/lib/color/color';  // from //third_party/javascript/closure/color
 
 import {reduxStore} from '../../space_opera_base.js';
@@ -219,9 +219,14 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   rgbToHex(rgba: RGBA|RGB): string {
-    const selectedColorRgb =
-        rgba.slice(0, 3).map((color: number) => Math.round(color * 255));
+    const selectedColorRgb = rgba.slice(0, 3).map(
+        (color: number) => Math.round(this.linearToSrgb(color) * 255));
     return color.rgbArrayToHex(selectedColorRgb);
+  }
+
+  linearToSrgb(val: number): number {
+    return (val < 0.0031308) ? val * 12.92 :
+                               1.055 * (Math.pow(val, 0.41666)) - 0.055;
   }
 
   /* Interpolate base color as curr approaches duration */
@@ -252,8 +257,9 @@ export class MaterialPanel extends ConnectedLitElement {
   // Logic for interpolating from red emissive factor to the original.
   interpolateMaterial() {
     this.isInterpolating = true;
-    const originalBaseColor = this.selectedBaseColor;
-    const originalEmissiveFactor = this.selectedEmissiveFactor;
+    const originalBaseColor =
+        this.getMaterial().pbrMetallicRoughness.baseColorFactor;
+    const originalEmissiveFactor = this.getMaterial().emissiveFactor;
 
     let start = -1;
     const DURATION = 500;  // in milliseconds
@@ -603,32 +609,6 @@ export class MaterialPanel extends ConnectedLitElement {
     }
   };
 
-  get selectedBaseColor(): RGBA {
-    const alphaFactor =
-        this.getMaterial().pbrMetallicRoughness.baseColorFactor[3];
-    const selectedColor = color.hexToRgb(this.baseColorPicker.selectedColorHex);
-    // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
-    // 0-1.
-    return [
-      selectedColor[0] / 255,
-      selectedColor[1] / 255,
-      selectedColor[2] / 255,
-      alphaFactor
-    ];
-  }
-
-  get selectedEmissiveFactor(): RGB {
-    const selectedColor =
-        color.hexToRgb(this.emissiveFactorPicker.selectedColorHex);
-    // color.hexToRgb returns RGB vals from 0-255, but glTF expects a val from
-    // 0-1.
-    return [
-      selectedColor[0] / 255,
-      selectedColor[1] / 255,
-      selectedColor[2] / 255
-    ];
-  }
-
   get selectedRoughnessFactor(): number {
     return checkFinite(Number(this.roughnessFactorSlider.value));
   }
@@ -679,7 +659,8 @@ export class MaterialPanel extends ConnectedLitElement {
   onBaseColorChange() {
     const material = this.getMaterialVariant();
 
-    material.pbrMetallicRoughness.setBaseColorFactor(this.selectedBaseColor);
+    material.pbrMetallicRoughness.setBaseColorFactor(
+        this.baseColorPicker.selectedColorHex);
 
     reduxStore.dispatch(dispatchModelDirty());
   }
@@ -805,7 +786,8 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onEmissiveFactorChanged() {
-    this.getMaterialVariant().setEmissiveFactor(this.selectedEmissiveFactor);
+    this.getMaterialVariant().setEmissiveFactor(
+        this.emissiveFactorPicker.selectedColorHex);
     reduxStore.dispatch(dispatchModelDirty());
   }
 
@@ -840,7 +822,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   onAlphaFactorChange() {
     const material = this.getMaterialVariant();
-    const rgba = this.selectedBaseColor;
+    const rgba = this.getMaterial().pbrMetallicRoughness.baseColorFactor;
     rgba[3] = this.alphaFactorSlider.value;
     material.pbrMetallicRoughness.setBaseColorFactor(rgba);
     reduxStore.dispatch(dispatchModelDirty());

@@ -16,7 +16,7 @@
  */
 
 import {html} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {openMobileViewStyles} from '../../styles.css.js';
@@ -138,7 +138,8 @@ export class OpenMobileView extends ConnectedLitElement {
   getStaleContent(): EditorUpdates {
     return {
       gltfChanged: true, stateChanged: true, posterId: getRandomInt(1e+20),
-          envChanged: this.urls.env != undefined && this.urls.env !== 'neutral',
+          envChanged: this.urls.env != undefined &&
+          this.urls.env !== 'neutral' && this.urls.env !== 'legacy',
           envIsHdr: this.envIsHdr(), gltfId: getRandomInt(1e+20),
     }
   }
@@ -226,7 +227,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
     let envBlob: Blob|undefined;
     const {env, gltf} = this.urls;
-    if (env != null && env !== 'neutral' &&
+    if (env != null && env !== 'neutral' && env !== 'legacy' &&
         (updatedContent.envChanged || (haveStale && staleContent.envChanged))) {
       const response = await fetch(env);
       if (!response.ok) {

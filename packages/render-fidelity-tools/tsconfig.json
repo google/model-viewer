@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "esnext",
+    "target": "es2021",
+    "module": "ES2020",
     "moduleResolution": "node",
     "lib": [
       "es2017",
@@ -19,7 +19,9 @@
     "rootDir": "./src",
     "experimentalDecorators": true,
     "noErrorTruncation": true,
-    "declaration": true
+    "declaration": true,
+    "skipLibCheck": true,
+    "useUnknownInCatchVariables": false
   },
   "include": [
     "./src/**/*.ts"

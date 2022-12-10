@@ -20,17 +20,8 @@
       "description": "gltf-sample-viewer"
     },
     {
-      "name": "dspbr-pt",
-      "description": "dspbr-pt"
-    },
-    {
       "name": "stellar",
       "description": "Dassault Systèmes STELLAR",
-      "command": {}
-    },
-    {
-      "name": "three-gpu-pathtracer",
-      "description": "three-gpu-pathtracer",
       "command": {}
     }
   ],
@@ -75,10 +66,7 @@
       },
       "target": {
         "y": 0.001
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-SheenChair",
@@ -107,10 +95,7 @@
       },
       "dimensions": {
         "height": 500
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-BoomBox",
@@ -124,20 +109,14 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet/glTF/FlightHelmet.gltf",
       "target": {
         "y": 0.32
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-SciFiHelmet",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SciFiHelmet/glTF/SciFiHelmet.gltf",
       "orbit": {
         "radius": 4
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-DamagedHelmet",
@@ -158,10 +137,7 @@
       },
       "orbit": {
         "radius": 11.2
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-Corset",
@@ -171,10 +147,7 @@
       },
       "orbit": {
         "radius": 0.095
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-Avocado",
@@ -228,10 +201,7 @@
         "theta": 2,
         "phi": 70.0,
         "radius": 2.45
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-SheenCloth",
@@ -251,10 +221,7 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/Suzanne/glTF/Suzanne.gltf",
       "orbit": {
         "radius": 3
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-SpecGlossVsMetalRough",
@@ -263,7 +230,6 @@
         "radius": 0.5
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -279,9 +245,7 @@
       },
       "exclude": [
         "model-viewer",
-        "dspbr-pt",
-        "stellar",
-        "three-gpu-pathtracer"
+        "stellar"
       ]
     },
     {
@@ -328,10 +292,7 @@
       "orbit": {
         "radius": 12
       },
-      "renderSkybox": true,
-      "exclude": [
-        "dspbr-pt"
-      ]
+      "renderSkybox": true
     },
     {
       "name": "khronos-MetalRoughSpheres-LDR",
@@ -341,11 +302,9 @@
         "radius": 12
       },
       "exclude": [
-        "dspbr-pt",
         "stellar",
         "babylon",
-        "gltf-sample-viewer",
-        "three-gpu-pathtracer"
+        "gltf-sample-viewer"
       ],
       "renderSkybox": true
     },
@@ -363,7 +322,6 @@
       "renderSkybox": true,
       "exclude": [
         "model-viewer",
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -380,7 +338,6 @@
         "radius": 20
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -391,7 +348,6 @@
         "radius": 11
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -409,7 +365,6 @@
         "radius": 6
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -480,7 +435,6 @@
         "radius": 4.25
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -491,7 +445,6 @@
         "radius": 4.25
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -505,7 +458,6 @@
         "radius": 0.05
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -520,7 +472,6 @@
         "radius": 800
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -534,7 +485,6 @@
         "radius": 3.6
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -550,10 +500,7 @@
         "theta": -60,
         "phi": 60,
         "radius": 286
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-CesiumMilkTruck",
@@ -563,10 +510,7 @@
       },
       "orbit": {
         "radius": 7.8
-      },
-      "exclude": [
-        "dspbr-pt"
-      ]
+      }
     },
     {
       "name": "khronos-Fox",
@@ -581,7 +525,6 @@
         "radius": 124
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -601,7 +544,6 @@
         "radius": 25
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -622,7 +564,6 @@
         "radius": 300
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -637,7 +578,6 @@
         "y": -0.28
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -654,7 +594,6 @@
         "y": 0.3
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -672,7 +611,6 @@
         "width": 680
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -686,7 +624,6 @@
         "y": 0.5
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -698,7 +635,6 @@
         "radius": 3.5
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -712,7 +648,6 @@
         "radius": 2
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -725,7 +660,6 @@
         "radius": 4.75
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -738,7 +672,6 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -752,7 +685,6 @@
         "radius": 18.4
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -765,7 +697,6 @@
         "radius": 4.75
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -778,7 +709,6 @@
         "radius": 23
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -789,7 +719,6 @@
         "radius": 3
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -804,7 +733,6 @@
         "radius": 1.5
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -817,7 +745,6 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -830,9 +757,7 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt",
-        "stellar",
-        "three-gpu-pathtracer"
+        "stellar"
       ]
     },
     {
@@ -844,7 +769,6 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -857,7 +781,6 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -870,7 +793,6 @@
         "radius": 2.38
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -887,7 +809,6 @@
         "width": 400
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -903,7 +824,6 @@
         "radius": 1.2
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -917,7 +837,6 @@
         "radius": 2.5
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -928,7 +847,6 @@
         "radius": 4.25
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -943,7 +861,6 @@
         "radius": 13
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -960,7 +877,6 @@
         "radius": 3
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -975,7 +891,6 @@
         "radius": 3.5
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -990,7 +905,6 @@
         "radius": 9
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -1001,7 +915,6 @@
         "radius": 4
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -1012,7 +925,6 @@
         "radius": 15
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -1023,7 +935,6 @@
         "radius": 4
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -1038,7 +949,6 @@
         "radius": 1.5
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -1053,7 +963,6 @@
         "radius": 1.5
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -1064,7 +973,6 @@
         "radius": 7
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -1075,7 +983,6 @@
         "radius": 4
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ]
     },
@@ -1090,7 +997,6 @@
         "radius": 10
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ],
       "renderSkybox": true
@@ -1109,7 +1015,6 @@
         "radius": 20
       },
       "exclude": [
-        "dspbr-pt",
         "stellar"
       ],
       "renderSkybox": true

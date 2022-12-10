@@ -29,7 +29,7 @@ const templateResult = html`
   height: 150px;
 }
 
-/* NOTE: This ruleset is our integration surface area with the
+/* NOTE: This rule set is our integration surface area with the
  * :focus-visible polyfill.
  *
  * @see https://github.com/WICG/focus-visible/pull/196 */
@@ -40,14 +40,14 @@ const templateResult = html`
 
 .container {
   position: relative;
+  overflow: hidden;
 }
 
 .userInput {
   width: 100%;
   height: 100%;
-  display: block;
+  display: none;
   position: relative;
-  overflow: hidden;
 }
 
 canvas {
@@ -62,7 +62,7 @@ canvas {
   transform: translateZ(0);
 }
 
-canvas.show {
+.show {
   display: block;
 }
 
@@ -115,18 +115,12 @@ canvas.show {
 }
 
 .slot.poster {
-  opacity: 0;
-  transition: opacity 0.3s 0.3s;
+  display: none;
   background-color: inherit;
 }
 
 .slot.poster.show {
-  opacity: 1;
-  transition: none;
-}
-
-.slot.poster.quick {
-  transition: none;
+  display: inherit;
 }
 
 .slot.poster > * {
@@ -149,8 +143,7 @@ canvas.show {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: var(--poster-color, #fff);
-  background-image: var(--poster-image, none);
+  background-color: #fff0;
 }
 
 #default-progress-bar {
@@ -160,17 +153,6 @@ canvas.show {
   height: 100%;
   pointer-events: none;
   overflow: hidden;
-}
-
-#default-progress-bar > .mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--progress-mask, #fff);
-  transition: opacity 0.3s;
-  opacity: 0.2;
 }
 
 #default-progress-bar > .bar {
@@ -376,7 +358,6 @@ canvas.show {
     <div class="slot progress-bar">
       <slot name="progress-bar">
         <div id="default-progress-bar" aria-hidden="true">
-          <div class="mask" part="default-progress-mask"></div>
           <div class="bar" part="default-progress-bar"></div>
         </div>
       </slot>

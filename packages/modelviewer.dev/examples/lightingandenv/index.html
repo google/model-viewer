@@ -53,7 +53,7 @@ window.oscillate = function(min, max, period, time) {
 
   <div class="examples-container">
     <div class="sample">
-      <div id="hdrSkyboyImage" class="demo"></div>
+      <div id="hdrSkyboxImage" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Lighting &amp; Environment. </span>Control the lighting and the environment surrounding &lt;model-viewer&gt;. This page showcases the skybox-image attribute, which links to an equirectangular projection image which is used as the skybox, and applied as an environment map to the model.</h4>
@@ -61,9 +61,9 @@ window.oscillate = function(min, max, period, time) {
             <h2 class="demo-title">An equirectangular HDR <span class="attribute">skybox-image</span></h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="hdrSkyboyImage" highlight-as="html">
+          <example-snippet stamp-to="hdrSkyboxImage" highlight-as="html">
             <template>
-<model-viewer camera-controls skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a damaged helmet" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a damaged helmet" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -80,7 +80,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="litModel" highlight-as="html">
             <template>
-<model-viewer camera-controls skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -97,7 +97,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="unlitModel" highlight-as="html">
             <template>
-<model-viewer camera-controls skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="An unlit 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut-Unlit.glb"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="An unlit 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut-Unlit.glb"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -114,7 +114,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="environmentLighting" highlight-as="html">
             <template>
-<model-viewer camera-controls environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest, on a pink background" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest, on a pink background" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -128,19 +128,17 @@ window.oscillate = function(min, max, period, time) {
           <div class="heading">
             <h2 class="demo-title">Showing the difference between our two baked-in lighting environments</h2>
             <h4>If no environment or skybox is specified, we have a baked-in
-            default scene that is faster to load. It is designed primarily for
-            frontward viewing, but there is also a baked-in neutral lighting
-            environment that is evenly lit on all sides, and can be activated by
-            setting 
-            <span class="attribute">environment-image="neutral"</span>. This
-            lighting has also been roughly calibrated to render colors at nearly
-            their baseColorMap RGB values. You may find the neutral lighting to
-            be more pleasing than the default when using auto-rotate, as shown
-            here, or when object does not have a clear front side.</h4>
+            default scene that is faster to load. It is designed as a neutral
+            lighting environment that is evenly lit on all sides, but there is
+            also a baked-in legacy lighting primarily for frontward viewing, and
+            can be activated by setting 
+            <span class="attribute">environment-image="legacy"</span>. Our
+            default neutral lighting has been roughly calibrated to render
+            colors at nearly their baseColorMap RGB values.</h4>
           </div>
           <example-snippet stamp-to="neutralLighting" highlight-as="html">
             <template>
-<model-viewer id="neutral-demo" camera-controls auto-rotate environment-image="neutral" alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
+<model-viewer id="neutral-demo" camera-controls touch-action="pan-y" auto-rotate alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
   <label for="neutral">Neutral Lighting: </label>
   <input id="neutral" type="checkbox" checked="true">
 </model-viewer>
@@ -150,7 +148,7 @@ window.oscillate = function(min, max, period, time) {
   const checkbox = document.querySelector('#neutral');
   
   checkbox.addEventListener('change',() => {
-    modelViewer.environmentImage = checkbox.checked ? 'neutral' : '';
+    modelViewer.environmentImage = checkbox.checked ? '' : 'legacy';
   });
 })();
 </script>
@@ -170,7 +168,7 @@ window.oscillate = function(min, max, period, time) {
         </div>
         <example-snippet stamp-to="renderExposure" highlight-as="html">
           <template>
-<model-viewer camera-controls id="exposure-demo" exposure="1" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a sphere reflecting a sunrise at varying exposure" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" id="exposure-demo" exposure="1" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a sphere reflecting a sunrise at varying exposure" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
 <script>
 (() => {
   const modelViewer = document.querySelector('#exposure-demo');
@@ -200,7 +198,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="shadows" highlight-as="html">
             <template>
-<model-viewer camera-controls id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
 <script>
 (() => {
   const modelViewer = document.querySelector('#shadow-intensity-demo');
@@ -230,7 +228,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="anotherHDRExample" highlight-as="html">
             <template>
-<model-viewer camera-controls skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -254,7 +252,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="ldrEnvironmentImage" highlight-as="html">
             <template>
-<model-viewer camera-controls skybox-image="../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -262,7 +260,7 @@ window.oscillate = function(min, max, period, time) {
     </div>
   
     <div class="sample">
-      <div id="skyboxAndEnvrionment" class="demo"></div>
+      <div id="skyboxAndEnvironment" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
@@ -278,9 +276,9 @@ window.oscillate = function(min, max, period, time) {
             realistic results. 
             </h4>
           </div>
-          <example-snippet stamp-to="skyboxAndEnvrionment" highlight-as="html">
+          <example-snippet stamp-to="skyboxAndEnvironment" highlight-as="html">
             <template>
-<model-viewer camera-controls skybox-image="../../assets/spruit_sunrise_4k_LDR.jpg" environment-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a sphere reflecting a sunrise" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../assets/spruit_sunrise_4k_LDR.jpg" environment-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a sphere reflecting a sunrise" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
             </template>
           </example-snippet>
         </div>

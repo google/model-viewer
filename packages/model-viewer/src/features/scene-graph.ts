@@ -14,12 +14,10 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {Euler, RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
+import {RepeatWrapping, sRGBEncoding, Texture, TextureLoader} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $renderer, $scene} from '../model-viewer-base.js';
-import {normalizeUnit} from '../styles/conversions.js';
-import {NumberNode, parseExpressions} from '../styles/parsers.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
@@ -33,15 +31,15 @@ import {Texture as ModelViewerTexture} from './scene-graph/texture';
 
 
 export const $currentGLTF = Symbol('currentGLTF');
-const $model = Symbol('model');
+export const $originalGltfJson = Symbol('originalGltfJson');
+export const $model = Symbol('model');
 const $getOnUpdateMethod = Symbol('getOnUpdateMethod');
 const $textureLoader = Symbol('textureLoader');
-const $originalGltfJson = Symbol('originalGltfJson');
 
 interface SceneExportOptions {
-  binary?: boolean, trs?: boolean, onlyVisible?: boolean, embedImages?: boolean,
-      maxTextureSize?: number, forcePowerOfTwoTextures?: boolean,
-      includeCustomExtensions?: boolean,
+  binary?: boolean, trs?: boolean, onlyVisible?: boolean,
+      maxTextureSize?: number, includeCustomExtensions?: boolean,
+      forceIndices?: boolean
 }
 
 export interface SceneGraphInterface {
@@ -141,38 +139,28 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('variantName')) {
-        const threeGLTF = this[$currentGLTF];
+        const updateVariantProgress = this[$progressTracker].beginActivity();
+        updateVariantProgress(0.1);
+        const model = this[$model];
         const {variantName} = this;
 
-        if (threeGLTF != null) {
-          await this[$model]![$switchVariant](variantName!);
+        if (model != null) {
+          await model[$switchVariant](variantName!);
           this[$needsRender]();
           this.dispatchEvent(new CustomEvent('variant-applied'));
         }
+        updateVariantProgress(1.0);
       }
 
       if (changedProperties.has('orientation') ||
           changedProperties.has('scale')) {
-        const {modelContainer} = this[$scene];
-
-        const orientation = parseExpressions(this.orientation)[0]
-                                .terms as [NumberNode, NumberNode, NumberNode];
-
-        const roll = normalizeUnit(orientation[0]).number;
-        const pitch = normalizeUnit(orientation[1]).number;
-        const yaw = normalizeUnit(orientation[2]).number;
-
-        modelContainer.quaternion.setFromEuler(
-            new Euler(pitch, yaw, roll, 'YXZ'));
-
-        const scale = parseExpressions(this.scale)[0]
-                          .terms as [NumberNode, NumberNode, NumberNode];
-
-        modelContainer.scale.set(
-            scale[0].number, scale[1].number, scale[2].number);
-
-        this[$scene].updateBoundingBox();
-        this[$scene].updateShadow();
+        if (!this.loaded) {
+          return;
+        }
+        const scene = this[$scene];
+        scene.applyTransform();
+        scene.updateBoundingBox();
+        scene.updateShadow();
         this[$renderer].arRenderer.onUpdateScene();
         this[$needsRender]();
       }
@@ -180,7 +168,6 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$onModelLoad]() {
       super[$onModelLoad]();
-
 
       const {currentGLTF} = this[$scene];
 
@@ -204,22 +191,19 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$currentGLTF] = currentGLTF;
-      // TODO: remove this event, as it is synonymous with the load event.
-      this.dispatchEvent(new CustomEvent('scene-graph-ready'));
     }
 
     /** @export */
     async exportScene(options?: SceneExportOptions): Promise<Blob> {
       const scene = this[$scene];
-      return new Promise<Blob>(async (resolve) => {
+      return new Promise<Blob>(async (resolve, reject) => {
         // Defaults
         const opts = {
           binary: true,
           onlyVisible: true,
           maxTextureSize: Infinity,
-          forcePowerOfTwoTextures: false,
           includeCustomExtensions: false,
-          embedImages: true
+          forceIndices: false
         } as GLTFExporterOptions;
 
         Object.assign(opts, options);
@@ -242,13 +226,19 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                 .register(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
-        exporter.parse(scene.modelContainer.children[0], (gltf: object) => {
-          return resolve(
-              new Blob([opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
-                type: opts.binary ? 'application/octet-stream' :
-                                    'application/json'
-              }));
-        }, opts);
+        exporter.parse(
+            scene.model,
+            (gltf: object) => {
+              return resolve(new Blob(
+                  [opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
+                    type: opts.binary ? 'application/octet-stream' :
+                                        'application/json'
+                  }));
+            },
+            () => {
+              return reject('glTF export failed');
+            },
+            opts);
 
         if (shadow != null) {
           shadow.visible = visible;

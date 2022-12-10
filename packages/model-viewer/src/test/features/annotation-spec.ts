@@ -15,13 +15,12 @@
 
 import {Vector3} from 'three';
 
-import {AnnotationInterface, AnnotationMixin} from '../../features/annotation';
-import ModelViewerElementBase, {$needsRender, $scene, Vector2D, Vector3D} from '../../model-viewer-base';
+import {ModelViewerElement} from '../../model-viewer';
+import {$needsRender, $scene, toVector3D, Vector2D, Vector3D} from '../../model-viewer-base';
 import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {timePasses, waitForEvent} from '../../utilities';
 import {assetPath, rafPasses} from '../helpers';
-import {BasicSpecTemplate} from '../templates';
 
 const expect = chai.expect;
 
@@ -52,28 +51,19 @@ const closeToVector3 = (a: Vector3D, b: Vector3) => {
 const withinRange = (a: Vector2D, start: number, finish: number) => {
   expect(a.u).to.be.within(start, finish);
   expect(a.v).to.be.within(start, finish);
-}
+};
 
-suite('ModelViewerElementBase with AnnotationMixin', () => {
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement:
-      Constructor<ModelViewerElementBase&AnnotationInterface>;
-  let element: ModelViewerElementBase&AnnotationInterface;
+suite('Annotation', () => {
+  let element: ModelViewerElement;
   let scene: ModelScene;
 
-  setup(() => {
-    tagName = `model-viewer-annotation-${nextId++}`;
-    ModelViewerElement = class extends AnnotationMixin
-    (ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
+  setup(async () => {
     element = new ModelViewerElement();
     document.body.insertBefore(element, document.body.firstChild);
     scene = element[$scene];
+
+    element.src = assetPath('models/cube.gltf');
+    await waitForEvent(element, 'poster-dismissed');
   });
 
   teardown(() => {
@@ -81,8 +71,6 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       element.parentNode.removeChild(element);
     }
   });
-
-  BasicSpecTemplate(() => ModelViewerElement, () => tagName);
 
   suite('a model-viewer element with a hotspot', () => {
     let hotspot: HTMLElement;
@@ -98,8 +86,34 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       numSlots = scene.target.children.length;
     });
 
+    teardown(() => {
+      if (hotspot.parentElement === element) {
+        element.removeChild(hotspot);
+      }
+    });
+
     test('creates a corresponding slot', () => {
       expect(sceneContainsHotspot(scene, hotspot)).to.be.true;
+    });
+
+    test('querying it returns valid data', () => {
+      // to test querying, place hotspot in the center and verify the screen
+      // position is half the default width and height (300 x 150) with a depth
+      // value of ~1.
+      const defaultDimensions = {width: 300, height: 150};
+      element.updateHotspot({name: 'hotspot-1', position: `0m 0m 0m`});
+
+      const hotspotData = element.queryHotspot('hotspot-1');
+
+      expect(hotspotData?.canvasPosition.x)
+          .to.be.closeTo(defaultDimensions.width / 2, 0.0001);
+      expect(hotspotData?.canvasPosition.y)
+          .to.be.closeTo(defaultDimensions.height / 2, 0.0001);
+      expect(hotspotData?.position.toString())
+          .to.equal(toVector3D(new Vector3(0, 0, 0)).toString());
+      expect(hotspotData?.normal.toString())
+          .to.equal(toVector3D(new Vector3(0, 0, -1)).toString());
+      expect(hotspotData?.facingCamera).to.be.true;
     });
 
     suite('adding a second hotspot with the same name', () => {
@@ -112,6 +126,12 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         hotspot2.setAttribute('data-normal', '1m 0m 0m');
         element.appendChild(hotspot2);
         await timePasses();
+      });
+
+      teardown(() => {
+        if (hotspot2.parentElement === element) {
+          element.removeChild(hotspot2);
+        }
       });
 
       test('does not change the slot', () => {
@@ -134,6 +154,21 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
         expect(normal).to.be.deep.equal(new Vector3(1, 0, 0));
       });
 
+      test('and removing it does not remove the slot', async () => {
+        element.removeChild(hotspot);
+        await timePasses();
+
+        expect(scene.target.children.length).to.be.equal(numSlots);
+      });
+
+      test('but removing both does remove the slot', async () => {
+        element.removeChild(hotspot);
+        element.removeChild(hotspot2);
+        await timePasses();
+
+        expect(scene.target.children.length).to.be.equal(numSlots - 1);
+      });
+
       suite('with a camera', () => {
         let wrapper: HTMLElement;
 
@@ -145,17 +180,7 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           // already visible.
           await rafPasses();
 
-          const hotspotObject2D =
-              scene.target.children[numSlots - 1] as Hotspot;
-
-          const camera = element[$scene].camera;
-          camera.position.z = 2;
-          camera.updateMatrixWorld();
-          element[$needsRender]();
-
-          await waitForEvent(hotspot2, 'hotspot-visibility');
-
-          wrapper = hotspotObject2D.element;
+          wrapper = (scene.target.children[numSlots - 1] as Hotspot).element;
         });
 
         test('the hotspot is hidden', async () => {
@@ -172,21 +197,6 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
           expect(!!wrapper.classList.contains('hide')).to.be.false;
         });
       });
-
-      test('and removing it does not remove the slot', async () => {
-        element.removeChild(hotspot);
-        await timePasses();
-
-        expect(scene.target.children.length).to.be.equal(numSlots);
-      });
-
-      test('but removing both does remove the slot', async () => {
-        element.removeChild(hotspot);
-        element.removeChild(hotspot2);
-        await timePasses();
-
-        expect(scene.target.children.length).to.be.equal(numSlots - 1);
-      });
     });
   });
 
@@ -198,36 +208,34 @@ suite('ModelViewerElementBase with AnnotationMixin', () => {
       width = 200;
       height = 300;
       element.setAttribute('style', `width: ${width}px; height: ${height}px`);
-      element.src = assetPath('models/cube.gltf');
-
-      const camera = element[$scene].camera;
-      camera.position.z = 2;
-      camera.updateMatrixWorld();
-      await waitForEvent(element, 'load');
+      element.cameraOrbit = '0deg 90deg 2m';
+      element.jumpCameraToGoal();
+      await rafPasses();
     });
 
-    test('gets expected hit result', () => {
+    test('gets expected hit result', async () => {
+      await rafPasses();
       const hitResult =
           element.positionAndNormalFromPoint(width / 2, height / 2);
       expect(hitResult).to.be.ok;
       const {position, normal, uv} = hitResult!;
       closeToVector3(position, new Vector3(0, 0, 0.5));
       closeToVector3(normal, new Vector3(0, 0, 1));
-      if(uv != null){
+      if (uv != null) {
         withinRange(uv, 0, 1);
       }
     });
 
-    test('gets expected hit result when turned', () => {
-      element[$scene].yaw = -Math.PI / 2;
-      element[$scene].updateMatrixWorld();
+    test('gets expected hit result when turned', async () => {
+      element.resetTurntableRotation(-Math.PI / 2);
+      await rafPasses();
       const hitResult =
           element.positionAndNormalFromPoint(width / 2, height / 2);
       expect(hitResult).to.be.ok;
       const {position, normal, uv} = hitResult!;
       closeToVector3(position, new Vector3(0.5, 0, 0));
       closeToVector3(normal, new Vector3(1, 0, 0));
-      if(uv != null){
+      if (uv != null) {
         withinRange(uv, 0, 1);
       }
     });

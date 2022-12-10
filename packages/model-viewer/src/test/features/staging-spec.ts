@@ -14,46 +14,26 @@
  */
 
 import {CameraChangeDetails} from '../../features/controls.js';
-import {StagingMixin} from '../../features/staging.js';
-import ModelViewerElementBase from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {ChangeSource} from '../../three-components/SmoothControls.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
-import {BasicSpecTemplate} from '../templates.js';
 
 const expect = chai.expect;
 
 const ODD_SHAPE_GLB_PATH = assetPath('models/odd-shape.glb');
 const AUTO_ROTATE_DELAY = 50;
 
-suite('ModelViewerElementBase with StagingMixin', () => {
-  let nextId = 0;
-  let tagName: string;
-  let ModelViewerElement: any;
-  let element: any;
-
-  setup(() => {
-    tagName = `model-viewer-staging-${nextId++}`;
-    ModelViewerElement = class extends StagingMixin
-    (ModelViewerElementBase) {
-      static get is() {
-        return tagName;
-      }
-    };
-    customElements.define(tagName, ModelViewerElement);
-  });
-
-  BasicSpecTemplate(() => ModelViewerElement, () => tagName);
-
+suite('Staging', () => {
   suite('with a visible loaded model', () => {
+    let element: ModelViewerElement;
+
     setup(async () => {
       element = new ModelViewerElement();
       element.src = ODD_SHAPE_GLB_PATH;
       document.body.insertBefore(element, document.body.firstChild);
 
-      await waitForEvent(element, 'load');
-      Object.defineProperty(
-          element, 'modelIsVisible', {value: true, writable: true});
+      await waitForEvent(element, 'poster-dismissed');
       await rafPasses();
     });
 

@@ -56,7 +56,7 @@
           </div>
           <example-snippet stamp-to="autoplay" highlight-as="html">
             <template>
-<model-viewer camera-controls autoplay ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" autoplay ar ar-modes="webxr scene-viewer" shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -73,7 +73,7 @@
           </div>
           <example-snippet stamp-to="selectingAnimations" highlight-as="html">
             <template>
-<model-viewer camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" autoplay animation-name="Running" ar ar-modes="webxr scene-viewer" shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -90,7 +90,7 @@
           </div>
           <example-snippet stamp-to="controlSpeed" highlight-as="html">
             <template>
-<model-viewer id="change-speed-demo" camera-controls animation-name="Dance" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
+<model-viewer id="change-speed-demo" camera-controls touch-action="pan-y" animation-name="Dance" ar ar-modes="webxr scene-viewer" shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animate 3D model of a robot"></model-viewer>
 <script type="module">
   const modelViewer = document.querySelector('#change-speed-demo');
   const speeds = [1, 2, 0.5, -1];
@@ -119,7 +119,7 @@
           </div>
           <example-snippet stamp-to="crossFade" highlight-as="html">
             <template>
-<model-viewer id="paused-change-demo" camera-controls autoplay animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+<model-viewer id="paused-change-demo" camera-controls touch-action="pan-y" autoplay animation-name="Running" ar ar-modes="webxr scene-viewer" shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
 <script>
 (() => {
   const modelViewer = document.querySelector('#paused-change-demo');
@@ -146,7 +146,7 @@
           </div>
           <example-snippet stamp-to="paused" highlight-as="html">
             <template>
-<model-viewer id="xfade-demo" camera-controls animation-name="Running" ar shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
+<model-viewer id="xfade-demo" camera-controls touch-action="pan-y" animation-name="Running" ar ar-modes="webxr scene-viewer" shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb" alt="An animated 3D model of a robot"></model-viewer>
 <script>
 (() => {
   const modelViewer = document.querySelector('#xfade-demo');

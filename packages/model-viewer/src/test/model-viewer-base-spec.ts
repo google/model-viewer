@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-import ModelViewerElementBase, {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
+import {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
+import {ModelViewerElement} from '../model-viewer.js';
 import {Renderer} from '../three-components/Renderer.js';
-import {Constructor, timePasses, waitForEvent} from '../utilities.js';
+import {timePasses, waitForEvent} from '../utilities.js';
 
 import {assetPath, spy, until} from './helpers.js';
-import {BasicSpecTemplate} from './templates.js';
-
 
 const expect = chai.expect;
 
@@ -39,43 +38,23 @@ const expectBlobDimensions =
 };
 
 suite('ModelViewerElementBase', () => {
-  test('is not registered as a custom element by default', () => {
-    expect(customElements.get('model-viewer-base')).to.be.equal(undefined);
-  });
-
-  suite('when registered', () => {
-    let nextId = 0;
-    let tagName: string;
-    let ModelViewerElement: Constructor<ModelViewerElementBase>;
+  suite('with an element', () => {
+    let element: ModelViewerElement;
+    let input: HTMLDivElement;
 
     setup(() => {
-      tagName = `model-viewer-base-${nextId++}`;
-      ModelViewerElement = class extends ModelViewerElementBase {
-        static get is() {
-          return tagName;
-        }
-      };
-      customElements.define(tagName, ModelViewerElement);
+      element = new ModelViewerElement();
+      input = element[$userInputElement];
+      document.body.insertBefore(element, document.body.firstChild);
     });
 
-    BasicSpecTemplate(() => ModelViewerElement, () => tagName);
+    teardown(() => {
+      if (element.parentNode != null) {
+        element.parentNode.removeChild(element);
+      }
+    });
 
     suite('with alt text', () => {
-      let element: ModelViewerElementBase;
-      let input: HTMLDivElement;
-
-      setup(() => {
-        element = new ModelViewerElement();
-        input = element[$userInputElement];
-        document.body.insertBefore(element, document.body.firstChild);
-      });
-
-      teardown(() => {
-        if (element.parentNode != null) {
-          element.parentNode.removeChild(element);
-        }
-      });
-
       test('gives the input a related aria-label', async () => {
         const altText = 'foo';
         element.alt = altText;
@@ -100,24 +79,11 @@ suite('ModelViewerElementBase', () => {
     });
 
     suite('with a valid src', () => {
-      let element: ModelViewerElementBase;
-      setup(() => {
-        element = new ModelViewerElement();
-        document.body.insertBefore(element, document.body.firstChild);
-      });
-
-      teardown(() => {
-        if (element.parentNode != null) {
-          element.parentNode.removeChild(element);
-        }
-      });
-
       test('eventually dispatches a load event', async () => {
         const sourceLoads = waitForEvent(element, 'load');
         element.src = assetPath('models/Astronaut.glb');
         await sourceLoads;
       });
-
 
       suite('that changes before the model loads', () => {
         test('it loads the second value on microtask timing', async () => {
@@ -142,70 +108,41 @@ suite('ModelViewerElementBase', () => {
       });
     });
 
-    suite('with an invalid src', () => {
-      let element: ModelViewerElementBase;
-      setup(() => {
-        element = new ModelViewerElement();
-        document.body.insertBefore(element, document.body.firstChild);
-      });
+    test('with an invalid src, dispatches an error event', async () => {
+      const sourceErrors = waitForEvent(element, 'error');
+      element.src = './does-not-exist.glb';
+      const event = await sourceErrors;
 
-      teardown(() => {
-        if (element.parentNode != null) {
-          element.parentNode.removeChild(element);
-        }
-      });
-
-      test('eventually dispatches an error event', async () => {
-        const sourceErrors = waitForEvent(element, 'error');
-        element.src = './does-not-exist.glb';
-        await sourceErrors;
-      });
+      expect((event as any).detail.type).to.be.eq('loadfailure');
     });
 
-    suite('when losing the GL context', () => {
-      let element: ModelViewerElementBase;
-      setup(() => {
-        element = new ModelViewerElement();
-        document.body.insertBefore(element, document.body.firstChild);
-      });
+    test('when losing the GL context, dispatches an error event', async () => {
+      const {threeRenderer, canvas3D} = Renderer.singleton;
 
-      teardown(() => {
-        if (element.parentNode != null) {
-          element.parentNode.removeChild(element);
-        }
-      });
+      canvas3D.addEventListener('webglcontextlost', function(event) {
+        event.preventDefault();
+        Renderer.resetSingleton();
+      }, false);
 
-      test('dispatches a related error event', async () => {
-        const {threeRenderer, canvas3D} = Renderer.singleton;
-
-        canvas3D.addEventListener('webglcontextlost', function(event) {
-          event.preventDefault();
-          Renderer.resetSingleton();
-        }, false);
-
-        const errorEventDispatches = waitForEvent(element, 'error');
-        // We make a best effor to simulate the real scenario here, but
-        // for some cases like headless Chrome WebGL might be disabled,
-        // so we simulate the scenario.
-        // @see https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.forceContextLoss
-        if (threeRenderer.getContext() != null) {
-          threeRenderer.forceContextLoss();
-        } else {
-          threeRenderer.domElement.dispatchEvent(
-              new CustomEvent('webglcontextlost'));
-        }
-        const event = await errorEventDispatches;
-        expect((event as any).detail.type).to.be.equal('webglcontextlost');
-      });
+      const errorEventDispatches = waitForEvent(element, 'error');
+      // We make a best effort to simulate the real scenario here, but
+      // for some cases like headless Chrome WebGL might be disabled,
+      // so we simulate the scenario.
+      // @see https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.forceContextLoss
+      if (threeRenderer.getContext() != null) {
+        threeRenderer.forceContextLoss();
+      } else {
+        threeRenderer.domElement.dispatchEvent(
+            new CustomEvent('webglcontextlost'));
+      }
+      const event = await errorEventDispatches;
+      expect((event as any).detail.type).to.be.equal('webglcontextlost');
     });
 
     suite('capturing screenshots', () => {
-      let element: ModelViewerElementBase;
       let width: number;
       let height: number;
       setup(async () => {
-        element = new ModelViewerElement();
-
         // Avoid testing our memory ceiling in CI by limiting the size
         // of the screenshots we produce in these tests:
         width = 32;
@@ -213,17 +150,9 @@ suite('ModelViewerElementBase', () => {
         element.style.width = `${width}px`;
         element.style.height = `${height}px`;
 
-        document.body.insertBefore(element, document.body.firstChild);
-
         const modelLoads = waitForEvent(element, 'load');
         element.src = assetPath('models/cube.gltf');
         await modelLoads;
-      });
-
-      teardown(() => {
-        if (element.parentNode != null) {
-          element.parentNode.removeChild(element);
-        }
       });
 
       suite('toDataURL', () => {
@@ -312,53 +241,53 @@ suite('ModelViewerElementBase', () => {
         });
       });
     });
+  });
 
-    suite('orchestrates rendering', () => {
-      let elements: Array<ModelViewerElementBase> = [];
+  suite('orchestrates rendering', () => {
+    let elements: Array<ModelViewerElement> = [];
 
-      setup(async () => {
-        elements.push(new ModelViewerElement());
-        elements.push(new ModelViewerElement());
-        elements.push(new ModelViewerElement());
+    setup(async () => {
+      elements.push(new ModelViewerElement());
+      elements.push(new ModelViewerElement());
+      elements.push(new ModelViewerElement());
 
-        for (let element of elements) {
-          element.style.position = 'relative';
-          element.style.marginBottom = '100vh';
-          element.src = assetPath('models/cube.gltf');
-          document.body.insertBefore(element, document.body.firstChild);
-        }
+      for (let element of elements) {
+        element.style.position = 'relative';
+        element.style.marginBottom = '100vh';
+        element.src = assetPath('models/cube.gltf');
+        document.body.insertBefore(element, document.body.firstChild);
+      }
+    });
+
+    teardown(() => {
+      elements.forEach(
+          element => element.parentNode != null &&
+              element.parentNode.removeChild(element));
+    });
+
+    test('sets a model within viewport to be visible', async () => {
+      await until(() => {
+        return elements[2].modelIsVisible;
       });
 
-      teardown(() => {
-        elements.forEach(
-            element => element.parentNode != null &&
-                element.parentNode.removeChild(element));
+      expect(elements[2].modelIsVisible).to.be.true;
+    });
+
+    test.skip('only models visible in the viewport', async () => {
+      // IntersectionObserver needs to set appropriate
+      // visibility on the scene, lots of timing issues when
+      // running -- wait for the visibility flags to be flipped
+      await until(() => {
+        return elements
+            .map((element, index) => {
+              return (index === 0) === element.modelIsVisible;
+            })
+            .reduce(((l, r) => l && r), true);
       });
 
-      test('sets a model within viewport to be visible', async () => {
-        await until(() => {
-          return elements[2].modelIsVisible;
-        });
-
-        expect(elements[2].modelIsVisible).to.be.true;
-      });
-
-      test.skip('only models visible in the viewport', async () => {
-        // IntersectionObserver needs to set appropriate
-        // visibility on the scene, lots of timing issues when
-        // running -- wait for the visibility flags to be flipped
-        await until(() => {
-          return elements
-              .map((element, index) => {
-                return (index === 0) === element.modelIsVisible;
-              })
-              .reduce(((l, r) => l && r), true);
-        });
-
-        expect(elements[0].modelIsVisible).to.be.ok;
-        expect(elements[1].modelIsVisible).to.not.be.ok;
-        expect(elements[2].modelIsVisible).to.not.be.ok;
-      });
+      expect(elements[0].modelIsVisible).to.be.ok;
+      expect(elements[1].modelIsVisible).to.not.be.ok;
+      expect(elements[2].modelIsVisible).to.not.be.ok;
     });
   });
 });
