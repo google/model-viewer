@@ -28,8 +28,8 @@ interface SidebarIds {
 
 function activateSidebar(sidebarIds: SidebarIds) {
   document.querySelector(`div[id=${sidebarIds.name}]`)!.classList.add('active');
-  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.add(
-      'active');
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)
+      ?.classList.add('active');
   document.querySelector(`h3[id=${sidebarIds.category}]`)!.classList.add(
       'active');
 }
@@ -37,8 +37,8 @@ function activateSidebar(sidebarIds: SidebarIds) {
 function deactivateSidebar(sidebarIds: SidebarIds) {
   document.querySelector(`div[id=${sidebarIds.name}]`)!.classList.remove(
       'active');
-  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.remove(
-      'active');
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)
+      ?.classList.remove('active');
   document.querySelector(`h3[id=${sidebarIds.category}]`)!.classList.remove(
       'active');
 }
@@ -49,8 +49,8 @@ function addDeactive(sidebarIds: SidebarIds) {
 }
 
 function addDeactiveCategory(sidebarIds: SidebarIds) {
-  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.add(
-      'de-active');
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)
+      ?.classList.add('de-active');
 }
 
 function removeDeactive(sidebarIds: SidebarIds) {
@@ -59,8 +59,8 @@ function removeDeactive(sidebarIds: SidebarIds) {
 }
 
 function removeDeactiveCategory(sidebarIds: SidebarIds) {
-  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)!.classList.remove(
-      'de-active');
+  document.querySelector(`h4[id=${sidebarIds.subcategory}]`)
+      ?.classList.remove('de-active');
 }
 
 export function getSidebarCategoryForNewPage(): string {
@@ -158,13 +158,15 @@ function removeActiveEntry(sidebarIds: SidebarIds) {
 
 function updateHeader() {
   const sidebarIds = getSidebarIdsFromSidebarName(previouslyActive);
-  const subCat = document.querySelector(`h4[id=${
-      sidebarIds.subcategory}]`)!.firstElementChild!.innerHTML;
+  const subCat = document.querySelector(`h4[id=${sidebarIds.subcategory}]`)
+                     ?.firstElementChild!.innerHTML;
   const cat = document.querySelector(`h3[id=${
       sidebarIds.category}]`)!.firstElementChild!.innerHTML;
   const outerHeaderId = sidebarIds.category.split('-')[0];
   const outerHeader = document.querySelector(`h1[id=${outerHeaderId}]`)!;
-  outerHeader.innerHTML = cat.concat(': ', subCat);
+  if (subCat) {
+    outerHeader.innerHTML = cat.concat(': ', subCat);
+  }
 }
 
 function handleHTMLEntry(htmlEntry: IntersectionObserverEntry) {

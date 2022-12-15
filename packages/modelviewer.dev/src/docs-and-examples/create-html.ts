@@ -182,11 +182,11 @@ function createSidebar(category: Category) {
   const innerCategory =
       document.getElementById(lowerCaseTitle.concat('aboveHeader'));
   for (const subcategory of subcategories) {
-    innerCategory!.innerHTML +=
-        createSubcategorySidebar(subcategory, lowerCaseTitle);
+    if (subcategory !== 'Questions') {
+      innerCategory!.innerHTML +=
+          createSubcategorySidebar(subcategory, lowerCaseTitle);
+    }
 
-    const innerSubcategory =
-        document.getElementById(lowerCaseTitle.concat('aboveHeader'));
     const lowerCaseKey = getLowerCaseKey(subcategory);
     const entries =
         (<Entry[]>category[subcategory as keyof typeof CategoryConstant]);
@@ -195,7 +195,7 @@ function createSidebar(category: Category) {
           lowerCaseTitle.concat('-', lowerCaseKey, '-', entry.htmlName);
       const aId = '#entrydocs-'.concat(divId);
       const sidebarName = createSidebarName(entry.name);
-      innerSubcategory!.innerHTML += `
+      innerCategory!.innerHTML += `
 <div class="element de-active" id=${divId}>
   <a class="darken" href=${aId} onclick="sidebarClick()">${sidebarName}</a>
 </div>`;
@@ -293,7 +293,7 @@ function createSubcategory(
   <div class='inner-content'>
     <div id=${subcategoryContainerId}>
       <h3 id=${category.concat('-', pluralLowerCaseSubcategory)}>
-        ${subcategory}
+        ${subcategory === 'Questions' ? '' : subcategory}
       </h3>
     </div>
   </div>

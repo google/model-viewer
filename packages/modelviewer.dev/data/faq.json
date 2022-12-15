@@ -1,12 +1,18 @@
 [
   {
-    "Title": "Loading",
+    "Title": "General",
     "htmlName": "general",
-    "Attributes": [
+    "Questions": [
       {
-        "name": "src",
-        "htmlName": "src",
-        "description": "The URL to the 3D model. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported.",
+        "name": "What AR modes are available?",
+        "htmlName": "ar",
+        "description": "&lt;model-viewer&gt; supports three AR modes: WebXR and SceneViewer on Android and QuickLook on iOS. WebXR is our default mode on Android as it is faster (no redownload of model), has consistent rendering, and stays in the browser, retaining all of our advanced features like annotations and material editing.<br/><br/>SceneViewer has most of the same limitations as QuickLook, being independent apps and only customizable through URL parameters. QuickLook only supports Apple's proprietary USDZ format, but &lt;model-viewer&gt; can now auto-generate a USDZ on the fly, much simplifying your deployment and processing. It also allows material edits in 3D mode to propagate into QuickLook, which is not possible in SceneViewer due to redownloading from the original URL. ",
+        "links": []
+      },
+      {
+        "name": "What 3D formats are supported?",
+        "htmlName": "formats",
+        "description": "&lt;model-viewer&gt; supports and plans to support only glTF/GLB 3D models. It's the Khronos standard known as the JPEG of 3D. Under the hood, three.js supports loading many different 3D file types, so it's actually fairly easy to hack in extra support and features. This is intentionally outside of the public (stable) API, but if you want to fork &lt;model-viewer&gt; for your own purposes, we can show you where to start. ",
         "links": []
       }
     ]
