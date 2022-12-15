@@ -242,9 +242,13 @@ function createLinks(
     lowerCaseCategory: string): string {
   const id = 'links'.concat(
       entry.htmlName, pluralLowerCaseSubcategory, lowerCaseCategory);
-  return `
-<div class="links" id=${id}>
-</div>`;
+
+  let linksEntry = `<div class="links" id=${id}>`;
+  for (const link of entry.links) {
+    linksEntry += `<div>${link}</div>`;
+  }
+  linksEntry += `</div>`;
+  return linksEntry;
 }
 
 function createEntry(
@@ -278,10 +282,8 @@ function createEntry(
 }
 
 function createSubcategory(
-    subcategoryArray: Entry[],
-    category: string,
-    subcategory: string,
-    pluralLowerCaseSubcategory: string) {
+    subcategoryArray: Entry[], category: string, subcategory: string) {
+  const pluralLowerCaseSubcategory = getLowerCaseKey(subcategory);
   const element = document.getElementById(category.concat('-docs'));
   const subcategoryContainerId =
       'docs-'.concat(category, '-', pluralLowerCaseSubcategory);
@@ -303,15 +305,6 @@ function createSubcategory(
   for (const entry of subcategoryArray) {
     innerSubcategoryContainer!.innerHTML +=
         createEntry(entry, category, pluralLowerCaseSubcategory);
-
-    if ('links' in entry) {
-      const linksId =
-          'links'.concat(entry.htmlName, pluralLowerCaseSubcategory, category);
-      const linksDiv = document.getElementById(linksId);
-      for (const link of entry.links) {
-        linksDiv!.innerHTML += `<div>${link}</div>`;
-      }
-    }
   }
 }
 
@@ -336,8 +329,7 @@ export function convertJSONToHTML(json: any[]) {
     createTitle(Title, htmlName);
     for (const key in category) {
       if (key !== 'Title' && key !== 'htmlName') {
-        const lowerCaseKey = getLowerCaseKey(key);
-        createSubcategory(category[key], htmlName, key, lowerCaseKey);
+        createSubcategory(category[key], htmlName, key);
       }
     }
     createSidebar(category);
