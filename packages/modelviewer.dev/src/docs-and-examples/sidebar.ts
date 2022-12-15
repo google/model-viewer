@@ -294,41 +294,41 @@ function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
 /*
  * Update the table of contents based on how the page is viewed.
  */
-export function sidebarObserver(docsOrExample: string) {
-  if (docsOrExample === 'docs') {
-    const observer = new IntersectionObserver(entries => {
-      if (isSideBarClick) {  // sidebar click
-        handlePageJump(entries);
-      } else {  // scroll
-        for (const htmlEntry of entries) {
-          handleHTMLEntry(htmlEntry);
-        }
+export function sidebarDocsObserver() {
+  const observer = new IntersectionObserver(entries => {
+    if (isSideBarClick) {  // sidebar click
+      handlePageJump(entries);
+    } else {  // scroll
+      for (const htmlEntry of entries) {
+        handleHTMLEntry(htmlEntry);
       }
-      if (isFirstOpen) {  // page load
-        updateSidebarViewFirstTime(entries);
-      }
-      updateHeader();
-    });
-    // i.e. attributes, properties, events, methods, slots, custom css.
-    let orderIndex = 0;
-    document.querySelectorAll('div[id*="entrydocs"]').forEach((section) => {
-      const idSplitList = section.getAttribute('id')!.split('-');
-      const id = idSplitList.slice(1, 10).join('-');
-      order.set(id, orderIndex);
-      orderIndex += 1;
-      observer.observe(section);
-    });
-  } else {
-    const options = {
-      root: null,
-      rootMargin: '0px',
-      threshold: [0, 0.25, 0.5, 0.75, 1],
-    };
-    const observer = new IntersectionObserver(handleExamples, options);
-    document.querySelectorAll('div[class="demo"]').forEach((section) => {
-      observer.observe(section);
-    });
-  }
+    }
+    if (isFirstOpen) {  // page load
+      updateSidebarViewFirstTime(entries);
+    }
+    updateHeader();
+  });
+  // i.e. attributes, properties, events, methods, slots, custom css.
+  let orderIndex = 0;
+  document.querySelectorAll('div[id*="entrydocs"]').forEach((section) => {
+    const idSplitList = section.getAttribute('id')!.split('-');
+    const id = idSplitList.slice(1, 10).join('-');
+    order.set(id, orderIndex);
+    orderIndex += 1;
+    observer.observe(section);
+  });
+}
+
+export function sidebarExamplesObserver() {
+  const options = {
+    root: null,
+    rootMargin: '0px',
+    threshold: [0, 0.25, 0.5, 0.75, 1],
+  };
+  const observer = new IntersectionObserver(handleExamples, options);
+  document.querySelectorAll('div[class="demo"]').forEach((section) => {
+    observer.observe(section);
+  });
 }
 
 export function sidebarClick() {

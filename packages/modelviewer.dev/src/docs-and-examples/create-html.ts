@@ -75,9 +75,10 @@ export function starterSidebar(docsOrExample: string) {
   const nav = document.getElementById('sidenav')!;
   const inputList = docsOrExample.split('-');
   const category = inputList[inputList.length - 1];
-  const isDocs = docsOrExample === 'docs';
-  const docsExamples = isDocs ? getCurrentDocs() : getCurrentExample(category);
-  const href = isDocs ? '../' : '../../';
+  const isExample = inputList[0] === 'examples';
+  const docsExamples =
+      isExample ? getCurrentExample(category) : getCurrentDocs();
+  const href = isExample ? '../../' : '../';
   nav.innerHTML = `
 <div class="home lockup">
   <a href=${href} class="sidebar-mv inner-home">
@@ -86,9 +87,11 @@ export function starterSidebar(docsOrExample: string) {
   </a>
 </div>
 <hr class="sidebar-hr">
+${docsOrExample === 'faq' ? '' : `
 <div class="flipper">
   ${docsExamples}
 </div>
+`}
 <div class="categories" id="sidebar-category-container"></div>`;
 }
 
