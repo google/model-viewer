@@ -130,5 +130,35 @@
         ]
       }
     ]
+  },
+  {
+    "Title": "Tools",
+    "htmlName": "tools",
+    "Questions": [
+      {
+        "name": "What is KTX2?",
+        "htmlName": "ktx2",
+        "description": "KTX2 is a new image format for GPU-friendly compression (BASIS underlies it). It won't give much file size difference compared to JPEG, but it vastly reduces the amount of GPU RAM used and accelerates upload to the GPU. Large high-res models can easily run out of GPU RAM on mobile devices, and this is the fix.",
+        "links": [
+          "<a href='https://doc.babylonjs.com/features/featuresDeepDive/materials/using/ktx2Compression'>KTX2 overview</a>"
+        ]
+      },
+      {
+        "name": "How do I export a great GLB?",
+        "htmlName": "export",
+        "description": "Extensions are added to glTF pretty frequently and the best import/export support is nearly always in Blender, which is a free, open-source 3D animation application. Though its UX may be unfamiliar, it is becoming very popular with 3D artists in many industries. ",
+        "links": [
+          "<a href='https://www.blender.org/'>Blender</a>"
+        ]
+      },
+      {
+        "name": "How do I debug/modify a GLB?",
+        "htmlName": "vscode",
+        "description": "If you need to get into the weeds to debug a glTF or manually modify something, a VSCode extension exists to help. You can even live-preview the render with your changes. This is maintained by the chair of the glTF PBR Next TSG, so it is very up-to-date.",
+        "links": [
+          "<a href='https://github.com/AnalyticalGraphicsInc/gltf-vscode'>glTF VSCode extension</a>"
+        ]
+      }
+    ]
   }
 ]
