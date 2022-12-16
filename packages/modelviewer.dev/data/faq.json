@@ -148,15 +148,15 @@
         "htmlName": "export",
         "description": "Extensions are added to glTF pretty frequently and the best import/export support is nearly always in Blender, which is a free, open-source 3D animation application. Though its UX may be unfamiliar, it is becoming very popular with 3D artists in many industries. ",
         "links": [
-          "<a href='(https://www.blender.org/'>Blender</a>"
+          "<a href='https://www.blender.org/'>Blender</a>"
         ]
       },
       {
         "name": "How do I debug/modify a GLB?",
         "htmlName": "vscode",
-        "description": "If you need to get into the weeds to debug a glTF or manually modify something, a VSCode extension exists to help. You can even live preview the render with your changes. This is maintained by the chair of the glTF PBR Next TSG, so it is very up-to-date.",
+        "description": "If you need to get into the weeds to debug a glTF or manually modify something, a VSCode extension exists to help. You can even live-preview the render with your changes. This is maintained by the chair of the glTF PBR Next TSG, so it is very up-to-date.",
         "links": [
-          "<a href='(https://github.com/AnalyticalGraphicsInc/gltf-vscode'>glTF VSCode extension</a>"
+          "<a href='https://github.com/AnalyticalGraphicsInc/gltf-vscode'>glTF VSCode extension</a>"
         ]
       }
     ]
