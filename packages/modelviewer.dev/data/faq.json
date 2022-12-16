@@ -14,13 +14,21 @@
       {
         "name": "What 3D formats are supported?",
         "htmlName": "formats",
-        "description": "&lt;model-viewer&gt; supports and plans to support only glTF/GLB 3D models. It's the Khronos standard known as the JPEG of 3D. Under the hood, three.js supports loading many different 3D file types, so it's actually fairly easy to hack in extra support and features. This is intentionally outside of the public (stable) API, but if you want to fork &lt;model-viewer&gt; for your own purposes, we can show you where to start. ",
-        "links": []
+        "description": "&lt;model-viewer&gt; supports and plans to support only glTF/GLB 3D models. It is the Khronos standard known as the JPEG of 3D and the first format to standardize Physically-Based Rendering (PBR), making your models look realistic under any lighting, on any renderer. It is also compact, compressible, and loads rapidly into the GPU.",
+        "links": [
+          "<a href='https://www.khronos.org/gltf/'>Khronos glTF</a>"
+        ]
       },
       {
         "name": "What AR modes are available?",
         "htmlName": "ar",
         "description": "&lt;model-viewer&gt; supports three AR modes: WebXR and SceneViewer on Android and QuickLook on iOS. WebXR is our default mode on Android as it is faster (no redownload of model), has consistent rendering, and stays in the browser, retaining all of our advanced features like annotations and material editing.<br/><br/>SceneViewer has most of the same limitations as QuickLook, being independent apps and only customizable through URL parameters. QuickLook only supports Apple's proprietary USDZ format, but &lt;model-viewer&gt; can now auto-generate a USDZ on the fly, much simplifying your deployment and processing. It also allows material edits in 3D mode to propagate into QuickLook, which is not possible in SceneViewer due to redownloading from the original URL. ",
+        "links": []
+      },
+      {
+        "name": "Can I have just the AR button?",
+        "htmlName": "no3d",
+        "description": "This is certainly possible, but not recommended. We have found through UX studies that very few users will accept the necessary camera permissions for AR if they have not yet interacted with the 3D model to see its value. Also, AR does not work reliably in all environments, so it is helpful to think of AR as a progressive enhancement over 3D on the page.",
         "links": []
       },
       {
@@ -83,6 +91,14 @@
         "description": "Both our API reference and these FAQs are designed as scrollable single pages, specifically so that the browser's find method will search everything at once. Try <code>Ctrl+F</code> and search for different keywords.",
         "links": [
           "<a href='index.html'>API Reference</a>"
+        ]
+      },
+      {
+        "name": "How do I get help?",
+        "htmlName": "help",
+        "description": "We're here to help! Please search our documentation, examples, and discussion forum. If you still can't find what you need, open a new discussion and you'll see an answer soon, often from maintainers. Please refrain from posting the same question in more than one place, and please only file an issue if you can complete the template.",
+        "links": [
+          "<a href='https://github.com/google/model-viewer/discussions'>Discussion forum</a>"
         ]
       },
       {
