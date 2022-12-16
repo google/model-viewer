@@ -113,7 +113,8 @@ hr.solid {
 
 .element {
   font-weight: normal;
-  padding-left: 20px;
+  padding-left: 30px;
+  text-indent: -10px;
 }
 
 .sidebar-mv {

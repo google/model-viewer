@@ -14,6 +14,36 @@
         "htmlName": "formats",
         "description": "&lt;model-viewer&gt; supports and plans to support only glTF/GLB 3D models. It's the Khronos standard known as the JPEG of 3D. Under the hood, three.js supports loading many different 3D file types, so it's actually fairly easy to hack in extra support and features. This is intentionally outside of the public (stable) API, but if you want to fork &lt;model-viewer&gt; for your own purposes, we can show you where to start. ",
         "links": []
+      },
+      {
+        "name": "How high is our rendering quality?",
+        "htmlName": "quality",
+        "description": "&lt;model-viewer&gt; uses three.js for rendering, which is high-quality and rapidly supports the most recent PBR glTF extensions. The advantage of glTF is that it is widely-supported with consistent rendering (assuming the render parameters are set up the same way). We track convergence of the most popular glTF renderers to demonstrate the state of the industry and to file bugs to drive further improvement; see for yourself at the following link.",
+        "links": [
+          "<a href='../fidelity'>glTF fidelity comparison</a>"
+        ]
+      },
+      {
+        "name": "Why am I getting CORS errors?",
+        "htmlName": "cors",
+        "description": "CORS is a browser security policy, Cross-Origin Resource Sharing, which by default limits scripts (like &lt;model-viewer&gt;) from fetching resources (like 3D models) from a different origin than they are served from. In order to allow this, your server that hosts your 3D models must be set up to respond with CORS headers that permit your site origin where &lt;model-viewer&gt; is used.<br/><br/>For instance, if you use an Amazon S3 bucket, you may want to go to the 'CORS' section under 'Permissions' and set: <code>[{'AllowedHeaders': ['*'], 'AllowedMethods': ['GET'], 'AllowedOrigins': ['*'], 'ExposeHeaders': []}]</code>",
+        "links": []
+      },
+      {
+        "name": "How do I optimize page load performance?",
+        "htmlName": "lighthouse",
+        "description": "&lt;model-viewer&gt; is already well-optimized by default, lazy-loading and caching 3D models automatically. Always use a seamless poster so that the loading process becomes one of progressive enhancement. For more details about fine-tuning page-load metrics, see the following link.",
+        "links": [
+          "<a href='../examples/lighthouse.html'>Lighthouse details</a>"
+        ]
+      },
+      {
+        "name": "Can I embed a 3D model in Twitter?",
+        "htmlName": "twitter",
+        "description": "Yes, &lt;model-viewer&gt; works in a Twitter player card, which will iframe the given URL into the web version of Twitter and will link to it from the mobile app version. We supply a 3D Twitter card generator to make this process easier.",
+        "links": [
+          "<a href='../examples/twitter/generator.html'>3D Twitter card generator</a>"
+        ]
       }
     ]
   }
