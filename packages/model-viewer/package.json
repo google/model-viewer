@@ -73,7 +73,7 @@
     "3d"
   ],
   "dependencies": {
-    "three": "^0.147.0",
+    "three": "^0.148.0",
     "lit": "^2.2.3"
   },
   "devDependencies": {
