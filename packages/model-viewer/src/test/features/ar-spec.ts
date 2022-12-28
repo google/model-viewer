@@ -87,6 +87,37 @@ suite('AR', () => {
       expect(search.get('link')).to.contain('http://');
       expect(search.get('link')).to.contain('/foo.html');
     });
+
+    test('strips hash params from SceneViewer model src', () => {
+      element.src =
+          'https://example.com/model.gltf#applePayButtonType=plain&checkoutTitle=TitleText';
+      element.alt = 'alt';
+      (element as any)[$openSceneViewer]();
+
+      expect(intentUrls.length).to.be.equal(1);
+
+      const search = new URLSearchParams(new URL(intentUrls[0]).search);
+      const file = new URL( search.get('file') as any );
+      
+      expect(file.hash).to.equal('');
+    });
+
+    test('strips hash params but preserves query params', () => {
+      element.src =
+          'https://example.com/model.gltf?link=http://linkme.com&title=bar#applePayButtonType=plain&checkoutTitle=TitleText';
+      element.alt = 'alt';
+      (element as any)[$openSceneViewer]();
+
+      expect(intentUrls.length).to.be.equal(1);
+
+      const search = new URLSearchParams(new URL(intentUrls[0]).search);
+      const file = new URL( search.get('file') as any );
+      
+      expect(file.hash).to.equal('');
+      expect(search.get('title')).to.equal('bar');
+      expect(search.get('link')).to.equal('http://linkme.com/');
+    });
+
   });
 
   suite('openQuickLook', () => {
