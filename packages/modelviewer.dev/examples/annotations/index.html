@@ -48,7 +48,7 @@
       <div id="addHotspots" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <h4 id="intro"><span class="font-medium">Annotations. </span></h4>
+          <h4><span class="font-medium">Annotations. </span></h4>
           <p>
             Use &lt;model-viewer&gt; to make your models interactive.
             This page showcases how you can add hotspots to your scene. Child elements are hotspots if their slot begins with "hotspot".
@@ -125,7 +125,7 @@
       <div id="dimensions" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <h4 id="intro"><span class="font-medium">Show Dimensions. </span></h4>
+          <h4><span class="font-medium">Show Dimensions. </span></h4>
           <p>
             Hotspots don't have to be on the model; they can be at arbitrary
             points in 3D space. Here we demonstrate using hotspots to show a
@@ -160,7 +160,7 @@
   <button slot="hotspot-dot-X-Y-Z" class="dot" data-position="-1 -1 -1" data-normal="-1 0 0"></button>
   <button slot="hotspot-dim-X-Y" class="dim" data-position="-1 -1 0" data-normal="-1 0 0"></button>
   <button slot="hotspot-dot-X-Y+Z" class="dot" data-position="-1 -1 1" data-normal="-1 0 0"></button>
-  <svg id="lines" xmlns="http://www.w3.org/2000/svg" class="dimensionLineContainer">
+  <svg id="lines" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="dimensionLineContainer">
     <line class="dimensionLine"></line>
     <line class="dimensionLine"></line>
     <line class="dimensionLine"></line>
@@ -359,8 +359,6 @@
     pointer-events: none;
     position: fixed;
     display: block;
-    width: 100%;
-    height: 100%; 
   }
 
   .dimensionLine{
@@ -391,7 +389,7 @@
       <div id="cameraViews" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <h4 id="intro"><span class="font-medium">Camera Views. </span></h4>
+          <h4><span class="font-medium">Camera Views. </span></h4>
           <p>
             Hotspots can contain additional data attributes and can be interactive. This example attaches click events to hotspots to move the camera.
           </p>
