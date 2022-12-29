@@ -22,7 +22,7 @@ import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
 import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
-import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
+import {ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {Path, timeline, TimingFunction} from '../utilities/animation.js';
 
@@ -204,7 +204,6 @@ const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCameraForRadius = Symbol('updateCameraForRadius');
 
-const $onChange = Symbol('onChange');
 const $onPointerChange = Symbol('onPointerChange');
 
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
@@ -440,8 +439,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.connectedCallback();
 
       this[$controls].addEventListener(
-          'change', this[$onChange] as (event: Event) => void);
-      this[$controls].addEventListener(
           'pointer-change-start',
           this[$onPointerChange] as (event: Event) => void);
       this[$controls].addEventListener(
@@ -452,8 +449,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     disconnectedCallback() {
       super.disconnectedCallback();
 
-      this[$controls].removeEventListener(
-          'change', this[$onChange] as (event: Event) => void);
       this[$controls].removeEventListener(
           'pointer-change-start',
           this[$onPointerChange] as (event: Event) => void);
@@ -751,9 +746,21 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-      controls.update(time, delta);
-      if (scene.updateTarget(delta)) {
-        this[$onChange]({type: 'change', source: controls.changeSource});
+      const cameraMoved = controls.update(time, delta);
+      const targetMoved = scene.updateTarget(delta);
+
+      if (cameraMoved || targetMoved) {
+        this[$updateAria]();
+        this[$needsRender]();
+        const source = controls.changeSource;
+
+        if (source === ChangeSource.USER_INTERACTION) {
+          this[$userHasInteracted] = true;
+          this[$deferInteractionPrompt]();
+        }
+
+        this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+            'camera-change', {detail: {source}}));
       }
     }
 
@@ -837,19 +844,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.requestUpdate('cameraTarget', this.cameraTarget);
       this.jumpCameraToGoal();
     }
-
-    [$onChange] = ({source}: ChangeEvent) => {
-      this[$updateAria]();
-      this[$needsRender]();
-
-      if (source === ChangeSource.USER_INTERACTION) {
-        this[$userHasInteracted] = true;
-        this[$deferInteractionPrompt]();
-      }
-
-      this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
-          'camera-change', {detail: {source}}));
-    };
 
     [$onPointerChange] = (event: PointerChangeEvent) => {
       if (event.type === 'pointer-change-start') {
