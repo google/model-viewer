@@ -297,17 +297,16 @@
 
     const lines = modelViewer.querySelectorAll('line');
 
-    // use requestAnimationFrame to update with renderer
-    const startSVGRenderLoop = () => {
+    const renderSVG = () => {
       drawLine(lines[0], modelViewer.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Y'));
       drawLine(lines[1], modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Z'));
       drawLine(lines[2], modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X+Y-Z')); // always visible
       drawLine(lines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
       drawLine(lines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
-      requestAnimationFrame(startSVGRenderLoop);
     };
 
-    startSVGRenderLoop();
+    modelViewer.addEventListener('camera-change', renderSVG);
+    renderSVG();
   });
 </script>
 <style>
@@ -364,7 +363,13 @@
   .dimensionLine{
     stroke: #16a5e6;
     stroke-width: 2;
-    stroke-dasharray: 2
+    stroke-dasharray: 2;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    transform:translate3d(0,0,0);
+    -webkit-transform:translate3d(0,0,0);
   }
 
   .show{
