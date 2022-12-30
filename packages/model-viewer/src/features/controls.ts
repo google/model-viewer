@@ -204,6 +204,7 @@ const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCameraForRadius = Symbol('updateCameraForRadius');
 
+const $onChange = Symbol('onChange');
 const $onPointerChange = Symbol('onPointerChange');
 
 const $waitingToPromptUser = Symbol('waitingToPromptUser');
@@ -524,6 +525,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         Promise.resolve().then(() => {
           controls.jumpToGoal();
           scene.jumpToGoal();
+          this[$onChange]();
           this[$jumpCamera] = false;
         });
       }
@@ -750,17 +752,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const targetMoved = scene.updateTarget(delta);
 
       if (cameraMoved || targetMoved) {
-        this[$updateAria]();
-        this[$needsRender]();
-        const source = controls.changeSource;
-
-        if (source === ChangeSource.USER_INTERACTION) {
-          this[$userHasInteracted] = true;
-          this[$deferInteractionPrompt]();
-        }
-
-        this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
-            'camera-change', {detail: {source}}));
+        this[$onChange]();
       }
     }
 
@@ -844,6 +836,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.requestUpdate('cameraTarget', this.cameraTarget);
       this.jumpCameraToGoal();
     }
+
+    [$onChange] = () => {
+      this[$updateAria]();
+      this[$needsRender]();
+      const source = this[$controls].changeSource;
+
+      if (source === ChangeSource.USER_INTERACTION) {
+        this[$userHasInteracted] = true;
+        this[$deferInteractionPrompt]();
+      }
+
+      this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+          'camera-change', {detail: {source}}));
+    };
 
     [$onPointerChange] = (event: PointerChangeEvent) => {
       if (event.type === 'pointer-change-start') {

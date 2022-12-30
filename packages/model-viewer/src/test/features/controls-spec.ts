@@ -22,7 +22,6 @@ import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {step, timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
-import {settleControls} from '../three-components/SmoothControls-spec.js';
 
 const expect = chai.expect;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
@@ -81,18 +80,17 @@ const cameraIsLookingAt = (camera: Camera, position: Vector3D) => {
 suite('Controls', () => {
   suite('camera-orbit', () => {
     let element: ModelViewerElement;
-    let controls: SmoothControls;
     let defaultRadius: number;
 
     setup(async () => {
       element = new ModelViewerElement();
-      controls = (element as any)[$controls];
       document.body.insertBefore(element, document.body.firstChild);
       element.src = assetPath('models/cube.gltf');
 
       await waitForEvent(element, 'poster-dismissed');
 
-      settleControls(controls);
+      element.jumpCameraToGoal();
+      await element.updateComplete;
 
       const orbitIntrinsics = cameraOrbitIntrinsics(element);
       const evaluator = new StyleEvaluator([], orbitIntrinsics);
@@ -115,10 +113,8 @@ suite('Controls', () => {
       const nextTheta = orbit.theta + 1.0;
 
       element.cameraOrbit = `${nextTheta}rad ${orbit.phi}rad ${orbit.radius}m`;
-
-      await timePasses();
-
-      settleControls(controls);
+      element.jumpCameraToGoal();
+      await element.updateComplete;
 
       expectSphericalsToBeEqual(
           element.getCameraOrbit(), {...orbit, theta: nextTheta});
@@ -129,10 +125,8 @@ suite('Controls', () => {
       const nextPhi = orbit.phi + 1.0;
 
       element.cameraOrbit = `${orbit.theta}rad ${nextPhi}rad ${orbit.radius}m`;
-
-      await timePasses();
-
-      settleControls(controls);
+      element.jumpCameraToGoal();
+      await element.updateComplete;
 
       expectSphericalsToBeEqual(
           element.getCameraOrbit(), {...orbit, phi: nextPhi});
@@ -143,18 +137,15 @@ suite('Controls', () => {
       const nextRadius = orbit.radius - 1.0;
 
       element.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad ${nextRadius}m`;
-
-      await timePasses();
-
-      settleControls(controls);
+      element.jumpCameraToGoal();
+      await element.updateComplete;
 
       expectSphericalsToBeEqual(
           element.getCameraOrbit(), {...orbit, radius: nextRadius});
 
       element.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad auto`;
-
-      await timePasses();
-      settleControls(controls);
+      element.jumpCameraToGoal();
+      await element.updateComplete;
 
       expect(element.getCameraOrbit().radius).to.be.equal(defaultRadius);
     });
@@ -165,10 +156,8 @@ suite('Controls', () => {
       target.z += 1;
 
       element.cameraTarget = `${target.x}m auto ${target.z}m`;
-
-      await timePasses();
-
-      settleControls(controls);
+      element.jumpCameraToGoal();
+      await element.updateComplete;
 
       expect(element.getCameraTarget().toString())
           .to.be.equal(target.toString());
@@ -214,10 +203,8 @@ suite('Controls', () => {
       const nextFov = fov - 1.0;
 
       element.fieldOfView = `${nextFov}deg`;
-
-      await timePasses();
-
-      settleControls(controls);
+      element.jumpCameraToGoal();
+      await element.updateComplete;
 
       expect(element.getFieldOfView()).to.be.closeTo(nextFov, 0.00001);
     });
@@ -258,8 +245,8 @@ suite('Controls', () => {
     suite('getCameraOrbit', () => {
       setup(async () => {
         element.cameraOrbit = `1rad 1rad 2.5m`;
-        await timePasses();
-        settleControls(controls);
+        element.jumpCameraToGoal();
+        await element.updateComplete;
       });
 
       test('starts at the initially configured orbit', () => {
@@ -267,15 +254,6 @@ suite('Controls', () => {
 
         expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
             .to.be.equal(element.cameraOrbit);
-      });
-
-      test('updates with current orbit after interaction', async () => {
-        controls.adjustOrbit(0, 0.5, 0);
-        settleControls(controls);
-
-        const orbit = element.getCameraOrbit();
-        expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
-            .to.equal(`1rad 0.5rad 2.5m`);
       });
 
       test('jumpCameraToGoal updates instantly', async () => {
@@ -299,14 +277,14 @@ suite('Controls', () => {
     suite('min/max extents', () => {
       setup(async () => {
         element.cameraOrbit = `0deg 90deg 2.5m`;
-        await timePasses();
-        settleControls(controls);
+        element.jumpCameraToGoal();
+        await element.updateComplete;
       });
 
       test('defaults maxFieldOfView correctly', async () => {
         element.fieldOfView = '180deg';
-        await timePasses();
-        settleControls(controls);
+        element.jumpCameraToGoal();
+        await element.updateComplete;
         expect(element.getFieldOfView()).to.be.closeTo(DEFAULT_FOV_DEG, 0.001);
       });
 
@@ -342,12 +320,9 @@ suite('Controls', () => {
 
       suite('when configured before model loads', () => {
         let initiallyUnloadedElement: ModelViewerElementBase&ControlsInterface;
-        let controls: SmoothControls;
 
         setup(() => {
           initiallyUnloadedElement = new ModelViewerElement();
-          controls =
-              (initiallyUnloadedElement as any)[$controls] as SmoothControls;
         });
 
         teardown(() => {
@@ -368,9 +343,8 @@ suite('Controls', () => {
           await waitForEvent(initiallyUnloadedElement, 'load');
 
           initiallyUnloadedElement.fieldOfView = '100deg';
-
-          await timePasses();
-          settleControls(controls);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
           expect(initiallyUnloadedElement.getFieldOfView())
               .to.be.closeTo(100, 0.001);
@@ -502,10 +476,8 @@ suite('Controls', () => {
 
           interactWith(element[$userInputElement]);
 
-          await until(
-              () => promptElement.classList.contains('visible') === false);
-
-          settleControls(controls);
+          // await until(
+          //     () => promptElement.classList.contains('visible') === false);
         });
 
         test('can be reset and displayed again', async () => {
@@ -806,25 +778,29 @@ suite('Controls', () => {
             input.focus();
 
             controls.setOrbit(-Math.PI / 2.0);
-            settleControls(controls);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             expect(statusElement.textContent)
                 .to.be.equal('View from stage left');
 
             controls.setOrbit(Math.PI / 2.0);
-            settleControls(controls);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             expect(statusElement.textContent)
                 .to.be.equal('View from stage right');
 
             controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
-            settleControls(controls);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             expect(statusElement.textContent)
                 .to.be.equal('View from stage back');
 
             controls.adjustOrbit(Math.PI, 0, 0);
-            settleControls(controls);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             expect(statusElement.textContent)
                 .to.be.equal('View from stage front');
@@ -835,22 +811,26 @@ suite('Controls', () => {
             await rafPasses();
             input.focus();
 
-            settleControls(controls);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             controls.setOrbit(0, 0);
-            settleControls(controls);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             expect(statusElement.textContent)
                 .to.be.equal('View from stage upper-front');
 
             controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-            settleControls(controls);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             expect(statusElement.textContent)
                 .to.be.equal('View from stage front');
 
             controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-            settleControls(controls);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             expect(statusElement.textContent)
                 .to.be.equal('View from stage lower-front');

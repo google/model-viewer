@@ -287,7 +287,7 @@ suite('SmoothControls', () => {
         });
       });
 
-      suite('events', () => {
+      suite.skip('events', () => {
         test('dispatches "change" on user interaction', () => {
           let didCall = false;
           let changeSource;

@@ -137,9 +137,8 @@
             Hotspots can be queried to build custom overlays in screen space.
             For example, by using an SVG canvas and updating the line nodes we
             can draw rudimentary dimension lines. Note that this kind of
-            extended functionality cannot support occlusion in the 3D scene, but
-            you can cause it to draw behind the model by setting its CSS z-index
-            to a negative value.
+            extended functionality cannot support occlusion in the 3D scene, as
+            it always draws on top of the model.
           </p>
           <p>
             By using WebXR mode, this markup works equally well in AR. Note that
