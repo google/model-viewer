@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Event as ThreeEvent, EventDispatcher, WebGLRenderer} from 'three';
+import {Event as ThreeEvent, EventDispatcher, Texture, WebGLRenderer} from 'three';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
@@ -31,6 +31,8 @@ export interface PreloadEvent extends ThreeEvent {
   element: ModelViewerElementBase;
   src: String;
 }
+
+(Texture as any).DEFAULT_ANISOTROPY = 4;
 
 /**
  * A helper to Promise-ify a Three.js GLTFLoader
