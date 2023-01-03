@@ -694,6 +694,10 @@ export class SmoothControls extends EventDispatcher {
       this.changeSource = ChangeSource.USER_INTERACTION;
       this.onMouseDown(event);
     }
+
+    if (this.changeSource === ChangeSource.USER_INTERACTION) {
+      this.dispatchEvent({type: 'user-interaction'});
+    }
   };
 
   private onPointerMove = (event: PointerEvent) => {
@@ -809,6 +813,7 @@ export class SmoothControls extends EventDispatcher {
     this.userAdjustOrbit(0, 0, deltaZoom);
 
     event.preventDefault();
+    this.dispatchEvent({type: 'user-interaction'});
   };
 
   private onKeyDown = (event: KeyboardEvent) => {
@@ -824,6 +829,7 @@ export class SmoothControls extends EventDispatcher {
 
     if (relevantKey) {
       event.preventDefault();
+      this.dispatchEvent({type: 'user-interaction'});
     } else {
       this.changeSource = changeSource;
     }

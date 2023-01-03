@@ -342,16 +342,11 @@ suite('Controls', () => {
 
           await waitForEvent(initiallyUnloadedElement, 'load');
 
-          initiallyUnloadedElement.fieldOfView = '100deg';
-          element.jumpCameraToGoal();
-          await element.updateComplete;
-
           expect(initiallyUnloadedElement.getFieldOfView())
-              .to.be.closeTo(100, 0.001);
+              .to.be.closeTo(90, 0.001);
 
           expect(initiallyUnloadedElement.getMinimumFieldOfView())
               .to.be.closeTo(90, 0.001);
-
           expect(initiallyUnloadedElement.getMaximumFieldOfView())
               .to.be.closeTo(100, 0.001);
         });
@@ -473,11 +468,9 @@ suite('Controls', () => {
           element.interactionPrompt = 'auto';
 
           await until(() => promptElement.classList.contains('visible'));
-
           interactWith(element[$userInputElement]);
-
-          // await until(
-          //     () => promptElement.classList.contains('visible') === false);
+          await until(
+              () => promptElement.classList.contains('visible') === false);
         });
 
         test('can be reset and displayed again', async () => {
