@@ -436,10 +436,7 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ClearCoatTest/glTF/ClearCoatTest.gltf",
       "orbit": {
         "radius": 20
-      },
-      "exclude": [
-        "three-gpu-pathtracer"
-      ]
+      }
     },
     {
       "name": "khronos-NormalTangentMirrorTest",

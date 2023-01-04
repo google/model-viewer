@@ -14,11 +14,13 @@
  */
 
 import {PathTracingRenderer, PathTracingSceneGenerator, PhysicalPathTracingMaterial} from 'three-gpu-pathtracer';
-import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3} from 'three';
+import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3, Object3D, Mesh, BufferAttribute} from 'three';
 import {FullScreenQuad} from 'three/examples/jsm/postprocessing/Pass';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import * as MikkTSpace from 'three/examples/jsm/libs/mikktspace.module';
 
 import {css, html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
@@ -117,6 +119,27 @@ export class ThreePathTracerViewer extends LitElement {
     const hdr = await new RGBELoader().loadAsync(lighting);
     const gltf = await new GLTFLoader().loadAsync(model);
     gltf.scene.updateMatrixWorld(true);
+
+    // generate tangents if they're not present
+    await MikkTSpace.ready;
+    gltf.scene.traverse((c:Object3D) => {
+      if (c instanceof Mesh) {
+        if (!c.geometry.hasAttribute('normal')) {
+          c.geometry.computeVertexNormals();
+        }
+
+        if (!c.geometry.attributes.tangent) {
+          if (c.geometry.hasAttribute('uv')) {
+            BufferGeometryUtils.computeMikkTSpaceTangents(c.geometry, MikkTSpace);
+          } else {
+            c.geometry.setAttribute(
+              'tangent',
+              new BufferAttribute(new Float32Array(c.geometry.attributes.position.count * 4), 4, false),
+            );
+          }
+        }
+      }
+    });
 
     // scale the scene to avoid floating point issues
     const box = new Box3();
