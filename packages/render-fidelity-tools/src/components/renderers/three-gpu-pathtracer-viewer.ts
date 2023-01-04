@@ -108,7 +108,7 @@ export class ThreePathTracerViewer extends LitElement {
     const ptMaterial = pathtracer.material;
     const controls = this[$controls];
 
-    pathtracer.tiles.set(3, 3);
+    pathtracer.tiles.set(2, 2);
     renderer.setClearColor(0xffffff, 0);
     renderer.setAnimationLoop(null);
     renderer.clear();
