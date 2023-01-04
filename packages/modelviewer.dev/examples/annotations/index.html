@@ -333,7 +333,7 @@
     color: rgba(0, 0, 0, 0.8);
     display: block;
     font-family: Futura, Helvetica Neue, sans-serif;
-    font-size: 18px;
+    font-size: 1em;
     font-weight: 700;
     max-width: 128px;
     overflow-wrap: break-word;
@@ -344,6 +344,12 @@
     transform: translate3d(-50%, -50%, 0);
     pointer-events: none;
     --min-hotspot-opacity: 0;
+  }
+
+  @media only screen and (max-width: 800px) {
+    .dim{
+      font-size: 3vw;
+    }
   }
 
   .dimensionLineContainer{
