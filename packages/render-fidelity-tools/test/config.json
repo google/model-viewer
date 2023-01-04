@@ -234,7 +234,8 @@
         "radius": 0.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -249,7 +250,8 @@
       },
       "exclude": [
         "model-viewer",
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -308,7 +310,8 @@
       "exclude": [
         "stellar",
         "babylon",
-        "gltf-sample-viewer"
+        "gltf-sample-viewer",
+        "three-gpu-pathtracer"
       ],
       "renderSkybox": true
     },
@@ -384,7 +387,10 @@
       },
       "dimensions": {
         "height": 700
-      }
+      },
+      "exclude": [
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-TransmissionRoughnessTest",
@@ -430,7 +436,10 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ClearCoatTest/glTF/ClearCoatTest.gltf",
       "orbit": {
         "radius": 20
-      }
+      },
+      "exclude": [
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-NormalTangentMirrorTest",
@@ -439,7 +448,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -449,7 +459,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -582,7 +593,8 @@
         "y": -0.28
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -737,7 +749,8 @@
         "radius": 1.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -761,7 +774,8 @@
         "radius": 2.38
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -813,7 +827,8 @@
         "width": 400
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -851,7 +866,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -881,7 +897,8 @@
         "radius": 3
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -895,7 +912,8 @@
         "radius": 3.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -909,7 +927,8 @@
         "radius": 9
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -953,7 +972,8 @@
         "radius": 1.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -967,7 +987,8 @@
         "radius": 1.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -977,7 +998,8 @@
         "radius": 7
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -1019,7 +1041,8 @@
         "radius": 20
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ],
       "renderSkybox": true
     }
