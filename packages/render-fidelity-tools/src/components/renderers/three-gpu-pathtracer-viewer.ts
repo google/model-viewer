@@ -18,7 +18,7 @@ import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMappi
 import {FullScreenQuad} from 'three/examples/jsm/postprocessing/Pass';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader';
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
 import {css, html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
@@ -38,12 +38,12 @@ const $controls = Symbol('controls');
 @customElement('three-gpu-pathtracer-viewer')
 export class ThreePathTracerViewer extends LitElement {
   @property({type: Object}) scenario: ScenarioConfig|null = null;
-  private[$canvas]: HTMLCanvasElement|null;
-  private[$renderer]: WebGLRenderer;
+  private[$canvas]: HTMLCanvasElement|null = null;
+  private[$renderer]!: WebGLRenderer;
   private[$pathtracer]: any;
-  private[$fsquad]: FullScreenQuad;
-  private[$camera]: PerspectiveCamera;
-  private[$controls]: OrbitControls;
+  private[$fsquad]!: FullScreenQuad;
+  private[$camera]!: PerspectiveCamera;
+  private[$controls]!: OrbitControls;
 
   updated(changedProperties: Map<string, any>) {
     super.updated(changedProperties);
@@ -108,6 +108,7 @@ export class ThreePathTracerViewer extends LitElement {
     const ptMaterial = pathtracer.material;
     const controls = this[$controls];
 
+    pathtracer.tiles.set(3, 3);
     renderer.setClearColor(0xffffff, 0);
     renderer.setAnimationLoop(null);
     renderer.clear();
@@ -124,12 +125,8 @@ export class ThreePathTracerViewer extends LitElement {
     const sphere = new Sphere();
     box.getBoundingSphere(sphere);
 
-    const multiplier = 1 / sphere.radius;
-    gltf.scene.scale.multiplyScalar(multiplier);
-    gltf.scene.updateMatrixWorld(true);
-
     // update camera
-    const radius = Math.max(orbit.radius, sphere.radius);
+    const radius = Math.max(orbit.radius, sphere.radius, 1e-5);
     camera.near = 2 * radius / 1000;
     camera.far = 2 * radius;
     camera.updateProjectionMatrix();
@@ -138,11 +135,10 @@ export class ThreePathTracerViewer extends LitElement {
     camera.position.x += target.x;
     camera.position.y += target.y;
     camera.position.z += target.z;
-    camera.position.multiplyScalar(multiplier);
     camera.fov = verticalFoV;
     camera.updateProjectionMatrix();
 
-    controls.target.set(target.x, target.y, target.z).multiplyScalar(multiplier);
+    controls.target.set(target.x, target.y, target.z);
     controls.update();
 
     // process assets
@@ -152,9 +148,12 @@ export class ThreePathTracerViewer extends LitElement {
 
     // update bvh and geometry info
     ptMaterial.bvh.updateFrom(bvh);
-    ptMaterial.normalAttribute.updateFrom(geometry.attributes.normal);
-    ptMaterial.tangentAttribute.updateFrom(geometry.attributes.tangent);
-    ptMaterial.uvAttribute.updateFrom(geometry.attributes.uv);
+    ptMaterial.attributesArray.updateFrom(
+      geometry.attributes.normal,
+      geometry.attributes.tangent,
+      geometry.attributes.uv,
+      geometry.attributes.color,
+    );
     ptMaterial.filterGlossyFactor = 0.5;
     ptMaterial.bounces = 8;
     ptMaterial.backgroundAlpha = renderSkybox ? 1 : 0;
