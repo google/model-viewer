@@ -137,9 +137,8 @@
             Hotspots can be queried to build custom overlays in screen space.
             For example, by using an SVG canvas and updating the line nodes we
             can draw rudimentary dimension lines. Note that this kind of
-            extended functionality cannot support occlusion in the 3D scene, but
-            you can cause it to draw behind the model by setting its CSS z-index
-            to a negative value.
+            extended functionality cannot support occlusion in the 3D scene, as
+            it always draws on top of the model.
           </p>
           <p>
             By using WebXR mode, this markup works equally well in AR. Note that
@@ -153,9 +152,9 @@
   <button slot="hotspot-dim+X-Y" class="dim" data-position="1 -1 0" data-normal="1 0 0"></button>
   <button slot="hotspot-dot+X-Y-Z" class="dot" data-position="1 -1 -1" data-normal="1 0 0"></button>
   <button slot="hotspot-dim+X-Z" class="dim" data-position="1 0 -1" data-normal="1 0 0"></button>
-  <button slot="hotspot-dot+X+Y-Z" class="dot show" data-position="1 1 -1" data-normal="0 1 0"></button>
-  <button slot="hotspot-dim+Y-Z" class="dim show" data-position="0 -1 -1" data-normal="0 1 0"></button>
-  <button slot="hotspot-dot-X+Y-Z" class="dot show" data-position="-1 1 -1" data-normal="0 1 0"></button>
+  <button slot="hotspot-dot+X+Y-Z" class="dot" data-position="1 1 -1" data-normal="0 1 0"></button>
+  <button slot="hotspot-dim+Y-Z" class="dim" data-position="0 -1 -1" data-normal="0 1 0"></button>
+  <button slot="hotspot-dot-X+Y-Z" class="dot" data-position="-1 1 -1" data-normal="0 1 0"></button>
   <button slot="hotspot-dim-X-Z" class="dim" data-position="-1 0 -1" data-normal="-1 0 0"></button>
   <button slot="hotspot-dot-X-Y-Z" class="dot" data-position="-1 -1 -1" data-normal="-1 0 0"></button>
   <button slot="hotspot-dim-X-Y" class="dim" data-position="-1 -1 0" data-normal="-1 0 0"></button>
@@ -205,6 +204,36 @@
     });
   });
 
+  // update svg
+  function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
+    if (dotHotspot1 && dotHotspot1) {
+      svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
+      svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
+      svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
+      svgLine.setAttribute('y2', dotHotspot2.canvasPosition.y);
+
+      // use provided optional hotspot to tie visibility of this svg line to
+      if (dimensionHotspot && !dimensionHotspot.facingCamera) {
+        svgLine.classList.add('hide');
+      }
+      else {
+        svgLine.classList.remove('hide');
+      }
+    }
+  }
+
+  const lines = modelViewer.querySelectorAll('line');
+
+  const renderSVG = () => {
+    drawLine(lines[0], modelViewer.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Y'));
+    drawLine(lines[1], modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Z'));
+    drawLine(lines[2], modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X+Y-Z')); // always visible
+    drawLine(lines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
+    drawLine(lines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
+  };
+
+  modelViewer.addEventListener('camera-change', renderSVG);
+
   modelViewer.addEventListener('load', () => {
     const center = modelViewer.getBoundingBoxCenter();
     const size = modelViewer.getDimensions();
@@ -219,7 +248,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim+X-Y',
-      position: `${center.x + x2} ${center.y - y2} ${center.z}`
+      position: `${center.x + x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent =
         `${(size.z * 100).toFixed(0)} cm`;
@@ -231,7 +260,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim+X-Z',
-      position: `${center.x + x2} ${center.y} ${center.z - z2}`
+      position: `${center.x + x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent =
         `${(size.y * 100).toFixed(0)} cm`;
@@ -243,7 +272,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim+Y-Z',
-      position: `${center.x} ${center.y + y2} ${center.z - z2}`
+      position: `${center.x} ${center.y + y2 * 1.1} ${center.z - z2 * 1.1}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent =
         `${(size.x * 100).toFixed(0)} cm`;
@@ -255,7 +284,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim-X-Z',
-      position: `${center.x - x2} ${center.y} ${center.z - z2}`
+      position: `${center.x - x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent =
         `${(size.y * 100).toFixed(0)} cm`;
@@ -267,7 +296,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim-X-Y',
-      position: `${center.x - x2} ${center.y - y2} ${center.z}`
+      position: `${center.x - x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent =
         `${(size.z * 100).toFixed(0)} cm`;
@@ -277,37 +306,7 @@
       position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`
     });
 
-    // update svg
-    function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
-      if (dotHotspot1 && dotHotspot1) {
-        svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
-        svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
-        svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
-        svgLine.setAttribute('y2', dotHotspot2.canvasPosition.y);
-
-        // use provided optional hotspot to tie visibility of this svg line to
-        if (dimensionHotspot && !dimensionHotspot.facingCamera) {
-          svgLine.classList.add('hide');
-        }
-        else {
-          svgLine.classList.remove('hide');
-        }
-      }
-    }
-
-    const lines = modelViewer.querySelectorAll('line');
-
-    // use requestAnimationFrame to update with renderer
-    const startSVGRenderLoop = () => {
-      drawLine(lines[0], modelViewer.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Y'));
-      drawLine(lines[1], modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Z'));
-      drawLine(lines[2], modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X+Y-Z')); // always visible
-      drawLine(lines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
-      drawLine(lines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
-      requestAnimationFrame(startSVGRenderLoop);
-    };
-
-    startSVGRenderLoop();
+    renderSVG();
   });
 </script>
 <style>
@@ -318,19 +317,11 @@
     max-width: unset;
     transform: unset;
     pointer-events: auto;
+    z-index: 100;
   }
 
   .dot{
-    display: block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: none;
-    box-sizing: border-box;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-    background: #fff;
-    pointer-events: none;
-    --min-hotspot-opacity: 0;
+    display: none;
   }
 
   .dim{
@@ -342,7 +333,7 @@
     color: rgba(0, 0, 0, 0.8);
     display: block;
     font-family: Futura, Helvetica Neue, sans-serif;
-    font-size: 18px;
+    font-size: 1em;
     font-weight: 700;
     max-width: 128px;
     overflow-wrap: break-word;
@@ -355,9 +346,14 @@
     --min-hotspot-opacity: 0;
   }
 
+  @media only screen and (max-width: 800px) {
+    .dim{
+      font-size: 3vw;
+    }
+  }
+
   .dimensionLineContainer{
     pointer-events: none;
-    position: fixed;
     display: block;
     width: 100%;
     height: 100%; 
@@ -366,11 +362,7 @@
   .dimensionLine{
     stroke: #16a5e6;
     stroke-width: 2;
-    stroke-dasharray: 2
-  }
-
-  .show{
-    --min-hotspot-opacity: 1;
+    stroke-dasharray: 2;
   }
 
   .hide{
