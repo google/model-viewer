@@ -1041,8 +1041,7 @@
         "radius": 20
       },
       "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
+        "stellar"
       ],
       "renderSkybox": true
     }
