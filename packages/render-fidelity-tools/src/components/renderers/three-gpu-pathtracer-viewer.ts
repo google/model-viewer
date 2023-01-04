@@ -129,6 +129,11 @@ export class ThreePathTracerViewer extends LitElement {
     gltf.scene.updateMatrixWorld(true);
 
     // update camera
+    const radius = Math.max(orbit.radius, sphere.radius);
+    camera.near = 2 * radius / 1000;
+    camera.far = 2 * radius;
+    camera.updateProjectionMatrix();
+
     camera.position.setFromSphericalCoords(orbit.radius, MathUtils.DEG2RAD * orbit.phi, MathUtils.DEG2RAD * orbit.theta);
     camera.position.x += target.x;
     camera.position.y += target.y;
