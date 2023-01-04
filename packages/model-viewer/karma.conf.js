@@ -127,7 +127,7 @@ module.exports = function(config) {
       'Safari (latest)': {
         base: 'BrowserStack',
         os: 'OS X',
-        os_version: 'Monterey',
+        os_version: 'Ventura',
         browser: 'safari',
         browser_version: 'latest',
       },

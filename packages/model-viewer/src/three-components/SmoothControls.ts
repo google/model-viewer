@@ -424,13 +424,13 @@ export class SmoothControls extends EventDispatcher {
   /**
    * Update controls. In most cases, this will result in the camera
    * interpolating its position and rotation until it lines up with the
-   * designated goal orbital position.
+   * designated goal orbital position. Returns false if the camera did not move.
    *
    * Time and delta are measured in milliseconds.
    */
-  update(_time: number, delta: number) {
+  update(_time: number, delta: number): boolean {
     if (this.isStationary()) {
-      return;
+      return false;
     }
     const {maximumPolarAngle, maximumRadius} = this._options;
 
@@ -454,6 +454,7 @@ export class SmoothControls extends EventDispatcher {
     this.logFov = this.fovDamper.update(this.logFov, this.goalLogFov, delta, 1);
 
     this.moveCamera();
+    return true;
   }
 
   updateTouchActionStyle() {
@@ -478,10 +479,6 @@ export class SmoothControls extends EventDispatcher {
         this.goalLogFov === this.logFov;
   }
 
-  private dispatchChange() {
-    this.dispatchEvent({type: 'change', source: this.changeSource});
-  }
-
   private moveCamera() {
     // Derive the new camera position from the updated spherical:
     this.spherical.makeSafe();
@@ -493,8 +490,6 @@ export class SmoothControls extends EventDispatcher {
       this.camera.fov = Math.exp(this.logFov);
       this.camera.updateProjectionMatrix();
     }
-
-    this.dispatchChange();
   }
 
   private userAdjustOrbit(
@@ -503,12 +498,6 @@ export class SmoothControls extends EventDispatcher {
         deltaTheta * this.orbitSensitivity * this.inputSensitivity,
         deltaPhi * this.orbitSensitivity * this.inputSensitivity,
         deltaZoom * this.inputSensitivity);
-
-    // Always make sure that an initial event is triggered in case there is
-    // contention between user interaction and imperative changes. This initial
-    // event will give external observers that chance to observe that
-    // interaction occurred at all:
-    this.dispatchChange();
   }
 
   // Wraps to between -pi and pi
@@ -615,8 +604,6 @@ export class SmoothControls extends EventDispatcher {
     target.add(dxy.applyMatrix3(this.panProjection));
     scene.boundingSphere.clampPoint(target, target);
     scene.setTarget(target.x, target.y, target.z);
-
-    this.dispatchChange();
   }
 
   private recenter(pointer: PointerEvent) {
@@ -706,6 +693,10 @@ export class SmoothControls extends EventDispatcher {
     } else {
       this.changeSource = ChangeSource.USER_INTERACTION;
       this.onMouseDown(event);
+    }
+
+    if (this.changeSource === ChangeSource.USER_INTERACTION) {
+      this.dispatchEvent({type: 'user-interaction'});
     }
   };
 
@@ -822,6 +813,7 @@ export class SmoothControls extends EventDispatcher {
     this.userAdjustOrbit(0, 0, deltaZoom);
 
     event.preventDefault();
+    this.dispatchEvent({type: 'user-interaction'});
   };
 
   private onKeyDown = (event: KeyboardEvent) => {
@@ -837,6 +829,7 @@ export class SmoothControls extends EventDispatcher {
 
     if (relevantKey) {
       event.preventDefault();
+      this.dispatchEvent({type: 'user-interaction'});
     } else {
       this.changeSource = changeSource;
     }
