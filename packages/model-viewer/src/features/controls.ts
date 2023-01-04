@@ -456,7 +456,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.disconnectedCallback();
 
       this[$controls].removeEventListener(
-          'user-interaction', this[$onChange] as (event: Event) => void);
+          'user-interaction', this[$cancelPrompts]);
       this[$controls].removeEventListener(
           'pointer-change-start',
           this[$onPointerChange] as (event: Event) => void);
