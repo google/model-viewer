@@ -23,6 +23,10 @@
       "name": "stellar",
       "description": "Dassault Systèmes STELLAR",
       "command": {}
+    },
+    {
+      "name": "three-gpu-pathtracer",
+      "description": "three.js path tracer"
     }
   ],
   "scenarios": [
