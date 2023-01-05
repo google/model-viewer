@@ -35,6 +35,7 @@
     "@types/pngjs": "^3.4.0",
     "@types/puppeteer": "^5.4.6",
     "@types/rimraf": "^3.0.1",
+    "@types/three": "^0.148.0",
     "filament": "1.12.2",
     "focus-visible": "^5.2.0",
     "http-server": "^14.1.1",
@@ -42,7 +43,9 @@
     "mkdirp": "^1.0.4",
     "pngjs": "^6.0.0",
     "puppeteer": "^18.2.1",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "three": "^0.148.0",
+    "three-gpu-pathtracer": "^0.0.10"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
