@@ -759,6 +759,40 @@ suite('Controls', () => {
         expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
         expect(newOrbit.phi).to.be.closeTo(orbit.phi, 0.001, 'phi');
       });
+
+      test('zero element size does not produce NaNs', async () => {
+        element.style.width = '0px';
+        element.style.height = '0px';
+        await rafPasses();
+
+        const finger = {
+          x: {
+            initialValue: 0.6,
+            keyframes: [
+              {frames: 1, value: 0.7},
+              {frames: 1, value: 0.6},
+            ]
+          },
+          y: {
+            // No Y change to test potential 0 / 0
+            initialValue: 0.4,
+            keyframes: [
+              {frames: 1, value: 0.4},
+              {frames: 1, value: 0.4},
+            ]
+          }
+        };
+
+        element.interact(50, finger);
+        await rafPasses();
+        await rafPasses();
+        await rafPasses();
+
+        const newOrbit = element.getCameraOrbit();
+        expect(newOrbit.theta).to.be.finite;
+        expect(newOrbit.phi).to.be.finite;
+        expect(newOrbit.radius).to.be.finite;
+      });
     });
 
     suite('a11y', () => {
