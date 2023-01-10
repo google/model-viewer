@@ -337,6 +337,10 @@ export class SmoothControls extends EventDispatcher {
       return false;
     }
 
+    if (!isFinite(nextTheta) || !isFinite(nextPhi) || !isFinite(nextRadius)) {
+      return false;
+    }
+
     this.goalSpherical.theta = nextTheta;
     this.goalSpherical.phi = nextPhi;
     this.goalSpherical.radius = nextRadius;
@@ -508,7 +512,7 @@ export class SmoothControls extends EventDispatcher {
   }
 
   private pixelLengthToSphericalAngle(pixelLength: number): number {
-    return 2 * Math.PI * pixelLength / this.element.clientHeight;
+    return 2 * Math.PI * pixelLength / this.scene.height;
   }
 
   private twoTouchDistance(touchOne: Pointer, touchTwo: Pointer): number {
