@@ -27,7 +27,7 @@ import {clamp, debounce} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
-const CLEAR_MODEL_TIMEOUT_MS = 1000;
+const CLEAR_MODEL_TIMEOUT_MS = 10;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
 const UNSIZED_MEDIA_WIDTH = 300;
