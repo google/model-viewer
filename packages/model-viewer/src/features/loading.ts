@@ -318,7 +318,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     connectedCallback() {
       super.connectedCallback();
 
-      this.showPoster();
+      if (!this.loaded) {
+        this.showPoster();
+      }
 
       this[$progressTracker].addEventListener('progress', this[$onProgress]);
     }
