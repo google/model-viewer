@@ -93,8 +93,8 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       console.warn(`Material ${gltfMaterial.name} uses a deprecated extension
           "KHR_materials_pbrSpecularGlossiness", please use
           "pbrMetallicRoughness" instead. Specular Glossiness materials are
-          currently supported for rendering, but not for our scene-graph API,
-          nor for auto-generation of USDZ for Quick Look.`);
+          no longer supported; to convert to metal-rough, see 
+          https://www.donmccurdy.com/2022/11/28/converting-gltf-pbr-materials-from-specgloss-to-metalrough/.`);
     }
 
     if (gltfMaterial.pbrMetallicRoughness == null) {

@@ -14,7 +14,8 @@
 .method-name,
 .staticMethod-name,
 .event-name,
-.slot-name {
+.slot-name,
+.question-name {
   padding: 10px 20px 10px 20px;
   margin: 10px 0 20px 0;
   background-color: #ececec;
@@ -28,7 +29,8 @@
 .method-definition,
 .staticMethod-definition,
 .event-definition,
-.slot-definition {
+.slot-definition,
+.question-definition {
   margin: 0 0 20px 20px;
 }
 
@@ -44,7 +46,8 @@
 .method-container,
 .staticMethod-container,
 .event-container,
-.slot-container {
+.slot-container,
+.question-container {
   padding-bottom: 20px;
 }
 
@@ -110,7 +113,8 @@ hr.solid {
 
 .element {
   font-weight: normal;
-  padding-left: 20px;
+  padding-left: 30px;
+  text-indent: -10px;
 }
 
 .sidebar-mv {
