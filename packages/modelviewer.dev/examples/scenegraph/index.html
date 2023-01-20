@@ -25,6 +25,14 @@
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
 
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../../node_modules/@google/model-viewer/dist/model-viewer.js"
+      }
+    }
+  </script>
+
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
@@ -467,6 +475,99 @@ modelViewerTexture1.addEventListener("load", () => {
       </div>
     </div>
 
+    <div class="sample">
+      <div id="animatedTexturesExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Create animated textures</h2>
+            <p>Though video textures are not part of the glTF spec yet, you can
+            create them and add them to your model after it loads. Video
+            elements, Canvas elements, and Lottie animations are all
+            supported.</p>
+            <p>For Lottie animations, an import map is required, pointing
+            "three" to the model-viewer library file you are loading, since
+            three.js is contained in the model-viewer bundle. Unfortunately this
+            cannot be done by our library automatically because the import map
+            must be specified before any libraries load. Put something like this
+            in your page's head:</p>
+            <pre><code>
+&lt;script type="importmap"&gt;
+{
+  "imports": {
+    "three": "../../node_modules/@google/model-viewer/dist/model-viewer.js"
+  }
+}
+&lt;/script&gt;
+            </code></pre>
+          </div>
+          <example-snippet stamp-to="animatedTexturesExample" highlight-as="html">
+            <template>
+<model-viewer id="animated" camera-controls touch-action="pan-y" src="../../shared-assets/models/sphere.glb" ar alt="A 3D model of a duck">
+  <div class="controls">
+    <p>Texture Type</p>
+    <select id="type">
+      <option value="video">Video</option>
+      <option value="canvas">Canvas</option>
+      <option value="lottie">Lottie</option>
+    </select>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerAnimated = document.querySelector("model-viewer#animated");
+
+const videoTexture = modelViewerAnimated.createVideoTexture("../../shared-assets/models/lottie-logo.mp4");
+let canvasTexture = null;
+let lottieTexture = null;
+
+function getCanvasTexture() {
+  if(canvasTexture) return canvasTexture;
+  canvasTexture = modelViewerAnimated.createCanvasTexture();
+  const canvas = canvasTexture.source.element;
+  canvas.width = 1600;
+  canvas.height = 800;
+  const ctx = canvas.getContext('2d');
+  ctx.font = "250px sans-serif";
+  ctx.fillStyle = "#aaa";
+  ctx.fillText('Canvas 2D!', 0, 400);
+  canvasTexture.source.update();
+  return canvasTexture;
+}
+
+function getLottieTexture() {
+  if(lottieTexture) return lottieTexture;
+  lottieTexture = modelViewerAnimated.createLottieTexture("../../shared-assets/models/24017-lottie-logo-animation.json", 2);
+  return lottieTexture;
+}
+
+modelViewerAnimated.addEventListener("load", () => {
+
+  const material = modelViewerAnimated.model.materials[0];
+  const {baseColorTexture} = material.pbrMetallicRoughness;
+
+  baseColorTexture.setTexture(videoTexture);
+
+  document.querySelector('#type').addEventListener('input', async (event) => {
+    switch(event.target.value){
+      case "video":
+        baseColorTexture.setTexture(videoTexture);
+        break;
+      case "canvas":
+        baseColorTexture.setTexture(getCanvasTexture());
+        break;
+      case "lottie":
+        baseColorTexture.setTexture(await getLottieTexture());
+        break;
+    }
+  });
+});
+
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
 
     <div class="sample">
       <div id="pickMaterialExample" class="demo"></div>
@@ -594,12 +695,24 @@ interface Image {
   // The bufferView of the image, if it is embedded.
   readonly bufferView?: number
 
+  // The backing HTML element, if this is a video or canvas texture.
+  readonly element?: HTMLVideoElement|HTMLCanvasElement;
+
+  // The Lottie animation object, if this is a Lottie texture.
+  readonly animation?: AnimationItem;
+
   /**
     * A method to create an object URL of this image at the desired
     * resolution. Especially useful for KTX2 textures which are GPU compressed,
     * and so are unreadable on the CPU without a method like this.
     */
   createThumbnail(width: number, height: number): Promise<string>;
+
+  /**
+   * Only applies to canvas textures. Call when the content of the canvas has
+   * been updated and should be reflected in the model.
+   */
+  update(): void;
 }
 
 type RGBA = [number, number, number, number];
