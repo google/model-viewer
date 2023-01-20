@@ -1075,7 +1075,7 @@
       {
         "name": "createLottieTexture(uri, quality?)",
         "htmlName": "createLottieTexture",
-        "description": "Async method that returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The uri to the lottie json is required, while the quality defaults to 1 (resolution specified in the file). The Lottie animation created is available through <code>texture.source.animation</code> for controlling playback. The Lottie canvas module is lazy-loaded like the DRACO decoder and if you don't like our default CDN, you can specify your own location using <a href=\"./#entrydocs-loading-staticProperties-lottieLoaderLocation\">lottieLoaderLocation</a>.",
+        "description": "Async method that returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The uri to the lottie json is required, while the quality defaults to 1 (resolution specified in the file). The Lottie animation created is available through <code>texture.source.animation</code> for controlling playback. The Lottie canvas module is lazy-loaded like the DRACO decoder and if you don't like our default CDN, you can specify your own location using <a href=\"./#entrydocs-loading-staticProperties-lottieLoaderLocation\">lottieLoaderLocation</a>. Note that an import map is required mapping 'three' to your model-viewer library file in order to load a Lottie, follow the link below for an example.",
         "links": [
           "<a href=\"../examples/scenegraph/#animatedTexturesExample\">Create animated textures example</a>"
         ]
