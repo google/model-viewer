@@ -22,7 +22,7 @@ import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
 import {DECAY_MILLISECONDS} from '../three-components/Damper.js';
-import {ChangeEvent, ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
+import {ChangeSource, PointerChangeEvent, SmoothControls} from '../three-components/SmoothControls.js';
 import {Constructor} from '../utilities.js';
 import {Path, timeline, TimingFunction} from '../utilities/animation.js';
 
@@ -204,6 +204,7 @@ const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $updateCameraForRadius = Symbol('updateCameraForRadius');
 
+const $cancelPrompts = Symbol('cancelPrompts');
 const $onChange = Symbol('onChange');
 const $onPointerChange = Symbol('onPointerChange');
 
@@ -211,6 +212,7 @@ const $waitingToPromptUser = Symbol('waitingToPromptUser');
 const $userHasInteracted = Symbol('userHasInteracted');
 const $promptElementVisibleTime = Symbol('promptElementVisibleTime');
 const $lastPromptOffset = Symbol('lastPromptOffset');
+const $cancellationSource = Symbol('cancellationSource');
 
 const $lastSpherical = Symbol('lastSpherical');
 const $jumpCamera = Symbol('jumpCamera');
@@ -364,6 +366,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$promptElementVisibleTime] = Infinity;
     protected[$userHasInteracted] = false;
     protected[$waitingToPromptUser] = false;
+    protected[$cancellationSource] = ChangeSource.AUTOMATIC;
 
     protected[$controls] = new SmoothControls(
         this[$scene].camera as PerspectiveCamera, this[$userInputElement],
@@ -440,7 +443,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.connectedCallback();
 
       this[$controls].addEventListener(
-          'change', this[$onChange] as (event: Event) => void);
+          'user-interaction', this[$cancelPrompts]);
       this[$controls].addEventListener(
           'pointer-change-start',
           this[$onPointerChange] as (event: Event) => void);
@@ -453,7 +456,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.disconnectedCallback();
 
       this[$controls].removeEventListener(
-          'change', this[$onChange] as (event: Event) => void);
+          'user-interaction', this[$cancelPrompts]);
       this[$controls].removeEventListener(
           'pointer-change-start',
           this[$onPointerChange] as (event: Event) => void);
@@ -529,6 +532,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         Promise.resolve().then(() => {
           controls.jumpToGoal();
           scene.jumpToGoal();
+          this[$onChange]();
           this[$jumpCamera] = false;
         });
       }
@@ -602,7 +606,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const moveTouches = () => {
         // Cancel interaction if something else moves the camera or input is
         // removed from the DOM.
-        const {changeSource} = this[$controls];
+        const changeSource = this[$cancellationSource];
         if (changeSource !== ChangeSource.AUTOMATIC ||
             !inputElement.isConnected) {
           for (const fingerElement of this[$fingerAnimatedContainers]) {
@@ -627,7 +631,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         } else {
           dispatchTouches('pointerup');
           this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
-              'interact-stopped', {detail: {source: changeSource}}));
+              'interact-stopped', {detail: {source: ChangeSource.AUTOMATIC}}));
           document.removeEventListener('visibilitychange', onVisibilityChange);
         }
       };
@@ -645,13 +649,18 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       dispatchTouches('pointerdown');
 
+      this[$cancellationSource] = ChangeSource.AUTOMATIC;
+
       requestAnimationFrame(moveTouches);
     }
 
     [$syncFieldOfView](style: EvaluatedStyle<Intrinsics<['rad']>>) {
+      const controls = this[$controls];
       const scene = this[$scene];
       scene.framedFoVDeg = style[0] * 180 / Math.PI;
-      this[$controls].setFieldOfView(scene.adjustedFoV(scene.framedFoVDeg));
+      controls.changeSource = ChangeSource.NONE;
+      controls.setFieldOfView(scene.adjustedFoV(scene.framedFoVDeg));
+      this[$cancelPrompts]();
     }
 
     [$syncCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
@@ -664,6 +673,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
       controls.changeSource = ChangeSource.NONE;
       controls.setOrbit(style[0], style[1], style[2]);
+      this[$cancelPrompts]();
     }
 
     [$syncMinCameraOrbit](style: EvaluatedStyle<SphericalIntrinsics>) {
@@ -704,6 +714,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
       this[$controls].changeSource = ChangeSource.NONE;
       this[$renderer].arRenderer.updateTarget();
+      this[$cancelPrompts]();
     }
 
     [$tick](time: number, delta: number) {
@@ -751,9 +762,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       }
 
-      controls.update(time, delta);
-      if (scene.updateTarget(delta)) {
-        this[$onChange]({type: 'change', source: controls.changeSource});
+      const cameraMoved = controls.update(time, delta);
+      const targetMoved = scene.updateTarget(delta);
+
+      if (cameraMoved || targetMoved) {
+        this[$onChange]();
       }
     }
 
@@ -838,14 +851,20 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.jumpCameraToGoal();
     }
 
-    [$onChange] = ({source}: ChangeEvent) => {
-      this[$updateAria]();
-      this[$needsRender]();
+    [$cancelPrompts] = () => {
+      const source = this[$controls].changeSource;
+      this[$cancellationSource] = source;
 
       if (source === ChangeSource.USER_INTERACTION) {
         this[$userHasInteracted] = true;
         this[$deferInteractionPrompt]();
       }
+    };
+
+    [$onChange] = () => {
+      this[$updateAria]();
+      this[$needsRender]();
+      const source = this[$controls].changeSource;
 
       this.dispatchEvent(new CustomEvent<CameraChangeDetails>(
           'camera-change', {detail: {source}}));

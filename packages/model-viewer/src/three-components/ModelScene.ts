@@ -276,6 +276,7 @@ export class ModelScene extends Scene {
 
   reset() {
     this.url = null;
+    this.renderCount = 0;
     this.queueRender();
     if (this.shadow != null) {
       this.shadow.setIntensity(0);

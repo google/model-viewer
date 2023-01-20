@@ -122,6 +122,11 @@
         ]
       },
       {
+        "name": "lottieLoaderLocation",
+        "htmlName": "lottieLoaderLocation",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s LottieLoader location URL. The default URL is <code>https://cdn.jsdelivr.net/npm/three@0.146.0/examples/jsm/loaders/LottieLoader.js</code>. It will also require the server to provide the lottie canvas module at <code>../libs/lottie_canvas.module.js</code>."
+      },
+      {
         "name": "minimumRenderScale",
         "htmlName": "minimumRenderScale",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Monitor its behavior with the <a href=\"./#entrydocs-loading-events-renderScale\">render-scale</a> event. Turn off this effect by setting to 1.",
@@ -1057,6 +1062,30 @@
         "description": "Async method that returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The uri is required, but the type defaults to 'image/png', which only designates the export format for saving a GLB. The mimetypes 'image/jpeg' and 'image/webp' are also supported.",
         "links": [
           "<a href=\"../examples/scenegraph/#createTexturesExample\">Create texture example</a>"
+        ]
+      },
+      {
+        "name": "createVideoTexture(uri)",
+        "htmlName": "createVideoTexture",
+        "description": "Returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The video element created is available through <code>texture.source.element</code> for controlling playback.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#animatedTexturesExample\">Create animated textures example</a>"
+        ]
+      },
+      {
+        "name": "createCanvasTexture()",
+        "htmlName": "createCanvasTexture",
+        "description": "Returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The 2D canvas element created is available through <code>texture.source.element</code>; simply get the 2d context and draw as desired, then call <code>texture.source.update()</code>.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#animatedTexturesExample\">Create animated textures example</a>"
+        ]
+      },
+      {
+        "name": "createLottieTexture(uri, quality?)",
+        "htmlName": "createLottieTexture",
+        "description": "Async method that returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The uri to the lottie json is required, while the quality defaults to 1 (resolution specified in the file). The Lottie animation created is available through <code>texture.source.animation</code> for controlling playback. The Lottie canvas module is lazy-loaded like the DRACO decoder and if you don't like our default CDN, you can specify your own location using <a href=\"./#entrydocs-loading-staticProperties-lottieLoaderLocation\">lottieLoaderLocation</a>. Note that an import map is required mapping 'three' to your model-viewer library file in order to load a Lottie, follow the link below for an example.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#animatedTexturesExample\">Create animated textures example</a>"
         ]
       }
     ]

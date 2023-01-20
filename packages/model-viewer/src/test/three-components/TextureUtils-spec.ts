@@ -58,14 +58,14 @@ suite('TextureUtils', () => {
 
   suite('load', () => {
     test('loads a valid texture from URL', async () => {
-      let texture = await textureUtils.load(EQUI_URL);
+      let texture = await textureUtils.loadEquirect(EQUI_URL);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(EQUI_URL);
       expect(texture.mapping).to.be.eq(EquirectangularReflectionMapping);
     });
     test('loads a valid HDR texture from URL', async () => {
-      let texture = await textureUtils.load(HDR_EQUI_URL);
+      let texture = await textureUtils.loadEquirect(HDR_EQUI_URL);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(HDR_EQUI_URL);
@@ -73,7 +73,7 @@ suite('TextureUtils', () => {
     });
     test('throws on invalid URL', async () => {
       try {
-        await textureUtils.load('');
+        await textureUtils.loadEquirect('');
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;
@@ -81,7 +81,7 @@ suite('TextureUtils', () => {
     });
     test('throws if texture not found', async () => {
       try {
-        await textureUtils.load('./nope.png');
+        await textureUtils.loadEquirect('./nope.png');
         expect(false).to.be.ok;
       } catch (e) {
         expect(true).to.be.ok;
