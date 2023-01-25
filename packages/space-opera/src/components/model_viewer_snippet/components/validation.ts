@@ -86,9 +86,9 @@ export class ValidationModal extends LitElement {
         <li>${this.report.info!.materialCount} materials</li>
         <li>${this.report.info!.totalVertexCount} vertices</li>
         <li>${this.report.info!.totalTriangleCount} triangles</li>
-        <li>${this.report.info!.width!.toPrecision(3)} m x-width</li>
-        <li>${this.report.info!.height!.toPrecision(3)} m y-height</li>
-        <li>${this.report.info!.length!.toPrecision(3)} m z-length</li>
+        <li>${this.report.info!.width?.toPrecision(3)} m x-width</li>
+        <li>${this.report.info!.height?.toPrecision(3)} m y-height</li>
+        <li>${this.report.info!.length?.toPrecision(3)} m z-length</li>
         <li>Extensions used: ${
         this.report.info!.extensionsUsed?.join(', ')}</li>
         ${
@@ -169,6 +169,10 @@ export class Validation extends ConnectedLitElement {
 
     if (originalGltf != null && gltfUrl != null &&
         this.originalGltf !== originalGltf) {
+      if (this.severityTitle = 'Converted') {
+        URL.revokeObjectURL(this.gltfUrl!);
+      }
+
       this.originalGltf = originalGltf;
       this.fileMap = fileMap;
       this.gltfUrl = gltfUrl;
