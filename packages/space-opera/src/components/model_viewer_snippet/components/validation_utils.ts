@@ -36,6 +36,7 @@ export type Report = {
     width?: number;
     length?: number;
     height?: number;
+    converted?: boolean;
   };
   validatorVersion?: string;
   issues?: {

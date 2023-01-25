@@ -91,6 +91,12 @@ export class ValidationModal extends LitElement {
         <li>${this.report.info!.length!.toPrecision(3)} m z-length</li>
         <li>Extensions used: ${
         this.report.info!.extensionsUsed?.join(', ')}</li>
+        ${
+        this.report.info!.converted ? html`
+        <li><b>KHR_materials_pbrSpecularGlossiness extension was encountered, but is no longer supported. 
+        This file has been automatically (and losslessly) converted to Metallic-Roughness.
+        Please download the GLB to get the updated version.</b></li>` :
+                                      html``}
       </ul>
     </li>
   </ul>
@@ -151,6 +157,7 @@ export class Validation extends ConnectedLitElement {
   @state() originalGltf?: GLTF;
   @state() report: Report = {};
 
+  @state() converted = false;
   @state() severityTitle: string = '';
   @state() severityColor: string = '';
 
@@ -168,8 +175,7 @@ export class Validation extends ConnectedLitElement {
 
       await this.awaitLoad(gltfUrl);
 
-      if (!!this.report.info?.extensionsUsed?.find(
-              (e) => e == 'KHR_materials_pbrSpecularGlossiness')) {
+      if (this.severityTitle === 'Converting') {
         // Auto-convert SpecGloss to MetalRough and reload.
         const io = new WebIO().registerExtensions(KHRONOS_EXTENSIONS);
         const doc = await io.read(gltfUrl);
@@ -177,8 +183,11 @@ export class Validation extends ConnectedLitElement {
         const glb = await io.writeBinary(doc);
         const blob = new Blob([glb], {type: 'application/octet-stream'});
         const fileURL = URL.createObjectURL(blob);
+        this.converted = true;
         reduxStore.dispatch(dispatchGltfUrl(fileURL));
         return;
+      } else {
+        this.converted = false;
       }
 
       this.countJoints(originalGltf);
@@ -214,6 +223,16 @@ export class Validation extends ConnectedLitElement {
     if (this.report.issues!.numErrors) {
       this.severityColor = '#f44336';
       this.severityTitle = 'Error';
+    }
+    if (this.converted) {
+      this.report.info!.converted = true;
+      this.severityColor = '#8bc34a';
+      this.severityTitle = 'Converted';
+    }
+    if (!!this.report.info?.extensionsUsed?.find(
+            (e) => e == 'KHR_materials_pbrSpecularGlossiness')) {
+      this.severityColor = '#f9a825';
+      this.severityTitle = 'Converting';
     }
   }
 
