@@ -40,10 +40,7 @@ export function renderHotspot(config: HotspotConfig) {
   const hotspotElement = document.createElement('button');
   hotspotElement.classList.add('Hotspot');
   hotspotElement.slot = `hotspot-${config.name}`;
-  hotspotElement.dataset['position'] = config.position.toString();
-  if (config.normal) {
-    hotspotElement.dataset['normal'] = config.normal.toString();
-  }
+  hotspotElement.dataset['surface'] = config.surface;
   hotspotElement.dataset['visibilityAttribute'] = 'visible';
 
   if (config.annotation) {

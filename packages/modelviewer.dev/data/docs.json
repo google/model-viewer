@@ -783,13 +783,21 @@
         "links": [
           "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>positionAndNormalFromPoint</span> example</a>"
         ]
+      },
+      {
+        "name": "surfaceFromPoint(clientX, clientY)",
+        "htmlName": "surfaceFromPoint",
+        "description": "This method returns a dynamic hotspot ID string of the point on the mesh corresponding to the input pixel coordinates given relative to the model-viewer element. The ID string can be used in the data-surface attribute of the hotspot to make it follow this point on the surface even as the model animates. If the mesh is not hit, the result is null.",
+        "links": [
+          "<a href=\"../examples/annotations/#animatedHotspots\"><span class='attribute'>animated hotspots</span> example</a>"
+        ]
       }
     ],
     "Slots": [
       {
         "name": "hotspot-*",
         "htmlName": "hotspot",
-        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. See the <a href=\"../examples/annotations\">annotations example</a> for details."
+        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes in model coordinates. Alternately, the <span class='attribute'>data-surface</span> attribute can be used to instead specify the glTF mesh, primitive, three vertex indices and three barycentric coordinates to specify a surface point that will animate along with the mesh. It is recommended to use the <a href=\"./#entrydocs-annotations-methods-surfaceFromPoint\">surfaceFromPoint</a> method to generate this string interactively. See the <a href=\"../examples/annotations/#animatedHotspots\">annotations example</a> for details."
       }
     ]
   },

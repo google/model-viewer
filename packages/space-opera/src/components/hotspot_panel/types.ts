@@ -15,25 +15,10 @@
  *
  */
 
-import {Vector3D} from '@google/model-viewer/lib/model-viewer-base';
-
 /** Config for a single hotspot */
 export interface HotspotConfig {
   // Name of the hotspot, needs to be unique among all hotspots.
   name: string;
-  position: Vector3D;
-  normal?: Vector3D;
+  surface: string
   annotation?: string;
 }
-
-/** Converts a number array to vector3D */
-export const toVector3D = (v: [number, number, number]) => {
-  return {
-    x: v[0],
-    y: v[1],
-    z: v[2],
-    toString() {
-      return `${this.x}m ${this.y}m ${this.z}m`;
-    }
-  };
-};

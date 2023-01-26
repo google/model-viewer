@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import {Group, Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D, Raycaster} from 'three';
+import {Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D} from 'three';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {GLTF, GLTFElement, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Model as ModelInterface} from './api.js';
 import {$setActive, $variantSet, Material} from './material.js';
-import {$children, Node, PrimitiveNode} from './nodes/primitive-node.js';
+import {Node, PrimitiveNode} from './nodes/primitive-node.js';
 import {$correlatedObjects, $sourceObject} from './three-dom-element.js';
 
 
@@ -33,9 +33,9 @@ export const $loadVariant = Symbol('loadVariant');
 export const $correlatedSceneGraph = Symbol('correlatedSceneGraph');
 export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
 export const $switchVariant = Symbol('switchVariant');
-export const $threeScene = Symbol('threeScene');
-export const $materialsFromPoint = Symbol('materialsFromPoint');
 export const $materialFromPoint = Symbol('materialFromPoint');
+export const $nodeFromPoint = Symbol('nodeFromPoint');
+export const $nodeFromIndex = Symbol('nodeFromIndex');
 export const $variantData = Symbol('variantData');
 export const $availableVariants = Symbol('availableVariants');
 const $modelOnUpdate = Symbol('modelOnUpdate');
@@ -78,7 +78,6 @@ export class Model implements ModelInterface {
   private[$hierarchy] = new Array<Node>();
   private[$roots] = new Array<Node>();
   private[$primitivesList] = new Array<PrimitiveNode>();
-  private[$threeScene]: Object3D|Group;
   private[$modelOnUpdate]: () => void = () => {};
   private[$correlatedSceneGraph]: CorrelatedSceneGraph;
   private[$variantData] = new Map<string, VariantData>();
@@ -89,7 +88,6 @@ export class Model implements ModelInterface {
     this[$modelOnUpdate] = onUpdate;
     this[$correlatedSceneGraph] = correlatedSceneGraph;
     const {gltf, threeGLTF, gltfElementMap} = correlatedSceneGraph;
-    this[$threeScene] = threeGLTF.scene;
 
     for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
@@ -168,7 +166,7 @@ export class Model implements ModelInterface {
 
       const parent: Node|undefined = parentMap.get(object);
       if (parent != null) {
-        parent[$children].push(node);
+        parent.children.push(node);
       } else {
         this[$roots].push(node);
       }
@@ -213,46 +211,37 @@ export class Model implements ModelInterface {
     return null;
   }
 
-
-  /**
-   * Intersects a ray with the Model and returns a list of materials whose
-   * objects were intersected.
-   */
-  [$materialsFromPoint](raycaster: Raycaster): Material[] {
-    const hits = raycaster.intersectObject(this[$threeScene], true);
-
-    // Map the object hits to primitives and then to the active material of
-    // the primitive.
-    return hits.map((hit: Intersection<Object3D>) => {
-      const found = this[$hierarchy].find((node: Node) => {
-        if (node instanceof PrimitiveNode) {
-          const primitive = node as PrimitiveNode;
-          if (primitive.mesh === hit.object) {
-            return true;
-          }
+  [$nodeFromIndex](mesh: number, primitive: number): PrimitiveNode|null {
+    const found = this[$hierarchy].find((node: Node) => {
+      if (node instanceof PrimitiveNode) {
+        const {meshes, primitives} = node.mesh.userData.associations;
+        if (meshes == mesh && primitives == primitive) {
+          return true;
         }
-        return false;
-      }) as PrimitiveNode;
-
-      if (found != null) {
-        return found.getActiveMaterial();
       }
-      return null;
-    }) as Material[];
+      return false;
+    });
+    return found == null ? null : found as PrimitiveNode;
+  }
+
+  [$nodeFromPoint](hit: Intersection<Object3D>): PrimitiveNode {
+    return this[$hierarchy].find((node: Node) => {
+      if (node instanceof PrimitiveNode) {
+        const primitive = node as PrimitiveNode;
+        if (primitive.mesh === hit.object) {
+          return true;
+        }
+      }
+      return false;
+    }) as PrimitiveNode;
   }
 
   /**
    * Intersects a ray with the Model and returns the first material whose
    * object was intersected.
    */
-  [$materialFromPoint](raycaster: Raycaster): Material|null {
-    const materials = this[$materialsFromPoint](raycaster);
-
-    if (materials.length > 0) {
-      return materials[0];
-    }
-
-    return null;
+  [$materialFromPoint](hit: Intersection<Object3D>): Material {
+    return this[$nodeFromPoint](hit).getActiveMaterial();
   }
 
   /**

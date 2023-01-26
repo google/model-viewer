@@ -138,6 +138,10 @@
         "name": "Add Hotspots"
       },
       {
+        "htmlId": "animatedHotspots",
+        "name": "Animated Hotspots"
+      },
+      {
         "htmlId": "dimensions",
         "name": "Dimensions"
       },

@@ -167,16 +167,15 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private addHotspot(event: MouseEvent) {
-    const positionAndNormal = this.modelViewer.positionAndNormalFromPoint(
-        event.clientX, event.clientY);
-    if (!positionAndNormal) {
+    const surface =
+        this.modelViewer.surfaceFromPoint(event.clientX, event.clientY);
+    if (!surface) {
           console.log('Click was not on model, no hotspot added.');
           return;
     }
     reduxStore.dispatch(dispatchAddHotspot({
       name: generateUniqueHotspotName(),
-      position: positionAndNormal.position,
-      normal: positionAndNormal.normal,
+      surface,
     }));
     reduxStore.dispatch(dispatchUpdateHotspotMode(false));
   }

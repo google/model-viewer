@@ -16,7 +16,6 @@
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial';
 
 import {$primitivesList, $variantData, Model} from '../../../../features/scene-graph/model.js';
-import {$initialMaterialIdx} from '../../../../features/scene-graph/nodes/primitive-node.js';
 import {ModelViewerElement} from '../../../../model-viewer.js';
 import {CorrelatedSceneGraph} from '../../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {waitForEvent} from '../../../../utilities.js';
@@ -65,7 +64,7 @@ suite('scene-graph/model/mesh-primitives', () => {
       const model = element.model!;
       expect(model[$primitivesList].length).to.equal(1);
       expect(model.materials.length).to.equal(1);
-      expect(model[$primitivesList][0][$initialMaterialIdx]).to.equal(0);
+      expect(model[$primitivesList][0].initialMaterialIdx).to.equal(0);
       expect(model.materials[0].name).to.equal('Default');
     });
   });

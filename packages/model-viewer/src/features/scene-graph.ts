@@ -276,11 +276,18 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     materialFromPoint(pixelX: number, pixelY: number): Material|null {
+      const model = this[$model];
+      if (model == null) {
+        return null;
+      }
       const scene = this[$scene];
       const ndcCoords = scene.getNDC(pixelX, pixelY);
-      scene.raycaster.setFromCamera(ndcCoords, scene.getCamera());
+      const hit = scene.hitFromPoint(ndcCoords);
+      if (hit == null || hit.face == null) {
+        return null;
+      }
 
-      return this[$model]![$materialFromPoint](scene.raycaster);
+      return model[$materialFromPoint](hit);
     }
   }
 

@@ -18,11 +18,15 @@
 
 
 import {dispatchAddHotspot, dispatchClearHotspot, dispatchRemoveHotspot, dispatchSetHotspots, dispatchUpdateHotspot, generateUniqueHotspotName, getHotspots} from '../../components/hotspot_panel/reducer.js';
-import {toVector3D} from '../../components/hotspot_panel/types.js';
 import {reduxStore} from '../../space_opera_base.js';
 
 
 describe('hotspot dispatchers test', () => {
+  const config = {
+    name: 'test',
+    surface: 'stuff',
+  };
+
   afterEach(() => {
     // Redux store is preserved between tests, clear it between tests
     reduxStore.dispatch(dispatchClearHotspot());
@@ -31,26 +35,16 @@ describe('hotspot dispatchers test', () => {
   it('adds a hotspot to reduxStore when dispatchAddHotspot is called with \
     valid config',
      () => {
-       const config = {
-         name: 'test',
-         position: toVector3D([1, 0, 0]),
-       };
        reduxStore.dispatch(dispatchAddHotspot(config));
        const hotspots = getHotspots(reduxStore.getState());
        expect(hotspots.length).toBe(1);
        expect(hotspots[0].name).toBe('test');
-       expect(hotspots[0].position.x).toBe(1);
-       expect(hotspots[0].position.y).toBe(0);
-       expect(hotspots[0].position.z).toBe(0);
+       expect(hotspots[0].surface).toBe('stuff');
      });
 
   it('throws an error when dispatchAddHotspot is called with configs with \
     duplicated hotspot names',
      () => {
-       const config = {
-         name: 'test',
-         position: toVector3D([1, 0, 0]),
-       };
        reduxStore.dispatch(dispatchAddHotspot(config));
        expect(() => {
          reduxStore.dispatch(dispatchAddHotspot(config));
@@ -59,15 +53,11 @@ describe('hotspot dispatchers test', () => {
 
   it('updates a hotspot when dispatchUpdateHotspot is called with valid config',
      () => {
-       const config = {
-         name: 'test',
-         position: toVector3D([1, 0, 0]),
-       };
        reduxStore.dispatch(dispatchAddHotspot(config));
 
        reduxStore.dispatch(dispatchUpdateHotspot({
          name: 'test',
-         position: toVector3D([1, 0, 0]),
+         surface: 'stuff',
          annotation: 'test-annotation',
        }));
        const hotspots = getHotspots(reduxStore.getState());
@@ -77,11 +67,6 @@ describe('hotspot dispatchers test', () => {
 
   it('throws an error when dispatchUpdateHotspot is called with configs with \ non - existing hotspot names',
      () => {
-       const config = {
-         name: 'test',
-         position: toVector3D([1, 0, 0]),
-       };
-
        expect(() => {
          reduxStore.dispatch(dispatchUpdateHotspot(config));
        }).toThrow(new Error('Hotspot name doesn\'t exist: test'));
@@ -91,12 +76,12 @@ describe('hotspot dispatchers test', () => {
      () => {
        reduxStore.dispatch(dispatchAddHotspot({
          name: 'test',
-         position: toVector3D([1, 0, 0]),
+         surface: 'stuff',
        }));
 
        reduxStore.dispatch(dispatchAddHotspot({
          name: 'test-1',
-         position: toVector3D([1, 0, 0]),
+         surface: 'stuff',
        }));
 
        reduxStore.dispatch(dispatchRemoveHotspot('test'));
@@ -113,11 +98,6 @@ describe('hotspot dispatchers test', () => {
 
   it('throws an error when dispatchRemoveHotspot is called with configs with \ non - existing hotspot names',
      () => {
-       const config = {
-         name: 'test',
-         position: toVector3D([1, 0, 0]),
-       };
-
        reduxStore.dispatch(dispatchAddHotspot(config));
 
        expect(() => {
@@ -127,38 +107,30 @@ describe('hotspot dispatchers test', () => {
 
   it('generates unique hotspot name when genearteUniqueHotspotName is called',
      () => {
-       reduxStore.dispatch(dispatchAddHotspot({
-         name: generateUniqueHotspotName(),
-         position: toVector3D([1, 0, 0])
-       }));
+       reduxStore.dispatch(dispatchAddHotspot(
+           {name: generateUniqueHotspotName(), surface: 'stuff'}));
        let hotspots = getHotspots(reduxStore.getState());
        expect(hotspots.length).toBe(1);
-       reduxStore.dispatch(dispatchAddHotspot({
-         name: generateUniqueHotspotName(),
-         position: toVector3D([1, 0, 0])
-       }));
+       reduxStore.dispatch(dispatchAddHotspot(
+           {name: generateUniqueHotspotName(), surface: 'stuff'}));
        hotspots = getHotspots(reduxStore.getState());
        expect(hotspots.length).toBe(2);
      });
 
   it('generates unique hotspot name when genearteUniqueHotspotName is called with existing hotspots',
      () => {
-       reduxStore.dispatch(
-           dispatchAddHotspot({name: '1', position: toVector3D([1, 0, 0])}));
-       reduxStore.dispatch(
-           dispatchAddHotspot({name: '2', position: toVector3D([1, 0, 0])}));
-       reduxStore.dispatch(dispatchAddHotspot({
-         name: generateUniqueHotspotName(),
-         position: toVector3D([1, 0, 0])
-       }));
+       reduxStore.dispatch(dispatchAddHotspot({name: '1', surface: 'stuff'}));
+       reduxStore.dispatch(dispatchAddHotspot({name: '2', surface: 'stuff'}));
+       reduxStore.dispatch(dispatchAddHotspot(
+           {name: generateUniqueHotspotName(), surface: 'stuff'}));
        const hotspots = getHotspots(reduxStore.getState());
        expect(hotspots.length).toBe(3);
      });
 
   it('sets hotspot list when dispatchSetHotspots is called', () => {
     reduxStore.dispatch(dispatchSetHotspots([
-      {name: '1', position: toVector3D([1, 0, 0])},
-      {name: '2', position: toVector3D([2, 0, 0])},
+      {name: '1', surface: 'stuff'},
+      {name: '2', surface: 'stuff2'},
     ]));
     const hotspots = getHotspots(reduxStore.getState());
     expect(hotspots.length).toBe(2);
@@ -170,8 +142,8 @@ describe('hotspot dispatchers test', () => {
   it('generates unique hotspot name when generateUniqueHotspotName is called after loading previously set hotspots',
      () => {
        reduxStore.dispatch(dispatchSetHotspots([
-         {name: generateUniqueHotspotName(), position: toVector3D([1, 0, 0])},
-         {name: generateUniqueHotspotName(), position: toVector3D([2, 0, 0])},
+         {name: generateUniqueHotspotName(), surface: 'stuff'},
+         {name: generateUniqueHotspotName(), surface: 'stuff2'},
        ]));
        let hotspots = getHotspots(reduxStore.getState());
        reduxStore.dispatch(dispatchClearHotspot());
@@ -179,7 +151,7 @@ describe('hotspot dispatchers test', () => {
 
        reduxStore.dispatch(dispatchAddHotspot({
          name: generateUniqueHotspotName(),
-         position: toVector3D([1, 0, 0]),
+         surface: 'stuff',
        }));
        hotspots = getHotspots(reduxStore.getState());
        expect(hotspots.length).toBe(3);
