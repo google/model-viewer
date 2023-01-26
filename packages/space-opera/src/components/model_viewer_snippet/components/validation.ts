@@ -15,18 +15,22 @@
  *
  */
 
+import {WebIO} from '@gltf-transform/core';
+import {KHRONOS_EXTENSIONS} from '@gltf-transform/extensions';
+import {metalRough} from '@gltf-transform/functions';
 import {html, LitElement} from 'lit';
-import {customElement, state, property, query} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 
 import {validationStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
-import {getModel, getModelViewer} from '../../model_viewer_preview/reducer.js';
+import {dispatchGltfUrl, getModel, getModelViewer} from '../../model_viewer_preview/reducer.js';
 
 import {resolveExternalResource, validateGltf} from './validation_utils.js';
 
 import type {Report, Message} from './validation_utils';
 import {GLTF} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
+import {reduxStore} from '../../../space_opera_base.js';
 
 @customElement('me-validation-modal')
 export class ValidationModal extends LitElement {
@@ -82,9 +86,17 @@ export class ValidationModal extends LitElement {
         <li>${this.report.info!.materialCount} materials</li>
         <li>${this.report.info!.totalVertexCount} vertices</li>
         <li>${this.report.info!.totalTriangleCount} triangles</li>
-        <li>${this.report.info!.width!.toPrecision(3)} m x-width</li>
-        <li>${this.report.info!.height!.toPrecision(3)} m y-height</li>
-        <li>${this.report.info!.length!.toPrecision(3)} m z-length</li>
+        <li>${this.report.info!.width?.toPrecision(3)} m x-width</li>
+        <li>${this.report.info!.height?.toPrecision(3)} m y-height</li>
+        <li>${this.report.info!.length?.toPrecision(3)} m z-length</li>
+        <li>Extensions used: ${
+        this.report.info!.extensionsUsed?.join(', ')}</li>
+        ${
+        this.report.info!.converted ? html`
+        <li><b>KHR_materials_pbrSpecularGlossiness extension was encountered, but is no longer supported. 
+        This file has been automatically (and losslessly) converted to Metallic-Roughness.
+        Please download the GLB to get the updated version.</b></li>` :
+                                      html``}
       </ul>
     </li>
   </ul>
@@ -145,6 +157,7 @@ export class Validation extends ConnectedLitElement {
   @state() originalGltf?: GLTF;
   @state() report: Report = {};
 
+  @state() converted = false;
   @state() severityTitle: string = '';
   @state() severityColor: string = '';
 
@@ -156,11 +169,31 @@ export class Validation extends ConnectedLitElement {
 
     if (originalGltf != null && gltfUrl != null &&
         this.originalGltf !== originalGltf) {
+      if (this.severityTitle = 'Converted') {
+        URL.revokeObjectURL(this.gltfUrl!);
+      }
+
       this.originalGltf = originalGltf;
       this.fileMap = fileMap;
       this.gltfUrl = gltfUrl;
 
       await this.awaitLoad(gltfUrl);
+
+      if (this.severityTitle === 'Converting') {
+        // Auto-convert SpecGloss to MetalRough and reload.
+        const io = new WebIO().registerExtensions(KHRONOS_EXTENSIONS);
+        const doc = await io.read(gltfUrl);
+        await doc.transform(metalRough());
+        const glb = await io.writeBinary(doc);
+        const blob = new Blob([glb], {type: 'application/octet-stream'});
+        const fileURL = URL.createObjectURL(blob);
+        this.converted = true;
+        reduxStore.dispatch(dispatchGltfUrl(fileURL));
+        return;
+      } else {
+        this.converted = false;
+      }
+
       this.countJoints(originalGltf);
 
       const dimensions = getModelViewer().getDimensions();
@@ -194,6 +227,16 @@ export class Validation extends ConnectedLitElement {
     if (this.report.issues!.numErrors) {
       this.severityColor = '#f44336';
       this.severityTitle = 'Error';
+    }
+    if (this.converted) {
+      this.report.info!.converted = true;
+      this.severityColor = '#8bc34a';
+      this.severityTitle = 'Converted';
+    }
+    if (!!this.report.info?.extensionsUsed?.find(
+            (e) => e == 'KHR_materials_pbrSpecularGlossiness')) {
+      this.severityColor = '#f9a825';
+      this.severityTitle = 'Converting';
     }
   }
 
