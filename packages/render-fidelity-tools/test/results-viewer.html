@@ -94,7 +94,7 @@
   </div>
   <div align="center">
     <h2>Render Fidelity Comparison Results</h2>
-  
+
     <p>The purpose of <a href="https://www.khronos.org/gltf/"
     target="_blank" rel="noopener">glTF</a> is to standardize Physically-Based Rendering (PBR)
     materials such that you can be confident your model will appear as intended
@@ -106,8 +106,10 @@
     renderers: <a href="https://threejs.org/" target="_blank" rel="noopener">three.js</a>
     (represented by &lt;model-viewer&gt;), <a
     href="https://google.github.io/filament/webgl/"
-    target="_blank" rel="noopener">filament.js</a>, and <a href="https://www.babylonjs.com/"
-    target="_blank" rel="noopener">babylon.js</a>. If any other renderers would like to be
+    target="_blank" rel="noopener">filament.js</a>, <a href="https://www.babylonjs.com/"
+    target="_blank" rel="noopener">babylon.js</a>, <a href="https://github.khronos.org/glTF-Sample-Viewer-Release/"
+    target="_blank" rel="noopener">gltf-sample-viewer</a>, and <a href="https://github.com/gkjohnson/three-gpu-pathtracer/"
+    target="_blank" rel="noopener">three-gpu-pathtracer</a>. If any other renderers would like to be
     included, please open a PR adding them to the <a
     href="https://github.com/google/model-viewer/tree/master/packages/render-fidelity-tools/src/components/renderers"
     target="_blank" rel="noopener">render-fidelity-tools</a>
@@ -131,14 +133,14 @@
     the case where a single bright pixel represents a directional light. The
     Filament version uses an actual directional light, so this is the ground
     truth.</p>
-      
+
     <p>In &lt;model-viewer&gt;, we do not consider rendering changes to be breaking
     changes, as our quality is incrementally improving with every release.
     However, the difference between the renders you see here bounds how much you
     can expect our rendering to change going forward. Note the largest
     differences are in the handling of transparent materials, as this is quite
     difficult to get right, so the largest changes will likely be here.</p>
-      
+
     <p>We show a simple logarithmic metric on an average of the pixel
     differences, excluding the transparent background. This is <b>not</b> a
     perceptual metric, so take it with a grain of salt. It is mostly there to
