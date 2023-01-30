@@ -162,7 +162,10 @@
       "dimensions": {
       	"height": 800,
       	"width": 550
-      }
+      },
+      "exclude": [
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-LightsPunctualLamp",
@@ -180,7 +183,10 @@
       "dimensions": {
         "height": 800,
         "width": 550
-      }
+      },
+      "exclude": [
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-MosquitoInAmber",
@@ -212,7 +218,6 @@
     {
       "name": "khronos-IridescenceDielectricSpheres",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceDielectricSpheres/glTF/IridescenceDielectricSpheres.gltf",
-      "renderSkybox": true,
       "orbit": {
         "radius": 50,
         "theta": 45,
@@ -224,12 +229,14 @@
       "dimensions": {
         "height": 700,
         "width": 700
-      }
+      },
+      "exclude": [
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-IridescenceMetallicSpheres",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceMetallicSpheres/glTF/IridescenceMetallicSpheres.gltf",
-      "renderSkybox": true,
       "orbit": {
         "radius": 50,
         "theta": 45,
@@ -241,7 +248,10 @@
       "dimensions": {
         "height": 700,
         "width": 700
-      }
+      },
+      "exclude": [
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-IridescenceSuzanne",
@@ -253,7 +263,10 @@
       "dimensions": {
         "height": 400,
         "width": 1000
-      }
+      },
+      "exclude": [
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-AntiqueCamera",
