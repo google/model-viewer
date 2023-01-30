@@ -145,7 +145,10 @@
       "dimensions": {
         "height": 600,
         "width": 1000
-      }
+      },
+      "exclude": [
+        "stellar"
+      ]
     },
     {
       "name": "khronos-IridescenceLamp",
@@ -164,7 +167,8 @@
       	"width": 550
       },
       "exclude": [
-        "three-gpu-pathtracer"
+        "three-gpu-pathtracer",
+        "stellar"
       ]
     },
     {
@@ -185,7 +189,8 @@
         "width": 550
       },
       "exclude": [
-        "three-gpu-pathtracer"
+        "three-gpu-pathtracer",
+        "stellar"
       ]
     },
     {
@@ -200,7 +205,10 @@
       "dimensions": {
         "height": 700,
         "width": 700
-      }
+      },
+      "exclude": [
+        "stellar"
+      ]
     },
     {
       "name": "khronos-EmissiveStrengthTest",
@@ -213,7 +221,10 @@
       "dimensions": {
         "height": 600,
         "width": 1000
-      }
+      },
+      "exclude": [
+        "stellar"
+      ]
     },
     {
       "name": "khronos-IridescenceDielectricSpheres",
@@ -231,7 +242,8 @@
         "width": 700
       },
       "exclude": [
-        "three-gpu-pathtracer"
+        "three-gpu-pathtracer",
+        "stellar"
       ]
     },
     {
@@ -250,7 +262,8 @@
         "width": 700
       },
       "exclude": [
-        "three-gpu-pathtracer"
+        "three-gpu-pathtracer",
+        "stellar"
       ]
     },
     {
@@ -265,7 +278,8 @@
         "width": 1000
       },
       "exclude": [
-        "three-gpu-pathtracer"
+        "three-gpu-pathtracer",
+        "stellar"
       ]
     },
     {
