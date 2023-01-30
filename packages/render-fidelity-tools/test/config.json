@@ -131,6 +131,158 @@
       }
     },
     {
+      "name": "khronos-ABeautifulGame",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ABeautifulGame/glTF/ABeautifulGame.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 1,
+        "theta": -140,
+        "phi": 50
+      },
+      "target": {
+      	"y": -0.15
+      },
+      "dimensions": {
+        "height": 600,
+        "width": 1000
+      },
+      "exclude": [
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-IridescenceLamp",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceLamp/glTF/IridescenceLamp.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 0.85,
+        "theta": 0,
+        "phi": 100
+      },
+      "target": {
+      	"y": 0.25
+      },
+      "dimensions": {
+      	"height": 800,
+      	"width": 550
+      },
+      "exclude": [
+        "three-gpu-pathtracer",
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-LightsPunctualLamp",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/LightsPunctualLamp/glTF/LightsPunctualLamp.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 2.75,
+        "theta": -155,
+        "phi": 90
+      },
+      "target": {
+      	"x": 0.25,
+      	"y": 0.85
+      },
+      "dimensions": {
+        "height": 800,
+        "width": 550
+      },
+      "exclude": [
+        "three-gpu-pathtracer",
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-MosquitoInAmber",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MosquitoInAmber/glTF/MosquitoInAmber.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 0.2,
+        "theta": -25,
+        "phi": 75
+      },
+      "dimensions": {
+        "height": 700,
+        "width": 700
+      },
+      "exclude": [
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-EmissiveStrengthTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EmissiveStrengthTest/glTF/EmissiveStrengthTest.gltf",
+      "orbit": {
+        "radius": 12,
+        "theta": 0,
+        "phi": 75
+      },
+      "dimensions": {
+        "height": 600,
+        "width": 1000
+      },
+      "exclude": [
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-IridescenceDielectricSpheres",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceDielectricSpheres/glTF/IridescenceDielectricSpheres.gltf",
+      "orbit": {
+        "radius": 50,
+        "theta": 45,
+        "phi": 65
+      },
+      "target": {
+      	"y": -3
+      },
+      "dimensions": {
+        "height": 700,
+        "width": 700
+      },
+      "exclude": [
+        "three-gpu-pathtracer",
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-IridescenceMetallicSpheres",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceMetallicSpheres/glTF/IridescenceMetallicSpheres.gltf",
+      "orbit": {
+        "radius": 50,
+        "theta": 45,
+        "phi": 65
+      },
+      "target": {
+      	"y": -3
+      },
+      "dimensions": {
+        "height": 700,
+        "width": 700
+      },
+      "exclude": [
+        "three-gpu-pathtracer",
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-IridescenceSuzanne",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceSuzanne/glTF/IridescenceSuzanne.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 5
+      },
+      "dimensions": {
+        "height": 400,
+        "width": 1000
+      },
+      "exclude": [
+        "three-gpu-pathtracer",
+        "stellar"
+      ]
+    },
+    {
       "name": "khronos-AntiqueCamera",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
       "dimensions": {
