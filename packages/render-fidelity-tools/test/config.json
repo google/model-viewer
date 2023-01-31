@@ -140,7 +140,7 @@
         "phi": 50
       },
       "target": {
-      	"y": -0.15
+        "y": -0.15
       },
       "dimensions": {
         "height": 600,
@@ -160,11 +160,11 @@
         "phi": 100
       },
       "target": {
-      	"y": 0.25
+        "y": 0.25
       },
       "dimensions": {
-      	"height": 800,
-      	"width": 550
+        "height": 800,
+        "width": 620
       },
       "exclude": [
         "three-gpu-pathtracer",
@@ -181,8 +181,8 @@
         "phi": 90
       },
       "target": {
-      	"x": 0.25,
-      	"y": 0.85
+        "x": 0.25,
+        "y": 0.85
       },
       "dimensions": {
         "height": 800,
@@ -235,7 +235,7 @@
         "phi": 65
       },
       "target": {
-      	"y": -3
+        "y": -3
       },
       "dimensions": {
         "height": 700,
@@ -255,7 +255,7 @@
         "phi": 65
       },
       "target": {
-      	"y": -3
+        "y": -3
       },
       "dimensions": {
         "height": 700,
