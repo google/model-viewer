@@ -14,8 +14,8 @@
  */
 
 import './images-4-up.js';
-
 import '@polymer/paper-slider';
+
 import {html, LitElement} from 'lit';
 import {property} from 'lit/decorators.js';
 
@@ -74,17 +74,17 @@ export class AnalysisView extends LitElement {
     super.connectedCallback && super.connectedCallback();
 
     document.body.addEventListener('click', (event) => {
-      const originatingElement = (event as any).path[0] as HTMLElement;
+      const originatingElement = event.target as HTMLImageElement;
 
-      if (originatingElement.tagName !== 'IMG') {
+      if (originatingElement == null || originatingElement.tagName !== 'IMG') {
         return;
       }
 
       if ((originatingElement.parentNode! as HTMLElement)
               .classList.contains('selected')) {
-        this.deselect(originatingElement as HTMLImageElement);
+        this.deselect(originatingElement);
       } else {
-        this.select(originatingElement as HTMLImageElement);
+        this.select(originatingElement);
       }
     });
 
