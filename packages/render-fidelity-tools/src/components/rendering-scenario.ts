@@ -43,6 +43,21 @@ export class RenderingScenario extends LitElement {
     return `./results/${this.name}`;
   }
 
+  async connectedCallback() {
+    super.connectedCallback && super.connectedCallback();
+
+    this.shadowRoot!.addEventListener('click', (event) => {
+      const originatingElement = event.target as HTMLImageElement;
+
+      if (originatingElement == null || originatingElement.tagName !== 'IMG') {
+        return;
+      }
+
+      this.dispatchEvent(
+          new CustomEvent('select', {detail: {element: originatingElement}}));
+    });
+  }
+
   updated(changedProperties: Map<any, any>) {
     super.updated(changedProperties);
 
