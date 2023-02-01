@@ -397,7 +397,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     }
 
     if (changedProperties.has('withCredentials')) {
-      CachingGLTFLoader.withCredentials = this.withCredentials
+      CachingGLTFLoader.withCredentials = this.withCredentials;
+      this[$renderer].textureUtils!.withCredentials = this.withCredentials;
     }
 
     if (changedProperties.has('generateSchema')) {

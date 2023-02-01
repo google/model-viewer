@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearEncoding, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearEncoding, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
@@ -35,10 +35,11 @@ const HDR_FILE_RE = /\.hdr(\.js)?$/;
 
 export default class TextureUtils extends EventDispatcher {
   public lottieLoaderUrl = '';
+  public withCredentials = false;
 
   private _ldrLoader: TextureLoader|null = null;
   private _hdrLoader: RGBELoader|null = null;
-  private _lottieLoader = null;
+  private _lottieLoader: Loader|null = null;
 
   private generatedEnvironmentMap: Promise<CubeTexture>|null = null;
   private generatedEnvironmentMapAlt: Promise<CubeTexture>|null = null;
@@ -56,6 +57,7 @@ export default class TextureUtils extends EventDispatcher {
     if (this._ldrLoader == null) {
       this._ldrLoader = new TextureLoader();
     }
+    this._ldrLoader.withCredentials = this.withCredentials;
     return this._ldrLoader;
   }
 
@@ -64,14 +66,16 @@ export default class TextureUtils extends EventDispatcher {
       this._hdrLoader = new RGBELoader();
       this._hdrLoader.setDataType(HalfFloatType);
     }
+    this._hdrLoader.withCredentials = this.withCredentials;
     return this._hdrLoader;
   }
 
   async getLottieLoader(): Promise<any> {
     if (this._lottieLoader == null) {
       const {LottieLoader} = await import(this.lottieLoaderUrl);
-      this._lottieLoader = new LottieLoader();
+      this._lottieLoader = new LottieLoader() as Loader;
     }
+    this._lottieLoader.withCredentials = this.withCredentials;
     return this._lottieLoader;
   }
 
