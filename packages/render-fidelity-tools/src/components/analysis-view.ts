@@ -73,21 +73,6 @@ export class AnalysisView extends LitElement {
   async connectedCallback() {
     super.connectedCallback && super.connectedCallback();
 
-    document.body.addEventListener('click', (event) => {
-      const originatingElement = event.target as HTMLImageElement;
-
-      if (originatingElement == null || originatingElement.tagName !== 'IMG') {
-        return;
-      }
-
-      if ((originatingElement.parentNode! as HTMLElement)
-              .classList.contains('selected')) {
-        this.deselect(originatingElement);
-      } else {
-        this.select(originatingElement);
-      }
-    });
-
     await this.updateComplete;
 
     const candidateCanvas =
@@ -114,6 +99,15 @@ export class AnalysisView extends LitElement {
           deltaCanvas
         },
         [candidateCanvas, goldenCanvas, blackWhiteCanvas, deltaCanvas]);
+  }
+
+  pick(originatingElement: HTMLImageElement) {
+    if ((originatingElement.parentNode! as HTMLElement)
+            .classList.contains('selected')) {
+      this.deselect(originatingElement);
+    } else {
+      this.select(originatingElement);
+    }
   }
 
   get canCompareImages(): boolean {

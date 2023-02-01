@@ -17,14 +17,18 @@ import './analysis-view.js';
 import './rendering-scenario.js';
 
 import {html, LitElement} from 'lit';
-import {property} from 'lit/decorators.js';
+import {property, query} from 'lit/decorators.js';
 
 import {ImageComparisonConfig} from '../common.js';
+
+import {AnalysisView} from './analysis-view.js';
 
 export class ImageComparisonApp extends LitElement {
   @property({type: String}) src: string = '';
 
   @property({type: Object}) config: ImageComparisonConfig|null = null;
+
+  @query('analysis-view') analysisView!: AnalysisView;
 
   updated(changedProperties: Map<any, any>) {
     super.updated(changedProperties);
@@ -45,6 +49,9 @@ export class ImageComparisonApp extends LitElement {
   }
 
   private onHashChange = () => {
+    if (!location.hash) {
+      return;
+    }
     const targetElement = this.shadowRoot!.querySelector(`${location.hash}`);
     if (targetElement) {
       targetElement.scrollIntoView();
@@ -59,6 +66,10 @@ export class ImageComparisonApp extends LitElement {
     }
     await this.updateComplete;
     this.onHashChange();
+  }
+
+  private selectElement(event: {detail: {element: HTMLImageElement;};}) {
+    this.analysisView.pick(event.detail.element);
   }
 
   render() {
@@ -76,7 +87,8 @@ export class ImageComparisonApp extends LitElement {
     .name="${scenario.name}"
     .goldens="${goldens}"
     .dimensions="${scenario.dimensions}"
-    .exclude="${scenario.exclude || []}">
+    .exclude="${scenario.exclude || []}"
+    @select="${this.selectElement}">
 </rendering-scenario>`);
 
     return html`
