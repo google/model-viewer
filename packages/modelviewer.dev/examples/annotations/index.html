@@ -180,10 +180,10 @@
     tailRect = document.querySelector('#tail').getBoundingClientRect();
   }
 
-  onResize();
   modelViewer1.addEventListener('ar-status', onResize);
 
   modelViewer1.addEventListener('load', () => {
+    onResize();
     // update svg
     function drawLine(svgLine, name, rect) {
       const hotspot = modelViewer1.queryHotspot('hotspot-' + name);

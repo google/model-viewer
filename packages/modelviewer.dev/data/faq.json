@@ -78,6 +78,14 @@
         "links": [
           "<a href='../examples/lighthouse.html'>Lighthouse details</a>"
         ]
+      },
+      {
+        "name": "Does &lt;model-viewer&gt; work in React?",
+        "htmlName": "react",
+        "description": "Yes, as web components do generally, but we are not React experts. For those trying to get a TypeScript React project set up to successfully import our TS declaration, please see the following link, posted by one of our users.",
+        "links": [
+          "<a href='https://dev.to/asross311/a-strongly-typed-google-model-viewer-implementation-in-react-3m5c'>Working with React types</a>"
+        ]
       }
     ]
   },
