@@ -16,6 +16,7 @@
  */
 
 import {html} from 'lit';
+
 import {getMobileModelViewer} from '../mobile_view/reducer';
 import {getModelViewer} from '../model_viewer_preview/reducer';
 
@@ -42,9 +43,6 @@ export const onProgress = (event) => {
     event.target.removeEventListener('progress', onProgress);
   } else {
     progressBar.classList.remove('hide');
-    if (event.detail.totalProgress === 0) {
-      event.target.querySelector('.center-pre-prompt')?.classList.add('hide');
-    }
   }
 };
 

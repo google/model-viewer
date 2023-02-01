@@ -21,11 +21,15 @@ export const modelViewerStyles: CSSResult = css`:not(:defined) > * {
   display: none;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
   padding: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
 }
 
 model-viewer {
