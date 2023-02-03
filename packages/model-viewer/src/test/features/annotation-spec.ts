@@ -154,6 +154,14 @@ suite('Annotation', () => {
         expect(normal).to.be.deep.equal(new Vector3(1, 0, 0));
       });
 
+      test('updateHotspot does change the surface', () => {
+        const surface = '0 0 1 2 3 0.217 0.341 0.442';
+        element.updateHotspot({name: 'hotspot-1', surface});
+        const {surface: internalSurface} =
+            (scene.target.children[numSlots - 1] as Hotspot);
+        expect(internalSurface).to.be.deep.equal(surface);
+      });
+
       test('and removing it does not remove the slot', async () => {
         element.removeChild(hotspot);
         await timePasses();
