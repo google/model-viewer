@@ -130,6 +130,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
+      hotspot.surface = config.surface;
       this[$needsRender]();
     }
 
