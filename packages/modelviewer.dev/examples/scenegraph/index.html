@@ -516,9 +516,13 @@ modelViewerTexture1.addEventListener("load", () => {
 <script type="module">
 const modelViewerAnimated = document.querySelector("model-viewer#animated");
 
-const videoTexture = modelViewerAnimated.createVideoTexture("../../shared-assets/models/lottie-logo.mp4");
+let videoTexture = null;
 let canvasTexture = null;
 let lottieTexture = null;
+
+customElements.whenDefined('model-viewer').then(() => {
+  videoTexture = modelViewerAnimated.createVideoTexture("../../shared-assets/models/lottie-logo.mp4");
+});
 
 function getCanvasTexture() {
   if(canvasTexture) return canvasTexture;
