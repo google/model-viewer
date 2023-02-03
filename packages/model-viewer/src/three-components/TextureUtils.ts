@@ -57,7 +57,7 @@ export default class TextureUtils extends EventDispatcher {
     if (this._ldrLoader == null) {
       this._ldrLoader = new TextureLoader();
     }
-    this._ldrLoader.withCredentials = this.withCredentials;
+    this._ldrLoader.setWithCredentials(this.withCredentials);
     return this._ldrLoader;
   }
 
@@ -66,7 +66,7 @@ export default class TextureUtils extends EventDispatcher {
       this._hdrLoader = new RGBELoader();
       this._hdrLoader.setDataType(HalfFloatType);
     }
-    this._hdrLoader.withCredentials = this.withCredentials;
+    this._hdrLoader.setWithCredentials(this.withCredentials);
     return this._hdrLoader;
   }
 
@@ -75,7 +75,7 @@ export default class TextureUtils extends EventDispatcher {
       const {LottieLoader} = await import(this.lottieLoaderUrl);
       this._lottieLoader = new LottieLoader() as Loader;
     }
-    this._lottieLoader.withCredentials = this.withCredentials;
+    this._lottieLoader.setWithCredentials(this.withCredentials);
     return this._lottieLoader;
   }
 
