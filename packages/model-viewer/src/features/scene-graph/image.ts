@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationItem} from 'lottie-web';
+import type {AnimationItem} from 'lottie-web';
 import {Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene, Texture as ThreeTexture, WebGLRenderTarget} from 'three';
 
 import {blobCanvas} from '../../model-viewer-base.js';
