@@ -25,7 +25,9 @@
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
 
-  <script type="importmap">
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+  <script type="importmap-shim">
     {
       "imports": {
         "three": "../../node_modules/@google/model-viewer/dist/model-viewer.js"
@@ -500,6 +502,22 @@ modelViewerTexture1.addEventListener("load", () => {
 }
 &lt;/script&gt;
             </code></pre>
+            <p>Unfortunately, Safari does not yet support import maps, so to get
+            this to work universally, you will need the following code
+            instead:</p>
+            <pre><code>
+&lt;script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"&gt;&lt;/script&gt;
+
+&lt;script type="importmap-shim"&gt;
+{
+  "imports": {
+    "three": "path/to/your/model-viewer.min.js"
+  }
+}
+&lt;/script&gt;
+
+&lt;script type="module-shim" src="path/to/your/model-viewer.min.js"&gt;&lt;/script&gt;
+            </code></pre>
           </div>
           <example-snippet stamp-to="animatedTexturesExample" highlight-as="html">
             <template>
@@ -836,7 +854,7 @@ enum MaxFilter {
   </script>
 
   <!-- Loads <model-viewer> on modern browsers: -->
-  <script type="module"
+  <script type="module-shim"
       src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
   </script>
 </body>
