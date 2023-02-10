@@ -102,6 +102,9 @@ export class TextureInfo implements TextureInfoInterface {
     const oldTexture = this[$texture]?.source[$threeTexture] as VideoTexture;
     if (oldTexture != null && oldTexture.isVideoTexture) {
       this[$activeVideo] = false;
+    } else if (this[$texture]?.source.animation) {
+      this[$texture].source.animation.removeEventListener(
+          'enterFrame', this[$onUpdate]);
     }
 
     this[$texture] = texture;
@@ -128,6 +131,8 @@ export class TextureInfo implements TextureInfoInterface {
         };
         requestAnimationFrame(update);
       }
+    } else if (texture?.source.animation != null) {
+      texture.source.animation.addEventListener('enterFrame', this[$onUpdate]);
     }
 
     let encoding: TextureEncoding = sRGBEncoding;
