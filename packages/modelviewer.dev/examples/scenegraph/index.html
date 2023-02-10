@@ -507,9 +507,9 @@ modelViewerTexture1.addEventListener("load", () => {
   <div class="controls">
     <p>Texture Type</p>
     <select id="type">
+      <option value="lottie">Lottie</option>
       <option value="video">Video</option>
       <option value="canvas">Canvas</option>
-      <option value="lottie">Lottie</option>
     </select>
   </div>
 </model-viewer>
@@ -544,12 +544,12 @@ function getLottieTexture() {
   return lottieTexture;
 }
 
-modelViewerAnimated.addEventListener("load", () => {
+modelViewerAnimated.addEventListener("load", async () => {
 
   const material = modelViewerAnimated.model.materials[0];
   const {baseColorTexture} = material.pbrMetallicRoughness;
 
-  baseColorTexture.setTexture(videoTexture);
+  baseColorTexture.setTexture(await getLottieTexture());
 
   document.querySelector('#type').addEventListener('input', async (event) => {
     switch(event.target.value){
