@@ -101,11 +101,7 @@ export class TextureInfo implements TextureInfoInterface {
 
     const oldTexture = this[$texture] as unknown as VideoTexture;
     if (oldTexture != null && oldTexture.isVideoTexture) {
-      const element = oldTexture.image;
       this[$activeVideo] = false;
-      if (element.requestVideoFrameCallback == null) {
-        element.removeEventListener('timeupdate', this[$onUpdate]);
-      }
     }
 
     this[$texture] = texture;
@@ -123,7 +119,14 @@ export class TextureInfo implements TextureInfoInterface {
         };
         element.requestVideoFrameCallback(update);
       } else {
-        element.addEventListener('timeupdate', this[$onUpdate]);
+        const update = () => {
+          if (!this[$activeVideo]) {
+            return;
+          }
+          this[$onUpdate]();
+          requestAnimationFrame(update);
+        };
+        requestAnimationFrame(update);
       }
     }
 
