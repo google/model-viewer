@@ -55,13 +55,13 @@ export class TextureInfo implements TextureInfoInterface {
   };
 
   // Holds a reference to the Three data that backs the material object.
-  [$materials]: Set<MeshStandardMaterial>|null;
+  private[$materials]: Set<MeshStandardMaterial>|null;
 
   // Texture usage defines the how the texture is used (ie Normal, Emissive...
   // etc)
-  [$usage]: TextureUsage;
-  [$onUpdate]: () => void;
-  [$activeVideo] = false;
+  private[$usage]: TextureUsage;
+  private[$onUpdate]: () => void;
+  private[$activeVideo] = false;
 
   constructor(
       onUpdate: () => void, usage: TextureUsage,
@@ -99,9 +99,12 @@ export class TextureInfo implements TextureInfoInterface {
     const threeTexture: ThreeTexture|null =
         texture != null ? texture.source[$threeTexture] : null;
 
-    const oldTexture = this[$texture] as unknown as VideoTexture;
+    const oldTexture = this[$texture]?.source[$threeTexture] as VideoTexture;
     if (oldTexture != null && oldTexture.isVideoTexture) {
       this[$activeVideo] = false;
+    } else if (this[$texture]?.source.animation) {
+      this[$texture].source.animation.removeEventListener(
+          'enterFrame', this[$onUpdate]);
     }
 
     this[$texture] = texture;
@@ -128,6 +131,8 @@ export class TextureInfo implements TextureInfoInterface {
         };
         requestAnimationFrame(update);
       }
+    } else if (texture?.source.animation != null) {
+      texture.source.animation.addEventListener('enterFrame', this[$onUpdate]);
     }
 
     let encoding: TextureEncoding = sRGBEncoding;
