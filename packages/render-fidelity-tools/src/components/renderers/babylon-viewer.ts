@@ -121,18 +121,17 @@ export class BabylonViewer extends LitElement {
     const modelFileName =
         scenario.model.substring(lastSlashIndex + 1, scenario.model.length);
 
-    await SceneLoader.AppendAsync(modelRootPath, modelFileName, this[$scene])
-        .then(() => {
-          const {min, max} =
-              this[$scene].meshes[0].getHierarchyBoundingVectors();
-          const modelRadius =
-              Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
-          const farClip = 2 * Math.max(modelRadius, orbit.radius);
-          const nearClip = farClip / 1000;
-          // not setting maxZ(far clip) because it will clip the skybox, and the
-          // rendering result is the same
-          camera.minZ = nearClip;
-        });
+    await SceneLoader.AppendAsync(modelRootPath, modelFileName, this[$scene]);
+
+    const {min, max} =
+        this[$scene].meshes[0].getHierarchyBoundingVectors();
+    const modelRadius =
+        Math.max(max.x - min.x, max.y - min.y, max.z - min.z);
+    const farClip = 2 * Math.max(modelRadius, orbit.radius);
+    const nearClip = farClip / 1000;
+    // not setting maxZ(far clip) because it will clip the skybox, and the
+    // rendering result is the same
+    camera.minZ = nearClip;
 
     this[$scene].stopAllAnimations();
 
@@ -150,7 +149,7 @@ export class BabylonViewer extends LitElement {
         this[$scene],
         256,
         false,
-        false,
+        true,
         false,
         !needRealTimeFilter);
     this[$scene].environmentTexture = environment;
