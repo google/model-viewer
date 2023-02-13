@@ -14,7 +14,7 @@
  */
 
 import {PathTracingRenderer, PathTracingSceneGenerator, PhysicalPathTracingMaterial} from 'three-gpu-pathtracer';
-import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3, Object3D, Mesh, BufferAttribute} from 'three';
+import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3, Object3D, Mesh, BufferAttribute, Group} from 'three';
 import {FullScreenQuad} from 'three/examples/jsm/postprocessing/Pass';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader';
@@ -155,18 +155,18 @@ export class ThreePathTracerViewer extends LitElement {
     camera.updateProjectionMatrix();
 
     camera.position.setFromSphericalCoords(orbit.radius, MathUtils.DEG2RAD * orbit.phi, MathUtils.DEG2RAD * orbit.theta);
-    camera.position.x += target.x;
-    camera.position.y += target.y;
-    camera.position.z += target.z;
     camera.fov = verticalFoV;
     camera.updateProjectionMatrix();
-
-    controls.target.set(target.x, target.y, target.z);
     controls.update();
+
+    const targetGroup = new Group();
+    targetGroup.position.set(-target.x, -target.y, -target.z);
+    targetGroup.add(gltf.scene);
+    targetGroup.updateMatrixWorld(true);
 
     // process assets
     const generator = new PathTracingSceneGenerator();
-    const {bvh, textures, materials} = generator.generate(gltf.scene);
+    const {bvh, textures, materials} = generator.generate(targetGroup);
     const geometry = bvh.geometry;
 
     // update bvh and geometry info

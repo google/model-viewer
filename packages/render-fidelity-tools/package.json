@@ -45,7 +45,7 @@
     "puppeteer": "^18.2.1",
     "rimraf": "^3.0.2",
     "three": "^0.148.0",
-    "three-gpu-pathtracer": "^0.0.10"
+    "three-gpu-pathtracer": "^0.0.13"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
