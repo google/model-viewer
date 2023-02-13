@@ -14,7 +14,7 @@
  */
 
 import {PathTracingRenderer, PathTracingSceneGenerator, PhysicalPathTracingMaterial} from 'three-gpu-pathtracer';
-import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3, Object3D, Mesh, BufferAttribute, Group} from 'three';
+import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3, Object3D, Mesh, BufferAttribute, Group, DirectionalLight} from 'three';
 import {FullScreenQuad} from 'three/examples/jsm/postprocessing/Pass';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader';
@@ -118,6 +118,16 @@ export class ThreePathTracerViewer extends LitElement {
     // load assets
     const hdr = await new RGBELoader().loadAsync(lighting);
     const gltf = await new GLTFLoader().loadAsync(model);
+
+    // remove directional light parents to replicate issue with light targets
+    // after cloning a gltf model
+    // see mrdoob/three#17370
+    gltf.scene.traverse((child) => {
+      if (child instanceof DirectionalLight) {
+        child.target.removeFromParent();
+      }
+    });
+
     gltf.scene.updateMatrixWorld(true);
 
     // generate tangents if they're not present
@@ -217,7 +227,6 @@ export class ThreePathTracerViewer extends LitElement {
       }
     });
   }
-
 
   private[$updateSize]() {
     if (this[$canvas] == null || this.scenario == null) {
