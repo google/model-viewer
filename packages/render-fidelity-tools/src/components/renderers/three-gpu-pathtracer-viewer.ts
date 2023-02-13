@@ -166,7 +166,7 @@ export class ThreePathTracerViewer extends LitElement {
 
     // process assets
     const generator = new PathTracingSceneGenerator();
-    const {bvh, textures, materials} = generator.generate(targetGroup);
+    const {bvh, textures, materials, lights} = generator.generate(targetGroup);
     const geometry = bvh.geometry;
 
     // update bvh and geometry info
@@ -185,6 +185,7 @@ export class ThreePathTracerViewer extends LitElement {
     ptMaterial.materialIndexAttribute.updateFrom(bvh.geometry.attributes.materialIndex);
     ptMaterial.textures.setTextures(renderer, 2048, 2048, textures);
     ptMaterial.materials.updateFrom(materials, textures);
+    ptMaterial.lights.updateFrom(lights);
 
     // update envmap
     ptMaterial.envMapInfo.updateFrom(hdr);
