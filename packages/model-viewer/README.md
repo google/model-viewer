@@ -29,10 +29,10 @@ The `<model-viewer>` web component can be installed from [NPM](https://npmjs.org
 npm install @google/model-viewer
 ```
 
-It can also be used directly from various free CDNs such as [unpkg.com](https://unpkg.com):
+It can also be used directly from various free CDNs such as Google's own [hosted libraries](https://developers.google.com/speed/libraries#model-viewer):
 
 ```html
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
 ```
 
 For more detailed usage documentation and live examples, please visit our docs
@@ -51,18 +51,6 @@ testing).
 
 If you’ve installed via [NPM](https://npmjs.org), you’re all set - you’ll only
 upgrade when you run [`npm update`](https://docs.npmjs.com/cli/update.html).
-
-If you’re using [unpkg.com](https://unpkg.com), you can pin to a specific
-version by specifying it in the URL. Replace the `<version>` tag in the sample
-below with the full version number (like `0.10.0`) to be pinned to.
-
-```html
-<!-- Loads <model-viewer> for modern browsers: -->
-<script type="module"
-    src="https://unpkg.com/@google/model-viewer@<version>/dist/model-viewer.min.js">
-</script>
-```
-
 
 ## Browser Support
 
