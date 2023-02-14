@@ -30,7 +30,7 @@ export const modelViewerTemplate = `<!doctype html>
     <!-- <model-viewer> HTML element -->
     REPLACEME
     <!-- Loads <model-viewer> for browsers: -->
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
   </body>
 </html>`;
 
