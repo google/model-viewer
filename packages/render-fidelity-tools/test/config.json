@@ -184,10 +184,7 @@
       "dimensions": {
         "height": 800,
         "width": 550
-      },
-      "exclude": [
-        "three-gpu-pathtracer"
-      ]
+      }
     },
     {
       "name": "khronos-MosquitoInAmber",
@@ -232,7 +229,6 @@
         "width": 700
       },
       "exclude": [
-        "three-gpu-pathtracer",
         "stellar"
       ]
     },
@@ -252,7 +248,6 @@
         "width": 700
       },
       "exclude": [
-        "three-gpu-pathtracer",
         "stellar"
       ]
     },
@@ -268,7 +263,6 @@
         "width": 1000
       },
       "exclude": [
-        "three-gpu-pathtracer",
         "stellar"
       ]
     },

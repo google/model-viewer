@@ -14,7 +14,7 @@
  */
 
 import {PathTracingRenderer, PathTracingSceneGenerator, PhysicalPathTracingMaterial} from 'three-gpu-pathtracer';
-import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3, Object3D, Mesh, BufferAttribute} from 'three';
+import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3, Object3D, Mesh, BufferAttribute, Group, DirectionalLight} from 'three';
 import {FullScreenQuad} from 'three/examples/jsm/postprocessing/Pass';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader';
@@ -118,6 +118,16 @@ export class ThreePathTracerViewer extends LitElement {
     // load assets
     const hdr = await new RGBELoader().loadAsync(lighting);
     const gltf = await new GLTFLoader().loadAsync(model);
+
+    // remove directional light parents to replicate issue with light targets
+    // after cloning a gltf model
+    // see mrdoob/three#17370
+    gltf.scene.traverse((child) => {
+      if (child instanceof DirectionalLight) {
+        child.target.removeFromParent();
+      }
+    });
+
     gltf.scene.updateMatrixWorld(true);
 
     // generate tangents if they're not present
@@ -155,18 +165,18 @@ export class ThreePathTracerViewer extends LitElement {
     camera.updateProjectionMatrix();
 
     camera.position.setFromSphericalCoords(orbit.radius, MathUtils.DEG2RAD * orbit.phi, MathUtils.DEG2RAD * orbit.theta);
-    camera.position.x += target.x;
-    camera.position.y += target.y;
-    camera.position.z += target.z;
     camera.fov = verticalFoV;
     camera.updateProjectionMatrix();
-
-    controls.target.set(target.x, target.y, target.z);
     controls.update();
+
+    const targetGroup = new Group();
+    targetGroup.position.set(-target.x, -target.y, -target.z);
+    targetGroup.add(gltf.scene);
+    targetGroup.updateMatrixWorld(true);
 
     // process assets
     const generator = new PathTracingSceneGenerator();
-    const {bvh, textures, materials} = generator.generate(gltf.scene);
+    const {bvh, textures, materials, lights} = generator.generate(targetGroup);
     const geometry = bvh.geometry;
 
     // update bvh and geometry info
@@ -185,6 +195,7 @@ export class ThreePathTracerViewer extends LitElement {
     ptMaterial.materialIndexAttribute.updateFrom(bvh.geometry.attributes.materialIndex);
     ptMaterial.textures.setTextures(renderer, 2048, 2048, textures);
     ptMaterial.materials.updateFrom(materials, textures);
+    ptMaterial.lights.updateFrom(lights);
 
     // update envmap
     ptMaterial.envMapInfo.updateFrom(hdr);
@@ -216,7 +227,6 @@ export class ThreePathTracerViewer extends LitElement {
       }
     });
   }
-
 
   private[$updateSize]() {
     if (this[$canvas] == null || this.scenario == null) {
