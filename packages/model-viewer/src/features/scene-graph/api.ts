@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type {AnimationItem} from 'lottie-web';
 
 import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -324,9 +323,11 @@ export declare interface Image {
   readonly element?: HTMLVideoElement|HTMLCanvasElement;
 
   /**
-   * The Lottie animation object, if this is a Lottie texture.
+   * The Lottie animation object, if this is a Lottie texture. You may wish to
+   * do image.animation as import('lottie-web').AnimationItem; to get its type
+   * info.
    */
-  readonly animation?: AnimationItem;
+  readonly animation?: any;
 
   /**
    * A method to create an object URL of this image at the desired
