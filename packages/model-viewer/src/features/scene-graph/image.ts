@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import type {AnimationItem} from 'lottie-web';
 import {Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene, Texture as ThreeTexture, WebGLRenderTarget} from 'three';
 
 import {blobCanvas} from '../../model-viewer-base.js';
@@ -76,7 +75,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return;
   }
 
-  get animation(): AnimationItem|undefined {
+  get animation(): any|undefined {
     const texture = this[$threeTexture] as any;
     if (texture && texture.isCanvasTexture && texture.animation) {
       return texture.animation;
