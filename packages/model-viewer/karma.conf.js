@@ -65,6 +65,8 @@ module.exports = function(config) {
 
     mochaReporter: {output: 'autowatch'},
 
+    logLevel: config.LOG_DEBUG,
+
     // Note setting --browsers on the command-line always overrides this list.
     browsers: [
       'ChromeHeadlessNoSandbox',
@@ -73,7 +75,7 @@ module.exports = function(config) {
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox'],
+        flags: ['--no-sandbox', '--use-angle=metal', '--ignore-gpu-blocklist'],
       }
     },
   });
