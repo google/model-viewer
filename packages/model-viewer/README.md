@@ -1,13 +1,15 @@
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.1/model-viewer.min.js"></script>
 <p align="center">
-  <img alt="A 3D model of an astronaut" src="screenshot.png" width="480">
+  <model-viewer alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb" ar environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr" poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp" shadow-intensity="1" camera-controls touch-action="pan-y" style="width: 480px; height: 600px"></model-viewer>
 </p>
 
 # `<model-viewer>`
 
- [![Build Status](https://github.com/google/model-viewer/workflows/Unit%20tests/badge.svg?branch=master)](https://github.com/google/model-viewer/actions?query=branch%3Amaster)
- [![NPM](https://img.shields.io/npm/v/@google/model-viewer.svg)](https://www.npmjs.com/package/@google/model-viewer)
- [![Bundlephobia](https://badgen.net/bundlephobia/minzip/@google/model-viewer)](https://bundlephobia.com/result?p=@google/model-viewer)
- [![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/model-viewer)
+ [![Min Zip](https://badgen.net/bundlephobia/minzip/@google/model-viewer)](https://bundlephobia.com/result?p=@google/model-viewer)
+ [![Latest Release](https://img.shields.io/github/v/release/google/model-viewer)](https://github.com/google/model-viewer/releases)
+
+ [![follow on Twitter](https://img.shields.io/twitter/follow/modelviewer?style=social&logo=twitter)](https://twitter.com/intent/follow?screen_name=modelviewer)
+ [![Github Discussions](https://img.shields.io/github/stars/google/model-viewer.svg?style=social&label=Star&maxAge=2592000)](https://github.com/google/model-viewer/discussions)
 
 `<model-viewer>` is a web component that makes rendering interactive 3D
 models - optionally in AR - easy to do, on as many browsers and devices as possible.
@@ -18,7 +20,7 @@ As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
 supported to provide a seamless development experience.
 
-[Demo](https://model-viewer.glitch.me) • [Documentation](https://modelviewer.dev/) • [Kanban](https://github.com/google/model-viewer/projects/1) • [Quality Tests](https://modelviewer.dev/fidelity/)
+[Demo](https://model-viewer.glitch.me) • [Documentation](https://modelviewer.dev/) • [Quality Tests](https://modelviewer.dev/fidelity/)
 
 
 ## Installing
@@ -26,13 +28,13 @@ supported to provide a seamless development experience.
 The `<model-viewer>` web component can be installed from [NPM](https://npmjs.org):
 
 ```sh
-npm install @google/model-viewer
+npm install three @google/model-viewer
 ```
 
-It can also be used directly from various free CDNs such as Google's own [hosted libraries](https://developers.google.com/speed/libraries#model-viewer):
+It can also be used directly from various free CDNs such as [jsDelivr](https://www.jsdelivr.com/package/npm/@google/model-viewer) and Google's own [hosted libraries](https://developers.google.com/speed/libraries#model-viewer):
 
 ```html
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.1/model-viewer.min.js"></script>
 ```
 
 For more detailed usage documentation and live examples, please visit our docs
@@ -51,6 +53,14 @@ testing).
 
 If you’ve installed via [NPM](https://npmjs.org), you’re all set - you’ll only
 upgrade when you run [`npm update`](https://docs.npmjs.com/cli/update.html).
+Note that three.js is a peer dependency, so that must also be installed, but can
+be shared with other bundled code. Note that `<model-viewer>` requires the
+version of three.js we test on to maintain quality, due to frequent upstream
+breaking changes. We strongly recommend you keep your three.js version locked to
+`<model-viewer>`'s. If you must use a different version, npm will give you an
+error which you can work around using their `--legacy-peer-deps` option, which
+will allow you to go outside of our version range. Please do not file issues if
+you use this option. 
 
 ## Browser Support
 
