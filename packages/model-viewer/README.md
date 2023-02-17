@@ -51,6 +51,14 @@ testing).
 
 If you’ve installed via [NPM](https://npmjs.org), you’re all set - you’ll only
 upgrade when you run [`npm update`](https://docs.npmjs.com/cli/update.html).
+Note that three.js is a peer dependency, so that must also be installed, but can
+be shared with other bundled code. Note that `<model-viewer>` requires the
+version of three.js we test on to maintain quality, due to frequent upstream
+breaking changes. We strongly recommend you keep your three.js version locked to
+`<model-viewer>`'s. If you must use a different version, npm will give you an
+error which you can work around using their `--legacy-peer-deps` option, which
+will allow you to go outside of our version range. Please do not file issues if
+you use this option. 
 
 ## Browser Support
 
