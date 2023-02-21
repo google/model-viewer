@@ -31,8 +31,6 @@ const basepath = (urlString: string): string => {
   return url.toString();
 };
 
-const IS_BINARY_RE = /\.glb$/;
-
 const $engine = Symbol('engine');
 const $scene = Symbol('scene');
 const $ibl = Symbol('ibl');
@@ -217,14 +215,14 @@ export class FilamentViewer extends LitElement {
       this[$scene].addEntity(directionalLight);
     } else {
       await fetchFilamentAssets([iblUrl, skyboxUrl]);
-      const ibl = this[$engine].createIblFromKtx(iblUrl);
+      const ibl = this[$engine].createIblFromKtx1(iblUrl);
       this[$scene].setIndirectLight(ibl);
       this[$ibl] = ibl;
       ibl.setIntensity(1.0);
       ibl.setRotation([0, 0, -1, 0, 1, 0, 1, 0, 0]);  // 90 degrees
 
       if (scenario.renderSkybox) {
-        this[$skybox] = this[$engine].createSkyFromKtx(skyboxUrl);
+        this[$skybox] = this[$engine].createSkyFromKtx1(skyboxUrl);
         this[$scene].setSkybox(this[$skybox]);
       } else {
         this[$view].setBlendMode(View$BlendMode.TRANSLUCENT);
@@ -238,9 +236,7 @@ export class FilamentViewer extends LitElement {
     }
     const loader = this[$assetLoader]!;
 
-    this[$currentAsset] = IS_BINARY_RE.test(modelUrl) ?
-        loader.createAssetFromBinary(modelUrl) :
-        loader.createAssetFromJson(modelUrl);
+    this[$currentAsset] = loader.createAsset(modelUrl);
 
     const asset = this[$currentAsset]!;
 
@@ -248,6 +244,9 @@ export class FilamentViewer extends LitElement {
       console.log('Loading resources for', modelUrl);
       asset.loadResources(resolve, () => {}, basepath(modelUrl), 1);
     });
+
+    // Since asset.loadResources() has finished; it's safe to call releaseSourceData.
+    asset.releaseSourceData();
 
     this[$boundingBox] = asset.getBoundingBox();
     const entities = asset.getEntities();
@@ -322,7 +321,12 @@ export class FilamentViewer extends LitElement {
     const {min, max} = this[$boundingBox]!;
     const modelRadius =
         Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
-    const far = 2 * Math.max(modelRadius, orbit.radius);
+    const maxRadius = Math.max(modelRadius, orbit.radius);
+
+    // Compute the near and far for the camera projection.
+    // far and near must be > 0, otherwise Filament throws an error.
+    // This can happen at initialization before the asset is loaded.
+    const far = maxRadius > 0 ? 2 * maxRadius : 10.0;
     const near = far / 1000;
 
     const camera = this[$camera];
