@@ -36,7 +36,7 @@
     "@types/puppeteer": "^5.4.6",
     "@types/rimraf": "^3.0.1",
     "@types/three": "^0.148.0",
-    "filament": "1.12.2",
+    "filament": "1.31.5",
     "focus-visible": "^5.2.0",
     "http-server": "^14.1.1",
     "lit": "^2.2.3",
