@@ -150,8 +150,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       const video = document.createElement('video');
       video.src = uri;
       video.muted = true;
-      video.play();
+      video.playsInline = true;
       video.loop = true;
+      video.play();
       const texture = new VideoTexture(video);
 
       return this[$buildTexture](texture);
