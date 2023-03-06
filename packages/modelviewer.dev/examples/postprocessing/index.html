@@ -81,7 +81,7 @@ button {
           </div>
           <example-snippet stamp-to="effects" highlight-as="html">
             <template>
-<model-viewer id="lantern" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF-Binary/Lantern.glb" ar alt="A 3D model of a Lantern"
+<model-viewer id="lantern" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" ar alt="A 3D model of a Lantern"
 bloom-effect pixelate-effect outline-effect ssao-effect>
   <div class="controls">
     <label for="bloom">Bloom Effect:</label>
@@ -96,12 +96,14 @@ bloom-effect pixelate-effect outline-effect ssao-effect>
 </model-viewer>
 <script>
 const modelViewerPostprocessing = document.querySelector("model-viewer#lantern");
-const bloom = modelViewer.querySelector('#bloom');
-const pixelate = modelViewer.querySelector('#pixelate');
-const outline = modelViewer.querySelector('#outline');
-const ssao = modelViewer.querySelector('#ssao');
+const bloom = modelViewerPostprocessing.querySelector('#bloom');
+const pixelate = modelViewerPostprocessing.querySelector('#pixelate');
+const outline = modelViewerPostprocessing.querySelector('#outline');
+const ssao = modelViewerPostprocessing.querySelector('#ssao');
 
 function toggleEffect(checkbox, property) {
+  console.log(modelViewerPostprocessing);
+  console.log(modelViewerPostprocessing[property]);
     modelViewerPostprocessing[property] = checkbox.checked;
 }
 

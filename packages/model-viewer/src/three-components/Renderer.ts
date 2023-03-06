@@ -149,8 +149,6 @@ export class Renderer extends EventDispatcher {
         antialias: true,
         powerPreference: options.powerPreference as WebGLPowerPreference,
         preserveDrawingBuffer: true,
-        stencil: false,
-        depth: false
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = sRGBEncoding;
@@ -294,7 +292,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setSize(width, height, false);
       this.effectComposer.setSize(width, height, false);
       this.renderPass.setSize(width, height);
-      this.effectComposer.passes[1].setSize(width, height);
+      // this.effectComposer.passes[0].setSize(width, height);
       // this.effectComposer.setSize(width, height);
     }
 
@@ -433,14 +431,21 @@ export class Renderer extends EventDispatcher {
     const exposureIsNumber =
         typeof exposure === 'number' && !Number.isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
-	
-    for (const [effectName, pass] of EffectMap.entries()) {
-      pass.enabled = scene[effectName];
-    }
+    
+    // for (const [effectName, pass] of EffectMap.entries()) {
+    //   console.log((scene.element as any)[effectName])
+    //   pass.enabled = (scene.element as any)[effectName];
+    // }
     for (const pass of this.effectComposer.passes) {
       pass.mainScene = scene;
       pass.mainCamera = scene.getCamera();
     }
+    // this.effectComposer.setMainScene(scene);
+    // this.effectComposer.setMainCamera(scene.getCamera());
+    // for (const pass of this.effectComposer.passes) {
+    //   pass.mainScene = scene;
+    //   pass.mainCamera = scene.getCamera();
+    // }
   }
 
   render(t: number, frame?: XRFrame) {
@@ -494,6 +499,7 @@ export class Renderer extends EventDispatcher {
         });
         continue;
       }
+	    this.effectComposer.render();
 
       if (!element.modelIsVisible && !this.multipleScenesVisible) {
         // Here we are pre-rendering on the visible canvas, so we must mark the
@@ -514,7 +520,7 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
-	    this.effectComposer.render();
+      this.threeRenderer.render(scene, scene.camera);
 
       if (this.multipleScenesVisible || scene.renderCount === 0) {
         this.copyPixels(scene, width, height);
