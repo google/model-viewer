@@ -81,36 +81,25 @@ button {
           </div>
           <example-snippet stamp-to="effects" highlight-as="html">
             <template>
-<model-viewer id="lantern" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" ar alt="A 3D model of a Lantern"
-bloom-effect pixelate-effect outline-effect ssao-effect>
+<model-viewer id="lantern" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" ar alt="A 3D model of a Lantern">
+  <mv-effects-composer>
+    <mv-pixelate-effect id="pixelate" granularity="30"></mv-pixelate-effect>
+  </mv-effects-composer>
   <div class="controls">
-    <label for="bloom">Bloom Effect:</label>
-    <input id="bloom" type="checkbox" checked="true">
-    <label for="pixelate">Pixelate Effect:</label>
-    <input id="pixelate" type="checkbox" checked="true">
-    <label for="outline">Outline Effect:</label>
-    <input id="outline" type="checkbox" checked="true">
-    <label for="ssao">SSAO Effect:</label>
-    <input id="ssao" type="checkbox" checked="true">
+    <label for="granularity">Granularity</label>
+    <input id="granularity" type="range" min="10" max="100" step="0.5" value="30">
   </div>
 </model-viewer>
 <script>
 const modelViewerPostprocessing = document.querySelector("model-viewer#lantern");
-const bloom = modelViewerPostprocessing.querySelector('#bloom');
 const pixelate = modelViewerPostprocessing.querySelector('#pixelate');
-const outline = modelViewerPostprocessing.querySelector('#outline');
-const ssao = modelViewerPostprocessing.querySelector('#ssao');
+const granularity = modelViewerPostprocessing.querySelector('#granularity');
 
-function toggleEffect(checkbox, property) {
-  console.log(modelViewerPostprocessing);
-  console.log(modelViewerPostprocessing[property]);
-    modelViewerPostprocessing[property] = checkbox.checked;
+function updateGranularity(event) {
+  pixelate.granularity = event.target.value;
 }
 
-bloom.addEventListener('change', () => toggleEffect(bloom, 'bloomEffect'));
-pixelate.addEventListener('change', () => toggleEffect(pixelate, 'bloomEffect'));
-outline.addEventListener('change', () => toggleEffect(outline, 'bloomEffect'));
-ssao.addEventListener('change', () => toggleEffect(ssao, 'bloomEffect'));
+granularity.addEventListener('change', updateGranularity);
 </script>
             </template>
           </example-snippet>

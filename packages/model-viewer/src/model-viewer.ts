@@ -23,24 +23,28 @@ import {SceneGraphMixin} from './features/scene-graph.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
 import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
-import {PostProcessingMixin} from './features/post-processing.js';
+import { ModelViewerEffectComposer, ModelViewerPixelateEffect } from './model-viewer-effects.js';
 
 // Uncomment these lines to export PMREM textures in Glitch:
 // export {default as TextureUtils} from './three-components/TextureUtils';
 // export * from 'three';
 
-export const ModelViewerElement = PostProcessingMixin(AnnotationMixin(SceneGraphMixin(StagingMixin(
+export const ModelViewerElement = AnnotationMixin(SceneGraphMixin(StagingMixin(
     EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
-        FocusVisiblePolyfillMixin(ModelViewerElementBase))))))))));
+        FocusVisiblePolyfillMixin(ModelViewerElementBase)))))))));
 
 export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 
 export {RGB, RGBA} from './three-components/gltf-instance/gltf-2.0';
 
 customElements.define('model-viewer', ModelViewerElement);
+customElements.define('mv-effects-composer', ModelViewerEffectComposer);
+customElements.define('mv-pixelate-effect', ModelViewerPixelateEffect);
 
 declare global {
   interface HTMLElementTagNameMap {
     'model-viewer': ModelViewerElement;
+    'mv-effects-composer': ModelViewerEffectComposer;
+    'mv-pixelate-effect': ModelViewerPixelateEffect;
   }
 }

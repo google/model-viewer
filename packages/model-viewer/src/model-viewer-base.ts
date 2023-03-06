@@ -119,6 +119,10 @@ export interface Camera {
   projectionMatrix: Array<number>;
 }
 
+export interface EffectsRendererInterface {
+  render(): void,
+}
+
 export interface RendererInterface {
   load(progressCallback: (progress: number) => void): Promise<FramingInfo>;
   render(camera: Camera): void;
@@ -478,6 +482,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
     } finally {
       this[$updateSize]({width, height});
     };
+  }
+
+  registerEffectsComposer(effectsComposer: EffectsRendererInterface) {
+    this[$scene].effectsRenderer = effectsComposer;
+  }
+
+  unregisterEffectsComposer() {
+    this[$scene].effectsRenderer = null;
   }
 
   registerRenderer(renderer: RendererInterface) {

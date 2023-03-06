@@ -17,7 +17,7 @@ import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Euler, Eve
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
-import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, EffectsRendererInterface, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
@@ -66,6 +66,7 @@ export class ModelScene extends Scene {
   public element: ModelViewerElement;
   public canvas: HTMLCanvasElement;
   public annotationRenderer = new CSS2DRenderer();
+  public effectsRenderer: EffectsRendererInterface|null = null;
   public schemaElement = document.createElement('script');
   public width = 1;
   public height = 1;

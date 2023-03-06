@@ -14,8 +14,6 @@
  */
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
-import { RenderPass, EffectComposer } from 'postprocessing';
-
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
 import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
@@ -27,8 +25,6 @@ import {Debugger} from './Debugger.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
-import { CreateEffectComposer, RENDER_PASS } from './PPRenderPipeline.js';
-import { EffectMap } from '../features/post-processing.js';
 
 export interface RendererOptions {
   powerPreference: string;
@@ -95,8 +91,6 @@ export class Renderer extends EventDispatcher {
 
   public threeRenderer!: WebGLRenderer;
   public canvas3D: HTMLCanvasElement;
-  public renderPass!: RenderPass;
-  public effectComposer!: EffectComposer;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
   public loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
@@ -162,9 +156,6 @@ export class Renderer extends EventDispatcher {
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = ACESFilmicToneMapping;
-
-	    this.effectComposer = CreateEffectComposer(this.threeRenderer);
-      this.renderPass = RENDER_PASS;
     } catch (error) {
       console.warn(error);
     }
@@ -290,10 +281,6 @@ export class Renderer extends EventDispatcher {
 
     if (this.canRender) {
       this.threeRenderer.setSize(width, height, false);
-      this.effectComposer.setSize(width, height, false);
-      this.renderPass.setSize(width, height);
-      // this.effectComposer.passes[0].setSize(width, height);
-      // this.effectComposer.setSize(width, height);
     }
 
     // Each scene's canvas must match the renderer size. In general they can be
@@ -431,21 +418,6 @@ export class Renderer extends EventDispatcher {
     const exposureIsNumber =
         typeof exposure === 'number' && !Number.isNaN(exposure);
     this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
-    
-    // for (const [effectName, pass] of EffectMap.entries()) {
-    //   console.log((scene.element as any)[effectName])
-    //   pass.enabled = (scene.element as any)[effectName];
-    // }
-    for (const pass of this.effectComposer.passes) {
-      pass.mainScene = scene;
-      pass.mainCamera = scene.getCamera();
-    }
-    // this.effectComposer.setMainScene(scene);
-    // this.effectComposer.setMainCamera(scene.getCamera());
-    // for (const pass of this.effectComposer.passes) {
-    //   pass.mainScene = scene;
-    //   pass.mainCamera = scene.getCamera();
-    // }
   }
 
   render(t: number, frame?: XRFrame) {
@@ -499,7 +471,6 @@ export class Renderer extends EventDispatcher {
         });
         continue;
       }
-	    this.effectComposer.render();
 
       if (!element.modelIsVisible && !this.multipleScenesVisible) {
         // Here we are pre-rendering on the visible canvas, so we must mark the
@@ -520,8 +491,11 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
-      this.threeRenderer.render(scene, scene.camera);
-
+      if (scene.effectsRenderer != null) {
+        scene.effectsRenderer.render();
+      } else {
+        this.threeRenderer.render(scene, scene.camera);
+      }
       if (this.multipleScenesVisible || scene.renderCount === 0) {
         this.copyPixels(scene, width, height);
       } else {
