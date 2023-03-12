@@ -262,8 +262,12 @@
     "htmlName": "postprocessing",
     "examples": [
       {
-        "htmlId": "effects",
-        "name": "Toggle Effects"
+        "htmlId": "pixelate",
+        "name": "Pixelate Effect"
+      },
+      {
+        "htmlId": "bloom",
+        "name": "Bloom Effect"
       }
     ]
   } 

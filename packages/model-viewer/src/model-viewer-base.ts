@@ -15,7 +15,7 @@
 
 import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
-import {Event as ThreeEvent, Vector2, Vector3} from 'three';
+import {Event as ThreeEvent, Vector2, Vector3, WebGLRenderer, Camera as ThreeCamera} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {$updateEnvironment} from './features/environment.js';
@@ -70,6 +70,7 @@ export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 export const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
+export const $setEffectComposerScene = Symbol('setEffectComposerScene');
 
 export interface Vector3D {
   x: number
@@ -120,7 +121,11 @@ export interface Camera {
 }
 
 export interface EffectsRendererInterface {
-  render(): void,
+  setRenderer(renderer: WebGLRenderer): void;
+  setMainScene(scene: ModelScene): void;
+  setMainCamera(camera: ThreeCamera): void;
+  render(deltaTime?: number): void,
+  setSize(width: number, height: number): void,
 }
 
 export interface RendererInterface {
@@ -484,10 +489,22 @@ export default class ModelViewerElementBase extends ReactiveElement {
     };
   }
 
-  registerEffectsComposer(effectsComposer: EffectsRendererInterface) {
-    this[$scene].effectsRenderer = effectsComposer;
+  /**
+   * Registers a new EffectComposer as the main rendering pipeline,
+   * instead of the default ThreeJs renderer. 
+   * This method also calls setRenderer, setMainScene, and setMainCamera on 
+   * your effectComposer.
+   * @param effectComposer An EffectComposer from `pmndrs/postprocessing`
+   */
+  registerEffectsComposer(effectComposer: EffectsRendererInterface) {
+    effectComposer.setRenderer(this[$renderer].threeRenderer);
+    this[$setEffectComposerScene](effectComposer);
+    this[$scene].effectsRenderer = effectComposer;
   }
 
+  /**
+   * 
+   */
   unregisterEffectsComposer() {
     this[$scene].effectsRenderer = null;
   }
@@ -553,6 +570,12 @@ export default class ModelViewerElementBase extends ReactiveElement {
   }
 
   [$onModelLoad]() {
+    this.dispatchEvent(new CustomEvent('beforeRender'));
+  }
+
+  [$setEffectComposerScene](effectsRenderer: EffectsRendererInterface) {
+    effectsRenderer.setMainCamera(this[$scene].getCamera());
+    effectsRenderer.setMainScene(this[$scene]);
   }
 
   [$updateStatus](status: string) {

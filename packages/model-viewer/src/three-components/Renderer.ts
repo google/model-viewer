@@ -291,6 +291,7 @@ export class Renderer extends EventDispatcher {
       canvas.width = width;
       canvas.height = height;
       scene.forceRescale();
+      scene.effectsRenderer?.setSize(width, height);
     }
   }
 
@@ -452,7 +453,9 @@ export class Renderer extends EventDispatcher {
       this.preRender(scene, t, delta);
 
       if (!this.shouldRender(scene)) {
-        continue;
+        // continue; 
+        // TODO: This messes with the GlitchEffect, which obviously requires a render every frame. 
+        // For all other effects there is no issue, as they do only need to udpate when the scene updates. Figure out some solution here.
       }
 
       if (scene.externalRenderer != null) {
@@ -492,8 +495,14 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
       if (scene.effectsRenderer != null) {
-        scene.effectsRenderer.render();
+        // the EffectComposer expects autoClear to be false
+        // while the threeRenderer should be true so that
+        // the frames are cleared each render. 
+        this.threeRenderer.autoClear = false;
+        scene.effectsRenderer.render(delta);
+        this.threeRenderer.autoClear = true;
       } else {
+        this.threeRenderer.autoClear = true; 
         this.threeRenderer.render(scene, scene.camera);
       }
       if (this.multipleScenesVisible || scene.renderCount === 0) {

@@ -1,0 +1,1 @@
+import './model-effect-composer-spec.js';

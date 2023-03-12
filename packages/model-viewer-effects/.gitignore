@@ -1,0 +1,9 @@
+renderers/*
+node_modules/*
+shared-assets
+dist/*
+lib/*
+**/*.sw*
+.DS_Store
+.idea
+*.iml

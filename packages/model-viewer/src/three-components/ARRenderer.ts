@@ -401,7 +401,7 @@ export class ARRenderer extends EventDispatcher {
 
   private updateView(view: XRView) {
     const scene = this.presentedScene!;
-    const xr = this.threeRenderer.xr as any;
+    const xr = this.threeRenderer.xr;
 
     xr.updateCamera(camera);
     scene.xrCamera = xr.getCamera();
