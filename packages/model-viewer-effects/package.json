@@ -74,9 +74,10 @@
     "postprocessing": "^6.30.0"
   },
   "peerDependencies": {
-    "@beilinson/model-viewer": "^3.1.0"
+    "@google/model-viewer": "^3.1.0"
   },
   "devDependencies": {
+    "@google/model-viewer": "^3.1.0",
     "@open-wc/karma-esm": "^4.0.0",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
