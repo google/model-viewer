@@ -25,7 +25,7 @@ const onwarn = (warning, warn) => {
 
 const plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
 
-const watchFiles = ['lib/**', '../model-viewer/lib/**'];
+const watchFiles = ['lib/**', '../model-viewer/lib/**', '../model-viewer-effects/lib/**'];
 
 const outputOptions = [
   {

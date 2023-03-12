@@ -73,7 +73,6 @@ export default class EnvironmentScene extends Scene {
     box6.scale.set(3.875, 3.487, 2.986);
     this.add(box6);
 
-
     // -x right
     const light1 = new Mesh(geometry, this.createAreaLightMaterial(50));
     light1.position.set(-16.116, 14.37, 8.208);

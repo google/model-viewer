@@ -264,5 +264,19 @@
         "name": "Exporter"
       }
     ]
-  }
+  },
+  {
+    "name": "PostProcessing Effects",
+    "htmlName": "postprocessing",
+    "examples": [
+      {
+        "htmlId": "pixelate",
+        "name": "Pixelate Effect"
+      },
+      {
+        "htmlId": "bloom",
+        "name": "Bloom Effect"
+      }
+    ]
+  } 
 ]

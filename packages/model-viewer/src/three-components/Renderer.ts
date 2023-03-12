@@ -14,7 +14,6 @@
  */
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
-
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
 import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
@@ -143,10 +142,11 @@ export class Renderer extends EventDispatcher {
         alpha: true,
         antialias: true,
         powerPreference: options.powerPreference as WebGLPowerPreference,
-        preserveDrawingBuffer: true
+        preserveDrawingBuffer: true,
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = sRGBEncoding;
+      
       this.threeRenderer.physicallyCorrectLights = true;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 
@@ -291,6 +291,7 @@ export class Renderer extends EventDispatcher {
       canvas.width = width;
       canvas.height = height;
       scene.forceRescale();
+      scene.effectsRenderer?.setSize(width, height);
     }
   }
 
@@ -452,7 +453,9 @@ export class Renderer extends EventDispatcher {
       this.preRender(scene, t, delta);
 
       if (!this.shouldRender(scene)) {
-        continue;
+        // continue; 
+        // TODO: This messes with the GlitchEffect, which obviously requires a render every frame. 
+        // For all other effects there is no issue, as they do only need to udpate when the scene updates. Figure out some solution here.
       }
 
       if (scene.externalRenderer != null) {
@@ -491,8 +494,17 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
-      this.threeRenderer.render(scene, scene.camera);
-
+      if (scene.effectsRenderer != null) {
+        // the EffectComposer expects autoClear to be false
+        // while the threeRenderer should be true so that
+        // the frames are cleared each render. 
+        this.threeRenderer.autoClear = false;
+        scene.effectsRenderer.render(delta);
+        this.threeRenderer.autoClear = true;
+      } else {
+        this.threeRenderer.autoClear = true; 
+        this.threeRenderer.render(scene, scene.camera);
+      }
       if (this.multipleScenesVisible ||
           (!scene.element.modelIsVisible && scene.renderCount === 0)) {
         this.copyPixels(scene, width, height);

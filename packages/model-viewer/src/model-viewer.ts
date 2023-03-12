@@ -37,7 +37,6 @@ export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 export {RGB, RGBA} from './three-components/gltf-instance/gltf-2.0';
 
 customElements.define('model-viewer', ModelViewerElement);
-
 declare global {
   interface HTMLElementTagNameMap {
     'model-viewer': ModelViewerElement;

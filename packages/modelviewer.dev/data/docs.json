@@ -94,6 +94,14 @@
           "default": "N/A",
           "options": "true, false"
         }
+      },
+      {
+        "name": "webGLRenderer",
+        "htmlName": "webGLRenderer",
+        "description": "This property is read-only. It returns the <a href=\"https://threejs.org/docs/#api/en/renderers/WebGLRenderer\" target=\"_blank\">WebGLRenderer</a> used in the default Render loop.",
+        "links": [
+          "<a href=\"https://threejs.org/docs/#api/en/renderers/WebGLRenderer\" target=\"_blank\">"
+        ]
       }
     ],
     "Static Properties": [
@@ -192,6 +200,16 @@
         "description": "Returns a screenshot of the current model render in the format specified by <i>type</i> (defaults to image/png). The screenshot is encoded as a data URL string. In formats that support a sliding scale of quality (such as image/jpeg and image/webp) you can also specify a value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i> defaults to 0.92 otherwise)."
       },
       {
+        "name": "registerEffectsComposer(effectsComposer)",
+        "htmlName": "registerEffectsComposer",
+        "description": "This method allows you to replace the default rendering with an <a href=\"https://github.com/pmndrs/postprocessing\" target=\"_blank\">EffectComposer</a> renderer stack for this element. The EffectComposer should use the <a href=\".#entrydocs-loading-properties-webGLRenderer\">webGLRenderer</a> internally, so that all glTF and rendering-related portions of our API continue to function normally.<br/><br/>The effectComposer you provide must implement our <code>EffectsRendererInterface</code>, which consists of two functions: <br/><br/>- <code>render(): void</code><br/>- <code>setSize(width: number, height: number): void</code> <br/><br/>We will call your <code>render</code> method as we would the regular render method. We will call your <code>setSize</code> method when the element is resized so you can take coordinated action on your slotted canvas element."
+      },
+      {
+        "name": "unregisterEffectsComposer()",
+        "htmlName": "unregisterEffectsComposer",
+        "description": "Switches back to default rendering and stops calling the EffectComposer."
+      },
+      {
         "name": "registerRenderer(externalRenderer)",
         "htmlName": "registerRenderer",
         "description": "This method allows you to replace our entire rendering stack with your own for this element. The glTF-related portions of our API cease to function: ar, lighting, staging, animation, scene-graph. However, loading, camera, and annotations continue to function normally. Note that you are now in charge of your own data, so you can load any type of file you choose, or even generate a scene from script.<br/><br/>The externalRenderer you provide must implement our <code>RendererInterface</code>, which consists of three functions: <br/><br/>- <code>load(progressCallback: (progress: number) => void): Promise&lt;FramingInfo&gt;</code><br/>- <code>render(camera: Camera): void</code><br/>- <code>resize(width: number, height: number): void</code> <br/><br/>The element will call your <code>load</code> method when it would normally load a glTF, lazily by default. Make sure to set the <code>src</code> to something (any string will do) to indicate this is not an empty element. Make sure to call our <code>progressCallback</code> occasionally, which will update our progress bar, and ensure you set a progress value of 1.0 when your pixels are ready to be shown. You must return us a <code>FramingInfo</code> object containing two numbers: <code>framedRadius</code> and <code>fieldOfViewAspect</code> to allow our camera to set its defaults. The <code>framedRadius</code> is the size of the bounding sphere and <code>fieldOfViewAspect</code> is the ideal element aspect ratio to frame the model (1.0 is a good default). <br/><br/>We will call your <code>render</code> method when the camera changes and pass you the <code>Camera</code> object containing <code>viewMatrix: Array&lt;number&gt;</code> and <code>projectionMatrix: Array&lt;number&gt;</code> as 4x4 matrices. Use this to update the rendered pixels in your <a href=\"./#entrydocs-loading-slots-canvas\">canvas slot element</a>. We will call your <code>resize</code> method when the element is resized so you can take coordinated action on your slotted canvas element."
@@ -214,11 +232,16 @@
         "name": "error",
         "htmlName": "error",
         "description": "This event can be triggered for two reasons: a model has failed to load or parse, or the WebGL context was lost. If the model failed to load, event.detail.type will be 'loadfailure'. If the WebGL context was lost, event.detail.type will be 'webglcontextlost'. In both cases, recovery countermeasures are left as an exercise for the user. The element will not make automatic attempts to re-load a model that has failed to load. Nor will the element attempt to restore the GL context after it has been lost. Error events also hold a reference to the originating error event (when there is one) as event.detail.sourceEvent."
+      }, 
+      {
+        "name": "beforeRender",
+        "htmlName": "beforeRender",
+        "description": "Fired when a model is loaded, before the first render frame. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the <span class='attribute'>src</span> attribute is changed."
       },
       {
         "name": "load",
         "htmlName": "load",
-        "description": "Fired when a model is loaded. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the <span class='attribute'>src</span> attribute is changed."
+        "description": "Fired when a model is loaded, after the first render frame. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the <span class='attribute'>src</span> attribute is changed."
       },
       {
         "name": "poster-dismissed",
@@ -1086,6 +1109,36 @@
         "description": "Async method that returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The uri to the lottie json is required, while the quality defaults to 1 (resolution specified in the file). The Lottie animation created is available through <code>texture.source.animation</code> for controlling playback. The Lottie canvas module is lazy-loaded like the DRACO decoder and if you don't like our default CDN, you can specify your own location using <a href=\"./#entrydocs-loading-staticProperties-lottieLoaderLocation\">lottieLoaderLocation</a>. Note that an import map is required mapping 'three' to your model-viewer library file in order to load a Lottie, follow the link below for an example.",
         "links": [
           "<a href=\"../examples/scenegraph/#animatedTexturesExample\">Create animated textures example</a>"
+        ]
+      }
+    ]
+  },
+  {
+    "Title": "PostProcessing Effects",
+    "htmlName": "postprocessing",
+    "Attributes": [
+      {
+        "name": "bloom-effect",
+        "htmlName": "bloomEffect",
+        "description": "Toggle the Bloom effect.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#effects\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "ssao-effect",
+        "htmlName": "ssaoEffect",
+        "description": "Toggle the SSAO effect.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#effects\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "pixelate-effect",
+        "htmlName": "pixelateEffect",
+        "description": "Toggle the Pixelate effect.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#effects\">Related examples</a>"
         ]
       }
     ]

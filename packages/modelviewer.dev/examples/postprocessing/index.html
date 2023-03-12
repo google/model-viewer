@@ -1,0 +1,202 @@
+<!--
+/*
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; PostProcessing Examples</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; scene graph examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
+
+  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+  <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
+
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+  <style>
+.controls {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  bottom: 8px;
+  left: 8px;
+}
+
+#texture-name,
+#image-name {
+  font-size: 0.8em;
+}
+
+button {
+  font-size: 1.3em;
+  margin: 0 0.25em;
+}
+  </style>
+</head>
+<body>
+<div class="examples-page">
+  <div class="sidebar" id="sidenav"></div>
+  <div id="toggle"></div>
+
+  <div class="examples-container">
+    <div class="sample">
+      <div id="pixelate" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Toggle Effects</h2>
+            <p>This example demonstrates the use of PostProcessing Effects with the 
+            model-viewer. Enabling an effect is as simple as adding the attribute to 
+            the model-viewer element, or enabling it using the property. For example,
+            enabling a <a href="https://en.wikipedia.org/wiki/Bloom_(shader_effect)">Bloom Effect</a>
+            which is useful for emissive meshes can be done by adding the <code>bloom-effect</code>
+            attribute, or setting the <code>bloomEffect</code> attribute to <code>true</code>.
+            All implemented effects can be seen in this example, you can toggle them to see the difference.
+            <i>Note: the order of the effect attributes does not matter.</i></p>
+          </div>
+          <example-snippet stamp-to="pixelate" highlight-as="html">
+            <template>
+<model-viewer id="lantern" camera-controls touch-action="pan-y" src="../../shared-assets/models/cubes.gltf" ar alt="A 3D model of a Lantern">
+  <mv-effects-composer>
+    <!-- <mv-glitch-effect></mv-glitch-effect> -->
+    <mv-pixelate-effect id="pixelate" granularity="10"></mv-pixelate-effect>
+    <!-- <mv-smaa-effect quality="ultra"></mv-smaa-effect> -->
+  </mv-effects-composer>
+  <div class="controls">
+    <label for="granularity">Granularity</label>
+    <input id="granularity" type="range" min="5" max="50" step="0.5" value="10">
+  </div>
+</model-viewer>
+<script>
+const modelViewerPostprocessing = document.querySelector("model-viewer#lantern");
+const pixelate = modelViewerPostprocessing.querySelector('#pixelate');
+const granularity = modelViewerPostprocessing.querySelector('#granularity');
+
+function updateGranularity(event) {
+  pixelate.granularity = event.target.value;
+}
+
+granularity.addEventListener('input', updateGranularity);
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="bloom" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Bloom Effect</h2>
+            <p>This example demonstrates the use of PostProcessing Effects with the 
+            model-viewer. Enabling an effect is as simple as adding the attribute to 
+            the model-viewer element, or enabling it using the property. For example,
+            enabling a <a href="https://en.wikipedia.org/wiki/Bloom_(shader_effect)">Bloom Effect</a>
+            which is useful for emissive meshes can be done by adding the <code>bloom-effect</code>
+            attribute, or setting the <code>bloomEffect</code> attribute to <code>true</code>.
+            All implemented effects can be seen in this example, you can toggle them to see the difference.
+          </div>
+          <example-snippet stamp-to="bloom" highlight-as="html">
+            <template>
+<model-viewer style="background: #000" id="bloomViewer" camera-controls touch-action="pan-y" src="../../shared-assets/models/EmissiveStrengthTest.glb  " ar alt="A 3D model of a Lantern">
+  <mv-effects-composer>
+    <!-- <mv-ssao-effect></mv-ssao-effect> -->
+    <mv-glitch-effect></mv-glitch-effect>
+    <mv-smaa-effect quality="ultra"></mv-smaa-effect>
+    <mv-bloom-effect id="bloom" intensity="1"></mv-bloom-effect>
+    <mv-outline-effect blur-strength="2" edge-strength="4" color="red"></mv-outline-effect>
+    <!-- <mv-color-grade-effect brightness="-0.2" contrast="0.25" saturation="0.25"></mv-color-grade-effect> -->
+  </mv-effects-composer>
+  <div class="controls">
+    <label for="intensity">Intensity</label>
+    <input id="intensity" type="range" min="0" max="5" step="0.1" value="1">
+    <label for="threshold">Threshold</label>
+    <input id="threshold" type="range" min="0" max="1" step="0.01" value="0.85">
+    <label for="smoothing">Smoothing</label>
+    <input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.02">
+  </div>
+</model-viewer>
+<script>
+const mv = document.querySelector("model-viewer#bloomViewer");
+const bloom = mv.querySelector('#bloom');
+
+function updateProperty(event, propertyName) {
+  bloom[propertyName] = event.target.value;
+}
+
+mv.querySelector('#intensity').addEventListener('input', (e) => updateProperty(e, 'intensity'));
+mv.querySelector('#threshold').addEventListener('input', (e) => updateProperty(e, 'threshold'));
+mv.querySelector('#smoothing').addEventListener('input', (e) => updateProperty(e, 'smoothing'));
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="footer">
+      <ul>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/Lantern">Lantern</a>,
+          licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero</a>.
+        </li>
+      </ul>
+      <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+      <div id='footer-links'></div>
+    </div>
+  </div>
+</div>
+
+  <script type="module" src="../../examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { init('examples-postprocessing'); })();
+    (() => { initFooterLinks();})();
+  </script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="../built/dependencies.js">
+  </script>
+
+  <!-- Loads <model-viewer> on modern browsers: -->
+  <script type="module"
+      src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  
+  <!-- Loads <model-viewer-effects> on modern browsers: -->
+  <script type="module"
+      src="../../node_modules/@beilinson/model-viewer-effects/dist/model-viewer-effects.js">
+  </script>
+</body>
+</html>
