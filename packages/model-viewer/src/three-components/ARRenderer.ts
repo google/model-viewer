@@ -16,7 +16,7 @@
 import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
-import {ControlsInterface} from '../features/controls.js';
+import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
 import {$currentBackground, $currentEnvironmentMap} from '../features/environment.js';
 import ModelViewerElementBase, {$onResize} from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
@@ -25,6 +25,7 @@ import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
+import {ChangeSource} from './SmoothControls.js';
 
 // number of initial null pose XRFrames allowed before we post not-tracking
 const INIT_FRAMES = 30;
@@ -355,6 +356,11 @@ export class ARRenderer extends EventDispatcher {
       element.requestUpdate('cameraTarget');
       element.requestUpdate('maxCameraOrbit');
       element[$onResize](element.getBoundingClientRect());
+
+      requestAnimationFrame(() => {
+        scene.element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+            'camera-change', {detail: {source: ChangeSource.NONE}}));
+      });
     }
 
     // Force the Renderer to update its size
@@ -418,10 +424,14 @@ export class ARRenderer extends EventDispatcher {
       const scale = view.recommendedViewportScale;
       view.requestViewportScale(Math.max(scale, MIN_VIEWPORT_SCALE));
     }
-    const layer = this.currentSession!.renderState.baseLayer;
-    const viewport = layer!.getViewport(view)!;
-    this.threeRenderer.setViewport(
-        viewport.x, viewport.y, viewport.width, viewport.height);
+    const layer = xr.getBaseLayer();
+    if (layer != null) {
+      const viewport = layer instanceof XRWebGLLayer ?
+          layer!.getViewport(view)! :
+          xr.getBinding().getViewSubImage(layer, view).viewport;
+      this.threeRenderer.setViewport(
+          viewport.x, viewport.y, viewport.width, viewport.height);
+    }
   }
 
   private placeInitially() {
@@ -683,8 +693,10 @@ export class ARRenderer extends EventDispatcher {
     const goal = this.goalPosition;
     const oldScale = scene.scale.x;
     const box = this.placementBox!;
+    let source = ChangeSource.NONE;
 
     if (!goal.equals(position) || this.goalScale !== oldScale) {
+      source = ChangeSource.USER_INTERACTION;
       let {x, y, z} = position;
       x = this.xDamper.update(x, goal.x, delta, boundingRadius);
       y = this.yDamper.update(y, goal.y, delta, boundingRadius);
@@ -711,6 +723,10 @@ export class ARRenderer extends EventDispatcher {
     scene.updateTarget(delta);
     // yaw must be updated last, since this also updates the shadow position.
     scene.yaw = this.yawDamper.update(yaw, this.goalYaw, delta, Math.PI);
+    // camera changes on every frame - user-interaction only if touching the
+    // screen, plus damping time.
+    scene.element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
+        'camera-change', {detail: {source}}));
   }
 
   /**

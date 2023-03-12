@@ -48,7 +48,7 @@
       <div id="addHotspots" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <h4 id="intro"><span class="font-medium">Annotations. </span></h4>
+          <h4><span class="font-medium">Annotations. </span></h4>
           <p>
             Use &lt;model-viewer&gt; to make your models interactive.
             This page showcases how you can add hotspots to your scene. Child elements are hotspots if their slot begins with "hotspot".
@@ -122,10 +122,150 @@
     </div>
 
     <div class="sample">
+      <div id="animatedHotspots" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Animated Hotspots. </span></h4>
+          <p>
+            Hotspots can follow a point on the surface of an animated model by
+            specifying the data-surface attribute instead of world-space
+            position and normal. You can use the <a
+            href="../../docs/index.html#entrydocs-annotations-methods-surfaceFromPoint">surfaceFromPoint</a>
+            method to get this data-surface string, or even easier, just load
+            your model in our <a
+            href="https://modelviewer.dev/editor/">editor</a> and add the
+            hotspots there.
+          </p>
+          <p>
+            Hotspots can be queried to build custom overlays in screen space.
+            For example, by using an SVG canvas and updating the line nodes we
+            can draw label standoff lines.
+          </p>
+          <p>
+            By using WebXR mode, this markup works equally well in AR. Note that
+            because the text is not part of the 3D rendering it is easier to
+            read and more accessible. 
+          </p>
+          <example-snippet stamp-to="animatedHotspots" highlight-as="html">
+            <template>
+<model-viewer id="animation-demo" autoplay ar ar-modes="webxr" scale="0.01 0.01 0.01" camera-orbit="90deg auto auto" shadow-intensity="1" camera-controls touch-action="pan-y" src="../../shared-assets/models/Horse.glb" alt="A 3D model of a horse galloping.">
+  <div slot="hotspot-nose" class="anchor" data-surface="0 0 228 113 111 0.217 0.341 0.442"></div>
+  <div slot="hotspot-hoof" class="anchor" data-surface="0 0 752 733 735 0.132 0.379 0.489"></div>
+  <div slot="hotspot-tail" class="anchor" data-surface="0 0 220 221 222 0.405 0.061 0.534"></div>
+  <svg id="lines" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="lineContainer">
+    <line class="line"></line>
+    <line class="line"></line>
+    <line class="line"></line>
+  </svg>
+
+  <div id="container">
+    <button id="nose" class="label">Nose</button>
+    <button id="hoof" class="label">Hoof</button>
+    <button id="tail" class="label">Tail</button>
+  </div>
+</model-viewer>
+
+<script type="module">
+  const modelViewer1 = document.querySelector('#animation-demo');
+  const lines = modelViewer1.querySelectorAll('line');
+  let baseRect;
+  let noseRect;
+  let hoofRect;
+  let tailRect;
+  
+  function onResize(){
+    baseRect = modelViewer1.getBoundingClientRect();
+    noseRect = document.querySelector('#nose').getBoundingClientRect();
+    hoofRect = document.querySelector('#hoof').getBoundingClientRect();
+    tailRect = document.querySelector('#tail').getBoundingClientRect();
+  }
+
+  modelViewer1.addEventListener('ar-status', onResize);
+
+  modelViewer1.addEventListener('load', () => {
+    onResize();
+    // update svg
+    function drawLine(svgLine, name, rect) {
+      const hotspot = modelViewer1.queryHotspot('hotspot-' + name);
+      svgLine.setAttribute('x1', hotspot.canvasPosition.x);
+      svgLine.setAttribute('y1', hotspot.canvasPosition.y);
+      svgLine.setAttribute('x2', (rect.left + rect.right) / 2 - baseRect.left);
+      svgLine.setAttribute('y2', rect.top - baseRect.top);
+    }
+
+    // use requestAnimationFrame to update with renderer
+    const startSVGRenderLoop = () => {
+      drawLine(lines[0], 'nose', noseRect);
+      drawLine(lines[1], 'hoof', hoofRect);
+      drawLine(lines[2], 'tail', tailRect);
+      requestAnimationFrame(startSVGRenderLoop);
+    };
+
+    startSVGRenderLoop();
+  });
+</script>
+<style>
+  .anchor{
+    display: none;
+  }
+
+  .lineContainer{
+    pointer-events: none;
+    display: block;
+  }
+
+  .line{
+    stroke: #16a5e6;
+    stroke-width: 2;
+    stroke-dasharray: 2
+  }
+
+  #container{
+    position: absolute;
+    display: flex;
+    justify-content: space-evenly;
+    bottom: 8px;
+    left: 8px;
+    width: 100%;
+  }
+
+  .label{
+    background: #fff;
+    border-radius: 4px;
+    border: none;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    color: rgba(0, 0, 0, 0.8);
+    display: block;
+    font-family: Futura, Helvetica Neue, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    max-width: 128px;
+    padding: 0.5em 1em;
+    bottom: 10px;
+    pointer-events: none;
+  }
+
+  #animation-demo::part(default-ar-button){
+    bottom: 64px;
+  }
+
+  /* This keeps child nodes hidden while the element loads */
+  :not(:defined) > * {
+    display: none;
+  }
+</style>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
       <div id="dimensions" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <h4 id="intro"><span class="font-medium">Show Dimensions. </span></h4>
+          <h4><span class="font-medium">Show Dimensions. </span></h4>
           <p>
             Hotspots don't have to be on the model; they can be at arbitrary
             points in 3D space. Here we demonstrate using hotspots to show a
@@ -137,9 +277,8 @@
             Hotspots can be queried to build custom overlays in screen space.
             For example, by using an SVG canvas and updating the line nodes we
             can draw rudimentary dimension lines. Note that this kind of
-            extended functionality cannot support occlusion in the 3D scene, but
-            you can cause it to draw behind the model by setting its CSS z-index
-            to a negative value.
+            extended functionality cannot support occlusion in the 3D scene, as
+            it always draws on top of the model.
           </p>
           <p>
             By using WebXR mode, this markup works equally well in AR. Note that
@@ -153,14 +292,14 @@
   <button slot="hotspot-dim+X-Y" class="dim" data-position="1 -1 0" data-normal="1 0 0"></button>
   <button slot="hotspot-dot+X-Y-Z" class="dot" data-position="1 -1 -1" data-normal="1 0 0"></button>
   <button slot="hotspot-dim+X-Z" class="dim" data-position="1 0 -1" data-normal="1 0 0"></button>
-  <button slot="hotspot-dot+X+Y-Z" class="dot show" data-position="1 1 -1" data-normal="0 1 0"></button>
-  <button slot="hotspot-dim+Y-Z" class="dim show" data-position="0 -1 -1" data-normal="0 1 0"></button>
-  <button slot="hotspot-dot-X+Y-Z" class="dot show" data-position="-1 1 -1" data-normal="0 1 0"></button>
+  <button slot="hotspot-dot+X+Y-Z" class="dot" data-position="1 1 -1" data-normal="0 1 0"></button>
+  <button slot="hotspot-dim+Y-Z" class="dim" data-position="0 -1 -1" data-normal="0 1 0"></button>
+  <button slot="hotspot-dot-X+Y-Z" class="dot" data-position="-1 1 -1" data-normal="0 1 0"></button>
   <button slot="hotspot-dim-X-Z" class="dim" data-position="-1 0 -1" data-normal="-1 0 0"></button>
   <button slot="hotspot-dot-X-Y-Z" class="dot" data-position="-1 -1 -1" data-normal="-1 0 0"></button>
   <button slot="hotspot-dim-X-Y" class="dim" data-position="-1 -1 0" data-normal="-1 0 0"></button>
   <button slot="hotspot-dot-X-Y+Z" class="dot" data-position="-1 -1 1" data-normal="-1 0 0"></button>
-  <svg id="lines" xmlns="http://www.w3.org/2000/svg" class="dimensionLineContainer">
+  <svg id="dimLines" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="dimensionLineContainer">
     <line class="dimensionLine"></line>
     <line class="dimensionLine"></line>
     <line class="dimensionLine"></line>
@@ -199,11 +338,41 @@
   }
 
   checkbox.addEventListener('change', () => {
-    setVisibility(modelViewer.querySelector('#lines'));
+    setVisibility(modelViewer.querySelector('#dimLines'));
     modelViewer.querySelectorAll('button').forEach((hotspot) => {
       setVisibility(hotspot);
     });
   });
+
+  // update svg
+  function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
+    if (dotHotspot1 && dotHotspot2) {
+      svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
+      svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
+      svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
+      svgLine.setAttribute('y2', dotHotspot2.canvasPosition.y);
+
+      // use provided optional hotspot to tie visibility of this svg line to
+      if (dimensionHotspot && !dimensionHotspot.facingCamera) {
+        svgLine.classList.add('hide');
+      }
+      else {
+        svgLine.classList.remove('hide');
+      }
+    }
+  }
+
+  const dimLines = modelViewer.querySelectorAll('line');
+
+  const renderSVG = () => {
+    drawLine(dimLines[0], modelViewer.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Y'));
+    drawLine(dimLines[1], modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Z'));
+    drawLine(dimLines[2], modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X+Y-Z')); // always visible
+    drawLine(dimLines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
+    drawLine(dimLines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
+  };
+
+  modelViewer.addEventListener('camera-change', renderSVG);
 
   modelViewer.addEventListener('load', () => {
     const center = modelViewer.getBoundingBoxCenter();
@@ -219,7 +388,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim+X-Y',
-      position: `${center.x + x2} ${center.y - y2} ${center.z}`
+      position: `${center.x + x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent =
         `${(size.z * 100).toFixed(0)} cm`;
@@ -231,7 +400,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim+X-Z',
-      position: `${center.x + x2} ${center.y} ${center.z - z2}`
+      position: `${center.x + x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent =
         `${(size.y * 100).toFixed(0)} cm`;
@@ -243,7 +412,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim+Y-Z',
-      position: `${center.x} ${center.y + y2} ${center.z - z2}`
+      position: `${center.x} ${center.y + y2 * 1.1} ${center.z - z2 * 1.1}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent =
         `${(size.x * 100).toFixed(0)} cm`;
@@ -255,7 +424,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim-X-Z',
-      position: `${center.x - x2} ${center.y} ${center.z - z2}`
+      position: `${center.x - x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent =
         `${(size.y * 100).toFixed(0)} cm`;
@@ -267,7 +436,7 @@
 
     modelViewer.updateHotspot({
       name: 'hotspot-dim-X-Y',
-      position: `${center.x - x2} ${center.y - y2} ${center.z}`
+      position: `${center.x - x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
     });
     modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent =
         `${(size.z * 100).toFixed(0)} cm`;
@@ -277,37 +446,7 @@
       position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`
     });
 
-    // update svg
-    function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
-      if (dotHotspot1 && dotHotspot1) {
-        svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
-        svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
-        svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
-        svgLine.setAttribute('y2', dotHotspot2.canvasPosition.y);
-
-        // use provided optional hotspot to tie visibility of this svg line to
-        if (dimensionHotspot && !dimensionHotspot.facingCamera) {
-          svgLine.classList.add('hide');
-        }
-        else {
-          svgLine.classList.remove('hide');
-        }
-      }
-    }
-
-    const lines = modelViewer.querySelectorAll('line');
-
-    // use requestAnimationFrame to update with renderer
-    const startSVGRenderLoop = () => {
-      drawLine(lines[0], modelViewer.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Y'));
-      drawLine(lines[1], modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Z'));
-      drawLine(lines[2], modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X+Y-Z')); // always visible
-      drawLine(lines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
-      drawLine(lines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
-      requestAnimationFrame(startSVGRenderLoop);
-    };
-
-    startSVGRenderLoop();
+    renderSVG();
   });
 </script>
 <style>
@@ -318,19 +457,11 @@
     max-width: unset;
     transform: unset;
     pointer-events: auto;
+    z-index: 100;
   }
 
   .dot{
-    display: block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: none;
-    box-sizing: border-box;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-    background: #fff;
-    pointer-events: none;
-    --min-hotspot-opacity: 0;
+    display: none;
   }
 
   .dim{
@@ -342,7 +473,7 @@
     color: rgba(0, 0, 0, 0.8);
     display: block;
     font-family: Futura, Helvetica Neue, sans-serif;
-    font-size: 18px;
+    font-size: 1em;
     font-weight: 700;
     max-width: 128px;
     overflow-wrap: break-word;
@@ -355,22 +486,21 @@
     --min-hotspot-opacity: 0;
   }
 
+  @media only screen and (max-width: 800px) {
+    .dim{
+      font-size: 3vw;
+    }
+  }
+
   .dimensionLineContainer{
     pointer-events: none;
-    position: fixed;
     display: block;
-    width: 100%;
-    height: 100%; 
   }
 
   .dimensionLine{
     stroke: #16a5e6;
     stroke-width: 2;
-    stroke-dasharray: 2
-  }
-
-  .show{
-    --min-hotspot-opacity: 1;
+    stroke-dasharray: 2;
   }
 
   .hide{
@@ -391,7 +521,7 @@
       <div id="cameraViews" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-          <h4 id="intro"><span class="font-medium">Camera Views. </span></h4>
+          <h4><span class="font-medium">Camera Views. </span></h4>
           <p>
             Hotspots can contain additional data attributes and can be interactive. This example attaches click events to hotspots to move the camera.
           </p>
@@ -528,6 +658,14 @@
           <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
           licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
         </li>        
+        <li class="attribution">
+          <a href="https://github.com/dataarts/3-dreams-of-black/tree/master/deploy/files/models/soup">Horse</a> by <a href="https://github.com/dataarts">Google Data Arts Team</a>,
+          licensed under <a href="https://github.com/dataarts/3-dreams-of-black/blob/master/deploy/files/models/soup/LICENSE.txt">Creative Commons Attribution-NonCommercial-ShareAlike</a>.
+        </li>
+        <li class="attribution">
+          Chair, Mixer, GeoPlanter ©Copyright 2020 <a href="https://www.shopify.com/">Shopify Inc.</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>.
+        </li>
         <li class="attribution">
           <a href="https://sketchfab.com/3d-models/thor-and-the-midgard-serpent-2ef4c45caa35450db1b876a7f94ff79d">Thor and the Midgard Serpent</a> by <a href="https://sketchfab.com/MatthijsDeRijk">Matthijs de Rijk</a>,
           licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY</a>.

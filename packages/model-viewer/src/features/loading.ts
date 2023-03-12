@@ -24,14 +24,16 @@ import {Constructor, throttle} from '../utilities.js';
 export type RevealAttributeValue = 'auto'|'manual';
 export type LoadingAttributeValue = 'auto'|'lazy'|'eager';
 
-export const POSTER_TRANSITION_TIME = 300;
 export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 
 const DEFAULT_DRACO_DECODER_LOCATION =
-    'https://www.gstatic.com/draco/versioned/decoders/1.4.1/';
+    'https://www.gstatic.com/draco/versioned/decoders/1.5.6/';
 
 const DEFAULT_KTX2_TRANSCODER_LOCATION =
     'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/';
+
+const DEFAULT_LOTTIE_LOADER_LOCATION =
+    'https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/loaders/LottieLoader.js';
 
 const RevealStrategy: {[index: string]: RevealAttributeValue} = {
   AUTO: 'auto',
@@ -74,6 +76,7 @@ export declare interface LoadingStaticInterface {
   dracoDecoderLocation: string;
   ktx2TranscoderLocation: string;
   meshoptDecoderLocation: string;
+  lottieLoaderLocation: string;
   mapURLs(callback: (url: string) => string): void;
 }
 
@@ -81,6 +84,7 @@ export interface ModelViewerGlobalConfig {
   dracoDecoderLocation?: string;
   ktx2TranscoderLocation?: string;
   meshoptDecoderLocation?: string;
+  lottieLoaderLocation?: string;
   powerPreference?: string;
 }
 
@@ -159,6 +163,14 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     static get meshoptDecoderLocation() {
       return CachingGLTFLoader.getMeshoptDecoderLocation();
+    }
+
+    static set lottieLoaderLocation(value: string) {
+      Renderer.singleton.textureUtils!.lottieLoaderUrl = value;
+    }
+
+    static get lottieLoaderLocation() {
+      return Renderer.singleton.textureUtils!.lottieLoaderUrl
     }
 
     /**
@@ -313,12 +325,18 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
         CachingGLTFLoader.setMeshoptDecoderLocation(
             ModelViewerElement.meshoptDecoderLocation);
       }
+
+      const lottieLoaderLocation = ModelViewerElement.lottieLoaderLocation ||
+          DEFAULT_LOTTIE_LOADER_LOCATION;
+      Renderer.singleton.textureUtils!.lottieLoaderUrl = lottieLoaderLocation;
     }
 
     connectedCallback() {
       super.connectedCallback();
 
-      this.showPoster();
+      if (!this.loaded) {
+        this.showPoster();
+      }
 
       this[$progressTracker].addEventListener('progress', this[$onProgress]);
     }

@@ -26,12 +26,12 @@ import '../shared/draggable_input/draggable_input.js';
 import '../shared/checkbox/checkbox.js';
 
 import {html} from 'lit';
-import {customElement, state, property, query} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {cameraSettingsStyles} from '../../styles.css.js';
 import {ModelViewerConfig, State} from '../../types.js';
-import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../config/reducer.js';
+import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraFov, dispatchSaveCameraOrbit, getConfig} from '../config/reducer.js';
 import {Vector3D} from '../config/types.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {getModelViewer, getUpdatedModelViewer, isLoaded} from '../model_viewer_preview/reducer.js';
@@ -46,13 +46,6 @@ class CameraOrbitEditor extends ConnectedLitElement {
 
   @query('me-draggable-input#yaw') yawInput!: DraggableInput;
   @query('me-draggable-input#pitch') pitchInput!: DraggableInput;
-
-  get currentOrbit() {
-    return {
-      phi: degToRad(this.pitchInput.value),
-      theta: degToRad(this.yawInput.value),
-    };
-  }
 
   private onChange() {
     this.dispatchEvent(new CustomEvent('change'));
@@ -179,11 +172,13 @@ export class CameraSettings extends ConnectedLitElement {
   async onSaveCameraOrbit() {
     const modelViewer = await getUpdatedModelViewer();
     reduxStore.dispatch(dispatchSaveCameraOrbit(modelViewer.getCameraOrbit()));
+    reduxStore.dispatch(dispatchSaveCameraFov(modelViewer.getFieldOfView()));
   }
 
   resetInitialCamera() {
     this.cameraOrbitEditor.style.display = 'none';
     reduxStore.dispatch(dispatchSaveCameraOrbit(undefined));
+    reduxStore.dispatch(dispatchSaveCameraFov(undefined));
   }
 
   onUpdateFraming() {
@@ -193,8 +188,10 @@ export class CameraSettings extends ConnectedLitElement {
   }
 
   onCameraOrbitEditorChange() {
-    reduxStore.dispatch(
-        dispatchSaveCameraOrbit(this.cameraOrbitEditor.currentOrbit));
+    const orbit = getModelViewer().getCameraOrbit();
+    orbit.phi = degToRad(this.cameraOrbitEditor.pitchInput.value),
+    orbit.theta = degToRad(this.cameraOrbitEditor.yawInput.value),
+    reduxStore.dispatch(dispatchSaveCameraOrbit(orbit));
     getModelViewer().jumpCameraToGoal();
   }
 

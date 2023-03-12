@@ -14,7 +14,7 @@
  */
 
 import {convertJSONToHTML, createExamplesHeader, createExamplesSidebar, starterSidebar} from './create-html';
-import {getSidebarCategoryForNewPage, sidebarObserver} from './sidebar';
+import {getSidebarCategoryForNewPage, sidebarDocsObserver, sidebarExamplesObserver} from './sidebar';
 
 
 // TODO: Handle going from examples back to docs (old state), possibly
@@ -97,18 +97,20 @@ export function initFooterLinks() {
  * docsOrExample: 'docs' or 'examples-${category}'
  */
 export function init(docsOrExample: string) {
-  const filePath = docsOrExample === 'docs' ? '../data/docs.json' :
-                                              '../../data/examples.json';
+  const base = docsOrExample.split('-')[0];
+  const filePath =
+      (base === 'examples' ? '../' : '') + '../data/' + base + '.json';
   loadJSON(filePath, function(response: string) {
     const json = JSON.parse(response);
     starterSidebar(docsOrExample);
-    if (docsOrExample === 'docs') {
-      convertJSONToHTML(json);
-    } else {
+    if (base === 'examples') {
       createExamplesSidebar(json);
       createExamplesHeader();
+      sidebarExamplesObserver();
+    } else {
+      convertJSONToHTML(json);
+      sidebarDocsObserver();
     }
-    sidebarObserver(docsOrExample);
     jumpToSection();
   });
 }

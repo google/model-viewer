@@ -23,9 +23,9 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.4",
-    "@babylonjs/core": "^5.27.1",
-    "@babylonjs/loaders": "^5.27.1",
-    "@google/model-viewer": "^2.1.1",
+    "@babylonjs/core": "^5.44.0",
+    "@babylonjs/loaders": "^5.44.0",
+    "@google/model-viewer": "^3.0.2",
     "@khronosgroup/gltf-viewer": "^1.0.9",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
@@ -35,14 +35,17 @@
     "@types/pngjs": "^3.4.0",
     "@types/puppeteer": "^5.4.6",
     "@types/rimraf": "^3.0.1",
-    "filament": "1.12.2",
+    "@types/three": "^0.148.0",
+    "filament": "1.31.5",
     "focus-visible": "^5.2.0",
     "http-server": "^14.1.1",
     "lit": "^2.2.3",
     "mkdirp": "^1.0.4",
     "pngjs": "^6.0.0",
     "puppeteer": "^18.2.1",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "three": "^0.148.0",
+    "three-gpu-pathtracer": "^0.0.13"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",

@@ -19,7 +19,6 @@
 
 import {HotspotEditorElement} from '../../components/hotspot_panel/hotspot_editor.js';
 import {dispatchAddHotspot, dispatchClearHotspot, getHotspots} from '../../components/hotspot_panel/reducer.js';
-import {toVector3D} from '../../components/hotspot_panel/types.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
@@ -28,10 +27,7 @@ describe('hotspot editor test', () => {
 
   beforeEach(async () => {
     reduxStore.dispatch(dispatchReset());
-    const config = {
-      name: 'test',
-      position: toVector3D([1, 0, 0]),
-    };
+    const config = {name: 'test', surface: 'stuff'};
     reduxStore.dispatch(dispatchAddHotspot(config));
     hotspotEditor = new HotspotEditorElement();
     hotspotEditor.config = config;

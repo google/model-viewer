@@ -14,8 +14,8 @@
  */
 
 import './images-4-up.js';
-
 import '@polymer/paper-slider';
+
 import {html, LitElement} from 'lit';
 import {property} from 'lit/decorators.js';
 
@@ -73,21 +73,6 @@ export class AnalysisView extends LitElement {
   async connectedCallback() {
     super.connectedCallback && super.connectedCallback();
 
-    document.body.addEventListener('click', (event) => {
-      const originatingElement = (event as any).path[0] as HTMLElement;
-
-      if (originatingElement.tagName !== 'IMG') {
-        return;
-      }
-
-      if ((originatingElement.parentNode! as HTMLElement)
-              .classList.contains('selected')) {
-        this.deselect(originatingElement as HTMLImageElement);
-      } else {
-        this.select(originatingElement as HTMLImageElement);
-      }
-    });
-
     await this.updateComplete;
 
     const candidateCanvas =
@@ -114,6 +99,15 @@ export class AnalysisView extends LitElement {
           deltaCanvas
         },
         [candidateCanvas, goldenCanvas, blackWhiteCanvas, deltaCanvas]);
+  }
+
+  pick(originatingElement: HTMLImageElement) {
+    if ((originatingElement.parentNode! as HTMLElement)
+            .classList.contains('selected')) {
+      this.deselect(originatingElement);
+    } else {
+      this.select(originatingElement);
+    }
   }
 
   get canCompareImages(): boolean {

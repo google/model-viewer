@@ -28,7 +28,7 @@ import {customElement, query, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {modelViewerPreviewStyles} from '../../styles.css.js';
-import {BestPracticesState, extractStagingConfig, ModelViewerConfig, State} from '../../types.js';
+import {ArConfigState, BestPracticesState, extractStagingConfig, ModelViewerConfig, State} from '../../types.js';
 import {getBestPractices} from '../best_practices/reducer.js';
 import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {dispatchCameraIsDirty} from '../camera_settings/reducer.js';
@@ -37,7 +37,7 @@ import {ConnectedLitElement} from '../connected_lit_element/connected_lit_elemen
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
 import {createBlobUrlFromEnvironmentImage, dispatchAddEnvironmentImage} from '../ibl_selector/reducer.js';
-import {dispatchSetForcePost, getRefreshable} from '../mobile_view/reducer.js';
+import {dispatchSetForcePost, getArConfig, getRefreshable} from '../mobile_view/reducer.js';
 import {getExtraAttributes} from '../model_viewer_snippet/reducer.js';
 import {dispatchSetEnvironmentName, dispatchSetModelName} from '../relative_file_paths/reducer.js';
 import {createSafeObjectUrlFromArrayBuffer} from '../utils/create_object_url.js';
@@ -55,6 +55,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
       [modelViewerPreviewStyles, hotspotStyles, arButtonCSS, progressBarCSS];
   @query('model-viewer') readonly modelViewer!: ModelViewerElement;
   @state() config: ModelViewerConfig = {};
+  @state() arConfig: ArConfigState = {};
   @state() hotspots: HotspotConfig[] = [];
   @state() addHotspotMode = false;
   @state() gltfUrl?: string;
@@ -71,6 +72,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   stateChanged(state: State) {
     this.addHotspotMode = getHotspotMode(state) || false;
     this.config = getConfig(state);
+    this.arConfig = getArConfig(state);
     this.hotspots = getHotspots(state);
     this.extraAttributes = getExtraAttributes(state);
     this.refreshButtonIsReady = getRefreshable(state);
@@ -128,12 +130,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
           <small>Drop an HDR for lighting</small></div>`);
     }
 
-    const emptyARConfig = {};
-
     return html`${
         renderModelViewer(
             editedConfig,
-            emptyARConfig,
+            this.arConfig,
             this.extraAttributes,
             {
               load: () => {
@@ -167,16 +167,15 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private addHotspot(event: MouseEvent) {
-    const positionAndNormal = this.modelViewer.positionAndNormalFromPoint(
-        event.clientX, event.clientY);
-    if (!positionAndNormal) {
+    const surface =
+        this.modelViewer.surfaceFromPoint(event.clientX, event.clientY);
+    if (!surface) {
           console.log('Click was not on model, no hotspot added.');
           return;
     }
     reduxStore.dispatch(dispatchAddHotspot({
       name: generateUniqueHotspotName(),
-      position: positionAndNormal.position,
-      normal: positionAndNormal.normal,
+      surface,
     }));
     reduxStore.dispatch(dispatchUpdateHotspotMode(false));
   }

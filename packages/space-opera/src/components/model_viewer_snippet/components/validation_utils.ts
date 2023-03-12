@@ -26,6 +26,7 @@ export type Report = {
   info?: {
     version?: string;
     generator?: string;
+    extensionsUsed?: [string];
     drawCallCount?: number;
     animationCount?: number;
     materialCount?: number;
@@ -35,6 +36,7 @@ export type Report = {
     width?: number;
     length?: number;
     height?: number;
+    converted?: boolean;
   };
   validatorVersion?: string;
   issues?: {

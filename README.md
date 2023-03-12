@@ -16,6 +16,8 @@ Check out the README.md files for specific projects to get more details:
 
 🎨 **[shared-assets](packages/shared-assets)** • 3D models, environment maps and other assets shared across many sub-projects
 
+🚀 **[space-opera](packages/space-opera/)** • The source of the `<model-viewer>` [editor](editor)
+
 ## Development
 
 When developing across all the projects in this repository, first install git,

@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Vector2, Vector3, WebGLRenderer} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Triangle, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+// @ts-ignore
+import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
 
 import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
+import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
 import ModelViewerElementBase, {$renderer, EffectsRendererInterface, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {normalizeUnit} from '../styles/conversions.js';
@@ -26,7 +29,6 @@ import {resolveDpr} from '../utilities.js';
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {Hotspot} from './Hotspot.js';
-import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
 const MIN_SHADOW_RATIO = 100;
@@ -275,6 +277,7 @@ export class ModelScene extends Scene {
 
   reset() {
     this.url = null;
+    this.renderCount = 0;
     this.queueRender();
     if (this.shadow != null) {
       this.shadow.setIntensity(0);
@@ -811,6 +814,14 @@ export class ModelScene extends Scene {
     return raycaster;
   }
 
+  hitFromPoint(ndcPosition: Vector2, object: Object3D = this) {
+    this.raycaster.setFromCamera(ndcPosition, this.getCamera());
+    const hits = this.raycaster.intersectObject(object, true);
+
+    return hits.find(
+        (hit) => hit.object.visible && !hit.object.userData.shadow);
+  }
+
   /**
    * This method returns the world position, model-space normal and texture
    * coordinate of the point on the mesh corresponding to the input pixel
@@ -819,11 +830,7 @@ export class ModelScene extends Scene {
    */
   positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
       {position: Vector3, normal: Vector3, uv: Vector2|null}|null {
-    this.raycaster.setFromCamera(ndcPosition, this.getCamera());
-    const hits = this.raycaster.intersectObject(object, true);
-
-    const hit =
-        hits.find((hit) => hit.object.visible && !hit.object.userData.shadow);
+    const hit = this.hitFromPoint(ndcPosition, object);
     if (hit == null || hit.face == null) {
       return null;
     }
@@ -836,6 +843,43 @@ export class ModelScene extends Scene {
         new Matrix3().getNormalMatrix(hit.object.matrixWorld));
 
     return {position: hit.point, normal: hit.face.normal, uv: hit.uv};
+  }
+
+  /**
+   * This method returns a dynamic hotspot ID string of the point on the mesh
+   * corresponding to the input pixel coordinates given relative to the
+   * model-viewer element. The ID string can be used in the data-surface
+   * attribute of the hotspot to make it follow this point on the surface even
+   * as the model animates. If the mesh is not hit, the result is null.
+   */
+  surfaceFromPoint(ndcPosition: Vector2, object: Object3D = this): string|null {
+    const model = this.element.model;
+    if (model == null) {
+      return null;
+    }
+
+    const hit = this.hitFromPoint(ndcPosition, object);
+    if (hit == null || hit.face == null) {
+      return null;
+    }
+
+    const node = model[$nodeFromPoint](hit);
+    const {meshes, primitives} = node.mesh.userData.associations;
+
+    const va = new Vector3();
+    const vb = new Vector3();
+    const vc = new Vector3();
+    const {a, b, c} = hit.face;
+    const mesh = hit.object as any;
+    mesh.getVertexPosition(a, va);
+    mesh.getVertexPosition(b, vb);
+    mesh.getVertexPosition(c, vc);
+    const tri = new Triangle(va, vb, vc);
+    const uvw = new Vector3();
+    tri.getBarycoord(mesh.worldToLocal(hit.point), uvw);
+
+    return `${meshes} ${primitives} ${a} ${b} ${c} ${uvw.x.toFixed(3)} ${
+        uvw.y.toFixed(3)} ${uvw.z.toFixed(3)}`;
   }
 
   /**
@@ -869,10 +913,59 @@ export class ModelScene extends Scene {
   }
 
   /**
+   * Lazy initializer for surface hotspots - will only run once.
+   */
+  initializeSurface(hotspot: Hotspot) {
+    if (hotspot.surface != null && hotspot.mesh == null) {
+      const nodes = parseExpressions(hotspot.surface)[0].terms as NumberNode[];
+      if (nodes.length != 8) {
+        console.warn(hotspot.surface + ' does not have exactly 8 numbers.');
+        return;
+      }
+      const primitiveNode =
+          this.element.model![$nodeFromIndex](nodes[0].number, nodes[1].number);
+      const tri =
+          new Vector3(nodes[2].number, nodes[3].number, nodes[4].number);
+
+      if (primitiveNode == null) {
+        console.warn(
+            hotspot.surface +
+            ' does not match a node/primitive in this glTF! Skipping this hotspot.');
+        return;
+      }
+
+      const numVert = primitiveNode.mesh.geometry.attributes.position.count;
+      if (tri.x >= numVert || tri.y >= numVert || tri.z >= numVert) {
+        console.warn(
+            hotspot.surface +
+            ' vertex indices out of range in this glTF! Skipping this hotspot.');
+        return;
+      }
+
+      const bary =
+          new Vector3(nodes[5].number, nodes[6].number, nodes[7].number);
+      hotspot.mesh = primitiveNode.mesh;
+      hotspot.tri = tri;
+      hotspot.bary = bary;
+    }
+  }
+
+  /**
+   * Update positions of surface hotspots to follow model animation.
+   */
+  updateSurfaceHotspots() {
+    const forceUpdate = !this.element.paused;
+    this.forHotspots((hotspot) => {
+      this.initializeSurface(hotspot);
+      hotspot.updateSurface(forceUpdate);
+    });
+  }
+
+  /**
    * Update the CSS visibility of the hotspots based on whether their normals
    * point toward the camera.
    */
-  updateHotspots(viewerPosition: Vector3) {
+  updateHotspotsVisibility(viewerPosition: Vector3) {
     this.forHotspots((hotspot) => {
       view.copy(viewerPosition);
       target.setFromMatrixPosition(hotspot.matrixWorld);

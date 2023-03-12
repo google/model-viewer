@@ -20,6 +20,10 @@
       "description": "gltf-sample-viewer"
     },
     {
+      "name": "three-gpu-pathtracer",
+      "description": "three-gpu-pathtracer"
+    },
+    {
       "name": "stellar",
       "description": "Dassault Systèmes STELLAR",
       "command": {}
@@ -127,6 +131,142 @@
       }
     },
     {
+      "name": "khronos-ABeautifulGame",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/ABeautifulGame/glTF/ABeautifulGame.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 1,
+        "theta": -140,
+        "phi": 50
+      },
+      "target": {
+        "y": -0.15
+      },
+      "dimensions": {
+        "height": 600,
+        "width": 1000
+      }
+    },
+    {
+      "name": "khronos-IridescenceLamp",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceLamp/glTF/IridescenceLamp.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 0.85,
+        "theta": 0,
+        "phi": 100
+      },
+      "target": {
+        "y": 0.25
+      },
+      "dimensions": {
+        "height": 800,
+        "width": 620
+      },
+      "exclude": [
+        "three-gpu-pathtracer",
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-LightsPunctualLamp",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/LightsPunctualLamp/glTF/LightsPunctualLamp.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 2.75,
+        "theta": -155,
+        "phi": 90
+      },
+      "target": {
+        "x": 0.25,
+        "y": 0.85
+      },
+      "dimensions": {
+        "height": 800,
+        "width": 550
+      }
+    },
+    {
+      "name": "khronos-MosquitoInAmber",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/MosquitoInAmber/glTF/MosquitoInAmber.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 0.2,
+        "theta": -25,
+        "phi": 75
+      },
+      "dimensions": {
+        "height": 700,
+        "width": 700
+      }
+    },
+    {
+      "name": "khronos-EmissiveStrengthTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/EmissiveStrengthTest/glTF/EmissiveStrengthTest.gltf",
+      "orbit": {
+        "radius": 12,
+        "theta": 0,
+        "phi": 75
+      },
+      "dimensions": {
+        "height": 600,
+        "width": 1000
+      }
+    },
+    {
+      "name": "khronos-IridescenceDielectricSpheres",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceDielectricSpheres/glTF/IridescenceDielectricSpheres.gltf",
+      "orbit": {
+        "radius": 50,
+        "theta": 45,
+        "phi": 65
+      },
+      "target": {
+        "y": -3
+      },
+      "dimensions": {
+        "height": 700,
+        "width": 700
+      },
+      "exclude": [
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-IridescenceMetallicSpheres",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceMetallicSpheres/glTF/IridescenceMetallicSpheres.gltf",
+      "orbit": {
+        "radius": 50,
+        "theta": 45,
+        "phi": 65
+      },
+      "target": {
+        "y": -3
+      },
+      "dimensions": {
+        "height": 700,
+        "width": 700
+      },
+      "exclude": [
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-IridescenceSuzanne",
+      "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/IridescenceSuzanne/glTF/IridescenceSuzanne.gltf",
+      "renderSkybox": true,
+      "orbit": {
+        "radius": 5
+      },
+      "dimensions": {
+        "height": 400,
+        "width": 1000
+      },
+      "exclude": [
+        "stellar"
+      ]
+    },
+    {
       "name": "khronos-AntiqueCamera",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
       "dimensions": {
@@ -230,7 +370,8 @@
         "radius": 0.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -245,7 +386,8 @@
       },
       "exclude": [
         "model-viewer",
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -304,7 +446,8 @@
       "exclude": [
         "stellar",
         "babylon",
-        "gltf-sample-viewer"
+        "gltf-sample-viewer",
+        "three-gpu-pathtracer"
       ],
       "renderSkybox": true
     },
@@ -380,7 +523,10 @@
       },
       "dimensions": {
         "height": 700
-      }
+      },
+      "exclude": [
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-TransmissionRoughnessTest",
@@ -435,7 +581,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -445,7 +592,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -578,7 +726,8 @@
         "y": -0.28
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -733,7 +882,8 @@
         "radius": 1.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -757,7 +907,8 @@
         "radius": 2.38
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -809,7 +960,8 @@
         "width": 400
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -847,7 +999,8 @@
         "radius": 4.25
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -877,7 +1030,8 @@
         "radius": 3
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -891,7 +1045,8 @@
         "radius": 3.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -905,7 +1060,8 @@
         "radius": 9
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -949,7 +1105,8 @@
         "radius": 1.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -963,7 +1120,8 @@
         "radius": 1.5
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -973,7 +1131,8 @@
         "radius": 7
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {

@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-import {Vector3} from 'three';
+import {Matrix3, Mesh, Quaternion, Triangle, Vector3} from 'three';
 import {CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
+
+import {ModelScene} from './ModelScene.js';
 
 export interface HotspotVisibilityDetails {
   visible: boolean;
@@ -33,7 +35,15 @@ export interface HotspotConfiguration {
   name: string;
   position?: string;
   normal?: string;
+  surface?: string;
 }
+
+const a = new Vector3();
+const b = new Vector3();
+const c = new Vector3();
+const mat = new Matrix3();
+const triangle = new Triangle();
+const quat = new Quaternion();
 
 /**
  * The Hotspot object is a reference-counted slot. If decrement() returns true,
@@ -41,6 +51,10 @@ export interface HotspotConfiguration {
  */
 export class Hotspot extends CSS2DObject {
   public normal: Vector3 = new Vector3(0, 1, 0);
+  public surface?: string;
+  public mesh?: Mesh;
+  public tri?: Vector3;
+  public bary?: Vector3;
   private initialized = false;
   private referenceCount = 1;
   private pivot = document.createElement('div');
@@ -58,6 +72,7 @@ export class Hotspot extends CSS2DObject {
 
     this.updatePosition(config.position);
     this.updateNormal(config.normal);
+    this.surface = config.surface;
   }
 
   get facingCamera(): boolean {
@@ -124,9 +139,35 @@ export class Hotspot extends CSS2DObject {
       return;
     const normalNodes = parseExpressions(normal)[0].terms;
     for (let i = 0; i < 3; ++i) {
-      this.normal.setComponent(
-          i, normalizeUnit(normalNodes[i] as NumberNode<'m'>).number);
+      this.normal.setComponent(i, (normalNodes[i] as NumberNode).number);
     }
+  }
+
+  updateSurface(forceUpdate: boolean) {
+    if (!forceUpdate && this.initialized) {
+      return;
+    }
+    const {mesh, tri, bary} = this;
+    if (mesh == null || tri == null || bary == null) {
+      return;
+    }
+
+    (mesh as any).getVertexPosition(tri.x, a);
+    (mesh as any).getVertexPosition(tri.y, b);
+    (mesh as any).getVertexPosition(tri.z, c);
+
+    a.toArray(mat.elements, 0);
+    b.toArray(mat.elements, 3);
+    c.toArray(mat.elements, 6);
+    this.position.copy(bary).applyMatrix3(mat);
+    const target = this.parent!;
+    target.worldToLocal(mesh.localToWorld(this.position));
+
+    triangle.set(a, b, c);
+    triangle.getNormal(this.normal).transformDirection(mesh.matrixWorld);
+    const scene = target.parent as ModelScene;
+    quat.setFromAxisAngle(a.set(0, 1, 0), -scene.yaw);
+    this.normal.applyQuaternion(quat);
   }
 
   orient(radians: number) {

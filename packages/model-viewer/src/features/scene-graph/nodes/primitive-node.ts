@@ -22,24 +22,10 @@ import {$getLoadedMaterial, $variantIndices, Material} from '../material.js';
 import {VariantData} from '../model.js';
 import {$correlatedObjects} from '../three-dom-element.js';
 
-
-
-const $materials = Symbol('materials');
-const $variantToMaterialMap = Symbol('variantToMaterialMap');
-const $modelVariants = Symbol('modelVariants');
-const $mesh = Symbol('mesh');
-export const $primitives = Symbol('primitives');
-export const $loadVariant = Symbol('loadVariant');
-export const $prepareVariantsForExport = Symbol('prepareVariantsForExport');
-export const $switchVariant = Symbol('switchVariant');
-export const $children = Symbol('children');
-export const $initialMaterialIdx = Symbol('initialMaterialIdx');
-export const $activeMaterialIdx = Symbol('activeMaterialIdx');
-
 // Defines the base level node methods and data.
 export class Node {
   name: string = '';
-  [$children] = new Array<Node>();
+  children = new Array<Node>();
   constructor(name: string) {
     this.name = name;
   }
@@ -47,29 +33,29 @@ export class Node {
 
 // Represents a primitive in a glTF mesh.
 export class PrimitiveNode extends Node {
-  private[$mesh]: Mesh;
+  public mesh: Mesh;
   // Maps glTF material index number to a material that this primitive supports.
-  [$materials] = new Map<number, Material>();
+  public materials = new Map<number, Material>();
   // Maps variant index to material.
-  private[$variantToMaterialMap] = new Map<number, Material>();
-  private[$initialMaterialIdx] = 0;
-  private[$activeMaterialIdx] = 0;
-  private[$modelVariants]: Map<string, VariantData>;
+  private variantToMaterialMap = new Map<number, Material>();
+  public initialMaterialIdx = 0;
+  private activeMaterialIdx = 0;
+  private modelVariants: Map<string, VariantData>;
 
   constructor(
       mesh: Mesh, mvMaterials: Material[],
       modelVariants: Map<string, VariantData>,
       correlatedSceneGraph: CorrelatedSceneGraph) {
     super(mesh.name);
-    this[$mesh] = mesh;
+    this.mesh = mesh;
     const {gltf, threeGLTF, threeObjectMap} = correlatedSceneGraph;
-    this[$modelVariants] = modelVariants;
+    this.modelVariants = modelVariants;
     this.mesh.userData.variantData = modelVariants;
     // Captures the primitive's initial material.
     const materialMappings =
         threeObjectMap.get(mesh.material as ThreeMaterial)!;
     if (materialMappings.materials != null) {
-      this[$initialMaterialIdx] = this[$activeMaterialIdx] =
+      this.initialMaterialIdx = this.activeMaterialIdx =
           materialMappings.materials;
     } else {
       console.error(
@@ -99,14 +85,14 @@ export class PrimitiveNode extends Node {
 
     // Maps the gltfPrimitive default to a material.
     if (gltfPrimitive.material != null) {
-      this[$materials].set(
+      this.materials.set(
           gltfPrimitive.material, mvMaterials[gltfPrimitive.material]);
     } else {
       const defaultIdx = mvMaterials.findIndex((mat: Material) => {
         return mat.name === 'Default';
       });
       if (defaultIdx >= 0) {
-        this[$materials].set(defaultIdx, mvMaterials[defaultIdx]);
+        this.materials.set(defaultIdx, mvMaterials[defaultIdx]);
       } else {
         console.warn('gltfPrimitive has no material!');
       }
@@ -124,10 +110,10 @@ export class PrimitiveNode extends Node {
       for (const mapping of variantsExtension.mappings) {
         const mvMaterial = mvMaterials[mapping.material];
         // Maps variant indices to Materials.
-        this[$materials].set(mapping.material, mvMaterial);
+        this.materials.set(mapping.material, mvMaterial);
         for (const variant of mapping.variants) {
           const {name} = variantNames[variant];
-          this[$variantToMaterialMap].set(variant, mvMaterial);
+          this.variantToMaterialMap.set(variant, mvMaterial);
           // Provides variant info for material self lookup.
           mvMaterial[$variantIndices]().add(variant);
           // Updates the models variant data.
@@ -139,33 +125,29 @@ export class PrimitiveNode extends Node {
     }
   }
 
-  get mesh() {
-    return this[$mesh];
-  }
-
   async setActiveMaterial(material: number): Promise<ThreeMaterial|null> {
-    const mvMaterial = this[$materials].get(material);
+    const mvMaterial = this.materials.get(material);
     if (mvMaterial != null) {
       this.mesh.material = await mvMaterial[$getLoadedMaterial]();
-      this[$activeMaterialIdx] = material;
+      this.activeMaterialIdx = material;
     }
     return this.mesh.material as ThreeMaterial;
   }
 
   getActiveMaterial(): Material {
-    return this[$materials].get(this[$activeMaterialIdx])!;
+    return this.materials.get(this.activeMaterialIdx)!;
   }
 
   getMaterial(index: number): Material|undefined {
-    return this[$materials].get(index);
+    return this.materials.get(index);
   }
 
   async enableVariant(name: string|null): Promise<ThreeMaterial|null> {
     if (name == null) {
-      return this.setActiveMaterial(this[$initialMaterialIdx]);
+      return this.setActiveMaterial(this.initialMaterialIdx);
     }
-    if (this[$variantToMaterialMap] != null && this[$modelVariants].has(name)) {
-      const modelVariants = this[$modelVariants].get(name)!;
+    if (this.variantToMaterialMap != null && this.modelVariants.has(name)) {
+      const modelVariants = this.modelVariants.get(name)!;
       return this.enableVariantHelper(modelVariants.index);
     }
     return null;
@@ -173,8 +155,8 @@ export class PrimitiveNode extends Node {
 
   private async enableVariantHelper(index: number|
                                     null): Promise<ThreeMaterial|null> {
-    if (this[$variantToMaterialMap] != null && index != null) {
-      const material = this[$variantToMaterialMap].get(index);
+    if (this.variantToMaterialMap != null && index != null) {
+      const material = this.variantToMaterialMap.get(index);
       if (material != null) {
         return this.setActiveMaterial(material.index);
       }
@@ -183,10 +165,10 @@ export class PrimitiveNode extends Node {
   }
 
   async instantiateVariants() {
-    if (this[$variantToMaterialMap] == null) {
+    if (this.variantToMaterialMap == null) {
       return;
     }
-    for (const index of this[$variantToMaterialMap].keys()) {
+    for (const index of this.variantToMaterialMap.keys()) {
       const variantMaterial = this.mesh.userData.variantMaterials.get(index) as
           UserDataVariantMapping;
       if (variantMaterial.material != null) {
@@ -200,7 +182,7 @@ export class PrimitiveNode extends Node {
   }
 
   get variantInfo() {
-    return this[$variantToMaterialMap];
+    return this.variantToMaterialMap;
   }
 
   addVariant(materialVariant: Material, variantName: string) {
@@ -209,19 +191,19 @@ export class PrimitiveNode extends Node {
     }
 
     // Adds the variant to the model variants if needed.
-    if (!this[$modelVariants].has(variantName)) {
-      this[$modelVariants].set(
-          variantName, {name: variantName, index: this[$modelVariants].size});
+    if (!this.modelVariants.has(variantName)) {
+      this.modelVariants.set(
+          variantName, {name: variantName, index: this.modelVariants.size});
     }
-    const modelVariantData = this[$modelVariants].get(variantName)!;
+    const modelVariantData = this.modelVariants.get(variantName)!;
     const variantIndex = modelVariantData.index;
 
     // Updates materials mapped to the variant.
     materialVariant[$variantIndices]().add(variantIndex);
 
     // Updates internal mappings.
-    this[$variantToMaterialMap].set(variantIndex, materialVariant);
-    this[$materials].set(materialVariant.index, materialVariant);
+    this.variantToMaterialMap.set(variantIndex, materialVariant);
+    this.materials.set(materialVariant.index, materialVariant);
 
     this.updateVariantUserData(variantIndex, materialVariant);
 
@@ -245,7 +227,7 @@ export class PrimitiveNode extends Node {
     // Adds variants name to material variants set.
     materialVariant[$variantIndices]().add(variantIndex);
 
-    this.mesh.userData.variantData = this[$modelVariants];
+    this.mesh.userData.variantData = this.modelVariants;
     // Updates import data (see VariantMaterialLoaderPlugin.ts).
     this.mesh.userData.variantMaterials = this.mesh.userData.variantMaterials ||
         new Map<number, UserDataVariantMapping>();
@@ -258,7 +240,7 @@ export class PrimitiveNode extends Node {
   }
 
   private ensureVariantIsUnused(variantName: string) {
-    const modelVariants = this[$modelVariants].get(variantName);
+    const modelVariants = this.modelVariants.get(variantName);
 
     if (modelVariants != null && this.variantInfo.has(modelVariants!.index)) {
       console.warn(`Primitive cannot add variant '${

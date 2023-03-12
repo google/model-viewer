@@ -20,7 +20,7 @@ import {Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.
 import {Renderer} from '../../three-components/Renderer.js';
 
 import {Image as ImageInterface} from './api.js';
-import {$correlatedObjects, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
 
 
 const quadMaterial = new MeshBasicMaterial();
@@ -67,12 +67,37 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return (this[$sourceObject] as GLTFImage).bufferView;
   }
 
+  get element(): HTMLVideoElement|HTMLCanvasElement|undefined {
+    const texture = this[$threeTexture] as any;
+    if (texture && (texture.isCanvasTexture || texture.isVideoTexture)) {
+      return texture.image;
+    }
+    return;
+  }
+
+  get animation(): any|undefined {
+    const texture = this[$threeTexture] as any;
+    if (texture && texture.isCanvasTexture && texture.animation) {
+      return texture.animation;
+    }
+    return;
+  }
+
   get type(): 'embedded'|'external' {
     return this.uri != null ? 'external' : 'embedded';
   }
 
   set name(name: string) {
     (this[$sourceObject] as GLTFImage).name = name;
+  }
+
+  update() {
+    const texture = this[$threeTexture] as any;
+    // Applies to non-Lottie canvas textures only
+    if (texture && texture.isCanvasTexture && !texture.animation) {
+      this[$threeTexture].needsUpdate = true;
+      this[$onUpdate]();
+    }
   }
 
   async createThumbnail(width: number, height: number): Promise<string> {

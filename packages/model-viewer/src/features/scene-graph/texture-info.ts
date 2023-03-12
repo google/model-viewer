@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {LinearEncoding, MeshStandardMaterial, sRGBEncoding, Texture as ThreeTexture, TextureEncoding, Vector2} from 'three';
+import {LinearEncoding, MeshStandardMaterial, sRGBEncoding, Texture as ThreeTexture, TextureEncoding, Vector2, VideoTexture} from 'three';
 
 import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -25,6 +25,8 @@ const $texture = Symbol('texture');
 const $transform = Symbol('transform');
 export const $materials = Symbol('materials');
 export const $usage = Symbol('usage');
+const $onUpdate = Symbol('onUpdate');
+const $activeVideo = Symbol('activeVideo');
 
 // Defines what a texture will be used for.
 export enum TextureUsage {
@@ -53,12 +55,13 @@ export class TextureInfo implements TextureInfoInterface {
   };
 
   // Holds a reference to the Three data that backs the material object.
-  [$materials]: Set<MeshStandardMaterial>|null;
+  private[$materials]: Set<MeshStandardMaterial>|null;
 
   // Texture usage defines the how the texture is used (ie Normal, Emissive...
   // etc)
-  [$usage]: TextureUsage;
-  onUpdate: () => void;
+  private[$usage]: TextureUsage;
+  private[$onUpdate]: () => void;
+  private[$activeVideo] = false;
 
   constructor(
       onUpdate: () => void, usage: TextureUsage,
@@ -83,7 +86,7 @@ export class TextureInfo implements TextureInfoInterface {
           new Texture(onUpdate, threeTexture, gltfTexture, sampler, image);
     }
 
-    this.onUpdate = onUpdate;
+    this[$onUpdate] = onUpdate;
     this[$materials] = material;
     this[$usage] = usage;
   }
@@ -95,9 +98,44 @@ export class TextureInfo implements TextureInfoInterface {
   setTexture(texture: Texture|null): void {
     const threeTexture: ThreeTexture|null =
         texture != null ? texture.source[$threeTexture] : null;
-    let encoding: TextureEncoding = sRGBEncoding;
+
+    const oldTexture = this[$texture]?.source[$threeTexture] as VideoTexture;
+    if (oldTexture != null && oldTexture.isVideoTexture) {
+      this[$activeVideo] = false;
+    } else if (this[$texture]?.source.animation) {
+      this[$texture].source.animation.removeEventListener(
+          'enterFrame', this[$onUpdate]);
+    }
+
     this[$texture] = texture;
 
+    if (threeTexture != null && (threeTexture as VideoTexture).isVideoTexture) {
+      const element = threeTexture.image;
+      this[$activeVideo] = true;
+      if (element.requestVideoFrameCallback != null) {
+        const update = () => {
+          if (!this[$activeVideo]) {
+            return;
+          }
+          this[$onUpdate]();
+          element.requestVideoFrameCallback(update);
+        };
+        element.requestVideoFrameCallback(update);
+      } else {
+        const update = () => {
+          if (!this[$activeVideo]) {
+            return;
+          }
+          this[$onUpdate]();
+          requestAnimationFrame(update);
+        };
+        requestAnimationFrame(update);
+      }
+    } else if (texture?.source.animation != null) {
+      texture.source.animation.addEventListener('enterFrame', this[$onUpdate]);
+    }
+
+    let encoding: TextureEncoding = sRGBEncoding;
     if (this[$materials]) {
       for (const material of this[$materials]!) {
         switch (this[$usage]) {
@@ -133,6 +171,6 @@ export class TextureInfo implements TextureInfoInterface {
       threeTexture.repeat = this[$transform].scale;
       threeTexture.offset = this[$transform].offset;
     }
-    this.onUpdate();
+    this[$onUpdate]();
   }
 }

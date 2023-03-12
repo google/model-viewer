@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 
@@ -314,7 +315,19 @@ export declare interface Image {
   /**
    * The bufferView of the image, if it is embedded.
    */
-  readonly bufferView?: number
+  readonly bufferView?: number;
+
+  /**
+   * The backing HTML element, if this is a video or canvas texture.
+   */
+  readonly element?: HTMLVideoElement|HTMLCanvasElement;
+
+  /**
+   * The Lottie animation object, if this is a Lottie texture. You may wish to
+   * do image.animation as import('lottie-web').AnimationItem; to get its type
+   * info.
+   */
+  readonly animation?: any;
 
   /**
    * A method to create an object URL of this image at the desired
@@ -322,6 +335,12 @@ export declare interface Image {
    * and so are unreadable on the CPU without a method like this.
    */
   createThumbnail(width: number, height: number): Promise<string>;
+
+  /**
+   * Only applies to canvas textures. Call when the content of the canvas has
+   * been updated and should be reflected in the model.
+   */
+  update(): void;
 }
 
 /**

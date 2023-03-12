@@ -24,7 +24,7 @@ import {toastStyles} from '../../styles.css.js';
 import {timePasses} from '../../test/utils/test_utils.js';
 import {ArConfigState, BestPracticesState, ModelViewerConfig, ModelViewerSnippetState} from '../../types.js';
 import {arButtonCSS, arPromptCSS, progressBarCSS} from '../best_practices/styles.css.js';
-import {HotspotConfig, toVector3D} from '../hotspot_panel/types.js';
+import {HotspotConfig} from '../hotspot_panel/types.js';
 import {renderCommonChildElements} from '../model_viewer_preview/reducer.js';
 import {styles as hotspotStyles} from '../utils/hotspot/hotspot.css.js';
 import {spread} from '../utils/spread_directive';
@@ -78,14 +78,6 @@ export class MobileView extends LitElement {
   updateState(snippet: ModelViewerSnippetState, urls: URLs) {
     this.editorUrls = urls;
     this.hotspots = snippet.hotspots;
-    for (let hotspot of this.hotspots) {
-      hotspot.position = toVector3D(
-          [hotspot.position.x, hotspot.position.y, hotspot.position.z]);
-      if (hotspot.normal) {
-        hotspot.normal =
-            toVector3D([hotspot.normal.x, hotspot.normal.y, hotspot.normal.z]);
-      }
-    }
 
     // Set all of the other relevant snippet information
     this.arConfig = snippet.arConfig;

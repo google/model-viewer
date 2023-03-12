@@ -27,7 +27,7 @@ import {clamp, debounce} from './utilities.js';
 import {dataUrlToBlob} from './utilities/data-conversion.js';
 import {ProgressTracker} from './utilities/progress-tracker.js';
 
-const CLEAR_MODEL_TIMEOUT_MS = 1000;
+const CLEAR_MODEL_TIMEOUT_MS = 10;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
 const UNSIZED_MEDIA_WIDTH = 300;
@@ -406,7 +406,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     }
 
     if (changedProperties.has('withCredentials')) {
-      CachingGLTFLoader.withCredentials = this.withCredentials
+      CachingGLTFLoader.withCredentials = this.withCredentials;
+      this[$renderer].textureUtils!.withCredentials = this.withCredentials;
     }
 
     if (changedProperties.has('generateSchema')) {
@@ -546,11 +547,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
   /**
    * Called on initialization and when the resize observer fires.
    */
-  [$updateSize]({width, height}: {width: any, height: any}) {
+  [$updateSize]({width, height}: {width: number, height: number}) {
+    if (width === 0 || height === 0) {
+      return;
+    }
     this[$container].style.width = `${width}px`;
     this[$container].style.height = `${height}px`;
 
-    this[$onResize]({width: parseFloat(width), height: parseFloat(height)});
+    this[$onResize]({width, height});
   }
 
   [$tick](_time: number, _delta: number) {

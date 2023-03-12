@@ -505,13 +505,12 @@ export class Renderer extends EventDispatcher {
         this.threeRenderer.autoClear = true; 
         this.threeRenderer.render(scene, scene.camera);
       }
-      if (this.multipleScenesVisible || scene.renderCount === 0) {
+      if (this.multipleScenesVisible ||
+          (!scene.element.modelIsVisible && scene.renderCount === 0)) {
         this.copyPixels(scene, width, height);
-      } else {
-        if (canvas3D.parentElement !== scene.canvas.parentElement) {
-          scene.canvas.parentElement!.appendChild(canvas3D);
-          scene.canvas.classList.remove('show');
-        }
+      } else if (canvas3D.parentElement !== scene.canvas.parentElement) {
+        scene.canvas.parentElement!.appendChild(canvas3D);
+        scene.canvas.classList.remove('show');
       }
 
       scene.hasRendered();

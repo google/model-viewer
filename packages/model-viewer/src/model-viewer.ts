@@ -24,9 +24,9 @@ import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
 import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 
-// Uncomment these lines to export PMREM textures in Glitch:
-// export {default as TextureUtils} from './three-components/TextureUtils';
-// export * from 'three';
+// Export these to allow lazy-loaded LottieLoader.js to find what it needs.
+// Requires an import map - "three": "path/to/model-viewer.min.js".
+export {CanvasTexture, FileLoader, Loader, NearestFilter} from 'three';
 
 export const ModelViewerElement = AnnotationMixin(SceneGraphMixin(StagingMixin(
     EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(

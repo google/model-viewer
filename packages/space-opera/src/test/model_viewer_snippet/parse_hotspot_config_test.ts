@@ -23,38 +23,28 @@ describe('parse hotspot config test', () => {
   it('returns a list with one hotspot when given a valid config', () => {
     const snippet = `<style></style>
 <model-viewer src='test.glb'>
-<div slot="hotspot-1" data-position="1m 2m 3m" data-normal="1 0 0">
+<div slot="hotspot-1" data-surface="data">
   <div class="HotspotAnnotation">Test Annotation</div>
 </div>
 </model-viewer>`;
     const hotspots = parseHotspotsFromSnippet(snippet);
     expect(hotspots.length).toBe(1);
     expect(hotspots[0].name).toBe('1');
-    expect(hotspots[0].position.x).toBe(1);
-    expect(hotspots[0].position.y).toBe(2);
-    expect(hotspots[0].position.z).toBe(3);
-    expect(hotspots[0].normal).toBeDefined();
-    expect(hotspots[0].normal!.x).toBe(1);
-    expect(hotspots[0].normal!.y).toBe(0);
-    expect(hotspots[0].normal!.z).toBe(0);
+    expect(hotspots[0].surface).toBe('data');
     expect(hotspots[0].annotation).toBe('Test Annotation');
   });
 
   it('returns a list with two hotspots when given a valid config', () => {
     const snippet = `<model-viewer src='test.glb'>
-<div slot="hotspot-1" data-position="1m 2m 3m"></div>
-<div slot="hotspot-2" data-position="4m 5m 6m"></div>
+<div slot="hotspot-1" data-surface="data"></div>
+<div slot="hotspot-2" data-surface="data2"></div>
 </model-viewer>`;
     const hotspots = parseHotspotsFromSnippet(snippet);
     expect(hotspots.length).toBe(2);
     expect(hotspots[0].name).toBe('1');
-    expect(hotspots[0].position.x).toBe(1);
-    expect(hotspots[0].position.y).toBe(2);
-    expect(hotspots[0].position.z).toBe(3);
+    expect(hotspots[0].surface).toBe('data');
     expect(hotspots[1].name).toBe('2');
-    expect(hotspots[1].position.x).toBe(4);
-    expect(hotspots[1].position.y).toBe(5);
-    expect(hotspots[1].position.z).toBe(6);
+    expect(hotspots[1].surface).toBe('data2');
   });
 
   it('throws an error when given an invalid config without model-viewer tag',
@@ -88,20 +78,7 @@ snippet without position',
        expect(hotspots.length).toBe(0);
        expect(errorList.length).toBe(1);
        expect(errorList[0])
-           .toEqual(
-               new Error('No position found for hotspot at slot "hotspot-1"'));
-     });
-
-  it('returns an empty hotspot list and registers an error when given an invalid \
-snippet with malformed position',
-     () => {
-       const errorList: Error[] = [];
-       const snippet = `<model-viewer src='test.glb'>
-<div slot="hotspot-1" data-position="1m 2m"></div>
-</model-viewer>`;
-       const hotspots = parseHotspotsFromSnippet(snippet, errorList);
-       expect(hotspots.length).toBe(0);
-       expect(errorList.length).toBe(1);
-       expect(errorList[0]).toEqual(new Error('Invalid vector: \'1m 2m\''));
+           .toEqual(new Error(
+               'Only surface hotspots are supported: no surface for hotspot at slot "hotspot-1"'));
      });
 });

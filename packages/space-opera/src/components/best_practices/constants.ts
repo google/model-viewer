@@ -30,7 +30,7 @@ export const modelViewerTemplate = `<!doctype html>
     <!-- <model-viewer> HTML element -->
     REPLACEME
     <!-- Loads <model-viewer> for browsers: -->
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.1/model-viewer.min.js"></script>
   </body>
 </html>`;
 
@@ -44,11 +44,9 @@ const onProgress = (event) => {
   updatingBar.style.width = \`\${event.detail.totalProgress * 100}%\`;
   if (event.detail.totalProgress === 1) {
     progressBar.classList.add('hide');
+    event.target.removeEventListener('progress', onProgress);
   } else {
     progressBar.classList.remove('hide');
-    if (event.detail.totalProgress === 0) {
-      event.target.querySelector('.center-pre-prompt').classList.add('hide');
-    }
   }
 };
 document.querySelector('model-viewer').addEventListener('progress', onProgress);`;

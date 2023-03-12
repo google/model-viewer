@@ -138,6 +138,10 @@
         "name": "Add Hotspots"
       },
       {
+        "htmlId": "animatedHotspots",
+        "name": "Animated Hotspots"
+      },
+      {
         "htmlId": "dimensions",
         "name": "Dimensions"
       },
@@ -246,6 +250,10 @@
       {
         "htmlId": "swapTextures",
         "name": "Swap Textures"
+      },
+      {
+        "htmlId": "animatedTexturesExample",
+        "name": "Animated Textures"
       },
       {
         "htmlId": "pickMaterialExample",
