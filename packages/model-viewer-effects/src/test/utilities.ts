@@ -15,6 +15,7 @@
 
 
 import {ModelViewerElement} from '@google/model-viewer';
+import { EventDispatcher } from 'three';
 
 
 /**
@@ -164,3 +165,31 @@ export const createModelViewerElement = (src: string | null): ModelViewerElement
   element.src = src;
   return element;
 }
+
+
+/**
+ * Three.js EventDispatcher and DOM EventTarget use different event patterns,
+ * so AnyEvent covers the shape of both event types.
+ */
+export type AnyEvent = Event|CustomEvent<any>|{[index: string]: string};
+
+export type PredicateFunction<T = void> = (value: T) => boolean;
+
+/**
+ * @param {EventTarget|EventDispatcher} target
+ * @param {string} eventName
+ * @param {?Function} predicate
+ */
+export const waitForEvent = <T extends AnyEvent = Event>(
+    target: EventTarget|EventDispatcher,
+    eventName: string,
+    predicate: PredicateFunction<T>|null = null): Promise<T> =>
+    new Promise(resolve => {
+      function handler(event: AnyEvent) {
+        if (!predicate || predicate(event as T)) {
+          resolve(event as T);
+          target.removeEventListener(eventName, handler);
+        }
+      }
+      target.addEventListener(eventName, handler);
+    });

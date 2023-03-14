@@ -82,11 +82,11 @@ button {
           <example-snippet stamp-to="pixelate" highlight-as="html">
             <template>
 <model-viewer id="lantern" camera-controls touch-action="pan-y" src="../../shared-assets/models/cubes.gltf" ar alt="A 3D model of a Lantern">
-  <mv-effects-composer>
+  <mv-effect-composer>
     <!-- <mv-glitch-effect></mv-glitch-effect> -->
     <mv-pixelate-effect id="pixelate" granularity="10"></mv-pixelate-effect>
     <!-- <mv-smaa-effect quality="ultra"></mv-smaa-effect> -->
-  </mv-effects-composer>
+  </mv-effect-composer>
   <div class="controls">
     <label for="granularity">Granularity</label>
     <input id="granularity" type="range" min="5" max="50" step="0.5" value="10">
@@ -127,14 +127,14 @@ granularity.addEventListener('input', updateGranularity);
           <example-snippet stamp-to="bloom" highlight-as="html">
             <template>
 <model-viewer style="background: #000" id="bloomViewer" camera-controls touch-action="pan-y" src="../../shared-assets/models/EmissiveStrengthTest.glb  " ar alt="A 3D model of a Lantern">
-  <mv-effects-composer>
+  <mv-effect-composer>
     <!-- <mv-ssao-effect></mv-ssao-effect> -->
     <mv-glitch-effect></mv-glitch-effect>
     <mv-smaa-effect quality="ultra"></mv-smaa-effect>
     <mv-bloom-effect id="bloom" intensity="1"></mv-bloom-effect>
     <mv-outline-effect blur-strength="2" edge-strength="4" color="red"></mv-outline-effect>
-    <!-- <mv-color-grade-effect brightness="-0.2" contrast="0.25" saturation="0.25"></mv-color-grade-effect> -->
-  </mv-effects-composer>
+    <mv-color-grade-effect brightness="0" hue="6" contrast="0.1" saturation="0.25"></mv-color-grade-effect>
+  </mv-effect-composer>
   <div class="controls">
     <label for="intensity">Intensity</label>
     <input id="intensity" type="range" min="0" max="5" step="0.1" value="1">

@@ -14,8 +14,8 @@
  */
 
 import {ReactiveElement} from 'lit';
-import {Effect, EffectComposer, EffectPass, NormalPass, RenderPass, Selection, EffectAttribute, Pass} from 'postprocessing';
-import {isConvolution} from './utilities.js';
+import {EffectComposer, EffectPass, NormalPass, RenderPass, Selection, Pass} from 'postprocessing';
+import {disposeEffectPass, isConvolution} from './utilities.js';
 import {ModelViewerElement} from '@google/model-viewer';
 import {$requireNormals, $requireSeparatePass, IMVEffect, MVEffectBase} from './effects/effect-base.js';
 import {ModelScene} from '@google/model-viewer/lib/three-components/ModelScene.js';
@@ -28,12 +28,19 @@ export const $effectOptions = Symbol('effectOptions');
 export const $effectComposer = Symbol('effectComposer');
 export const $renderPass = Symbol('renderPass');
 export const $normalPass = Symbol('normalPass');
+export const $clearPass = Symbol('clearPass');
+export const $removeClearPass = Symbol('removeClearPass');
+export const $addClearPass = Symbol('addClearPass');
 export const $effectPasses = Symbol('effectsPass');
 export const $effects = Symbol('effects');
 export const $selection = Symbol('selection');
 export const $setSelection = Symbol('setSelection');
 export const $resetEffectPasses = Symbol('resetEffectPasses');
+export const $userEffectCount = Symbol('userEffectCount');
 
+/**
+ * Adds camera and scene to EffectComposer, update
+ */
 export class EffectRenderer extends EffectComposer {
   public camera!: Camera;
   public scene!: ModelScene;
@@ -50,12 +57,24 @@ export class EffectRenderer extends EffectComposer {
       super(renderer, options);
     }
 
-    setMainCamera(camera: Camera): void {
+    /**
+     * Adds a pass, optionally at a specific index.
+     * Additionally sets `scene` and `camera`.
+     * @param pass A new pass.
+     * @param index An index at which the pass should be inserted.
+     */
+    override addPass(pass: Pass, index?: number): void {
+      pass.mainScene = this.scene;
+      pass.mainCamera = this.camera;
+      super.addPass(pass, index);
+    }
+
+    override setMainCamera(camera: Camera): void {
       this.camera = camera;
       super.setMainCamera(camera);
     }
 
-    setMainScene(scene: ModelScene): void {
+    override setMainScene(scene: ModelScene): void {
       this.scene = scene;
       super.setMainScene(scene);
     }
@@ -69,27 +88,29 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   /**
-   * 'quality' | 'performance'. Changing this after the element was constructed has no effect.
-   * @default 'quality'
+   * `quality` | `performance`. Changing this after the element was constructed has no effect.
+   * 
+   * Using `quality` improves banding on certain effects, at a memory cost. Use in HDR scenarios.
+   * 
+   * `performance` should be sufficient for most use-cases.
+   * @default 'performance'
    */
   @property({type: String, attribute: 'render-mode', noAccessor: true})
-  readonly renderMode: RenderMode = 'quality';
+  readonly renderMode: RenderMode = 'performance';
 
   protected readonly [$effectComposer]: EffectRenderer;
   protected readonly [$renderPass]: RenderPass;
   protected readonly [$normalPass]: NormalPass;
+  protected readonly [$clearPass]: EffectPass;
   protected readonly [$selection]: Selection;
-  protected[$effectPasses]: Pass[] = [];
-
-  /**
-   * Array to store user added {@link Effect}'s not made using the web-component API.
-   */
-  userEffects: IMVEffect[] = [];
+  protected[$userEffectCount]: number = 0;
   
   /**
-   * Array to store user added {@link Pass}'s not made using the web-component API.
+   * Array of custom {@link Pass}'s added with {@link addEffectPass}.
    */
-  userPasses: Pass[] = [];
+  get userPasses(): Pass[] {
+    return this[$effectComposer].passes.slice(2, 2 + this[$userEffectCount]);
+  }
 
   get modelViewerElement() {
     return this.parentNode as ModelViewerElement;
@@ -121,6 +142,10 @@ export class MVEffectComposer extends ReactiveElement {
     this[$renderPass] = new RenderPass();
     // @ts-expect-error they are allowed to be undefined
     this[$normalPass] = new NormalPass();
+    // @ts-expect-error they are allowed to be undefined
+    this[$clearPass] = new EffectPass(undefined);
+    this[$clearPass].name = 'ClearPass';
+    this[$normalPass].enabled = false;
     this[$selection] = new Selection();
   }
 
@@ -129,11 +154,9 @@ export class MVEffectComposer extends ReactiveElement {
       throw new Error('<mv-effect-composer> must be a child of a <model-viewer> component.');
     }
     this.modelViewerElement.registerEffectsComposer(this[$effectComposer]);
-    this[$renderPass].mainScene = this[$effectComposer].scene;
-    this[$renderPass].mainCamera = this[$effectComposer].camera;
-    this[$normalPass].mainScene = this[$effectComposer].scene;
-    this[$normalPass].mainCamera = this[$effectComposer].camera;
     this[$effectComposer].addPass(this[$renderPass], 0);
+    this[$effectComposer].addPass(this[$normalPass], 1);
+    this.updateEffects();
     this[$setSelection]();
     this.modelViewerElement.addEventListener('beforeRender', this[$setSelection]);
   }
@@ -150,53 +173,47 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   /**
-   * Adds a custom Pass that extends the {@link Pass} class. All passes added through this method will be appended before all other passes, except the render pass.
+   * Adds a custom Pass that extends the {@link Pass} class. All passes added through this method will be prepended before all other web-component effects.
+   * 
+   * This method automatically sets the `scene` and `camera` of the pass.
    * @param {Pass} pass Custom Pass to add. The camera and scene are set automatically. 
+   * @param {boolean} requireNormals Whether any effect in this pass uses the {@link normalBuffer}
    */
-  addEffectPass(pass: Pass) {
-    pass.mainCamera = this[$effectComposer].camera;
-    pass.mainScene = this[$scene];
-    this.userPasses.push(pass);
-    this.updateEffects();
+  addEffectPass(pass: Pass, requireNormals?: boolean) {
+    if (requireNormals) this[$normalPass].enabled = true;
+    (pass as any).requireNormals = requireNormals;
+    const index = this[$userEffectCount] + 2;   // Including the renderPass and normalPas
+    this[$effectComposer].addPass(pass, index); // push after current userPasses, before any web-component effects.
+    this[$userEffectCount]++;
+    this[$removeClearPass]();
   }
 
   /**
-   * Adds a custom effect that extends the {@link Effect} class. All effects added through this method will be appended after all web-component effects and {@link userPasses}.
-   * @param {Effect} effect The effect instance to add. The camera and scene are set automatically.
-   * @param {Boolean} requireNormals Set this to true if your Effect uses the {@link normalBuffer} provided by this component.
-   * @param {Boolean} requireSeparatePass Whether to place the effect on a separate pass. This is automatically enabled for effects with {@link EffectAttribute.CONVOLUTION}
+   * Removes and optionally disposes of a previously added Pass.
+   * @param pass Custom Pass to remove
+   * @param {Boolean} dispose Disposes of the Pass properties and effects. Default is `true`.
    */
-  addEffect(effect: Effect, requireNormals: boolean = false, requireSeparatePass: boolean = false): void {
-    effect.mainCamera = this[$scene].getCamera();
-    effect.mainScene = this[$scene];
-    this.userEffects.push({
-      [$effects]: [effect],
-      [$requireNormals]: requireNormals,
-      [$requireSeparatePass]: isConvolution(effect) ?? requireSeparatePass,
-    })
-    this.updateEffects();
+  removeEffectPass(pass: Pass, dispose: boolean = true) {
+    if (!this[$effectComposer].passes.includes(pass)) throw new Error(`Pass ${pass.name} not found.`);
+    this[$effectComposer].removePass(pass);
+    if (dispose) pass.dispose();
+    this[$normalPass].enabled = this[$requireNormals](this[$effects]);
+    this[$userEffectCount]--;
+    this[$addClearPass]();
   }
 
   /**
-   * Updates all existing EffectPasses, adding any new web-component or user-added effects and passes.
-   * The order is:
-   * 1. All {@link userPasses} in the order they were added.
-   * 2. All web-component effects in the order they were added.
-   * 3. All {@link userEffects} in the order they were added.
+   * Updates all existing EffectPasses, adding any new `<mv-*-effect>`'s 
+   * in the order they were added, after any custom Passes added with {@link addEffectPass}.
    */
   updateEffects(): void {
     this[$resetEffectPasses]();
 
     const effects = this[$effects];
-    // Insert the NormalPass directly after the render pass, but only if required.
-    if (this[$requireNormals](effects)) this[$effectComposer].addPass(this[$normalPass], 1);
-    
-    // Add any new userPasses
-    this.userPasses.forEach((pass) => {
-      if (!this[$effectComposer].passes.includes(pass)) this[$effectComposer].addPass(pass);
-    })
-    
-    // Iterate over all effects (both web-component and userEffects), and combines as many as possible. 
+    // Enable the normalPass if used by any effect.
+    this[$normalPass].enabled = this[$requireNormals](effects);
+  
+    // Iterate over all effects (web-component), and combines as many as possible. 
     // Convolution effects must sit on their own EffectPass. In order to preserve the correct effect order, 
     // the convolution effects separate all effects before and after into separate EffectPasses.
     const scene = this[$scene];
@@ -206,18 +223,22 @@ export class MVEffectComposer extends ReactiveElement {
       const separateIndex = effects.slice(i).findIndex((effect) => effect[$requireSeparatePass] || isConvolution(effect[$effects][0]));
       if (separateIndex != 0) {
         const effectPass = new EffectPass(scene.getCamera(), ...effectsArr.slice(i, separateIndex == -1 ? effects.length : separateIndex))
-        this[$effectPasses].push(effectPass);
         this[$effectComposer].addPass(effectPass);
       }
       
       if (separateIndex != -1) {
         const convolutionPass = new EffectPass(scene.getCamera(), effectsArr[i + separateIndex]);
-        this[$effectPasses].push(convolutionPass);
         this[$effectComposer].addPass(convolutionPass);
         i += separateIndex + 1;
       } else {
         break; // A convolution was not found, the first Effect pass contains all effects from i to effects.length
       }
+    }
+    // If there is no pass after the normal pass, then nothing will render on the screen.
+    if (effects.length === 0 && this[$userEffectCount] === 0) {
+      this[$addClearPass]();
+    } else {
+      this[$removeClearPass]();
     }
     scene.queueRender();
   }
@@ -239,22 +260,35 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   [$requireNormals](effects: IMVEffect[]) {
-    return effects.some((effect) => effect[$requireNormals]);
+    return effects.some((effect) => effect[$requireNormals]) || this.userPasses.some((pass) => (pass as any).requireNormals);
   }
 
   [$resetEffectPasses]() {
     this[$effectPasses].forEach((pass) => {
       this[$effectComposer].removePass(pass);
-      pass.dispose();
+      disposeEffectPass(pass);
     });
-    this[$effectPasses] = [];
-    this[$effectComposer].removePass(this[$normalPass]);
+  }
+
+  [$removeClearPass]() {
+    if (this[$effectComposer].passes.length > 2) {
+      this[$effectComposer].removePass(this[$clearPass]);
+    }
+  }
+
+  [$addClearPass]() {
+    if (this[$effectComposer].passes.length === 2) {
+      this[$effectComposer].addPass(this[$clearPass]);
+    }
   }
 
   get[$scene]() {
     return this[$effectComposer].scene;
   }
 
+  /**
+   * Gets child effects
+   */
   get[$effects](): IMVEffect[] {
     // iterate over all web-component children effects
     const effects: IMVEffect[] = [];
@@ -272,8 +306,13 @@ export class MVEffectComposer extends ReactiveElement {
         }));
       }
     }
-    // add all userEffects
-    effects.push(...this.userEffects);
     return effects;
+  }
+
+  /**
+   * Gets effectPasses of child effects
+   */
+  get[$effectPasses]() {
+    return this[$effectComposer].passes.slice(2 + this[$userEffectCount]) as EffectPass[];
   }
 }

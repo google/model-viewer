@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 import {ModelViewerElement} from '@google/model-viewer';
-import {assetPath, createModelViewerElement} from './utilities';
+import {assetPath, createModelViewerElement, waitForEvent} from './utilities.js';
 import { MVEffectComposer } from '../model-viewer-effects.js';
-import { $effectComposer, $renderPass, $scene } from '../model-effect-composer.js';
-import { DotScreenEffect, GlitchEffect, GridEffect } from 'postprocessing';
-import { isConvolution } from '../utilities';
-
+import { $clearPass, $effectComposer, $normalPass, $renderPass, $scene } from '../model-effect-composer.js';
+import { DotScreenEffect, Effect, EffectPass, GridEffect } from 'postprocessing';
 const expect = chai.expect;
 
 suite('MVEffectComposer', () => {
   let element: ModelViewerElement;
   let composer: MVEffectComposer;
 
-  setup(() => {
+  setup(async () => {
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));
     composer = new MVEffectComposer();
     element.insertBefore(composer, element.firstChild);
+    await waitForEvent(element, 'beforeRender');
   });
 
   teardown(() => {
@@ -45,42 +44,50 @@ suite('MVEffectComposer', () => {
         expect(composer[$scene]).to.be.ok;
       });
     });
-    test('render pass added successfuly', () => {
-      expect(composer[$renderPass]).to.be.ok;
-      expect(composer[$effectComposer].passes.length).to.eq(1);
-      expect(composer[$effectComposer].passes[0]).to.eq(composer[$renderPass]);
-    });
-    test('selection works')
+    suite('passes, selection', () => {
+      test('renderPass + normalPass added successfuly', () => {
+        expect(composer[$renderPass]).to.be.ok;
+        expect(composer[$normalPass]).to.be.ok;
+        expect(composer[$effectComposer].passes.length).to.eq(3);
+        expect(composer[$effectComposer].passes[0]).to.eq(composer[$renderPass]);
+        expect(composer[$effectComposer].passes[1]).to.eq(composer[$normalPass]);
+        expect(composer[$effectComposer].passes[2]).to.eq(composer[$clearPass]);
+        expect(composer[$normalPass].enabled).to.be.false;
+        expect((composer[$renderPass] as any).scene).to.eq(composer[$scene]);
+      });
+
+      test('selection finds Meshes', () => {
+        expect(composer.selection.size).to.be.greaterThan(0);
+      });
+    })
   });
 
   suite('userEffects', () => {
+    let pass: EffectPass;
+    let effects: Effect[] = [];
     test('adds grid effect', () => {
       const effect = new GridEffect();
-      composer.addEffect(effect);
-      expect(composer[$effectComposer].passes.length).to.eq(2);
-      expect((composer[$effectComposer].passes[1] as any).effects).to.contain(effect);
+      effects.push(effect);
+      pass = new EffectPass(composer[$scene].camera, ...effects);
+      composer.addEffectPass(pass);
+      expect(composer[$effectComposer].passes.length).to.eq(3);
+      expect(composer[$effectComposer].passes[2]).to.eq(pass);
+      expect((composer[$effectComposer].passes[2] as any).effects).to.contain(effect);
+      
+      composer.removeEffectPass(pass, false);
     });
 
     test('multiple effects all on one layer', async () => {
       const effect = new DotScreenEffect();
-      composer.addEffect(effect);
-      expect(composer[$effectComposer].passes.length).to.eq(2);
-      expect((composer[$effectComposer].passes[1] as any).effects.length).to.eq(2);
-      expect((composer[$effectComposer].passes[1] as any).effects).to.contain(effect);
-    });
-
-    test('convolution effect on separate layer', async () => {
-      const effect = new GlitchEffect();
-      expect(isConvolution(effect)).to.be.true;
-      composer.addEffect(effect);
+      effects.push(effect);
+      pass = new EffectPass(composer[$scene].camera, ...effects)
+      composer.addEffectPass(pass);
       expect(composer[$effectComposer].passes.length).to.eq(3);
-      expect((composer[$effectComposer].passes[2] as any).effects.length).to.eq(1);
+      expect(composer[$effectComposer].passes[2]).to.eq(pass);
+      expect((composer[$effectComposer].passes[2] as any).effects.length).to.eq(2);
       expect((composer[$effectComposer].passes[2] as any).effects).to.contain(effect);
-    });
-
-    teardown(() => {
-      // TODO: this wont really remove the effects from the effectComposer instance
-      composer.userEffects = []; 
+      
+      composer.removeEffectPass(pass, false);
     });
   });
 }); 

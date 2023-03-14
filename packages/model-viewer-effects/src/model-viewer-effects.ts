@@ -8,7 +8,7 @@ import { MVSMAAEffect } from './effects/smaa.js';
 import { MVSSAOEffect } from './effects/ssao.js';
 import { MVEffectComposer } from './model-effect-composer.js';
 
-customElements.define('mv-effects-composer', MVEffectComposer);
+customElements.define('mv-effect-composer', MVEffectComposer);
 customElements.define('mv-pixelate-effect', MVPixelateEffect);
 customElements.define('mv-bloom-effect', MVBloomEffect);
 customElements.define('mv-color-grade-effect', MVColorGradeEffect);
@@ -20,7 +20,7 @@ customElements.define('mv-glitch-effect', MVGlitchEffect);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'mv-effects-composer': MVEffectComposer;
+    'mv-effect-composer': MVEffectComposer;
     'mv-pixelate-effect': MVPixelateEffect;
     'mv-bloom-effect': MVBloomEffect;
     'mv-color-grade-effect': MVColorGradeEffect;

@@ -1,4 +1,4 @@
-import { Effect, EffectAttribute } from 'postprocessing';
+import { Effect, EffectAttribute, EffectPass, Pass } from 'postprocessing';
 import { Color } from 'three';
 
 
@@ -84,4 +84,17 @@ function isTransparent(style: CSSStyleDeclaration): boolean {
  */
 export function isConvolution(effect: Effect): boolean {
   return (effect.getAttributes() & EffectAttribute.CONVOLUTION) != 0;
+}
+
+/**
+ * Disposes of Pass properties without disposing of the Effects.
+ * @param pass Pass to dispose of
+ */
+export function disposeEffectPass(pass: EffectPass): void {
+  Pass.prototype.dispose.call(pass);
+
+  if (!(pass as any).listener) return;
+  for(const effect of (pass as any).effects) {
+    effect.removeEventListener("change", (pass as any).listener);
+  }
 }

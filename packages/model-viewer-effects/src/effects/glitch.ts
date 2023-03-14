@@ -1,7 +1,7 @@
 import {ChromaticAberrationEffect, GlitchEffect} from 'postprocessing';
 import {Vector2} from 'three';
-import {$effectOptions, $effects} from '../model-effect-composer.js';
-import {MVEffectBase} from './effect-base.js';
+import {$effectOptions, $effects, $scene} from '../model-effect-composer.js';
+import {$mvEffectComposer, MVEffectBase} from './effect-base.js';
 
 export class MVGlitchEffect extends MVEffectBase {
   static get is() {
@@ -15,6 +15,16 @@ export class MVGlitchEffect extends MVEffectBase {
       new GlitchEffect(this[$effectOptions](chromaticAberrationEffect)),
       chromaticAberrationEffect
     ];
+  }
+
+  connectedCallback(): void {
+    super.connectedCallback && super.connectedCallback();
+    this[$mvEffectComposer][$scene].dirtyRender = true;
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this[$mvEffectComposer][$scene].dirtyRender = false;
   }
 
   [$effectOptions](chromaticAberrationEffect: ChromaticAberrationEffect) {

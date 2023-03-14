@@ -325,7 +325,7 @@ export class Renderer extends EventDispatcher {
         scene.scaleStep = 0;
         this.rescaleCanvas(scene);
       } else {
-        return false;
+        return scene.dirtyRender; // this is usually false, unless specified otherwise
       }
     } else if (scene.scaleStep != this.scaleStep) {
       // Update render scale
@@ -453,9 +453,7 @@ export class Renderer extends EventDispatcher {
       this.preRender(scene, t, delta);
 
       if (!this.shouldRender(scene)) {
-        // continue; 
-        // TODO: This messes with the GlitchEffect, which obviously requires a render every frame. 
-        // For all other effects there is no issue, as they do only need to udpate when the scene updates. Figure out some solution here.
+        continue; 
       }
 
       if (scene.externalRenderer != null) {

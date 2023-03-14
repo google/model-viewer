@@ -1,5 +1,5 @@
 import {BlendFunction, SSAOEffect} from 'postprocessing';
-import {$effects, $effectOptions, $scene} from '../model-effect-composer.js';
+import {$effects, $effectOptions} from '../model-effect-composer.js';
 import {$mvEffectComposer, $requireNormals, MVEffectBase} from './effect-base.js';
 
 export class MVSSAOEffect extends MVEffectBase {
@@ -11,8 +11,8 @@ export class MVSSAOEffect extends MVEffectBase {
 
   constructor() {
     super();
-    const scene = this[$mvEffectComposer][$scene];
-    this[$effects] = [new SSAOEffect(scene.getCamera(), null as any, this[$effectOptions])];
+    // @ts-expect-error scene and camera are optional as of `postprocessing@6.30.2`
+    this[$effects] = [new SSAOEffect(undefined, this[$mvEffectComposer].normalBuffer, this[$effectOptions])];
   }
 
   get [$effectOptions]() {

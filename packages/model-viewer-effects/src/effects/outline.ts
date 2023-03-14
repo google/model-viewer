@@ -1,9 +1,9 @@
 import {property} from 'lit/decorators.js';
 import {BlendFunction, OutlineEffect} from 'postprocessing';
 import { Color } from 'three';
-import {$effects, $effectOptions, $selection, $effectComposer, $setSelection} from '../model-effect-composer.js';
+import {$effects, $effectOptions, $selection, $setSelection} from '../model-effect-composer.js';
 import {$mvEffectComposer, MVEffectBase} from './effect-base.js';
-import { getKernelSize, setSceneCamera } from './utilities.js';
+import { getKernelSize } from './utilities.js';
 
 export class MVOutlineEffect extends MVEffectBase {
   static get is() {
@@ -24,14 +24,13 @@ export class MVOutlineEffect extends MVEffectBase {
 
   constructor() {
     super();
-    // @ts-expect-error
-    const outline = new OutlineEffect(null, null, this[$effectOptions]);
+    // @ts-expect-error scene and camera are optional as of `postprocessing@6.30.2`
+    const outline = new OutlineEffect(undefined, undefined, this[$effectOptions]);
     this[$effects] = [outline];
   }
   
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
-    setSceneCamera(this[$effects], this[$mvEffectComposer][$effectComposer]);
     this[$setSelection]();
     this[$mvEffectComposer].addEventListener('updatedSelection', this[$setSelection]);
   }
