@@ -38,6 +38,7 @@
   "types": "lib/model-viewer.d.ts",
   "scripts": {
     "clean": "rm -rf ./lib ./dist",
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-samples.sh",
     "build": "npm run build:tsc && npm run build:rollup",
     "build:dev": "npm run build:tsc && npm run build:rollup:dev",
     "build:tsc": "tsc --incremental",
