@@ -1,14 +1,14 @@
 import {property} from 'lit/decorators.js';
 import {PixelationEffect} from 'postprocessing';
 import {$effects} from '../model-effect-composer.js';
-import {$mvEffectComposer, MVEffectBase} from './effect-base.js';
+import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
 
 export class MVPixelateEffect extends MVEffectBase {
   static get is() {
     return 'mv-pixelate-effect';
   }
 
-  @property({type: Number, attribute: 'granularity'})
+  @property({type: Number, attribute: 'granularity', reflect: true})
   granularity = 10.0;
 
   constructor() {
@@ -17,11 +17,20 @@ export class MVPixelateEffect extends MVEffectBase {
     this[$effects] = [new PixelationEffect(this.granularity)];
   }
 
+  connectedCallback(): void {
+    super.connectedCallback && super.connectedCallback();
+    this[$updateProperties]();
+  }
+
   updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
     if (changedProperties.has('granularity')) {
-      (this[$effects][0] as PixelationEffect).granularity = this.granularity;
-      this[$mvEffectComposer].queueRender();
+      this[$updateProperties]();
     }
+  }
+
+  [$updateProperties]() {
+    (this[$effects][0] as PixelationEffect).granularity = this.granularity;
+    this[$mvEffectComposer].queueRender();
   }
 }

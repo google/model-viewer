@@ -1,6 +1,10 @@
 import { Effect, EffectAttribute, EffectPass, Pass } from 'postprocessing';
 import { Color } from 'three';
 
+export type Constructor<T = object, U = object> = {
+  new (...args: any[]): T,
+  prototype: T
+}&U;
 
 /**
  * Determines whether an object has a Symbol property with the specified key.
@@ -56,6 +60,10 @@ export function clamp(value: number, lowerLimit: number, upperLimit: number): nu
   return Math.max(lowerLimit, Math.min(upperLimit, value));
 }
 
+export function clampNormal(value: number): number {
+  return clamp(value, 0, 1);
+}
+
 /**
  * Searches through hierarchy of HTMLElement until an element with a non-transparent background is found
  * @param elem The element background to get
@@ -97,4 +105,9 @@ export function disposeEffectPass(pass: EffectPass): void {
   for(const effect of (pass as any).effects) {
     effect.removeEventListener("change", (pass as any).listener);
   }
+}
+
+export function getValueOfEnum<T extends Object>(Enum: T, key: string): T {
+  const index = Object.keys(Enum).filter((v) => !isNaN(Number(v))).indexOf(key);
+  return (Enum as any)[index];
 }

@@ -1,6 +1,6 @@
 {
   "name": "@beilinson/model-viewer-effects",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Easily add and combine post-processing effects with <model-viewer>!",
   "repository": "https://github.com/Beilinson/model-viewer",
   "bugs": {
@@ -74,10 +74,12 @@
     "postprocessing": "^6.30.0"
   },
   "peerDependencies": {
-    "@google/model-viewer": "^3.1.0"
+    "@google/model-viewer": "^3.1.0",
+    "three": "^0.150.0"
   },
   "devDependencies": {
-    "@google/model-viewer": "^3.1.0",
+    "@beilinson/model-viewer": "^3.1.0",
+    "three": "^0.150.0",
     "@open-wc/karma-esm": "^4.0.0",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",

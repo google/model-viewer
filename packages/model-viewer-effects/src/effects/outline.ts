@@ -2,7 +2,7 @@ import {property} from 'lit/decorators.js';
 import {BlendFunction, OutlineEffect} from 'postprocessing';
 import { Color } from 'three';
 import {$effects, $effectOptions, $selection, $setSelection} from '../model-effect-composer.js';
-import {$mvEffectComposer, MVEffectBase} from './effect-base.js';
+import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
 import { getKernelSize } from './utilities.js';
 
 export class MVOutlineEffect extends MVEffectBase {
@@ -10,16 +10,16 @@ export class MVOutlineEffect extends MVEffectBase {
     return 'mv-outline-effect';
   }
 
-  @property({type: String || Number, attribute: 'color'})
+  @property({type: String || Number, attribute: 'color', reflect: true})
   color: string | number = 'white';
 
-  @property({type: Number, attribute: 'edge-strength'})
+  @property({type: Number, attribute: 'edge-strength', reflect: true})
   edgeStrength = 2;
 
   /**
    * 0-6
    */
-  @property({type: Number, attribute: 'blur-strength'})
+  @property({type: Number, attribute: 'blur-strength', reflect: true})
   blurStrength = 0;
 
   constructor() {
@@ -32,6 +32,7 @@ export class MVOutlineEffect extends MVEffectBase {
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
     this[$setSelection]();
+    this[$updateProperties]();
     this[$mvEffectComposer].addEventListener('updatedSelection', this[$setSelection]);
   }
 
@@ -43,13 +44,17 @@ export class MVOutlineEffect extends MVEffectBase {
   updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
     if (changedProperties.has('color') || changedProperties.has('edge-strength') || changedProperties.has('blur-strength')) {
-      (this[$effects][0] as OutlineEffect).edgeStrength = this.edgeStrength;
-      (this[$effects][0] as OutlineEffect).visibleEdgeColor = new Color(this.color);
-      (this[$effects][0] as OutlineEffect).hiddenEdgeColor = new Color(this.color);
-      (this[$effects][0] as OutlineEffect).blurPass.enabled = Math.round(this.blurStrength) > 0;
-      (this[$effects][0] as OutlineEffect).blurPass.kernelSize = getKernelSize(this.blurStrength);
-      this[$mvEffectComposer].queueRender();
+      this[$updateProperties]();
     }
+  }
+  
+  [$updateProperties]() {
+    (this[$effects][0] as OutlineEffect).edgeStrength = this.edgeStrength;
+    (this[$effects][0] as OutlineEffect).visibleEdgeColor = new Color(this.color);
+    (this[$effects][0] as OutlineEffect).hiddenEdgeColor = new Color(this.color);
+    (this[$effects][0] as OutlineEffect).blurPass.enabled = Math.round(this.blurStrength) > 0;
+    (this[$effects][0] as OutlineEffect).blurPass.kernelSize = getKernelSize(this.blurStrength);
+    this[$mvEffectComposer].queueRender();
   }
 
   [$setSelection] = () => {

@@ -17,10 +17,13 @@ import {ReactiveElement} from 'lit';
 import {EffectComposer, EffectPass, NormalPass, RenderPass, Selection, Pass} from 'postprocessing';
 import {disposeEffectPass, isConvolution} from './utilities.js';
 import {ModelViewerElement} from '@google/model-viewer';
-import {$requireNormals, $requireSeparatePass, IMVEffect, MVEffectBase} from './effects/effect-base.js';
+import {$requireNormals, $requireSeparatePass, IMVEffect, MVEffectBase} from './effects/mixins/effect-base.js';
 import {ModelScene} from '@google/model-viewer/lib/three-components/ModelScene.js';
 import { Camera, HalfFloatType, UnsignedByteType, WebGLRenderer } from 'three';
 import { property } from 'lit/decorators.js';
+import { OverrideMaterialManager } from "postprocessing";
+
+OverrideMaterialManager.workaroundEnabled = true;
 
 export const $scene = Symbol('scene');
 
@@ -95,14 +98,14 @@ export class MVEffectComposer extends ReactiveElement {
    * `performance` should be sufficient for most use-cases.
    * @default 'performance'
    */
-  @property({type: String, attribute: 'render-mode', noAccessor: true})
-  readonly renderMode: RenderMode = 'performance';
+  @property({type: String, attribute: 'render-mode'})
+  renderMode: RenderMode = 'performance';
 
-  protected readonly [$effectComposer]: EffectRenderer;
-  protected readonly [$renderPass]: RenderPass;
-  protected readonly [$normalPass]: NormalPass;
-  protected readonly [$clearPass]: EffectPass;
-  protected readonly [$selection]: Selection;
+  protected [$effectComposer]!: EffectRenderer;
+  protected [$renderPass]: RenderPass;
+  protected [$normalPass]: NormalPass;
+  protected [$clearPass]: EffectPass;
+  protected [$selection]: Selection;
   protected[$userEffectCount]: number = 0;
   
   /**
@@ -135,10 +138,6 @@ export class MVEffectComposer extends ReactiveElement {
    */
   constructor() {
     super();
-    // The modelViewer element sets the renderer on registering.
-    this[$effectComposer] = new EffectRenderer(undefined, {
-      frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType
-    });
     this[$renderPass] = new RenderPass();
     // @ts-expect-error they are allowed to be undefined
     this[$normalPass] = new NormalPass();
@@ -150,15 +149,19 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   connectedCallback(): void {
+    super.connectedCallback && super.connectedCallback();
+    this[$effectComposer] = new EffectRenderer(undefined, {
+      frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType
+    });
     if (this.modelViewerElement.nodeName.toLowerCase() !== 'model-viewer') {
       throw new Error('<mv-effect-composer> must be a child of a <model-viewer> component.');
     }
     this.modelViewerElement.registerEffectsComposer(this[$effectComposer]);
     this[$effectComposer].addPass(this[$renderPass], 0);
     this[$effectComposer].addPass(this[$normalPass], 1);
-    this.updateEffects();
     this[$setSelection]();
     this.modelViewerElement.addEventListener('beforeRender', this[$setSelection]);
+    this.updateEffects();
   }
 
   disconnectedCallback() {
@@ -166,10 +169,6 @@ export class MVEffectComposer extends ReactiveElement {
     this.modelViewerElement.unregisterEffectsComposer();
     this.modelViewerElement.removeEventListener('beforeRender', this[$setSelection]);
     this[$effectComposer].dispose();
-  }
-
-  updated(changedProperties: Map<string|number|symbol, any>) {
-    super.updated(changedProperties);
   }
 
   /**
@@ -218,16 +217,15 @@ export class MVEffectComposer extends ReactiveElement {
     // the convolution effects separate all effects before and after into separate EffectPasses.
     const scene = this[$scene];
     let i = 0;
-    const effectsArr = effects.flatMap((effect) => effect[$effects])
     while (i < effects.length) {
-      const separateIndex = effects.slice(i).findIndex((effect) => effect[$requireSeparatePass] || isConvolution(effect[$effects][0]));
+      const separateIndex = effects.slice(i).findIndex((effect) => effect[$requireSeparatePass] || isConvolution(effect));
       if (separateIndex != 0) {
-        const effectPass = new EffectPass(scene.getCamera(), ...effectsArr.slice(i, separateIndex == -1 ? effects.length : separateIndex))
+        const effectPass = new EffectPass(scene.getCamera(), ...effects.slice(i, separateIndex == -1 ? effects.length : separateIndex))
         this[$effectComposer].addPass(effectPass);
       }
       
       if (separateIndex != -1) {
-        const convolutionPass = new EffectPass(scene.getCamera(), effectsArr[i + separateIndex]);
+        const convolutionPass = new EffectPass(scene.getCamera(), effects[i + separateIndex]);
         this[$effectComposer].addPass(convolutionPass);
         i += separateIndex + 1;
       } else {
@@ -293,17 +291,11 @@ export class MVEffectComposer extends ReactiveElement {
     // iterate over all web-component children effects
     const effects: IMVEffect[] = [];
     for (let i = 0; i < this.children.length; i++) {
-      const childEffect = this.children.item(i) as MVEffectBase|null;
-      if (!childEffect || !childEffect.enabled) continue;
+      const childEffect = this.children.item(i) as MVEffectBase;
+      if (!childEffect[$effects]) continue;
       const childEffects = childEffect[$effects];
       if (childEffects) {
-        effects.push(...childEffects.map((effect): IMVEffect => {
-          return {
-            [$effects]: [effect],
-            [$requireNormals]: childEffect[$requireNormals],
-            [$requireSeparatePass]: childEffect[$requireSeparatePass],
-          }
-        }));
+        effects.push(...childEffects.filter((effect) => !effect.disabled));
       }
     }
     return effects;
