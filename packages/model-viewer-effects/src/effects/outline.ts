@@ -7,7 +7,7 @@ import { getKernelSize } from './utilities.js';
 
 export class MVOutlineEffect extends MVEffectBase {
   static get is() {
-    return 'mv-outline-effect';
+    return 'outline-effect';
   }
 
   @property({type: String || Number, attribute: 'color', reflect: true})

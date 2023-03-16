@@ -5,7 +5,7 @@ import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effec
 
 export class MVPixelateEffect extends MVEffectBase {
   static get is() {
-    return 'mv-pixelate-effect';
+    return 'pixelate-effect';
   }
 
   @property({type: Number, attribute: 'granularity', reflect: true})

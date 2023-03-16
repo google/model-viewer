@@ -8,7 +8,7 @@ export type SMAAPresetQuality = 'LOW' | 'MEDIUM' | 'HIGH' | 'ULTRA';
 
 export class MVSMAAEffect extends MVEffectBase {
   static get is() {
-    return 'mv-smaa-effect';
+    return 'smaa-effect';
   }
 
   @property({type: String, attribute: 'quality', reflect: true})

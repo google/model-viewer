@@ -573,9 +573,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     this[$scene].queueRender();
   }
 
-  [$onModelLoad]() {
-    this.dispatchEvent(new CustomEvent('beforeRender'));
-  }
+  [$onModelLoad]() {}
 
   [$setEffectComposerScene](effectsRenderer: EffectsRendererInterface) {
     effectsRenderer.setMainCamera(this[$scene].getCamera());
@@ -645,6 +643,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
       this[$markLoaded]();
       this[$onModelLoad]();
+      
+      this.dispatchEvent(new CustomEvent('beforeRender'));
 
       // Wait for shaders to compile and pixels to be drawn.
       await new Promise<void>(resolve => {

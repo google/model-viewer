@@ -16,10 +16,10 @@
 import {ReactiveElement} from 'lit';
 import {EffectComposer, EffectPass, NormalPass, RenderPass, Selection, Pass} from 'postprocessing';
 import {disposeEffectPass, isConvolution} from './utilities.js';
-import {ModelViewerElement} from '@google/model-viewer';
+import {ModelViewerElement} from '@beilinson/model-viewer';
 import {$requireNormals, $requireSeparatePass, IMVEffect, MVEffectBase} from './effects/mixins/effect-base.js';
-import {ModelScene} from '@google/model-viewer/lib/three-components/ModelScene.js';
-import { Camera, HalfFloatType, UnsignedByteType, WebGLRenderer } from 'three';
+import {ModelScene} from '@beilinson/model-viewer/lib/three-components/ModelScene.js';
+import { Camera, HalfFloatType, PerspectiveCamera, UnsignedByteType, WebGLRenderer } from 'three';
 import { property } from 'lit/decorators.js';
 import { OverrideMaterialManager } from "postprocessing";
 
@@ -74,6 +74,8 @@ export class EffectRenderer extends EffectComposer {
 
     override setMainCamera(camera: Camera): void {
       this.camera = camera;
+      Object.setPrototypeOf(camera, PerspectiveCamera.prototype);
+      console.log(camera instanceof PerspectiveCamera);
       super.setMainCamera(camera);
     }
 
@@ -87,7 +89,7 @@ export type RenderMode = 'performance' | 'quality';
 
 export class MVEffectComposer extends ReactiveElement {
   static get is() {
-    return 'mv-effect-composer';
+    return 'effect-composer';
   }
 
   /**
@@ -151,16 +153,18 @@ export class MVEffectComposer extends ReactiveElement {
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
     this[$effectComposer] = new EffectRenderer(undefined, {
-      frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType
+      multisampling: 0,
+      frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType,
     });
     if (this.modelViewerElement.nodeName.toLowerCase() !== 'model-viewer') {
-      throw new Error('<mv-effect-composer> must be a child of a <model-viewer> component.');
+      throw new Error('<effect-composer> must be a child of a <model-viewer> component.');
     }
     this.modelViewerElement.registerEffectsComposer(this[$effectComposer]);
     this[$effectComposer].addPass(this[$renderPass], 0);
     this[$effectComposer].addPass(this[$normalPass], 1);
     this[$setSelection]();
     this.modelViewerElement.addEventListener('beforeRender', this[$setSelection]);
+    this.modelViewerElement.addEventListener('load', () => this[$effectComposer].setMainCamera(this[$scene].camera));
     this.updateEffects();
   }
 
@@ -168,6 +172,7 @@ export class MVEffectComposer extends ReactiveElement {
     super.disconnectedCallback && super.disconnectedCallback();
     this.modelViewerElement.unregisterEffectsComposer();
     this.modelViewerElement.removeEventListener('beforeRender', this[$setSelection]);
+    this.modelViewerElement.removeEventListener('load', () => this[$effectComposer].setMainCamera(this[$scene].camera));
     this[$effectComposer].dispose();
   }
 
@@ -202,7 +207,7 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   /**
-   * Updates all existing EffectPasses, adding any new `<mv-*-effect>`'s 
+   * Updates all existing EffectPasses, adding any new `<*-effect>`'s 
    * in the order they were added, after any custom Passes added with {@link addEffectPass}.
    */
   updateEffects(): void {

@@ -9,7 +9,7 @@ export type GlitchMode = 'sporadic' | 'constant';
 
 export class MVGlitchEffect extends MVEffectBase {
   static get is() {
-    return 'mv-glitch-effect';
+    return 'glitch-effect';
   }
 
   /**

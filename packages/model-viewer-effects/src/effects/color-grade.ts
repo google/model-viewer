@@ -8,7 +8,7 @@ const TWO_PI = Math.PI * 2;
 
 export class MVColorGradeEffect extends MVEffectBase {
   static get is() {
-    return 'mv-color-grade-effect';
+    return 'color-grade-effect';
   }
 
   @property({type: String || Number, attribute: 'brightness', reflect: true})

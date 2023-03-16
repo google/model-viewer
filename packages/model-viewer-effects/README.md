@@ -9,7 +9,7 @@ effects to your models easy to do, on as many browsers and devices as possible.
 performance.
 
 ## Usage
-Using effects is as simple as adding the `mv-effect-composer>` inside your `<model-viewer>`.
+Using effects is as simple as adding the `<effect-composer>` inside your `<model-viewer>`.
 
 ```html
 <model-viewer src="...">

@@ -14,7 +14,7 @@
  */
 
 
-import {ModelViewerElement} from '@google/model-viewer';
+import {ModelViewerElement} from '@beilinson/model-viewer';
 import { EventDispatcher } from 'three';
 
 

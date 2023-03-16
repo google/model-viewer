@@ -8,27 +8,27 @@ import { MVSMAAEffect } from './effects/smaa.js';
 import { MVSSAOEffect } from './effects/ssao.js';
 import { MVEffectComposer } from './model-effect-composer.js';
 
-customElements.define('mv-effect-composer', MVEffectComposer);
-customElements.define('mv-pixelate-effect', MVPixelateEffect);
-customElements.define('mv-bloom-effect', MVBloomEffect);
-customElements.define('mv-color-grade-effect', MVColorGradeEffect);
-customElements.define('mv-outline-effect', MVOutlineEffect);
-customElements.define('mv-smaa-effect', MVSMAAEffect);
-customElements.define('mv-fxaa-effect', MVFXAAEffect);
-customElements.define('mv-ssao-effect', MVSSAOEffect);
-customElements.define('mv-glitch-effect', MVGlitchEffect);
+customElements.define('effect-composer', MVEffectComposer);
+customElements.define('pixelate-effect', MVPixelateEffect);
+customElements.define('bloom-effect', MVBloomEffect);
+customElements.define('color-grade-effect', MVColorGradeEffect);
+customElements.define('outline-effect', MVOutlineEffect);
+customElements.define('smaa-effect', MVSMAAEffect);
+customElements.define('fxaa-effect', MVFXAAEffect);
+customElements.define('ssao-effect', MVSSAOEffect);
+customElements.define('glitch-effect', MVGlitchEffect);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'mv-effect-composer': MVEffectComposer;
-    'mv-pixelate-effect': MVPixelateEffect;
-    'mv-bloom-effect': MVBloomEffect;
-    'mv-color-grade-effect': MVColorGradeEffect;
-    'mv-outline-effect': MVOutlineEffect;
-    'mv-smaa-effect': MVSMAAEffect;
-    'mv-fxaa-effect': MVFXAAEffect;
-    'mv-ssao-effect': MVSSAOEffect;
-    'mv-glitch-effect': MVGlitchEffect;
+    'effect-composer': MVEffectComposer;
+    'pixelate-effect': MVPixelateEffect;
+    'bloom-effect': MVBloomEffect;
+    'color-grade-effect': MVColorGradeEffect;
+    'outline-effect': MVOutlineEffect;
+    'smaa-effect': MVSMAAEffect;
+    'fxaa-effect': MVFXAAEffect;
+    'ssao-effect': MVSSAOEffect;
+    'glitch-effect': MVGlitchEffect;
   }
 }
 

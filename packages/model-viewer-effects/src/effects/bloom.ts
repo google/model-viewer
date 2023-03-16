@@ -5,7 +5,7 @@ import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effec
 
 export class MVBloomEffect extends MVEffectBase {
   static get is() {
-    return 'mv-bloom-effect';
+    return 'bloom-effect';
   }
 
   @property({type: Number, attribute: 'intensity', reflect: true})

@@ -82,14 +82,14 @@ button {
           <example-snippet stamp-to="pixelate" highlight-as="html">
             <template>
 <model-viewer id="lantern" camera-controls touch-action="pan-y" src="../../shared-assets/models/cubes.gltf" ar alt="A 3D model of a Lantern">
-  <mv-effect-composer>
-    <mv-glitch-effect id="glitch" strength="1" mode="sporadic"></mv-glitch-effect>
-    <mv-pixelate-effect id="pixelate" granularity="10"></mv-pixelate-effect>
-    <!-- <mv-smaa-effect quality="ultra"></mv-smaa-effect> -->
-  </mv-effect-composer>
+  <effect-composer>
+    <glitch-effect id="glitch" strength="0.5" mode="sporadic"></glitch-effect>
+    <pixelate-effect id="pixelate" granularity="10"></pixelate-effect>
+    <!-- <smaa-effect quality="ultra"></smaa-effect> -->
+  </effect-composer>
   <div class="controls">
     <label for="granularity">Granularity</label>
-    <input id="granularity" type="range" min="0" max="1" step="0.1" value=".5">
+    <input id="granularity" type="range" min="5" max="20" step="2" value="10">
   </div>
 </model-viewer>
 <script>
@@ -99,7 +99,7 @@ const glitch = modelViewerPostprocessing.querySelector('#glitch');
 const granularity = modelViewerPostprocessing.querySelector('#granularity');
 
 function updateGranularity(event) {
-  glitch.strength = event.target.value;
+  pixelate.granularity = event.target.value;
 }
 
 granularity.addEventListener('input', updateGranularity);
@@ -127,17 +127,17 @@ granularity.addEventListener('input', updateGranularity);
           </div>
           <example-snippet stamp-to="bloom" highlight-as="html">
             <template>
-<model-viewer id="bloomViewer" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RobotExpressive.glb  " ar alt="A 3D model of a Lantern">
-  <mv-effect-composer render-mode="quality">
-    <!-- <mv-fxaa-effect></mv-fxaa-effect> -->
-    <!-- <mv-ssao-effect></mv-ssao-effect> -->
-    <mv-outline-effect blur-strength="2" edge-strength="4" color="teal"></mv-outline-effect>
-    <mv-bloom-effect id="bloom" intensity="1" blend-mode="negation"></mv-bloom-effect>
-    <mv-glitch-effect strength="0.3" mode="sporadic"></mv-glitch-effect>
-    <mv-smaa-effect quality="ultra"></mv-smaa-effect>
-    <mv-pixelate-effect granularity="5" blend-mode="skip"></mv-pixelate-effect>
-    <mv-color-grade-effect id="color-grade" brightness="0" hue="3" contrast="0.5" saturation="0.25"></mv-color-grade-effect>
-  </mv-effect-composer>
+<model-viewer id="bloomViewer" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/EmissiveStrengthTest.glb  " ar alt="A 3D model of a Lantern">
+  <effect-composer render-mode="quality">
+    <!-- <fxaa-effect></fxaa-effect> -->
+    <outline-effect blur-strength="2" edge-strength="4" color="teal"></outline-effect>
+    <ssao-effect blend-mode="multiply"></ssao-effect>
+    <bloom-effect id="bloom" intensity="1" blend-mode="negation"></bloom-effect>
+    <!-- <glitch-effect strength="0" mode="sporadic" blend-mode="negation"></glitch-effect> -->
+    <smaa-effect quality="ultra"></smaa-effect>
+    <!-- <pixelate-effect granularity="10"></pixelate-effect> -->
+    <color-grade-effect id="color-grade" brightness="-0.3" hue="3" contrast="0.5" saturation="0.25"></color-grade-effect>
+  </effect-composer>
   <div class="controls">
     <label for="intensity">Intensity</label>
     <input id="intensity" type="range" min="0" max="5" step="0.1" value="1">
@@ -152,14 +152,12 @@ const mv = document.querySelector("model-viewer#bloomViewer");
 const bloom = mv.querySelector('#bloom');
 const color = mv.querySelector('#color-grade');
 
-/*requestAnimationFrame(() => {
-  color.hue += .01;
-})*/
-console.log(color);
-const a = setInterval(() => {
-  if (!color.hue) color.hue = 0;
-  color.hue += .01;
-}, 10);
+if (color) {
+  const a = setInterval(() => {
+    if (!color.hue) color.hue = 0;
+    color.hue += .01;
+  }, 10);
+}
 
 function updateProperty(event, propertyName) {
   bloom[propertyName] = event.target.value;

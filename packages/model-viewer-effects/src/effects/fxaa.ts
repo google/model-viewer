@@ -4,7 +4,7 @@ import {MVEffectBase} from './mixins/effect-base.js';
 
 export class MVFXAAEffect extends MVEffectBase {
   static get is() {
-    return 'mv-fxaa-effect';
+    return 'fxaa-effect';
   }
   
   constructor() {
