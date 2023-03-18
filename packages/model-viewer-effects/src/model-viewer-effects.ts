@@ -6,7 +6,7 @@ import { MVOutlineEffect } from './effects/outline.js';
 import { MVPixelateEffect } from './effects/pixelate.js';
 import { MVSMAAEffect } from './effects/smaa.js';
 import { MVSSAOEffect } from './effects/ssao.js';
-import { MVEffectComposer } from './model-effect-composer.js';
+import { MVEffectComposer } from './effect-composer.js';
 
 customElements.define('effect-composer', MVEffectComposer);
 customElements.define('pixelate-effect', MVPixelateEffect);

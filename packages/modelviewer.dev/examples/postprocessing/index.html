@@ -25,6 +25,15 @@
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
 
+  
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.150.0/build/three.module.js"
+      }
+    }
+  </script>
+
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
@@ -127,16 +136,16 @@ granularity.addEventListener('input', updateGranularity);
           </div>
           <example-snippet stamp-to="bloom" highlight-as="html">
             <template>
-<model-viewer id="bloomViewer" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/EmissiveStrengthTest.glb  " ar alt="A 3D model of a Lantern">
+<model-viewer id="bloomViewer" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/EmissiveStrengthTest.glb" ar alt="A 3D model of a Lantern">
   <effect-composer render-mode="quality">
     <!-- <fxaa-effect></fxaa-effect> -->
     <outline-effect blur-strength="2" edge-strength="4" color="teal"></outline-effect>
-    <ssao-effect blend-mode="multiply"></ssao-effect>
-    <bloom-effect id="bloom" intensity="1" blend-mode="negation"></bloom-effect>
-    <!-- <glitch-effect strength="0" mode="sporadic" blend-mode="negation"></glitch-effect> -->
-    <smaa-effect quality="ultra"></smaa-effect>
     <!-- <pixelate-effect granularity="10"></pixelate-effect> -->
-    <color-grade-effect id="color-grade" brightness="-0.3" hue="3" contrast="0.5" saturation="0.25"></color-grade-effect>
+    <!-- <glitch-effect strength=".5" mode="sporadic"></glitch-effect> -->
+    <smaa-effect quality="ultra"></smaa-effect>
+    <ssao-effect></ssao-effect>
+    <bloom-effect id="bloom"></bloom-effect>
+    <color-grade-effect id="color-grade" contrast="0.1" hue="0" saturation="0.75"></color-grade-effect>
   </effect-composer>
   <div class="controls">
     <label for="intensity">Intensity</label>
@@ -152,12 +161,12 @@ const mv = document.querySelector("model-viewer#bloomViewer");
 const bloom = mv.querySelector('#bloom');
 const color = mv.querySelector('#color-grade');
 
-if (color) {
+/*if (color) {
   const a = setInterval(() => {
     if (!color.hue) color.hue = 0;
     color.hue += .01;
   }, 10);
-}
+}*/
 
 function updateProperty(event, propertyName) {
   bloom[propertyName] = event.target.value;

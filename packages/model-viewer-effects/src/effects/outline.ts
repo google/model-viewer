@@ -1,7 +1,7 @@
 import {property} from 'lit/decorators.js';
 import {BlendFunction, OutlineEffect} from 'postprocessing';
 import { Color } from 'three';
-import {$effects, $effectOptions, $selection, $setSelection} from '../model-effect-composer.js';
+import {$effects, $effectOptions, $selection, $setSelection} from '../effect-composer.js';
 import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
 import { getKernelSize } from './utilities.js';
 

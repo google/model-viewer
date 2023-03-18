@@ -1,6 +1,6 @@
 import {property} from 'lit/decorators.js';
 import {PixelationEffect} from 'postprocessing';
-import {$effects} from '../model-effect-composer.js';
+import {$effects} from '../effect-composer.js';
 import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
 
 export class MVPixelateEffect extends MVEffectBase {

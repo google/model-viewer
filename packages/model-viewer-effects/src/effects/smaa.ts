@@ -1,6 +1,6 @@
 import {property} from 'lit/decorators.js';
 import {SMAAEffect, SMAAPreset} from 'postprocessing';
-import {$effects, $effectOptions} from '../model-effect-composer.js';
+import {$effects, $effectOptions} from '../effect-composer.js';
 import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
 
 export type SMAAQuality = 'low' | 'medium' | 'high' | 'ultra';

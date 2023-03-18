@@ -1,6 +1,6 @@
 import { ReactiveElement } from "lit";
 import { BlendFunction, BlendMode, Effect } from "postprocessing";
-import { $effects, MVEffectComposer } from "../../model-effect-composer";
+import { $effects, MVEffectComposer } from "../../effect-composer";
 import { Constructor } from "../../utilities";
 import { BlendModeMixin } from "./blend-mode";
 

@@ -19,7 +19,7 @@ import {disposeEffectPass, isConvolution} from './utilities.js';
 import {ModelViewerElement} from '@beilinson/model-viewer';
 import {$requireNormals, $requireSeparatePass, IMVEffect, MVEffectBase} from './effects/mixins/effect-base.js';
 import {ModelScene} from '@beilinson/model-viewer/lib/three-components/ModelScene.js';
-import { Camera, HalfFloatType, PerspectiveCamera, UnsignedByteType, WebGLRenderer } from 'three';
+import { Camera, HalfFloatType, UnsignedByteType, WebGLRenderer } from 'three';
 import { property } from 'lit/decorators.js';
 import { OverrideMaterialManager } from "postprocessing";
 
@@ -42,7 +42,8 @@ export const $resetEffectPasses = Symbol('resetEffectPasses');
 export const $userEffectCount = Symbol('userEffectCount');
 
 /**
- * Adds camera and scene to EffectComposer, update
+ * Light wrapper around {@link EffectComposer} for storing the `scene` and `camera
+ * at a top level, and setting them for every {@link Pass} added.
  */
 export class EffectRenderer extends EffectComposer {
   public camera!: Camera;
@@ -74,14 +75,19 @@ export class EffectRenderer extends EffectComposer {
 
     override setMainCamera(camera: Camera): void {
       this.camera = camera;
-      Object.setPrototypeOf(camera, PerspectiveCamera.prototype);
-      console.log(camera instanceof PerspectiveCamera);
       super.setMainCamera(camera);
     }
 
     override setMainScene(scene: ModelScene): void {
       this.scene = scene;
       super.setMainScene(scene);
+    }
+
+    /**
+     * Materials that use effects need to be manually updated whenever the camera settings update.
+     */
+    updateCameraSettings(): void {
+      super.setMainCamera(this.camera);
     }
 }
 
@@ -137,6 +143,7 @@ export class MVEffectComposer extends ReactiveElement {
 
   /**
    * Creates a new MVEffectComposer element.
+   * The EffectComposer instance is created only on connection with the dom so that 
    */
   constructor() {
     super();
@@ -148,12 +155,13 @@ export class MVEffectComposer extends ReactiveElement {
     this[$clearPass].name = 'ClearPass';
     this[$normalPass].enabled = false;
     this[$selection] = new Selection();
+    console.log(this.renderMode);
   }
 
   connectedCallback(): void {
+    console.log(this.renderMode);
     super.connectedCallback && super.connectedCallback();
     this[$effectComposer] = new EffectRenderer(undefined, {
-      multisampling: 0,
       frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType,
     });
     if (this.modelViewerElement.nodeName.toLowerCase() !== 'model-viewer') {
@@ -164,7 +172,6 @@ export class MVEffectComposer extends ReactiveElement {
     this[$effectComposer].addPass(this[$normalPass], 1);
     this[$setSelection]();
     this.modelViewerElement.addEventListener('beforeRender', this[$setSelection]);
-    this.modelViewerElement.addEventListener('load', () => this[$effectComposer].setMainCamera(this[$scene].camera));
     this.updateEffects();
   }
 
@@ -172,7 +179,6 @@ export class MVEffectComposer extends ReactiveElement {
     super.disconnectedCallback && super.disconnectedCallback();
     this.modelViewerElement.unregisterEffectsComposer();
     this.modelViewerElement.removeEventListener('beforeRender', this[$setSelection]);
-    this.modelViewerElement.removeEventListener('load', () => this[$effectComposer].setMainCamera(this[$scene].camera));
     this[$effectComposer].dispose();
   }
 
@@ -207,7 +213,7 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   /**
-   * Updates all existing EffectPasses, adding any new `<*-effect>`'s 
+   * Updates all existing EffectPasses, adding any new `<model-viewer-effects>` Effects 
    * in the order they were added, after any custom Passes added with {@link addEffectPass}.
    */
   updateEffects(): void {
@@ -255,6 +261,7 @@ export class MVEffectComposer extends ReactiveElement {
 
   [$setSelection] = () => {
     // Place all meshes in the selection
+    this[$effectComposer].updateCameraSettings();
     const scene = this[$scene];
     scene.traverse((obj) => {
       if (obj.type === 'Mesh') this[$selection].add(obj);

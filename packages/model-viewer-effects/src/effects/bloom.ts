@@ -1,6 +1,6 @@
 import {property} from 'lit/decorators.js';
 import {BlendFunction, BloomEffect} from 'postprocessing';
-import {$effects, $effectOptions} from '../model-effect-composer.js';
+import {$effects, $effectOptions} from '../effect-composer.js';
 import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
 
 export class MVBloomEffect extends MVEffectBase {
@@ -17,6 +17,9 @@ export class MVBloomEffect extends MVEffectBase {
   @property({type: Number, attribute: 'smoothing', reflect: true})
   smoothing = 0.025;
 
+  @property({type: Number, attribute: 'radius', reflect: true})
+  radius = 0.85;
+
   constructor() {
     super();
 
@@ -30,7 +33,7 @@ export class MVBloomEffect extends MVEffectBase {
 
   updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
-    if (changedProperties.has('intensity') || changedProperties.has('threshold') || changedProperties.has('smoothing')) {
+    if (changedProperties.has('intensity') || changedProperties.has('threshold') || changedProperties.has('smoothing') || changedProperties.has('radius')) {
       this[$updateProperties]();
     }
   }
@@ -39,6 +42,7 @@ export class MVBloomEffect extends MVEffectBase {
     (this[$effects][0] as BloomEffect).luminanceMaterial.threshold = this.threshold;
     (this[$effects][0] as BloomEffect).luminanceMaterial.smoothing = this.smoothing;
     (this[$effects][0] as BloomEffect).intensity = this.intensity;
+    (this[$effects][0] as any).mipmapBlurPass.radius = this.radius;
     this[$mvEffectComposer].queueRender();
   }
 
@@ -46,6 +50,7 @@ export class MVBloomEffect extends MVEffectBase {
     return {
       blendFunction: BlendFunction.ADD,
       mipmapBlur: true,
+      radius: this.radius,
       luminanceThreshold: this.threshold,
       luminanceSmoothing: this.smoothing,
       intensity: this.intensity,

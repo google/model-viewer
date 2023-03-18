@@ -786,7 +786,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           Math.max(this[$scene].boundingSphere.radius, radius);
 
       const near = 0;
-      const far = 2 * maximumRadius;
+      const far = Math.abs(2 * maximumRadius);
       this[$controls].updateNearFar(near, far);
     }
 

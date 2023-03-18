@@ -15,7 +15,7 @@
 import {ModelViewerElement} from '@beilinson/model-viewer';
 import {assetPath, createModelViewerElement, waitForEvent} from './utilities.js';
 import { MVEffectComposer } from '../model-viewer-effects.js';
-import { $clearPass, $effectComposer, $normalPass, $renderPass, $scene } from '../model-effect-composer.js';
+import { $clearPass, $effectComposer, $normalPass, $renderPass, $scene } from '../effect-composer.js';
 import { DotScreenEffect, Effect, EffectPass, GridEffect } from 'postprocessing';
 const expect = chai.expect;
 

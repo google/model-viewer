@@ -1,6 +1,6 @@
 import {property} from 'lit/decorators.js';
 import {BlendFunction, BrightnessContrastEffect, HueSaturationEffect} from 'postprocessing';
-import {$effects} from '../model-effect-composer.js';
+import {$effects} from '../effect-composer.js';
 import {clamp} from '../utilities.js';
 import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
 

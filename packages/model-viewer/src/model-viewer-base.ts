@@ -643,8 +643,11 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
       this[$markLoaded]();
       this[$onModelLoad]();
-      
-      this.dispatchEvent(new CustomEvent('beforeRender'));
+        
+      this.updateComplete.then(() => {
+        console.log(this[$scene].camera.far);
+        this.dispatchEvent(new CustomEvent('beforeRender'));
+      });
 
       // Wait for shaders to compile and pixels to be drawn.
       await new Promise<void>(resolve => {

@@ -1,1 +1,1 @@
-import './model-effect-composer-spec.js';
+import './effect-composer-spec.js';

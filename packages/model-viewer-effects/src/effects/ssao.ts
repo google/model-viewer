@@ -1,5 +1,5 @@
 import {SSAOEffect} from 'postprocessing';
-import {$effects, $effectOptions} from '../model-effect-composer.js';
+import {$effects, $effectOptions} from '../effect-composer.js';
 import {PerspectiveCamera} from 'three';
 import {$mvEffectComposer, $requireNormals, $updateProperties, IMVEffect, MVEffectBase} from './mixins/effect-base.js';
 import { property } from 'lit/decorators.js';

@@ -2,7 +2,7 @@ import { ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
 import {BlendFunction} from 'postprocessing';
 import { Constructor, clampNormal } from '../../utilities.js';
-import {$effects} from '../../model-effect-composer.js';
+import {$effects} from '../../effect-composer.js';
 import { IEffectBaseMixin } from './effect-base.js';
 
 export const $setDefaultProperties = Symbol('setDefaultProperties');

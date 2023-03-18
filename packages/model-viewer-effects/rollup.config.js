@@ -30,10 +30,10 @@ const onwarn = (warning, warn) => {
   }
 };
 
-let plugins =
-    [resolve({dedupe: ['three']}), replace({'Reflect.decorate': 'undefined'})];
+let plugins = 
+    [resolve(), replace({'Reflect.decorate': 'undefined'})];
 
-const watchFiles = ['lib/**', '../model-viewer/lib/**'];
+const watchFiles = ['lib/**'];
 
 const outputOptions = [{
   input: './lib/model-viewer-effects.js',
@@ -47,6 +47,7 @@ const outputOptions = [{
     include: watchFiles,
   },
   plugins,
+  external: ['three'],
   onwarn,
 }];
 

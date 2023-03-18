@@ -1,7 +1,7 @@
 import { property } from 'lit/decorators.js';
 import {ChromaticAberrationEffect, GlitchEffect, GlitchMode as Mode} from 'postprocessing';
 import {Vector2} from 'three';
-import {$effectOptions, $effects, $scene} from '../model-effect-composer.js';
+import {$effectOptions, $effects, $scene} from '../effect-composer.js';
 import { clamp } from '../utilities.js';
 import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
 
