@@ -144,8 +144,8 @@ granularity.addEventListener('input', updateGranularity);
     <!-- <glitch-effect strength=".5" mode="sporadic"></glitch-effect> -->
     <smaa-effect quality="ultra"></smaa-effect>
     <ssao-effect></ssao-effect>
-    <bloom-effect id="bloom"></bloom-effect>
-    <color-grade-effect id="color-grade" contrast="0.1" hue="0" saturation="0.75"></color-grade-effect>
+    <!-- <bloom-effect id="bloom"></bloom-effect>
+    <color-grade-effect id="color-grade" contrast="0.1" hue="0" saturation="0.75"></color-grade-effect> -->
   </effect-composer>
   <div class="controls">
     <label for="intensity">Intensity</label>
@@ -210,7 +210,7 @@ mv.querySelector('#smoothing').addEventListener('input', (e) => updateProperty(e
 
   <!-- Loads <model-viewer> on modern browsers: -->
   <script type="module"
-      src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
+      src="../../node_modules/@google/model-viewer/dist/model-viewer-no-three.min.js">
   </script>
 
   

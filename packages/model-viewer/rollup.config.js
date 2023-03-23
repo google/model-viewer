@@ -31,7 +31,7 @@ const onwarn = (warning, warn) => {
 };
 
 let plugins =
-    [resolve(), replace({'Reflect.decorate': 'undefined'})];
+    [resolve({dedupe: 'three'}), replace({'Reflect.decorate': 'undefined'})];
 
 const watchFiles = ['lib/**'];
 
@@ -47,7 +47,6 @@ const outputOptions = [{
     include: watchFiles,
   },
   plugins,
-  external: ['three'],
   onwarn,
 }];
 
@@ -124,6 +123,78 @@ if (NODE_ENV !== 'development') {
       name: 'ModelViewerElement'
     },
     plugins: [dts()]
+  });
+
+  /** Bundled w/o three */
+  outputOptions.push({
+    input: './lib/model-viewer.js',
+    output: {
+      file: './dist/model-viewer-no-three.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'ModelViewerElement'
+    },
+    external: ['three'],
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
+  })
+
+  // IE11 does not support modules, so they are removed here, as well as in a
+  // dedicated unit test build which is needed for the same reason.
+  outputOptions.push({
+    input: './lib/model-viewer.js',
+    output: {
+      file: './dist/model-viewer-no-three-umd.js',
+      sourcemap: true,
+      format: 'umd',
+      name: 'ModelViewerElement'
+    },
+    external: ['three'],
+    watch: {
+      include: watchFiles,
+    },
+    plugins: pluginsIE11,
+    onwarn,
+  });
+
+  plugins = [
+    ...plugins,
+    terser(),
+  ];
+
+  outputOptions.push({
+    input: './dist/model-viewer-no-three.js',
+    output: {
+      file: './dist/model-viewer-no-three.min.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'ModelViewerElement'
+    },
+    external: ['three'],
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
+  });
+
+  outputOptions.push({
+    input: './dist/model-viewer-no-three-umd.js',
+    output: {
+      file: './dist/model-viewer-no-three-umd.min.js',
+      sourcemap: true,
+      format: 'umd',
+      name: 'ModelViewerElement'
+    },
+    external: ['three'],
+    watch: {
+      include: watchFiles,
+    },
+    plugins,
+    onwarn,
   });
 }
 

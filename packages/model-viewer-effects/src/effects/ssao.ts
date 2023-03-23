@@ -3,7 +3,6 @@ import {$effects, $effectOptions} from '../effect-composer.js';
 import {PerspectiveCamera} from 'three';
 import {$mvEffectComposer, $requireNormals, $updateProperties, IMVEffect, MVEffectBase} from './mixins/effect-base.js';
 import { property } from 'lit/decorators.js';
-import { $setDefaultProperties } from './mixins/blend-mode.js';
 
 export class MVSSAOEffect extends MVEffectBase {
   static get is() {
@@ -25,7 +24,7 @@ export class MVSSAOEffect extends MVEffectBase {
 
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
-    this[$setDefaultProperties]();
+    this['setDefaultProperties']();
     this[$updateProperties]();
   }
   
@@ -41,7 +40,7 @@ export class MVSSAOEffect extends MVEffectBase {
     this[$mvEffectComposer].queueRender();
   }
 
-  [$setDefaultProperties]() {
+  setDefaultProperties() {
     (this[$effects][0] as SSAOEffect).ssaoMaterial.normalBuffer = this[$mvEffectComposer].normalBuffer;
     (this[$effects][0] as any).depthDownsamplingPass.fullscreenMaterial.normalBuffer = this[$mvEffectComposer].normalBuffer;
   }
@@ -52,10 +51,6 @@ export class MVSSAOEffect extends MVEffectBase {
       worldDistanceFalloff: 1000,
       worldProximityThreshold: 1000,
       worldProximityFalloff: 1000,
-      // worldDistanceThreshold: 100,
-      // worldDistanceFalloff: 5,
-      // worldProximityThreshold: 0.4,
-      // worldProximityFalloff: 0.1,
       luminanceInfluence: 0.7,
       samples: 16,
       fade: 0.05,

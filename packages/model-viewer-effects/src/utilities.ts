@@ -1,5 +1,4 @@
 import { Effect, EffectAttribute, EffectPass, Pass } from 'postprocessing';
-import { Color } from 'three';
 
 export type Constructor<T = object, U = object> = {
   new (...args: any[]): T,
@@ -12,10 +11,14 @@ export type Constructor<T = object, U = object> = {
  * @param key Key to search for (case sensitive)
  */
 export function hasOwnPropertySymbol(object: any, key: string): boolean {
-  for (const symbol of Object.getOwnPropertySymbols(object)) {
-    if (symbol.toString() === `Symbol(${key})`) {
-      return true;
+  while (object) {
+    for (const symbol of Object.getOwnPropertySymbols(object)) {
+      if (symbol.toString() === `Symbol(${key})`) {
+        return true;
+      }
     }
+    // Search further up in prototype chain
+    object = Object.getPrototypeOf(object);
   }
   return false;
 }
@@ -27,10 +30,14 @@ export function hasOwnPropertySymbol(object: any, key: string): boolean {
  * @returns `Symbol(key)`
  */
 export function getOwnPropertySymbol(object: any, key: string): symbol | undefined {
-  for (const symbol of Object.getOwnPropertySymbols(object)) {
-    if (symbol.toString() === `Symbol(${key})`) {
-      return symbol;
+  while (object) {
+    for (const symbol of Object.getOwnPropertySymbols(object)) {
+      if (symbol.toString() === `Symbol(${key})`) {
+        return symbol;
+      }
     }
+    // Search further up in prototype chain
+    object = Object.getPrototypeOf(object);
   }
   return;
 }
@@ -42,10 +49,14 @@ export function getOwnPropertySymbol(object: any, key: string): symbol | undefin
  * @returns `object[Symbol(key)]`
  */
 export function getOwnPropertySymbolValue<T = unknown>(object: any, key: string): T | undefined {
-  for (const symbol of Object.getOwnPropertySymbols(object)) {
-    if (symbol.toString() === `Symbol(${key})`) {
-      return object[symbol];
+  while (object) {
+    for (const symbol of Object.getOwnPropertySymbols(object)) {
+      if (symbol.toString() === `Symbol(${key})`) {
+        return object[symbol];
+      }
     }
+    // Search further up in prototype chain
+    object = Object.getPrototypeOf(object);
   }
   return;
 }
@@ -67,15 +78,15 @@ export function clampNormal(value: number): number {
 /**
  * Searches through hierarchy of HTMLElement until an element with a non-transparent background is found
  * @param elem The element background to get
- * @returns A {@link Color} instance
+ * @returns The backgroundColor
  */
-export function getBackgroundColor(elem: HTMLElement): Color {
+export function getBackgroundColor(elem: HTMLElement): string {
   let currElem: HTMLElement | null = elem;
   while (currElem && isTransparent(getComputedStyle(currElem))) {
     currElem = currElem.parentElement;
   }
-  if (!currElem) return new Color(0xffffff);
-  return new Color(getComputedStyle(currElem).backgroundColor);
+  if (!currElem) return '';
+  return getComputedStyle(currElem).backgroundColor;
 }
 
 /**
@@ -83,7 +94,7 @@ export function getBackgroundColor(elem: HTMLElement): Color {
  * @param style The CSS properties of an Element
  */
 function isTransparent(style: CSSStyleDeclaration): boolean {
-  return style.backgroundColor == 'transparent' || style.backgroundColor == 'rgba(0, 0, 0, 0)' || !style.backgroundColor;
+  return style.backgroundColor === 'transparent' || style.backgroundColor === 'rgba(0, 0, 0, 0)' || !style.backgroundColor;
 }
 
 /**
