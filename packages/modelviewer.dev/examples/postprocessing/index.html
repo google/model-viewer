@@ -136,9 +136,9 @@ button {
           </div>
           <example-snippet stamp-to="effects" highlight-as="html">
             <template>
-<model-viewer id="transform" orientation="20deg 0 0" shadow-intensity="1" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+<model-viewer id="blendViewer" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
   <effect-composer render-mode="quality">
-    <color-grade-effect id="color-grade" contrast="0.5" saturation="0.75"></color-grade-effect>
+    <color-grade-effect id="color-grade" contrast="0.5" saturation="0.4"></color-grade-effect>
   </effect-composer>
   <div class="controls">
     <label for="opacity">Opacity</label>
