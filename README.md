@@ -10,13 +10,15 @@ Check out the README.md files for specific projects to get more details:
 
 👩‍🚀 **[`<model-viewer>`](packages/model-viewer)** • The `<model-viewer>` web component (probably what you are looking for)
 
+✨ **[`<model-viewer-effects>`](packages/model-viewer-effects)** • The PostProcessing plugin for `<model-viewer>`
+
 🌐 **[modelviewer.dev](packages/modelviewer.dev)** • The source for the `<model-viewer>` documentation website
 
 🖼 **[render-fidelity-tools](packages/render-fidelity-tools)** • Tools for testing how well `<model-viewer>` renders models
 
 🎨 **[shared-assets](packages/shared-assets)** • 3D models, environment maps and other assets shared across many sub-projects
 
-🚀 **[space-opera](packages/space-opera/)** • The source of the `<model-viewer>` [editor](editor)
+🚀 **[space-opera](packages/space-opera/)** • The source of the `<model-viewer>` [editor](https://modelviewer.dev/editor/)
 
 ## Development
 
@@ -68,7 +70,7 @@ export CHROME_BIN="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
 npm run test
 ```
 
-Note that you should be able to run the `packages/model-viewer` tests with that setup, but running fidelity tests requires GUI support which is only available in WSL on Windows 11.  
+Note that you should be able to run the `packages/model-viewer` and `packages/model-viewer-effects` tests with that setup, but running fidelity tests requires GUI support which is only available in WSL on Windows 11.  
 
 <details>
  <summary>Additional WSL Troubleshooting – provided for reference only</summary>
@@ -83,7 +85,7 @@ export CHROME_BIN="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
 npm run test
 ```
 
-Tests in `packages/model-viewer` should now run properly; fidelity tests might still fail (see errors and potential workarounds below).
+Tests in `packages/model-viewer` and `packages/model-viewer-effects` should now run properly; fidelity tests might still fail (see errors and potential workarounds below).
 
 ### Error: `/bin/bash^M: bad interpreter: No such file or directory`
 **Symptom**

@@ -1,15 +1,16 @@
 # `<model-viewer-effects>`
 
- [![Min Zip](https://badgen.net/bundlephobia/minzip/@beilinson/model-viewer-effects)](https://bundlephobia.com/result?p=@beilinson/model-viewer-effects)
+ ![npm bundle size](https://img.shields.io/bundlephobia/min/@beilinson/model-viewer-effects)
+ ![npm (scoped)](https://img.shields.io/npm/v/@beilinson/model-viewer-effects)
 
-`<model-viewer-effects>` is a web component library addon for `<model-viewer>` that exposes a simple API for adding post-processing
+`<model-viewer-effects>` is a web component library addon for `<model-viewer>` that makes adding post-processing
 effects to your models easy to do, on as many browsers and devices as possible.
 
 `<model-viewer-effects>` strives to give you great defaults for rendering quality and
 performance.
 
 ## Usage
-Using effects is as simple as adding the `<effect-composer>` inside your `<model-viewer>`.
+Using effects is as simple as adding the `<effect-composer>` inside your `<model-viewer>`, and placing any effects inside the composer component.
 
 ```html
 <model-viewer src="...">
@@ -19,6 +20,11 @@ Using effects is as simple as adding the `<effect-composer>` inside your `<model
 </model-viewer>
 ```
 
+### PostProcessing
+`<model-viewer-effects>` uses the [postprocessing](https://github.com/pmndrs/postprocessing) library under the hood, for its superior [performance](https://github.com/pmndrs/postprocessing#performance) and support.
+
+While not all effects are wrapped by this library, you can add any custom effects/passes that follow the postprocessing spec.
+
 There is no documentation yet, but you may refer to the types for all available properties.
 
 ### *XR Support*
@@ -27,9 +33,10 @@ The effects are not supported in the `<model-viewer>` XR modes, which will rende
 ## Status
 `<model-viewer-effects>` is in early development. Currently, it relies on my fork of `<model-viewer>`: 
 
-`@beilinson/model-viewer`. 
+[@beilinson/model-viewer](https://npmjs.com/@beilinson/model-viewer).
 
 ## Installing
+### NPM
 
 The `<model-viewer-effects>` library can be installed from [NPM](https://npmjs.org):
 
@@ -37,10 +44,27 @@ The `<model-viewer-effects>` library can be installed from [NPM](https://npmjs.o
 npm install three @beilinson/model-viewer @beilinson/model-viewer-effects
 ```
 
-Or using jsDeliver:
+### HTML
+
+`<model-viewer-effects>` and `<model-viewer>` share a [Three.js](https://threejs.org/) dependency. In order to avoid version conflicts, you should bring Three through an `import-map`:
 
 ```html
-<script type="module" src=" https://cdn.jsdelivr.net/npm/@beilinson/model-viewer-effects@0.0.4/dist/model-viewer-effects.min.js "></script>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js"
+    }
+  }
+</script>
+```
+
+You should then bring the `no-three` version of `<model-viewer>`, along with `<model-viewer-effects>` from your favourite CDN, such as [jsDelivr](https://www.jsdelivr.com/package/npm/@google/model-viewer):
+
+
+```html
+<script type="module" src=" https://cdn.jsdelivr.net/npm/@beilinson/model-viewer/dist/model-viewer-no-three.min.js "></script>
+
+<script type="module" src=" https://cdn.jsdelivr.net/npm/@beilinson/model-viewer-effects/dist/model-viewer-effects.min.js "></script>
 ```
 
 ## Browser Support

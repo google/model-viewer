@@ -2,11 +2,11 @@
   "name": "@beilinson/model-viewer-effects",
   "version": "0.0.7",
   "description": "Easily add and combine post-processing effects with <model-viewer>!",
-  "repository": "https://github.com/Beilinson/model-viewer",
+  "repository": "https://github.com/Beilinson/model-viewer/tree/post-processing/packages/model-viewer-effects",
   "bugs": {
     "url": "https://github.com/google/model-viewer/issues"
   },
-  "homepage": "https://github.com/google/model-viewer#readme",
+  "homepage": "https://github.com/Beilinson/model-viewer/tree/post-processing/packages/model-viewer-effects#readme",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0"
