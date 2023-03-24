@@ -1,8 +1,7 @@
-import {property} from 'lit/decorators.js';
-import {BlendFunction, BrightnessContrastEffect, HueSaturationEffect} from 'postprocessing';
-import {$effects} from '../effect-composer.js';
-import {clamp} from '../utilities.js';
-import {$mvEffectComposer, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
+import { property } from 'lit/decorators.js';
+import { BlendFunction, BrightnessContrastEffect, HueSaturationEffect } from 'postprocessing';
+import { clamp, wrapClamp } from '../utilities.js';
+import { $updateProperties, MVEffectBase } from './mixins/effect-base.js';
 
 const TWO_PI = Math.PI * 2;
 
@@ -11,21 +10,35 @@ export class MVColorGradeEffect extends MVEffectBase {
     return 'color-grade-effect';
   }
 
-  @property({type: String || Number, attribute: 'brightness', reflect: true})
+  /**
+   * Value in the range of (-1, 1).
+   */
+  @property({ type: String || Number, attribute: 'brightness', reflect: true })
   brightness = 0;
 
-  @property({type: Number, attribute: 'contrast', reflect: true})
+  /**
+   * Value in the range of (-1, 1).
+   */
+  @property({ type: Number, attribute: 'contrast', reflect: true })
   contrast = 0;
 
-  @property({type: Number, attribute: 'saturation', reflect: true})
+  /**
+   * Value in the range of (-1, 1).
+   */
+  @property({ type: Number, attribute: 'saturation', reflect: true })
   saturation = 0;
 
-  @property({type: Number, attribute: 'hue', reflect: true})
+  /**
+   * Value in the range of (0, 2 * PI).
+   *
+   * This property is wrapping, meaning that if you set it above the max it resets to the minimum and vice-versa.
+   */
+  @property({ type: Number, attribute: 'hue', reflect: true })
   hue = 0;
 
   constructor() {
     super();
-    this[$effects] = [
+    this.effects = [
       new HueSaturationEffect({
         hue: clamp(this.hue, 0, TWO_PI),
         saturation: clamp(this.saturation, -1, 1),
@@ -35,7 +48,7 @@ export class MVColorGradeEffect extends MVEffectBase {
         brightness: clamp(this.brightness, -1, 1),
         contrast: clamp(this.contrast, -1, 1),
         blendFunction: BlendFunction.SRC,
-      })
+      }),
     ];
   }
 
@@ -43,20 +56,28 @@ export class MVColorGradeEffect extends MVEffectBase {
     super.connectedCallback && super.connectedCallback();
     this[$updateProperties]();
   }
-  
-  updated(changedProperties: Map<string|number|symbol, any>) {
+
+  updated(changedProperties: Map<string | number | symbol, any>) {
     super.updated(changedProperties);
-    if (changedProperties.has('brightness') || changedProperties.has('contrast') || changedProperties.has('hue') || changedProperties.has('saturation')) {
+    if (
+      changedProperties.has('brightness') ||
+      changedProperties.has('contrast') ||
+      changedProperties.has('hue') ||
+      changedProperties.has('saturation')
+    ) {
       this[$updateProperties]();
     }
   }
-  
+
   [$updateProperties]() {
-    (this[$effects][0] as HueSaturationEffect).saturation = clamp(this.saturation, -1, 1);
-    if (this.hue >= TWO_PI) this.hue = 0;
-    (this[$effects][0] as HueSaturationEffect).hue = clamp(this.hue, 0, TWO_PI);
-    (this[$effects][1] as BrightnessContrastEffect).brightness = clamp(this.brightness, -1, 1);
-    (this[$effects][1] as BrightnessContrastEffect).contrast = clamp(this.contrast, -1, 1);
-    this[$mvEffectComposer].queueRender();
+    this.hue = wrapClamp(this.hue, 0, TWO_PI);
+    this.saturation = clamp(this.saturation, -1, 1);
+    this.brightness = clamp(this.brightness, -1, 1);
+    this.contrast = clamp(this.contrast, -1, 1);
+    (this.effects[0] as HueSaturationEffect).saturation = this.saturation;
+    (this.effects[0] as HueSaturationEffect).hue = this.hue;
+    (this.effects[1] as BrightnessContrastEffect).brightness = this.brightness;
+    (this.effects[1] as BrightnessContrastEffect).contrast = this.contrast;
+    this.effectComposer.queueRender();
   }
 }
