@@ -120,7 +120,7 @@ export interface Camera {
   projectionMatrix: Array<number>;
 }
 
-export interface EffectsRendererInterface {
+export interface EffectComposerInterface {
   setRenderer(renderer: WebGLRenderer): void;
   setMainScene(scene: ModelScene): void;
   setMainCamera(camera: ThreeCamera): void;
@@ -497,7 +497,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
    * your effectComposer.
    * @param effectComposer An EffectComposer from `pmndrs/postprocessing`
    */
-  registerEffectsComposer(effectComposer: EffectsRendererInterface) {
+  registerEffectsComposer(effectComposer: EffectComposerInterface) {
     effectComposer.setRenderer(this[$renderer].threeRenderer);
     this[$setEffectComposerScene](effectComposer);
     this[$scene].effectsRenderer = effectComposer;
@@ -575,7 +575,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   [$onModelLoad]() {}
 
-  [$setEffectComposerScene](effectsRenderer: EffectsRendererInterface) {
+  [$setEffectComposerScene](effectsRenderer: EffectComposerInterface) {
     effectsRenderer.setMainCamera(this[$scene].getCamera());
     effectsRenderer.setMainScene(this[$scene]);
   }

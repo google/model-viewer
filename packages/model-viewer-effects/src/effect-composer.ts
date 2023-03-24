@@ -17,17 +17,17 @@ import { ReactiveElement } from 'lit';
 import { EffectComposer, EffectPass, NormalPass, RenderPass, Selection, Pass } from 'postprocessing';
 import { disposeEffectPass, isConvolution } from './utilities.js';
 import { ModelViewerElement } from '@beilinson/model-viewer';
-import { $requireNormals, $requireSeparatePass, IMVEffect, MVEffectBase } from './effects/mixins/effect-base.js';
+import { $updateProperties, IMVEffect, IntegrationOptions, MVEffectBase } from './effects/mixins/effect-base.js';
 import { ModelScene } from '@beilinson/model-viewer/lib/three-components/ModelScene.js';
 import { Camera, HalfFloatType, UnsignedByteType, WebGLRenderer } from 'three';
 import { property } from 'lit/decorators.js';
 import { OverrideMaterialManager } from 'postprocessing';
+import { TEMP_CAMERA } from './effects/utilities.js';
 
 OverrideMaterialManager.workaroundEnabled = true;
 
 export const $scene = Symbol('scene');
 
-export const $effectOptions = Symbol('effectOptions');
 export const $effectComposer = Symbol('effectComposer');
 export const $renderPass = Symbol('renderPass');
 export const $normalPass = Symbol('normalPass');
@@ -35,6 +35,7 @@ export const $clearPass = Symbol('clearPass');
 export const $removeClearPass = Symbol('removeClearPass');
 export const $addClearPass = Symbol('addClearPass');
 export const $effectPasses = Symbol('effectsPass');
+export const $requires = Symbol('requires');
 export const $effects = Symbol('effects');
 export const $selection = Symbol('selection');
 export const $setSelection = Symbol('setSelection');
@@ -90,7 +91,13 @@ export class EffectRenderer extends EffectComposer {
   updateCameraSettings(): void {
     super.setMainCamera(this.camera);
   }
+
+  set dirtyRender(value: boolean) {
+    this.scene.dirtyRender = value;
+  }
 }
+
+export type MVPass = Pass & IntegrationOptions;
 
 export type RenderMode = 'performance' | 'quality';
 
@@ -118,13 +125,13 @@ export class MVEffectComposer extends ReactiveElement {
   protected [$userEffectCount]: number = 0;
 
   /**
-   * Array of custom {@link Pass}'s added with {@link addEffectPass}.
+   * Array of custom {@link MVPass}'s added with {@link addPass}.
    */
-  get userPasses(): Pass[] {
+  get userPasses(): MVPass[] {
     return this[$effectComposer].passes.slice(2, 2 + this[$userEffectCount]);
   }
 
-  get modelViewerElement() {
+  get modelViewerElement(): ModelViewerElement {
     return this.parentNode as ModelViewerElement;
   }
 
@@ -151,8 +158,7 @@ export class MVEffectComposer extends ReactiveElement {
     this[$renderPass] = new RenderPass();
     // @ts-expect-error they are allowed to be undefined
     this[$normalPass] = new NormalPass();
-    // @ts-expect-error they are allowed to be undefined
-    this[$clearPass] = new EffectPass(undefined);
+    this[$clearPass] = new EffectPass(TEMP_CAMERA);
     this[$clearPass].name = 'ClearPass';
     this[$normalPass].enabled = false;
     this[$selection] = new Selection();
@@ -182,19 +188,23 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   /**
-   * Adds a custom Pass that extends the {@link Pass} class. All passes added through this method will be prepended before all other web-component effects.
+   * Adds a custom Pass that extends the {@link Pass} class.
+   * All passes added through this method will be prepended before all other web-component effects.
    *
    * This method automatically sets the `scene` and `camera` of the pass.
    * @param {Pass} pass Custom Pass to add. The camera and scene are set automatically.
    * @param {boolean} requireNormals Whether any effect in this pass uses the {@link normalBuffer}
+   * @param {boolean} requireDirtyRender Enable this if the effect requires a render frame every frame. Significant performance impact from enabling this.
    */
-  addEffectPass(pass: Pass, requireNormals?: boolean) {
-    if (requireNormals) this[$normalPass].enabled = true;
-    (pass as any).requireNormals = requireNormals;
+  addPass(pass: Pass, requireNormals?: boolean, requireDirtyRender?: boolean): void {
+    (pass as MVPass).requireNormals = requireNormals;
+    (pass as MVPass).requireDirtyRender = requireDirtyRender;
     const index = this[$userEffectCount] + 2; // Including the renderPass and normalPas
     this[$effectComposer].addPass(pass, index); // push after current userPasses, before any web-component effects.
     this[$userEffectCount]++;
     this[$removeClearPass]();
+    // Enable the normalPass and dirtyRendering if required by any effect.
+    this[$updateProperties]();
   }
 
   /**
@@ -202,33 +212,33 @@ export class MVEffectComposer extends ReactiveElement {
    * @param pass Custom Pass to remove
    * @param {Boolean} dispose Disposes of the Pass properties and effects. Default is `true`.
    */
-  removeEffectPass(pass: Pass, dispose: boolean = true) {
+  removePass(pass: Pass, dispose: boolean = true): void {
     if (!this[$effectComposer].passes.includes(pass)) throw new Error(`Pass ${pass.name} not found.`);
     this[$effectComposer].removePass(pass);
     if (dispose) pass.dispose();
-    this[$normalPass].enabled = this[$requireNormals](this[$effects]);
+    // Enable the normalPass and dirtyRendering if required by any effect.
+    this[$updateProperties]();
     this[$userEffectCount]--;
     this[$addClearPass]();
   }
 
   /**
    * Updates all existing EffectPasses, adding any new `<model-viewer-effects>` Effects
-   * in the order they were added, after any custom Passes added with {@link addEffectPass}.
+   * in the order they were added, after any custom Passes added with {@link addPass}.
+   *
+   * Runs automatically whenever a new Effect is added.
    */
   updateEffects(): void {
     this[$resetEffectPasses]();
 
-    const effects = this[$effects];
-    // Enable the normalPass if used by any effect.
-    this[$normalPass].enabled = this[$requireNormals](effects);
-
     // Iterate over all effects (web-component), and combines as many as possible.
     // Convolution effects must sit on their own EffectPass. In order to preserve the correct effect order,
     // the convolution effects separate all effects before and after into separate EffectPasses.
+    const effects = this[$effects];
     const scene = this[$scene];
     let i = 0;
     while (i < effects.length) {
-      const separateIndex = effects.slice(i).findIndex((effect) => effect[$requireSeparatePass] || isConvolution(effect));
+      const separateIndex = effects.slice(i).findIndex((effect) => effect.requireSeparatePass || isConvolution(effect));
       if (separateIndex != 0) {
         const effectPass = new EffectPass(scene.getCamera(), ...effects.slice(i, separateIndex == -1 ? effects.length : separateIndex));
         this[$effectComposer].addPass(effectPass);
@@ -248,6 +258,10 @@ export class MVEffectComposer extends ReactiveElement {
     } else {
       this[$removeClearPass]();
     }
+
+    // Enable the normalPass and dirtyRendering if required by any effect.
+    this[$updateProperties]();
+
     scene.queueRender();
   }
 
@@ -256,39 +270,6 @@ export class MVEffectComposer extends ReactiveElement {
    */
   queueRender(): void {
     this[$scene].queueRender();
-  }
-
-  [$setSelection] = () => {
-    // Place all meshes in the selection
-    this[$effectComposer].updateCameraSettings();
-    const scene = this[$scene];
-    scene.traverse((obj) => {
-      if (obj.type === 'Mesh') this[$selection].add(obj);
-    });
-    this.dispatchEvent(new CustomEvent('updatedSelection'));
-  };
-
-  [$requireNormals](effects: IMVEffect[]) {
-    return effects.some((effect) => effect[$requireNormals]) || this.userPasses.some((pass) => (pass as any).requireNormals);
-  }
-
-  [$resetEffectPasses]() {
-    this[$effectPasses].forEach((pass) => {
-      this[$effectComposer].removePass(pass);
-      disposeEffectPass(pass);
-    });
-  }
-
-  [$removeClearPass]() {
-    if (this[$effectComposer].passes.length > 2) {
-      this[$effectComposer].removePass(this[$clearPass]);
-    }
-  }
-
-  [$addClearPass]() {
-    if (this[$effectComposer].passes.length === 2) {
-      this[$effectComposer].addPass(this[$clearPass]);
-    }
   }
 
   get [$scene]() {
@@ -303,8 +284,8 @@ export class MVEffectComposer extends ReactiveElement {
     const effects: IMVEffect[] = [];
     for (let i = 0; i < this.children.length; i++) {
       const childEffect = this.children.item(i) as MVEffectBase;
-      if (!childEffect[$effects]) continue;
-      const childEffects = childEffect[$effects];
+      if (!childEffect.effects) continue;
+      const childEffects = childEffect.effects;
       if (childEffects) {
         effects.push(...childEffects.filter((effect) => !effect.disabled));
       }
@@ -317,5 +298,45 @@ export class MVEffectComposer extends ReactiveElement {
    */
   get [$effectPasses]() {
     return this[$effectComposer].passes.slice(2 + this[$userEffectCount]) as EffectPass[];
+  }
+
+  [$setSelection] = (): void => {
+    // Place all meshes in the selection
+    this[$effectComposer].updateCameraSettings();
+    const scene = this[$scene];
+    scene.traverse((obj) => {
+      if (obj.type === 'Mesh') this[$selection].add(obj);
+    });
+    this.dispatchEvent(new CustomEvent('updatedSelection'));
+  };
+
+  [$updateProperties]() {
+    this[$normalPass].enabled = this[$requires]('requireNormals');
+    this[$effectComposer].dirtyRender = this[$requires]('requireDirtyRender');
+  }
+
+  [$requires](property: 'requireNormals' | 'requireSeparatePass' | 'requireDirtyRender'): boolean {
+    return this[$effectComposer].passes.some(
+      (pass: any) => pass[property] || (pass.effects && pass.effects.some((effect: IMVEffect) => effect[property]))
+    );
+  }
+
+  [$resetEffectPasses](): void {
+    this[$effectPasses].forEach((pass) => {
+      this[$effectComposer].removePass(pass);
+      disposeEffectPass(pass);
+    });
+  }
+
+  [$removeClearPass](): void {
+    if (this[$effectComposer].passes.length > 2) {
+      this[$effectComposer].removePass(this[$clearPass]);
+    }
+  }
+
+  [$addClearPass](): void {
+    if (this[$effectComposer].passes.length === 2) {
+      this[$effectComposer].addPass(this[$clearPass]);
+    }
   }
 }

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ModelViewerElement} from '@beilinson/model-viewer';
-import {assetPath, createModelViewerElement, waitForEvent} from './utilities.js';
+import { ModelViewerElement } from '@beilinson/model-viewer';
+import { assetPath, createModelViewerElement, waitForEvent } from './utilities.js';
 import { MVEffectComposer } from '../model-viewer-effects.js';
 import { $clearPass, $effectComposer, $normalPass, $renderPass, $scene } from '../effect-composer.js';
 import { DotScreenEffect, Effect, EffectPass, GridEffect } from 'postprocessing';
@@ -59,7 +59,7 @@ suite('MVEffectComposer', () => {
       test('selection finds Meshes', () => {
         expect(composer.selection.size).to.be.greaterThan(0);
       });
-    })
+    });
   });
 
   suite('userEffects', () => {
@@ -69,25 +69,25 @@ suite('MVEffectComposer', () => {
       const effect = new GridEffect();
       effects.push(effect);
       pass = new EffectPass(composer[$scene].camera, ...effects);
-      composer.addEffectPass(pass);
+      composer.addPass(pass);
       expect(composer[$effectComposer].passes.length).to.eq(3);
       expect(composer[$effectComposer].passes[2]).to.eq(pass);
       expect((composer[$effectComposer].passes[2] as any).effects).to.contain(effect);
-      
-      composer.removeEffectPass(pass, false);
+
+      composer.removePass(pass, false);
     });
 
     test('multiple effects all on one layer', async () => {
       const effect = new DotScreenEffect();
       effects.push(effect);
-      pass = new EffectPass(composer[$scene].camera, ...effects)
-      composer.addEffectPass(pass);
+      pass = new EffectPass(composer[$scene].camera, ...effects);
+      composer.addPass(pass);
       expect(composer[$effectComposer].passes.length).to.eq(3);
       expect(composer[$effectComposer].passes[2]).to.eq(pass);
       expect((composer[$effectComposer].passes[2] as any).effects.length).to.eq(2);
       expect((composer[$effectComposer].passes[2] as any).effects).to.contain(effect);
-      
-      composer.removeEffectPass(pass, false);
+
+      composer.removePass(pass, false);
     });
   });
-}); 
+});

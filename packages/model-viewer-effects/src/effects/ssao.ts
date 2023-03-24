@@ -1,25 +1,24 @@
-import {SSAOEffect} from 'postprocessing';
-import {$effects, $effectOptions} from '../effect-composer.js';
-import {PerspectiveCamera} from 'three';
-import {$mvEffectComposer, $requireNormals, $updateProperties, IMVEffect, MVEffectBase} from './mixins/effect-base.js';
+import { SSAOEffect } from 'postprocessing';
+import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
 import { property } from 'lit/decorators.js';
+import { TEMP_CAMERA } from './utilities.js';
 
 export class MVSSAOEffect extends MVEffectBase {
   static get is() {
     return 'ssao-effect';
   }
 
-  @property({type: Number, attribute: 'strength', reflect: true})
+  /**
+   * The strength of the shadow occlusions. Higher value means darker shadows.
+   */
+  @property({ type: Number, attribute: 'strength', reflect: true })
   strength: number = 2;
 
   constructor() {
     super();
-    const tempCamera = new PerspectiveCamera();
-    Object.setPrototypeOf(tempCamera, PerspectiveCamera.prototype);
     // @ts-expect-error scene and camera are optional as of `postprocessing@6.30.2`
-    const effect = new SSAOEffect(tempCamera, undefined, this[$effectOptions]);
-    (effect as IMVEffect)[$requireNormals] = true;
-    this[$effects] = [effect];
+    this.effects = [new SSAOEffect(TEMP_CAMERA, undefined, this[$effectOptions])];
+    this.effects[0].requireNormals = true;
   }
 
   connectedCallback(): void {
@@ -27,8 +26,8 @@ export class MVSSAOEffect extends MVEffectBase {
     this['setDefaultProperties']();
     this[$updateProperties]();
   }
-  
-  update(changedProperties: Map<string|number|symbol, any>): void {
+
+  update(changedProperties: Map<string | number | symbol, any>): void {
     super.update && super.update(changedProperties);
     if (changedProperties.has('strength')) {
       this[$updateProperties]();
@@ -36,13 +35,13 @@ export class MVSSAOEffect extends MVEffectBase {
   }
 
   [$updateProperties](): void {
-    (this[$effects][0] as SSAOEffect).intensity = this.strength;
-    this[$mvEffectComposer].queueRender();
+    (this.effects[0] as SSAOEffect).intensity = this.strength;
+    this.effectComposer.queueRender();
   }
 
   setDefaultProperties() {
-    (this[$effects][0] as SSAOEffect).ssaoMaterial.normalBuffer = this[$mvEffectComposer].normalBuffer;
-    (this[$effects][0] as any).depthDownsamplingPass.fullscreenMaterial.normalBuffer = this[$mvEffectComposer].normalBuffer;
+    (this.effects[0] as SSAOEffect).ssaoMaterial.normalBuffer = this.effectComposer.normalBuffer;
+    (this.effects[0] as any).depthDownsamplingPass.fullscreenMaterial.normalBuffer = this.effectComposer.normalBuffer;
   }
 
   get [$effectOptions]() {

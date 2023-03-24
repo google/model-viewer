@@ -7,6 +7,7 @@ import { MVPixelateEffect } from './effects/pixelate.js';
 import { MVSMAAEffect } from './effects/smaa.js';
 import { MVSSAOEffect } from './effects/ssao.js';
 import { MVEffectComposer } from './effect-composer.js';
+import { MVEffectBase } from './effects/mixins/effect-base.js';
 
 customElements.define('effect-composer', MVEffectComposer);
 customElements.define('pixelate-effect', MVPixelateEffect);
@@ -42,4 +43,5 @@ export {
   MVFXAAEffect,
   MVSSAOEffect,
   MVGlitchEffect,
+  MVEffectBase,
 };

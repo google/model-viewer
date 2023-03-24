@@ -77,6 +77,7 @@ if (NODE_ENV !== 'development') {
     watch: {
       include: watchFiles,
     },
+    external: ['three'],
     plugins: pluginsIE11,
     onwarn,
   });
@@ -97,6 +98,7 @@ if (NODE_ENV !== 'development') {
     watch: {
       include: watchFiles,
     },
+    external: ['three'],
     plugins,
     onwarn,
   });
@@ -112,6 +114,7 @@ if (NODE_ENV !== 'development') {
     watch: {
       include: watchFiles,
     },
+    external: ['three'],
     plugins,
     onwarn,
   });

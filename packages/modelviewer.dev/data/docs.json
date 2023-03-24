@@ -94,14 +94,6 @@
           "default": "N/A",
           "options": "true, false"
         }
-      },
-      {
-        "name": "webGLRenderer",
-        "htmlName": "webGLRenderer",
-        "description": "This property is read-only. It returns the <a href=\"https://threejs.org/docs/#api/en/renderers/WebGLRenderer\" target=\"_blank\">WebGLRenderer</a> used in the default Render loop.",
-        "links": [
-          "<a href=\"https://threejs.org/docs/#api/en/renderers/WebGLRenderer\" target=\"_blank\">"
-        ]
       }
     ],
     "Static Properties": [
@@ -202,7 +194,7 @@
       {
         "name": "registerEffectsComposer(effectsComposer)",
         "htmlName": "registerEffectsComposer",
-        "description": "This method allows you to replace the default rendering with an <a href=\"https://github.com/pmndrs/postprocessing\" target=\"_blank\">EffectComposer</a> renderer stack for this element. The EffectComposer should use the <a href=\".#entrydocs-loading-properties-webGLRenderer\">webGLRenderer</a> internally, so that all glTF and rendering-related portions of our API continue to function normally.<br/><br/>The effectComposer you provide must implement our <code>EffectsRendererInterface</code>, which consists of two functions: <br/><br/>- <code>render(): void</code><br/>- <code>setSize(width: number, height: number): void</code> <br/><br/>We will call your <code>render</code> method as we would the regular render method. We will call your <code>setSize</code> method when the element is resized so you can take coordinated action on your slotted canvas element."
+        "description": "This method allows you to replace the default rendering with an <a href=\"https://github.com/pmndrs/postprocessing\" target=\"_blank\">EffectComposer</a> renderer stack for this element. Unlike 'externalRenderer', all glTF and rendering-related portions of our API continue to function normally.<br/><br/>The EffectComposer you provide must implement our <code>EffectComposerInterface</code>, which consists of the following functions: <br/><br/>- <code>render(deltaTime?: number): void</code><br/>- <code>setRenderer(renderer: WebGLRenderer): void</code><br/>- <code>setMainScene(scene: Scene): void</code><br/>- <code>setMainCamera(camera: Camera): void</code><br/>- <code>setSize(width: number, height: number): void</code><br/><br/>. Registering your EffectComposer using this method calls setRenderer, setMainScene, and setMainCamera. We will call your <code>render</code> method as we would the regular render method, with deltaTime in milliseconds. We will call your <code>setSize</code> method when the element is resized so your effects are always properly sized."
       },
       {
         "name": "unregisterEffectsComposer()",

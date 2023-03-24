@@ -270,13 +270,21 @@
     "htmlName": "postprocessing",
     "examples": [
       {
-        "htmlId": "pixelate",
-        "name": "Pixelate Effect"
+        "htmlId": "setup",
+        "name": "Setup PostProcessing"
       },
       {
-        "htmlId": "bloom",
-        "name": "Bloom Effect"
+        "htmlId": "effects",
+        "name": "The Effects API"
+      },
+      {
+        "htmlId": "combining-effects",
+        "name": "Combining Effects"
+      },
+      {
+        "htmlId": "custom-effects",
+        "name": "Custom Effects"
       }
     ]
-  } 
+  }
 ]

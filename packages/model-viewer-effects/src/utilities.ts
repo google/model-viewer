@@ -1,9 +1,9 @@
 import { Effect, EffectAttribute, EffectPass, Pass } from 'postprocessing';
 
 export type Constructor<T = object, U = object> = {
-  new (...args: any[]): T,
-  prototype: T
-}&U;
+  new (...args: any[]): T;
+  prototype: T;
+} & U;
 
 /**
  * Determines whether an object has a Symbol property with the specified key.
@@ -65,14 +65,30 @@ export function getOwnPropertySymbolValue<T = unknown>(object: any, key: string)
  * @param {Number} value
  * @param {Number} lowerLimit
  * @param {Number} upperLimit
- * @return {Number} value clamped within lowerLimit..upperLimit
+ * @return {Number} value clamped within `lowerLimit - upperLimit`
  */
 export function clamp(value: number, lowerLimit: number, upperLimit: number): number {
   return Math.max(lowerLimit, Math.min(upperLimit, value));
 }
 
+/**
+ * @param {Number} value
+ * @returns value clamped between `0 - 1`
+ */
 export function clampNormal(value: number): number {
   return clamp(value, 0, 1);
+}
+
+/**
+ * @param {Number} value
+ * @param {Number} lowerLimit
+ * @param {Number} upperLimit
+ * @return {Number} wraps value between `lowerLimit - upperLimit`
+ */
+export function wrapClamp(value: number, lowerLimit: number, upperLimit: number): number {
+  if (value > upperLimit) return lowerLimit;
+  if (value < lowerLimit) return upperLimit;
+  return value;
 }
 
 /**
@@ -113,12 +129,14 @@ export function disposeEffectPass(pass: EffectPass): void {
   Pass.prototype.dispose.call(pass);
 
   if (!(pass as any).listener) return;
-  for(const effect of (pass as any).effects) {
-    effect.removeEventListener("change", (pass as any).listener);
+  for (const effect of (pass as any).effects) {
+    effect.removeEventListener('change', (pass as any).listener);
   }
 }
 
 export function getValueOfEnum<T extends Object>(Enum: T, key: string): T {
-  const index = Object.keys(Enum).filter((v) => !isNaN(Number(v))).indexOf(key);
+  const index = Object.keys(Enum)
+    .filter((v) => !isNaN(Number(v)))
+    .indexOf(key);
   return (Enum as any)[index];
 }
