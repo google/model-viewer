@@ -6,24 +6,6 @@ export type Constructor<T = object, U = object> = {
 } & U;
 
 /**
- * Determines whether an object has a Symbol property with the specified key.
- * @param object Object to retrieve symbol from
- * @param key Key to search for (case sensitive)
- */
-export function hasOwnPropertySymbol(object: any, key: string): boolean {
-  while (object) {
-    for (const symbol of Object.getOwnPropertySymbols(object)) {
-      if (symbol.toString() === `Symbol(${key})`) {
-        return true;
-      }
-    }
-    // Search further up in prototype chain
-    object = Object.getPrototypeOf(object);
-  }
-  return false;
-}
-
-/**
  * Get symbol of given key if exists on object.
  * @param object Object to retrieve symbol from
  * @param key Key to search for (case sensitive)
@@ -31,15 +13,21 @@ export function hasOwnPropertySymbol(object: any, key: string): boolean {
  */
 export function getOwnPropertySymbol(object: any, key: string): symbol | undefined {
   while (object) {
-    for (const symbol of Object.getOwnPropertySymbols(object)) {
-      if (symbol.toString() === `Symbol(${key})`) {
-        return symbol;
-      }
-    }
+    const symbol = Object.getOwnPropertySymbols(object).find((symbol) => symbol.toString() === `Symbol(${key})`)
+    if (symbol) return symbol;
     // Search further up in prototype chain
     object = Object.getPrototypeOf(object);
   }
   return;
+}
+
+/**
+ * Determines whether an object has a Symbol property with the specified key.
+ * @param object Object to retrieve symbol from
+ * @param key Key to search for (case sensitive)
+ */
+export function hasOwnPropertySymbol(object: any, key: string): boolean {
+  return getOwnPropertySymbol(object, key) !== undefined;
 }
 
 /**
@@ -49,16 +37,8 @@ export function getOwnPropertySymbol(object: any, key: string): symbol | undefin
  * @returns `object[Symbol(key)]`
  */
 export function getOwnPropertySymbolValue<T = unknown>(object: any, key: string): T | undefined {
-  while (object) {
-    for (const symbol of Object.getOwnPropertySymbols(object)) {
-      if (symbol.toString() === `Symbol(${key})`) {
-        return object[symbol];
-      }
-    }
-    // Search further up in prototype chain
-    object = Object.getPrototypeOf(object);
-  }
-  return;
+  const symbol = getOwnPropertySymbol(object, key);
+  return symbol && object[symbol];
 }
 
 /**

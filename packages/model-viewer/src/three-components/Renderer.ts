@@ -146,7 +146,6 @@ export class Renderer extends EventDispatcher {
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = sRGBEncoding;
-      
       this.threeRenderer.physicallyCorrectLights = true;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 
@@ -453,7 +452,7 @@ export class Renderer extends EventDispatcher {
       this.preRender(scene, t, delta);
 
       if (!this.shouldRender(scene)) {
-        continue; 
+        continue;
       }
 
       if (scene.externalRenderer != null) {

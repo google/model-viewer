@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 const playerLocation = 'player.html';
 const player = document.querySelector('#player');
 const url = document.querySelector('#url');
