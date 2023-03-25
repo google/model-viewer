@@ -21,10 +21,7 @@ import { $updateProperties, IMVEffect, IntegrationOptions, MVEffectBase } from '
 import { ModelScene } from '@beilinson/model-viewer/lib/three-components/ModelScene.js';
 import { Camera, HalfFloatType, UnsignedByteType, WebGLRenderer } from 'three';
 import { property } from 'lit/decorators.js';
-import { OverrideMaterialManager } from 'postprocessing';
 import { TEMP_CAMERA } from './effects/utilities.js';
-
-OverrideMaterialManager.workaroundEnabled = true;
 
 export const $scene = Symbol('scene');
 
@@ -49,6 +46,7 @@ export const $userEffectCount = Symbol('userEffectCount');
 export class EffectComposer extends PPEffectComposer {
   public camera!: Camera;
   public scene!: ModelScene;
+  public dirtyRender?: boolean;
 
   constructor(
     renderer?: WebGLRenderer,
@@ -92,8 +90,10 @@ export class EffectComposer extends PPEffectComposer {
     super.setMainCamera(this.camera);
   }
 
-  set dirtyRender(value: boolean) {
-    this.scene.dirtyRender = value;
+  beforeRender(_time: DOMHighResTimeStamp, _delta: DOMHighResTimeStamp): void {
+    if (this.dirtyRender) {
+      this.scene.queueRender();
+    }
   }
 }
 
@@ -131,7 +131,7 @@ export class MVEffectComposer extends ReactiveElement {
     return this[$effectComposer].passes.slice(2, 2 + this[$userEffectCount]);
   }
 
-  get modelViewerElement(): ModelViewerElement {
+  get modelViewerElement() {
     return this.parentNode as ModelViewerElement;
   }
 
@@ -151,7 +151,10 @@ export class MVEffectComposer extends ReactiveElement {
 
   /**
    * Creates a new MVEffectComposer element.
-   * The EffectComposer instance is created only on connection with the dom so that
+   * 
+   * @warning The EffectComposer instance is created only on connection with the DOM, 
+   * so that the renderMode is properly taken into account. Do not interact with this class if it is not 
+   * mounted to the DOM.
    */
   constructor() {
     super();

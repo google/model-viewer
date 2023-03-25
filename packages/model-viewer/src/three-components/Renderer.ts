@@ -291,7 +291,7 @@ export class Renderer extends EventDispatcher {
       canvas.width = width;
       canvas.height = height;
       scene.forceRescale();
-      scene.effectsRenderer?.setSize(width, height);
+      scene.effectRenderer?.setSize(width, height);
     }
   }
 
@@ -325,7 +325,7 @@ export class Renderer extends EventDispatcher {
         scene.scaleStep = 0;
         this.rescaleCanvas(scene);
       } else {
-        return scene.dirtyRender; // this is usually false, unless specified otherwise
+        return false;
       }
     } else if (scene.scaleStep != this.scaleStep) {
       // Update render scale
@@ -492,12 +492,12 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
-      if (scene.effectsRenderer != null) {
+      if (scene.effectRenderer != null) {
         // the EffectComposer expects autoClear to be false
         // while the threeRenderer should be true so that
         // the frames are cleared each render. 
         this.threeRenderer.autoClear = false;
-        scene.effectsRenderer.render(delta);
+        scene.effectRenderer.render(delta);
         this.threeRenderer.autoClear = true;
       } else {
         this.threeRenderer.autoClear = true; 

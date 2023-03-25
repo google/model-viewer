@@ -124,8 +124,9 @@ export interface EffectComposerInterface {
   setRenderer(renderer: WebGLRenderer): void;
   setMainScene(scene: ModelScene): void;
   setMainCamera(camera: ThreeCamera): void;
-  render(deltaTime?: number): void,
-  setSize(width: number, height: number): void,
+  setSize(width: number, height: number): void;
+  beforeRender(time: DOMHighResTimeStamp, delta: DOMHighResTimeStamp): void;
+  render(deltaTime?: DOMHighResTimeStamp): void;
 }
 
 export interface RendererInterface {
@@ -500,14 +501,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
   registerEffectsComposer(effectComposer: EffectComposerInterface) {
     effectComposer.setRenderer(this[$renderer].threeRenderer);
     this[$setEffectComposerScene](effectComposer);
-    this[$scene].effectsRenderer = effectComposer;
+    this[$scene].effectRenderer = effectComposer;
   }
 
   /**
    * 
    */
   unregisterEffectsComposer() {
-    this[$scene].effectsRenderer = null;
+    this[$scene].effectRenderer = null;
   }
 
   registerRenderer(renderer: RendererInterface) {
@@ -557,7 +558,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     this[$onResize]({width, height});
   }
 
-  [$tick](_time: number, _delta: number) {
+  [$tick](time: number, delta: number) {
+    this[$scene].effectRenderer?.beforeRender(time, delta);
   }
 
   [$markLoaded]() {
@@ -575,9 +577,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   [$onModelLoad]() {}
 
-  [$setEffectComposerScene](effectsRenderer: EffectComposerInterface) {
-    effectsRenderer.setMainCamera(this[$scene].getCamera());
-    effectsRenderer.setMainScene(this[$scene]);
+  [$setEffectComposerScene](effectComposer: EffectComposerInterface) {
+    effectComposer.setMainCamera(this[$scene].getCamera());
+    effectComposer.setMainScene(this[$scene]);
   }
 
   [$updateStatus](status: string) {

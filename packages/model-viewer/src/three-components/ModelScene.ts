@@ -68,7 +68,7 @@ export class ModelScene extends Scene {
   public element: ModelViewerElement;
   public canvas: HTMLCanvasElement;
   public annotationRenderer = new CSS2DRenderer();
-  public effectsRenderer: EffectComposerInterface|null = null;
+  public effectRenderer: EffectComposerInterface|null = null;
   public schemaElement = document.createElement('script');
   public width = 1;
   public height = 1;
@@ -99,7 +99,6 @@ export class ModelScene extends Scene {
   public exposure = 1;
   public canScale = true;
 
-  public dirtyRender = false;
   private isDirty = false;
 
   private goalTarget = new Vector3();
