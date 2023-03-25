@@ -321,6 +321,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     const enableTransparency =
         (material: MeshStandardMaterial, enabled: boolean): void => {
           material.transparent = enabled;
+          material.depthWrite = !enabled;
         };
 
     (this[$sourceObject] as DefaultedMaterial).alphaMode = alphaMode;

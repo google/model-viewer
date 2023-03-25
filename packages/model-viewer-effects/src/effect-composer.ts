@@ -14,7 +14,7 @@
  */
 
 import { ReactiveElement } from 'lit';
-import { EffectComposer, EffectPass, NormalPass, RenderPass, Selection, Pass } from 'postprocessing';
+import { EffectComposer as PPEffectComposer, EffectPass, NormalPass, RenderPass, Selection, Pass } from 'postprocessing';
 import { disposeEffectPass, isConvolution } from './utilities.js';
 import { ModelViewerElement } from '@beilinson/model-viewer';
 import { $updateProperties, IMVEffect, IntegrationOptions, MVEffectBase } from './effects/mixins/effect-base.js';
@@ -46,7 +46,7 @@ export const $userEffectCount = Symbol('userEffectCount');
  * Light wrapper around {@link EffectComposer} for storing the `scene` and `camera
  * at a top level, and setting them for every {@link Pass} added.
  */
-export class EffectRenderer extends EffectComposer {
+export class EffectComposer extends PPEffectComposer {
   public camera!: Camera;
   public scene!: ModelScene;
 
@@ -117,7 +117,7 @@ export class MVEffectComposer extends ReactiveElement {
   @property({ type: String, attribute: 'render-mode' })
   renderMode: RenderMode = 'performance';
 
-  protected [$effectComposer]!: EffectRenderer;
+  protected [$effectComposer]!: EffectComposer;
   protected [$renderPass]: RenderPass;
   protected [$normalPass]: NormalPass;
   protected [$clearPass]: EffectPass;
@@ -166,7 +166,7 @@ export class MVEffectComposer extends ReactiveElement {
 
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
-    this[$effectComposer] = new EffectRenderer(undefined, {
+    this[$effectComposer] = new EffectComposer(undefined, {
       frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType,
     });
     if (this.modelViewerElement.nodeName.toLowerCase() !== 'model-viewer') {
@@ -176,14 +176,14 @@ export class MVEffectComposer extends ReactiveElement {
     this[$effectComposer].addPass(this[$renderPass], 0);
     this[$effectComposer].addPass(this[$normalPass], 1);
     this[$setSelection]();
-    this.modelViewerElement.addEventListener('beforeRender', this[$setSelection]);
+    this.modelViewerElement.addEventListener('before-render', this[$setSelection]);
     this.updateEffects();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback && super.disconnectedCallback();
     this.modelViewerElement.unregisterEffectsComposer();
-    this.modelViewerElement.removeEventListener('beforeRender', this[$setSelection]);
+    this.modelViewerElement.removeEventListener('before-render', this[$setSelection]);
     this[$effectComposer].dispose();
   }
 
@@ -307,7 +307,7 @@ export class MVEffectComposer extends ReactiveElement {
     scene.traverse((obj) => {
       if (obj.type === 'Mesh') this[$selection].add(obj);
     });
-    this.dispatchEvent(new CustomEvent('updatedSelection'));
+    this.dispatchEvent(new CustomEvent('updated-selection'));
   };
 
   [$updateProperties]() {

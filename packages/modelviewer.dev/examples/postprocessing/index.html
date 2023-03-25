@@ -137,7 +137,7 @@ button {
           <example-snippet stamp-to="effects" highlight-as="html">
             <template>
 <model-viewer id="blendViewer" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
-  <effect-composer render-mode="quality">
+  <effect-composer>
     <color-grade-effect id="color-grade" contrast="0.5" saturation="0.4"></color-grade-effect>
   </effect-composer>
   <div class="controls">
@@ -152,7 +152,6 @@ button {
         <option value="divide">Divide</option>
         <option value="negation">Negation</option>
     </select>
-
   </div>
 </model-viewer>
 <script>
@@ -188,28 +187,28 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           </div>
           <example-snippet stamp-to="combining-effects" highlight-as="html">
             <template>
-<model-viewer id="effectsViewer" camera-controls touch-action="pan-y" src="../../shared-assets/models/EmissiveStrengthTest.glb" ar alt="A 3D ">
+<model-viewer id="effectsViewer" camera-controls touch-action="pan-y" src="../../shared-assets/the_positronic_brain/scene.gltf" ar alt="A 3D ">
   <effect-composer id="composer">
     <outline-effect blend-mode="skip"></outline-effect>
-    <smaa-effect blend-mode="skip"></smaa-effect>
     <ssao-effect blend-mode="skip"></ssao-effect>
+    <glitch-effect blend-mode="skip"></glitch-effect>
+    <smaa-effect blend-mode="skip"></smaa-effect>
     <bloom-effect blend-mode="skip"></bloom-effect>
     <pixelate-effect blend-mode="skip"></pixelate-effect>
-    <glitch-effect blend-mode="skip"></glitch-effect>
   </effect-composer>
   <div class="controls">
     <label for="outline">Outline Effect</label>
     <input type="checkbox" id="outline">
-    <label for="smaa">SMAA Effect</label>
-    <input type="checkbox" id="smaa">
     <label for="ssao">SSAO Effect</label>
     <input type="checkbox" id="ssao">
+    <label for="glitch">Glitch Effect</label>
+    <input type="checkbox" id="glitch">
+    <label for="smaa">SMAA Effect</label>
+    <input type="checkbox" id="smaa">
     <label for="bloom">Bloom Effect</label>
     <input type="checkbox" id="bloom">
     <label for="pixelate">Pixelate Effect</label>
     <input type="checkbox" id="pixelate">
-    <label for="glitch">Glitch Effect</label>
-    <input type="checkbox" id="glitch">
   </div>
 </model-viewer>
 <script>
@@ -248,7 +247,7 @@ for (let i = 0; i < effects.length; i++) {
           <example-snippet stamp-to="custom-effects" highlight-as="html">
             <template>
 <model-viewer camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RobotExpressive.glb" ar alt="A 3D model of a Lantern">
-  <effect-composer id="customComposer" render-mode="quality">
+  <effect-composer id="customComposer">
   </effect-composer>
 </model-viewer>
 <script type="module">

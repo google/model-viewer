@@ -74,7 +74,7 @@
     "postprocessing": "^6.30.0"
   },
   "peerDependencies": {
-    "@beilinson/model-viewer": "^3.1.0",
+    "@beilinson/model-viewer": "^3.1.4",
     "three": "^0.150.0"
   },
   "devDependencies": {

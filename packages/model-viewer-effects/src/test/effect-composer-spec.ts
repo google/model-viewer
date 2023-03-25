@@ -27,7 +27,7 @@ suite('MVEffectComposer', () => {
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));
     composer = new MVEffectComposer();
     element.insertBefore(composer, element.firstChild);
-    await waitForEvent(element, 'beforeRender');
+    await waitForEvent(element, 'before-render');
   });
 
   teardown(() => {

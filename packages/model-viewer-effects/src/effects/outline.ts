@@ -40,12 +40,12 @@ export class MVOutlineEffect extends MVEffectBase {
     super.connectedCallback && super.connectedCallback();
     this[$setSelection]();
     this[$updateProperties]();
-    this.effectComposer.addEventListener('updatedSelection', this[$setSelection]);
+    this.effectComposer.addEventListener('updated-selection', this[$setSelection]);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback && super.disconnectedCallback();
-    this.effectComposer.removeEventListener('updatedSelection', this[$setSelection]);
+    this.effectComposer.removeEventListener('updated-selection', this[$setSelection]);
   }
 
   updated(changedProperties: Map<string | number | symbol, any>) {
