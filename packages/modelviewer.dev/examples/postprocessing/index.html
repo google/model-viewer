@@ -35,11 +35,13 @@
     }
   </script>
 
-  
   <!-- Import the no-three component -->
   <script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer-no-three.js"></script>
 
 
+  <!-- Import the <model-viewer-effects> addon -->
+  <script type="module" src="../../node_modules/@beilinson/model-viewer-effects/dist/model-viewer-effects.js"></script>
+  
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
@@ -89,27 +91,29 @@ button {
             you with a easy-to-use postprocessing workflow for spicing up your models.<br/><br/>
             In order to avoid package collisions, you will be required to add an 
             <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap">import-map</a>
-            for the <a href="https://threejs.org/">Three.js</a> package, and use the <i>no-three</i> version of &lt;model-viewer&gt;.<br/><br/>
-            Setting up post-processing effects is as simple as adding an &lt;effect-composer&gt; component inside your &lt;model-viewer&gt; element.
-            From here, simply add any of the supported effects inside the &lt;effect-composer&gt;.</p>
+            for the <a href="https://threejs.org/">Three.js</a> package, and use the <i>no-three</i> version of &lt;model-viewer&gt;.</p>
+            <pre><code>
+&lt;script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"&gt;&lt;/script&gt;
+
+&lt;script type="importmap"&gt;
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js"
+  }
+}
+&lt;/script&gt;
+
+&lt;!-- Import the no-three &lt;model-viewer&gt; --&gt;
+&lt;script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer-no-three.js&gt;&lt;/script&gt;
+  
+&lt;!-- Import the &lt;model-viewer-effects&gt; addon --&gt;
+&lt;script type="module" src="../../node_modules/@beilinson/model-viewer-effects/dist/model-viewer-effects.js"&gt;&lt;/script&gt;
+            </code></pre>
+            <p>Setting up post-processing effects is as simple as adding an &lt;effect-composer&gt; component inside your &lt;model-viewer&gt; element.
+              From here, simply add any of the supported effects inside the &lt;effect-composer&gt;.</p>
           </div>
           <example-snippet stamp-to="setup" highlight-as="html">
             <template>
-<!-- Import Three.js using an import-map -->
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js"
-    }
-  }
-</script>
-
-<!-- Import the no-three <model-viewer> -->
-<script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer-no-three.js"></script>
-  
-<!-- Import the <model-viewer-effects> addon -->
-<script type="module" src="../../node_modules/@beilinson/model-viewer-effects/dist/model-viewer-effects.js"></script>
-
 <!-- Use the <effect-composer> component inside the <model-viewer> element -->
 <model-viewer autoplay ar camera-controls touch-action="pan-y" src="../../shared-assets/models/Horse.glb" alt="A 3D model of a horse galloping.">
   <effect-composer>

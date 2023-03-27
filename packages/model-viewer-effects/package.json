@@ -31,6 +31,7 @@
   "types": "lib/model-viewer-effects.d.ts",
   "scripts": {
     "clean": "rm -rf ./lib ./dist",
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-samples.sh",
     "build": "npm run build:tsc && npm run build:rollup",
     "build:dev": "npm run build:tsc && npm run build:rollup:dev",
     "build:tsc": "tsc --incremental",
@@ -39,8 +40,6 @@
     "prepublishOnly": "npm run build",
     "test": "karma start --single-run",
     "test:ci": "npm run test",
-    "check-fidelity": "node ./test/fidelity/index.js ./test/fidelity/config.json",
-    "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
     "serve": "node_modules/.bin/http-server -c-1",
     "dev": "npm run build:dev && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:test' 'serve -- -s'",
     "watch:tsc": "tsc -w --incremental",

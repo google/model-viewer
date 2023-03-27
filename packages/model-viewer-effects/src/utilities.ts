@@ -13,7 +13,7 @@ export type Constructor<T = object, U = object> = {
  */
 export function getOwnPropertySymbol(object: any, key: string): symbol | undefined {
   while (object) {
-    const symbol = Object.getOwnPropertySymbols(object).find((symbol) => symbol.toString() === `Symbol(${key})`)
+    const symbol = Object.getOwnPropertySymbols(object).find((symbol) => symbol.description === key);
     if (symbol) return symbol;
     // Search further up in prototype chain
     object = Object.getPrototypeOf(object);

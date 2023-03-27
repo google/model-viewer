@@ -40,7 +40,7 @@
       {
         "name": "Can I have X feature from three.js?",
         "htmlName": "three",
-        "description": "Probably not. We intentionally keep our API at a higher level than three.js, which is a full game engine. You're welcome to file a feature request if you have an idea that can be explained easily to lay users. You are also welcome to hack/fork us. You can use <code>mvElement[Object.getOwnPropertySymbols(mvElement).find(e => e.toString() === 'Symbol(scene)')];</code> to get access to our internal three.js scene and do whatever you want. However, this is outside the scope of our public API, so we make no effort to avoid breaking changes or to provide support.",
+        "description": "Probably not. We intentionally keep our API at a higher level than three.js, which is a full game engine. You're welcome to file a feature request if you have an idea that can be explained easily to lay users. You are also welcome to hack/fork us. You can use <code>mvElement[Object.getOwnPropertySymbols(mvElement).find(e => e.description === 'scene')];</code> to get access to our internal three.js scene and do whatever you want. However, this is outside the scope of our public API, so we make no effort to avoid breaking changes or to provide support.",
         "links": []
       },
       {
