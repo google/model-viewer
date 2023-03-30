@@ -14,7 +14,9 @@
  */
 
 import { ModelViewerElement } from '@beilinson/model-viewer';
-import { EventDispatcher, WebGLRenderer } from 'three';
+import { Renderer } from '@beilinson/model-viewer/lib/three-components/Renderer';
+import { EventDispatcher, HSL } from 'three';
+import { getOwnPropertySymbolValue } from '../utilities';
 
 export const timePasses = (ms: number = 0): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -178,10 +180,24 @@ export const waitForEvent = <T extends AnyEvent = Event>(
     target.addEventListener(eventName, handler);
   });
 
+  
+export interface TypedArray<T = unknown> {
+  readonly BYTES_PER_ELEMENT: number;
+  length: number;
+  [n: number]: T;
+  reduce(
+    callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: TypedArray<number>) => number,
+    initialValue?: number
+    ): number;
+}
+    
 const COMPONENTS_PER_PIXEL = 4;
 
-export function screenshot(renderer: WebGLRenderer) {
-  const screenshotContext = renderer.getContext();
+export function screenshot(element: ModelViewerElement): TypedArray<number> {
+  const renderer = getOwnPropertySymbolValue<Renderer>(element, 'renderer');
+  if (!renderer) throw new Error("Invalid element provided");
+
+  const screenshotContext = renderer.threeRenderer.getContext();
   const width = screenshotContext.drawingBufferWidth;
   const height = screenshotContext.drawingBufferHeight;
 
@@ -191,16 +207,6 @@ export function screenshot(renderer: WebGLRenderer) {
   screenshotContext.readPixels(0, 0, width, height, screenshotContext.RGBA, screenshotContext.UNSIGNED_BYTE, pixels);
 
   return pixels;
-}
-
-interface TypedArray<T = unknown> {
-  readonly BYTES_PER_ELEMENT: number;
-  length: number;
-  [n: number]: T;
-  reduce(
-    callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint8Array) => number,
-    initialValue?: number
-  ): number;
 }
 
 export function ArraysAreEqual(arr1: TypedArray, arr2: TypedArray): boolean {
@@ -213,21 +219,40 @@ export function ArraysAreEqual(arr1: TypedArray, arr2: TypedArray): boolean {
   return true;
 }
 
-/**
- *
+/*
+ * Compares two 
  * @param arr1
  * @param arr2
- * @returns Percentage of similarity
+ * @returns Percentage of similarity (0-1), higher is better
  */
 export function CompareArrays(arr1: TypedArray<number>, arr2: TypedArray<number>): number {
   if (arr1.length !== arr2.length || arr1.BYTES_PER_ELEMENT !== arr2.BYTES_PER_ELEMENT) return 0;
 
-  let similarity: number[] = [];
+  const similarity: number[] = [];
   const max = maxValue(arr1.BYTES_PER_ELEMENT);
-  for (let i = 0; i < arr1.length; i++) {
-    similarity.push(percentage(arr1[i], arr2[i], max));
+  for (let i = 0; i < arr1.length; i += COMPONENTS_PER_PIXEL) {
+    if (arr1[i+3] !=  0 || arr2[i+3] != 0) { // a
+      similarity.push(1 - percentage(arr1[i], arr2[i], max));     // r
+      similarity.push(1 - percentage(arr1[i+1], arr2[i+1], max)); // g
+      similarity.push(1 - percentage(arr1[i+2], arr2[i+2], max)); // b
+    }
   }
   return average(similarity);
+}
+
+export function AverageHSL(arr: TypedArray<number>): HSL {
+  const H: number[] = [];
+  const S: number[] = [];
+  const L: number[] = [];
+  for (let i = 0; i < arr.length; i += COMPONENTS_PER_PIXEL) {
+    if (arr[i+3] != 0) { // a
+      const hsl = rgbToHsl(arr[i], arr[i+1], arr[i+2]);
+      H.push(hsl.h);
+      S.push(hsl.s);
+      L.push(hsl.l);
+    }
+  }
+  return {h: average(H), s: average(S), l: average(L)};
 }
 
 function maxValue(bytes: number): number {
@@ -240,4 +265,40 @@ function percentage(n1: number, n2: number, maxN: number): number {
 
 function average(arr: number[]): number {
   return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+/**
+ * Converts an RGB color value to HSL. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes r, g, and b are contained in the set [0, 255] and
+ * returns h, s, and l in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSL representation
+ */
+function rgbToHsl(r: number, g: number, b: number): HSL {
+  r /= 255, g /= 255, b /= 255;
+
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+
+  if (max == min) {
+    h = s = 0; // achromatic
+  } else {
+    var d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+      default: throw new Error("invalid rgb");
+    }
+
+    h /= 6;
+  }
+
+  return { h, s, l };
 }

@@ -14,7 +14,7 @@
  */
 
 import { ModelViewerElement } from '@beilinson/model-viewer';
-import { ArraysAreEqual, assetPath, CompareArrays, createModelViewerElement, screenshot, timePasses, waitForEvent } from './utilities.js';
+import { ArraysAreEqual, assetPath, CompareArrays, createModelViewerElement, screenshot, timePasses, TypedArray, waitForEvent } from './utilities.js';
 import { MVEffectComposer } from '../model-viewer-effects.js';
 import { $effectComposer } from '../effect-composer.js';
 import { getOwnPropertySymbolValue } from '../utilities.js';
@@ -23,7 +23,7 @@ const expect = chai.expect;
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
-  let baseScreenshot: Uint8Array;
+  let baseScreenshot: TypedArray<number>;
 
   setup(async () => {
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));
@@ -39,16 +39,16 @@ suite('Screenshot Baseline Test', () => {
     expect(renderer).to.not.be.undefined;
     expect(renderer.threeRenderer).to.not.be.undefined;
     await timePasses(5);
-    baseScreenshot = screenshot(renderer.threeRenderer);
+    baseScreenshot = screenshot(element);
     await timePasses(5);
-    const screenshot2 = screenshot(renderer.threeRenderer);
+    const screenshot2 = screenshot(element);
 
     expect(ArraysAreEqual(baseScreenshot, screenshot2)).to.be.true;
   });
 
   suite('<effect-composer>', () => {
     let composer: MVEffectComposer;
-    let composerScreenshot: Uint8Array;
+    let composerScreenshot: TypedArray<number>;
 
     setup(async () => {
       composer = new MVEffectComposer();
@@ -60,16 +60,16 @@ suite('Screenshot Baseline Test', () => {
       const renderer = composer[$effectComposer].getRenderer();
       expect(renderer).to.not.be.undefined;
       await timePasses(5);
-      composerScreenshot = screenshot(renderer);
+      composerScreenshot = screenshot(element);
       await timePasses(5);
-      const screenshot2 = screenshot(renderer);
+      const screenshot2 = screenshot(element);
 
       expect(ArraysAreEqual(composerScreenshot, screenshot2)).to.be.true;
     });
 
     test('Compare Against BaseRenderer', () => {
       expect(ArraysAreEqual(baseScreenshot, composerScreenshot)).to.be.false;
-      expect(CompareArrays(baseScreenshot, composerScreenshot)).to.be.greaterThan(0.95);
+      expect(CompareArrays(baseScreenshot, composerScreenshot)).to.be.greaterThan(0.98);
     });
   });
 });

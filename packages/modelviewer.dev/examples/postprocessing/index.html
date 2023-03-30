@@ -93,26 +93,33 @@ button {
             In order to avoid package collisions, you will be required to add an 
             <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap">import-map</a>
             for the <a href="https://threejs.org/">Three.js</a> package, and use the <i>no-three</i> version of &lt;model-viewer&gt;.</p>
-            <p>Since Safari does not support <code>import maps</code>, the following script will make your code work universally: </p>
-            <pre><code>
-&lt;script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"&gt;&lt;/script&gt;
-            </code></pre>
+            <p>Safari does not support <code>import maps</code>, the following script will make your code work universally: </p>
+            <i>Note: remove the '-no-exec' suffix from the following scripts in order for them to run.</i>
+            <example-snippet>
+              <template>
+<script type="module-no-exec" async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+              </template>
+            </example-snippet>
             <p>Bring <code>Three.js</code> from any cdn - cdnjs, unpkg, or jsdelivr:</p>
-            <pre><code>
-&lt;script type="importmap"&gt;
+            <example-snippet>
+              <template>
+<script type="importmap-no-exec">
 {
   "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js"
   }
 }
-&lt;/script&gt;
-            </code></pre>
+</script>
+              </template>
+            </example-snippet>
             <p>Now import the &lt;model-viewer&gt; no-three version, and the &lt;model-viewer-effects&gt; addon</p>
-            <pre><code>
-&lt;script type="module" src="https://cdn.jsdelivr.net/npm/@beilinson/model-viewer/dist/model-viewer-no-three.min.js"&gt;&lt;/script&gt;
+            <example-snippet stamp-to="setup" highlight-as="html">
+              <template>
+<script type="module-no-exec" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-no-three.min.js"></script>
   
-&lt;script type="module" src="https://cdn.jsdelivr.net/npm/@beilinson/model-viewer-effects/dist/model-viewer-effects.min.js"&gt;&lt;/script&gt;
-            </code></pre>
+<script type="module-no-exec" src="https://cdn.jsdelivr.net/npm/@google/model-viewer-effects/dist/model-viewer-effects.min.js"></script>
+              </template>
+            </example-snippet>
             <p>Setting up post-processing effects is as simple as adding an &lt;effect-composer&gt; component inside your &lt;model-viewer&gt; element.
               From here, simply add any of the supported effects inside the &lt;effect-composer&gt;.</p>
           </div>
@@ -162,7 +169,7 @@ button {
     </select>
   </div>
 </model-viewer>
-<script>
+<script type="module">
 const blendViewer = document.querySelector("model-viewer#blendViewer");
 const colorGradeEffect = blendViewer.querySelector('#color-grade');
 const opacity = blendViewer.querySelector('#opacity');
@@ -195,24 +202,21 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
             <template>
 <model-viewer camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/Rocket Ship.glb" ar alt="A 3D model of a Rocket Ship">
   <effect-composer id="selectiveComposer" render-mode="quality">
-    <outline-effect id="selectiveOutline"></outline-effect>
     <bloom-effect id="selectiveBloom" strength="5" radius="0.5" threshold="0"></bloom-effect>
   </effect-composer>
 </model-viewer>
-<script>
-const composer = document.querySelector("effect-composer#selectiveComposer");
-const bloom = composer.querySelector("#selectiveBloom");
-const outline = composer.querySelector("#selectiveOutline");
+<script type="module">
+  const composer = document.querySelector("effect-composer#selectiveComposer");
+  const bloom = composer.querySelector("#selectiveBloom");
 
-composer.addEventListener('updated-selection', () => {
-  console.log(composer);
-  composer.selection.forEach((obj) => {
-    if (obj.material.emissive.r > 0 || obj.material.emissive.g > 0 || obj.material.emissive.b > 0) {
-      bloom.selection.push(obj.name);
-      outline.selection.push(obj.name);
-    }
+  composer.addEventListener('updated-selection', () => {
+    composer.selection.forEach((obj) => 
+      (obj.material.emissive.r > 0 
+      || obj.material.emissive.g > 0 
+      || obj.material.emissive.b > 0) 
+        && bloom.selection.push(obj.name)
+    );
   });
-});
 </script>
             </template>
           </example-snippet>
@@ -261,14 +265,14 @@ composer.addEventListener('updated-selection', () => {
     <input type="checkbox" id="pixelate">
   </div>
 </model-viewer>
-<script>
-const effectsViewer = document.querySelector("model-viewer#effectsViewer");
-const effects = effectsViewer.querySelector("#composer").children;
-const inputs = effectsViewer.querySelectorAll("input");
+<script type="module">
+  const effectsViewer = document.querySelector("model-viewer#effectsViewer");
+  const effects = effectsViewer.querySelector("#composer").children;
+  const inputs = effectsViewer.querySelectorAll("input");
 
-for (let i = 0; i < effects.length; i++) {
-  inputs[i].addEventListener('change', (e) => effects[i].blendMode = e.target.checked ? 'default' : 'skip');
-}
+  for (let i = 0; i < effects.length; i++) {
+    inputs[i].addEventListener('change', (e) => effects[i].blendMode = e.target.checked ? 'default' : 'skip');
+  }
 </script>
             </template>
           </example-snippet>
@@ -292,7 +296,7 @@ for (let i = 0; i < effects.length; i++) {
             you can access them from the &lt;effect-composer&gt;.<br/><br/>
             <i>Note: If your pass uses the normalBuffer, you must specify as such in the <code>addPass</code> method, as the normals 
             are disabled by default unless they are used. Similarly, if your pass requires to be re-rendered each frame, 
-            you must pass the <code>requireDirtyRender</code> parameter.</i></p>
+            you must pass the </i><code>requireDirtyRender</code><i> parameter.</i></p>
           </div>
           <example-snippet stamp-to="custom-effects" highlight-as="html">
             <template>
@@ -301,13 +305,13 @@ for (let i = 0; i < effects.length; i++) {
   </effect-composer>
 </model-viewer>
 <script type="module">
-import * as PostProcessing from 'https://cdn.jsdelivr.net/npm/postprocessing@6.30.1/build/postprocessing.esm.js';
-const customComposer = document.querySelector("effect-composer#customComposer");
+  import * as PostProcessing from 'https://cdn.jsdelivr.net/npm/postprocessing@6.30.1/build/postprocessing.esm.js';
+  const customComposer = document.querySelector("effect-composer#customComposer");
 
-const grid = new PostProcessing.GridEffect();
-const sepia = new PostProcessing.SepiaEffect();
-const noisePass = new PostProcessing.EffectPass(undefined, grid, sepia);
-customComposer.addPass(noisePass);
+  const grid = new PostProcessing.GridEffect();
+  const sepia = new PostProcessing.SepiaEffect();
+  const noisePass = new PostProcessing.EffectPass(undefined, grid, sepia);
+  customComposer.addPass(noisePass);
 </script>
             </template>
           </example-snippet>
