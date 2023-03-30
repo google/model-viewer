@@ -278,6 +278,10 @@
         "name": "The Effects API"
       },
       {
+        "htmlId": "selective-effects",
+        "name": "Selective Effects"
+      },
+      {
         "htmlId": "combining-effects",
         "name": "Combining Effects"
       },

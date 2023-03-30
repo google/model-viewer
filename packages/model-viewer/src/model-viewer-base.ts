@@ -70,7 +70,6 @@ export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 export const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
-export const $setEffectComposerScene = Symbol('setEffectComposerScene');
 
 export interface Vector3D {
   x: number
@@ -498,16 +497,17 @@ export default class ModelViewerElementBase extends ReactiveElement {
    * your effectComposer.
    * @param effectComposer An EffectComposer from `pmndrs/postprocessing`
    */
-  registerEffectsComposer(effectComposer: EffectComposerInterface) {
+  registerEffectComposer(effectComposer: EffectComposerInterface) {
     effectComposer.setRenderer(this[$renderer].threeRenderer);
-    this[$setEffectComposerScene](effectComposer);
+    effectComposer.setMainCamera(this[$scene].getCamera());
+    effectComposer.setMainScene(this[$scene]);
     this[$scene].effectRenderer = effectComposer;
   }
 
   /**
-   * 
+   * Removes the registered EffectComposer
    */
-  unregisterEffectsComposer() {
+  unregisterEffectComposer() {
     this[$scene].effectRenderer = null;
   }
 
@@ -576,11 +576,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
   }
 
   [$onModelLoad]() {}
-
-  [$setEffectComposerScene](effectComposer: EffectComposerInterface) {
-    effectComposer.setMainCamera(this[$scene].getCamera());
-    effectComposer.setMainScene(this[$scene]);
-  }
 
   [$updateStatus](status: string) {
     this[$status] = status;

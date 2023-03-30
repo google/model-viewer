@@ -88,13 +88,17 @@ button {
           <div class="heading">
             <h2 class="demo-title">Setup PostProcessing</h2>
             <p>The &lt;model-viewer-effects&gt; library addon for &lt;model-viewer&gt; provides
-            you with a easy-to-use postprocessing workflow for spicing up your models.<br/><br/>
+            you with a easy-to-use postprocessing workflow for spicing up your models. <br/>The list of currently
+            support effects is: SMAA, FXAA, Pixelate, Outline, Glitch, SSAO, Bloom, and Color Grade.<br/><br/>
             In order to avoid package collisions, you will be required to add an 
             <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap">import-map</a>
             for the <a href="https://threejs.org/">Three.js</a> package, and use the <i>no-three</i> version of &lt;model-viewer&gt;.</p>
+            <p>Since Safari does not support <code>import maps</code>, the following script will make your code work universally: </p>
             <pre><code>
 &lt;script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"&gt;&lt;/script&gt;
-
+            </code></pre>
+            <p>Bring <code>Three.js</code> from any cdn - cdnjs, unpkg, or jsdelivr:</p>
+            <pre><code>
 &lt;script type="importmap"&gt;
 {
   "imports": {
@@ -102,12 +106,12 @@ button {
   }
 }
 &lt;/script&gt;
-
-&lt;!-- Import the no-three &lt;model-viewer&gt; --&gt;
-&lt;script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer-no-three.js&gt;&lt;/script&gt;
+            </code></pre>
+            <p>Now import the &lt;model-viewer&gt; no-three version, and the &lt;model-viewer-effects&gt; addon</p>
+            <pre><code>
+&lt;script type="module" src="https://cdn.jsdelivr.net/npm/@beilinson/model-viewer/dist/model-viewer-no-three.min.js"&gt;&lt;/script&gt;
   
-&lt;!-- Import the &lt;model-viewer-effects&gt; addon --&gt;
-&lt;script type="module" src="../../node_modules/@beilinson/model-viewer-effects/dist/model-viewer-effects.js"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://cdn.jsdelivr.net/npm/@beilinson/model-viewer-effects/dist/model-viewer-effects.min.js"&gt;&lt;/script&gt;
             </code></pre>
             <p>Setting up post-processing effects is as simple as adding an &lt;effect-composer&gt; component inside your &lt;model-viewer&gt; element.
               From here, simply add any of the supported effects inside the &lt;effect-composer&gt;.</p>
@@ -173,6 +177,48 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
       </div>
     </div>
 
+
+    <div class="sample">
+      <div id="selective-effects" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Selective Effects</h2>
+            <p>Some of the implemented effects are selective and may be applied to only certain meshes in your model. 
+            Currently, this is exclusive to &lt;bloom-effect&gt; and &lt;outline-effect&gt;. The default behavior for selective
+            effects is to use the default <code>selection</code> provided by the &lt;effect-composer&gt;, which contains a set of
+            all meshes in the model.<br/>
+            By providing an array of mesh names to the <code>selection</code> attribute, you may enable the effects only for those meshes.<br/>
+            This example demonstrates the application of the Bloom effect exclusively to Meshes with an emissive material:</p>
+          </div>
+          <example-snippet stamp-to="selective-effects" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/Rocket Ship.glb" ar alt="A 3D model of a Rocket Ship">
+  <effect-composer id="selectiveComposer" render-mode="quality">
+    <outline-effect id="selectiveOutline"></outline-effect>
+    <bloom-effect id="selectiveBloom" strength="5" radius="0.5" threshold="0"></bloom-effect>
+  </effect-composer>
+</model-viewer>
+<script>
+const composer = document.querySelector("effect-composer#selectiveComposer");
+const bloom = composer.querySelector("#selectiveBloom");
+const outline = composer.querySelector("#selectiveOutline");
+
+composer.addEventListener('updated-selection', () => {
+  console.log(composer);
+  composer.selection.forEach((obj) => {
+    if (obj.material.emissive.r > 0 || obj.material.emissive.g > 0 || obj.material.emissive.b > 0) {
+      bloom.selection.push(obj.name);
+      outline.selection.push(obj.name);
+    }
+  });
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
 
     <div class="sample">
       <div id="combining-effects" class="demo"></div>
@@ -280,12 +326,16 @@ customComposer.addPass(noisePass);
           licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
         </li>
         <li class="attribution">
-          <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
-          licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+          <a href="https://poly.pizza/m/9dyJn4gp7U8">Rocket Ship</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Daniel Melchior</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/3.0/">CC-BY</a>.
         </li>
         <li class="attribution">
           <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/EmissiveStrengthTest">EmissiveStrengthTest</a> by <a href="https://github.com/emackey">Ed Mackey</a>,
           licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+          licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
         </li>
       </ul>
       <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>

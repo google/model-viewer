@@ -1,22 +1,24 @@
 /* @license
- * Copyright 2019 Google LLC. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Copyright 2023 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { ModelViewerElement } from '@beilinson/model-viewer';
 import { assetPath, createModelViewerElement, waitForEvent } from './utilities.js';
 import { MVEffectComposer } from '../model-viewer-effects.js';
 import { $clearPass, $effectComposer, $normalPass, $renderPass, $scene } from '../effect-composer.js';
 import { DotScreenEffect, Effect, EffectPass, GridEffect } from 'postprocessing';
+import { Camera } from 'three';
 const expect = chai.expect;
 
 suite('MVEffectComposer', () => {
@@ -68,7 +70,7 @@ suite('MVEffectComposer', () => {
     test('adds grid effect', () => {
       const effect = new GridEffect();
       effects.push(effect);
-      pass = new EffectPass(composer[$scene].camera, ...effects);
+      pass = new EffectPass(composer[$scene]?.camera as Camera, ...effects);
       composer.addPass(pass);
       expect(composer[$effectComposer].passes.length).to.eq(3);
       expect(composer[$effectComposer].passes[2]).to.eq(pass);
@@ -80,7 +82,7 @@ suite('MVEffectComposer', () => {
     test('multiple effects all on one layer', async () => {
       const effect = new DotScreenEffect();
       effects.push(effect);
-      pass = new EffectPass(composer[$scene].camera, ...effects);
+      pass = new EffectPass(composer[$scene]?.camera as Camera, ...effects);
       composer.addPass(pass);
       expect(composer[$effectComposer].passes.length).to.eq(3);
       expect(composer[$effectComposer].passes[2]).to.eq(pass);

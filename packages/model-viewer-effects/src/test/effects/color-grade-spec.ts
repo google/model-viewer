@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { ModelViewerElement } from '@beilinson/model-viewer';
 import { WebGLRenderer } from 'three';
 import { $effectComposer, MVEffectComposer } from '../../effect-composer';

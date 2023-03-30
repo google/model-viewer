@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Google LLC. All Rights Reserved.
+ * Copyright 2023 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ const outputOptions = [{
     file: './dist/model-viewer-effects.js',
     sourcemap: true,
     format: 'esm',
-    name: 'ModelViewerEffectsComposer'
+    name: 'ModelViewerEffects'
   },
   watch: {
     include: watchFiles,
@@ -72,7 +72,7 @@ if (NODE_ENV !== 'development') {
       file: './dist/model-viewer-effects-umd.js',
       sourcemap: true,
       format: 'umd',
-      name: 'ModelViewerEffectsComposer'
+      name: 'ModelViewerEffects'
     },
     watch: {
       include: watchFiles,
@@ -93,7 +93,7 @@ if (NODE_ENV !== 'development') {
       file: './dist/model-viewer-effects.min.js',
       sourcemap: true,
       format: 'esm',
-      name: 'ModelViewerEffectsComposer'
+      name: 'ModelViewerEffects'
     },
     watch: {
       include: watchFiles,
@@ -109,7 +109,7 @@ if (NODE_ENV !== 'development') {
       file: './dist/model-viewer-effects-umd.min.js',
       sourcemap: true,
       format: 'umd',
-      name: 'ModelViewerEffectsComposer'
+      name: 'ModelViewerEffects'
     },
     watch: {
       include: watchFiles,
@@ -124,7 +124,7 @@ if (NODE_ENV !== 'development') {
     output: {
       file: './dist/model-viewer-effects.d.ts',
       format: 'esm',
-      name: 'ModelViewerEffectsComposer'
+      name: 'ModelViewerEffects'
     },
     plugins: [dts()]
   });

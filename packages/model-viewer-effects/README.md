@@ -9,6 +9,7 @@ effects to your models easy to do, on as many browsers and devices as possible.
 `<model-viewer-effects>` strives to give you great defaults for rendering quality and
 performance.
 
+![A 3D Model of a Rocket Ship](screenshot.png)
 ## Usage
 Using effects is as simple as adding the `<effect-composer>` inside your `<model-viewer>`, and placing any effects inside the composer component.
 
@@ -94,3 +95,6 @@ Command                         | Description
 `npm run clean`                 | Deletes all build artifacts
 `npm run dev`                   | Starts `tsc` and `rollup` in "watch" mode, causing artifacts to automatically rebuild upon incremental changes
 
+
+----
+*Rocket Ship by Daniel Melchior [CC-BY](https://creativecommons.org/licenses/by/3.0/) via [Poly Pizza](https://poly.pizza/m/9dyJn4gp7U8)*

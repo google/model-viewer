@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { ModelViewerElement } from '@beilinson/model-viewer';
 import { ArraysAreEqual, assetPath, CompareArrays, createModelViewerElement, screenshot, timePasses, waitForEvent } from './utilities.js';
 import { MVEffectComposer } from '../model-viewer-effects.js';

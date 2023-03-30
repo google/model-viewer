@@ -1,11 +1,26 @@
+/* @license
+ * Copyright 2023 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { property } from 'lit/decorators.js';
 import { BlendFunction, OutlineEffect } from 'postprocessing';
 import { Color } from 'three';
-import { $selection, $setSelection } from '../effect-composer.js';
 import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
+import { SelectiveMixin } from './mixins/selective.js';
 import { getKernelSize, TEMP_CAMERA } from './utilities.js';
 
-export class MVOutlineEffect extends MVEffectBase {
+export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
   static get is() {
     return 'outline-effect';
   }
@@ -38,14 +53,7 @@ export class MVOutlineEffect extends MVEffectBase {
 
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
-    this[$setSelection]();
     this[$updateProperties]();
-    this.effectComposer.addEventListener('updated-selection', this[$setSelection]);
-  }
-
-  disconnectedCallback(): void {
-    super.disconnectedCallback && super.disconnectedCallback();
-    this.effectComposer.removeEventListener('updated-selection', this[$setSelection]);
   }
 
   updated(changedProperties: Map<string | number | symbol, any>) {
@@ -63,10 +71,6 @@ export class MVOutlineEffect extends MVEffectBase {
     (this.effects[0] as OutlineEffect).blurPass.kernelSize = getKernelSize(this.smoothing);
     this.effectComposer.queueRender();
   }
-
-  [$setSelection] = () => {
-    (this.effects[0] as OutlineEffect).selection.set(this.effectComposer[$selection].values());
-  };
 
   get [$effectOptions]() {
     return {

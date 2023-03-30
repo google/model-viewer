@@ -1,13 +1,13 @@
 /* @license
- * Copyright 2019 Google LLC. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Copyright 2023 Google LLC. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -35,7 +35,7 @@ export const $effectPasses = Symbol('effectsPass');
 export const $requires = Symbol('requires');
 export const $effects = Symbol('effects');
 export const $selection = Symbol('selection');
-export const $setSelection = Symbol('setSelection');
+export const $onSceneLoad = Symbol('onSceneLoad');
 export const $resetEffectPasses = Symbol('resetEffectPasses');
 export const $userEffectCount = Symbol('userEffectCount');
 
@@ -44,8 +44,8 @@ export const $userEffectCount = Symbol('userEffectCount');
  * at a top level, and setting them for every {@link Pass} added.
  */
 export class EffectComposer extends PPEffectComposer {
-  public camera!: Camera;
-  public scene!: ModelScene;
+  public camera?: Camera;
+  public scene?: ModelScene;
   public dirtyRender?: boolean;
 
   constructor(
@@ -68,9 +68,8 @@ export class EffectComposer extends PPEffectComposer {
    * @param index An index at which the pass should be inserted.
    */
   override addPass(pass: Pass, index?: number): void {
-    pass.mainScene = this.scene;
-    pass.mainCamera = this.camera;
     super.addPass(pass, index);
+    this.refresh();
   }
 
   override setMainCamera(camera: Camera): void {
@@ -84,15 +83,18 @@ export class EffectComposer extends PPEffectComposer {
   }
 
   /**
-   * Materials that use effects need to be manually updated whenever the camera settings update.
+   * Effect Materials that use the camera need to be manually updated whenever the camera settings update.
    */
-  updateCameraSettings(): void {
-    super.setMainCamera(this.camera);
+  refresh(): void {
+    if (this.camera && this.scene) {
+      super.setMainCamera(this.camera);
+      super.setMainScene(this.scene);
+    }
   }
 
   beforeRender(_time: DOMHighResTimeStamp, _delta: DOMHighResTimeStamp): void {
     if (this.dirtyRender) {
-      this.scene.queueRender();
+      this.scene?.queueRender();
     }
   }
 }
@@ -175,18 +177,18 @@ export class MVEffectComposer extends ReactiveElement {
     if (this.modelViewerElement.nodeName.toLowerCase() !== 'model-viewer') {
       throw new Error('<effect-composer> must be a child of a <model-viewer> component.');
     }
-    this.modelViewerElement.registerEffectsComposer(this[$effectComposer]);
+    this.modelViewerElement.registerEffectComposer(this[$effectComposer]);
     this[$effectComposer].addPass(this[$renderPass], 0);
     this[$effectComposer].addPass(this[$normalPass], 1);
-    this[$setSelection]();
-    this.modelViewerElement.addEventListener('before-render', this[$setSelection]);
+    this[$onSceneLoad]();
+    this.modelViewerElement.addEventListener('before-render', this[$onSceneLoad]);
     this.updateEffects();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback && super.disconnectedCallback();
-    this.modelViewerElement.unregisterEffectsComposer();
-    this.modelViewerElement.removeEventListener('before-render', this[$setSelection]);
+    this.modelViewerElement.unregisterEffectComposer();
+    this.modelViewerElement.removeEventListener('before-render', this[$onSceneLoad]);
     this[$effectComposer].dispose();
   }
 
@@ -243,12 +245,12 @@ export class MVEffectComposer extends ReactiveElement {
     while (i < effects.length) {
       const separateIndex = effects.slice(i).findIndex((effect) => effect.requireSeparatePass || isConvolution(effect));
       if (separateIndex != 0) {
-        const effectPass = new EffectPass(scene.getCamera(), ...effects.slice(i, separateIndex == -1 ? effects.length : separateIndex));
+        const effectPass = new EffectPass(scene?.getCamera() as Camera, ...effects.slice(i, separateIndex == -1 ? effects.length : separateIndex));
         this[$effectComposer].addPass(effectPass);
       }
 
       if (separateIndex != -1) {
-        const convolutionPass = new EffectPass(scene.getCamera(), effects[i + separateIndex]);
+        const convolutionPass = new EffectPass(scene?.getCamera() as Camera, effects[i + separateIndex]);
         this[$effectComposer].addPass(convolutionPass);
         i += separateIndex + 1;
       } else {
@@ -265,14 +267,14 @@ export class MVEffectComposer extends ReactiveElement {
     // Enable the normalPass and dirtyRendering if required by any effect.
     this[$updateProperties]();
 
-    scene.queueRender();
+    this.queueRender();
   }
 
   /**
    * Request a render-frame manually.
    */
   queueRender(): void {
-    this[$scene].queueRender();
+    this[$scene]?.queueRender();
   }
 
   get [$scene]() {
@@ -303,11 +305,11 @@ export class MVEffectComposer extends ReactiveElement {
     return this[$effectComposer].passes.slice(2 + this[$userEffectCount]) as EffectPass[];
   }
 
-  [$setSelection] = (): void => {
+  [$onSceneLoad] = (): void => {
     // Place all meshes in the selection
-    this[$effectComposer].updateCameraSettings();
+    this[$effectComposer].refresh();
     const scene = this[$scene];
-    scene.traverse((obj) => {
+    scene?.traverse((obj) => {
       if (obj.type === 'Mesh') this[$selection].add(obj);
     });
     this.dispatchEvent(new CustomEvent('updated-selection'));
