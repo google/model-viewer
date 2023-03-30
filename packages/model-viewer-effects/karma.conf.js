@@ -20,7 +20,6 @@ module.exports = function(config) {
     plugins: [
       require.resolve('@open-wc/karma-esm'),
       'karma-*',
-      'karma-browserstack-launcher',
     ],
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
@@ -77,93 +76,4 @@ module.exports = function(config) {
       }
     },
   });
-
-
-  if (process.env.USE_BROWSER_STACK) {
-    const browserStackLaunchers = {
-      'Chrome (latest)': {
-        base: 'BrowserStack',
-        os: 'Windows',
-        os_version: '10',
-        browser: 'Chrome',
-        browser_version: 'latest',
-      },
-      'Chrome (latest-1)': {
-        base: 'BrowserStack',
-        os: 'Windows',
-        os_version: '10',
-        browser: 'Chrome',
-        browser_version: 'latest-1',
-      },
-      'Edge (latest)': {
-        base: 'BrowserStack',
-        os: 'Windows',
-        os_version: '10',
-        browser: 'Edge',
-        browser_version: 'latest',
-      },
-      'Edge (latest-1)': {
-        base: 'BrowserStack',
-        os: 'Windows',
-        os_version: '10',
-        browser: 'Edge',
-        browser_version: 'latest-1',
-      },
-      'Firefox (latest)': {
-        base: 'BrowserStack',
-        os: 'Windows',
-        os_version: '10',
-        browser: 'Firefox',
-        browser_version: 'latest',
-        browserstack: {localIdentifier: 'Firefox'}
-      },
-      'Firefox (latest-1)': {
-        base: 'BrowserStack',
-        os: 'Windows',
-        os_version: '10',
-        browser: 'Firefox',
-        browser_version: 'latest-1',
-      },
-      'Safari (latest)': {
-        base: 'BrowserStack',
-        os: 'OS X',
-        os_version: 'Monterey',
-        browser: 'safari',
-        browser_version: 'latest',
-      },
-      'iOS Safari (iOS 15)': {
-        base: 'BrowserStack',
-        os: 'iOS',
-        os_version: '15',
-        device: 'iPhone 13',
-        browser: 'iPhone',
-        real_mobile: 'true',
-      },
-      'Android 11 (Samsung)': {
-        base: 'BrowserStack',
-        os: 'Android',
-        os_version: '11.0',
-        device: 'Samsung Galaxy S21',
-        browser: 'Android',
-        real_mobile: 'true',
-      },
-    };
-
-    config.set({
-      browserStack: {
-        idleTimeout: 600,
-        startTunnel: false,
-        localIdentifier: 'test',
-        name: '<model-viewer-effects> Unit Tests',
-        project: '<model-viewer-effects>',
-        apiClientEndpoint: 'https://api.browserstack.com',
-        build: process.env.BROWSER_STACK_BUILD_NAME
-      },
-
-      reporters: ['BrowserStack', 'mocha', 'dots'],
-
-      customLaunchers: browserStackLaunchers,
-      browsers: [...config.browsers, ...Object.keys(browserStackLaunchers)],
-    });
-  }
 };
