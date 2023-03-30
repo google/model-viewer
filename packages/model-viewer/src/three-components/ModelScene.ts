@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Triangle, Vector2, Vector3, WebGLRenderer} from 'three';
+import {AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, Triangle, Vector2, Vector3, WebGLRenderer} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 // @ts-ignore
 import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
@@ -663,7 +663,8 @@ export class ModelScene extends Scene {
    */
   playAnimation(
       name: string|null = null, crossfadeTime: number = 0,
-      loopMode: number = LoopRepeat, repetitionCount: number = Infinity) {
+      loopMode: AnimationActionLoopStyles = LoopRepeat,
+      repetitionCount: number = Infinity) {
     if (this._currentGLTF == null) {
       return;
     }
