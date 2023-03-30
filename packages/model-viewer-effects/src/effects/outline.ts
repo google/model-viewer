@@ -82,6 +82,7 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
       blur: Math.round(this.smoothing) > 0,
       kernelSize: getKernelSize(this.smoothing),
       xRay: true,
+      resolutionScale: 1
     } as ConstructorParameters<typeof OutlineEffect>[2];
   }
 }

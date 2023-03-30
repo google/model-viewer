@@ -30,7 +30,7 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js"
+        "three": "https://cdn.jsdelivr.net/npm/three@^0.150.0/build/three.module.js"
       }
     }
   </script>
@@ -89,7 +89,7 @@ button {
             <h2 class="demo-title">Setup PostProcessing</h2>
             <p>The &lt;model-viewer-effects&gt; library addon for &lt;model-viewer&gt; provides
             you with a easy-to-use postprocessing workflow for spicing up your models. <br/>The list of currently
-            support effects is: SMAA, FXAA, Pixelate, Outline, Glitch, SSAO, Bloom, and Color Grade.<br/><br/>
+            support effects is: SMAA, FXAA, Pixelate, Outline, Glitch, SSAO, Bloom (Global/Selective), and Color Grade.<br/><br/>
             In order to avoid package collisions, you will be required to add an 
             <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap">import-map</a>
             for the <a href="https://threejs.org/">Three.js</a> package, and use the <i>no-three</i> version of &lt;model-viewer&gt;.</p>
@@ -192,7 +192,7 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           <div class="heading">
             <h2 class="demo-title">Selective Effects</h2>
             <p>Some of the implemented effects are selective and may be applied to only certain meshes in your model. 
-            Currently, this is exclusive to &lt;bloom-effect&gt; and &lt;outline-effect&gt;. The default behavior for selective
+            Currently, this is exclusive to &lt;selective-bloom-effect&gt; and &lt;outline-effect&gt;. The default behavior for selective
             effects is to use the default <code>selection</code> provided by the &lt;effect-composer&gt;, which contains a set of
             all meshes in the model.<br/>
             By providing an array of mesh names to the <code>selection</code> attribute, you may enable the effects only for those meshes.<br/>
@@ -200,9 +200,9 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           </div>
           <example-snippet stamp-to="selective-effects" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/Rocket Ship.glb" ar alt="A 3D model of a Rocket Ship">
+<model-viewer camera-orbit="45deg 115deg auto" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/Rocket Ship.glb" ar alt="A 3D model of a Rocket Ship">
   <effect-composer id="selectiveComposer" render-mode="quality">
-    <bloom-effect id="selectiveBloom" strength="5" radius="0.5" threshold="0"></bloom-effect>
+    <selective-bloom-effect id="selectiveBloom" strength="5" radius="0.5" threshold="0"></selective-bloom-effect>
   </effect-composer>
 </model-viewer>
 <script type="module">
@@ -241,14 +241,14 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           </div>
           <example-snippet stamp-to="combining-effects" highlight-as="html">
             <template>
-<model-viewer id="effectsViewer" camera-controls touch-action="pan-y" src="../../shared-assets/models/EmissiveStrengthTest.glb" ar alt="A 3D ">
-  <effect-composer id="composer">
-    <outline-effect blend-mode="skip"></outline-effect>
+<model-viewer id="effectsViewer" camera-controls touch-action="pan-y" src="../../shared-assets/models/enzo_star_field.glb" ar alt="A 3D ">
+  <effect-composer id="composer" render-mode="quality">
+    <outline-effect color="blue" blend-mode="skip"></outline-effect>
     <ssao-effect blend-mode="skip"></ssao-effect>
     <glitch-effect blend-mode="skip"></glitch-effect>
     <smaa-effect blend-mode="skip"></smaa-effect>
-    <bloom-effect blend-mode="skip"></bloom-effect>
-    <pixelate-effect blend-mode="skip"></pixelate-effect>
+    <bloom-effect threshold="0" strength="1" smoothing="0.7" radius="0.5" blend-mode="default"></bloom-effect>
+    <pixelate-effect granularity="5" blend-mode="skip"></pixelate-effect>
   </effect-composer>
   <div class="controls">
     <label for="outline">Outline Effect</label>

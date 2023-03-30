@@ -23,10 +23,12 @@ import { MVSMAAEffect } from './effects/smaa.js';
 import { MVSSAOEffect } from './effects/ssao.js';
 import { MVEffectComposer } from './effect-composer.js';
 import { MVEffectBase } from './effects/mixins/effect-base.js';
+import { MVSelectiveBloomEffect } from './effects/selective-bloom.js';
 
 customElements.define('effect-composer', MVEffectComposer);
 customElements.define('pixelate-effect', MVPixelateEffect);
 customElements.define('bloom-effect', MVBloomEffect);
+customElements.define('selective-bloom-effect', MVSelectiveBloomEffect);
 customElements.define('color-grade-effect', MVColorGradeEffect);
 customElements.define('outline-effect', MVOutlineEffect);
 customElements.define('smaa-effect', MVSMAAEffect);
@@ -39,6 +41,7 @@ declare global {
     'effect-composer': MVEffectComposer;
     'pixelate-effect': MVPixelateEffect;
     'bloom-effect': MVBloomEffect;
+    'selective-bloom-effect': MVSelectiveBloomEffect;
     'color-grade-effect': MVColorGradeEffect;
     'outline-effect': MVOutlineEffect;
     'smaa-effect': MVSMAAEffect;

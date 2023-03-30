@@ -53,7 +53,7 @@ npm install three @beilinson/model-viewer @beilinson/model-viewer-effects
 <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js"
+      "three": "https://cdn.jsdelivr.net/npm/three@^0.150.0/build/three.module.js"
     }
   }
 </script>

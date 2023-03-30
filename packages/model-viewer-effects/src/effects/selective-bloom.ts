@@ -16,10 +16,12 @@
 import { property } from 'lit/decorators.js';
 import { BlendFunction, BloomEffect, SelectiveBloomEffect } from 'postprocessing';
 import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
+import { SelectiveMixin } from './mixins/selective.js';
+import { TEMP_CAMERA } from './utilities.js';
 
-export class MVBloomEffect extends MVEffectBase {
+export class MVSelectiveBloomEffect extends SelectiveMixin(MVEffectBase) {
   static get is() {
-    return 'bloom-effect';
+    return 'selective-bloom-effect';
   }
 
   /**
@@ -49,7 +51,8 @@ export class MVBloomEffect extends MVEffectBase {
   constructor() {
     super();
 
-    this.effects = [new BloomEffect(this[$effectOptions])];
+    // @ts-ignore
+    this.effects = [new SelectiveBloomEffect(undefined, TEMP_CAMERA, this[$effectOptions])];
   }
 
   connectedCallback(): void {

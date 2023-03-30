@@ -153,9 +153,9 @@ export class MVEffectComposer extends ReactiveElement {
 
   /**
    * Creates a new MVEffectComposer element.
-   * 
-   * @warning The EffectComposer instance is created only on connection with the DOM, 
-   * so that the renderMode is properly taken into account. Do not interact with this class if it is not 
+   *
+   * @warning The EffectComposer instance is created only on connection with the DOM,
+   * so that the renderMode is properly taken into account. Do not interact with this class if it is not
    * mounted to the DOM.
    */
   constructor() {
@@ -245,7 +245,10 @@ export class MVEffectComposer extends ReactiveElement {
     while (i < effects.length) {
       const separateIndex = effects.slice(i).findIndex((effect) => effect.requireSeparatePass || isConvolution(effect));
       if (separateIndex != 0) {
-        const effectPass = new EffectPass(scene?.getCamera() as Camera, ...effects.slice(i, separateIndex == -1 ? effects.length : separateIndex));
+        const effectPass = new EffectPass(
+          scene?.getCamera() as Camera,
+          ...effects.slice(i, separateIndex == -1 ? effects.length : separateIndex)
+        );
         this[$effectComposer].addPass(effectPass);
       }
 
@@ -306,12 +309,10 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   [$onSceneLoad] = (): void => {
-    // Place all meshes in the selection
     this[$effectComposer].refresh();
-    const scene = this[$scene];
-    scene?.traverse((obj) => {
-      if (obj.type === 'Mesh') this[$selection].add(obj);
-    });
+    // Place all Geometries in the selection
+    this[$selection].clear();
+    this[$scene]?.traverse((obj) => obj.hasOwnProperty('geometry') && this[$selection].add(obj));
     this.dispatchEvent(new CustomEvent('updated-selection'));
   };
 
