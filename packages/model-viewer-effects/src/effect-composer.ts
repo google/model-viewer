@@ -16,9 +16,9 @@
 import { ReactiveElement } from 'lit';
 import { EffectComposer as PPEffectComposer, EffectPass, NormalPass, RenderPass, Selection, Pass } from 'postprocessing';
 import { disposeEffectPass, isConvolution } from './utilities.js';
-import { ModelViewerElement } from '@beilinson/model-viewer';
+import { ModelViewerElement } from '@google/model-viewer';
 import { $updateProperties, IMVEffect, IntegrationOptions, MVEffectBase } from './effects/mixins/effect-base.js';
-import { ModelScene } from '@beilinson/model-viewer/lib/three-components/ModelScene.js';
+import { ModelScene } from '@google/model-viewer/lib/three-components/ModelScene.js';
 import { Camera, HalfFloatType, UnsignedByteType, WebGLRenderer } from 'three';
 import { property } from 'lit/decorators.js';
 import { TEMP_CAMERA } from './effects/utilities.js';
@@ -133,9 +133,7 @@ export class MVEffectComposer extends ReactiveElement {
     return this[$effectComposer].passes.slice(2, 2 + this[$userEffectCount]);
   }
 
-  get modelViewerElement() {
-    return this.parentNode as ModelViewerElement;
-  }
+  public modelViewerElement?: ModelViewerElement;
 
   /**
    * The Texture buffer of the inbuilt {@link NormalPass}.
@@ -174,6 +172,7 @@ export class MVEffectComposer extends ReactiveElement {
     this[$effectComposer] = new EffectComposer(undefined, {
       frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType,
     });
+    this.modelViewerElement = this.parentNode as ModelViewerElement;
     if (this.modelViewerElement.nodeName.toLowerCase() !== 'model-viewer') {
       throw new Error('<effect-composer> must be a child of a <model-viewer> component.');
     }
@@ -187,8 +186,8 @@ export class MVEffectComposer extends ReactiveElement {
 
   disconnectedCallback() {
     super.disconnectedCallback && super.disconnectedCallback();
-    this.modelViewerElement.unregisterEffectComposer();
-    this.modelViewerElement.removeEventListener('before-render', this[$onSceneLoad]);
+    this.modelViewerElement?.unregisterEffectComposer();
+    this.modelViewerElement?.removeEventListener('before-render', this[$onSceneLoad]);
     this[$effectComposer].dispose();
   }
 

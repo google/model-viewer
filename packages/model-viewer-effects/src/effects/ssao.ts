@@ -51,12 +51,13 @@ export class MVSSAOEffect extends MVEffectBase {
 
   [$updateProperties](): void {
     (this.effects[0] as SSAOEffect).intensity = this.strength;
-    this.effectComposer.queueRender();
+    this.effectComposer?.queueRender();
   }
 
   setDefaultProperties() {
-    (this.effects[0] as SSAOEffect).ssaoMaterial.normalBuffer = this.effectComposer.normalBuffer;
-    (this.effects[0] as any).depthDownsamplingPass.fullscreenMaterial.normalBuffer = this.effectComposer.normalBuffer;
+    if (!this.effectComposer) return;
+    (this.effects[0] as SSAOEffect).ssaoMaterial.normalBuffer = this.effectComposer?.normalBuffer;
+    (this.effects[0] as any).depthDownsamplingPass.fullscreenMaterial.normalBuffer = this.effectComposer?.normalBuffer;
   }
 
   get [$effectOptions]() {

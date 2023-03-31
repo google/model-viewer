@@ -52,10 +52,6 @@ export class MVGlitchEffect extends MVEffectBase {
     this[$updateProperties]();
   }
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
-  }
-
   updated(changedProperties: Map<string | number | symbol, any>) {
     super.updated(changedProperties);
     if (changedProperties.has('mode') || changedProperties.has('strength')) {

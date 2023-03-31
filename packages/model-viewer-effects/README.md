@@ -1,7 +1,7 @@
 # `<model-viewer-effects>`
 
- ![npm bundle size](https://img.shields.io/bundlephobia/min/@beilinson/model-viewer-effects)
- ![npm (scoped)](https://img.shields.io/npm/v/@beilinson/model-viewer-effects)
+ ![npm bundle size](https://img.shields.io/bundlephobia/min/@google/model-viewer-effects)
+ ![npm (scoped)](https://img.shields.io/npm/v/@google/model-viewer-effects)
 
 `<model-viewer-effects>` is a web component library addon for `<model-viewer>` that makes adding post-processing
 effects to your models easy to do, on as many browsers and devices as possible.
@@ -31,18 +31,13 @@ There is no documentation yet, but you may refer to the types for all available 
 ### *XR Support*
 The effects are not supported in the `<model-viewer>` XR modes, which will render as usual.
 
-## Status
-`<model-viewer-effects>` is in early development. Currently, it relies on my fork of `<model-viewer>`: 
-
-[@beilinson/model-viewer](https://npmjs.com/@beilinson/model-viewer).
-
 ## Installing
 ### NPM
 
 The `<model-viewer-effects>` library can be installed from [NPM](https://npmjs.org):
 
 ```sh
-npm install three @beilinson/model-viewer @beilinson/model-viewer-effects
+npm install three @google/model-viewer @google/model-viewer-effects
 ```
 
 ### HTML
@@ -63,9 +58,9 @@ You should then bring the `no-three` version of `<model-viewer>`, along with `<m
 
 
 ```html
-<script type="module" src=" https://cdn.jsdelivr.net/npm/@beilinson/model-viewer/dist/model-viewer-no-three.min.js "></script>
+<script type="module" src=" https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-no-three.min.js "></script>
 
-<script type="module" src=" https://cdn.jsdelivr.net/npm/@beilinson/model-viewer-effects/dist/model-viewer-effects.min.js "></script>
+<script type="module" src=" https://cdn.jsdelivr.net/npm/@google/model-viewer-effects/dist/model-viewer-effects.min.js "></script>
 ```
 
 ## Browser Support

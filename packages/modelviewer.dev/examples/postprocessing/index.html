@@ -25,6 +25,8 @@
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
 
+  <!-- ES-Shims for older browsers -->
+  <script type="module" async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
   <!-- Import Three.js using an import-map -->
   <script type="importmap">
@@ -34,13 +36,13 @@
       }
     }
   </script>
+  
 
   <!-- Import the no-three component -->
   <script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer-no-three.js"></script>
 
-
   <!-- Import the <model-viewer-effects> addon -->
-  <script type="module" src="../../node_modules/@beilinson/model-viewer-effects/dist/model-viewer-effects.js"></script>
+  <script type="module" src="../../node_modules/@google/model-viewer-effects/dist/model-viewer-effects.js"></script>
   
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
@@ -200,7 +202,7 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           </div>
           <example-snippet stamp-to="selective-effects" highlight-as="html">
             <template>
-<model-viewer camera-orbit="45deg 115deg auto" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/Rocket Ship.glb" ar alt="A 3D model of a Rocket Ship">
+<model-viewer camera-orbit="45deg 115deg auto" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RocketShip.glb" ar alt="A 3D model of a Rocket Ship">
   <effect-composer id="selectiveComposer" render-mode="quality">
     <selective-bloom-effect id="selectiveBloom" strength="5" radius="0.5" threshold="0"></selective-bloom-effect>
   </effect-composer>

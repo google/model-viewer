@@ -49,7 +49,7 @@ export interface IMVEffect extends Effect, IntegrationOptions {
 
 export interface IEffectBaseMixin {
   effects: IMVEffect[];
-  effectComposer: MVEffectComposer;
+  effectComposer?: MVEffectComposer;
 }
 
 export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(EffectClass: T): Constructor<IEffectBaseMixin> & T => {
@@ -59,19 +59,18 @@ export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(EffectCl
     /**
      * The parent {@link MVEffectComposer} element.
      */
-    protected get effectComposer(): MVEffectComposer {
-      return this.parentNode as MVEffectComposer;
-    }
+    effectComposer?: MVEffectComposer;
 
     connectedCallback(): void {
       super.connectedCallback && super.connectedCallback();
-      this.effectComposer.updateEffects();
+      this.effectComposer = this.parentNode as MVEffectComposer;
+      this.effectComposer?.updateEffects();
     }
 
     disconnectedCallback() {
       super.disconnectedCallback && super.disconnectedCallback();
       this.effects.forEach((effect) => effect.dispose());
-      this.effectComposer.updateEffects();
+      this.effectComposer?.updateEffects();
     }
   }
   return EffectBaseElement as Constructor<IEffectBaseMixin> & T;

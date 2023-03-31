@@ -40,23 +40,24 @@ export const SelectiveMixin = <T extends Constructor<IEffectBaseMixin & Reactive
     connectedCallback() {
       super.connectedCallback && super.connectedCallback();
       this[$setSelection]();
-      this.effectComposer.addEventListener('updated-selection', this[$setSelection]);
+      this.effectComposer?.addEventListener('updated-selection', this[$setSelection]);
     }
 
     disconnectedCallback(): void {
       super.disconnectedCallback && super.disconnectedCallback();
-      this.effectComposer.removeEventListener('updated-selection', this[$setSelection]);
+      this.effectComposer?.removeEventListener('updated-selection', this[$setSelection]);
     }
 
     updated(changedProperties: Map<string | number | symbol, any>) {
       super.updated(changedProperties);
       if (changedProperties.has('selection')) {
         this[$setSelection]();
-        this.effectComposer.queueRender();
+        this.effectComposer?.queueRender();
       }
     }
 
     [$setSelection] = () => {
+      if (!this.effectComposer) return;
       this.effects.forEach((effect: ISelectionEffect) => effect.selection?.clear());
       if (this.selection?.length > 0) {
         const scene = this.effectComposer[$scene];
@@ -64,7 +65,7 @@ export const SelectiveMixin = <T extends Constructor<IEffectBaseMixin & Reactive
           (obj) => this.selection.includes(obj.name) && this.effects.forEach((effect: ISelectionEffect) => effect.selection?.add(obj))
         );
       } else {
-        this.effects.forEach((effect: ISelectionEffect) => effect.selection?.set(this.effectComposer[$selection].values()));
+        this.effects.forEach((effect: ISelectionEffect) => effect.selection?.set(this.effectComposer![$selection].values()));
       }
     };
   }

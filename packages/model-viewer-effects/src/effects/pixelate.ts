@@ -49,6 +49,6 @@ export class MVPixelateEffect extends MVEffectBase {
 
   [$updateProperties]() {
     (this.effects[0] as PixelationEffect).granularity = this.granularity;
-    this.effectComposer.queueRender();
+    this.effectComposer?.queueRender();
   }
 }

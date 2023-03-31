@@ -77,7 +77,7 @@ export class MVSelectiveBloomEffect extends SelectiveMixin(MVEffectBase) {
     (this.effects[0] as BloomEffect).luminanceMaterial.smoothing = this.smoothing;
     (this.effects[0] as BloomEffect).intensity = this.strength;
     (this.effects[0] as any).mipmapBlurPass.radius = this.radius;
-    this.effectComposer.queueRender();
+    this.effectComposer?.queueRender();
   }
 
   get [$effectOptions]() {

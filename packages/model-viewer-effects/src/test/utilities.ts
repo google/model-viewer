@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { ModelViewerElement } from '@beilinson/model-viewer';
-import { Renderer } from '@beilinson/model-viewer/lib/three-components/Renderer';
+import { ModelViewerElement } from '@google/model-viewer';
+import { Renderer } from '@google/model-viewer/lib/three-components/Renderer';
 import { EventDispatcher, HSL } from 'three';
 import { getOwnPropertySymbolValue } from '../utilities';
 
