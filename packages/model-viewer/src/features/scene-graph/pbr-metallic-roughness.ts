@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Color, MeshStandardMaterial} from 'three';
+import {Color, ColorRepresentation, MeshStandardMaterial} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {PBRMetallicRoughness as DefaultedPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-defaulted.js';
@@ -110,7 +110,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     if (rgba instanceof Array) {
       color.fromArray(rgba);
     } else {
-      color.set(rgba).convertSRGBToLinear();
+      color.set(rgba as ColorRepresentation).convertSRGBToLinear();
     }
     for (const material of this[$threeMaterials]) {
       material.color.set(color);
