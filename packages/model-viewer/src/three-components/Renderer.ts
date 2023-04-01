@@ -147,7 +147,7 @@ export class Renderer extends EventDispatcher {
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = sRGBEncoding;
-      this.threeRenderer.physicallyCorrectLights = true;
+      this.threeRenderer.useLegacyLights = false;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 
       this.debugger = !!options.debug ? new Debugger(this) : null;

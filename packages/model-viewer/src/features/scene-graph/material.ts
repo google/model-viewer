@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Color, DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
+import {Color, ColorRepresentation, DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
 
 import {AlphaMode, GLTF, Material as GLTFMaterial, RGB} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Material as DefaultedMaterial} from '../../three-components/gltf-instance/gltf-defaulted.js';
@@ -258,7 +258,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     if (rgb instanceof Array) {
       color.fromArray(rgb);
     } else {
-      color.set(rgb).convertSRGBToLinear();
+      color.set(rgb as ColorRepresentation).convertSRGBToLinear();
     }
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
