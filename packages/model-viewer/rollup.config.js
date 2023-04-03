@@ -85,7 +85,7 @@ if (NODE_ENV !== 'development') {
   outputOptions.push({
     input: './lib/model-viewer.js',
     output: {
-      file: './dist/model-viewer-no-three.js',
+      file: './dist/model-viewer-module.js',
       sourcemap: true,
       format: 'esm',
       name: 'ModelViewerElement',
@@ -103,7 +103,7 @@ if (NODE_ENV !== 'development') {
   outputOptions.push({
     input: './lib/model-viewer.js',
     output: {
-      file: './dist/model-viewer-no-three-umd.js',
+      file: './dist/model-viewer-module-umd.js',
       sourcemap: true,
       format: 'umd',
       name: 'ModelViewerElement',
@@ -150,9 +150,9 @@ if (NODE_ENV !== 'development') {
   });
 
   outputOptions.push({
-    input: './dist/model-viewer-no-three.js',
+    input: './dist/model-viewer-module.js',
     output: {
-      file: './dist/model-viewer-no-three.min.js',
+      file: './dist/model-viewer-module.min.js',
       sourcemap: true,
       format: 'esm',
       name: 'ModelViewerElement',
@@ -166,9 +166,9 @@ if (NODE_ENV !== 'development') {
   });
 
   outputOptions.push({
-    input: './dist/model-viewer-no-three-umd.js',
+    input: './dist/model-viewer-module-umd.js',
     output: {
-      file: './dist/model-viewer-no-three-umd.min.js',
+      file: './dist/model-viewer-module-umd.min.js',
       sourcemap: true,
       format: 'umd',
       name: 'ModelViewerElement',

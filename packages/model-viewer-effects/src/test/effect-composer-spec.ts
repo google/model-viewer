@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ModelViewerElement } from '@beilinson/model-viewer';
+import { ModelViewerElement } from '@google/model-viewer';
 import { assetPath, createModelViewerElement, waitForEvent } from './utilities.js';
 import { MVEffectComposer } from '../model-viewer-effects.js';
 import { $clearPass, $effectComposer, $normalPass, $renderPass, $scene } from '../effect-composer.js';

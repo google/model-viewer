@@ -17,6 +17,7 @@ import { SSAOEffect } from 'postprocessing';
 import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
 import { property } from 'lit/decorators.js';
 import { TEMP_CAMERA } from './utilities.js';
+import { $setDefaultProperties } from './mixins/blend-mode.js';
 
 export class MVSSAOEffect extends MVEffectBase {
   static get is() {
@@ -31,14 +32,13 @@ export class MVSSAOEffect extends MVEffectBase {
 
   constructor() {
     super();
-    // @ts-expect-error scene and camera are optional as of `postprocessing@6.30.2`
     this.effects = [new SSAOEffect(TEMP_CAMERA, undefined, this[$effectOptions])];
     this.effects[0].requireNormals = true;
   }
 
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
-    this['setDefaultProperties']();
+    this[$setDefaultProperties]();
     this[$updateProperties]();
   }
 
@@ -54,10 +54,9 @@ export class MVSSAOEffect extends MVEffectBase {
     this.effectComposer?.queueRender();
   }
 
-  setDefaultProperties() {
+  [$setDefaultProperties]() {
     if (!this.effectComposer) return;
-    (this.effects[0] as SSAOEffect).ssaoMaterial.normalBuffer = this.effectComposer?.normalBuffer;
-    (this.effects[0] as any).depthDownsamplingPass.fullscreenMaterial.normalBuffer = this.effectComposer?.normalBuffer;
+    (this.effects[0] as SSAOEffect).normalBuffer = this.effectComposer?.normalBuffer;
   }
 
   get [$effectOptions]() {

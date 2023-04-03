@@ -70,14 +70,14 @@
   ],
   "dependencies": {
     "lit": "^2.2.3",
-    "postprocessing": "^6.30.0"
+    "postprocessing": "^6.30.2"
   },
   "peerDependencies": {
-    "@google/model-viewer": "^3.1.0",
+    "@google/model-viewer": "^3.0.2",
     "three": "^0.150.0"
   },
   "devDependencies": {
-    "@google/model-viewer": "^3.1.0",
+    "@google/model-viewer": "^3.0.2",
     "@open-wc/karma-esm": "^4.0.0",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
@@ -85,7 +85,7 @@
     "@types/chai": "^4.3.1",
     "@types/mocha": "^9.1.1",
     "@types/pngjs": "^6.0.1",
-    "@types/three": "^0.144.0",
+    "@types/three": "^0.149.0",
     "@ungap/event-target": "^0.2.3",
     "chai": "^4.3.6",
     "focus-visible": "^5.2.0",

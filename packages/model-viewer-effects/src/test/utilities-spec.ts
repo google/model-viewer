@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import { ModelViewerElement } from '@beilinson/model-viewer';
+import { ModelViewerElement } from '@google/model-viewer';
 import { ArraysAreEqual, assetPath, CompareArrays, createModelViewerElement, screenshot, timePasses, TypedArray, waitForEvent } from './utilities.js';
 import { MVEffectComposer } from '../model-viewer-effects.js';
 import { $effectComposer } from '../effect-composer.js';
 import { getOwnPropertySymbolValue } from '../utilities.js';
-import { Renderer } from '@beilinson/model-viewer/lib/three-components/Renderer.js';
+import { Renderer } from '@google/model-viewer/lib/three-components/Renderer.js';
 const expect = chai.expect;
 
 suite('Screenshot Baseline Test', () => {

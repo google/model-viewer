@@ -47,7 +47,6 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
 
   constructor() {
     super();
-    // @ts-expect-error scene and camera are optional as of `postprocessing@6.30.2`
     this.effects = [new OutlineEffect(undefined, TEMP_CAMERA, this[$effectOptions])];
   }
 

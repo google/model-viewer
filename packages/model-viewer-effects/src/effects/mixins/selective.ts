@@ -19,6 +19,7 @@ import { Selection } from 'postprocessing';
 import { $selection, $scene } from '../../effect-composer.js';
 import { Constructor } from '../../utilities.js';
 import { IEffectBaseMixin, IMVEffect } from './effect-base.js';
+import { Object3D } from 'three';
 
 export const $setSelection = Symbol('setSelection');
 
@@ -27,7 +28,7 @@ export interface ISelectionEffect extends IMVEffect {
 }
 
 export interface ISelectiveMixin {
-  selection: string[];
+  selection: Array<string | Object3D>;
 }
 
 export const SelectiveMixin = <T extends Constructor<IEffectBaseMixin & ReactiveElement>>(
@@ -35,7 +36,7 @@ export const SelectiveMixin = <T extends Constructor<IEffectBaseMixin & Reactive
 ): Constructor<ISelectiveMixin> & T => {
   class SelectiveEffectElement extends EffectClass {
     @property({ type: Array })
-    selection: string[] = [];
+    selection: Array<string | Object3D> = [];
 
     connectedCallback() {
       super.connectedCallback && super.connectedCallback();
@@ -57,15 +58,18 @@ export const SelectiveMixin = <T extends Constructor<IEffectBaseMixin & Reactive
     }
 
     [$setSelection] = () => {
-      if (!this.effectComposer) return;
-      this.effects.forEach((effect: ISelectionEffect) => effect.selection?.clear());
+      const {effectComposer} = this;
+      if (!effectComposer) return;
+      
       if (this.selection?.length > 0) {
-        const scene = this.effectComposer[$scene];
+        const selection: Object3D[] = [];
+        const scene = effectComposer[$scene];
         scene?.traverse(
-          (obj) => this.selection.includes(obj.name) && this.effects.forEach((effect: ISelectionEffect) => effect.selection?.add(obj))
+          (obj) => (this.selection.includes(obj.name) || this.selection.includes(obj)) && selection.push(obj)
         );
+        this.effects.forEach((effect: ISelectionEffect) => effect.selection?.set(selection))
       } else {
-        this.effects.forEach((effect: ISelectionEffect) => effect.selection?.set(this.effectComposer![$selection].values()));
+        this.effects.forEach((effect: ISelectionEffect) => effect.selection?.set(effectComposer[$selection].values()));
       }
     };
   }

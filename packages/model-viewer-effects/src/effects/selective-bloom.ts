@@ -51,7 +51,6 @@ export class MVSelectiveBloomEffect extends SelectiveMixin(MVEffectBase) {
   constructor() {
     super();
 
-    // @ts-ignore
     this.effects = [new SelectiveBloomEffect(undefined, TEMP_CAMERA, this[$effectOptions])];
   }
 

@@ -159,7 +159,6 @@ export class MVEffectComposer extends ReactiveElement {
   constructor() {
     super();
     this[$renderPass] = new RenderPass();
-    // @ts-expect-error they are allowed to be undefined
     this[$normalPass] = new NormalPass();
     this[$clearPass] = new EffectPass(TEMP_CAMERA);
     this[$clearPass].name = 'ClearPass';

@@ -25,21 +25,20 @@
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
 
-  <!-- ES-Shims for older browsers -->
-  <script type="module" async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
-
   <!-- Import Three.js using an import-map -->
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@^0.150.0/build/three.module.js"
+        "three": "https://cdn.jsdelivr.net/npm/three@^0.151.0/build/three.module.min.js"
       }
     }
   </script>
-  
 
-  <!-- Import the no-three component -->
-  <script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer-no-three.js"></script>
+  <!-- ES-Shims for older browsers -->
+  <script type="module" async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+  <!-- Import the <model-viewer> component without three bundled -->
+  <script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer-module.js"></script>
 
   <!-- Import the <model-viewer-effects> addon -->
   <script type="module" src="../../node_modules/@google/model-viewer-effects/dist/model-viewer-effects.js"></script>
@@ -114,10 +113,10 @@ button {
 </script>
               </template>
             </example-snippet>
-            <p>Now import the &lt;model-viewer&gt; no-three version, and the &lt;model-viewer-effects&gt; addon</p>
+            <p>Now import the &lt;model-viewer&gt; module version which doesn't package three, and the &lt;model-viewer-effects&gt; addon</p>
             <example-snippet stamp-to="setup" highlight-as="html">
               <template>
-<script type="module-no-exec" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-no-three.min.js"></script>
+<script type="module-no-exec" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-module.min.js"></script>
   
 <script type="module-no-exec" src="https://cdn.jsdelivr.net/npm/@google/model-viewer-effects/dist/model-viewer-effects.min.js"></script>
               </template>
@@ -243,13 +242,13 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           </div>
           <example-snippet stamp-to="combining-effects" highlight-as="html">
             <template>
-<model-viewer id="effectsViewer" camera-controls touch-action="pan-y" src="../../shared-assets/models/enzo_star_field.glb" ar alt="A 3D ">
+<model-viewer id="effectsViewer" camera-controls touch-action="pan-y" src="../../shared-assets/models/EmissiveStrengthTest.glb" ar alt="A 3D ">
   <effect-composer id="composer" render-mode="quality">
     <outline-effect color="blue" blend-mode="skip"></outline-effect>
     <ssao-effect blend-mode="skip"></ssao-effect>
     <glitch-effect blend-mode="skip"></glitch-effect>
     <smaa-effect blend-mode="skip"></smaa-effect>
-    <bloom-effect threshold="0" strength="1" smoothing="0.7" radius="0.5" blend-mode="default"></bloom-effect>
+    <bloom-effect blend-mode="skip"></bloom-effect>
     <pixelate-effect granularity="5" blend-mode="skip"></pixelate-effect>
   </effect-composer>
   <div class="controls">

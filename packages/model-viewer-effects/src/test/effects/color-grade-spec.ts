@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ModelViewerElement } from '@beilinson/model-viewer';
+import { ModelViewerElement } from '@google/model-viewer';
 import { MVEffectComposer } from '../../effect-composer';
 import { MVColorGradeEffect } from '../../model-viewer-effects';
 import { createModelViewerElement, assetPath, waitForEvent, screenshot, ArraysAreEqual, timePasses, TypedArray, CompareArrays, AverageHSL } from '../utilities';
