@@ -15,7 +15,7 @@
 
 import { property } from 'lit/decorators.js';
 import { BlendFunction, OutlineEffect } from 'postprocessing';
-import { Color } from 'three';
+import { Color, ColorRepresentation } from 'three';
 import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
 import { SelectiveMixin } from './mixins/selective.js';
 import { getKernelSize, TEMP_CAMERA } from './utilities.js';
@@ -30,7 +30,7 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
    * @default 'white'
    */
   @property({ type: String || Number, attribute: 'color', reflect: true })
-  color: string | number = 'white';
+  color: ColorRepresentation = 'white';
 
   /**
    * A larger value denotes a thicker edge.

@@ -1,17 +1,19 @@
 {
-  "name": "@beilinson/model-viewer-effects",
+  "name": "@google/model-viewer-effects",
   "version": "1.0.0",
   "description": "Easily add and combine post-processing effects with <model-viewer>!",
-  "repository": "https://github.com/Beilinson/model-viewer/tree/post-processing/packages/model-viewer-effects",
+  "repository": "https://github.com/google/model-viewer/tree/post-processing/packages/model-viewer-effects",
   "bugs": {
     "url": "https://github.com/google/model-viewer/issues"
   },
-  "homepage": "https://github.com/Beilinson/model-viewer/tree/post-processing/packages/model-viewer-effects#readme",
+  "homepage": "https://github.com/google/model-viewer/tree/post-processing/packages/model-viewer-effects#readme",
+  "contributors": [
+    "Adam Beili <adam.v.beili@gmail.com>"
+  ],
   "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0"
   },
-  "author": "Adam Beili <adam.v.beili@gmail.com>",
   "main": "dist/model-viewer-effects.min.js",
   "module": "lib/model-viewer-effects.js",
   "files": [
@@ -73,8 +75,7 @@
     "postprocessing": "^6.30.2"
   },
   "peerDependencies": {
-    "@google/model-viewer": "^3.0.2",
-    "three": "^0.150.0"
+    "@google/model-viewer": "^3.0.2"
   },
   "devDependencies": {
     "@google/model-viewer": "^3.0.2",
@@ -85,7 +86,7 @@
     "@types/chai": "^4.3.1",
     "@types/mocha": "^9.1.1",
     "@types/pngjs": "^6.0.1",
-    "@types/three": "^0.149.0",
+    "@types/three": "^0.150.0",
     "@ungap/event-target": "^0.2.3",
     "chai": "^4.3.6",
     "focus-visible": "^5.2.0",
@@ -104,7 +105,6 @@
     "rollup-plugin-dts": "^4.2.2",
     "rollup-plugin-polyfill": "^3.0.0",
     "rollup-plugin-terser": "^7.0.2",
-    "three": "^0.150.0",
     "typescript": "4.8.4"
   },
   "publishConfig": {
