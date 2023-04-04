@@ -24,6 +24,7 @@ export const $setDefaultProperties = Symbol('setDefaultProperties');
 export interface IBlendModeMixin {
   opacity: number;
   blendMode: string;
+  [$setDefaultProperties](): void;
 }
 
 export const BlendModeMixin = <T extends Constructor<IEffectBaseMixin & ReactiveElement>>(
@@ -65,7 +66,7 @@ export const BlendModeMixin = <T extends Constructor<IEffectBaseMixin & Reactive
       }
     }
 
-    private [$setDefaultProperties]() {
+    protected [$setDefaultProperties]() {
       this.effects.forEach((effect) => {
         effect.blendMode.defaultBlendFunction = effect.blendMode.blendFunction;
       });

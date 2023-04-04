@@ -29,7 +29,7 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@^0.151.0/build/three.module.min.js"
+        "three": "https://cdn.jsdelivr.net/npm/three@^0.151.2/build/three.module.min.js"
       }
     }
   </script>
@@ -87,7 +87,7 @@ button {
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">Setup PostProcessing</h2>
+            <h2 class="demo-title">Setup Post Processing</h2>
             <p>The &lt;model-viewer-effects&gt; library addon for &lt;model-viewer&gt; provides
             you with a easy-to-use postprocessing workflow for spicing up your models. <br/>The list of currently
             support effects is: SMAA, FXAA, Pixelate, Outline, Glitch, SSAO, Bloom (Global/Selective), and Color Grade.<br/><br/>
@@ -145,16 +145,28 @@ button {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">The Effects API</h2>
+            <h3>Effect Composer</h3>
+            <p>The &lt;effect-composer&gt; component has two main properties: <code>render-mode</code> and <code>msaa</code>.<br><br>
+            The default value for <code>renderMode</code> is <code>'performance'</code>. By switching to <code>'quality'</code>, the Effect Composer 
+            will use high-precision linear buffers for rendering, allowing for HDR-like workflows, at a performance cost. <code>renderMode</code> can only be set once,
+            before the Effect Composer instantiates. Updating it after that is not possible.<br>
+            <i>Note: the default 'performance' <code>renderMode</code> is prone to banding in dark scenes, which is especially noticeable with 
+            &lt;bloom-effect&gt;.</i><br><br>
+            <code>msaa</code> uses a performant algorithm for anti-aliasing on WebGL2 enabled browsers. Set this to a factor of 2 to enable - it is disabled by default.<br>
+            <i>Note: <code>msaa</code> may introduce visual artifacts when used with depth-based effects such as &lt;ssao-effect&gt;, in which case
+              it would be preferred to use the &lt;smaa-effect&gt;.</i>
+            </p><br>
+            <h3>Effects</h3>
             <p>All Effects are reactive components, so all properties can be changed during runtime. 
-            This example demonstrates the BlendMode API, which allows you to blend effects like you would
+            This example demonstrates the <code>opacity</code> and <code>blend-mode</code>>, which allows you to blend effects like you would
             layers in Photoshop. We use a &lt;color-grade-effect&gt;, which allows you to alter the look of your model.
             </p>
           </div>
           <example-snippet stamp-to="effects" highlight-as="html">
             <template>
 <model-viewer id="blendViewer" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
-  <effect-composer>
-    <color-grade-effect id="color-grade" contrast="0.5" saturation="0.4"></color-grade-effect>
+  <effect-composer render-mode="quality" msaa="8">
+    <color-grade-effect contrast="0.5" saturation="-1" opacity="1" blend-mode="default"></color-grade-effect>
   </effect-composer>
   <div class="controls">
     <label for="opacity">Opacity</label>
@@ -172,7 +184,7 @@ button {
 </model-viewer>
 <script type="module">
 const blendViewer = document.querySelector("model-viewer#blendViewer");
-const colorGradeEffect = blendViewer.querySelector('#color-grade');
+const colorGradeEffect = blendViewer.querySelector('color-grade-effect');
 const opacity = blendViewer.querySelector('#opacity');
 const mode = blendViewer.querySelector('#blend-mode');
 
@@ -211,12 +223,14 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
   const bloom = composer.querySelector("#selectiveBloom");
 
   composer.addEventListener('updated-selection', () => {
+    const selection = [];
     composer.selection.forEach((obj) => 
       (obj.material.emissive.r > 0 
       || obj.material.emissive.g > 0 
-      || obj.material.emissive.b > 0) 
-        && bloom.selection.push(obj.name)
+      || obj.material.emissive.b > 0) &&
+        selection.push(obj)
     );
+    bloom.selection = selection;
   });
 </script>
             </template>

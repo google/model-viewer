@@ -52,6 +52,8 @@ suite('Screenshot Baseline Test', () => {
 
     setup(async () => {
       composer = new MVEffectComposer();
+      composer.renderMode = 'quality';
+      composer.msaa = 8;
       element.insertBefore(composer, element.firstChild);
       await timePasses(5);
     });
@@ -59,9 +61,9 @@ suite('Screenshot Baseline Test', () => {
     test('Compare Self', async () => {
       const renderer = composer[$effectComposer].getRenderer();
       expect(renderer).to.not.be.undefined;
-      await timePasses(5);
+      await timePasses(10);
       composerScreenshot = screenshot(element);
-      await timePasses(5);
+      await timePasses(10);
       const screenshot2 = screenshot(element);
 
       expect(ArraysAreEqual(composerScreenshot, screenshot2)).to.be.true;

@@ -55,6 +55,7 @@ export class MVSSAOEffect extends MVEffectBase {
   }
 
   [$setDefaultProperties]() {
+    super[$setDefaultProperties]();
     if (!this.effectComposer) return;
     (this.effects[0] as SSAOEffect).normalBuffer = this.effectComposer?.normalBuffer;
   }

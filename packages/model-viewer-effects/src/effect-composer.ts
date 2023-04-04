@@ -119,6 +119,14 @@ export class MVEffectComposer extends ReactiveElement {
   @property({ type: String, attribute: 'render-mode' })
   renderMode: RenderMode = 'performance';
 
+  /**
+   * Anti-Aliasing using the MSAA performant algorithm
+   * Recommended to use with a factor of 2.
+   * @default 0
+   */
+  @property({ type: Number, attribute: 'msaa' })
+  msaa: number = 0;
+
   protected [$effectComposer]!: EffectComposer;
   protected [$renderPass]: RenderPass;
   protected [$normalPass]: NormalPass;
@@ -169,6 +177,7 @@ export class MVEffectComposer extends ReactiveElement {
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
     this[$effectComposer] = new EffectComposer(undefined, {
+      multisampling: this.msaa,
       frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType,
     });
     this.modelViewerElement = this.parentNode as ModelViewerElement;
@@ -188,6 +197,16 @@ export class MVEffectComposer extends ReactiveElement {
     this.modelViewerElement?.unregisterEffectComposer();
     this.modelViewerElement?.removeEventListener('before-render', this[$onSceneLoad]);
     this[$effectComposer].dispose();
+  }
+
+  updated(changedProperties: Map<string | number | symbol, any>) {
+    super.updated(changedProperties);
+    if (changedProperties.has('msaa')) {
+      this[$effectComposer].multisampling = this.msaa;
+    }
+    if (changedProperties.has('renderMode') && changedProperties.get('renderMode') !== undefined) {
+      throw new Error('renderMode cannot be changed after startup.')
+    }
   }
 
   /**

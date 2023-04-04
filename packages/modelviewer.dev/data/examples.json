@@ -266,12 +266,12 @@
     ]
   },
   {
-    "name": "PostProcessing Effects",
+    "name": "Post Process Effects",
     "htmlName": "postprocessing",
     "examples": [
       {
         "htmlId": "setup",
-        "name": "Setup PostProcessing"
+        "name": "Setup Post Processing"
       },
       {
         "htmlId": "effects",
