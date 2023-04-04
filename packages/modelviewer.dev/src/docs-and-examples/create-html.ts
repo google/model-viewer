@@ -87,7 +87,7 @@ export function starterSidebar(docsOrExample: string) {
   </a>
 </div>
 <hr class="sidebar-hr">
-${docsOrExample === 'faq' ? '' : `
+${docsOrExample === 'faq' || docsOrExample === 'mvedocs' ? '' : `
 <div class="flipper">
   ${docsExamples}
 </div>

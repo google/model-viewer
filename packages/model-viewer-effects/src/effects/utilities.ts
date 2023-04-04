@@ -16,6 +16,7 @@
 import { KernelSize } from 'postprocessing';
 import { PerspectiveCamera } from 'three';
 import { clamp } from '../utilities';
+import { MVEffectBase } from './mixins/effect-base.js';
 
 /**
  * Helper function for calculating the Kernel Size
@@ -24,6 +25,10 @@ import { clamp } from '../utilities';
  */
 export function getKernelSize(n: number): number {
   return Math.round(clamp(n + 1, KernelSize.VERY_SMALL, KernelSize.HUGE + 1)) - 1;
+}
+
+export function getComponentName(obj: MVEffectBase): string {
+  return '<' + obj.constructor.name.replace('MV', '').split(/(?=[A-Z])/).join('-').toLowerCase() + '>';
 }
 
 // Used for effects which require a valid Camera for shader instance

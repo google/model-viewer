@@ -68,7 +68,7 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
     (this.effects[0] as OutlineEffect).hiddenEdgeColor = new Color(this.color);
     (this.effects[0] as OutlineEffect).blurPass.enabled = Math.round(this.smoothing) > 0;
     (this.effects[0] as OutlineEffect).blurPass.kernelSize = getKernelSize(this.smoothing);
-    this.effectComposer?.queueRender();
+    this.effectComposer.queueRender();
   }
 
   get [$effectOptions]() {

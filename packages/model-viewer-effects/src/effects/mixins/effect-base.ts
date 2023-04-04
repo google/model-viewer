@@ -15,9 +15,10 @@
 
 import { LitElement, ReactiveElement } from 'lit';
 import { BlendFunction, BlendMode, Effect } from 'postprocessing';
-import { MVEffectComposer } from '../../effect-composer';
+import { $effectComposer, MVEffectComposer } from '../../effect-composer';
 import { Constructor } from '../../utilities';
 import { BlendModeMixin } from './blend-mode';
+import { getComponentName } from '../utilities';
 
 export const $updateProperties = Symbol('updateProperties');
 export const $effectOptions = Symbol('effectOptions');
@@ -49,28 +50,34 @@ export interface IMVEffect extends Effect, IntegrationOptions {
 
 export interface IEffectBaseMixin {
   effects: IMVEffect[];
-  effectComposer?: MVEffectComposer;
+  effectComposer: MVEffectComposer;
 }
 
 export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(EffectClass: T): Constructor<IEffectBaseMixin> & T => {
   class EffectBaseElement extends EffectClass {
+    [$effectComposer]?: MVEffectComposer;
     protected effects!: IMVEffect[];
 
     /**
      * The parent {@link MVEffectComposer} element.
      */
-    effectComposer?: MVEffectComposer;
+    protected get effectComposer() {
+      if (!this[$effectComposer]) throw new Error(`${getComponentName(this as any)} must be a child of a <model-viewer> component.`);
+      return this[$effectComposer];
+    }
 
     connectedCallback(): void {
       super.connectedCallback && super.connectedCallback();
-      this.effectComposer = this.parentNode as MVEffectComposer;
-      this.effectComposer?.updateEffects();
+      if (this.parentNode?.nodeName.toLowerCase() === 'effect-composer') {
+        this[$effectComposer] = this.parentNode as MVEffectComposer;
+      }
+      this.effectComposer.updateEffects();
     }
 
     disconnectedCallback() {
       super.disconnectedCallback && super.disconnectedCallback();
       this.effects.forEach((effect) => effect.dispose());
-      this.effectComposer?.updateEffects();
+      this.effectComposer.updateEffects();
     }
   }
   return EffectBaseElement as Constructor<IEffectBaseMixin> & T;

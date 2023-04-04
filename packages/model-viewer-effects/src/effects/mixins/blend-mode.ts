@@ -60,9 +60,9 @@ export const BlendModeMixin = <T extends Constructor<IEffectBaseMixin & Reactive
         });
         // Recreate EffectPasses if the new or old value was 'skip'
         if (this.blendMode.toLowerCase() === 'skip' || changedProperties.get('blendMode') === 'skip') {
-          this.effectComposer?.updateEffects();
+          this.effectComposer.updateEffects();
         }
-        this.effectComposer?.queueRender();
+        this.effectComposer.queueRender();
       }
     }
 

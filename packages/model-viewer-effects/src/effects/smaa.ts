@@ -52,7 +52,7 @@ export class MVSMAAEffect extends MVEffectBase {
 
   [$updateProperties]() {
     (this.effects[0] as SMAAEffect).applyPreset(SMAAPreset[this.quality.toUpperCase() as SMAAPresetQuality] ?? SMAAPreset.MEDIUM);
-    this.effectComposer?.queueRender();
+    this.effectComposer.queueRender();
   }
 
   get [$effectOptions]() {

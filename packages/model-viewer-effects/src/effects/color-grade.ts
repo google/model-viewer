@@ -93,6 +93,6 @@ export class MVColorGradeEffect extends MVEffectBase {
     (this.effects[0] as HueSaturationEffect).hue = this.hue;
     (this.effects[1] as BrightnessContrastEffect).brightness = this.brightness;
     (this.effects[1] as BrightnessContrastEffect).contrast = this.contrast;
-    this.effectComposer?.queueRender();
+    this.effectComposer.queueRender();
   }
 }

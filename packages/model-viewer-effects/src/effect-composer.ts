@@ -17,14 +17,15 @@ import { ReactiveElement } from 'lit';
 import { EffectComposer as PPEffectComposer, EffectPass, NormalPass, RenderPass, Selection, Pass } from 'postprocessing';
 import { disposeEffectPass, isConvolution } from './utilities.js';
 import { ModelViewerElement } from '@google/model-viewer';
-import { $updateProperties, IMVEffect, IntegrationOptions, MVEffectBase } from './effects/mixins/effect-base.js';
+import { IMVEffect, IntegrationOptions, MVEffectBase } from './effects/mixins/effect-base.js';
 import { ModelScene } from '@google/model-viewer/lib/three-components/ModelScene.js';
 import { Camera, HalfFloatType, UnsignedByteType, WebGLRenderer } from 'three';
 import { property } from 'lit/decorators.js';
 import { TEMP_CAMERA } from './effects/utilities.js';
 
 export const $scene = Symbol('scene');
-
+export const $composer = Symbol('composer');
+export const $modelViewerElement = Symbol('modelViewerElement');
 export const $effectComposer = Symbol('effectComposer');
 export const $renderPass = Symbol('renderPass');
 export const $normalPass = Symbol('normalPass');
@@ -38,6 +39,7 @@ export const $selection = Symbol('selection');
 export const $onSceneLoad = Symbol('onSceneLoad');
 export const $resetEffectPasses = Symbol('resetEffectPasses');
 export const $userEffectCount = Symbol('userEffectCount');
+const $updateProperties = Symbol('updateProperties');
 
 /**
  * Light wrapper around {@link EffectComposer} for storing the `scene` and `camera
@@ -120,19 +122,26 @@ export class MVEffectComposer extends ReactiveElement {
   renderMode: RenderMode = 'performance';
 
   /**
-   * Anti-Aliasing using the MSAA performant algorithm
+   * Anti-Aliasing using the MSAA algorithm. Doesn't work well with depth-based effects.
+   * 
    * Recommended to use with a factor of 2.
    * @default 0
    */
   @property({ type: Number, attribute: 'msaa' })
   msaa: number = 0;
 
-  protected [$effectComposer]!: EffectComposer;
+  protected [$composer]?: EffectComposer;
+  protected [$modelViewerElement]?: ModelViewerElement;
   protected [$renderPass]: RenderPass;
   protected [$normalPass]: NormalPass;
   protected [$clearPass]: EffectPass;
   protected [$selection]: Selection;
   protected [$userEffectCount]: number = 0;
+
+  get [$effectComposer]() {
+    if (!this[$composer]) throw new Error('The EffectComposer has not been instantiated yet. Please make sure the component is properly mounted on the Document within a <model-viewer> element.')
+    return this[$composer];
+  }
 
   /**
    * Array of custom {@link MVPass}'s added with {@link addPass}.
@@ -140,8 +149,11 @@ export class MVEffectComposer extends ReactiveElement {
   get userPasses(): MVPass[] {
     return this[$effectComposer].passes.slice(2, 2 + this[$userEffectCount]);
   }
-
-  public modelViewerElement?: ModelViewerElement;
+  
+  get modelViewerElement() {
+    if (!this[$modelViewerElement]) throw new Error('<effect-composer> must be a child of a <model-viewer> component.')
+    return this[$modelViewerElement];
+  }
 
   /**
    * The Texture buffer of the inbuilt {@link NormalPass}.
@@ -176,17 +188,16 @@ export class MVEffectComposer extends ReactiveElement {
 
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
-    this[$effectComposer] = new EffectComposer(undefined, {
+    this[$composer] = new EffectComposer(undefined, {
       multisampling: this.msaa,
       frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType,
     });
-    this.modelViewerElement = this.parentNode as ModelViewerElement;
-    if (this.modelViewerElement.nodeName.toLowerCase() !== 'model-viewer') {
-      throw new Error('<effect-composer> must be a child of a <model-viewer> component.');
-    }
-    this.modelViewerElement.registerEffectComposer(this[$effectComposer]);
     this[$effectComposer].addPass(this[$renderPass], 0);
     this[$effectComposer].addPass(this[$normalPass], 1);
+    if (this.parentNode?.nodeName.toLowerCase() !== 'model-viewer') {
+      this[$modelViewerElement] = this.parentNode as ModelViewerElement;
+    }
+    this.modelViewerElement.registerEffectComposer(this[$effectComposer]);
     this[$onSceneLoad]();
     this.modelViewerElement.addEventListener('before-render', this[$onSceneLoad]);
     this.updateEffects();
@@ -194,8 +205,8 @@ export class MVEffectComposer extends ReactiveElement {
 
   disconnectedCallback() {
     super.disconnectedCallback && super.disconnectedCallback();
-    this.modelViewerElement?.unregisterEffectComposer();
-    this.modelViewerElement?.removeEventListener('before-render', this[$onSceneLoad]);
+    this.modelViewerElement.unregisterEffectComposer();
+    this.modelViewerElement.removeEventListener('before-render', this[$onSceneLoad]);
     this[$effectComposer].dispose();
   }
 
@@ -331,7 +342,7 @@ export class MVEffectComposer extends ReactiveElement {
     this[$selection].clear();
     this[$scene]?.traverse((obj) => obj.hasOwnProperty('geometry') && this[$selection].add(obj));
     this.dispatchEvent(new CustomEvent('updated-selection'));
-  };
+  }
 
   [$updateProperties]() {
     this[$normalPass].enabled = this[$requires]('requireNormals');
