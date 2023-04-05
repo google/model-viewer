@@ -88,12 +88,12 @@ button {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Setup Post Processing</h2>
-            <p>The &lt;model-viewer-effects&gt; library addon for &lt;model-viewer&gt; provides
+            <p>The <code>&lt;model-viewer-effects&gt;</code> library addon for <code>&lt;model-viewer&gt;</code> provides
             you with a easy-to-use postprocessing workflow for spicing up your models. <br/>The list of currently
             support effects is: SMAA, FXAA, Pixelate, Outline, Glitch, SSAO, Bloom (Global/Selective), and Color Grade.<br/><br/>
             In order to avoid package collisions, you will be required to add an 
-            <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap">import-map</a>
-            for the <a href="https://threejs.org/">Three.js</a> package, and use the <i>no-three</i> version of &lt;model-viewer&gt;.</p>
+            <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap" target='_blank'>import-map</a>
+            for the <a href="https://threejs.org/" target='_blank'>Three.js</a> package, and use the <i>module</i> version of <code>&lt;model-viewer&gt;</code>.</p>
             <p>Safari does not support <code>import maps</code>, the following script will make your code work universally: </p>
             <i>Note: remove the '-no-exec' suffix from the following scripts in order for them to run.</i>
             <example-snippet>
@@ -113,7 +113,7 @@ button {
 </script>
               </template>
             </example-snippet>
-            <p>Now import the &lt;model-viewer&gt; module version which doesn't package three, and the &lt;model-viewer-effects&gt; addon</p>
+            <p>Now import the <code>&lt;model-viewer&gt;</code> module version which doesn't package three, and the <code>&lt;model-viewer-effects&gt;</code> addon:</p>
             <example-snippet stamp-to="setup" highlight-as="html">
               <template>
 <script type="module-no-exec" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-module.min.js"></script>
@@ -121,8 +121,8 @@ button {
 <script type="module-no-exec" src="https://cdn.jsdelivr.net/npm/@google/model-viewer-effects/dist/model-viewer-effects.min.js"></script>
               </template>
             </example-snippet>
-            <p>Setting up post-processing effects is as simple as adding an &lt;effect-composer&gt; component inside your &lt;model-viewer&gt; element.
-              From here, simply add any of the supported effects inside the &lt;effect-composer&gt;.<br>See the
+            <p>Setting up post-processing effects is as simple as adding an <code>&lt;effect-composer&gt;</code> component inside your <code>&lt;model-viewer&gt;</code> element.
+              From here, simply add any of the supported effects inside the <code>&lt;effect-composer&gt;</code>.<br>See the
             <a href="../../docs/mve.html">API Reference</a> for a list of all supported effects.</p>
           </div>
           <example-snippet stamp-to="setup" highlight-as="html">
@@ -146,21 +146,21 @@ button {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">The Effects API</h2>
-            <h3>Effect Composer</h3>
-            <p>The &lt;effect-composer&gt; component has two main properties: <code>render-mode</code> and <code>msaa</code>.<br><br>
-            The default value for <code>renderMode</code> is <code>'performance'</code>. By switching to <code>'quality'</code>, the Effect Composer 
+            <a href="../../docs/mve#effectcomposer"><h3>Effect Composer</h3></a>
+            <p>The <code>&lt;effect-composer&gt;</code> component has two main properties: <code>render-mode</code> and <code>msaa</code>.<br><br>
+            The default value for <code>renderMode</code> is <code>'performance'</code>. By switching to <code>'quality'</code>, the <code>&lt;effect-composer&gt;</code>
             will use high-precision linear buffers for rendering, allowing for HDR-like workflows, at a performance cost. <code>renderMode</code> can only be set once,
             before the Effect Composer instantiates. Updating it after that is not possible.<br>
             <i>Note: the default 'performance' <code>renderMode</code> is prone to banding in dark scenes, which is especially noticeable with 
-            &lt;bloom-effect&gt;.</i><br><br>
-            <code>msaa</code> uses a performant MSAA algorithm for anti-aliasing on WebGL2 enabled browsers. Set this to a factor of 2 to enable - it is disabled by default.<br>
-            <i>Note: <code>msaa</code> may introduce visual artifacts when used with depth-based effects such as &lt;ssao-effect&gt;, in which case
-              it would be preferred to use the &lt;smaa-effect&gt;.</i>
+            <code>&lt;bloom-effect&gt;</code>.</i><br><br>
+            <code>msaa</code> uses a performant algorithm for anti-aliasing on WebGL2 enabled browsers. Set this to a factor of 2 to enable - it is disabled by default.<br>
+            <i>Note: <code>msaa</code> may introduce visual artifacts when used with depth-based effects such as <code>&lt;ssao-effect&gt;</code>, in which case
+              it would be preferred to use the <code>&lt;smaa-effect&gt;</code>.</i>
             </p><br>
-            <h3>Effects</h3>
+            <a href="../../docs/mve#bloom"><h3>Effects</h3></a>
             <p>All Effects are reactive components, so all properties can be changed during runtime. 
-            This example demonstrates the <code>opacity</code> and <code>blend-mode</code>>, which allows you to blend effects like you would
-            layers in Photoshop. We use a &lt;color-grade-effect&gt;, which allows you to alter the look of your model.
+            This example demonstrates the <a href='../../docs/mve#blendmodemixin'><code>BlendMode API</code></a>, which allows you to blend effects like you would
+            layers in Photoshop. We use a <a href="../../docs/mve#colorgrade"><code>&lt;color-grade-effect&gt;</code></a>, which allows you to alter the look of your model.
             </p>
           </div>
           <example-snippet stamp-to="effects" highlight-as="html">
@@ -206,22 +206,23 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           <div class="heading">
             <h2 class="demo-title">Selective Effects</h2>
             <p>Some of the implemented effects are selective and may be applied to only certain meshes in your model. 
-            Currently, this is exclusive to &lt;selective-bloom-effect&gt; and &lt;outline-effect&gt;. The default behavior for selective
-            effects is to use the default <code>selection</code> provided by the &lt;effect-composer&gt;, which contains a set of
+            Currently, this is exclusive to <a href="../../docs/mve#selectivebloom"><code>&lt;selective-bloom-effect&gt;</code></a> 
+            and <a href="../../docs/mve#outline"><code>&lt;outline-effect&gt;</code></a>. The default behavior for selective
+            effects is to use the default <code>selection</code> provided by the <code>&lt;effect-composer&gt;</code>, which contains a set of
             all meshes in the model.<br/>
             By providing an array of mesh names to the <code>selection</code> attribute, you may enable the effects only for those meshes.<br/>
-            This example demonstrates the application of the Bloom effect exclusively to Meshes with an emissive material:</p>
+            This example demonstrates the application of the <code>&lt;selective-bloom-effect&gt;</code> exclusively to Meshes with an emissive material:</p>
           </div>
           <example-snippet stamp-to="selective-effects" highlight-as="html">
             <template>
 <model-viewer camera-orbit="45deg 115deg auto" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RocketShip.glb" ar alt="A 3D model of a Rocket Ship">
   <effect-composer id="selectiveComposer" render-mode="quality">
-    <selective-bloom-effect id="selectiveBloom" strength="5" radius="0.5" threshold="0"></selective-bloom-effect>
+    <selective-bloom-effect strength="5" radius="0.5" threshold="0"></selective-bloom-effect>
   </effect-composer>
 </model-viewer>
 <script type="module">
   const selectiveComposer = document.querySelector("effect-composer#selectiveComposer");
-  const selectiveBloom = selectiveComposer.querySelector("#selectiveBloom");
+  const selectiveBloom = selectiveComposer.querySelector("selective-bloom-effect");
 
   selectiveComposer.addEventListener('updated-selection', () => {
     const selection = [];
@@ -246,12 +247,12 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Combining Effects</h2>
-            <p>&lt;model-viewer-effects&gt; will attempt to join as many of your effects as possible into a single
+            <p>&lt;model-viewer-effects&gt;</code> will attempt to join as many of your effects as possible into a single
             <code>EffectPass</code>, which has a significant performance benefit as opposed to keeping all the effects
             in separates Passes. Effects can be disabled by setting the <code>blend-mode</code> to <code>skip</code>.
             <br>
-            It is recommended to follow the official <a href="https://github.com/pmndrs/postprocessing/wiki/Effect-Merging#effect-execution-order">Postprocessing Wiki</a>
-            for best practices in combining effects. The &lt;model-viewer-effects&gt; handles effect compatibility issues by 
+            It is recommended to follow the official <a href="https://github.com/pmndrs/postprocessing/wiki/Effect-Merging#effect-execution-order" target='_blank'>Postprocessing Wiki</a>
+            for best practices in combining effects. The <code>&lt;model-viewer-effects&gt;</code> handles effect compatibility issues by 
             placing incompatible effects in a separate Pass.
             </p>
           </div>
@@ -303,13 +304,17 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Custom Effects</h2>
-            <p>Using the <code>addPass</code> method on the &lt;effect-composer&gt;, you can add custom 
+            <p>Using the <a href="../../docs/mve.html#entrydocs-effectcomposer-methods-addPass"><code>addPass()</code></a> method on the <code>&lt;effect-composer&gt;</code>, you can add custom 
             PostProcessing effects that are not provided by the base library. If you would like to implement
-            your own effects from scratch, refer to the <a href="https://github.com/pmndrs/postprocessing/wiki/Custom-Effects">Postprocessing Wiki</a>.<br/><br/>
+            your own effects from scratch, refer to the <a href="https://github.com/pmndrs/postprocessing/wiki/Custom-Effects" target='_blank'>Postprocessing Wiki</a>.<br/><br/>
             
             If your Pass requires the scene or camera instance, they are set automatically. Similarly, 
-            if any of the effects in the pass require a <i>normalBuffer</i> or <i>selection</i>,
-            you can access them from the &lt;effect-composer&gt;.<br/><br/>
+            if any of the effects in the pass require a <code>normalBuffer</code> or <code>selection</code>,
+            you can access them from the <code>&lt;effect-composer&gt;</code>.<br/>
+
+            If any property of your effect changes, you must call the <a href="../../docs/mve.html#entrydocs-effectcomposer-methods-queueRender"><code>queueRender()</code></a> 
+            method so that the <code>&lt;effect-composer&gt;</code> knows to re-render with your new changes.<br/><br/> 
+
             <i>Note: If your pass uses the normalBuffer, you must specify as such in the <code>addPass</code> method, as the normals 
             are disabled by default unless they are used. Similarly, if your pass requires to be re-rendered each frame, 
             you must pass the </i><code>requireDirtyRender</code><i> parameter.</i></p>
@@ -335,6 +340,7 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
 
   customComposer.nextElementSibling.addEventListener('input', (e) => {
     grid.scale = e.target.value;
+    // Request a render frame, to update
     customComposer.queueRender();
   });
 </script>
