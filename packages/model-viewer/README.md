@@ -23,7 +23,10 @@ supported to provide a seamless development experience.
 The `<model-viewer>` web component can be installed from [NPM](https://npmjs.org):
 
 ```sh
-npm install three @google/model-viewer
+# install peer depedency
+npm install three 
+# install package
+npm install @google/model-viewer
 ```
 
 It can also be used directly from various free CDNs such as [jsDelivr](https://www.jsdelivr.com/package/npm/@google/model-viewer) and Google's own [hosted libraries](https://developers.google.com/speed/libraries#model-viewer):
