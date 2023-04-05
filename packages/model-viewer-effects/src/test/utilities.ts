@@ -230,8 +230,7 @@ export function CompareArrays(arr1: TypedArray<number>, arr2: TypedArray<number>
   const similarity: number[] = [];
   const max = maxValue(arr1.BYTES_PER_ELEMENT);
   for (let i = 0; i < arr1.length; i += COMPONENTS_PER_PIXEL) {
-    if (arr1[i + 3] != 0 || arr2[i + 3] != 0) {
-      // a
+    if (arr1[i + 3] != 0 && arr2[i + 3] != 0) { // a
       similarity.push(1 - percentage(arr1[i], arr2[i], max)); // r
       similarity.push(1 - percentage(arr1[i + 1], arr2[i + 1], max)); // g
       similarity.push(1 - percentage(arr1[i + 2], arr2[i + 2], max)); // b

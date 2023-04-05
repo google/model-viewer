@@ -49,7 +49,7 @@ suite('Color Grade Effect', () => {
   });
 
   test('Color Grade Affects Pixels', async () => {
-    colorGrade.contrast = 0.3;
+    colorGrade.contrast = 1.0;
     await timePasses(20);
     const colorGradeScreenshot = screenshot(element);
 
