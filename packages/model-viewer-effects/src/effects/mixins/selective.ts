@@ -35,6 +35,11 @@ export const SelectiveMixin = <T extends Constructor<IEffectBaseMixin & Reactive
   EffectClass: T
 ): Constructor<ISelectiveMixin> & T => {
   class SelectiveEffectElement extends EffectClass {
+    /**
+     * The objects to attemp to place into the effect selection. Can be either the 'name' or the actual objects themselves.
+     *
+     * Note that since this is an array property, it must be set using the '=' operator in order to properly update.
+     */
     @property({ type: Array })
     selection: Array<string | Object3D> = [];
 
@@ -58,16 +63,14 @@ export const SelectiveMixin = <T extends Constructor<IEffectBaseMixin & Reactive
     }
 
     [$setSelection] = () => {
-      const {effectComposer} = this;
+      const { effectComposer } = this;
       if (!effectComposer) return;
-      
+
       if (this.selection?.length > 0) {
         const selection: Object3D[] = [];
         const scene = effectComposer[$scene];
-        scene?.traverse(
-          (obj) => (this.selection.includes(obj.name) || this.selection.includes(obj)) && selection.push(obj)
-        );
-        this.effects.forEach((effect: ISelectionEffect) => effect.selection?.set(selection))
+        scene?.traverse((obj) => (this.selection.includes(obj.name) || this.selection.includes(obj)) && selection.push(obj));
+        this.effects.forEach((effect: ISelectionEffect) => effect.selection?.set(selection));
       } else {
         this.effects.forEach((effect: ISelectionEffect) => effect.selection?.set(effectComposer[$selection].values()));
       }

@@ -14,8 +14,8 @@
  */
 
 import { ModelViewerElement } from '@google/model-viewer';
-import { ArraysAreEqual, assetPath, CompareArrays, createModelViewerElement, screenshot, timePasses, TypedArray, waitForEvent } from './utilities.js';
-import { MVEffectComposer } from '../model-viewer-effects.js';
+import { ArraysAreEqual, assetPath, CompareArrays, createModelViewerElement, screenshot, timePasses, waitForEvent } from './utilities.js';
+import { EffectComposer } from '../model-viewer-effects.js';
 import { $effectComposer } from '../effect-composer.js';
 import { getOwnPropertySymbolValue } from '../utilities.js';
 import { Renderer } from '@google/model-viewer/lib/three-components/Renderer.js';
@@ -23,7 +23,7 @@ const expect = chai.expect;
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
-  let baseScreenshot: TypedArray<number>;
+  let baseScreenshot: Uint8Array;
 
   setup(async () => {
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));
@@ -47,11 +47,11 @@ suite('Screenshot Baseline Test', () => {
   });
 
   suite('<effect-composer>', () => {
-    let composer: MVEffectComposer;
-    let composerScreenshot: TypedArray<number>;
+    let composer: EffectComposer;
+    let composerScreenshot: Uint8Array;
 
     setup(async () => {
-      composer = new MVEffectComposer();
+      composer = new EffectComposer();
       composer.renderMode = 'quality';
       composer.msaa = 8;
       element.insertBefore(composer, element.firstChild);

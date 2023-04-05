@@ -21,7 +21,6 @@ import { IMVEffect, IntegrationOptions, MVEffectBase } from './effects/mixins/ef
 import { ModelScene } from '@google/model-viewer/lib/three-components/ModelScene.js';
 import { Camera, HalfFloatType, UnsignedByteType, WebGLRenderer } from 'three';
 import { property } from 'lit/decorators.js';
-import { TEMP_CAMERA } from './effects/utilities.js';
 
 export const $scene = Symbol('scene');
 export const $composer = Symbol('composer');
@@ -123,7 +122,7 @@ export class MVEffectComposer extends ReactiveElement {
 
   /**
    * Anti-Aliasing using the MSAA algorithm. Doesn't work well with depth-based effects.
-   * 
+   *
    * Recommended to use with a factor of 2.
    * @default 0
    */
@@ -139,7 +138,10 @@ export class MVEffectComposer extends ReactiveElement {
   protected [$userEffectCount]: number = 0;
 
   get [$effectComposer]() {
-    if (!this[$composer]) throw new Error('The EffectComposer has not been instantiated yet. Please make sure the component is properly mounted on the Document within a <model-viewer> element.')
+    if (!this[$composer])
+      throw new Error(
+        'The EffectComposer has not been instantiated yet. Please make sure the component is properly mounted on the Document within a <model-viewer> element.'
+      );
     return this[$composer];
   }
 
@@ -149,9 +151,9 @@ export class MVEffectComposer extends ReactiveElement {
   get userPasses(): MVPass[] {
     return this[$effectComposer].passes.slice(2, 2 + this[$userEffectCount]);
   }
-  
+
   get modelViewerElement() {
-    if (!this[$modelViewerElement]) throw new Error('<effect-composer> must be a child of a <model-viewer> component.')
+    if (!this[$modelViewerElement]) throw new Error('<effect-composer> must be a child of a <model-viewer> component.');
     return this[$modelViewerElement];
   }
 
@@ -180,7 +182,7 @@ export class MVEffectComposer extends ReactiveElement {
     super();
     this[$renderPass] = new RenderPass();
     this[$normalPass] = new NormalPass();
-    this[$clearPass] = new EffectPass(TEMP_CAMERA);
+    this[$clearPass] = new EffectPass();
     this[$clearPass].name = 'ClearPass';
     this[$normalPass].enabled = false;
     this[$selection] = new Selection();
@@ -188,16 +190,16 @@ export class MVEffectComposer extends ReactiveElement {
 
   connectedCallback(): void {
     super.connectedCallback && super.connectedCallback();
+    if (this.parentNode?.nodeName.toLowerCase() === 'model-viewer') {
+      this[$modelViewerElement] = this.parentNode as ModelViewerElement;
+    }
     this[$composer] = new EffectComposer(undefined, {
       multisampling: this.msaa,
       frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType,
     });
+    this.modelViewerElement.registerEffectComposer(this[$effectComposer]);
     this[$effectComposer].addPass(this[$renderPass], 0);
     this[$effectComposer].addPass(this[$normalPass], 1);
-    if (this.parentNode?.nodeName.toLowerCase() !== 'model-viewer') {
-      this[$modelViewerElement] = this.parentNode as ModelViewerElement;
-    }
-    this.modelViewerElement.registerEffectComposer(this[$effectComposer]);
     this[$onSceneLoad]();
     this.modelViewerElement.addEventListener('before-render', this[$onSceneLoad]);
     this.updateEffects();
@@ -216,7 +218,7 @@ export class MVEffectComposer extends ReactiveElement {
       this[$effectComposer].multisampling = this.msaa;
     }
     if (changedProperties.has('renderMode') && changedProperties.get('renderMode') !== undefined) {
-      throw new Error('renderMode cannot be changed after startup.')
+      throw new Error('renderMode cannot be changed after startup.');
     }
   }
 
@@ -224,7 +226,7 @@ export class MVEffectComposer extends ReactiveElement {
    * Adds a custom Pass that extends the {@link Pass} class.
    * All passes added through this method will be prepended before all other web-component effects.
    *
-   * This method automatically sets the `scene` and `camera` of the pass.
+   * This method automatically sets the `mainScene` and `mainCamera` of the pass.
    * @param {Pass} pass Custom Pass to add. The camera and scene are set automatically.
    * @param {boolean} requireNormals Whether any effect in this pass uses the {@link normalBuffer}
    * @param {boolean} requireDirtyRender Enable this if the effect requires a render frame every frame. Significant performance impact from enabling this.
@@ -232,8 +234,7 @@ export class MVEffectComposer extends ReactiveElement {
   addPass(pass: Pass, requireNormals?: boolean, requireDirtyRender?: boolean): void {
     (pass as MVPass).requireNormals = requireNormals;
     (pass as MVPass).requireDirtyRender = requireDirtyRender;
-    const index = this[$userEffectCount] + 2; // Including the renderPass and normalPas
-    this[$effectComposer].addPass(pass, index); // push after current userPasses, before any web-component effects.
+    this[$effectComposer].addPass(pass, this[$userEffectCount] + 2); // push after current userPasses, before any web-component effects.
     this[$userEffectCount]++;
     this[$removeClearPass]();
     // Enable the normalPass and dirtyRendering if required by any effect.
@@ -268,20 +269,16 @@ export class MVEffectComposer extends ReactiveElement {
     // Convolution effects must sit on their own EffectPass. In order to preserve the correct effect order,
     // the convolution effects separate all effects before and after into separate EffectPasses.
     const effects = this[$effects];
-    const scene = this[$scene];
     let i = 0;
     while (i < effects.length) {
       const separateIndex = effects.slice(i).findIndex((effect) => effect.requireSeparatePass || isConvolution(effect));
       if (separateIndex != 0) {
-        const effectPass = new EffectPass(
-          scene?.getCamera() as Camera,
-          ...effects.slice(i, separateIndex == -1 ? effects.length : separateIndex)
-        );
+        const effectPass = new EffectPass(undefined, ...effects.slice(i, separateIndex == -1 ? effects.length : separateIndex));
         this[$effectComposer].addPass(effectPass);
       }
 
       if (separateIndex != -1) {
-        const convolutionPass = new EffectPass(scene?.getCamera() as Camera, effects[i + separateIndex]);
+        const convolutionPass = new EffectPass(undefined, effects[i + separateIndex]);
         this[$effectComposer].addPass(convolutionPass);
         i += separateIndex + 1;
       } else {
@@ -342,7 +339,7 @@ export class MVEffectComposer extends ReactiveElement {
     this[$selection].clear();
     this[$scene]?.traverse((obj) => obj.hasOwnProperty('geometry') && this[$selection].add(obj));
     this.dispatchEvent(new CustomEvent('updated-selection'));
-  }
+  };
 
   [$updateProperties]() {
     this[$normalPass].enabled = this[$requires]('requireNormals');

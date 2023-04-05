@@ -180,7 +180,6 @@ export const waitForEvent = <T extends AnyEvent = Event>(
     target.addEventListener(eventName, handler);
   });
 
-  
 export interface TypedArray<T = unknown> {
   readonly BYTES_PER_ELEMENT: number;
   length: number;
@@ -188,14 +187,14 @@ export interface TypedArray<T = unknown> {
   reduce(
     callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: TypedArray<number>) => number,
     initialValue?: number
-    ): number;
+  ): number;
 }
-    
+
 const COMPONENTS_PER_PIXEL = 4;
 
-export function screenshot(element: ModelViewerElement): TypedArray<number> {
+export function screenshot(element: ModelViewerElement): Uint8Array {
   const renderer = getOwnPropertySymbolValue<Renderer>(element, 'renderer');
-  if (!renderer) throw new Error("Invalid element provided");
+  if (!renderer) throw new Error('Invalid element provided');
 
   const screenshotContext = renderer.threeRenderer.getContext();
   const width = screenshotContext.drawingBufferWidth;
@@ -220,7 +219,7 @@ export function ArraysAreEqual(arr1: TypedArray, arr2: TypedArray): boolean {
 }
 
 /*
- * Compares two 
+ * Compares two
  * @param arr1
  * @param arr2
  * @returns Percentage of similarity (0-1), higher is better
@@ -231,10 +230,11 @@ export function CompareArrays(arr1: TypedArray<number>, arr2: TypedArray<number>
   const similarity: number[] = [];
   const max = maxValue(arr1.BYTES_PER_ELEMENT);
   for (let i = 0; i < arr1.length; i += COMPONENTS_PER_PIXEL) {
-    if (arr1[i+3] !=  0 || arr2[i+3] != 0) { // a
-      similarity.push(1 - percentage(arr1[i], arr2[i], max));     // r
-      similarity.push(1 - percentage(arr1[i+1], arr2[i+1], max)); // g
-      similarity.push(1 - percentage(arr1[i+2], arr2[i+2], max)); // b
+    if (arr1[i + 3] != 0 || arr2[i + 3] != 0) {
+      // a
+      similarity.push(1 - percentage(arr1[i], arr2[i], max)); // r
+      similarity.push(1 - percentage(arr1[i + 1], arr2[i + 1], max)); // g
+      similarity.push(1 - percentage(arr1[i + 2], arr2[i + 2], max)); // b
     }
   }
   return average(similarity);
@@ -245,14 +245,15 @@ export function AverageHSL(arr: TypedArray<number>): HSL {
   const S: number[] = [];
   const L: number[] = [];
   for (let i = 0; i < arr.length; i += COMPONENTS_PER_PIXEL) {
-    if (arr[i+3] != 0) { // a
-      const hsl = rgbToHsl(arr[i], arr[i+1], arr[i+2]);
+    if (arr[i + 3] != 0) {
+      // a
+      const hsl = rgbToHsl(arr[i], arr[i + 1], arr[i + 2]);
       H.push(hsl.h);
       S.push(hsl.s);
       L.push(hsl.l);
     }
   }
-  return {h: average(H), s: average(S), l: average(L)};
+  return { h: average(H), s: average(S), l: average(L) };
 }
 
 function maxValue(bytes: number): number {
@@ -279,10 +280,13 @@ function average(arr: number[]): number {
  * @return  Array           The HSL representation
  */
 function rgbToHsl(r: number, g: number, b: number): HSL {
-  r /= 255, g /= 255, b /= 255;
+  (r /= 255), (g /= 255), (b /= 255);
 
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  let h,
+    s,
+    l = (max + min) / 2;
 
   if (max == min) {
     h = s = 0; // achromatic
@@ -291,10 +295,17 @@ function rgbToHsl(r: number, g: number, b: number): HSL {
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
 
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-      default: throw new Error("invalid rgb");
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+      default:
+        throw new Error('invalid rgb');
     }
 
     h /= 6;

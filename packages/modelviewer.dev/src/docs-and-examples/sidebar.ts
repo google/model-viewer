@@ -63,8 +63,15 @@ function removeDeactiveCategory(sidebarIds: SidebarIds) {
       ?.classList.remove('de-active');
 }
 
+const identicalCategories = ['loading', 'augmentedreality', 'stagingandcameras', 'annotations', 'lightingandenv', 'animation', 'scenegraph'];
+
 export function getSidebarCategoryForNewPage(): string {
-  return previouslyActive.split('-')[0];
+  const category = previouslyActive.split('-')[0];
+  if (identicalCategories.includes(category)) {
+    return category;
+  } else {
+    return 'postprocessing';
+  }
 }
 
 function getSidebarIdsFromSidebarName(name: string): SidebarIds {

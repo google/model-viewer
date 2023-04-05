@@ -26,7 +26,7 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
   }
 
   /**
-   * String or RGB Color #-hexadecimal.
+   * String or RGB #-hexadecimal Color.
    * @default 'white'
    */
   @property({ type: String || Number, attribute: 'color', reflect: true })
@@ -34,9 +34,10 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
 
   /**
    * A larger value denotes a thicker edge.
+   * @default 1
    */
   @property({ type: Number, attribute: 'strength', reflect: true })
-  strength = 2;
+  strength = 1;
 
   /**
    * Value in the range of (0, 6). Controls the edge blur strength.
@@ -81,7 +82,7 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
       blur: Math.round(this.smoothing) > 0,
       kernelSize: getKernelSize(this.smoothing),
       xRay: true,
-      resolutionScale: 1
+      resolutionScale: 1,
     } as ConstructorParameters<typeof OutlineEffect>[2];
   }
 }

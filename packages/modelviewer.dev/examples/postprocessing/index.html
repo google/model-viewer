@@ -122,7 +122,8 @@ button {
               </template>
             </example-snippet>
             <p>Setting up post-processing effects is as simple as adding an &lt;effect-composer&gt; component inside your &lt;model-viewer&gt; element.
-              From here, simply add any of the supported effects inside the &lt;effect-composer&gt;.</p>
+              From here, simply add any of the supported effects inside the &lt;effect-composer&gt;.<br>See the
+            <a href="../../docs/mve.html">API Reference</a> for a list of all supported effects.</p>
           </div>
           <example-snippet stamp-to="setup" highlight-as="html">
             <template>
@@ -152,7 +153,7 @@ button {
             before the Effect Composer instantiates. Updating it after that is not possible.<br>
             <i>Note: the default 'performance' <code>renderMode</code> is prone to banding in dark scenes, which is especially noticeable with 
             &lt;bloom-effect&gt;.</i><br><br>
-            <code>msaa</code> uses a performant algorithm for anti-aliasing on WebGL2 enabled browsers. Set this to a factor of 2 to enable - it is disabled by default.<br>
+            <code>msaa</code> uses a performant MSAA algorithm for anti-aliasing on WebGL2 enabled browsers. Set this to a factor of 2 to enable - it is disabled by default.<br>
             <i>Note: <code>msaa</code> may introduce visual artifacts when used with depth-based effects such as &lt;ssao-effect&gt;, in which case
               it would be preferred to use the &lt;smaa-effect&gt;.</i>
             </p><br>
@@ -219,18 +220,18 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
   </effect-composer>
 </model-viewer>
 <script type="module">
-  const composer = document.querySelector("effect-composer#selectiveComposer");
-  const bloom = composer.querySelector("#selectiveBloom");
+  const selectiveComposer = document.querySelector("effect-composer#selectiveComposer");
+  const selectiveBloom = selectiveComposer.querySelector("#selectiveBloom");
 
-  composer.addEventListener('updated-selection', () => {
+  selectiveComposer.addEventListener('updated-selection', () => {
     const selection = [];
-    composer.selection.forEach((obj) => 
+    selectiveComposer.selection.forEach((obj) => 
       (obj.material.emissive.r > 0 
       || obj.material.emissive.g > 0 
       || obj.material.emissive.b > 0) &&
         selection.push(obj)
     );
-    bloom.selection = selection;
+    selectiveBloom.selection = selection;
   });
 </script>
             </template>
@@ -257,7 +258,7 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           <example-snippet stamp-to="combining-effects" highlight-as="html">
             <template>
 <model-viewer id="effectsViewer" camera-controls touch-action="pan-y" src="../../shared-assets/models/EmissiveStrengthTest.glb" ar alt="A 3D ">
-  <effect-composer id="composer" render-mode="quality">
+  <effect-composer render-mode="quality">
     <outline-effect color="blue" blend-mode="skip"></outline-effect>
     <ssao-effect blend-mode="skip"></ssao-effect>
     <glitch-effect blend-mode="skip"></glitch-effect>
@@ -282,7 +283,7 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
 </model-viewer>
 <script type="module">
   const effectsViewer = document.querySelector("model-viewer#effectsViewer");
-  const effects = effectsViewer.querySelector("#composer").children;
+  const effects = effectsViewer.querySelector("effect-composer").children;
   const inputs = effectsViewer.querySelectorAll("input");
 
   for (let i = 0; i < effects.length; i++) {
@@ -316,8 +317,11 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           <example-snippet stamp-to="custom-effects" highlight-as="html">
             <template>
 <model-viewer camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RobotExpressive.glb" ar alt="A 3D model of a Lantern">
-  <effect-composer id="customComposer">
-  </effect-composer>
+  <effect-composer id="customComposer"></effect-composer>
+  <div class="controls">
+    <label for="scale">Grid Scale</label>
+    <input id="scale" type="range" min="0" max="2" step="0.01" value="1">
+  </div>
 </model-viewer>
 <script type="module">
   import * as PostProcessing from 'https://cdn.jsdelivr.net/npm/postprocessing@6.30.1/build/postprocessing.esm.js';
@@ -325,8 +329,14 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
 
   const grid = new PostProcessing.GridEffect();
   const sepia = new PostProcessing.SepiaEffect();
+  // The camera is set automatically when added to the <effect-composer>
   const noisePass = new PostProcessing.EffectPass(undefined, grid, sepia);
   customComposer.addPass(noisePass);
+
+  customComposer.nextElementSibling.addEventListener('input', (e) => {
+    grid.scale = e.target.value;
+    customComposer.queueRender();
+  });
 </script>
             </template>
           </example-snippet>

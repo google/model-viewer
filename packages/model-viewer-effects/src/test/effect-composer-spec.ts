@@ -15,7 +15,7 @@
 
 import { ModelViewerElement } from '@google/model-viewer';
 import { assetPath, createModelViewerElement, waitForEvent } from './utilities.js';
-import { MVEffectComposer } from '../model-viewer-effects.js';
+import { EffectComposer } from '../model-viewer-effects.js';
 import { $clearPass, $effectComposer, $normalPass, $renderPass, $scene } from '../effect-composer.js';
 import { DotScreenEffect, Effect, EffectPass, GridEffect } from 'postprocessing';
 import { Camera } from 'three';
@@ -23,11 +23,11 @@ const expect = chai.expect;
 
 suite('MVEffectComposer', () => {
   let element: ModelViewerElement;
-  let composer: MVEffectComposer;
+  let composer: EffectComposer;
 
   setup(async () => {
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));
-    composer = new MVEffectComposer();
+    composer = new EffectComposer();
     element.insertBefore(composer, element.firstChild);
     await waitForEvent(element, 'before-render');
   });

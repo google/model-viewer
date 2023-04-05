@@ -26,7 +26,7 @@ export class MVBloomEffect extends MVEffectBase {
    * The strength of the bloom effect.
    */
   @property({ type: Number, attribute: 'strength', reflect: true })
-  strength = 3;
+  strength = 1;
 
   /**
    * Value in the range of (0, 1). Pixels with a brightness above this will bloom.
@@ -37,15 +37,15 @@ export class MVBloomEffect extends MVEffectBase {
   /**
    * Value in the range of (0, 1).
    */
-  @property({ type: Number, attribute: 'smoothing', reflect: true })
-  smoothing = 0.025;
+  @property({ type: Number, attribute: 'radius', reflect: true })
+  radius = 0.85;
 
   /**
    * Value in the range of (0, 1).
    */
-  @property({ type: Number, attribute: 'radius', reflect: true })
-  radius = 0.85;
-  
+  @property({ type: Number, attribute: 'smoothing', reflect: true })
+  smoothing = 0.025;
+
   constructor() {
     super();
 

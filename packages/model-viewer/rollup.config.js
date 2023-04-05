@@ -89,6 +89,9 @@ if (NODE_ENV !== 'development') {
       sourcemap: true,
       format: 'esm',
       name: 'ModelViewerElement',
+      globals: {
+        'three': 'three',
+      },
     },
     external: ['three'],
     watch: {
@@ -107,6 +110,9 @@ if (NODE_ENV !== 'development') {
       sourcemap: true,
       format: 'umd',
       name: 'ModelViewerElement',
+      globals: {
+        'three': 'three',
+      },
     },
     external: ['three'],
     watch: {
@@ -156,6 +162,9 @@ if (NODE_ENV !== 'development') {
       sourcemap: true,
       format: 'esm',
       name: 'ModelViewerElement',
+      globals: {
+        'three': 'three',
+      },
     },
     external: ['three'],
     watch: {
@@ -172,6 +181,9 @@ if (NODE_ENV !== 'development') {
       sourcemap: true,
       format: 'umd',
       name: 'ModelViewerElement',
+      globals: {
+        'three': 'three',
+      },
     },
     external: ['three'],
     watch: {

@@ -47,7 +47,7 @@ export class MVSelectiveBloomEffect extends SelectiveMixin(MVEffectBase) {
    */
   @property({ type: Number, attribute: 'radius', reflect: true })
   radius = 0.85;
-  
+
   constructor() {
     super();
 

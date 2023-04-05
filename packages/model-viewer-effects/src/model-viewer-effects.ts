@@ -23,6 +23,7 @@ import { MVSMAAEffect } from './effects/smaa.js';
 import { MVSSAOEffect } from './effects/ssao.js';
 import { MVEffectComposer } from './effect-composer.js';
 import { MVEffectBase } from './effects/mixins/effect-base.js';
+import { SelectiveMixin } from './effects/mixins/selective.js';
 import { MVSelectiveBloomEffect } from './effects/selective-bloom.js';
 
 customElements.define('effect-composer', MVEffectComposer);
@@ -52,14 +53,15 @@ declare global {
 }
 
 export {
-  MVEffectComposer,
-  MVPixelateEffect,
-  MVBloomEffect,
-  MVColorGradeEffect,
-  MVOutlineEffect,
-  MVSMAAEffect,
-  MVFXAAEffect,
-  MVSSAOEffect,
-  MVGlitchEffect,
-  MVEffectBase,
+  MVEffectComposer as EffectComposer,
+  MVPixelateEffect as PixelateEffect,
+  MVBloomEffect as BloomEffect,
+  MVColorGradeEffect as ColorGradeEffect,
+  MVOutlineEffect as OutlineEffect,
+  MVSMAAEffect as SMAAEffect,
+  MVFXAAEffect as FXAAEffect,
+  MVSSAOEffect as SSAOEffect,
+  MVGlitchEffect as GlitchEffect,
+  MVEffectBase as EffectBase,
+  SelectiveMixin,  
 };

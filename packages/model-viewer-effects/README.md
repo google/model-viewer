@@ -9,7 +9,9 @@ effects to your models easy to do, on as many browsers and devices as possible.
 `<model-viewer-effects>` strives to give you great defaults for rendering quality and
 performance.
 
-![A 3D Model of a Rocket Ship](screenshot.png)
+![A 3D Model of a Rocket Ship](https://raw.githubusercontent.com/google/model-viewer/master/packages/model-viewer-effects/screenshot.png)
+
+[Examples](https://modelviewer.dev/examples/postprocessing/) • [Documentation](https://modelviewer.dev/docs/mve)
 ## Usage
 Using effects is as simple as adding the `<effect-composer>` inside your `<model-viewer>`, and placing any effects inside the composer component.
 
@@ -24,9 +26,7 @@ Using effects is as simple as adding the `<effect-composer>` inside your `<model
 ### PostProcessing
 `<model-viewer-effects>` uses the [postprocessing](https://github.com/pmndrs/postprocessing) library under the hood, for its superior [performance](https://github.com/pmndrs/postprocessing#performance) and support.
 
-While not all effects are wrapped by this library, you can add any custom effects/passes that follow the postprocessing spec.
-
-There is no documentation yet, but you may refer to the types for all available properties.
+In addition to the built-in effects wrapped by this library, you can add any custom effects/passes that follow the [postprocessing spec](https://github.com/pmndrs/postprocessing/wiki/Custom-Passes).
 
 ### *XR Support*
 The effects are not supported in the `<model-viewer>` XR modes, which will render as usual.
@@ -45,20 +45,24 @@ npm install three @google/model-viewer @google/model-viewer-effects
 `<model-viewer-effects>` and `<model-viewer>` share a [Three.js](https://threejs.org/) dependency. In order to avoid version conflicts, you should bring Three through an `import-map`:
 
 ```html
+<!-- ES-Shims for older browser compatibility -->
+<script type="module" async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+<!-- Import Three.js using an import-map -->
 <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@^0.150.0/build/three.module.js"
+      "three": "https://cdn.jsdelivr.net/npm/three@^0.151.0/build/three.module.js"
     }
   }
 </script>
 ```
 
-You should then bring the `no-three` version of `<model-viewer>`, along with `<model-viewer-effects>` from your favourite CDN, such as [jsDelivr](https://www.jsdelivr.com/package/npm/@google/model-viewer):
+You should then bring the `module` version of `<model-viewer>`, along with `<model-viewer-effects>` from your favourite CDN, such as [jsDelivr](https://www.jsdelivr.com/package/npm/@google/model-viewer):
 
 
 ```html
-<script type="module" src=" https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-no-three.min.js "></script>
+<script type="module" src=" https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-module.min.js "></script>
 
 <script type="module" src=" https://cdn.jsdelivr.net/npm/@google/model-viewer-effects/dist/model-viewer-effects.min.js "></script>
 ```

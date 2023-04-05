@@ -31,9 +31,15 @@ export const BlendModeMixin = <T extends Constructor<IEffectBaseMixin & Reactive
   EffectClass: T
 ): Constructor<IBlendModeMixin> & T => {
   class BlendEffectElement extends EffectClass {
+    /**
+     * The function to use to blend the effect with the base render.
+     */
     @property({ type: String, attribute: 'blend-mode', reflect: true })
     blendMode: string = 'default';
 
+    /**
+     * The opacity of the effect that will be blended with the base render.
+     */
     @property({ type: Number, attribute: 'opacity', reflect: true })
     opacity: number = 1;
 

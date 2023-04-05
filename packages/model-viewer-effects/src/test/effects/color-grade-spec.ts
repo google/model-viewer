@@ -14,25 +14,33 @@
  */
 
 import { ModelViewerElement } from '@google/model-viewer';
-import { MVEffectComposer } from '../../effect-composer';
-import { MVColorGradeEffect } from '../../model-viewer-effects';
-import { createModelViewerElement, assetPath, waitForEvent, screenshot, ArraysAreEqual, timePasses, TypedArray, CompareArrays, AverageHSL } from '../utilities';
+import { EffectComposer, ColorGradeEffect } from '../../model-viewer-effects.js';
+import {
+  createModelViewerElement,
+  assetPath,
+  waitForEvent,
+  screenshot,
+  ArraysAreEqual,
+  timePasses,
+  CompareArrays,
+  AverageHSL,
+} from '../utilities';
 const expect = chai.expect;
 
 suite('Color Grade Effect', () => {
   let element: ModelViewerElement;
-  let composer: MVEffectComposer;
-  let baseScreenshot: TypedArray<number>;
-  let colorGrade: MVColorGradeEffect;
+  let composer: EffectComposer;
+  let baseScreenshot: Uint8Array;
+  let colorGrade: ColorGradeEffect;
 
   setup(async () => {
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));
-    composer = new MVEffectComposer();
+    composer = new EffectComposer();
     element.insertBefore(composer, element.firstChild);
     await waitForEvent(element, 'load');
 
     baseScreenshot = screenshot(element);
-    colorGrade = new MVColorGradeEffect();
+    colorGrade = new ColorGradeEffect();
     composer.insertBefore(colorGrade, composer.firstChild);
   });
 
@@ -49,7 +57,7 @@ suite('Color Grade Effect', () => {
     expect(CompareArrays(baseScreenshot, colorGradeScreenshot)).to.be.lessThan(0.98);
   });
 
- test('Saturation = 0', async () => {
+  test('Saturation = 0', async () => {
     colorGrade.saturation = -1;
     await timePasses(20);
     const colorGradeScreenshot = screenshot(element);
@@ -58,7 +66,7 @@ suite('Color Grade Effect', () => {
     expect(hslBefore.s).to.be.greaterThan(hslAfter.s);
     expect(hslAfter.s).to.be.eq(0);
   });
-  
+
   test('Brightness = 0', async () => {
     colorGrade.brightness = -1;
     await timePasses(20);
