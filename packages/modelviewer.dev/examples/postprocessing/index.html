@@ -322,7 +322,7 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           <example-snippet stamp-to="custom-effects" highlight-as="html">
             <template>
 <model-viewer camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RobotExpressive.glb" ar alt="A 3D model of a Lantern">
-  <effect-composer id="customComposer"></effect-composer>
+  <effect-composer id="customComposer" msaa="8"></effect-composer>
   <div class="controls">
     <label for="scale">Grid Scale</label>
     <input id="scale" type="range" min="0" max="2" step="0.01" value="1">

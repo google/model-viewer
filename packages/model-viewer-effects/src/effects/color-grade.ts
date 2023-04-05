@@ -55,7 +55,7 @@ export class MVColorGradeEffect extends MVEffectBase {
     super();
     this.effects = [
       new HueSaturationEffect({
-        hue: clamp(this.hue, 0, TWO_PI),
+        hue: wrapClamp(this.hue, 0, TWO_PI),
         saturation: clamp(this.saturation, -1, 1),
         blendFunction: BlendFunction.SRC,
       }),

@@ -15,7 +15,6 @@
 
 import { MVBloomEffect } from './effects/bloom.js';
 import { MVColorGradeEffect } from './effects/color-grade.js';
-import { MVFXAAEffect } from './effects/fxaa.js';
 import { MVGlitchEffect } from './effects/glitch.js';
 import { MVOutlineEffect } from './effects/outline.js';
 import { MVPixelateEffect } from './effects/pixelate.js';
@@ -33,7 +32,6 @@ customElements.define('selective-bloom-effect', MVSelectiveBloomEffect);
 customElements.define('color-grade-effect', MVColorGradeEffect);
 customElements.define('outline-effect', MVOutlineEffect);
 customElements.define('smaa-effect', MVSMAAEffect);
-customElements.define('fxaa-effect', MVFXAAEffect);
 customElements.define('ssao-effect', MVSSAOEffect);
 customElements.define('glitch-effect', MVGlitchEffect);
 
@@ -45,9 +43,8 @@ declare global {
     'selective-bloom-effect': MVSelectiveBloomEffect;
     'color-grade-effect': MVColorGradeEffect;
     'outline-effect': MVOutlineEffect;
-    'smaa-effect': MVSMAAEffect;
-    'fxaa-effect': MVFXAAEffect;
     'ssao-effect': MVSSAOEffect;
+    'smaa-effect': MVSMAAEffect;
     'glitch-effect': MVGlitchEffect;
   }
 }
@@ -56,11 +53,11 @@ export {
   MVEffectComposer as EffectComposer,
   MVPixelateEffect as PixelateEffect,
   MVBloomEffect as BloomEffect,
+  MVSelectiveBloomEffect as SelectiveBloomEffect,
   MVColorGradeEffect as ColorGradeEffect,
   MVOutlineEffect as OutlineEffect,
-  MVSMAAEffect as SMAAEffect,
-  MVFXAAEffect as FXAAEffect,
   MVSSAOEffect as SSAOEffect,
+  MVSMAAEffect as SMAAEffect,
   MVGlitchEffect as GlitchEffect,
   MVEffectBase as EffectBase,
   SelectiveMixin,  

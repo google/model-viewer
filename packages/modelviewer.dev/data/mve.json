@@ -325,11 +325,6 @@
     ]
   },
   {
-    "Title": "FXAAEffect",
-    "htmlName": "fxaa",
-    "Description": "This effect runs Fast Approximate Antialiasing (FXAA) on the scene."
-  },
-  {
     "Title": "BlendMode",
     "htmlName": "blendmodemixin",
     "Description": "This mixin provides blending attributes for all built-in &lt;model-viewer-effect&gt; effects.",
