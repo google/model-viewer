@@ -29,6 +29,7 @@
   <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
   <script src="../../node_modules/focus-visible/dist/focus-visible.js" defer></script>
 
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
     ga('create', 'UA-169901325-1', { 'storage': 'none' });
@@ -116,7 +117,7 @@
 </model-viewer>
 
 <script>
-  document.querySelector('#button-load').addEventListener('click', 
+  document.querySelector('#button-load').addEventListener('click',
     () => document.querySelector('#lazy-load').dismissPoster());
 </script>
             </template>
@@ -342,7 +343,7 @@ ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/
             <template>
 <script>
 self.ModelViewerElement = self.ModelViewerElement || {};
-self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer/meshopt_decoder.js';
+self.ModelViewerElement.meshoptDecoderLocation = 'https://cdn.jsdelivr.net/npm/meshoptimizer/meshopt_decoder.js';
 </script>
             </template>
           </example-snippet>
@@ -383,11 +384,11 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimize
             <h4>To see throttling happen, you'll have to tax your GPU. This model is intentionally complex (including transparency and clear coat)
               so that it will throttle on a fairly broad range of devices. Note that expanding your window and zooming in will tend to tax the GPU
               more since more pixels are being shaded. Also note that the render returns to full scale any time the scene stops moving. If you use
-              very complex 3D models, you may want to disable auto-rotate for this reason. 
+              very complex 3D models, you may want to disable auto-rotate for this reason.
             </h4>
             <h4>Our renderer tries to keep the frame rate between 38 and 60 frames per second. It's a pretty safe bet that if you are at the reportedDpr,
               you are smoothly running at 60 fps, and if you are at the minimumDpr you are likely well below 38 fps. This event only fires in 3D mode;
-              The AR modes also do dynamic render scaling, but do not report their status. 
+              The AR modes also do dynamic render scaling, but do not report their status.
             </h4>
           </div>
           <example-snippet stamp-to="renderScale" highlight-as="html">
@@ -508,7 +509,7 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimize
   <!-- Enables Meshopt decoder. -->
   <script>
     self.ModelViewerElement = self.ModelViewerElement || {};
-    self.ModelViewerElement.meshoptDecoderLocation = 'https://unpkg.com/meshoptimizer/meshopt_decoder.js';
+    self.ModelViewerElement.meshoptDecoderLocation = 'https://cdn.jsdelivr.net/npm/meshoptimizer/meshopt_decoder.js';
   </script>
 
   <!-- Loads <model-viewer> on modern browsers: -->
