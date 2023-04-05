@@ -23,7 +23,7 @@ supported to provide a seamless development experience.
 The `<model-viewer>` web component can be installed from [NPM](https://npmjs.org):
 
 ```sh
-# install peer depedency
+# install peer dependency ThreeJS
 npm install three 
 # install package
 npm install @google/model-viewer
