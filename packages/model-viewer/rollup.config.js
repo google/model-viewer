@@ -49,6 +49,24 @@ const outputOptions = [
     plugins,
     onwarn,
   },
+  {
+    input: './lib/model-viewer.js',
+    output: {
+      file: './dist/model-viewer-module.js',
+      sourcemap: true,
+      format: 'esm',
+      name: 'ModelViewerElement',
+      globals: {
+        'three': 'three',
+      },
+    },
+    external: ['three'],
+    watch: {
+      include: watchFiles,
+    },
+    plugins: [...plugins, terser()],
+    onwarn,
+  }
 ];
 
 if (NODE_ENV !== 'development') {
@@ -82,24 +100,6 @@ if (NODE_ENV !== 'development') {
   });
 
   /** Bundled w/o three */
-  outputOptions.push({
-    input: './lib/model-viewer.js',
-    output: {
-      file: './dist/model-viewer-module.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'ModelViewerElement',
-      globals: {
-        'three': 'three',
-      },
-    },
-    external: ['three'],
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  });
 
   // IE11 does not support modules, so they are removed here, as well as in a
   // dedicated unit test build which is needed for the same reason.

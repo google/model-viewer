@@ -16,7 +16,7 @@
 import { ReactiveElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { BlendFunction } from 'postprocessing';
-import { Constructor, clampNormal } from '../../utilities.js';
+import { Constructor, clampNormal, validateLiteralType } from '../../utilities.js';
 import { IEffectBaseMixin } from './effect-base.js';
 
 export const $setDefaultProperties = Symbol('setDefaultProperties');
@@ -27,6 +27,9 @@ export interface IBlendModeMixin {
   [$setDefaultProperties](): void;
 }
 
+export type BlendMode = keyof typeof BlendFunction;
+export const BLEND_MODES = Object.keys(BlendFunction) as BlendMode[];
+
 export const BlendModeMixin = <T extends Constructor<IEffectBaseMixin & ReactiveElement>>(
   EffectClass: T
 ): Constructor<IBlendModeMixin> & T => {
@@ -35,7 +38,7 @@ export const BlendModeMixin = <T extends Constructor<IEffectBaseMixin & Reactive
      * The function to use to blend the effect with the base render.
      */
     @property({ type: String, attribute: 'blend-mode', reflect: true })
-    blendMode: string = 'default';
+    blendMode: 'DEFAULT' | BlendMode = 'DEFAULT';
 
     /**
      * The opacity of the effect that will be blended with the base render.
@@ -52,20 +55,20 @@ export const BlendModeMixin = <T extends Constructor<IEffectBaseMixin & Reactive
       super.updated(changedProperties);
       if (changedProperties.has('blendMode') || changedProperties.has('opacity')) {
         this.opacity = clampNormal(this.opacity);
+        this.blendMode = this.blendMode.toUpperCase() as BlendMode;
         this.effects.forEach((effect) => {
-          if (this.blendMode.toLowerCase() === 'default' && effect.blendMode.defaultBlendFunction !== undefined) {
+          if (this.blendMode === 'DEFAULT') {
+            if (effect.blendMode.defaultBlendFunction === undefined) throw new Error(`${effect.name} has no default blend function`);
             effect.blendMode.blendFunction = effect.blendMode.defaultBlendFunction;
-          } else if (this.blendMode.toLowerCase() === 'skip') {
-            effect.blendMode.blendFunction = BlendFunction.SKIP;
           } else {
-            // @ts-ignore
-            effect.blendMode.blendFunction = BlendFunction[this.blendMode.toUpperCase()] ?? effect.blendMode.defaultBlendFunction;
+            validateLiteralType(BLEND_MODES, this.blendMode);
+            effect.blendMode.blendFunction = BlendFunction[this.blendMode];
           }
-          effect.disabled = this.blendMode.toLowerCase() === 'skip';
+          effect.disabled = this.blendMode === 'SKIP';
           effect.blendMode.setOpacity(this.opacity);
         });
         // Recreate EffectPasses if the new or old value was 'skip'
-        if (this.blendMode.toLowerCase() === 'skip' || changedProperties.get('blendMode') === 'skip') {
+        if (this.blendMode === 'SKIP' || changedProperties.get('blendMode') === 'SKIP') {
           this.effectComposer.updateEffects();
         }
         this.effectComposer.queueRender();

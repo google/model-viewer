@@ -15,7 +15,7 @@
 
 import { ReactiveElement } from 'lit';
 import { EffectComposer as PPEffectComposer, EffectPass, NormalPass, RenderPass, Selection, Pass } from 'postprocessing';
-import { disposeEffectPass, isConvolution } from './utilities.js';
+import { disposeEffectPass, isConvolution, validateLiteralType } from './utilities.js';
 import { ModelViewerElement } from '@google/model-viewer';
 import { IMVEffect, IntegrationOptions, MVEffectBase } from './effects/mixins/effect-base.js';
 import { ModelScene } from '@google/model-viewer/lib/three-components/ModelScene.js';
@@ -102,7 +102,8 @@ export class EffectComposer extends PPEffectComposer {
 
 export type MVPass = Pass & IntegrationOptions;
 
-export type RenderMode = 'performance' | 'quality';
+export const RENDER_MODES = ['performance', 'quality'] as const;
+export type RenderMode = typeof RENDER_MODES[number]; 
 
 export class MVEffectComposer extends ReactiveElement {
   static get is() {
@@ -138,10 +139,7 @@ export class MVEffectComposer extends ReactiveElement {
   protected [$userEffectCount]: number = 0;
 
   get [$effectComposer]() {
-    if (!this[$composer])
-      throw new Error(
-        'The EffectComposer has not been instantiated yet. Please make sure the component is properly mounted on the Document within a <model-viewer> element.'
-      );
+    if (!this[$composer]) throw new Error('The EffectComposer has not been instantiated yet. Please make sure the component is properly mounted on the Document within a <model-viewer> element.');
     return this[$composer];
   }
 
@@ -193,7 +191,14 @@ export class MVEffectComposer extends ReactiveElement {
     if (this.parentNode?.nodeName.toLowerCase() === 'model-viewer') {
       this[$modelViewerElement] = this.parentNode as ModelViewerElement;
     }
+
+    try {
+      validateLiteralType(RENDER_MODES, this.renderMode);
+    } catch(e) {
+      console.error((e as Error).message + "\nrenderMode defaulting to: performance");
+    }
     this[$composer] = new EffectComposer(undefined, {
+      stencilBuffer: true,
       multisampling: this.msaa,
       frameBufferType: this.renderMode === 'quality' ? HalfFloatType : UnsignedByteType,
     });

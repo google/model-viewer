@@ -15,10 +15,11 @@
 
 import { property } from 'lit/decorators.js';
 import { SMAAEffect, SMAAPreset } from 'postprocessing';
-import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
+import { $updateProperties, MVEffectBase } from './mixins/effect-base.js';
+import { validateLiteralType } from '../utilities.js';
 
-export type SMAAQuality = 'low' | 'medium' | 'high' | 'ultra';
-export type SMAAPresetQuality = 'LOW' | 'MEDIUM' | 'HIGH' | 'ULTRA';
+export type SMAAQuality = keyof typeof SMAAPreset;
+export const SMAA_QUALITIES = Object.keys(SMAAPreset) as SMAAQuality[];
 
 export class MVSMAAEffect extends MVEffectBase {
   static get is() {
@@ -30,12 +31,12 @@ export class MVSMAAEffect extends MVEffectBase {
    * @default 'medium'
    */
   @property({ type: String, attribute: 'quality', reflect: true })
-  quality: SMAAQuality = 'medium';
+  quality: SMAAQuality = 'MEDIUM';
 
   constructor() {
     super();
 
-    this.effects = [new SMAAEffect(this[$effectOptions])];
+    this.effects = [new SMAAEffect({ preset: SMAAPreset[this.quality] })];
   }
 
   connectedCallback(): void {
@@ -51,13 +52,9 @@ export class MVSMAAEffect extends MVEffectBase {
   }
 
   [$updateProperties]() {
-    (this.effects[0] as SMAAEffect).applyPreset(SMAAPreset[this.quality.toUpperCase() as SMAAPresetQuality] ?? SMAAPreset.MEDIUM);
+    this.quality = this.quality.toUpperCase() as SMAAQuality;
+    validateLiteralType(SMAA_QUALITIES, this.quality);
+    (this.effects[0] as SMAAEffect).applyPreset(SMAAPreset[this.quality]);
     this.effectComposer.queueRender();
-  }
-
-  get [$effectOptions]() {
-    return {
-      preset: SMAAPreset[this.quality.toUpperCase() as SMAAPresetQuality] ?? SMAAPreset.MEDIUM,
-    } as ConstructorParameters<typeof SMAAEffect>[0];
   }
 }

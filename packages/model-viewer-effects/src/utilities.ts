@@ -135,3 +135,19 @@ export function getValueOfEnum<T extends Object>(Enum: T, key: string): T {
     .indexOf(key);
   return (Enum as any)[index];
 }
+
+/**
+ * Helper function to validate whether a value is in-fact a valid option of a literal type.
+ * 
+ * Requires the type to be defined as follows:
+ * @code
+ * `const TOptions = [...] as const;`
+ * 
+ * `type T = typeof TOptions[number];` 
+ * @param options `TOptions`
+ * @param value `value: T`
+ * @throws TypeError
+ */
+export function validateLiteralType<TOptions extends readonly unknown[]>(options: TOptions, value: typeof options[number]): void {
+  if (!options.includes(value)) throw new TypeError(`Validation Error: ${value} is not a valid value. Expected ${options.join(' | ')}`);
+}
