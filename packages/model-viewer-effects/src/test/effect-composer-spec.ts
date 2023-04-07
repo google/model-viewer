@@ -16,7 +16,7 @@
 import { ModelViewerElement } from '@google/model-viewer';
 import { assetPath, createModelViewerElement, waitForEvent } from './utilities.js';
 import { EffectComposer } from '../model-viewer-effects.js';
-import { $clearPass, $effectComposer, $normalPass, $renderPass, $scene } from '../effect-composer.js';
+import { $effectComposer, $normalPass, $renderPass, $scene } from '../effect-composer.js';
 import { DotScreenEffect, Effect, EffectPass, GridEffect } from 'postprocessing';
 import { Camera } from 'three';
 const expect = chai.expect;
@@ -50,11 +50,11 @@ suite('MVEffectComposer', () => {
       test('renderPass + normalPass added successfuly', () => {
         expect(composer[$renderPass]).to.be.ok;
         expect(composer[$normalPass]).to.be.ok;
-        expect(composer[$effectComposer].passes.length).to.eq(3);
+        expect(composer[$effectComposer].passes.length).to.eq(2);
         expect(composer[$effectComposer].passes[0]).to.eq(composer[$renderPass]);
         expect(composer[$effectComposer].passes[1]).to.eq(composer[$normalPass]);
-        expect(composer[$effectComposer].passes[2]).to.eq(composer[$clearPass]);
         expect(composer[$normalPass].enabled).to.be.false;
+        expect(composer[$normalPass].renderToScreen).to.be.false;
         expect((composer[$renderPass] as any).scene).to.eq(composer[$scene]);
       });
 

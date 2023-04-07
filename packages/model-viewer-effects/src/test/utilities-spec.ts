@@ -14,7 +14,7 @@
  */
 
 import { ModelViewerElement } from '@google/model-viewer';
-import { ArraysAreEqual, assetPath, CompareArrays, createModelViewerElement, screenshot, timePasses, waitForEvent } from './utilities.js';
+import { ArraysAreEqual, assetPath, createModelViewerElement, screenshot, timePasses, waitForEvent } from './utilities.js';
 import { EffectComposer } from '../model-viewer-effects.js';
 import { $effectComposer } from '../effect-composer.js';
 import { getOwnPropertySymbolValue } from '../utilities.js';
@@ -69,9 +69,8 @@ suite('Screenshot Baseline Test', () => {
       expect(ArraysAreEqual(composerScreenshot, screenshot2)).to.be.true;
     });
 
-    test('Compare Against BaseRenderer', () => {
-      expect(ArraysAreEqual(baseScreenshot, composerScreenshot)).to.be.false;
-      expect(CompareArrays(baseScreenshot, composerScreenshot)).to.be.greaterThan(0.98);
+    test('Empty EffectComposer and base Renderer are identical', () => {
+      expect(ArraysAreEqual(baseScreenshot, composerScreenshot)).to.be.true;
     });
   });
 });

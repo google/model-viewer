@@ -28,9 +28,6 @@ export const $modelViewerElement = Symbol('modelViewerElement');
 export const $effectComposer = Symbol('effectComposer');
 export const $renderPass = Symbol('renderPass');
 export const $normalPass = Symbol('normalPass');
-export const $clearPass = Symbol('clearPass');
-export const $removeClearPass = Symbol('removeClearPass');
-export const $addClearPass = Symbol('addClearPass');
 export const $effectPasses = Symbol('effectsPass');
 export const $requires = Symbol('requires');
 export const $effects = Symbol('effects');
@@ -134,7 +131,6 @@ export class MVEffectComposer extends ReactiveElement {
   protected [$modelViewerElement]?: ModelViewerElement;
   protected [$renderPass]: RenderPass;
   protected [$normalPass]: NormalPass;
-  protected [$clearPass]: EffectPass;
   protected [$selection]: Selection;
   protected [$userEffectCount]: number = 0;
 
@@ -180,9 +176,6 @@ export class MVEffectComposer extends ReactiveElement {
     super();
     this[$renderPass] = new RenderPass();
     this[$normalPass] = new NormalPass();
-    this[$clearPass] = new EffectPass();
-    this[$clearPass].name = 'ClearPass';
-    this[$normalPass].enabled = false;
     this[$selection] = new Selection();
   }
 
@@ -205,6 +198,7 @@ export class MVEffectComposer extends ReactiveElement {
     this.modelViewerElement.registerEffectComposer(this[$effectComposer]);
     this[$effectComposer].addPass(this[$renderPass], 0);
     this[$effectComposer].addPass(this[$normalPass], 1);
+    
     this[$onSceneLoad]();
     this.modelViewerElement.addEventListener('before-render', this[$onSceneLoad]);
     this.updateEffects();
@@ -241,7 +235,6 @@ export class MVEffectComposer extends ReactiveElement {
     (pass as MVPass).requireDirtyRender = requireDirtyRender;
     this[$effectComposer].addPass(pass, this[$userEffectCount] + 2); // push after current userPasses, before any web-component effects.
     this[$userEffectCount]++;
-    this[$removeClearPass]();
     // Enable the normalPass and dirtyRendering if required by any effect.
     this[$updateProperties]();
   }
@@ -258,7 +251,6 @@ export class MVEffectComposer extends ReactiveElement {
     // Enable the normalPass and dirtyRendering if required by any effect.
     this[$updateProperties]();
     this[$userEffectCount]--;
-    this[$addClearPass]();
   }
 
   /**
@@ -289,12 +281,6 @@ export class MVEffectComposer extends ReactiveElement {
       } else {
         break; // A convolution was not found, the first Effect pass contains all effects from i to effects.length
       }
-    }
-    // If there is no pass after the normal pass, then nothing will render on the screen.
-    if (effects.length === 0 && this[$userEffectCount] === 0) {
-      this[$addClearPass]();
-    } else {
-      this[$removeClearPass]();
     }
 
     // Enable the normalPass and dirtyRendering if required by any effect.
@@ -348,7 +334,9 @@ export class MVEffectComposer extends ReactiveElement {
 
   [$updateProperties]() {
     this[$normalPass].enabled = this[$requires]('requireNormals');
+    this[$normalPass].renderToScreen = false;
     this[$effectComposer].dirtyRender = this[$requires]('requireDirtyRender');
+    this[$renderPass].renderToScreen = this[$effectComposer].passes.length === 2;
   }
 
   [$requires](property: 'requireNormals' | 'requireSeparatePass' | 'requireDirtyRender'): boolean {
@@ -362,17 +350,5 @@ export class MVEffectComposer extends ReactiveElement {
       this[$effectComposer].removePass(pass);
       disposeEffectPass(pass);
     });
-  }
-
-  [$removeClearPass](): void {
-    if (this[$effectComposer].passes.length > 2) {
-      this[$effectComposer].removePass(this[$clearPass]);
-    }
-  }
-
-  [$addClearPass](): void {
-    if (this[$effectComposer].passes.length === 2) {
-      this[$effectComposer].addPass(this[$clearPass]);
-    }
   }
 }
