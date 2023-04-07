@@ -196,6 +196,15 @@
     "Description": "This effect alters the look of the entire scene.",
     "Attributes": [
       {
+        "name": "tonemapping",
+        "htmlName": "tonemapping",
+        "description": "The tonemapping of the scene.",
+        "default": {
+          "default": "aces_filmic",
+          "options": "reinhard, reinhard2, reinhard_adaptive, optimized_cineon, aces_filmic, none"
+        }
+      },
+      {
         "name": "brightness",
         "htmlName": "brightness",
         "description": "The brightness of the entire canvas. 0.0 is the original brightness, 1.0 is completely white, -1.0 is completely black.",

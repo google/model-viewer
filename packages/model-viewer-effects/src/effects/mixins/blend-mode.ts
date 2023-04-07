@@ -21,14 +21,14 @@ import { IEffectBaseMixin } from './effect-base.js';
 
 export const $setDefaultProperties = Symbol('setDefaultProperties');
 
-export interface IBlendModeMixin {
-  opacity: number;
-  blendMode: string;
-  [$setDefaultProperties](): void;
-}
-
 export type BlendMode = keyof typeof BlendFunction;
 export const BLEND_MODES = Object.keys(BlendFunction) as BlendMode[];
+
+export interface IBlendModeMixin {
+  opacity: number;
+  blendMode: BlendMode;
+  [$setDefaultProperties](): void;
+}
 
 export const BlendModeMixin = <T extends Constructor<IEffectBaseMixin & ReactiveElement>>(
   EffectClass: T

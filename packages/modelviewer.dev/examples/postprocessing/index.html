@@ -186,12 +186,12 @@ button {
 </model-viewer>
 <script type="module">
 const blendViewer = document.querySelector("model-viewer#blendViewer");
-const colorGradeEffect = blendViewer.querySelector('color-grade-effect');
+const blendEffect = blendViewer.querySelector('color-grade-effect');
 const opacity = blendViewer.querySelector('#opacity');
 const mode = blendViewer.querySelector('#blend-mode');
 
-opacity.addEventListener('input', (e) => colorGradeEffect.opacity = e.target.value);
-mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.value);
+opacity.addEventListener('input', (e) => blendEffect.opacity = e.target.value);
+mode.addEventListener('x', (e) => blendEffect.blendMode = e.target.value);
 </script>
             </template>
           </example-snippet>
@@ -199,6 +199,55 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
       </div>
     </div>
 
+
+    <div class="sample">
+      <div id="colorgrade" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Color Grading</h2>
+            <p>The default <code>tonemapping</code> provided by <code>&lt;model-viewer&gt;</code> is <code>Aces Filmic</code> tonemapping,
+              which provides the most pleasing image, similar to Filament's gltf-viewer. However the this tonemapping is not applied to
+            <code>&lt;model-viewer-effects&gt;</code> postprocessing. To overcome this, it is recommended to always add the <code>&lt;color-grade-effect&gt;</code> 
+              at the end of your postprocess pipeline, which similarly sets the default tonemapping to <code>Aces Filmic</code>.<br>
+              The example below showcases the rendering difference with and without the <code>&lt;color-grade-effect&gt;</code> when &lt;bloom-effect&gt; is applied, as well as 
+              allows you to select any of the other tonemapping modes.
+            </p>
+          </div>
+          <example-snippet stamp-to="colorgrade" highlight-as="html">
+            <template>
+<model-viewer id="colorViewer" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/EmissiveStrengthTest.glb" alt="A 3D model of an astronaut">
+  <effect-composer render-mode="quality" msaa="8">
+    <bloom-effect></bloom-effect>
+    <color-grade-effect></color-grade-effect>
+  </effect-composer>
+  <div class="controls">
+    <label for="colorgrading">Color Grading</label>
+    <input type="checkbox" id="colorgrading" checked>
+    <label for="tonemapping">Tonemapping:</label>
+    <select id="tonemapping">
+        <option value="aces_filmic">Aces Filmic</option>
+        <option value="reinhard">Reinhard</option>
+        <option value="reinhard2">Reinhard2</option>
+        <option value="reinhard_adaptive">Reinhard Adaptive</option>
+        <option value="optimized_cineon">Optimized Cineon</option>
+    </select>
+  </div>
+</model-viewer>
+<script type="module">
+const colorViewer = document.querySelector("model-viewer#colorViewer");
+const colorGradeEffect = colorViewer.querySelector('color-grade-effect');
+const colorGrading = colorViewer.querySelector('#colorgrading');
+const tonemapping = colorViewer.querySelector('#tonemapping');
+
+colorGrading.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.checked ? 'default' : 'skip');
+tonemapping.addEventListener('input', (e) => colorGradeEffect.tonemapping = e.target.value);
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
 
     <div class="sample">
       <div id="selective-effects" class="demo"></div>
@@ -219,6 +268,7 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
 <model-viewer camera-orbit="45deg 115deg auto" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RocketShip.glb" ar alt="A 3D model of a Rocket Ship">
   <effect-composer id="selectiveComposer" render-mode="quality">
     <selective-bloom-effect strength="5" radius="0.5" threshold="0"></selective-bloom-effect>
+    <color-grade-effect></color-grade-effect>
   </effect-composer>
 </model-viewer>
 <script type="module">
@@ -267,6 +317,7 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
     <smaa-effect blend-mode="skip"></smaa-effect>
     <bloom-effect blend-mode="skip"></bloom-effect>
     <pixelate-effect granularity="5" blend-mode="skip"></pixelate-effect>
+    <color-grade-effect blend-mode="default"></color-grade-effect>
   </effect-composer>
   <div class="controls">
     <label for="outline">Outline Effect</label>
@@ -281,6 +332,8 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
     <input type="checkbox" id="bloom">
     <label for="pixelate">Pixelate Effect</label>
     <input type="checkbox" id="pixelate">
+    <label for="colorgrade">Color Grade Effect</label>
+    <input type="checkbox" id="colorgrade" checked>
   </div>
 </model-viewer>
 <script type="module">
@@ -323,7 +376,8 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           <example-snippet stamp-to="custom-effects" highlight-as="html">
             <template>
 <model-viewer camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RobotExpressive.glb" ar alt="A 3D model of a Lantern">
-  <effect-composer id="customComposer" msaa="8"></effect-composer>
+  <effect-composer id="customComposer" msaa="8">
+  </effect-composer>
   <div class="controls">
     <label for="scale">Grid Scale</label>
     <input id="scale" type="range" min="0" max="2" step="0.01" value="1">
@@ -374,7 +428,7 @@ mode.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.val
           licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
         </li>
       </ul>
-      <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+      <div style="margin-top:24px;" class="copyright">©Copyright 2023 Google Inc. Licensed under the Apache License 2.0.</div>
       <div id='footer-links'></div>
     </div>
   </div>

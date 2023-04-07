@@ -492,14 +492,9 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
       if (scene.effectRenderer != null) {
-        // the EffectComposer expects autoClear to be false
-        // while the threeRenderer should be true so that
-        // the frames are cleared each render. 
-        this.threeRenderer.autoClear = false;
         scene.effectRenderer.render(delta);
-        this.threeRenderer.autoClear = true;
       } else {
-        this.threeRenderer.autoClear = true; 
+        this.threeRenderer.autoClear = true; // this might get reset by the effectRenderer
         this.threeRenderer.render(scene, scene.camera);
       }
       if (this.multipleScenesVisible ||

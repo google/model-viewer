@@ -14,11 +14,17 @@
  */
 
 import { property } from 'lit/decorators.js';
-import { BlendFunction, BrightnessContrastEffect, HueSaturationEffect } from 'postprocessing';
-import { clamp, wrapClamp } from '../utilities.js';
+import { BlendFunction, BrightnessContrastEffect, HueSaturationEffect, ToneMappingEffect } from 'postprocessing';
+import { clamp, validateLiteralType, wrapClamp } from '../utilities.js';
 import { $updateProperties, MVEffectBase } from './mixins/effect-base.js';
+import { ToneMappingMode as PPToneMappingMode } from 'postprocessing';
+import { $effectComposer, $tonemapping } from '../effect-composer.js';
+import { ACESFilmicToneMapping, NoToneMapping } from 'three';
 
 const TWO_PI = Math.PI * 2;
+
+export type ToneMappingMode = keyof typeof PPToneMappingMode;;
+export const TONEMAPPING_MODES = Object.keys(PPToneMappingMode) as ToneMappingMode[];
 
 export class MVColorGradeEffect extends MVEffectBase {
   static get is() {
@@ -26,9 +32,16 @@ export class MVColorGradeEffect extends MVEffectBase {
   }
 
   /**
+   * `reinhard | reinhard2 | reinhard_adaptive | optimized_cineon | aces_filmic | linear`
+   * @default 'aces_filmic'
+   */
+  @property({ type: String, attribute: 'tonemapping', reflect: true})
+  tonemapping: ToneMappingMode = 'ACES_FILMIC'
+
+  /**
    * Value in the range of (-1, 1).
    */
-  @property({ type: String || Number, attribute: 'brightness', reflect: true })
+  @property({ type: Number, attribute: 'brightness', reflect: true })
   brightness = 0;
 
   /**
@@ -54,6 +67,9 @@ export class MVColorGradeEffect extends MVEffectBase {
   constructor() {
     super();
     this.effects = [
+      new ToneMappingEffect({
+        mode: PPToneMappingMode.ACES_FILMIC,
+      }),
       new HueSaturationEffect({
         hue: wrapClamp(this.hue, 0, TWO_PI),
         saturation: clamp(this.saturation, -1, 1),
@@ -75,24 +91,37 @@ export class MVColorGradeEffect extends MVEffectBase {
   updated(changedProperties: Map<string | number | symbol, any>) {
     super.updated(changedProperties);
     if (
+      changedProperties.has('tonemapping') ||
       changedProperties.has('brightness') ||
       changedProperties.has('contrast') ||
       changedProperties.has('hue') ||
-      changedProperties.has('saturation')
+      changedProperties.has('saturation') ||
+      changedProperties.has('blendMode')
     ) {
       this[$updateProperties]();
     }
   }
 
   [$updateProperties]() {
-    this.hue = wrapClamp(this.hue, 0, TWO_PI);
+    if (this.blendMode === 'SKIP') {
+      this.effectComposer[$effectComposer][$tonemapping] = ACESFilmicToneMapping;
+    } else {
+      this.effectComposer[$effectComposer][$tonemapping] = NoToneMapping;
+    }
     this.saturation = clamp(this.saturation, -1, 1);
+    this.hue = wrapClamp(this.hue, 0, TWO_PI);
     this.brightness = clamp(this.brightness, -1, 1);
     this.contrast = clamp(this.contrast, -1, 1);
-    (this.effects[0] as HueSaturationEffect).saturation = this.saturation;
-    (this.effects[0] as HueSaturationEffect).hue = this.hue;
-    (this.effects[1] as BrightnessContrastEffect).brightness = this.brightness;
-    (this.effects[1] as BrightnessContrastEffect).contrast = this.contrast;
-    this.effectComposer.queueRender();
+    (this.effects[1] as HueSaturationEffect).saturation = this.saturation;
+    (this.effects[1] as HueSaturationEffect).hue = this.hue;
+    (this.effects[2] as BrightnessContrastEffect).brightness = this.brightness;
+    (this.effects[2] as BrightnessContrastEffect).contrast = this.contrast;
+    try {
+      this.tonemapping = this.tonemapping.toUpperCase() as ToneMappingMode;
+      validateLiteralType(TONEMAPPING_MODES, this.tonemapping);
+      (this.effects[0] as ToneMappingEffect).mode = PPToneMappingMode[this.tonemapping];
+    } finally {
+      this.effectComposer.queueRender();
+    }
   }
 }

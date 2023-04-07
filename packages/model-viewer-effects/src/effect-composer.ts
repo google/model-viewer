@@ -19,7 +19,7 @@ import { disposeEffectPass, isConvolution, validateLiteralType } from './utiliti
 import { ModelViewerElement } from '@google/model-viewer';
 import { IMVEffect, IntegrationOptions, MVEffectBase } from './effects/mixins/effect-base.js';
 import { ModelScene } from '@google/model-viewer/lib/three-components/ModelScene.js';
-import { Camera, HalfFloatType, UnsignedByteType, WebGLRenderer } from 'three';
+import { ACESFilmicToneMapping, Camera, HalfFloatType, ToneMapping, UnsignedByteType, WebGLRenderer } from 'three';
 import { property } from 'lit/decorators.js';
 
 export const $scene = Symbol('scene');
@@ -35,6 +35,7 @@ export const $selection = Symbol('selection');
 export const $onSceneLoad = Symbol('onSceneLoad');
 export const $resetEffectPasses = Symbol('resetEffectPasses');
 export const $userEffectCount = Symbol('userEffectCount');
+export const $tonemapping = Symbol('tonemapping');
 const $updateProperties = Symbol('updateProperties');
 
 /**
@@ -45,6 +46,8 @@ export class EffectComposer extends PPEffectComposer {
   public camera?: Camera;
   public scene?: ModelScene;
   public dirtyRender?: boolean;
+
+  [$tonemapping]: ToneMapping = ACESFilmicToneMapping;
 
   constructor(
     renderer?: WebGLRenderer,
@@ -57,6 +60,26 @@ export class EffectComposer extends PPEffectComposer {
     }
   ) {
     super(renderer, options);
+  }
+
+  private preRender() {
+    // the EffectComposer expects autoClear to be false so that buffers aren't cleared between renders
+    // while the threeRenderer should be true so that the frames are cleared each render. 
+    const renderer = this.getRenderer();
+    renderer.autoClear = false;
+    renderer.toneMapping = this[$tonemapping];
+  }
+
+  private postRender() {
+    const renderer = this.getRenderer();
+    renderer.toneMapping = ACESFilmicToneMapping;
+    renderer.autoClear = true;
+  }
+
+  override render(deltaTime?: number | undefined): void {
+    this.preRender();
+    super.render(deltaTime);
+    this.postRender();
   }
 
   /**
@@ -102,6 +125,8 @@ export type MVPass = Pass & IntegrationOptions;
 export const RENDER_MODES = ['performance', 'quality'] as const;
 export type RenderMode = typeof RENDER_MODES[number]; 
 
+const N_DEFAULT_PASSES = 2; // RenderPass, NormalPass
+
 export class MVEffectComposer extends ReactiveElement {
   static get is() {
     return 'effect-composer';
@@ -143,7 +168,7 @@ export class MVEffectComposer extends ReactiveElement {
    * Array of custom {@link MVPass}'s added with {@link addPass}.
    */
   get userPasses(): MVPass[] {
-    return this[$effectComposer].passes.slice(2, 2 + this[$userEffectCount]);
+    return this[$effectComposer].passes.slice(N_DEFAULT_PASSES, N_DEFAULT_PASSES + this[$userEffectCount]);
   }
 
   get modelViewerElement() {
@@ -233,7 +258,7 @@ export class MVEffectComposer extends ReactiveElement {
   addPass(pass: Pass, requireNormals?: boolean, requireDirtyRender?: boolean): void {
     (pass as MVPass).requireNormals = requireNormals;
     (pass as MVPass).requireDirtyRender = requireDirtyRender;
-    this[$effectComposer].addPass(pass, this[$userEffectCount] + 2); // push after current userPasses, before any web-component effects.
+    this[$effectComposer].addPass(pass, this[$userEffectCount] + N_DEFAULT_PASSES); // push after current userPasses, before any web-component effects.
     this[$userEffectCount]++;
     // Enable the normalPass and dirtyRendering if required by any effect.
     this[$updateProperties]();
@@ -321,7 +346,7 @@ export class MVEffectComposer extends ReactiveElement {
    * Gets effectPasses of child effects
    */
   get [$effectPasses]() {
-    return this[$effectComposer].passes.slice(2 + this[$userEffectCount]) as EffectPass[];
+    return this[$effectComposer].passes.slice(N_DEFAULT_PASSES + this[$userEffectCount]) as EffectPass[];
   }
 
   [$onSceneLoad] = (): void => {
@@ -336,7 +361,7 @@ export class MVEffectComposer extends ReactiveElement {
     this[$normalPass].enabled = this[$requires]('requireNormals');
     this[$normalPass].renderToScreen = false;
     this[$effectComposer].dirtyRender = this[$requires]('requireDirtyRender');
-    this[$renderPass].renderToScreen = this[$effectComposer].passes.length === 2;
+    this[$renderPass].renderToScreen = this[$effectComposer].passes.length === N_DEFAULT_PASSES;
   }
 
   [$requires](property: 'requireNormals' | 'requireSeparatePass' | 'requireDirtyRender'): boolean {
