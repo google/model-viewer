@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { Vector2 } from 'three';
 import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 
@@ -201,9 +202,24 @@ export declare interface PBRMetallicRoughness {
  */
 export declare interface TextureInfo {
   /**
-   * The Texture being referenced by this TextureInfo
+   * The Texture being referenced by this TextureInfo.
    */
   readonly texture: Texture|null;
+
+  /**
+   * The texture rotation in radians.
+   */
+  readonly rotation: number|null;
+
+  /**
+   * The texture scale.
+   */
+  readonly scale: Vector2|null;
+
+  /**
+   * The texture offset.
+   */
+  readonly offset: Vector2|null;
 
   /**
    * Sets the texture, or removes it if argument is null. Note you cannot build
@@ -211,6 +227,22 @@ export declare interface TextureInfo {
    * or create one with the createTexture method.
    */
   setTexture(texture: Texture|null): void;
+
+  /**
+   * Sets the texture rotation, or resets it to zero if argument is null. Rotation is
+   * in radians.
+   */
+  setRotation(rotation: number|null): void;
+
+  /**
+   * Sets the texture scale, or resets it to (1, 1) if argument is null.
+   */
+  setScale(scale: Vector2|null): void;
+
+  /**
+   * Sets the texture offset, or resets it to (0, 0) if argument is null.
+   */
+  setOffset(offset: Vector2|null): void;
 }
 
 /**

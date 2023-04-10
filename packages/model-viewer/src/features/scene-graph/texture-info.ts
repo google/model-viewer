@@ -95,6 +95,27 @@ export class TextureInfo implements TextureInfoInterface {
     return this[$texture];
   }
 
+  get rotation(): number|null {
+    if (!this[$texture]) {
+      return null;
+    }
+    return this[$texture].source[$threeTexture].rotation;
+  }
+
+  get scale(): Vector2|null {
+    if (!this[$texture]) {
+      return null;
+    }
+    return this[$texture].source[$threeTexture].repeat;
+  }
+
+  get offset(): Vector2|null {
+    if (!this[$texture]) {
+      return null;
+    }
+    return this[$texture].source[$threeTexture].offset;
+  }
+
   setTexture(texture: Texture|null): void {
     const threeTexture: ThreeTexture|null =
         texture != null ? texture.source[$threeTexture] : null;
@@ -171,6 +192,42 @@ export class TextureInfo implements TextureInfoInterface {
       threeTexture.repeat = this[$transform].scale;
       threeTexture.offset = this[$transform].offset;
     }
+    this[$onUpdate]();
+  }
+
+  setRotation(rotation: number|null): void {
+    if (!this[$texture]) {
+      return;
+    }
+    if(!rotation) {
+      // Reset rotation.
+      rotation = 0;
+    }
+    this[$texture].source[$threeTexture].rotation = rotation;
+    this[$onUpdate]();
+  }
+
+  setScale(scale: Vector2|null): void {
+    if (!this[$texture]) {
+      return;
+    }
+    if(!scale) {
+      // Reset scale.
+      scale = new Vector2(1, 1);
+    }
+    this[$texture].source[$threeTexture].repeat = scale;
+    this[$onUpdate]();
+  }
+
+  setOffset(offset: Vector2|null): void {
+    if (!this[$texture]) {
+      return;
+    }
+    if(!offset) {
+      // Reset offset.
+      offset = new Vector2(0, 0);
+    }
+    this[$texture].source[$threeTexture].offset = offset;
     this[$onUpdate]();
   }
 }
