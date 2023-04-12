@@ -64,7 +64,7 @@ const outputOptions = [
     watch: {
       include: watchFiles,
     },
-    plugins: [...plugins, terser()],
+    plugins,
     onwarn,
   }
 ];

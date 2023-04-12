@@ -198,10 +198,10 @@
       {
         "name": "tonemapping",
         "htmlName": "tonemapping",
-        "description": "The tonemapping of the scene.",
+        "description": "The tonemapping of the scene. Due to the fact that in-built tonemapping cannot not applied to <code>&lt;model-viewer-effects&gt;</code> postprocessing, it is recommended to always add the <code>&lt;color-grade-effect&gt;</code> at the end of your postprocess pipeline, which sets the same default tonemapping to <code>Aces Filmic</code>.<br>",
         "default": {
           "default": "aces_filmic",
-          "options": "reinhard, reinhard2, reinhard_adaptive, optimized_cineon, aces_filmic, none"
+          "options": "reinhard, reinhard2, reinhard2_adaptive, optimized_cineon, aces_filmic, none"
         }
       },
       {

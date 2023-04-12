@@ -46,7 +46,7 @@ npm install three @google/model-viewer @google/model-viewer-effects
 
 ```html
 <!-- ES-Shims for older browser compatibility -->
-<script type="module" async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script async src="https://ga.jspm.io/npm:es-module-shims@1.7.1/dist/es-module-shims.js"></script>
 
 <!-- Import Three.js using an import-map -->
 <script type="importmap">

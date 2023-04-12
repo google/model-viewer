@@ -24,18 +24,18 @@
   <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
   <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
+  
+  <!-- ES-Shims for older browsers -->
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.1/dist/es-module-shims.js"></script>
 
   <!-- Import Three.js using an import-map -->
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@^0.151.2/build/three.module.min.js"
+        "three": "https://cdn.jsdelivr.net/npm/three@^0.151.0/build/three.module.min.js"
       }
     }
   </script>
-
-  <!-- ES-Shims for older browsers -->
-  <script type="module" async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
   <!-- Import the <model-viewer> component without three bundled -->
   <script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer-module.js"></script>
@@ -96,30 +96,29 @@ button {
             <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap" target='_blank'>import-map</a>
             for the <a href="https://threejs.org/" target='_blank'>Three.js</a> package, and use the <i>module</i> version of <code>&lt;model-viewer&gt;</code>.</p>
             <p>Safari does not support <code>import maps</code>, the following script will make your code work universally: </p>
-            <i>Note: remove the '-no-exec' suffix from the following scripts in order for them to run.</i>
-            <example-snippet>
+            <example-snippet stamp-to="setup" highlight-as="html">
               <template>
-<script type="module-no-exec" async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+  <script type="noexecute" async src="https://ga.jspm.io/npm:es-module-shims@1.7.1/dist/es-module-shims.js"></script>
               </template>
             </example-snippet>
             <p>Bring <code>Three.js</code> from any cdn - cdnjs, unpkg, or jsdelivr:</p>
-            <example-snippet>
+            <example-snippet stamp-to="setup" highlight-as="html">
               <template>
-<script type="importmap-no-exec">
+<script type="importmap-noexecute">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.151.0/build/three.module.js"
   }
 }
 </script>
               </template>
-            </example-snippet>
+            </example-snippet stamp-to="setup" highlight-as="html">
             <p>Now import the <code>&lt;model-viewer&gt;</code> module version which doesn't package three, and the <code>&lt;model-viewer-effects&gt;</code> addon:</p>
             <example-snippet stamp-to="setup" highlight-as="html">
               <template>
-<script type="module-no-exec" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-module.min.js"></script>
+<script type="module-noexecute" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-module.min.js"></script>
   
-<script type="module-no-exec" src="https://cdn.jsdelivr.net/npm/@google/model-viewer-effects/dist/model-viewer-effects.min.js"></script>
+<script type="module-noexecute" src="https://cdn.jsdelivr.net/npm/@google/model-viewer-effects/dist/model-viewer-effects.min.js"></script>
               </template>
             </example-snippet>
             <p>Setting up post-processing effects is as simple as adding an <code>&lt;effect-composer&gt;</code> component inside your <code>&lt;model-viewer&gt;</code> element.
@@ -191,7 +190,7 @@ const opacity = blendViewer.querySelector('#opacity');
 const mode = blendViewer.querySelector('#blend-mode');
 
 opacity.addEventListener('input', (e) => blendEffect.opacity = e.target.value);
-mode.addEventListener('x', (e) => blendEffect.blendMode = e.target.value);
+mode.addEventListener('change', (e) => blendEffect.blendMode = e.target.value);
 </script>
             </template>
           </example-snippet>
@@ -229,7 +228,7 @@ mode.addEventListener('x', (e) => blendEffect.blendMode = e.target.value);
         <option value="aces_filmic">Aces Filmic</option>
         <option value="reinhard">Reinhard</option>
         <option value="reinhard2">Reinhard2</option>
-        <option value="reinhard_adaptive">Reinhard Adaptive</option>
+        <option value="reinhard2_adaptive">Reinhard2 Adaptive</option>
         <option value="optimized_cineon">Optimized Cineon</option>
     </select>
   </div>
@@ -267,7 +266,7 @@ tonemapping.addEventListener('input', (e) => colorGradeEffect.tonemapping = e.ta
             <template>
 <model-viewer camera-orbit="45deg 115deg auto" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RocketShip.glb" ar alt="A 3D model of a Rocket Ship">
   <effect-composer id="selectiveComposer" render-mode="quality">
-    <selective-bloom-effect strength="5" radius="0.5" threshold="0"></selective-bloom-effect>
+    <selective-bloom-effect strength="5" radius="0.7" threshold="0"></selective-bloom-effect>
     <color-grade-effect></color-grade-effect>
   </effect-composer>
 </model-viewer>

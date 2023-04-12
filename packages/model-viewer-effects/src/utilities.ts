@@ -14,6 +14,7 @@
  */
 
 import { Effect, EffectAttribute, EffectPass, Pass } from 'postprocessing';
+import { ColorRepresentation } from 'three';
 
 export type Constructor<T = object, U = object> = {
   new (...args: any[]): T;
@@ -91,13 +92,13 @@ export function wrapClamp(value: number, lowerLimit: number, upperLimit: number)
  * @param elem The element background to get
  * @returns The backgroundColor
  */
-export function getBackgroundColor(elem: HTMLElement): string {
+export function getBackgroundColor(elem: HTMLElement): ColorRepresentation | undefined {
   let currElem: HTMLElement | null = elem;
   while (currElem && isTransparent(getComputedStyle(currElem))) {
     currElem = currElem.parentElement;
   }
-  if (!currElem) return '';
-  return getComputedStyle(currElem).backgroundColor;
+  if (!currElem) return;
+  return getComputedStyle(currElem).backgroundColor as ColorRepresentation;
 }
 
 /**

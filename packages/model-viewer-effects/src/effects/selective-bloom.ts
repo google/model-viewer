@@ -14,7 +14,7 @@
  */
 
 import { property } from 'lit/decorators.js';
-import { BlendFunction, BloomEffect, SelectiveBloomEffect } from 'postprocessing';
+import { BlendFunction, SelectiveBloomEffect } from 'postprocessing';
 import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
 import { SelectiveMixin } from './mixins/selective.js';
 import { TEMP_CAMERA } from './utilities.js';
@@ -28,7 +28,7 @@ export class MVSelectiveBloomEffect extends SelectiveMixin(MVEffectBase) {
    * The strength of the bloom effect.
    */
   @property({ type: Number, attribute: 'strength', reflect: true })
-  strength = 3;
+  strength = 1;
 
   /**
    * Value in the range of (0, 1). Pixels with a brightness above this will bloom.
@@ -72,9 +72,9 @@ export class MVSelectiveBloomEffect extends SelectiveMixin(MVEffectBase) {
   }
 
   [$updateProperties](): void {
-    (this.effects[0] as BloomEffect).luminanceMaterial.threshold = this.threshold;
-    (this.effects[0] as BloomEffect).luminanceMaterial.smoothing = this.smoothing;
-    (this.effects[0] as BloomEffect).intensity = this.strength;
+    (this.effects[0] as SelectiveBloomEffect).luminanceMaterial.threshold = this.threshold;
+    (this.effects[0] as SelectiveBloomEffect).luminanceMaterial.smoothing = this.smoothing;
+    (this.effects[0] as SelectiveBloomEffect).intensity = this.strength;
     (this.effects[0] as any).mipmapBlurPass.radius = this.radius;
     this.effectComposer.queueRender();
   }

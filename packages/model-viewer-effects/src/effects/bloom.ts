@@ -14,7 +14,7 @@
  */
 
 import { property } from 'lit/decorators.js';
-import { BlendFunction, BloomEffect, SelectiveBloomEffect } from 'postprocessing';
+import { BlendFunction, BloomEffect } from 'postprocessing';
 import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
 
 export class MVBloomEffect extends MVEffectBase {
@@ -85,6 +85,6 @@ export class MVBloomEffect extends MVEffectBase {
       luminanceThreshold: this.threshold,
       luminanceSmoothing: this.smoothing,
       intensity: this.strength,
-    } as ConstructorParameters<typeof SelectiveBloomEffect>[2];
+    } as ConstructorParameters<typeof BloomEffect>[0];
   }
 }
