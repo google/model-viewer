@@ -366,10 +366,6 @@
       modelViewer.type = 'module';
       modelViewer.src = '../node_modules/@google/model-viewer/dist/model-viewer.js'; 
       body.appendChild(modelViewer);
-
-      const focusVisible = document.createElement('script');
-      focusVisible.src = '../node_modules/focus-visible/dist/focus-visible.js'; 
-      body.appendChild(focusVisible);
     };
 
     body.addEventListener('mouseover', onInteraction, {once:true});
