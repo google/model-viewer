@@ -39,6 +39,8 @@ const templateResult = html`
   height: 100%;
   display: none;
   position: relative;
+  outline-offset: -1px;
+  outline-width: 1px;
 }
 
 canvas {
