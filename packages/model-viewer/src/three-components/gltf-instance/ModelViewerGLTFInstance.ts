@@ -62,7 +62,7 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
         node.name = node.uuid;
       }
       const mesh = node as Mesh;
-      if (mesh.isMesh) {
+      if (mesh.material) {
         const {geometry} = mesh;
         mesh.castShadow = true;
         if ((mesh as any).isSkinnedMesh) {
@@ -120,8 +120,8 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
       // and materials are copied by reference. This is necessary
       // for the same model to be used twice with different
       // scene-graph operations.
-      if ((node as Mesh).isMesh) {
-        const mesh = node as Mesh;
+      const mesh = node as Mesh;
+      if (mesh.material) {
         const material = mesh.material as MeshStandardMaterial;
         if (material != null) {
           if (sourceUUIDToClonedMaterial.has(material.uuid)) {
