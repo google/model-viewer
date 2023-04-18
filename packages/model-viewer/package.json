@@ -73,7 +73,7 @@
     "3d"
   ],
   "dependencies": {
-    "lit": "^2.2.3"
+    "lit": "^2.7.2"
   },
   "peerDependencies": {
     "three": "^0.151.2"
@@ -89,7 +89,6 @@
     "@types/three": "^0.150.0",
     "@ungap/event-target": "^0.2.3",
     "chai": "^4.3.6",
-    "focus-visible": "^5.2.0",
     "http-server": "^14.1.1",
     "karma": "^5.2.3",
     "karma-browserstack-launcher": "^1.6.0",

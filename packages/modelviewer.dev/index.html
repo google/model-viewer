@@ -34,9 +34,6 @@
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
   <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
 
-  <!-- 💁 OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
-  <script src="node_modules/focus-visible/dist/focus-visible.js" defer></script>
-
   <script defer src="https://web3dsurvey.com/collector.js"></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
@@ -180,18 +177,6 @@
           </div>
 
           <div style="clear:both"></div>
-
-          <p class="browser-support-desc"><code>:focus-visible</code> is an as-yet unimplemented web platform feature that enables
-          content authors to style a component on the condition that it received focus in
-          such a way that suggests the focus state should be visibly evident.</p>
-
-          <p class="browser-support-desc">The <code>:focus-visible</code> capability has not been implemented in any stable browsers
-          yet. If <a href="https://github.com/WICG/focus-visible">the polyfill</a> is available on the page, 
-          <code>&lt;model-viewer&gt;</code> will use it and only display focus rings when <code>:focus-visible</code> should apply.</p>
-
-          <p class="browser-support-desc">Check out <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible">this related MDN</a> 
-          article for more details on <code>:focus-visible</code>.</p>
-
         </div>
 
       </div>

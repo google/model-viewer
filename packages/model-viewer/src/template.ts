@@ -29,15 +29,6 @@ const templateResult = html`
   height: 150px;
 }
 
-/* NOTE: This rule set is our integration surface area with the
- * :focus-visible polyfill.
- *
- * @see https://github.com/WICG/focus-visible/pull/196 */
-:host([data-js-focus-visible]:focus:not(.focus-visible)),
-:host([data-js-focus-visible]) :focus:not(.focus-visible) {
-  outline: none;
-}
-
 .container {
   position: relative;
   overflow: hidden;
@@ -48,6 +39,8 @@ const templateResult = html`
   height: 100%;
   display: none;
   position: relative;
+  outline-offset: -1px;
+  outline-width: 1px;
 }
 
 canvas {

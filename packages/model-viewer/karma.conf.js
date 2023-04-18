@@ -24,10 +24,6 @@ module.exports = function(config) {
     ],
     frameworks: ['esm', 'mocha', 'chai'],
     files: [
-      {
-        pattern: 'node_modules/focus-visible/dist/focus-visible.js',
-        watched: false
-      },
       {pattern: 'node_modules/@ungap/event-target/min.js', watched: false},
       {pattern: 'shared-assets/**/*', included: false},
       {
