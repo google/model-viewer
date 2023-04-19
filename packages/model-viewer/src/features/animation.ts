@@ -130,6 +130,10 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$paused] = true;
 
+      if (this.animationName != null) {
+        this[$changeAnimation]();
+      }
+
       if (this.autoplay) {
         this.play();
       }
