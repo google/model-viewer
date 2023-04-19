@@ -364,10 +364,6 @@ p {
   max-width: 680px;
 }
 
-model-viewer:focus {
-  outline: none;
-}
-
 #intro {
   margin-top: 8px;
   max-width: 480px;

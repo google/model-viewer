@@ -19,6 +19,8 @@
 export interface HotspotConfig {
   // Name of the hotspot, needs to be unique among all hotspots.
   name: string;
-  surface: string
+  surface?: string;
+  position?: string;
+  normal?: string;
   annotation?: string;
 }

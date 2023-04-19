@@ -22,15 +22,14 @@ import {LoadingMixin} from './features/loading.js';
 import {SceneGraphMixin} from './features/scene-graph.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
-import {FocusVisiblePolyfillMixin} from './utilities/focus-visible.js';
 
 // Export these to allow lazy-loaded LottieLoader.js to find what it needs.
 // Requires an import map - "three": "path/to/model-viewer.min.js".
 export {CanvasTexture, FileLoader, Loader, NearestFilter} from 'three';
 
-export const ModelViewerElement = AnnotationMixin(SceneGraphMixin(StagingMixin(
-    EnvironmentMixin(ControlsMixin(ARMixin(LoadingMixin(AnimationMixin(
-        FocusVisiblePolyfillMixin(ModelViewerElementBase)))))))));
+export const ModelViewerElement =
+    AnnotationMixin(SceneGraphMixin(StagingMixin(EnvironmentMixin(ControlsMixin(
+        ARMixin(LoadingMixin(AnimationMixin(ModelViewerElementBase))))))));
 
 export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 

@@ -181,26 +181,24 @@ export class CorrelatedSceneGraph {
    */
   private static[$parallelTraverseThreeScene](
       sceneOne: Group, sceneTwo: Group, callback: ThreeSceneObjectCallback) {
-    const isMesh = (object: unknown): object is Mesh => {
-      return (object as Mesh).isMesh;
-    };
-    const traverse = (a: ThreeSceneObject, b: ThreeSceneObject) => {
+    const traverse = (a: Object3D, b: Object3D) => {
       callback(a, b);
 
-      if ((a as Object3D).isObject3D) {
-        if (isMesh(a)) {
-          if (Array.isArray(a.material)) {
-            for (let i = 0; i < a.material.length; ++i) {
-              traverse(
-                  a.material[i], ((b as typeof a).material as Material[])[i]);
+      if (a.isObject3D) {
+        const meshA = a as Mesh;
+        const meshB = b as Mesh;
+        if (meshA.material) {
+          if (Array.isArray(meshA.material)) {
+            for (let i = 0; i < meshA.material.length; ++i) {
+              callback(meshA.material[i], (meshB.material as Material[])[i]);
             }
           } else {
-            traverse(a.material, (b as typeof a).material as Material);
+            callback(meshA.material, meshB.material as Material);
           }
         }
 
-        for (let i = 0; i < (a as Object3D).children.length; ++i) {
-          traverse((a as Object3D).children[i], (b as Object3D).children[i]);
+        for (let i = 0; i < a.children.length; ++i) {
+          traverse(a.children[i], b.children[i]);
         }
       }
     };

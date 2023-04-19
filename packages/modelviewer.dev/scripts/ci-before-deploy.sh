@@ -35,7 +35,6 @@ DEPLOYABLE_STATIC_FILES=( \
   README.md \
   node_modules/@google/model-viewer/dist \
   node_modules/@google/model-viewer-effects/dist \
-  node_modules/focus-visible \
   node_modules/js-beautify \
   node_modules/web-animations-js \
   shared-assets/models/*.* \

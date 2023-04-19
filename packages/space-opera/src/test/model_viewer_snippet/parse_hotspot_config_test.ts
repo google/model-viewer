@@ -79,6 +79,6 @@ snippet without position',
        expect(errorList.length).toBe(1);
        expect(errorList[0])
            .toEqual(new Error(
-               'Only surface hotspots are supported: no surface for hotspot at slot "hotspot-1"'));
+               'no surface or position for hotspot at slot "hotspot-1"'));
      });
 });
