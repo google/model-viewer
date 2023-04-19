@@ -54,14 +54,15 @@ function parseHotspotConfig(element: HTMLElement): HotspotConfig {
         `Invalid hotspot slot name: ${element.getAttribute('slot')}`);
   }
   const surface = element.dataset['surface'];
-  if (!surface) {
-    throw new Error(
-        `Only surface hotspots are supported: no surface for hotspot at slot "${
-            element.getAttribute('slot')}"`);
+  const position = element.dataset['position'];
+  const normal = element.dataset['normal'];
+  if (!surface && !position) {
+    throw new Error(`no surface or position for hotspot at slot "${
+        element.getAttribute('slot')}"`);
   }
   const annotation =
       element.querySelector('.HotspotAnnotation')?.innerHTML || undefined;
-  return {name, surface, annotation};
+  return {name, surface, position, normal, annotation};
 }
 
 /**

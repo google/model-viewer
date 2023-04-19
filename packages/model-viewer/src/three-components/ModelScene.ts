@@ -357,7 +357,7 @@ export class ModelScene extends Scene {
 
     group.traverse((object: Object3D) => {
       const mesh = object as Mesh;
-      if (!mesh.isMesh) {
+      if (!mesh.material) {
         return;
       }
       const material = mesh.material as Material;
@@ -810,13 +810,9 @@ export class ModelScene extends Scene {
     }
   }
 
-  get raycaster() {
-    return raycaster;
-  }
-
   hitFromPoint(ndcPosition: Vector2, object: Object3D = this) {
-    this.raycaster.setFromCamera(ndcPosition, this.getCamera());
-    const hits = this.raycaster.intersectObject(object, true);
+    raycaster.setFromCamera(ndcPosition, this.getCamera());
+    const hits = raycaster.intersectObject(object, true);
 
     return hits.find(
         (hit) => hit.object.visible && !hit.object.userData.shadow);
@@ -831,18 +827,18 @@ export class ModelScene extends Scene {
   positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
       {position: Vector3, normal: Vector3, uv: Vector2|null}|null {
     const hit = this.hitFromPoint(ndcPosition, object);
-    if (hit == null || hit.face == null) {
+    if (hit == null) {
       return null;
     }
 
-    if (hit.uv == null) {
-      return {position: hit.point, normal: hit.face.normal, uv: null};
-    }
+    const position = hit.point;
+    const normal = hit.face != null ?
+        hit.face.normal.clone().applyNormalMatrix(
+            new Matrix3().getNormalMatrix(hit.object.matrixWorld)) :
+        raycaster.ray.direction.clone().multiplyScalar(-1);
+    const uv = hit.uv ?? null;
 
-    hit.face.normal.applyNormalMatrix(
-        new Matrix3().getNormalMatrix(hit.object.matrixWorld));
-
-    return {position: hit.point, normal: hit.face.normal, uv: hit.uv};
+    return {position, normal, uv};
   }
 
   /**

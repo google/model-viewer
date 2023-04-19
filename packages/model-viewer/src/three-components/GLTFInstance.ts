@@ -132,10 +132,11 @@ export class GLTFInstance implements GLTF {
   dispose(): void {
     this.scenes.forEach((scene: Group) => {
       scene.traverse((object: Object3D) => {
-        if (!(object as Mesh).isMesh) {
+        const mesh = object as Mesh;
+        if (!mesh.material) {
           return;
         }
-        const mesh = object as Mesh;
+
         const materials =
             Array.isArray(mesh.material) ? mesh.material : [mesh.material];
         materials.forEach(material => {

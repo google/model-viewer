@@ -117,7 +117,7 @@ export default class GLTFMaterialsVariantsExtension implements
       scene.traverse(object => {
         const mesh = object as Mesh;
 
-        if (!mesh.isMesh) {
+        if (!mesh.material) {
           return;
         }
 
