@@ -670,8 +670,6 @@ export class ModelScene extends Scene {
     }
     const {animations} = this;
     if (animations == null || animations.length === 0) {
-      console.warn(
-          `Cannot play animation (model does not have any animations)`);
       return;
     }
 
