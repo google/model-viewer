@@ -712,7 +712,7 @@ export class SmoothControls extends EventDispatcher {
     }
 
     // In case no one gave us a pointerup or pointercancel event.
-    if (event.pointerType == 'mouse' && event.buttons === 0) {
+    if (event.pointerType === 'mouse' && event.buttons === 0) {
       this.onPointerUp(event);
       return;
     }
