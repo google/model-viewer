@@ -711,6 +711,12 @@ export class SmoothControls extends EventDispatcher {
       return;
     }
 
+    // In case no one gave us a pointerup or pointercancel event.
+    if (event.pointerType === 'mouse' && event.buttons === 0) {
+      this.onPointerUp(event);
+      return;
+    }
+
     const numTouches = this.pointers.length;
     const dx = (event.clientX - pointer.clientX) / numTouches;
     const dy = (event.clientY - pointer.clientY) / numTouches;

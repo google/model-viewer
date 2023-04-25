@@ -808,7 +808,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     get[$ariaLabel]() {
-      return super[$ariaLabel] +
+      return super[$ariaLabel].replace(/\.$/, '') +
           (this.cameraControls ? INTERACTION_PROMPT : '');
     }
 
