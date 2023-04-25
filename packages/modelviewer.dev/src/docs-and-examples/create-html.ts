@@ -23,7 +23,7 @@ interface Entry {
 }
 
 interface Category {
-  Title: string, htmlName: string, Attributes: Entry[], CSS: Entry[],
+  Title: string, htmlName: string, Mixin: [], Attributes: Entry[], CSS: Entry[],
       Parts: Entry[], Properties: Entry[], 'Static Properties': Entry[],
       Methods: Entry[], 'Static Methods': Entry[], Events: Entry[],
       Slots: Entry[],
@@ -32,6 +32,7 @@ interface Category {
 const CategoryConstant: Category = {
   Title: '',
   htmlName: '',
+  Mixin: [],
   Attributes: [],
   CSS: [],
   Parts: [],
@@ -57,7 +58,13 @@ function getCurrentDocs() {
 }
 
 function getCurrentExample(category: string) {
-  const click = `onclick="switchPages('examples', '../../docs/#${category}')"`;
+  let target: string;
+  if (category === 'postprocessing') {
+    target = '../../docs/mve';
+  } else {
+    target = `../../docs/#${category}`;
+  }
+  const click = `onclick="switchPages('examples', '${target}')"`;
   return `
 <div class="inner-flipper" id="documentation-flipper" ${click}>
   <a class="darken">DOCUMENTATION</a>
@@ -78,12 +85,13 @@ export function starterSidebar(docsOrExample: string) {
   const isExample = inputList[0] === 'examples';
   const docsExamples =
       isExample ? getCurrentExample(category) : getCurrentDocs();
+  const isPostprocesssing = docsOrExample === 'mve' || category === 'postprocessing';
   const href = isExample ? '../../' : '../';
   nav.innerHTML = `
 <div class="home lockup">
   <a href=${href} class="sidebar-mv inner-home">
     <div class="icon-button icon-modelviewer-black inner-home"></div>
-    <div class="inner-home darken"><span class="attribute">&lt;model-viewer&gt;</span></div>
+    <div class="inner-home darken ${isPostprocesssing && 'inner-home-mve'}"><span class="attribute">&lt;${isPostprocesssing ? 'model-viewer-effects' : 'model-viewer'}&gt;</span></div>
   </a>
 </div>
 <hr class="sidebar-hr">
@@ -158,7 +166,7 @@ function createSidebar(category: Category) {
   const container = document.getElementById('sidebar-category-container');
   const lowerCaseTitle = category.htmlName;
   let subcategories = Object.keys(category);
-  subcategories = subcategories.filter(k => k !== 'Title' && k !== 'htmlName');
+  subcategories = subcategories.filter(k => k !== 'Title' && k !== 'htmlName' && k !== 'Description');
 
   // Link category href (Loading) to first subcategory (Loading, Attributes)
   let lowerKey = '';
@@ -203,23 +211,17 @@ function createSidebar(category: Category) {
   }
 }
 
-function createTitle(title: string, htmlName: string) {
+function createTitle(title: string, htmlName: string, description: string) {
   const titleContainer = document.getElementById(htmlName.concat('-docs'));
   titleContainer!.innerHTML += `
 <div class="header">
   <h1 id=${htmlName}>${title}</h1>
+  ${description ? `<h4>${description}</h4>` : ''}
 </div>`;
 }
 
 export function getLowerCaseKey(key: string): string {
-  switch (key) {
-    case 'Static Methods':
-      return 'staticMethods';
-    case 'Static Properties':
-      return 'staticProperties';
-    default:
-      return key.toLowerCase();
-  }
+  return key.split(' ').map((value) => value.toLowerCase()).join('');
 }
 
 function createDefaultTable(entry: Entry): string {
@@ -293,7 +295,7 @@ function createSubcategory(
   <div class='inner-content'>
     <div id=${subcategoryContainerId}>
       <h3 id=${category.concat('-', pluralLowerCaseSubcategory)}>
-        ${subcategory === 'Questions' ? '' : subcategory}
+        ${subcategory === 'Questions' || subcategory === 'Mixin' ? '' : subcategory}
       </h3>
     </div>
   </div>
@@ -325,10 +327,10 @@ function createToggle() {
 export function convertJSONToHTML(json: any[]) {
   createToggle();
   for (const category of json) {
-    const {Title, htmlName} = category;
-    createTitle(Title, htmlName);
+    const {Title, htmlName, Description} = category;
+    createTitle(Title, htmlName, Description);
     for (const key in category) {
-      if (key !== 'Title' && key !== 'htmlName') {
+      if (key !== 'Title' && key !== 'htmlName' && key !== 'Description') {
         createSubcategory(category[key], htmlName, key);
       }
     }

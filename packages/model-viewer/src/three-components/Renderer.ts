@@ -14,7 +14,6 @@
  */
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
-
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
 import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
@@ -143,7 +142,7 @@ export class Renderer extends EventDispatcher {
         alpha: true,
         antialias: true,
         powerPreference: options.powerPreference as WebGLPowerPreference,
-        preserveDrawingBuffer: true
+        preserveDrawingBuffer: true,
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.outputEncoding = sRGBEncoding;
@@ -291,6 +290,7 @@ export class Renderer extends EventDispatcher {
       canvas.width = width;
       canvas.height = height;
       scene.forceRescale();
+      scene.effectRenderer?.setSize(width, height);
     }
   }
 
@@ -491,8 +491,12 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setRenderTarget(null);
       this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
-      this.threeRenderer.render(scene, scene.camera);
-
+      if (scene.effectRenderer != null) {
+        scene.effectRenderer.render(delta);
+      } else {
+        this.threeRenderer.autoClear = true; // this might get reset by the effectRenderer
+        this.threeRenderer.render(scene, scene.camera);
+      }
       if (this.multipleScenesVisible ||
           (!scene.element.modelIsVisible && scene.renderCount === 0)) {
         this.copyPixels(scene, width, height);

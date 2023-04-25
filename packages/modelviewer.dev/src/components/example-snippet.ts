@@ -115,7 +115,8 @@ export class ExampleSnippet extends ReactiveElement {
 
       let snippet = template.innerHTML;
 
-      snippet = snippet.replace('type="noexecute" ', '');
+      snippet = snippet.replace(/type="noexecute" /g, '');
+      snippet = snippet.replace(/-noexecute/g, '');
 
       if (!this.preserveWhitespace) {
         snippet = snippet.trim();

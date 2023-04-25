@@ -1,49 +1,36 @@
 {
-  "name": "@google/model-viewer",
-  "version": "3.1.1",
-  "description": "Easily display interactive 3D models on the web and in AR!",
-  "repository": "https://github.com/google/model-viewer",
+  "name": "@google/model-viewer-effects",
+  "version": "1.0.0",
+  "description": "Easily add and combine post-processing effects with <model-viewer>!",
+  "repository": "https://github.com/google/model-viewer/tree/master/packages/model-viewer-effects",
   "bugs": {
     "url": "https://github.com/google/model-viewer/issues"
   },
-  "homepage": "https://github.com/google/model-viewer#readme",
+  "homepage": "https://github.com/google/model-viewer/tree/master/packages/model-viewer-effects#readme",
+  "contributors": [
+    "Adam Beili <adam.v.beili@gmail.com>"
+  ],
   "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0"
   },
-  "contributors": [
-    "Jordan Santell <jsantell@google.com>",
-    "Chris Joel <cdata@google.com>",
-    "Emmett Lalish <elalish@google.com>",
-    "Ricardo Cabello <ricardocabello@google.com>",
-    "Matt Small <mbsmall@google.com>",
-    "Yuin Chien <yuin@google.com>"
-  ],
-  "main": "dist/model-viewer.min.js",
-  "module": "lib/model-viewer.js",
+  "main": "dist/model-viewer-effects.min.js",
+  "module": "lib/model-viewer-effects.js",
   "files": [
     "src",
     "lib",
-    "dist/model-viewer.js",
-    "dist/model-viewer.js.map",
-    "dist/model-viewer.min.js",
-    "dist/model-viewer.min.js.map",
-    "dist/model-viewer-umd.js",
-    "dist/model-viewer-umd.js.map",
-    "dist/model-viewer-umd.min.js",
-    "dist/model-viewer-umd.min.js.map",
-    "dist/model-viewer-module.js",
-    "dist/model-viewer-module.js.map",
-    "dist/model-viewer-module.min.js",
-    "dist/model-viewer-module.min.js.map",
-    "dist/model-viewer-module-umd.js",
-    "dist/model-viewer-module-umd.js.map",
-    "dist/model-viewer-module-umd.min.js",
-    "dist/model-viewer-module-umd.min.js.map",
-    "dist/model-viewer.d.ts"
+    "dist/model-viewer-effects.js",
+    "dist/model-viewer-effects.js.map",
+    "dist/model-viewer-effects.min.js",
+    "dist/model-viewer-effects.min.js.map",
+    "dist/model-viewer-effects-umd.js",
+    "dist/model-viewer-effects-umd.js.map",
+    "dist/model-viewer-effects-umd.min.js",
+    "dist/model-viewer-effects-umd.min.js.map",
+    "dist/model-viewer-effects.d.ts"
   ],
-  "typings": "lib/model-viewer.d.ts",
-  "types": "lib/model-viewer.d.ts",
+  "typings": "lib/model-viewer-effects.d.ts",
+  "types": "lib/model-viewer-effects.d.ts",
   "scripts": {
     "clean": "rm -rf ./lib ./dist",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-samples.sh",
@@ -55,8 +42,6 @@
     "prepublishOnly": "npm run build",
     "test": "karma start --single-run",
     "test:ci": "npm run test",
-    "check-fidelity": "node ./test/fidelity/index.js ./test/fidelity/config.json",
-    "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
     "serve": "node_modules/.bin/http-server -c-1",
     "dev": "npm run build:dev && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:test' 'serve -- -s'",
     "watch:tsc": "tsc -w --incremental",
@@ -78,15 +63,22 @@
     "webaronarkit",
     "augmented reality",
     "model-viewer",
-    "3d"
+    "model-viewer-effects",
+    "3d",
+    "post",
+    "processing",
+    "effect",
+    "filter"
   ],
   "dependencies": {
-    "lit": "^2.7.2"
+    "lit": "^2.2.3",
+    "postprocessing": "^6.30.2"
   },
   "peerDependencies": {
-    "three": "^0.151.2"
+    "@google/model-viewer": "^3.1.0"
   },
   "devDependencies": {
+    "@google/model-viewer": "^3.1.0",
     "@open-wc/karma-esm": "^4.0.0",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
@@ -97,6 +89,7 @@
     "@types/three": "^0.150.0",
     "@ungap/event-target": "^0.2.3",
     "chai": "^4.3.6",
+    "focus-visible": "^5.2.0",
     "http-server": "^14.1.1",
     "karma": "^5.2.3",
     "karma-browserstack-launcher": "^1.6.0",
@@ -112,8 +105,7 @@
     "rollup-plugin-dts": "^4.2.2",
     "rollup-plugin-polyfill": "^3.0.0",
     "rollup-plugin-terser": "^7.0.2",
-    "typescript": "4.8.4",
-    "three": "^0.151.2"
+    "typescript": "4.8.4"
   },
   "publishConfig": {
     "access": "public"

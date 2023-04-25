@@ -9,10 +9,11 @@
 .attribute-name,
 .cs-name,
 .part-name,
+.mixi-name,
 .propertie-name,
-.staticPropertie-name,
+.staticpropertie-name,
 .method-name,
-.staticMethod-name,
+.staticmethod-name,
 .event-name,
 .slot-name,
 .question-name {
@@ -24,10 +25,11 @@
 .attribute-definition,
 .cs-definition,
 .part-definition,
+.mixi-definition,
 .propertie-definition,
-.staticPropertie-definition,
+.staticpropertie-definition,
 .method-definition,
-.staticMethod-definition,
+.staticmethod-definition,
 .event-definition,
 .slot-definition,
 .question-definition {
@@ -41,10 +43,11 @@
 .attribute-container,
 .cs-container,
 .part-container,
+.mixi-container,
 .propertie-container,
-.staticPropertie-container,
+.staticpropertie-container,
 .method-container,
-.staticMethod-container,
+.staticmethod-container,
 .event-container,
 .slot-container,
 .question-container {
@@ -86,7 +89,6 @@ hr.solid {
 }
 
 .category {
-  padding-right: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
 }
@@ -154,6 +156,10 @@ hr.solid {
   display: flex;
   align-items: center;
   font-size: 1.1em;
+}
+
+.inner-home-mve {
+  font-size: 0.95em;
 }
 
 .darken {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Google LLC. All Rights Reserved.
+ * Copyright 2023 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,43 +30,29 @@ const onwarn = (warning, warn) => {
   }
 };
 
-let plugins = [resolve({ dedupe: 'three' }), replace({ 'Reflect.decorate': 'undefined' })];
+let plugins = [resolve(), replace({ 'Reflect.decorate': 'undefined' })];
 
 const watchFiles = ['lib/**'];
 
 const outputOptions = [
   {
-    input: './lib/model-viewer.js',
+    input: './lib/model-viewer-effects.js',
     output: {
-      file: './dist/model-viewer.js',
+      file: './dist/model-viewer-effects.js',
       sourcemap: true,
       format: 'esm',
-      name: 'ModelViewerElement',
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  },
-  {
-    input: './lib/model-viewer.js',
-    output: {
-      file: './dist/model-viewer-module.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'ModelViewerElement',
+      name: 'ModelViewerEffects',
       globals: {
-        'three': 'three',
+        three: 'three',
       },
     },
-    external: ['three'],
     watch: {
       include: watchFiles,
     },
     plugins,
+    external: ['three'],
     onwarn,
-  }
+  },
 ];
 
 if (NODE_ENV !== 'development') {
@@ -85,120 +71,70 @@ if (NODE_ENV !== 'development') {
   // IE11 does not support modules, so they are removed here, as well as in a
   // dedicated unit test build which is needed for the same reason.
   outputOptions.push({
-    input: './lib/model-viewer.js',
+    input: './lib/model-viewer-effects.js',
     output: {
-      file: './dist/model-viewer-umd.js',
+      file: './dist/model-viewer-effects-umd.js',
       sourcemap: true,
       format: 'umd',
-      name: 'ModelViewerElement',
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins: pluginsIE11,
-    onwarn,
-  });
-
-  /** Bundled w/o three */
-
-  // IE11 does not support modules, so they are removed here, as well as in a
-  // dedicated unit test build which is needed for the same reason.
-  outputOptions.push({
-    input: './lib/model-viewer.js',
-    output: {
-      file: './dist/model-viewer-module-umd.js',
-      sourcemap: true,
-      format: 'umd',
-      name: 'ModelViewerElement',
+      name: 'ModelViewerEffects',
       globals: {
-        'three': 'three',
+        three: 'three',
       },
     },
-    external: ['three'],
     watch: {
       include: watchFiles,
     },
+    external: ['three'],
     plugins: pluginsIE11,
     onwarn,
   });
 
-  // Minified Versions
   plugins = [...plugins, terser()];
 
   outputOptions.push({
-    input: './dist/model-viewer.js',
+    input: './dist/model-viewer-effects.js',
     output: {
-      file: './dist/model-viewer.min.js',
+      file: './dist/model-viewer-effects.min.js',
       sourcemap: true,
       format: 'esm',
-      name: 'ModelViewerElement',
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  });
-
-  outputOptions.push({
-    input: './dist/model-viewer-umd.js',
-    output: {
-      file: './dist/model-viewer-umd.min.js',
-      sourcemap: true,
-      format: 'umd',
-      name: 'ModelViewerElement',
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  });
-
-  outputOptions.push({
-    input: './dist/model-viewer-module.js',
-    output: {
-      file: './dist/model-viewer-module.min.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'ModelViewerElement',
+      name: 'ModelViewerEffects',
       globals: {
-        'three': 'three',
+        three: 'three',
       },
     },
-    external: ['three'],
     watch: {
       include: watchFiles,
     },
+    external: ['three'],
     plugins,
     onwarn,
   });
 
   outputOptions.push({
-    input: './dist/model-viewer-module-umd.js',
+    input: './dist/model-viewer-effects-umd.js',
     output: {
-      file: './dist/model-viewer-module-umd.min.js',
+      file: './dist/model-viewer-effects-umd.min.js',
       sourcemap: true,
       format: 'umd',
-      name: 'ModelViewerElement',
+      name: 'ModelViewerEffects',
       globals: {
-        'three': 'three',
+        three: 'three',
       },
     },
-    external: ['three'],
     watch: {
       include: watchFiles,
     },
+    external: ['three'],
     plugins,
     onwarn,
   });
 
   outputOptions.push({
-    input: './lib/model-viewer.d.ts',
+    input: './lib/model-viewer-effects.d.ts',
     output: {
-      file: './dist/model-viewer.d.ts',
+      file: './dist/model-viewer-effects.d.ts',
       format: 'esm',
-      name: 'ModelViewerElement',
+      name: 'ModelViewerEffects',
     },
     plugins: [dts()],
   });

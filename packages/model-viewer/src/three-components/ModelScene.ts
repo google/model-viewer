@@ -20,7 +20,7 @@ import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
 
 import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
 import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
-import ModelViewerElementBase, {$renderer, RendererInterface} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, EffectComposerInterface, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
@@ -68,6 +68,7 @@ export class ModelScene extends Scene {
   public element: ModelViewerElement;
   public canvas: HTMLCanvasElement;
   public annotationRenderer = new CSS2DRenderer();
+  public effectRenderer: EffectComposerInterface|null = null;
   public schemaElement = document.createElement('script');
   public width = 1;
   public height = 1;

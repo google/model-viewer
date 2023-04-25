@@ -40,7 +40,7 @@
       {
         "name": "Can I have X feature from three.js?",
         "htmlName": "three",
-        "description": "Probably not. We intentionally keep our API at a higher level than three.js, which is a full game engine. You're welcome to file a feature request if you have an idea that can be explained easily to lay users. You are also welcome to hack/fork us. You can use <code>Object.getOwnPropertySymbols(mvElement).find(e => e === '$scene');</code> to get access to our internal three.js scene and do whatever you want. However, this is outside the scope of our public API, so we make no effort to avoid breaking changes or to provide support.",
+        "description": "Probably not. We intentionally keep our API at a higher level than three.js, which is a full game engine. You're welcome to file a feature request if you have an idea that can be explained easily to lay users. You are also welcome to hack/fork us. You can use <code>mvElement[Object.getOwnPropertySymbols(mvElement).find(e => e.description === 'scene')];</code> to get access to our internal three.js scene and do whatever you want. However, this is outside the scope of our public API, so we make no effort to avoid breaking changes or to provide support.",
         "links": []
       },
       {
@@ -99,7 +99,7 @@
       {
         "name": "How do I avoid duplicating three.js in my bundle?",
         "htmlName": "duplication",
-        "description": "Three.js used to be marked as our dependency, which meant it was duplicated if you used it in another part of your code base too. As of v3.0.2, it is marked as our peer dependency, allowing you to share it. Note that we pin its version due to frequent breaking changes, so you will not have much version flexibility. This can be worked around using npm's --legacy-peer-deps mode, but please do not file issues if you do this, as we can only ensure our tested quality on one version of three.js at a time.",
+        "description": "Three.js used to be marked as our dependency, which meant it was duplicated if you used it in another part of your code base too. As of v3.0.2, it is marked as our peer dependency, allowing you to share it. Note that we pin its version due to frequent breaking changes, so you will not have much version flexibility. This can be worked around using npm's --legacy-peer-deps mode, but please do not file issues if you do this, as we can only ensure our tested quality on one version of three.js at a time. If you are working directly with our bundle, then you may prefer to use the <code>model-viewer-no-three.min.js</code> bundle, and bring Three.js manually using an import-map.",
         "links": [
           "<a href='https://docs.npmjs.com/cli/v7/using-npm/config#legacy-peer-deps'>NPM legacy-peer-deps documentation</a>"
         ]

@@ -264,5 +264,35 @@
         "name": "Exporter"
       }
     ]
+  },
+  {
+    "name": "Post Process Effects",
+    "htmlName": "postprocessing",
+    "examples": [
+      {
+        "htmlId": "setup",
+        "name": "Setup Post Processing"
+      },
+      {
+        "htmlId": "effects",
+        "name": "The Effects API"
+      },
+      {
+        "htmlId": "colorgrade",
+        "name": "Color Grading"
+      },
+      {
+        "htmlId": "selective-effects",
+        "name": "Selective Effects"
+      },
+      {
+        "htmlId": "combining-effects",
+        "name": "Combining Effects"
+      },
+      {
+        "htmlId": "custom-effects",
+        "name": "Custom Effects"
+      }
+    ]
   }
 ]

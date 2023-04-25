@@ -15,7 +15,7 @@
 
 import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
-import {Event as ThreeEvent, Vector2, Vector3} from 'three';
+import {Event as ThreeEvent, Vector2, Vector3, WebGLRenderer, Camera as ThreeCamera} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {$updateEnvironment} from './features/environment.js';
@@ -117,6 +117,15 @@ export interface FramingInfo {
 export interface Camera {
   viewMatrix: Array<number>;
   projectionMatrix: Array<number>;
+}
+
+export interface EffectComposerInterface {
+  setRenderer(renderer: WebGLRenderer): void;
+  setMainScene(scene: ModelScene): void;
+  setMainCamera(camera: ThreeCamera): void;
+  setSize(width: number, height: number): void;
+  beforeRender(time: DOMHighResTimeStamp, delta: DOMHighResTimeStamp): void;
+  render(deltaTime?: DOMHighResTimeStamp): void;
 }
 
 export interface RendererInterface {
@@ -481,6 +490,27 @@ export default class ModelViewerElementBase extends ReactiveElement {
     };
   }
 
+  /**
+   * Registers a new EffectComposer as the main rendering pipeline,
+   * instead of the default ThreeJs renderer. 
+   * This method also calls setRenderer, setMainScene, and setMainCamera on 
+   * your effectComposer.
+   * @param effectComposer An EffectComposer from `pmndrs/postprocessing`
+   */
+  registerEffectComposer(effectComposer: EffectComposerInterface) {
+    effectComposer.setRenderer(this[$renderer].threeRenderer);
+    effectComposer.setMainCamera(this[$scene].getCamera());
+    effectComposer.setMainScene(this[$scene]);
+    this[$scene].effectRenderer = effectComposer;
+  }
+
+  /**
+   * Removes the registered EffectComposer
+   */
+  unregisterEffectComposer() {
+    this[$scene].effectRenderer = null;
+  }
+
   registerRenderer(renderer: RendererInterface) {
     this[$scene].externalRenderer = renderer;
   }
@@ -528,7 +558,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     this[$onResize]({width, height});
   }
 
-  [$tick](_time: number, _delta: number) {
+  [$tick](time: number, delta: number) {
+    this[$scene].effectRenderer?.beforeRender(time, delta);
   }
 
   [$markLoaded]() {
@@ -544,8 +575,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     this[$scene].queueRender();
   }
 
-  [$onModelLoad]() {
-  }
+  [$onModelLoad]() {}
 
   [$updateStatus](status: string) {
     this[$status] = status;
@@ -610,6 +640,10 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
       this[$markLoaded]();
       this[$onModelLoad]();
+        
+      this.updateComplete.then(() => {
+        this.dispatchEvent(new CustomEvent('before-render'));
+      });
 
       // Wait for shaders to compile and pixels to be drawn.
       await new Promise<void>(resolve => {

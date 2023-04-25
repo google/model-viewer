@@ -34,7 +34,7 @@
   --toggle-visibility: hidden;
   --og-sidebar-width: 300px;
   --neg-sidebar-width: 0px;
-  --sidebar-width: 300px;
+  --sidebar-width: 315px;
   --sidebar-speed: .15s;
   --border-style-dark: 1px solid rgba(0, 0, 0, .5);
 }
@@ -42,7 +42,7 @@
 .sidebar {
   margin: 0;
   padding: 0;
-  width: 300px;
+  width: var(--sidebar-width);
   margin-left: var(--neg-sidebar-width);
   background-color: #f6f6f6;
   position: fixed;
