@@ -112,10 +112,13 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
       gltfSampler.wrapT = texture ? texture.wrapT as WrapMode : Wrap.Repeat;
     }
     if (gltfSampler.rotation == null) {
-      gltfSampler.wrapT = texture ? texture.wrapT as WrapMode : Wrap.Repeat;
+      gltfSampler.rotation = texture ? texture.rotation as number : 0;
     }
-    if (gltfSampler.wrapT == null) {
-      gltfSampler.wrapT = texture ? texture.wrapT as WrapMode : Wrap.Repeat;
+    if (gltfSampler.repeat == null) {
+      gltfSampler.repeat = texture ? texture.repeat as Vector2 : new Vector2(1, 1);
+    }
+    if (gltfSampler.offset == null) {
+      gltfSampler.offset = texture ? texture.offset as Vector2 : new Vector2(0, 0);
     }
 
     super(
