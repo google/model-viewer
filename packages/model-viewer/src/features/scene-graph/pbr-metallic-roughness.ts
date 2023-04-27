@@ -110,7 +110,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     if (rgba instanceof Array) {
       color.fromArray(rgba);
     } else {
-      color.set(rgba as ColorRepresentation).convertSRGBToLinear();
+      color.set(rgba as ColorRepresentation);
     }
     for (const material of this[$threeMaterials]) {
       material.color.set(color);
