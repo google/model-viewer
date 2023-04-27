@@ -1,4 +1,4 @@
-import {TextureFilter, Wrapping} from 'three';
+import {TextureFilter, Vector2, Wrapping} from 'three';
 
 export type RGB = [number, number, number];
 
@@ -121,6 +121,9 @@ export interface Sampler {
   wrapT?: WrapMode;
   extensions?: ExtensionDictionary;
   extras?: Extras;
+  rotation?: number;
+  repeat?: Vector2;
+  offset?: Vector2;
 }
 
 export interface Texture {

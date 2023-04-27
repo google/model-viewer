@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Texture as ThreeTexture} from 'three';
+import {Texture as ThreeTexture, Vector2} from 'three';
 
 import {Filter, MagFilter, MinFilter, Sampler as GLTFSampler, Wrap, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Sampler as DefaultedSampler} from '../../three-components/gltf-instance/gltf-defaulted.js';
@@ -49,7 +49,7 @@ const isWrapMode = (() => {
              wrapModes.indexOf(value as WrapMode) > -1;
 })();
 
-const isValidSamplerValue = <P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
+const isValidSamplerValue = <P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'|'rotation'|'repeat'|'offset'>(
     property: P, value: unknown): value is DefaultedSampler[P] => {
   switch (property) {
     case 'minFilter':
@@ -59,6 +59,10 @@ const isValidSamplerValue = <P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
     case 'wrapS':
     case 'wrapT':
       return isWrapMode(value);
+    case 'rotation':
+    case 'repeat':
+    case 'offset':
+      return true;
     default:
       throw new Error(`Cannot configure property "${property}" on Sampler`);
   }
@@ -107,6 +111,12 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     if (gltfSampler.wrapT == null) {
       gltfSampler.wrapT = texture ? texture.wrapT as WrapMode : Wrap.Repeat;
     }
+    if (gltfSampler.rotation == null) {
+      gltfSampler.wrapT = texture ? texture.wrapT as WrapMode : Wrap.Repeat;
+    }
+    if (gltfSampler.wrapT == null) {
+      gltfSampler.wrapT = texture ? texture.wrapT as WrapMode : Wrap.Repeat;
+    }
 
     super(
         onUpdate, gltfSampler, new Set<ThreeTexture>(texture ? [texture] : []));
@@ -132,6 +142,18 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     return this[$sourceSampler].wrapT;
   }
 
+  get rotation(): number {
+    return this[$sourceSampler].rotation;
+  }
+
+  get scale(): Vector2 {
+    return this[$sourceSampler].repeat;
+  }
+
+  get offset(): Vector2|null {
+    return this[$sourceSampler].offset;
+  }
+
   setMinFilter(filter: MinFilter) {
     this[$setProperty]('minFilter', filter);
   }
@@ -148,15 +170,39 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     this[$setProperty]('wrapT', mode);
   }
 
-  private[$setProperty]<P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'>(
-      property: P, value: MinFilter|MagFilter|WrapMode) {
+  setRotation(rotation: number|null): void {
+    if(!rotation) {
+      // Reset rotation.
+      rotation = 0;
+    }
+    this[$setProperty]('rotation', rotation);
+  }
+
+  setScale(scale: Vector2|null): void {
+    if(!scale) {
+      // Reset scale.
+      scale = new Vector2(1, 1);
+    }
+    this[$setProperty]('repeat', scale);
+  }
+
+  setOffset(offset: Vector2|null): void {
+    if(!offset) {
+      // Reset offset.
+      offset = new Vector2(0, 0);
+    }
+    this[$setProperty]('offset', offset);
+  }
+
+  private[$setProperty]<P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'|'rotation'|'repeat'|'offset'>(
+      property: P, value: MinFilter|MagFilter|WrapMode|number|Vector2) {
     const sampler = this[$sourceSampler];
     if (sampler != null) {
       if (isValidSamplerValue(property, value)) {
         sampler[property] = value;
 
         for (const texture of this[$threeTextures]) {
-          (texture[property] as MinFilter | MagFilter | WrapMode) = value;
+          (texture[property] as MinFilter | MagFilter | WrapMode | number | Vector2) = value;
           texture.needsUpdate = true;
         }
       }

@@ -491,18 +491,18 @@ modelViewerTexture1.addEventListener("load", () => {
           </div>
           <example-snippet stamp-to="transformTexturesExample" highlight-as="html">
             <template>
-<model-viewer id="helmet2" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar alt="A 3D model of a helmet">
+<model-viewer id="box" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb" ar alt="A 3D model of a helmet">
   <div class="controls">
       <p>Rotation: <span id="texture-rotation"></span></p>
-      <input type="range" min="0" max="0.2" value="0" step="0.01" id="rotationSlider">
+      <input type="range" min="0" max="0.3" value="0" step="0.01" id="rotationSlider">
       <p>Scale: <span id="texture-scale"></span></p>
-      <input type="range" min="0.9" max="1.1" value="1" step="0.01" id="scaleSlider">
+      <input type="range" min="0.5" max="1.5" value="1" step="0.01" id="scaleSlider">
       <p>Offset</p>
-      <input type="range" min="0.9" max="1.1" value="1" step="0.01" id="offsetSlider">
+      <input type="range" min="0.5" max="1.5" value="1" step="0.01" id="offsetSlider">
     </div>
 </model-viewer>
 <script type="module">
-const modelViewerTexture2 = document.querySelector("model-viewer#helmet2");
+const modelViewerTexture2 = document.querySelector("model-viewer#box");
 const rotationSlider = document.querySelector('#rotationSlider');
 const scaleSlider = document.querySelector('#scaleSlider');
 const offsetSlider = document.querySelector('#offsetSlider');
@@ -517,38 +517,27 @@ modelViewerTexture2.addEventListener("load", () => {
   rotationDisplay.textContent = rotationSlider.value;
   scaleDisplay.textContent = scaleSlider.value;
 
-  const setTextureRotation = async (channel, rotation) => {
-    material[channel].setRotation(rotation);
-    rotationDisplay.textContent = rotation;
-  }
-
-  const setTextureScale = async (channel, scale) => {
-    material[channel].setScale(scale);
-    scaleDisplay.textContent = scale.x;
-  }
-
-  const setTextureOffset = async (channel, offset) => {
-    material[channel].setOffset(offset);
-  }
-
   rotationSlider.addEventListener('input', (event) => {
-    setTextureRotation('emissiveTexture', rotationSlider.value);
+    const rotation = rotationSlider.value;
+    material.pbrMetallicRoughness['baseColorTexture'].setRotation(rotation);
+    rotationDisplay.textContent = rotation;
   });
 
   scaleSlider.addEventListener('input', (event) => {
-    const scale = {
-      x: scaleSlider.value,
-      y: scaleSlider.value
-    };
-    setTextureScale('emissiveTexture', scale);
+    // const scale = {
+    //   x: scaleSlider.value,
+    //   y: scaleSlider.value
+    // };
+    // material.pbrMetallicRoughness['baseColorTexture'].setScale(scale);
+    // scaleDisplay.textContent = scale.x;
   });
 
   offsetSlider.addEventListener('input', (event) => {
-    const offset = {
-      x: offsetSlider.value,
-      y: -offsetSlider.value
-    };
-    setTextureOffset('emissiveTexture', offset);
+    // const offset = {
+    //   x: offsetSlider.value,
+    //   y: -offsetSlider.value
+    // };
+    // material.pbrMetallicRoughness['baseColorTexture'].setOffset(offset);
   });
 });
 

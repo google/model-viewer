@@ -207,42 +207,11 @@ export declare interface TextureInfo {
   readonly texture: Texture|null;
 
   /**
-   * The texture rotation in radians.
-   */
-  readonly rotation: number|null;
-
-  /**
-   * The texture scale.
-   */
-  readonly scale: Vector2|null;
-
-  /**
-   * The texture offset.
-   */
-  readonly offset: Vector2|null;
-
-  /**
    * Sets the texture, or removes it if argument is null. Note you cannot build
    * your own Texture object, but must either use one from another TextureInfo,
    * or create one with the createTexture method.
    */
   setTexture(texture: Texture|null): void;
-
-  /**
-   * Sets the texture rotation, or resets it to zero if argument is null. Rotation is
-   * in radians.
-   */
-  setRotation(rotation: number|null): void;
-
-  /**
-   * Sets the texture scale, or resets it to (1, 1) if argument is null.
-   */
-  setScale(scale: Vector2|null): void;
-
-  /**
-   * Sets the texture offset, or resets it to (0, 0) if argument is null.
-   */
-  setOffset(offset: Vector2|null): void;
 }
 
 /**
@@ -298,6 +267,21 @@ export declare interface Sampler {
    */
   readonly wrapT: WrapMode;
 
+   /**
+   * The texture rotation in radians.
+   */
+   readonly rotation: number|null;
+
+   /**
+    * The texture scale.
+    */
+   readonly scale: Vector2|null;
+ 
+   /**
+    * The texture offset.
+    */
+   readonly offset: Vector2|null;
+
   /**
    * Configure the minFilter value of the Sampler.
    */
@@ -317,6 +301,22 @@ export declare interface Sampler {
    * Configure the T (V) wrap mode of the Sampler.
    */
   setWrapT(mode: WrapMode): void;
+
+  /**
+   * Sets the texture rotation, or resets it to zero if argument is null. Rotation is
+   * in radians.
+   */
+  setRotation(rotation: number|null): void;
+
+  /**
+   * Sets the texture scale, or resets it to (1, 1) if argument is null.
+   */
+  setScale(scale: Vector2|null): void;
+
+  /**
+   * Sets the texture offset, or resets it to (0, 0) if argument is null.
+   */
+  setOffset(offset: Vector2|null): void;
 }
 
 
