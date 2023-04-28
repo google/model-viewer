@@ -258,7 +258,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     if (rgb instanceof Array) {
       color.fromArray(rgb);
     } else {
-      color.set(rgb as ColorRepresentation).convertSRGBToLinear();
+      color.set(rgb as ColorRepresentation);
     }
     for (const material of this[$correlatedObjects] as
          Set<MeshStandardMaterial>) {
