@@ -85,7 +85,7 @@
     "lit": "^2.7.2"
   },
   "peerDependencies": {
-    "three": "^0.152.0"
+    "three": "^0.152.1"
   },
   "devDependencies": {
     "@open-wc/karma-esm": "^4.0.0",
@@ -114,7 +114,7 @@
     "rollup-plugin-polyfill": "^3.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "4.8.4",
-    "three": "^0.152.0"
+    "three": "^0.152.1"
   },
   "publishConfig": {
     "access": "public"
