@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-// eslint-disable-next-line no-undef
 const fs = require('fs');
 const THREE_REGEX = /three@[~^]?([\dvx*]+(?:[-.](?:[\dx*]+|alpha|beta))*)/gm;
 let NEW_THREE_VERSION;
@@ -25,4 +23,3 @@ function updateThreeVersion(filePath) {
 
 updateThreeVersion('../model-viewer-effects/README.md');
 updateThreeVersion('../modelviewer.dev/examples/postprocessing/index.html');
-// updateThreeVersion('.././packages/model-viewer-effects/README.md');

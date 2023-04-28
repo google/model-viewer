@@ -1,4 +1,5 @@
 **/node_modules
+scripts/**/*.js
 packages/*/dist
 packages/**/*.d.ts
 packages/*/src/*-css.ts
