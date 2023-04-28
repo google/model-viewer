@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { Vector2 } from 'three';
+import {Vector2} from 'three';
+
 import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 
@@ -267,20 +268,20 @@ export declare interface Sampler {
    */
   readonly wrapT: WrapMode;
 
-   /**
+  /**
    * The texture rotation in radians.
    */
-   readonly rotation: number|null;
+  readonly rotation: number|null;
 
-   /**
-    * The texture scale.
-    */
-   readonly scale: Vector2|null;
- 
-   /**
-    * The texture offset.
-    */
-   readonly offset: Vector2|null;
+  /**
+   * The texture scale.
+   */
+  readonly scale: Vector2|null;
+
+  /**
+   * The texture offset.
+   */
+  readonly offset: Vector2|null;
 
   /**
    * Configure the minFilter value of the Sampler.
@@ -303,8 +304,8 @@ export declare interface Sampler {
   setWrapT(mode: WrapMode): void;
 
   /**
-   * Sets the texture rotation, or resets it to zero if argument is null. Rotation is
-   * in radians.
+   * Sets the texture rotation, or resets it to zero if argument is null.
+   * Rotation is in radians.
    */
   setRotation(rotation: number|null): void;
 

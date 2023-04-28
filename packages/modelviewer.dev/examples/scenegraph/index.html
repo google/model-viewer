@@ -517,27 +517,31 @@ modelViewerTexture2.addEventListener("load", () => {
   rotationDisplay.textContent = rotationSlider.value;
   scaleDisplay.textContent = scaleSlider.value;
 
+  // Texture wrap is often used as REPEAT.
+  material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setWrapS(10497); //WrapMode.Repeat
+  material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setWrapT(10497); //WrapMode.Repeat
+
   rotationSlider.addEventListener('input', (event) => {
     const rotation = rotationSlider.value;
-    material.pbrMetallicRoughness['baseColorTexture'].setRotation(rotation);
+    material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setRotation(rotation);
     rotationDisplay.textContent = rotation;
   });
 
   scaleSlider.addEventListener('input', (event) => {
-    // const scale = {
-    //   x: scaleSlider.value,
-    //   y: scaleSlider.value
-    // };
-    // material.pbrMetallicRoughness['baseColorTexture'].setScale(scale);
-    // scaleDisplay.textContent = scale.x;
+    const scale = {
+      x: scaleSlider.value,
+      y: scaleSlider.value
+    };
+    material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setScale(scale);
+    scaleDisplay.textContent = scale.x;
   });
 
   offsetSlider.addEventListener('input', (event) => {
-    // const offset = {
-    //   x: offsetSlider.value,
-    //   y: -offsetSlider.value
-    // };
-    // material.pbrMetallicRoughness['baseColorTexture'].setOffset(offset);
+    const offset = {
+      x: offsetSlider.value,
+      y: -offsetSlider.value
+    };
+    material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setOffset(offset);
   });
 });
 
@@ -752,22 +756,6 @@ interface TextureInfo {
    * or create one with the createTexture method.
    */
   setTexture(texture: Texture|null): void;
-
-  /**
-   * Sets the texture rotation, or resets it to zero if argument is null. Rotation is
-   * in radians.
-   */
-  setRotation(rotation: number|null): void;
-
-  /**
-   * Sets the texture scale, or resets it to (1, 1) if argument is null.
-   */
-  setScale(scale: Vector2|null): void;
-
-  /**
-   * Sets the texture offset, or resets it to (0, 0) if argument is null.
-   */
-  setOffset(offset: Vector2|null): void;
 }
 
 interface Texture {
@@ -787,6 +775,9 @@ interface Sampler {
   setMagFilter(filter: MagFilter): void;
   setWrapS(mode: WrapMode): void;
   setWrapT(mode: WrapMode): void;
+  setRotation(rotation: number|null): void;
+  setScale(scale: Vector2|null): void;
+  setOffset(offset: Vector2|null): void;
 }
 
 interface Image {
