@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {Camera, Vector3} from 'three';
 
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
@@ -23,7 +24,6 @@ import {ChangeSource, SmoothControls} from '../../three-components/SmoothControl
 import {step, timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
 
-const expect = chai.expect;
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {

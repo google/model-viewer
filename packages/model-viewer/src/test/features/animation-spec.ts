@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
-
-const expect = chai.expect;
 
 const TOLERANCE_SEC = 0.1;
 const NON_ANIMATED_GLB_PATH = assetPath('models/Astronaut.glb');

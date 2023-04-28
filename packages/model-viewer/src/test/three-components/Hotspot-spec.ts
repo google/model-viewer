@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {expect} from '@esm-bundle/chai';
+
 import {Hotspot, HotspotVisibilityDetails} from '../../three-components/Hotspot.js';
 import {waitForEvent} from '../../utilities.js';
-
-const expect = chai.expect;
 
 suite('Hotspot', () => {
   suite('with only a name', () => {

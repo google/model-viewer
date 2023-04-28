@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$prepared, GLTFInstance, PreparedGLTF} from '../../three-components/GLTFInstance.js';
 import {createFakeThreeGLTF} from '../helpers.js';
-
-
-const expect = chai.expect;
 
 suite('GLTFInstance', () => {
   let rawGLTF: GLTF;

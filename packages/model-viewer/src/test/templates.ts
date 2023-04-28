@@ -23,7 +23,7 @@ export type Constructor<T = object> = {
   new (...args: any[]): T
 };
 
-const expect = chai.expect;
+import {expect} from '@esm-bundle/chai';
 
 export const BasicSpecTemplate =
     (ModelViewerElementAccessor: () => Constructor<ModelViewerElementBase>,

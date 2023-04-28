@@ -21,6 +21,7 @@
   ],
   "main": "dist/model-viewer.min.js",
   "module": "lib/model-viewer.js",
+  "type": "module",
   "files": [
     "src",
     "lib",
@@ -54,7 +55,7 @@
     "build:rollup": "rollup -c --environment NODE_ENV:production",
     "build:rollup:dev": "rollup -c --environment NODE_ENV:development",
     "prepublishOnly": "npm run build",
-    "test": "karma start --single-run",
+    "test": "web-test-runner \"lib/test/**/*-spec.js\" --node-resolve --playwright --browsers chromium",
     "test:ci": "npm run test",
     "check-fidelity": "node ./test/fidelity/index.js ./test/fidelity/config.json",
     "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
@@ -63,7 +64,7 @@
     "watch:tsc": "tsc -w --incremental",
     "watch:rollup": "rollup -c -w --environment NODE_ENV:production",
     "watch:rollup:dev": "rollup -c -w --environment NODE_ENV:development",
-    "watch:test": "karma start",
+    "watch:test": "web-test-runner \"lib/test/**/*-spec.js\" --node-resolve --playwright --browsers chromium --watch",
     "build:dev:serve": "npm run build:dev && npm run serve"
   },
   "keywords": [
@@ -97,7 +98,9 @@
     "@types/pngjs": "^6.0.1",
     "@types/three": "^0.150.0",
     "@ungap/event-target": "^0.2.3",
-    "chai": "^4.3.6",
+    "@web/test-runner": "^0.16.1",
+    "@web/test-runner-playwright": "^0.10.0",
+    "@esm-bundle/chai": "4.3.4",
     "http-server": "^14.1.1",
     "karma": "^5.2.3",
     "karma-browserstack-launcher": "^1.6.0",

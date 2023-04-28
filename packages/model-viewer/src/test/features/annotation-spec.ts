@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {Vector3} from 'three';
 
 import {ModelViewerElement} from '../../model-viewer';
@@ -21,8 +22,6 @@ import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene';
 import {timePasses, waitForEvent} from '../../utilities';
 import {assetPath, rafPasses} from '../helpers';
-
-const expect = chai.expect;
 
 const sceneContainsHotspot =
     (scene: ModelScene, element: HTMLElement): boolean => {

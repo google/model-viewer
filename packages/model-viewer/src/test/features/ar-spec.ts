@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {IS_ANDROID, IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer} from '../../features/ar.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses, spy} from '../helpers.js';
-
-const expect = chai.expect;
 
 suite('AR', () => {
   let element: ModelViewerElement;
@@ -97,8 +97,8 @@ suite('AR', () => {
       expect(intentUrls.length).to.be.equal(1);
 
       const search = new URLSearchParams(new URL(intentUrls[0]).search);
-      const file = new URL( search.get('file') as any );
-      
+      const file = new URL(search.get('file') as any);
+
       expect(file.hash).to.equal('');
     });
 
@@ -111,13 +111,12 @@ suite('AR', () => {
       expect(intentUrls.length).to.be.equal(1);
 
       const search = new URLSearchParams(new URL(intentUrls[0]).search);
-      const file = new URL( search.get('file') as any );
-      
+      const file = new URL(search.get('file') as any);
+
       expect(file.hash).to.equal('');
       expect(search.get('title')).to.equal('bar');
       expect(search.get('link')).to.equal('http://linkme.com/');
     });
-
   });
 
   suite('openQuickLook', () => {

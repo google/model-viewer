@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../utilities.js';
 
 import {assetPath, spy, until} from './helpers.js';
-
-const expect = chai.expect;
 
 const expectBlobDimensions =
     async (blob: Blob, width: number, height: number) => {

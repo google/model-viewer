@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {$evictionPolicy, CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {assetPath} from '../helpers.js';
-
-const expect = chai.expect;
 
 const ModelViewerElement = class extends ModelViewerElementBase {
   static get is() {

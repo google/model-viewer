@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {GLTF} from '../../../three-components/gltf-instance/gltf-2.0.js';
 import {GLTFTreeVisitor} from '../../../three-components/gltf-instance/utilities.js';
 import {assetPath, loadThreeGLTF} from '../../helpers.js';
-
-const expect = chai.expect;
 
 const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
 

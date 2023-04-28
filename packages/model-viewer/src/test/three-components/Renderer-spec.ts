@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {Vector2} from 'three';
 
 import {$controls} from '../../features/controls.js';
@@ -23,7 +24,6 @@ import {Renderer} from '../../three-components/Renderer.js';
 import {resolveDpr, waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
 
-const expect = chai.expect;
 let externalCamera: Camera;
 let externalWidth = 0;
 let externalHeight = 0;

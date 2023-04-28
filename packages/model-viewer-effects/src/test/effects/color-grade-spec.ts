@@ -13,19 +13,11 @@
  * limitations under the License.
  */
 
-import { ModelViewerElement } from '@google/model-viewer';
-import { EffectComposer, ColorGradeEffect } from '../../model-viewer-effects.js';
-import {
-  createModelViewerElement,
-  assetPath,
-  waitForEvent,
-  screenshot,
-  ArraysAreEqual,
-  timePasses,
-  CompareArrays,
-  AverageHSL,
-} from '../utilities';
-const expect = chai.expect;
+import {expect} from '@esm-bundle/chai';
+import {ModelViewerElement} from '@google/model-viewer';
+
+import {ColorGradeEffect, EffectComposer} from '../../model-viewer-effects.js';
+import {ArraysAreEqual, assetPath, AverageHSL, CompareArrays, createModelViewerElement, screenshot, timePasses, waitForEvent,} from '../utilities';
 
 suite('Color Grade Effect', () => {
   let element: ModelViewerElement;
@@ -54,7 +46,8 @@ suite('Color Grade Effect', () => {
     const colorGradeScreenshot = screenshot(element);
 
     expect(ArraysAreEqual(baseScreenshot, colorGradeScreenshot)).to.be.false;
-    expect(CompareArrays(baseScreenshot, colorGradeScreenshot)).to.be.lessThan(0.98);
+    expect(CompareArrays(baseScreenshot, colorGradeScreenshot))
+        .to.be.lessThan(0.98);
   });
 
   test('Saturation = 0', async () => {

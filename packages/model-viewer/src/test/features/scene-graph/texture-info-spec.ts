@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {TextureInfo} from '../../../features/scene-graph/texture-info.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
 import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
-const expect = chai.expect;
 const DUCK_GLB_PATH =
     assetPath('models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb');
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {Mesh, MeshStandardMaterial} from 'three';
 
 import {$currentGLTF} from '../../features/scene-graph.js';
@@ -24,8 +25,6 @@ import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/Mode
 import {ModelScene} from '../../three-components/ModelScene';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
-
-const expect = chai.expect;
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');

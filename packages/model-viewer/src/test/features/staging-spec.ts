@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {CameraChangeDetails} from '../../features/controls.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ChangeSource} from '../../three-components/SmoothControls.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
-
-const expect = chai.expect;
 
 const ODD_SHAPE_GLB_PATH = assetPath('models/odd-shape.glb');
 const AUTO_ROTATE_DELAY = 50;

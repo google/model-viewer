@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {expect} from '@esm-bundle/chai';
 import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
 
 import {style} from '../decorators.js';
 import {numberNode} from '../styles/parsers.js';
 import {timePasses} from '../utilities.js';
-
-const expect = chai.expect;
 
 const $updateFoo = Symbol('updateFoo');
 
