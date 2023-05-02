@@ -56,7 +56,6 @@
     "build:rollup:dev": "rollup -c --environment NODE_ENV:development",
     "prepublishOnly": "npm run build",
     "test": "web-test-runner \"lib/test/**/*-spec.js\" --node-resolve --playwright --browsers chromium firefox webkit",
-    "test:ci": "npm run test",
     "check-fidelity": "node ./test/fidelity/index.js ./test/fidelity/config.json",
     "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
     "serve": "node_modules/.bin/http-server -c-1",
@@ -64,7 +63,7 @@
     "watch:tsc": "tsc -w --incremental",
     "watch:rollup": "rollup -c -w --environment NODE_ENV:production",
     "watch:rollup:dev": "rollup -c -w --environment NODE_ENV:development",
-    "watch:test": "web-test-runner \"lib/test/**/*-spec.js\" --node-resolve --playwright --browsers chromium --watch",
+    "watch:test": "web-test-runner \"lib/test/**/*-spec.js\" --node-resolve --playwright --browsers firefox --watch",
     "build:dev:serve": "npm run build:dev && npm run serve"
   },
   "keywords": [
