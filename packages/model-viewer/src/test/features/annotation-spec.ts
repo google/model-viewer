@@ -208,13 +208,11 @@ suite('Annotation', () => {
   });
 
   suite('a model-viewer element with a loaded cube', () => {
-    let width = 0;
-    let height = 0;
+    let rect: DOMRect;
 
     setup(async () => {
-      width = 200;
-      height = 300;
-      element.setAttribute('style', `width: ${width}px; height: ${height}px`);
+      element.setAttribute('style', `width: 200px; height: 300px`);
+      rect = element.getBoundingClientRect();
       element.cameraOrbit = '0deg 90deg 2m';
       element.jumpCameraToGoal();
       await rafPasses();
@@ -222,12 +220,13 @@ suite('Annotation', () => {
 
     test('gets expected hit result', async () => {
       await rafPasses();
-      const hitResult =
-          element.positionAndNormalFromPoint(width / 2, height / 2);
+      const hitResult = element.positionAndNormalFromPoint(
+          rect.width / 2 + rect.x, rect.height / 2 + rect.y);
       expect(hitResult).to.be.ok;
       const {position, normal, uv} = hitResult!;
       closeToVector3(position, new Vector3(0, 0, 0.5));
       closeToVector3(normal, new Vector3(0, 0, 1));
+
       if (uv != null) {
         withinRange(uv, 0, 1);
       }
@@ -236,8 +235,8 @@ suite('Annotation', () => {
     test('gets expected hit result when turned', async () => {
       element.resetTurntableRotation(-Math.PI / 2);
       await rafPasses();
-      const hitResult =
-          element.positionAndNormalFromPoint(width / 2, height / 2);
+      const hitResult = element.positionAndNormalFromPoint(
+          rect.width / 2 + rect.x, rect.height / 2 + rect.y);
       expect(hitResult).to.be.ok;
       const {position, normal, uv} = hitResult!;
       closeToVector3(position, new Vector3(0.5, 0, 0));
@@ -249,7 +248,8 @@ suite('Annotation', () => {
 
     test('returns a surface that shows and hides appropriately', async () => {
       await rafPasses();
-      const surface = element.surfaceFromPoint(width / 2, height / 2);
+      const surface = element.surfaceFromPoint(
+          rect.width / 2 + rect.x, rect.height / 2 + rect.y);
       expect(surface).to.be.ok;
 
       const hotspot = document.createElement('div');

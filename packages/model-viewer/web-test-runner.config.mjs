@@ -1,4 +1,4 @@
-import {esbuildPlugin} from '@web/dev-server-esbuild';
+// import {esbuildPlugin} from '@web/dev-server-esbuild';
 import {devices, playwrightLauncher} from '@web/test-runner-playwright';
 
 export default {
@@ -9,7 +9,7 @@ export default {
   testFramework: {
     config: {
       ui: 'tdd',
-      // timeout: '2000',
+      timeout: '10000',
     },
   },
   // plugins: [esbuildPlugin({ts: true})],

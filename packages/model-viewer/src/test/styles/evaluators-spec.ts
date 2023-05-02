@@ -156,7 +156,7 @@ suite('evaluators', () => {
       expect(evaluator.evaluate()).to.be.eql(numberNode(4, null));
     });
 
-    test('evaluates algebra with nested functions', () => {
+    suite('evaluates algebra with nested functions', () => {
       test('evaluates basic addition', () => {
         const evaluator = new CalcEvaluator(functionNode(
             'calc', [expressionNode([
