@@ -1,3 +1,4 @@
+import {esbuildPlugin} from '@web/dev-server-esbuild';
 import {devices, playwrightLauncher} from '@web/test-runner-playwright';
 
 export default {
@@ -11,6 +12,7 @@ export default {
       // timeout: '2000',
     },
   },
+  // plugins: [esbuildPlugin({ts: true})],
   // browsers:
   //     [
   //       playwrightLauncher({

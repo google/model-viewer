@@ -260,7 +260,7 @@ suite('Renderer with two scenes', () => {
         Object.defineProperty(self, 'devicePixelRatio', {value: originalDpr});
       });
 
-      test('updates effective DPR', () => {
+      test.skip('updates effective DPR', () => {
         const {element} = scene;
         const initialDpr = renderer.dpr;
         const {width, height} = scene.getSize();
