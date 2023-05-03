@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 
-import {Vector2} from 'three';
-
 import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
-
 
 
 /**
@@ -32,6 +29,12 @@ export declare interface ThreeDOMElementMap {
   'image': Image;
   'texture': Texture;
   'texture-info': TextureInfo;
+}
+
+/** A 2D Cartesian coordinate */
+export interface Vector2 {
+  x: number;
+  y: number;
 }
 
 /**
@@ -305,12 +308,13 @@ export declare interface Sampler {
 
   /**
    * Sets the texture rotation, or resets it to zero if argument is null.
-   * Rotation is in radians.
+   * Rotation is in radians, positive for counter-clockwise.
    */
   setRotation(rotation: number|null): void;
 
   /**
    * Sets the texture scale, or resets it to (1, 1) if argument is null.
+   * As the scale value increases, the repetition of the texture will increase.
    */
   setScale(scale: Vector2|null): void;
 

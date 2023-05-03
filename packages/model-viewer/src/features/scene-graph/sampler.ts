@@ -111,15 +111,6 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     if (gltfSampler.wrapT == null) {
       gltfSampler.wrapT = texture ? texture.wrapT as WrapMode : Wrap.Repeat;
     }
-    if (gltfSampler.rotation == null) {
-      gltfSampler.rotation = texture ? texture.rotation as number : 0;
-    }
-    if (gltfSampler.repeat == null) {
-      gltfSampler.repeat = texture ? texture.repeat as Vector2 : new Vector2(1, 1);
-    }
-    if (gltfSampler.offset == null) {
-      gltfSampler.offset = texture ? texture.offset as Vector2 : new Vector2(0, 0);
-    }
 
     super(
         onUpdate, gltfSampler, new Set<ThreeTexture>(texture ? [texture] : []));
@@ -146,15 +137,15 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   get rotation(): number {
-    return this[$sourceSampler].rotation;
+    return [...this[$threeTextures]][0]['rotation'];
   }
 
   get scale(): Vector2 {
-    return this[$sourceSampler].repeat;
+    return [...this[$threeTextures]][0]['repeat'];
   }
 
   get offset(): Vector2|null {
-    return this[$sourceSampler].offset;
+    return [...this[$threeTextures]][0]['offset'];
   }
 
   setMinFilter(filter: MinFilter) {
@@ -202,7 +193,10 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     const sampler = this[$sourceSampler];
     if (sampler != null) {
       if (isValidSamplerValue(property, value)) {
-        sampler[property] = value;
+        // Rotation, repeat, and offset are not defined in GltfSampler.
+        if (['rotation', 'repeat', 'offset'].indexOf(property) == -1) {
+          sampler[property] = value;
+        }
 
         for (const texture of this[$threeTextures]) {
           (texture[property] as MinFilter | MagFilter | WrapMode | number | Vector2) = value;
