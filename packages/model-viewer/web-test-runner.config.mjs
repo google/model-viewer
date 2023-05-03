@@ -6,6 +6,11 @@ export default {
   nodeResolve: true,
   // in a monorepo you need to set set the root dir to resolve modules
   rootDir: '../../',
+  browserLogs: false,
+  filterBrowserLogs:
+      (log) => {
+        return log.type !== 'info';
+      },
   testsFinishTimeout: 300000,
   testFramework: {
     config: {
