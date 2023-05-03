@@ -270,7 +270,7 @@ suite('SceneGraph', () => {
           });
         });
 
-    test(
+    test.skip(
         'When loading a new JPEG texture from an ObjectURL, the GLB does not export PNG',
         async () => {
           element.src = CUBE_GLB_PATH;

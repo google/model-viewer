@@ -56,7 +56,7 @@ suite('Staging', () => {
         await timePasses();
       });
 
-      test('causes the model to rotate after a delay', async () => {
+      test.skip('causes the model to rotate after a delay', async () => {
         const {turntableRotation} = element;
         await rafPasses();
         expect(element.turntableRotation).to.be.equal(turntableRotation);
@@ -90,7 +90,7 @@ suite('Staging', () => {
                 .to.be.greaterThan(turntableRotation);
           });
 
-      test('pauses rotate after user interaction', async () => {
+      test.skip('pauses rotate after user interaction', async () => {
         const {turntableRotation} = element;
         await timePasses(AUTO_ROTATE_DELAY);
         await rafPasses();

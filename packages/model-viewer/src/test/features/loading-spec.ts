@@ -33,7 +33,6 @@ suite('Loading', () => {
     element = new ModelViewerElement();
     firstChild = document.body.firstChild;
     document.body.insertBefore(element, firstChild);
-    element.poster = assetPath('../screenshot.png');
 
     // Wait at least a microtask for size calculations
     await timePasses();

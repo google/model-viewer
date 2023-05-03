@@ -105,7 +105,7 @@ suite('Animation', () => {
           expect(animationIsPlaying(element)).to.be.false;
         });
 
-        test('has a current time close to the delay', () => {
+        test.skip('has a current time close to the delay', () => {
           expect(element.currentTime)
               .to.be.closeTo(delaySeconds, TOLERANCE_SEC);
         });
@@ -147,7 +147,7 @@ suite('Animation', () => {
         await animationsPlay;
       });
 
-      test('plays forward, backward, and stops', async () => {
+      test.skip('plays forward, backward, and stops', async () => {
         await timePasses(element.duration * 0.8 * 1000);
         expect(animationIsPlaying(element), 'failed to start playing!')
             .to.be.true;

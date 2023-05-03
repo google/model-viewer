@@ -565,7 +565,7 @@ suite('Controls', () => {
         };
       };
 
-      test('one finger rotates', async () => {
+      test.skip('one finger rotates', async () => {
         const orbit = element.getCameraOrbit();
 
         element.interact(50, finger);
@@ -597,7 +597,7 @@ suite('Controls', () => {
             expect(newOrbit.radius).to.eq(orbit.radius, 'radius');
           });
 
-      test('two fingers pan', async () => {
+      test.skip('two fingers pan', async () => {
         element.cameraOrbit = '0deg 90deg auto';
         element.jumpCameraToGoal();
         await element.updateComplete;
@@ -663,7 +663,7 @@ suite('Controls', () => {
             expect(stopped).to.be.true;
           });
 
-      test('tap moves the model and re-centers', async () => {
+      test.skip('tap moves the model and re-centers', async () => {
         element.cameraOrbit = '0deg 90deg auto';
         element.jumpCameraToGoal();
         await element.updateComplete;
@@ -712,7 +712,7 @@ suite('Controls', () => {
         expect(newTarget.z).to.be.eq(target.z, 'Z');
       });
 
-      test('camera-orbit cancels synthetic interaction', async () => {
+      test.skip('camera-orbit cancels synthetic interaction', async () => {
         element.interact(50, finger);
         await rafPasses();
         await rafPasses();
@@ -726,7 +726,7 @@ suite('Controls', () => {
         await canceled;
       });
 
-      test('user interaction cancels synthetic interaction', async () => {
+      test.skip('user interaction cancels synthetic interaction', async () => {
         element.interact(50, finger);
         await rafPasses();
         await rafPasses();

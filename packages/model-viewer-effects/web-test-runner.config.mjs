@@ -9,7 +9,7 @@ export default {
   browserLogs: false,
   filterBrowserLogs:
       (log) => {
-        return log.type !== 'info';
+        return log.type === 'error';
       },
   testsFinishTimeout: 300000,
   testFramework: {

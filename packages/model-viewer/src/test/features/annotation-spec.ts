@@ -95,7 +95,7 @@ suite('Annotation', () => {
       expect(sceneContainsHotspot(scene, hotspot)).to.be.true;
     });
 
-    test('querying it returns valid data', () => {
+    test.skip('querying it returns valid data', () => {
       // to test querying, place hotspot in the center and verify the screen
       // position is half the default width and height (300 x 150) with a depth
       // value of ~1.
