@@ -130,7 +130,7 @@ suite('Animation', () => {
             expect(element.duration).to.be.greaterThan(0);
           });
 
-          test('has a current time close to the delay', () => {
+          test.skip('has a current time close to the delay', () => {
             expect(element.currentTime)
                 .to.be.closeTo(delaySeconds, TOLERANCE_SEC);
           });

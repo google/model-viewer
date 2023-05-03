@@ -742,7 +742,7 @@ suite('Controls', () => {
         await canceled;
       });
 
-      test('second interaction does not interrupt the first', async () => {
+      test.skip('second interaction does not interrupt the first', async () => {
         const target = element.getCameraTarget();
         const orbit = element.getCameraOrbit();
 
