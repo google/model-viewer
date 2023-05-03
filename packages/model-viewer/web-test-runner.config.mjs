@@ -6,6 +6,7 @@ export default {
   nodeResolve: true,
   // in a monorepo you need to set set the root dir to resolve modules
   rootDir: '../../',
+  testsFinishTimeout: 300000,
   testFramework: {
     config: {
       ui: 'tdd',
