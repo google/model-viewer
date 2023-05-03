@@ -68,7 +68,7 @@ suite('scene-graph/texture-info', () => {
       expect(emptyTextureInfo.texture).to.be.null;
     });
 
-    test.only('exports and re-imports the model with transformed texture', async () => {
+    test('exports and re-imports the model with transformed texture', async () => {
       // Load textured glb.
       element.src = TEXTURED_CUBE_GLB_PATH;
       await waitForEvent(element, 'load');
