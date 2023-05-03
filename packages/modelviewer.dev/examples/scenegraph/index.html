@@ -494,11 +494,11 @@ modelViewerTexture1.addEventListener("load", () => {
 <model-viewer id="box" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb" ar alt="A 3D model of a helmet">
   <div class="controls">
       <p>Rotation: <span id="texture-rotation"></span></p>
-      <input type="range" min="0" max="0.3" value="0" step="0.01" id="rotationSlider">
+      <input type="range" min="0" max="3.14" value="0" step="0.01" id="rotationSlider">
       <p>Scale: <span id="texture-scale"></span></p>
       <input type="range" min="0.5" max="1.5" value="1" step="0.01" id="scaleSlider">
       <p>Offset</p>
-      <input type="range" min="0.5" max="1.5" value="1" step="0.01" id="offsetSlider">
+      <input type="range" min="0" max="1" value="0" step="0.01" id="offsetSlider">
     </div>
 </model-viewer>
 <script type="module">
@@ -509,21 +509,17 @@ const offsetSlider = document.querySelector('#offsetSlider');
 
 modelViewerTexture2.addEventListener("load", () => {
 
-  const material = modelViewerTexture2.model.materials[0];
+  const sampler = modelViewerTexture2.model.materials[0].pbrMetallicRoughness['baseColorTexture'].texture.sampler;
 
-  let rotationDisplay = document.querySelector('#texture-rotation');
-  let scaleDisplay = document.querySelector('#texture-scale');
+  const rotationDisplay = document.querySelector('#texture-rotation');
+  const scaleDisplay = document.querySelector('#texture-scale');
 
   rotationDisplay.textContent = rotationSlider.value;
   scaleDisplay.textContent = scaleSlider.value;
 
-  // Texture wrap is often used as REPEAT.
-  material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setWrapS(10497); //WrapMode.Repeat
-  material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setWrapT(10497); //WrapMode.Repeat
-
   rotationSlider.addEventListener('input', (event) => {
     const rotation = rotationSlider.value;
-    material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setRotation(rotation);
+    sampler.setRotation(rotation);
     rotationDisplay.textContent = rotation;
   });
 
@@ -532,7 +528,7 @@ modelViewerTexture2.addEventListener("load", () => {
       x: scaleSlider.value,
       y: scaleSlider.value
     };
-    material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setScale(scale);
+    sampler.setScale(scale);
     scaleDisplay.textContent = scale.x;
   });
 
@@ -541,7 +537,7 @@ modelViewerTexture2.addEventListener("load", () => {
       x: offsetSlider.value,
       y: -offsetSlider.value
     };
-    material.pbrMetallicRoughness['baseColorTexture'].texture.sampler.setOffset(offset);
+    sampler.setOffset(offset);
   });
 });
 
@@ -814,6 +810,11 @@ interface Image {
    * been updated and should be reflected in the model.
    */
   update(): void;
+}
+
+interface Vector2 {
+  readonly x: number;
+  readonly y: number;
 }
 
 type RGBA = [number, number, number, number];

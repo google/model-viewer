@@ -173,7 +173,7 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   setRotation(rotation: number|null): void {
-    if(!rotation) {
+    if(rotation == null) {
       // Reset rotation.
       rotation = 0;
     }
@@ -181,7 +181,7 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   setScale(scale: Vector2|null): void {
-    if(!scale) {
+    if(scale == null) {
       // Reset scale.
       scale = new Vector2(1, 1);
     }
@@ -189,7 +189,7 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   setOffset(offset: Vector2|null): void {
-    if(!offset) {
+    if(offset == null) {
       // Reset offset.
       offset = new Vector2(0, 0);
     }

@@ -74,10 +74,10 @@ suite('scene-graph/texture-info', () => {
       await waitForEvent(element, 'load');
 
       // Transform the textures.
-      const sampler = element.model?.materials[0].pbrMetallicRoughness['baseColorTexture'].texture?.sampler;
-      sampler?.setRotation(0.1);
-      sampler?.setOffset(new Vector2(0.2, 0.3));
-      sampler?.setScale(new Vector2(0.4, 0.5));
+      const sampler = element.model?.materials[0].pbrMetallicRoughness['baseColorTexture'].texture?.sampler!;
+      sampler.setRotation(0.1);
+      sampler.setOffset(new Vector2(0.2, 0.3));
+      sampler.setScale(new Vector2(0.4, 0.5));
 
       // Export model.
       const exported = await element.exportScene({binary: true});
@@ -89,10 +89,10 @@ suite('scene-graph/texture-info', () => {
 
       URL.revokeObjectURL(url);
 
-      const exported_sampler = element.model?.materials[0].pbrMetallicRoughness['baseColorTexture'].texture?.sampler;
-      expect(exported_sampler?.rotation).to.be.eq(0.1, 'rotation');
-      expect(exported_sampler?.offset).to.be.eql(new Vector2(0.2, 0.3), 'offset');
-      expect(exported_sampler?.scale).to.be.eql(new Vector2(0.4, 0.5), 'scale');
+      const exported_sampler = element.model?.materials[0].pbrMetallicRoughness['baseColorTexture'].texture?.sampler!;
+      expect(exported_sampler.rotation).to.be.eq(0.1, 'rotation');
+      expect(exported_sampler.offset).to.be.eql(new Vector2(0.2, 0.3), 'offset');
+      expect(exported_sampler.scale).to.be.eql(new Vector2(0.4, 0.5), 'scale');
     });
   });
 });
