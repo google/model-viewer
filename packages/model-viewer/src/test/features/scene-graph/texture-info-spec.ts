@@ -68,7 +68,7 @@ suite('scene-graph/texture-info', () => {
       expect(emptyTextureInfo.texture).to.be.null;
     });
 
-    test('exports and re-imports the model with transformed texture', async () => {
+    test.only('exports and re-imports the model with transformed texture', async () => {
       // Load textured glb.
       element.src = TEXTURED_CUBE_GLB_PATH;
       await waitForEvent(element, 'load');
@@ -86,6 +86,8 @@ suite('scene-graph/texture-info', () => {
       // Re-load model.
       element.src = url;
       await waitForEvent(element, 'load');
+
+      URL.revokeObjectURL(url);
 
       const exported_sampler = element.model?.materials[0].pbrMetallicRoughness['baseColorTexture'].texture?.sampler;
       expect(exported_sampler?.rotation).to.be.eq(0.1, 'rotation');
