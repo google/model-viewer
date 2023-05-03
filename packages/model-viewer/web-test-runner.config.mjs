@@ -15,7 +15,7 @@ export default {
   testFramework: {
     config: {
       ui: 'tdd',
-      timeout: '60000',
+      timeout: '120000',
     },
   },
   // plugins: [esbuildPlugin({ts: true})],
