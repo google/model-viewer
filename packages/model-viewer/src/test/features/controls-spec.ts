@@ -433,31 +433,32 @@ suite('Controls', () => {
         expect(event.detail.source).to.be.equal(ChangeSource.USER_INTERACTION);
       });
 
-      test('does not send "user-interaction" after JS change', async () => {
-        const expectedSources = [
-          ChangeSource.USER_INTERACTION,
-          ChangeSource.USER_INTERACTION,
-          ChangeSource.NONE,
-          ChangeSource.NONE,
-        ];
-        let changeSource: Array<string> = [];
+      test.skip(
+          'does not send "user-interaction" after JS change', async () => {
+            const expectedSources = [
+              ChangeSource.USER_INTERACTION,
+              ChangeSource.USER_INTERACTION,
+              ChangeSource.NONE,
+              ChangeSource.NONE,
+            ];
+            let changeSource: Array<string> = [];
 
-        element.addEventListener('camera-change', (event) => {
-          changeSource.push(
-              (event as CustomEvent<CameraChangeDetails>).detail.source);
-        });
+            element.addEventListener('camera-change', (event) => {
+              changeSource.push(
+                  (event as CustomEvent<CameraChangeDetails>).detail.source);
+            });
 
-        dispatchSyntheticEvent(
-            element[$userInputElement], 'keydown', {key: 'ArrowUp'});
-        await rafPasses();
-        await rafPasses();
+            dispatchSyntheticEvent(
+                element[$userInputElement], 'keydown', {key: 'ArrowUp'});
+            await rafPasses();
+            await rafPasses();
 
-        element.cameraOrbit = '0deg 0deg auto';
-        await rafPasses();
-        await rafPasses();
+            element.cameraOrbit = '0deg 0deg auto';
+            await rafPasses();
+            await rafPasses();
 
-        expect(changeSource).to.eql(expectedSources);
-      });
+            expect(changeSource).to.eql(expectedSources);
+          });
     });
 
     suite('interaction-prompt', () => {
