@@ -68,6 +68,7 @@ const isValidSamplerValue = <P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'|'
   }
 };
 
+const $threeTexture = Symbol('threeTexture');
 const $threeTextures = Symbol('threeTextures');
 const $setProperty = Symbol('setProperty');
 const $sourceSampler = Symbol('sourceSampler');
@@ -76,6 +77,13 @@ const $sourceSampler = Symbol('sourceSampler');
  * Sampler facade implementation for Three.js textures
  */
 export class Sampler extends ThreeDOMElement implements SamplerInterface {
+  private get[$threeTexture]() {
+    console.assert(
+        this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
+        'Sampler correlated object is undefined');
+    return this[$correlatedObjects]?.values().next().value as ThreeTexture;
+  }
+
   private get[$threeTextures]() {
     console.assert(
         this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
@@ -137,15 +145,15 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   get rotation(): number {
-    return [...this[$threeTextures]][0]['rotation'];
+    return this[$threeTexture].rotation;
   }
 
   get scale(): Vector2 {
-    return [...this[$threeTextures]][0]['repeat'];
+    return this[$threeTexture].repeat;
   }
 
   get offset(): Vector2|null {
-    return [...this[$threeTextures]][0]['offset'];
+    return this[$threeTexture].offset;
   }
 
   setMinFilter(filter: MinFilter) {
@@ -193,8 +201,7 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     const sampler = this[$sourceSampler];
     if (sampler != null) {
       if (isValidSamplerValue(property, value)) {
-        // Rotation, repeat, and offset are not defined in GltfSampler.
-        if (['rotation', 'repeat', 'offset'].indexOf(property) == -1) {
+        if (property !== 'rotation' && property !== 'repeat' && property !== 'offset') {
           sampler[property] = value;
         }
 
