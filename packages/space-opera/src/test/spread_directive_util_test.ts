@@ -15,21 +15,25 @@
  *
  */
 
-import { html, render, nothing } from 'lit';
-import { spread } from '../components/utils/spread_directive';
+import {expect} from '@esm-bundle/chai';
+import {html, nothing, render} from 'lit';
 
-describe('spread directive util test', () => {
+import {spread} from '../components/utils/spread_directive';
+
+suite('spread directive util test', () => {
   let wrapper: HTMLDivElement;
-  beforeAll(() => {
+
+  setup(() => {
     wrapper = document.createElement('div');
     document.body.appendChild(wrapper);
-  });
-
-  beforeEach(() => {
     render(nothing, wrapper);
   });
 
-  it('Spread will spread new binds', () => {
+  teardown(() => {
+    wrapper.remove();
+  });
+
+  test('Spread will spread new binds', () => {
     let numTimesListenerCalled = 0;
     const listener = () => {
       numTimesListenerCalled++;
@@ -37,27 +41,27 @@ describe('spread directive util test', () => {
     const template = html`
       <input
         ${spread({
-          '?disabled': true,
-          value: 'hello',
-          '.pattern': '[0123]',
-          '@event-name': listener,
-        })}
+      '?disabled': true,
+      value: 'hello',
+      '.pattern': '[0123]',
+      '@event-name': listener,
+    })}
       />
     `;
 
     render(template, wrapper);
     const input = wrapper.querySelector('input')!;
-    expect(input.hasAttribute('disabled')).toBe(true);
-    expect(input.getAttribute('value')).toBe('hello');
-    expect(input.pattern).toBe('[0123]');
-    expect(numTimesListenerCalled).toBe(0);
+    expect(input.hasAttribute('disabled')).to.be.equal(true);
+    expect(input.getAttribute('value')).to.be.equal('hello');
+    expect(input.pattern).to.be.equal('[0123]');
+    expect(numTimesListenerCalled).to.be.equal(0);
 
     input.dispatchEvent(new Event('event-name'));
 
-    expect(numTimesListenerCalled).toBe(1);
+    expect(numTimesListenerCalled).to.be.equal(1);
   });
 
-  it('Spread will mutate binds if changed', () => {
+  test('Spread will mutate binds if changed', () => {
     let numTimesListener1Called = 0;
     const listener1 = () => {
       numTimesListener1Called++;
@@ -77,14 +81,14 @@ describe('spread directive util test', () => {
 
     render(template, wrapper);
     const input = wrapper.querySelector('input')!;
-    expect(input.hasAttribute('disabled')).toBe(true);
-    expect(input.getAttribute('value')).toBe('hello');
-    expect(input.pattern).toBe('[0123]');
-    expect(numTimesListener1Called).toBe(0);
+    expect(input.hasAttribute('disabled')).to.be.equal(true);
+    expect(input.getAttribute('value')).to.be.equal('hello');
+    expect(input.pattern).to.be.equal('[0123]');
+    expect(numTimesListener1Called).to.be.equal(0);
 
     input.dispatchEvent(new Event('event-name'));
 
-    expect(numTimesListener1Called).toBe(1);
+    expect(numTimesListener1Called).to.be.equal(1);
 
     template = getTemplate({
       '?disabled': false,
@@ -95,19 +99,19 @@ describe('spread directive util test', () => {
 
     render(template, wrapper);
 
-    expect(input.hasAttribute('disabled')).toBe(false);
-    expect(input.getAttribute('value')).toBe('world');
-    expect(input.pattern).toBe('[01234]');
-    expect(numTimesListener1Called).toBe(1);
-    expect(numTimesListener2Called).toBe(0);
+    expect(input.hasAttribute('disabled')).to.be.equal(false);
+    expect(input.getAttribute('value')).to.be.equal('world');
+    expect(input.pattern).to.be.equal('[01234]');
+    expect(numTimesListener1Called).to.be.equal(1);
+    expect(numTimesListener2Called).to.be.equal(0);
 
     input.dispatchEvent(new Event('event-name'));
 
-    expect(numTimesListener1Called).toBe(1);
-    expect(numTimesListener2Called).toBe(1);
+    expect(numTimesListener1Called).to.be.equal(1);
+    expect(numTimesListener2Called).to.be.equal(1);
   });
 
-  it('Spread will not mutate binds if not changed', () => {
+  test('Spread will not mutate binds if not changed', () => {
     let numTimesListener1Called = 0;
     const listener1 = () => {
       numTimesListener1Called++;
@@ -123,20 +127,20 @@ describe('spread directive util test', () => {
     render(template, wrapper);
     const input = wrapper.querySelector('input')!;
 
-    expect(input.hasAttribute('disabled')).toBe(true);
-    expect(input.getAttribute('value')).toBe('hello');
-    expect(numTimesListener1Called).toBe(0);
+    expect(input.hasAttribute('disabled')).to.be.equal(true);
+    expect(input.getAttribute('value')).to.be.equal('hello');
+    expect(numTimesListener1Called).to.be.equal(0);
 
     input.dispatchEvent(new Event('event-name'));
 
-    expect(numTimesListener1Called).toBe(1);
+    expect(numTimesListener1Called).to.be.equal(1);
 
-    let setAttributeArgs: [string, string] | [null, null] = [null, null];
+    let setAttributeArgs: [string, string]|[null, null] = [null, null];
     input.setAttribute = (name: string, value: string) => {
       setAttributeArgs = [name, value];
     };
 
-    let addEventListenerArgs: [string, EventListener] | [null, null] = [
+    let addEventListenerArgs: [string, EventListener]|[null, null] = [
       null,
       null,
     ];
@@ -144,7 +148,7 @@ describe('spread directive util test', () => {
       addEventListenerArgs = [name, listener];
     };
 
-    let toggleAttributeArgs: [string, boolean] | [null, null] = [null, null];
+    let toggleAttributeArgs: [string, boolean]|[null, null] = [null, null];
     input.toggleAttribute = (name: string, value?: boolean) => {
       toggleAttributeArgs = [name, !!value];
       return !!value;
@@ -158,23 +162,23 @@ describe('spread directive util test', () => {
 
     render(template, wrapper);
 
-    expect(input.hasAttribute('disabled')).toBe(true);
-    expect(input.getAttribute('value')).toBe('hello');
-    expect(numTimesListener1Called).toBe(1);
+    expect(input.hasAttribute('disabled')).to.be.equal(true);
+    expect(input.getAttribute('value')).to.be.equal('hello');
+    expect(numTimesListener1Called).to.be.equal(1);
 
     input.dispatchEvent(new Event('event-name'));
 
-    expect(numTimesListener1Called).toBe(2);
+    expect(numTimesListener1Called).to.be.equal(2);
 
-    expect(setAttributeArgs[0]).toEqual(null);
-    expect(setAttributeArgs[1]).toEqual(null);
-    expect(addEventListenerArgs[0]).toEqual(null);
-    expect(addEventListenerArgs[1]).toEqual(null);
-    expect(toggleAttributeArgs[0]).toEqual(null);
-    expect(toggleAttributeArgs[1]).toEqual(null);
+    expect(setAttributeArgs[0]).to.be.equal(null);
+    expect(setAttributeArgs[1]).to.be.equal(null);
+    expect(addEventListenerArgs[0]).to.be.equal(null);
+    expect(addEventListenerArgs[1]).to.be.equal(null);
+    expect(toggleAttributeArgs[0]).to.be.equal(null);
+    expect(toggleAttributeArgs[1]).to.be.equal(null);
   });
 
-  it('Spread will remove specific binds if removed', () => {
+  test('Spread will remove specific binds if removed', () => {
     let numTimesListener1Called = 0;
     const listener1 = () => {
       numTimesListener1Called++;
@@ -190,30 +194,30 @@ describe('spread directive util test', () => {
 
     render(template, wrapper);
     const input = wrapper.querySelector('input')!;
-    expect(input.hasAttribute('disabled')).toBe(true);
-    expect(input.getAttribute('value')).toBe('hello');
-    expect(input.pattern).toBe('[0123]');
-    expect(numTimesListener1Called).toBe(0);
+    expect(input.hasAttribute('disabled')).to.be.equal(true);
+    expect(input.getAttribute('value')).to.be.equal('hello');
+    expect(input.pattern).to.be.equal('[0123]');
+    expect(numTimesListener1Called).to.be.equal(0);
 
     input.dispatchEvent(new Event('event-name'));
 
-    expect(numTimesListener1Called).toBe(1);
+    expect(numTimesListener1Called).to.be.equal(1);
 
     template = getTemplate({});
 
     render(template, wrapper);
 
-    expect(input.hasAttribute('disabled')).toBe(false);
-    expect(input.hasAttribute('value')).toBe(false);
-    expect(input.pattern).toBe('[0123]');
-    expect(numTimesListener1Called).toBe(1);
+    expect(input.hasAttribute('disabled')).to.be.equal(false);
+    expect(input.hasAttribute('value')).to.be.equal(false);
+    expect(input.pattern).to.be.equal('[0123]');
+    expect(numTimesListener1Called).to.be.equal(1);
 
     input.dispatchEvent(new Event('event-name'));
 
-    expect(numTimesListener1Called).toBe(1);
+    expect(numTimesListener1Called).to.be.equal(1);
   });
 
-  afterEach(() => {
+  teardown(() => {
     render(nothing, wrapper);
   });
 });

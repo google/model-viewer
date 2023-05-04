@@ -18,15 +18,16 @@
 
 import '../../../components/shared/tabs/tabs.js';
 
+import {expect} from '@esm-bundle/chai';
 import {html, render} from 'lit';
 
 import {Tabs} from '../../../components/shared/tabs/tabs.js';
 
-describe('<tabs>', () => {
+suite('<tabs>', () => {
   let tabs: Tabs;
   let container: HTMLDivElement;
 
-  beforeEach(async () => {
+  setup(async () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     render(
@@ -38,12 +39,12 @@ describe('<tabs>', () => {
         container);
 
     tabs = container.querySelector('me-tabs')!;
-    expect(tabs).toBeDefined();
+    expect(tabs).to.be.ok;
     await tabs.updateComplete;
   });
 
-  it('exists', () => {
-    expect(tabs instanceof HTMLElement).toBe(true);
-    expect(tabs.tagName).toEqual('ME-TABS');
+  test('exists', () => {
+    expect(tabs instanceof HTMLElement).to.be.equal(true);
+    expect(tabs.tagName).to.be.equal('ME-TABS');
   });
 });

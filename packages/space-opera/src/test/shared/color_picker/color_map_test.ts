@@ -15,45 +15,45 @@
  *
  */
 
-
 import '../../../components/shared/color_picker/color_map.js';
+
+import {expect} from '@esm-bundle/chai';
 
 import {ColorMap} from '../../../components/shared/color_picker/color_map.js';
 
-describe('color map test', () => {
+suite('color map test', () => {
   let colorMap: ColorMap;
 
-  beforeEach(async () => {
+  setup(async () => {
     colorMap = new ColorMap();
     document.body.appendChild(colorMap);
 
     await colorMap.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(colorMap);
   });
 
-  it('dispatches a color change event on mouse event', async () => {
-    const dispatchEventSpy = spyOn(colorMap, 'dispatchEvent');
+  test('dispatches a color change event on mouse event', async () => {
+    let nCalled = 0;
+    const handler = () => ++nCalled;
+    colorMap.addEventListener('change', handler);
 
     // Click a position relative to the top-left, for a more robust test.
     const mapRect = colorMap.getBoundingClientRect();
     const fakeMouseEvent = new MouseEvent(
         'mouseup', {clientX: mapRect.x + 92, clientY: mapRect.y + 82});
 
-    const preventDefaultSpy = spyOn(fakeMouseEvent, 'preventDefault');
-
     colorMap.onMouseEvent(fakeMouseEvent);
 
     await colorMap.updateComplete;
 
-    expect(colorMap.saturation).toBe(0.46);
+    expect(colorMap.saturation).to.be.equal(0.46);
     // Allow some room for error in the value.
-    expect(colorMap.value).toBeLessThan(118);
-    expect(colorMap.value).toBeGreaterThan(115);
+    expect(colorMap.value).to.be.lessThan(118);
+    expect(colorMap.value).to.be.greaterThan(115);
 
-    expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
-    expect(preventDefaultSpy).toHaveBeenCalledTimes(1);
+    expect(nCalled).to.be.eq(1);
   });
 });

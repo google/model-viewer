@@ -18,14 +18,16 @@
 
 import '../../../components/shared/popup/popup.js';
 
+import {expect} from '@esm-bundle/chai';
 import {html, render} from 'lit';
+
 import {PopUp} from '../../../components/shared/popup/popup.js';
 
-describe('popup test', () => {
+suite('popup test', () => {
   let popup: PopUp;
   let container: HTMLElement;
 
-  beforeEach(async () => {
+  setup(async () => {
     container = document.createElement('div');
     document.body.appendChild(container);
 
@@ -38,74 +40,75 @@ describe('popup test', () => {
         container);
 
     popup = document.body.querySelector('me-popup#popup') as PopUp;
-    expect(popup).toBeDefined();
+    expect(popup).to.be.ok;
     await popup.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(container);
   });
 
-  it('opens when clicked', async () => {
+  test('opens when clicked', async () => {
     const label = popup.querySelector('#label')! as HTMLElement;
     label.click();
 
     await popup.updateComplete;
 
     const container = popup.shadowRoot!.querySelector('.PopupContainer')!;
-    expect(container.hasAttribute('open')).toBe(true);
+    expect(container.hasAttribute('open')).to.be.equal(true);
   });
 
-  it('closes when clicked outside', async () => {
+  test('closes when clicked outside', async () => {
     const label = popup.querySelector('#label')! as HTMLElement;
     label.click();
 
     await popup.updateComplete;
 
     const container = popup.shadowRoot!.querySelector('.PopupContainer')!;
-    expect(container.hasAttribute('open')).toBe(true);
+    expect(container.hasAttribute('open')).to.be.equal(true);
 
     document.body.click();
     await popup.updateComplete;
-    expect(container.hasAttribute('open')).toBe(false);
+    expect(container.hasAttribute('open')).to.be.equal(false);
   });
 
-  it('doesnt close when clicked inside the content', async () => {
+  test('doesnt close when clicked inside the content', async () => {
     const label = popup.querySelector('#label')! as HTMLElement;
     label.click();
 
     await popup.updateComplete;
 
     const container = popup.shadowRoot!.querySelector('.PopupContainer')!;
-    expect(container.hasAttribute('open')).toBe(true);
+    expect(container.hasAttribute('open')).to.be.equal(true);
 
     const content = popup.querySelector('#content')! as HTMLElement;
     content.click();
 
     await popup.updateComplete;
-    expect(container.hasAttribute('open')).toBe(true);
+    expect(container.hasAttribute('open')).to.be.equal(true);
   });
 
-  it('doesnt close when clicked inside the content within a shadowDom',
-     async () => {
-       const label = popup.querySelector('#label')! as HTMLElement;
-       label.click();
+  test(
+      'doesnt close when clicked inside the content within a shadowDom',
+      async () => {
+        const label = popup.querySelector('#label')! as HTMLElement;
+        label.click();
 
-       await popup.updateComplete;
+        await popup.updateComplete;
 
-       const container = popup.shadowRoot!.querySelector('.PopupContainer')!;
-       expect(container.hasAttribute('open')).toBe(true);
+        const container = popup.shadowRoot!.querySelector('.PopupContainer')!;
+        expect(container.hasAttribute('open')).to.be.equal(true);
 
-       const content = popup.querySelector('#content')! as HTMLElement;
-       content.attachShadow({mode: 'open'});
+        const content = popup.querySelector('#content')! as HTMLElement;
+        content.attachShadow({mode: 'open'});
 
-       // Test event originated under shadowDom such as a LitElement component
-       // get caught.
-       const shadowDomLabel = document.createElement('div');
-       content.shadowRoot!.appendChild(shadowDomLabel);
-       shadowDomLabel.click();
+        // Test event originated under shadowDom such as a LitElement component
+        // get caught.
+        const shadowDomLabel = document.createElement('div');
+        content.shadowRoot!.appendChild(shadowDomLabel);
+        shadowDomLabel.click();
 
-       await popup.updateComplete;
-       expect(container.hasAttribute('open')).toBe(true);
-     });
+        await popup.updateComplete;
+        expect(container.hasAttribute('open')).to.be.equal(true);
+      });
 });

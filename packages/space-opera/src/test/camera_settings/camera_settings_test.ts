@@ -15,8 +15,9 @@
  *
  */
 
-
 import '../../components/camera_settings/camera_settings.js';
+
+import {expect} from '@esm-bundle/chai';
 
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
 import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../../components/config/reducer.js';
@@ -26,11 +27,11 @@ import {DraggableInput} from '../../components/shared/draggable_input/draggable_
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-describe('camera constraints test', () => {
+suite('camera constraints test', () => {
   let cameraSettings: CameraSettings;
   let preview: ModelViewerPreview;
 
-  beforeEach(async () => {
+  setup(async () => {
     reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
@@ -41,18 +42,19 @@ describe('camera constraints test', () => {
     await cameraSettings.updateComplete;
   });
 
-  afterEach(async () => {
+  teardown(async () => {
     await cameraSettings.updateComplete;
     document.body.removeChild(cameraSettings);
     document.body.removeChild(preview);
   });
 
-  it('updates the camera target on camera target change', () => {
+  test('updates the camera target on camera target change', () => {
     reduxStore.dispatch(dispatchCameraTarget({x: 1, y: 2, z: 3}));
-    expect(getConfig(reduxStore.getState()).cameraTarget).toEqual('1m 2m 3m');
+    expect(getConfig(reduxStore.getState()).cameraTarget)
+        .to.be.equal('1m 2m 3m');
   });
 
-  it('updates camera target on UI change', async () => {
+  test('updates camera target on UI change', async () => {
     await cameraSettings.updateComplete;
     const cameraTargetInput =
         cameraSettings.shadowRoot!.querySelector('me-camera-target-input') as
@@ -66,34 +68,35 @@ describe('camera constraints test', () => {
     xInput.value = '6';
     xInput.dispatchEvent(new Event('change'));
 
-    expect(getConfig(reduxStore.getState()).cameraTarget).toEqual('6m 0m 0m');
+    expect(getConfig(reduxStore.getState()).cameraTarget)
+        .to.be.equal('6m 0m 0m');
   });
 
-  it('dispatches the correct camera orbit if its UI is changed', async () => {
+  test('dispatches the correct camera orbit if its UI is changed', async () => {
     const orbit = {phi: 0.5, theta: 1, radius: 56};
     reduxStore.dispatch(dispatchSaveCameraOrbit(orbit));
     await cameraSettings.updateComplete;
-    expect(cameraSettings.cameraOrbitEditor).toBeDefined();
+    expect(cameraSettings.cameraOrbitEditor).to.be.ok;
     const yawInput = cameraSettings.cameraOrbitEditor!.yawInput!;
-    expect(yawInput).toBeDefined();
-    expect(yawInput).not.toBeNull();
+    expect(yawInput).to.be.ok;
+    expect(yawInput).to.be.not.null;
   });
 
-  it('dispatches auto-rotate change when checkbox clicked', async () => {
+  test('dispatches auto-rotate change when checkbox clicked', async () => {
     reduxStore.dispatch(dispatchAutoRotate(false));
-    expect(getConfig(reduxStore.getState()).autoRotate).toBe(false);
+    expect(getConfig(reduxStore.getState()).autoRotate).to.be.equal(false);
     await cameraSettings.updateComplete;
     cameraSettings.autoRotateCheckbox.click();
-    expect(getConfig(reduxStore.getState()).autoRotate).toBe(true);
+    expect(getConfig(reduxStore.getState()).autoRotate).to.be.equal(true);
   });
 
-  it('updates checkbox state when receiving auto-rotate change', async () => {
+  test('updates checkbox state when receiving auto-rotate change', async () => {
     reduxStore.dispatch(dispatchAutoRotate(false));
     await cameraSettings.updateComplete;
-    expect(cameraSettings.autoRotateCheckbox.checked).toBe(false);
+    expect(cameraSettings.autoRotateCheckbox.checked).to.be.equal(false);
 
     reduxStore.dispatch(dispatchAutoRotate(true));
     await cameraSettings.updateComplete;
-    expect(cameraSettings.autoRotateCheckbox.checked).toBe(true);
+    expect(cameraSettings.autoRotateCheckbox.checked).to.be.equal(true);
   });
 });

@@ -15,19 +15,19 @@
  *
  */
 
-
 import '../../../components/shared/dropdown/dropdown.js';
 import '@polymer/paper-item';
 
+import {expect} from '@esm-bundle/chai';
 import {html, render} from 'lit';
 
 import {Dropdown} from '../../../components/shared/dropdown/dropdown.js';
 
-describe('dropdown test', () => {
+suite('dropdown test', () => {
   let dropdown: Dropdown;
   let container: HTMLDivElement;
 
-  beforeEach(async () => {
+  setup(async () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     render(
@@ -42,29 +42,31 @@ describe('dropdown test', () => {
     await dropdown.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(container);
   })
 
-  it('exists', () => {
-    expect(dropdown instanceof HTMLElement).toBe(true);
-    expect(dropdown.tagName).toEqual('ME-DROPDOWN');
+  test('exists', () => {
+    expect(dropdown instanceof HTMLElement).to.be.equal(true);
+    expect(dropdown.tagName).to.be.equal('ME-DROPDOWN');
   });
 
-  it('dispatches an event when selected changed', () => {
-    const dispatchEventSpy = spyOn(dropdown, 'dispatchEvent');
+  test('dispatches an event when selected changed', () => {
+    let nCalled = 0;
+    const handler = () => ++nCalled;
+    dropdown.addEventListener('select', handler);
 
     (dropdown.querySelectorAll('paper-item')[1] as HTMLElement).click();
 
-    expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
-    expect(dropdown.selectedIndex).toBe(1);
+    expect(nCalled).to.be.eq(1);
+    expect(dropdown.selectedIndex).to.be.equal(1);
   });
 
-  it('modifies paper-dropdown-menu when selectedIndex is set', async () => {
+  test('modifies paper-dropdown-menu when selectedIndex is set', async () => {
     dropdown.selectedIndex = 1;
     await dropdown.updateComplete;
 
     const paperListbox = dropdown.shadowRoot!.querySelector('paper-listbox')!;
-    expect(Number(paperListbox.get('selected'))).toBe(1);
+    expect(Number(paperListbox.get('selected'))).to.be.equal(1);
   });
 });

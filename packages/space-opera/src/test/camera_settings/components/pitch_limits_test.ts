@@ -15,8 +15,9 @@
  *
  */
 
-
 import '../../../components/camera_settings/components/pitch_limits.js';
+
+import {expect} from '@esm-bundle/chai';
 
 import {PitchLimits} from '../../../components/camera_settings/components/pitch_limits.js';
 import {getConfig} from '../../../components/config/reducer.js';
@@ -26,11 +27,11 @@ import {dispatchReset} from '../../../reducers.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {rafPasses} from '../../utils/test_utils.js';
 
-describe('pitch limits editor test', () => {
+suite('pitch limits editor test', () => {
   let pitchLimitsDeg: PitchLimits;
   let preview: ModelViewerPreview;
 
-  beforeEach(async () => {
+  setup(async () => {
     reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
@@ -41,12 +42,12 @@ describe('pitch limits editor test', () => {
     await pitchLimitsDeg.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(pitchLimitsDeg);
     document.body.removeChild(preview);
   });
 
-  it('correctly dispatches when I click set', async () => {
+  test('correctly dispatches when I click set', async () => {
     (pitchLimitsDeg.shadowRoot!.querySelector('#limit-enabled') as any).click();
     const modelViewer = getModelViewer()!;
     modelViewer.cameraOrbit = 'auto 33deg auto';
@@ -59,6 +60,6 @@ describe('pitch limits editor test', () => {
         .click();
     await pitchLimitsDeg.updateComplete;
     expect(getConfig(reduxStore.getState()).maxCameraOrbit)
-        .toEqual('auto 33deg auto');
+        .to.be.equal('auto 33deg auto');
   });
 });

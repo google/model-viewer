@@ -34,12 +34,12 @@ export type Sparse<T> = {
 };
 
 /**
- * Intrinsics describe the metadata required to do four things for any given
+ * Intrinsics suite the metadata required to do four things for any given
  * type of number-based CSS expression:
  *
  *  1. Establish the expected units of a final, evaluated result
  *  2. Provide a foundational value that percentages should scale against
- *  3. Describe the analog number values that correspond to various keywords
+ *  3. suite the analog number values that correspond to various keywords
  *  4. Have an available concrete value to fallback to when needed
  *
  * Intrinsics must always specify a basis and the substitute values for the

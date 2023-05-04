@@ -241,7 +241,7 @@ export declare interface Texture {
 }
 
 /**
- * A Sampler describes how to filter and wrap textures
+ * A Sampler suites how to filter and wrap textures
  *
  * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-sampler
  */
