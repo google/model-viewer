@@ -22,11 +22,11 @@ export default {
       <script type="module" src="${testFramework}"></script>
     </body>
   </html>`,
-  // testsFinishTimeout: 300000,
+  testsFinishTimeout: 300000,
   testFramework: {
     config: {
       ui: 'tdd',
-      // timeout: '120000',
+      timeout: '120000',
     },
   },
   // plugins: [esbuildPlugin({ts: true})],
