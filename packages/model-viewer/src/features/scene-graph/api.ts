@@ -16,7 +16,6 @@
 import {AlphaMode, MagFilter, MinFilter, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 
-
 /**
  * All constructs in a 3DOM scene graph have a corresponding string name.
  * This is similar in spirit to the concept of a "tag name" in HTML, and exists
@@ -30,6 +29,12 @@ export declare interface ThreeDOMElementMap {
   'image': Image;
   'texture': Texture;
   'texture-info': TextureInfo;
+}
+
+/** A 2D Cartesian coordinate */
+export interface Vector2 {
+  x: number;
+  y: number;
 }
 
 /**
@@ -201,7 +206,7 @@ export declare interface PBRMetallicRoughness {
  */
 export declare interface TextureInfo {
   /**
-   * The Texture being referenced by this TextureInfo
+   * The Texture being referenced by this TextureInfo.
    */
   readonly texture: Texture|null;
 
@@ -267,6 +272,21 @@ export declare interface Sampler {
   readonly wrapT: WrapMode;
 
   /**
+   * The texture rotation in radians.
+   */
+  readonly rotation: number|null;
+
+  /**
+   * The texture scale.
+   */
+  readonly scale: Vector2|null;
+
+  /**
+   * The texture offset.
+   */
+  readonly offset: Vector2|null;
+
+  /**
    * Configure the minFilter value of the Sampler.
    */
   setMinFilter(filter: MinFilter): void;
@@ -285,6 +305,23 @@ export declare interface Sampler {
    * Configure the T (V) wrap mode of the Sampler.
    */
   setWrapT(mode: WrapMode): void;
+
+  /**
+   * Sets the texture rotation, or resets it to zero if argument is null.
+   * Rotation is in radians, positive for counter-clockwise.
+   */
+  setRotation(rotation: number|null): void;
+
+  /**
+   * Sets the texture scale, or resets it to (1, 1) if argument is null.
+   * As the scale value increases, the repetition of the texture will increase.
+   */
+  setScale(scale: Vector2|null): void;
+
+  /**
+   * Sets the texture offset, or resets it to (0, 0) if argument is null.
+   */
+  setOffset(offset: Vector2|null): void;
 }
 
 
