@@ -248,8 +248,12 @@
         "name": "Create Textures"
       },
       {
-        "htmlId": "swapTextures",
+        "htmlId": "swapTexturesExample",
         "name": "Swap Textures"
+      },
+      {
+        "htmlId": "transformTexturesExample",
+        "name": "Transform Textures"
       },
       {
         "htmlId": "animatedTexturesExample",
