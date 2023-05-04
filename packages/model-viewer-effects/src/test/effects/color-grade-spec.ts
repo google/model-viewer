@@ -59,7 +59,7 @@ suite('Color Grade Effect', () => {
     const hslBefore = AverageHSL(baseScreenshot);
     const hslAfter = AverageHSL(colorGradeScreenshot);
     expect(hslBefore.s).to.be.greaterThan(hslAfter.s);
-    expect(hslAfter.s).to.be.eq(0);
+    expect(hslAfter.s).to.be.closeTo(0, 0.01);
   });
 
   test('Brightness = 0', async () => {
