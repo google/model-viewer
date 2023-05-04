@@ -40,14 +40,14 @@
     "build:rollup": "rollup -c --environment NODE_ENV:production",
     "build:rollup:dev": "rollup -c --environment NODE_ENV:development",
     "prepublishOnly": "npm run build",
-    "test": "web-test-runner \"lib/test/**/*-spec.js\" --playwright --browsers chromium firefox webkit",
-    "test:ci": "web-test-runner \"lib/test/**/*-spec.js\" --static-logging --playwright --browsers chromium webkit",
+    "test": "web-test-runner --playwright --browsers chromium firefox webkit",
+    "test:ci": "web-test-runner --static-logging --playwright --browsers chromium webkit",
     "serve": "node_modules/.bin/http-server -c-1",
     "dev": "npm run build:dev && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:test' 'serve -- -s'",
     "watch:tsc": "tsc -w --incremental",
     "watch:rollup": "rollup -c -w --environment NODE_ENV:production",
     "watch:rollup:dev": "rollup -c -w --environment NODE_ENV:development",
-    "watch:test": "web-test-runner \"lib/test/**/*-spec.js\" --node-resolve --playwright --browsers chromium --watch",
+    "watch:test": "web-test-runner --node-resolve --playwright --browsers chromium --watch",
     "build:dev:serve": "npm run build:dev && npm run serve"
   },
   "keywords": [
