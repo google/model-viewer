@@ -64,7 +64,7 @@
     "watch:tsc": "tsc -w --incremental",
     "watch:rollup": "rollup -c -w --environment NODE_ENV:production",
     "watch:rollup:dev": "rollup -c -w --environment NODE_ENV:development",
-    "watch:test": "web-test-runner \"lib/test/**/*-spec.js\" --node-resolve --playwright --browsers firefox --watch",
+    "watch:test": "web-test-runner \"lib/test/**/*-spec.js\" --node-resolve --playwright --browsers chromium --watch",
     "build:dev:serve": "npm run build:dev && npm run serve"
   },
   "keywords": [
@@ -89,7 +89,6 @@
     "three": "^0.152.1"
   },
   "devDependencies": {
-    "@open-wc/karma-esm": "^4.0.0",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
@@ -102,13 +101,6 @@
     "@web/test-runner-playwright": "^0.10.0",
     "@esm-bundle/chai": "4.3.4",
     "http-server": "^14.1.1",
-    "karma": "^5.2.3",
-    "karma-browserstack-launcher": "^1.6.0",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^3.1.1",
-    "karma-mocha": "^2.0.1",
-    "karma-mocha-reporter": "^2.2.5",
-    "karma-sourcemap-loader": "^0.3.8",
     "mocha": "^10.0.0",
     "npm-run-all": "^4.1.5",
     "rollup": "^2.77.2",

@@ -192,9 +192,6 @@ suite('ARRenderer', () => {
     }
   });
 
-  // This fails on Android when karma.conf has hostname: 'bs-local.com',
-  // possibly due to not serving over HTTPS (which disables WebXR)? However,
-  // Browserstack is unstable without this hostname.
   test('supports presenting to AR only on Android', async () => {
     expect(await arRenderer.supportsPresentation()).to.be.equal(IS_ANDROID);
   });

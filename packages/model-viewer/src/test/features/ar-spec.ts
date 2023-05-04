@@ -195,9 +195,6 @@ suite('AR', () => {
       await waitForEvent(element, 'poster-dismissed');
     });
 
-    // This fails on Android when karma.conf has hostname: 'bs-local.com',
-    // possibly due to not serving over HTTPS (which disables WebXR)? However,
-    // Browserstack is unstable without this hostname.
     test('if on a WebXR platform', () => {
       expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);
     });
