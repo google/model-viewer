@@ -367,7 +367,7 @@ suite('material panel test', () => {
         panel.emissiveFactorPicker.dispatchEvent(new Event('change'));
 
         const {emissiveFactor} = panel.getMaterial();
-        expect(emissiveFactor).to.be.equal([1, 0, 0]);
+        expect(emissiveFactor).to.be.eql([1, 0, 0]);
       });
 
   test('applies changes to model textures on alpha mode change', async () => {

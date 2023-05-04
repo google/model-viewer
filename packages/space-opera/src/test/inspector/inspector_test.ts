@@ -54,7 +54,7 @@ suite('loader inspector pane test', () => {
                                      '.inspector-content')!.textContent!;
     expect(textContent).to.be.ok;
     expect(JSON.parse(textContent))
-        .to.be.equal(getModelViewer()!.originalGltfJson);
+        .to.be.eql(getModelViewer()!.originalGltfJson);
   });
 
   test('uploads images in the bin to the inspector pane', async () => {

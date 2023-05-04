@@ -25,9 +25,9 @@ suite('reducer utils test', () => {
   test('immutableArrayUpdate returns a copy with the expected update', () => {
     const input = [1, 2, 3];
     const output = immutableArrayUpdate(input, 1, 4);
-    expect(output).to.be.equal([1, 4, 3]);
+    expect(output).to.be.eql([1, 4, 3]);
     // Must not mutate the input
-    expect(input).to.be.equal([1, 2, 3]);
+    expect(input).to.be.eql([1, 2, 3]);
   });
 
   test('immutableMapUpdate returns a copy with the expected update', () => {

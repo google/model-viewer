@@ -80,8 +80,8 @@ snippet without position',
         const hotspots = parseHotspotsFromSnippet(snippet, errorList);
         expect(hotspots.length).to.be.equal(0);
         expect(errorList.length).to.be.equal(1);
-        expect(errorList[0])
-            .to.be.equal(new Error(
-                'no surface or position for hotspot at slot "hotspot-1"'));
+        expect(errorList[0].message)
+            .to.be.equal(
+                'no surface or position for hotspot at slot "hotspot-1"');
       });
 });

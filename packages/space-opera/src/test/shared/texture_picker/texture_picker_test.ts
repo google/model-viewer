@@ -49,7 +49,7 @@ suite('texture picker test', () => {
   test('dispatches an event when select an image', () => {
     let nCalled = 0;
     const handler = () => ++nCalled;
-    texturePicker.addEventListener('texture-change', handler);
+    texturePicker.addEventListener('texture-changed', handler);
 
     const input = texturePicker.shadowRoot!.querySelectorAll('input')[1];
     input.click();
@@ -78,7 +78,7 @@ suite('texture picker test', () => {
 
     expect(nCalled).to.be.eq(1);
     const {url, type} = arg.detail as FileDetails;
-    expect(url).to.be.instanceOf(String);
+    expect(url).to.contain('blob:');
     expect(type).to.be.equal('image/jpeg');
   });
 
@@ -87,7 +87,7 @@ suite('texture picker test', () => {
       async () => {
         let nCalled = 0;
         const handler = () => ++nCalled;
-        texturePicker.addEventListener('texture-change', handler);
+        texturePicker.addEventListener('texture-changed', handler);
 
         texturePicker.selectedIndex = 0;
         await texturePicker.updateComplete;
