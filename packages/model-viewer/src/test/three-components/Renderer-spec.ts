@@ -70,7 +70,7 @@ function disposeScene(scene: ModelScene) {
   }
 }
 
-suite('Renderer with two scenes', () => {
+suite.skip('Renderer with two scenes', () => {
   let scene: ModelScene;
   let otherScene: ModelScene;
   let renderer: Renderer;

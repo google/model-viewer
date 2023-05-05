@@ -213,17 +213,10 @@ suite('ModelViewerElementBase', () => {
 
               const supportedBrowserBlob = await element.toBlob();
 
-              // Blob.prototype.arrayBuffer is not available in Edge / Safari
-              // Using Response to get arrayBuffer instead
-              const supportedBrowserResponse =
-                  new Response(supportedBrowserBlob);
-              const unsupportedBrowserResponse =
-                  new Response(unsupportedBrowserBlob);
-
               const supportedBrowserArrayBuffer =
-                  await supportedBrowserResponse.arrayBuffer();
+                  await supportedBrowserBlob.arrayBuffer();
               const unsupportedBrowserArrayBuffer =
-                  await unsupportedBrowserResponse.arrayBuffer();
+                  await unsupportedBrowserBlob.arrayBuffer();
 
               expect(unsupportedBrowserArrayBuffer)
                   .to.eql(supportedBrowserArrayBuffer);
