@@ -7,11 +7,11 @@ export default {
   files: 'lib/test/**/*-spec.js',
   // in a monorepo you need to set set the root dir to resolve modules
   rootDir: '../../',
-  // browserLogs: false,
-  // filterBrowserLogs:
-  //     (log) => {
-  //       return log.type === 'error';
-  //     },
+  browserLogs: false,
+  filterBrowserLogs:
+      (log) => {
+        return log.type === 'error';
+      },
   testRunnerHtml: testFramework => `
   <html>
     <head>
