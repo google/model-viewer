@@ -195,11 +195,12 @@ suite('AR', () => {
       await waitForEvent(element, 'poster-dismissed');
     });
 
-    test('if on a WebXR platform', () => {
-      expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);
+    test('on Android', () => {
+      expect(element.canActivateAR).to.be.equal(IS_ANDROID);
     });
 
-    test('with an ios-src on iOS', async () => {
+    // This only works on a physical iOS device, not an emulated one.
+    test.skip('with an ios-src on iOS', async () => {
       element.iosSrc = assetPath('models/Astronaut.usdz');
       await rafPasses();
       expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);

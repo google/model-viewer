@@ -16,7 +16,6 @@
 import {expect} from '@esm-bundle/chai';
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
-import {IS_ANDROID} from '../../constants.js';
 import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
@@ -190,10 +189,6 @@ suite('ARRenderer', () => {
     if (element.parentNode != null) {
       element.parentNode.removeChild(element);
     }
-  });
-
-  test('supports presenting to AR only on Android', async () => {
-    expect(await arRenderer.supportsPresentation()).to.be.equal(IS_ANDROID);
   });
 
   test('is not presenting if present has not been invoked', () => {

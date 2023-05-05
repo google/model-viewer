@@ -31,24 +31,6 @@ export default {
   // plugins: [esbuildPlugin({ts: true})],
   browsers: [
     playwrightLauncher({
-      product: 'chromium',
-      launchOptions: {
-        retries: 3,
-      },
-      createBrowserContext({browser}) {
-        return browser.newContext({...devices['Galaxy S9+']});
-      },
-    }),
-    playwrightLauncher({
-      product: 'chromium',
-      launchOptions: {
-        retries: 3,
-      },
-      createBrowserContext({browser}) {
-        return browser.newContext({...devices['Desktop Chrome']});
-      },
-    }),
-    playwrightLauncher({
       product: 'webkit',
       launchOptions: {
         retries: 3,
@@ -64,6 +46,24 @@ export default {
       },
       createBrowserContext({browser}) {
         return browser.newContext({...devices['Desktop Safari']});
+      },
+    }),
+    playwrightLauncher({
+      product: 'chromium',
+      launchOptions: {
+        retries: 3,
+      },
+      createBrowserContext({browser}) {
+        return browser.newContext({...devices['Galaxy S9+']});
+      },
+    }),
+    playwrightLauncher({
+      product: 'chromium',
+      launchOptions: {
+        retries: 3,
+      },
+      createBrowserContext({browser}) {
+        return browser.newContext({...devices['Desktop Chrome']});
       },
     }),
   ],

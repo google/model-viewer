@@ -472,7 +472,9 @@ suite('Controls', () => {
 
       test('can be configured to raise automatically', async () => {
         element.interactionPrompt = 'auto';
+        await element.updateComplete;
         await timePasses(element.interactionPromptThreshold + 100);
+        await rafPasses();
 
         const promptElement: HTMLElement = (element as any)[$promptElement];
         expect(promptElement.classList.contains('visible')).to.be.equal(true);
@@ -504,6 +506,7 @@ suite('Controls', () => {
           element.resetInteractionPrompt();
 
           await timePasses(element.interactionPromptThreshold + 100);
+          await rafPasses();
 
           expect(promptElement.classList.contains('visible')).to.be.true;
         });
