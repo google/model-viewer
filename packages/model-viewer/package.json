@@ -56,7 +56,7 @@
     "build:rollup:dev": "rollup -c --environment NODE_ENV:development",
     "prepublishOnly": "npm run build",
     "test": "web-test-runner --playwright --browsers chromium firefox webkit",
-    "test:ci": "web-test-runner --static-logging --playwright --browsers chromium webkit",
+    "test:ci": "web-test-runner --static-logging --config web-test-ci.config.mjs",
     "check-fidelity": "node ./test/fidelity/index.js ./test/fidelity/config.json",
     "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
     "serve": "node_modules/.bin/http-server -c-1",

@@ -1,5 +1,4 @@
 // import {esbuildPlugin} from '@web/dev-server-esbuild';
-import {devices, playwrightLauncher} from '@web/test-runner-playwright';
 
 export default {
   concurrency: 10,
@@ -29,13 +28,4 @@ export default {
     },
   },
   // plugins: [esbuildPlugin({ts: true})],
-  // browsers:
-  //     [
-  //       playwrightLauncher({
-  //         product: 'webkit',
-  //         createBrowserContext({browser}) {
-  //           return browser.newContext({...devices['iPhone X']});
-  //         },
-  //       }),
-  //     ],
 };
