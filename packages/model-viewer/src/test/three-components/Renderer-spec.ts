@@ -249,7 +249,7 @@ suite('Renderer with two scenes', () => {
           expect(scene.canvas.height).to.be.eq(size.y, 'canvas height');
         });
 
-    suite.skip('when resizing', () => {
+    suite('when resizing', () => {
       let originalDpr: number;
 
       setup(() => {
