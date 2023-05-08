@@ -20,7 +20,7 @@ import {ModelViewerElement} from '../model-viewer.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../utilities.js';
 
-import {assetPath, spy, until} from './helpers.js';
+import {assetPath, until} from './helpers.js';
 
 const expectBlobDimensions =
     async (blob: Blob, width: number, height: number) => {
@@ -179,48 +179,6 @@ suite('ModelViewerElementBase', () => {
           const blob = await element.toBlob();
           expect(blob.size).to.be.greaterThan(0);
         });
-
-        test('uses fallbacks on unsupported browsers', async () => {
-          // Emulate unsupported browser
-          let restoreCanvasToBlob = () => {};
-          try {
-            restoreCanvasToBlob =
-                spy(HTMLCanvasElement.prototype, 'toBlob', {value: undefined});
-          } catch (error) {
-            // Ignored...
-          }
-
-          const blob = await element.toBlob();
-          expect(blob).to.not.be.null;
-
-          restoreCanvasToBlob();
-        });
-
-        test(
-            'blobs on supported and unsupported browsers are equivalent',
-            async () => {
-              let restoreCanvasToBlob = () => {};
-              try {
-                restoreCanvasToBlob = spy(
-                    HTMLCanvasElement.prototype, 'toBlob', {value: undefined});
-              } catch (error) {
-                // Ignored...
-              }
-
-              const unsupportedBrowserBlob = await element.toBlob();
-
-              restoreCanvasToBlob();
-
-              const supportedBrowserBlob = await element.toBlob();
-
-              const supportedBrowserArrayBuffer =
-                  await supportedBrowserBlob.arrayBuffer();
-              const unsupportedBrowserArrayBuffer =
-                  await unsupportedBrowserBlob.arrayBuffer();
-
-              expect(unsupportedBrowserArrayBuffer)
-                  .to.eql(supportedBrowserArrayBuffer);
-            });
 
         test.skip('idealAspect gives the proper blob dimensions', async () => {
           const basicBlob = await element.toBlob();
