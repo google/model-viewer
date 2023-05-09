@@ -39,7 +39,7 @@ export type Sparse<T> = {
  *
  *  1. Establish the expected units of a final, evaluated result
  *  2. Provide a foundational value that percentages should scale against
- *  3. describe the analog number values that correspond to various keywords
+ *  3. Describe the analog number values that correspond to various keywords
  *  4. Have an available concrete value to fallback to when needed
  *
  * Intrinsics must always specify a basis and the substitute values for the

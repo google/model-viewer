@@ -56,7 +56,7 @@ export interface StyleDecoratorConfig<T extends Intrinsics<Array<Unit>>,
  *
  * Supported configurations are:
  *
- *  - `intrinsics`: An Intrinsics struct that suites how to interpret a
+ *  - `intrinsics`: An Intrinsics struct that describes how to interpret a
  * serialized style attribute. For more detail on intrinsics see
  * ./styles/evaluators.ts
  *  - `updateHandler`: A string or Symbol that is the key of a method to be
