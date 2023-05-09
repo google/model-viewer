@@ -17,7 +17,8 @@
     "outDir": "./lib",
     "experimentalDecorators": true,
     "noErrorTruncation": true,
-    "declaration": true
+    "declaration": true,
+    "esModuleInterop": true,
   },
   "include": [
     "./src/**/*.ts"

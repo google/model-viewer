@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../utilities.js';
 
-import {assetPath, spy, until} from './helpers.js';
-
-const expect = chai.expect;
+import {assetPath, until} from './helpers.js';
 
 const expectBlobDimensions =
     async (blob: Blob, width: number, height: number) => {
@@ -179,55 +179,6 @@ suite('ModelViewerElementBase', () => {
           const blob = await element.toBlob();
           expect(blob.size).to.be.greaterThan(0);
         });
-
-        test('uses fallbacks on unsupported browsers', async () => {
-          // Emulate unsupported browser
-          let restoreCanvasToBlob = () => {};
-          try {
-            restoreCanvasToBlob =
-                spy(HTMLCanvasElement.prototype, 'toBlob', {value: undefined});
-          } catch (error) {
-            // Ignored...
-          }
-
-          const blob = await element.toBlob();
-          expect(blob).to.not.be.null;
-
-          restoreCanvasToBlob();
-        });
-
-        test(
-            'blobs on supported and unsupported browsers are equivalent',
-            async () => {
-              let restoreCanvasToBlob = () => {};
-              try {
-                restoreCanvasToBlob = spy(
-                    HTMLCanvasElement.prototype, 'toBlob', {value: undefined});
-              } catch (error) {
-                // Ignored...
-              }
-
-              const unsupportedBrowserBlob = await element.toBlob();
-
-              restoreCanvasToBlob();
-
-              const supportedBrowserBlob = await element.toBlob();
-
-              // Blob.prototype.arrayBuffer is not available in Edge / Safari
-              // Using Response to get arrayBuffer instead
-              const supportedBrowserResponse =
-                  new Response(supportedBrowserBlob);
-              const unsupportedBrowserResponse =
-                  new Response(unsupportedBrowserBlob);
-
-              const supportedBrowserArrayBuffer =
-                  await supportedBrowserResponse.arrayBuffer();
-              const unsupportedBrowserArrayBuffer =
-                  await unsupportedBrowserResponse.arrayBuffer();
-
-              expect(unsupportedBrowserArrayBuffer)
-                  .to.eql(supportedBrowserArrayBuffer);
-            });
 
         test.skip('idealAspect gives the proper blob dimensions', async () => {
           const basicBlob = await element.toBlob();

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {clamp, deserializeUrl, resolveDpr, step} from '../utilities.js';
+import {expect} from '@esm-bundle/chai';
 
-const expect = chai.expect;
+import {clamp, deserializeUrl, resolveDpr, step} from '../utilities.js';
 
 suite('utils', () => {
   suite('deserializeUrl', () => {

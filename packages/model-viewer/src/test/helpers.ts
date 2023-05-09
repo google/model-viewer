@@ -54,7 +54,7 @@ export interface SyntheticEventProperties {
   deltaY?: number;
   key?: string;
   shiftKey?: boolean;
-  }
+}
 
 /**
  * Dispatch a synthetic event on a given element with a given type, and
@@ -77,7 +77,7 @@ export const dispatchSyntheticEvent =
     };
 
 
-export const ASSETS_DIRECTORY = '../base/shared-assets/';
+export const ASSETS_DIRECTORY = 'packages/shared-assets/';
 
 /**
  * Returns the full path for an asset by name. This is a convenience helper so

@@ -14,6 +14,7 @@
  */
 
 import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
+
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
 import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
@@ -494,7 +495,8 @@ export class Renderer extends EventDispatcher {
       if (scene.effectRenderer != null) {
         scene.effectRenderer.render(delta);
       } else {
-        this.threeRenderer.autoClear = true; // this might get reset by the effectRenderer
+        this.threeRenderer.autoClear =
+            true;  // this might get reset by the effectRenderer
         this.threeRenderer.render(scene, scene.camera);
       }
       if (this.multipleScenesVisible ||

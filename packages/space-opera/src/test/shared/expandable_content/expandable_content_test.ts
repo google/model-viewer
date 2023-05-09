@@ -15,10 +15,10 @@
  *
  */
 
-
 import '../../../components/shared/expandable_content/expandable_section.js';
 import '../../../components/shared/expandable_content/expandable_tab.js';
 
+import {expect} from '@esm-bundle/chai';
 import {html, render} from 'lit';
 
 import {ExpandableSection} from '../../../components/shared/expandable_content/expandable_section.js';
@@ -31,11 +31,11 @@ function elementIsVisible(e: HTMLElement) {
       rect.width > 0 && rect.height > 0;
 }
 
-describe('<me-expandable-section>', () => {
+suite('<me-expandable-section>', () => {
   let section: ExpandableSection;
   let container: HTMLDivElement;
 
-  beforeEach(async () => {
+  setup(async () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     render(
@@ -49,37 +49,37 @@ describe('<me-expandable-section>', () => {
     await section.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(container);
   })
 
-  it('is there', () => {
-    expect(section instanceof HTMLElement).toBe(true);
-    expect(section.tagName).toEqual('ME-EXPANDABLE-SECTION');
+  test('is there', () => {
+    expect(section instanceof HTMLElement).to.be.equal(true);
+    expect(section.tagName).to.be.equal('ME-EXPANDABLE-SECTION');
   });
 
-  it('contains content', () => {
-    expect(section.innerText.trim()).toEqual('Peekaboo!');
-    expect(section.textContent!.trim()).toEqual('Peekaboo!');
+  test('contains content', () => {
+    expect(section.innerText.trim()).to.be.equal('Peekaboo!');
+    expect(section.textContent!.trim()).to.be.equal('Peekaboo!');
   });
 
-  it('shows when opened', async () => {
+  test('shows when opened', async () => {
     // Also checks that the default state is hidden:
-    expect(section.open).toBe(false);
-    expect(elementIsVisible(section)).toBe(false);
+    expect(section.open).to.be.equal(false);
+    expect(elementIsVisible(section)).to.be.equal(false);
 
     section.open = true;
     await section.updateComplete;
     // TODO: add content visibility test
-    // expect(elementIsVisible(section)).toBe(true);
+    // expect(elementIsVisible(section)).to.be.equal(true);
   });
 });
 
-describe('<me-expandable-tab>', () => {
+suite('<me-expandable-tab>', () => {
   let tab: ExpandableTab;
   let container: HTMLDivElement;
 
-  beforeEach(async () => {
+  setup(async () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     render(
@@ -93,52 +93,52 @@ describe('<me-expandable-tab>', () => {
     await tab.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(container);
   })
 
-  it('is there', () => {
-    expect(tab instanceof HTMLElement).toBe(true);
-    expect(tab.tagName).toEqual('ME-EXPANDABLE-TAB');
+  test('is there', () => {
+    expect(tab instanceof HTMLElement).to.be.equal(true);
+    expect(tab.tagName).to.be.equal('ME-EXPANDABLE-TAB');
   });
 
-  it('contains header', () => {
+  test('contains header', () => {
     const tabHeader =
         tab.shadowRoot!.querySelector('.TabHeader')! as HTMLElement;
-    expect(tabHeader).toBeDefined();
-    expect(elementIsVisible(tabHeader)).toBe(true);
+    expect(tabHeader).to.be.ok;
+    expect(elementIsVisible(tabHeader)).to.be.equal(true);
     const headerText = tabHeader.innerText.trim();
-    expect(headerText).toMatch(/^TheName/);
-    expect(headerText).toMatch(/keyboard_arrow_down$/);
+    expect(headerText).to.match(/^TheName/);
+    expect(headerText).to.match(/keyboard_arrow_down$/);
   });
 
-  it('contains content', async () => {
+  test('contains content', async () => {
     // This is sneaky; it just asserts on the raw HTML wias written above; so
     // the header text, which gets generated later by lit-element, is not
     // included in tab.innerText. In practice I'm not sure how useful this test
     // is.
-    expect(tab.innerText.trim()).toEqual('Peekaboo!');
+    expect(tab.innerText.trim()).to.be.equal('Peekaboo!');
   });
 
-  it('shows content when clicked', async () => {
+  test('shows content when clicked', async () => {
     const tabHeader =
         tab.shadowRoot!.querySelector('.TabHeader')! as HTMLElement;
-    expect(tabHeader).toBeDefined();
+    expect(tabHeader).to.be.ok;
     const tabContent = tab.shadowRoot!.querySelector('me-expandable-section')!;
-    expect(tabContent).toBeDefined();
+    expect(tabContent).to.be.ok;
 
     // Also checks that the default state is hidden:
-    expect(elementIsVisible(tabHeader)).toBe(true);
-    expect(elementIsVisible(tabContent)).toBe(false);
+    expect(elementIsVisible(tabHeader)).to.be.equal(true);
+    expect(elementIsVisible(tabContent)).to.be.equal(false);
 
     tabHeader.click();
     await tab.updateComplete;
     await tabContent.updateComplete;
 
-    expect(tabContent.open).toBe(true);
-    expect(elementIsVisible(tabHeader)).toBe(true);
+    expect(tabContent.open).to.be.equal(true);
+    expect(elementIsVisible(tabHeader)).to.be.equal(true);
 
     // TODO: add content visibility test
-    // expect(elementIsVisible(tabContent)).toBe(true);
+    // expect(elementIsVisible(tabContent)).to.be.equal(true);
   });
 });

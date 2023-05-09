@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {CalcEvaluator, EnvEvaluator, OperatorEvaluator, PercentageEvaluator, SphericalIntrinsics, StyleEvaluator} from '../../styles/evaluators.js';
 import {numberNode} from '../../styles/parsers.js';
 import {expressionNode, functionNode, identNode, operatorNode, spy} from '../helpers.js';
-
-const expect = chai.expect;
 
 suite('evaluators', () => {
   suite('EnvEvaluator', () => {
@@ -156,7 +156,7 @@ suite('evaluators', () => {
       expect(evaluator.evaluate()).to.be.eql(numberNode(4, null));
     });
 
-    test('evaluates algebra with nested functions', () => {
+    suite('evaluates algebra with nested functions', () => {
       test('evaluates basic addition', () => {
         const evaluator = new CalcEvaluator(functionNode(
             'calc', [expressionNode([

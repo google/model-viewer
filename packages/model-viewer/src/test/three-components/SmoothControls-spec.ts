@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {PerspectiveCamera, Vector3} from 'three';
 
 import {$controls} from '../../features/controls.js';
@@ -21,8 +22,6 @@ import {ModelViewerElement} from '../../model-viewer.js';
 import {SmoothControls} from '../../three-components/SmoothControls.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, dispatchSyntheticEvent} from '../helpers.js';
-
-const expect = chai.expect;
 
 const ONE_FRAME_DELTA = 1000.0 / 60.0;
 const FIFTY_FRAME_DELTA = 50.0 * ONE_FRAME_DELTA;

@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {interpolate, sequence, timeline} from '../../utilities/animation.js';
 
-const expect = chai.expect;
 const easeLinear = (t: number) => t;
 const PRECISION = 0.000001;
 

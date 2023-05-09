@@ -15,25 +15,26 @@
  *
  */
 
-
 import '../../../components/shared/color_picker/color_picker.js';
+
+import {expect} from '@esm-bundle/chai';
 
 import {ColorPicker} from '../../../components/shared/color_picker/color_picker.js';
 
-describe('color picker test', () => {
+suite('color picker test', () => {
   let colorPicker: ColorPicker;
 
-  beforeEach(async () => {
+  setup(async () => {
     colorPicker = new ColorPicker();
     document.body.appendChild(colorPicker);
     await colorPicker.updateComplete;
   });
 
-  afterEach(async () => {
+  teardown(async () => {
     document.body.removeChild(colorPicker);
   });
 
-  it('updates the hue on slider input', async () => {
+  test('updates the hue on slider input', async () => {
     colorPicker.selectedColorHex = '#0000cc';
     await colorPicker.updateComplete;
 
@@ -41,40 +42,44 @@ describe('color picker test', () => {
     colorPicker.hueSlider.dispatchEvent(new Event('input'));
     await colorPicker.updateComplete;
 
-    expect(colorPicker.selectedColorHex).toBe('#cc6600');
+    expect(colorPicker.selectedColorHex).to.be.equal('#cc6600');
   });
 
-  it('dispatches a change event on color change', () => {
-    const dispatchEventSpy = spyOn(colorPicker, 'dispatchEvent');
+  test('dispatches a change event on color change', () => {
+    let nCalled = 0;
+    const handler = () => ++nCalled;
+    colorPicker.addEventListener('change', handler);
 
     colorPicker.onColorChange();
 
-    expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
+    expect(nCalled).to.be.eq(1);
   });
 
-  it('dispatches a change event on hue input', () => {
-    const dispatchEventSpy = spyOn(colorPicker, 'dispatchEvent');
+  test('dispatches a change event on hue input', () => {
+    let nCalled = 0;
+    const handler = () => ++nCalled;
+    colorPicker.addEventListener('change', handler);
 
     colorPicker.onHueInput();
 
-    expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
+    expect(nCalled).to.be.eq(1);
   });
 
-  it('updates the UI on selectedColorHex change', async () => {
+  test('updates the UI on selectedColorHex change', async () => {
     const exampleHex = '#55FF00';
     colorPicker.selectedColorHex = exampleHex;
     await colorPicker.updateComplete;
 
-    expect(colorPicker.selectedColorHex).toBe(exampleHex);
-    expect(colorPicker.colorMap.hue).toBe(100);
-    expect(colorPicker.colorMap.saturation).toBe(1);
-    expect(colorPicker.colorMap.value).toBe(255);
+    expect(colorPicker.selectedColorHex).to.be.equal(exampleHex);
+    expect(colorPicker.colorMap.hue).to.be.equal(100);
+    expect(colorPicker.colorMap.saturation).to.be.equal(1);
+    expect(colorPicker.colorMap.value).to.be.equal(255);
 
 
     colorPicker.colorMap.hue = 40;
     colorPicker.colorMap.dispatchEvent(new Event('change'));
 
     // Should be changed.
-    expect(colorPicker.selectedColorHex).toBe('#ffaa00');
+    expect(colorPicker.selectedColorHex).to.be.equal('#ffaa00');
   });
 });

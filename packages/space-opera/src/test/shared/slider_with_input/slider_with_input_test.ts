@@ -18,35 +18,39 @@
 
 import '../../../components/shared/slider_with_input/slider_with_input.js';
 
+import {expect} from '@esm-bundle/chai';
+
 import {SliderWithInputElement} from '../../../components/shared/slider_with_input/slider_with_input.js';
 
-describe('slider with input test', () => {
+suite('slider with input test', () => {
   let sliderWithInput: SliderWithInputElement;
 
-  beforeEach(async () => {
+  setup(async () => {
     sliderWithInput = new SliderWithInputElement();
     document.body.appendChild(sliderWithInput);
 
     await sliderWithInput.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(sliderWithInput);
   });
 
-  it('exists', () => {
-    expect(sliderWithInput instanceof HTMLElement).toBe(true);
-    expect(sliderWithInput.tagName).toEqual('ME-SLIDER-WITH-INPUT');
+  test('exists', () => {
+    expect(sliderWithInput instanceof HTMLElement).to.be.equal(true);
+    expect(sliderWithInput.tagName).to.be.equal('ME-SLIDER-WITH-INPUT');
   });
 
-  it('dispatches an event when input changed', () => {
-    const dispatchEventSpy = spyOn(sliderWithInput, 'dispatchEvent');
+  test('dispatches an event when input changed', () => {
+    let nCalled = 0;
+    const handler = () => ++nCalled;
+    sliderWithInput.addEventListener('change', handler);
 
     const input =
         sliderWithInput.shadowRoot!.querySelector('input') as HTMLInputElement;
     input.value = String(6);
     input.dispatchEvent(new Event('change'));
 
-    expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
+    expect(nCalled).to.be.eq(1);
   });
 });

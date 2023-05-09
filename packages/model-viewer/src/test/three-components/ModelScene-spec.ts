@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {Matrix4, Mesh, SphereGeometry, Vector3} from 'three';
 
 import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {assetPath} from '../helpers.js';
-
-
-const expect = chai.expect;
 
 suite('ModelScene', () => {
   let element: ModelViewerElement;

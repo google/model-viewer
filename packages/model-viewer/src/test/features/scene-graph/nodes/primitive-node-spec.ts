@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial';
 
 import {$primitivesList, $variantData, Model} from '../../../../features/scene-graph/model.js';
@@ -20,10 +21,6 @@ import {ModelViewerElement} from '../../../../model-viewer.js';
 import {CorrelatedSceneGraph} from '../../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {waitForEvent} from '../../../../utilities.js';
 import {assetPath, loadThreeGLTF} from '../../../helpers.js';
-
-
-
-const expect = chai.expect;
 
 const BRAIN_STEM_GLB_PATH = assetPath(
     'models/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb');

@@ -15,19 +15,21 @@
  *
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {InspectorPanel} from '../../components/inspector/inspector.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';
 import {dispatchGltfUrl, getModelViewer} from '../../components/model_viewer_preview/reducer.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-const ASTRONAUT_PATH = '../base/shared-assets/models/Astronaut.glb';
+const ASTRONAUT_PATH = 'packages/shared-assets/models/Astronaut.glb';
 
-describe('loader inspector pane test', () => {
+suite('loader inspector pane test', () => {
   let preview: ModelViewerPreview;
   let inspectorPane: InspectorPanel;
 
-  beforeEach(async () => {
+  setup(async () => {
     reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
@@ -41,24 +43,25 @@ describe('loader inspector pane test', () => {
     await inspectorPane.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(inspectorPane);
     document.body.removeChild(preview);
   })
 
-  it('outputs valid JSON to the inspector pane', async () => {
+  test('outputs valid JSON to the inspector pane', async () => {
     const textContent =
         inspectorPane.shadowRoot!.querySelector(
                                      '.inspector-content')!.textContent!;
-    expect(textContent).toBeTruthy();
-    expect(JSON.parse(textContent)).toEqual(getModelViewer()!.originalGltfJson);
+    expect(textContent).to.be.ok;
+    expect(JSON.parse(textContent))
+        .to.be.eql(getModelViewer()!.originalGltfJson);
   });
 
-  it('uploads images in the bin to the inspector pane', async () => {
+  test('uploads images in the bin to the inspector pane', async () => {
     const texImage = inspectorPane.shadowRoot!.querySelector<HTMLImageElement>(
         '.texture-images img')!;
-    expect(texImage).toBeTruthy();
+    expect(texImage).to.be.ok;
     // Check that an object URL was generated
-    expect(texImage.src).toMatch(/^blob:http/);
+    expect(texImage.src).to.match(/^blob:http/);
   });
 });

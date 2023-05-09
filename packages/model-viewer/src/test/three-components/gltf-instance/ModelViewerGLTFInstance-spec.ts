@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {BufferGeometry, DoubleSide, Mesh, MeshStandardMaterial} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ModelViewerGLTFInstance} from '../../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {PreparedGLTF} from '../../../three-components/GLTFInstance.js';
 import {createFakeThreeGLTF} from '../../helpers.js';
-
-
-
-const expect = chai.expect;
 
 suite('ModelViewerGLTFInstance', () => {
   let rawGLTF: GLTF;

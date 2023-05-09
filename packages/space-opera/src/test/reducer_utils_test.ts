@@ -17,34 +17,36 @@
 
 
 
+import {expect} from '@esm-bundle/chai';
+
 import {immutableArrayUpdate, immutableMapUpdate} from '../components/utils/reducer_utils.js';
 
-describe('reducer utils test', () => {
-  it('immutableArrayUpdate returns a copy with the expected update', () => {
+suite('reducer utils test', () => {
+  test('immutableArrayUpdate returns a copy with the expected update', () => {
     const input = [1, 2, 3];
     const output = immutableArrayUpdate(input, 1, 4);
-    expect(output).toEqual([1, 4, 3]);
+    expect(output).to.be.eql([1, 4, 3]);
     // Must not mutate the input
-    expect(input).toEqual([1, 2, 3]);
+    expect(input).to.be.eql([1, 2, 3]);
   });
 
-  it('immutableMapUpdate returns a copy with the expected update', () => {
+  test('immutableMapUpdate returns a copy with the expected update', () => {
     const input = new Map<string, string>();
     input.set('name', 'alice');
     input.set('age', '25');
     const output = immutableMapUpdate(input, 'age', '30');
 
     // Creates a clone
-    expect(output).not.toBe(input);
+    expect(output).not.to.be.equal(input);
 
     // Clone has correct values.
-    expect(output.size).toEqual(2);
-    expect(output.get('name')).toEqual('alice');
-    expect(output.get('age')).toEqual('30');
+    expect(output.size).to.be.equal(2);
+    expect(output.get('name')).to.be.equal('alice');
+    expect(output.get('age')).to.be.equal('30');
 
     // Input has old values
-    expect(input.size).toEqual(2);
-    expect(input.get('name')).toEqual('alice');
-    expect(input.get('age')).toEqual('25');
+    expect(input.size).to.be.equal(2);
+    expect(input.get('name')).to.be.equal('alice');
+    expect(input.get('age')).to.be.equal('25');
   });
 });

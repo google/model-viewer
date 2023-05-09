@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {CacheEvictionPolicy} from '../../utilities/cache-eviction-policy.js';
+import {expect} from '@esm-bundle/chai';
 
-const expect = chai.expect;
+import {CacheEvictionPolicy} from '../../utilities/cache-eviction-policy.js';
 
 suite('CacheEvictionPolicy', () => {
   let cache: Set<string>;

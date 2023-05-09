@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-import { ModelViewerElement } from '@google/model-viewer';
-import { assetPath, createModelViewerElement, waitForEvent } from './utilities.js';
-import { EffectComposer } from '../model-viewer-effects.js';
-import { $effectComposer, $normalPass, $renderPass, $scene } from '../effect-composer.js';
-import { DotScreenEffect, Effect, EffectPass, GridEffect } from 'postprocessing';
-import { Camera } from 'three';
-const expect = chai.expect;
+import {expect} from '@esm-bundle/chai';
+import {ModelViewerElement} from '@google/model-viewer';
+import {DotScreenEffect, Effect, EffectPass, GridEffect} from 'postprocessing';
+import {Camera} from 'three';
+
+import {$effectComposer, $normalPass, $renderPass, $scene} from '../effect-composer.js';
+import {EffectComposer} from '../model-viewer-effects.js';
+
+import {assetPath, createModelViewerElement, waitForEvent} from './utilities.js';
 
 suite('MVEffectComposer', () => {
   let element: ModelViewerElement;
@@ -51,8 +53,10 @@ suite('MVEffectComposer', () => {
         expect(composer[$renderPass]).to.be.ok;
         expect(composer[$normalPass]).to.be.ok;
         expect(composer[$effectComposer].passes.length).to.eq(2);
-        expect(composer[$effectComposer].passes[0]).to.eq(composer[$renderPass]);
-        expect(composer[$effectComposer].passes[1]).to.eq(composer[$normalPass]);
+        expect(composer[$effectComposer].passes[0])
+            .to.eq(composer[$renderPass]);
+        expect(composer[$effectComposer].passes[1])
+            .to.eq(composer[$normalPass]);
         expect(composer[$normalPass].enabled).to.be.false;
         expect(composer[$normalPass].renderToScreen).to.be.false;
         expect((composer[$renderPass] as any).scene).to.eq(composer[$scene]);
@@ -74,7 +78,8 @@ suite('MVEffectComposer', () => {
       composer.addPass(pass);
       expect(composer[$effectComposer].passes.length).to.eq(3);
       expect(composer[$effectComposer].passes[2]).to.eq(pass);
-      expect((composer[$effectComposer].passes[2] as any).effects).to.contain(effect);
+      expect((composer[$effectComposer].passes[2] as any).effects)
+          .to.contain(effect);
 
       composer.removePass(pass, false);
     });
@@ -86,8 +91,10 @@ suite('MVEffectComposer', () => {
       composer.addPass(pass);
       expect(composer[$effectComposer].passes.length).to.eq(3);
       expect(composer[$effectComposer].passes[2]).to.eq(pass);
-      expect((composer[$effectComposer].passes[2] as any).effects.length).to.eq(2);
-      expect((composer[$effectComposer].passes[2] as any).effects).to.contain(effect);
+      expect((composer[$effectComposer].passes[2] as any).effects.length)
+          .to.eq(2);
+      expect((composer[$effectComposer].passes[2] as any).effects)
+          .to.contain(effect);
 
       composer.removePass(pass, false);
     });

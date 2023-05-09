@@ -5,26 +5,10 @@ on: [push]
 jobs:
   full_test_run:
 
-    env:
-      USE_BROWSER_STACK: true
-
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
     steps:
-    - name: 'BrowserStack Env Setup'  # Invokes the setup-env action
-      uses: browserstack/github-actions/setup-env@master
-      with:
-        username: ${{ secrets.BROWSER_STACK_USERNAME }}
-        access-key: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
-
-    - name: 'BrowserStack Local Tunnel Setup'  # Invokes the setup-local action
-      uses: browserstack/github-actions/setup-local@master
-      with:
-        local-testing: start
-        local-identifier: test
-        local-logging-level: setup-logs
-
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
       with:
@@ -32,6 +16,9 @@ jobs:
 
     - name: NPM install
       run: npm ci
+
+    - name: Install playwright browsers
+      run: npx playwright install --with-deps
 
     # - name: Lint TypeScript sources
     #   run: npm run lint
@@ -44,8 +31,3 @@ jobs:
 
     - name: Unit tests
       run: npm run test:ci
-
-    - name: 'BrowserStackLocal Stop'  # Terminating the BrowserStackLocal tunnel connection
-      uses: browserstack/github-actions/setup-local@master
-      with:
-        local-testing: stop

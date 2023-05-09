@@ -22,6 +22,7 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
     "skipLibCheck": true,
+    "esModuleInterop": true,
   },
   "include": [
     "./src/**/*.ts"

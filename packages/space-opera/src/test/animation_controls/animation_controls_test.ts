@@ -15,8 +15,9 @@
  *
  */
 
-
 import '../../components/animation_controls/animation_controls.js';
+
+import {expect} from '@esm-bundle/chai';
 
 import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../../components/config/reducer.js';
@@ -26,13 +27,13 @@ import {Dropdown} from '../../components/shared/dropdown/dropdown.js';
 import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 
-const ANIMATED_GLB_PATH = '../base/shared-assets/models/RobotExpressive.glb';
+const ANIMATED_GLB_PATH = 'packages/shared-assets/models/RobotExpressive.glb';
 
-describe('animation controls test', () => {
+suite('animation controls test', () => {
   let preview: ModelViewerPreview;
   let animationControls: AnimationControls;
 
-  beforeEach(async () => {
+  setup(async () => {
     reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
@@ -46,24 +47,24 @@ describe('animation controls test', () => {
     await animationControls.updateComplete;
   });
 
-  afterEach(async () => {
+  teardown(async () => {
     await animationControls.updateComplete;
     document.body.removeChild(animationControls);
     document.body.removeChild(preview);
   })
 
-  it('updates the animation names when a gltf is uploaded', async () => {
+  test('updates the animation names when a gltf is uploaded', async () => {
     const animationNameSelector = animationControls.shadowRoot!.querySelector(
         'me-dropdown#animation-name-selector');
     const paperItems =
         animationNameSelector!.getElementsByTagName('paper-item');
 
-    expect(paperItems.length).toBe(14);
-    expect(paperItems[0].getAttribute('value')).toBe('Dance');
-    expect(paperItems[1].getAttribute('value')).toBe('Death');
+    expect(paperItems.length).to.be.equal(14);
+    expect(paperItems[0].getAttribute('value')).to.be.equal('Dance');
+    expect(paperItems[1].getAttribute('value')).to.be.equal('Death');
   });
 
-  it('dispatches an event when an animation is selected', async () => {
+  test('dispatches an event when an animation is selected', async () => {
     const animationNameSelector =
         animationControls.shadowRoot!.querySelector(
             'me-dropdown#animation-name-selector') as Dropdown;
@@ -71,34 +72,34 @@ describe('animation controls test', () => {
                                    'paper-item[value="Death"]') as HTMLElement;
     danceAnimationItem.click();
 
-    expect(getConfig(reduxStore.getState()).animationName).toBe('Death');
+    expect(getConfig(reduxStore.getState()).animationName).to.be.equal('Death');
   });
 
-  it('dispatches an event on UI click', async () => {
-    expect(getConfig(reduxStore.getState()).autoplay).toBe(true);
+  test('dispatches an event on UI click', async () => {
+    expect(getConfig(reduxStore.getState()).autoplay).to.be.equal(true);
     const autoplayCheckbox =
         animationControls.autoplayCheckbox!.shadowRoot!.querySelector(
             'mwc-checkbox')!;
 
     autoplayCheckbox.click();
     await animationControls.updateComplete;
-    expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
+    expect(getConfig(reduxStore.getState()).autoplay).to.be.equal(false);
 
     autoplayCheckbox.click();
     await animationControls.updateComplete;
-    expect(getConfig(reduxStore.getState()).autoplay).toBe(true);
+    expect(getConfig(reduxStore.getState()).autoplay).to.be.equal(true);
   });
 
-  it('updates checkbox state when receiving autoplay change', async () => {
+  test('updates checkbox state when receiving autoplay change', async () => {
     reduxStore.dispatch(dispatchAutoplayEnabled(false));
-    expect(getConfig(reduxStore.getState()).autoplay).toBe(false);
+    expect(getConfig(reduxStore.getState()).autoplay).to.be.equal(false);
     const autoplayCheckbox = animationControls.autoplayCheckbox!;
 
     await animationControls.updateComplete;
-    expect(autoplayCheckbox.checked).toBe(false);
+    expect(autoplayCheckbox.checked).to.be.equal(false);
   });
 
-  it('updates selected value on animationName change', async () => {
+  test('updates selected value on animationName change', async () => {
     const animationName = 'Idle';
     reduxStore.dispatch(dispatchAnimationName(animationName));
     const animationNameSelector =
@@ -106,6 +107,6 @@ describe('animation controls test', () => {
             'me-dropdown#animation-name-selector') as Dropdown;
     await animationControls.updateComplete;
     expect(animationNameSelector.selectedItem.getAttribute('value'))
-        .toBe('Idle');
+        .to.be.equal('Idle');
   });
 });

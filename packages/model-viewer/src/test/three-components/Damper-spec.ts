@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {Damper} from '../../three-components/Damper.js';
+import {expect} from '@esm-bundle/chai';
 
-const expect = chai.expect;
+import {Damper} from '../../three-components/Damper.js';
 
 const ONE_FRAME_DELTA = 1000.0 / 60.0;
 const FIFTY_FRAME_DELTA = 50 * ONE_FRAME_DELTA;

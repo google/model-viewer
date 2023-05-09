@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-import { ModelViewerElement } from '@google/model-viewer';
-import { ArraysAreEqual, assetPath, createModelViewerElement, screenshot, timePasses, waitForEvent } from './utilities.js';
-import { EffectComposer } from '../model-viewer-effects.js';
-import { $effectComposer } from '../effect-composer.js';
-import { getOwnPropertySymbolValue } from '../utilities.js';
-import { Renderer } from '@google/model-viewer/lib/three-components/Renderer.js';
-const expect = chai.expect;
+import {expect} from '@esm-bundle/chai';
+import {ModelViewerElement} from '@google/model-viewer';
+import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
+
+import {$effectComposer} from '../effect-composer.js';
+import {EffectComposer} from '../model-viewer-effects.js';
+import {getOwnPropertySymbolValue} from '../utilities.js';
+
+import {ArraysAreEqual, assetPath, createModelViewerElement, screenshot, timePasses, waitForEvent} from './utilities.js';
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
@@ -35,7 +37,8 @@ suite('Screenshot Baseline Test', () => {
   });
 
   test('Compare ModelViewer to Self', async () => {
-    const renderer = getOwnPropertySymbolValue<Renderer>(element, 'renderer') as Renderer;
+    const renderer =
+        getOwnPropertySymbolValue<Renderer>(element, 'renderer') as Renderer;
     expect(renderer).to.not.be.undefined;
     expect(renderer.threeRenderer).to.not.be.undefined;
     await timePasses(5);

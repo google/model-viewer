@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {waitForEvent} from '../../utilities.js';
 import {Activity, ProgressDetails, ProgressTracker} from '../../utilities/progress-tracker.js';
-
-const expect = chai.expect;
 
 suite('ProgressTracker', () => {
   let progressTracker: ProgressTracker;

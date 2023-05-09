@@ -18,14 +18,16 @@
 
 import '../../../components/shared/texture_picker/texture_picker.js';
 
+import {expect} from '@esm-bundle/chai';
+
 import {FileDetails, TexturePicker} from '../../../components/shared/texture_picker/texture_picker.js';
 import {createSafeObjectURL} from '../../../components/utils/create_object_url.js';
 import {generatePngBlob} from '../../utils/test_utils.js';
 
-describe('texture picker test', () => {
+suite('texture picker test', () => {
   let texturePicker: TexturePicker;
 
-  beforeEach(async () => {
+  setup(async () => {
     texturePicker = new TexturePicker();
     texturePicker.images = [
       createSafeObjectURL(await generatePngBlob('#000')),
@@ -35,28 +37,35 @@ describe('texture picker test', () => {
     await texturePicker.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(texturePicker);
   });
 
-  it('exists', () => {
-    expect(texturePicker instanceof HTMLElement).toBe(true);
-    expect(texturePicker.tagName).toEqual('ME-TEXTURE-PICKER');
+  test('exists', () => {
+    expect(texturePicker instanceof HTMLElement).to.be.equal(true);
+    expect(texturePicker.tagName).to.be.equal('ME-TEXTURE-PICKER');
   });
 
-  it('dispatches an event when select an image', () => {
-    const dispatchEventSpy = spyOn(texturePicker, 'dispatchEvent');
+  test('dispatches an event when select an image', () => {
+    let nCalled = 0;
+    const handler = () => ++nCalled;
+    texturePicker.addEventListener('texture-changed', handler);
 
     const input = texturePicker.shadowRoot!.querySelectorAll('input')[1];
     input.click();
 
-    expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
-    expect(texturePicker.selectedIndex).toBe(1);
+    expect(nCalled).to.be.eq(1);
+    expect(texturePicker.selectedIndex).to.be.equal(1);
   });
 
-  it('dispatches an event after uploading an image', async () => {
-    const eventListenerSpy = jasmine.createSpy('handler');
-    texturePicker.addEventListener('texture-uploaded', eventListenerSpy);
+  test('dispatches an event after uploading an image', async () => {
+    let nCalled = 0;
+    let arg;
+    const handler = (a) => {
+      arg = a;
+      ++nCalled;
+    };
+    texturePicker.addEventListener('texture-uploaded', handler);
 
     const fileInput = texturePicker.shadowRoot!.querySelector(
                           'input#texture-input') as HTMLInputElement;
@@ -67,27 +76,28 @@ describe('texture picker test', () => {
 
     fileInput.dispatchEvent(new CustomEvent('change'));
 
-    expect(eventListenerSpy).toHaveBeenCalledTimes(1);
-    const eventListenerArguments = eventListenerSpy.calls.first().args;
-    expect(eventListenerArguments.length).toBe(1);
-    const {url, type} = eventListenerArguments[0].detail as FileDetails;
-    expect(url).toBeInstanceOf(String);
-    expect(type).toEqual('image/jpeg');
+    expect(nCalled).to.be.eq(1);
+    const {url, type} = arg.detail as FileDetails;
+    expect(url).to.contain('blob:');
+    expect(type).to.be.equal('image/jpeg');
   });
 
-  it('dispatches an event with undefined selectedIndex on null texture click',
-     async () => {
-       const dispatchEventSpy = spyOn(texturePicker, 'dispatchEvent');
+  test(
+      'dispatches an event with undefined selectedIndex on null texture click',
+      async () => {
+        let nCalled = 0;
+        const handler = () => ++nCalled;
+        texturePicker.addEventListener('texture-changed', handler);
 
-       texturePicker.selectedIndex = 0;
-       await texturePicker.updateComplete;
-       const nullTextureSquare =
-           texturePicker.shadowRoot!.querySelector(
-               'div.NullTextureSquareInList') as HTMLInputElement;
-       expect(nullTextureSquare).toBeDefined();
-       nullTextureSquare.click();
+        texturePicker.selectedIndex = 0;
+        await texturePicker.updateComplete;
+        const nullTextureSquare =
+            texturePicker.shadowRoot!.querySelector(
+                'div.NullTextureSquareInList') as HTMLInputElement;
+        expect(nullTextureSquare).to.be.ok;
+        nullTextureSquare.click();
 
-       expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
-       expect(texturePicker.selectedIndex).not.toBeDefined();
-     });
+        expect(nCalled).to.be.eq(1);
+        expect(texturePicker.selectedIndex).not.to.be.ok;
+      });
 });

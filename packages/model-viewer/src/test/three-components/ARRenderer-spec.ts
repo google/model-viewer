@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {Matrix4, PerspectiveCamera, Vector2, Vector3} from 'three';
 
-import {IS_ANDROID} from '../../constants.js';
 import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ARRenderer} from '../../three-components/ARRenderer.js';
@@ -23,8 +23,6 @@ import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
-
-const expect = chai.expect;
 
 class MockXRFrame implements XRFrame {
   constructor(public session: XRSession) {
@@ -191,13 +189,6 @@ suite('ARRenderer', () => {
     if (element.parentNode != null) {
       element.parentNode.removeChild(element);
     }
-  });
-
-  // This fails on Android when karma.conf has hostname: 'bs-local.com',
-  // possibly due to not serving over HTTPS (which disables WebXR)? However,
-  // Browserstack is unstable without this hostname.
-  test('supports presenting to AR only on Android', async () => {
-    expect(await arRenderer.supportsPresentation()).to.be.equal(IS_ANDROID);
   });
 
   test('is not presenting if present has not been invoked', () => {

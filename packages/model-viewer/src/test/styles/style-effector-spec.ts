@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {parseExpressions} from '../../styles/parsers.js';
 import {EnvironmentState, StyleEffector} from '../../styles/style-effector.js';
 import {dispatchSyntheticEvent} from '../helpers.js';
 
-const expect = chai.expect;
 const triggerEnvironmentEffect = (type: EnvironmentState) => {
   switch (type) {
     case 'window-scroll':

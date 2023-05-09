@@ -33,7 +33,7 @@ export const ModelViewerElement =
 
 export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 
-export {RGB, RGBA} from './three-components/gltf-instance/gltf-2.0';
+export type{RGB, RGBA} from './three-components/gltf-instance/gltf-2.0';
 
 customElements.define('model-viewer', ModelViewerElement);
 

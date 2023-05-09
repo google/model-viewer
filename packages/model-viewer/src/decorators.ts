@@ -14,6 +14,7 @@
  */
 
 import {ReactiveElement} from 'lit';
+
 import {EvaluatedStyle, Intrinsics, StyleEvaluator} from './styles/evaluators';
 import {parseExpressions, Unit} from './styles/parsers';
 import {StyleEffector} from './styles/style-effector';

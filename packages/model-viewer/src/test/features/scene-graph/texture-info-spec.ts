@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-import { Vector2 } from 'three';
+import {expect} from '@esm-bundle/chai';
+import {Vector2} from 'three';
+
 import {TextureInfo} from '../../../features/scene-graph/texture-info.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
 import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
-const expect = chai.expect;
 const DUCK_GLB_PATH =
     assetPath('models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb');
-const TEXTURED_CUBE_GLB_PATH = assetPath('models/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb');
+const TEXTURED_CUBE_GLB_PATH = assetPath(
+    'models/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb');
 
 suite('scene-graph/texture-info', () => {
   suite('texture-info', () => {
@@ -68,31 +70,39 @@ suite('scene-graph/texture-info', () => {
       expect(emptyTextureInfo.texture).to.be.null;
     });
 
-    test('exports and re-imports the model with transformed texture', async () => {
-      // Load textured glb.
-      element.src = TEXTURED_CUBE_GLB_PATH;
-      await waitForEvent(element, 'load');
+    test(
+        'exports and re-imports the model with transformed texture',
+        async () => {
+          // Load textured glb.
+          element.src = TEXTURED_CUBE_GLB_PATH;
+          await waitForEvent(element, 'load');
 
-      // Transform the textures.
-      const sampler = element.model?.materials[0].pbrMetallicRoughness['baseColorTexture'].texture?.sampler!;
-      sampler.setRotation(0.1);
-      sampler.setOffset(new Vector2(0.2, 0.3));
-      sampler.setScale(new Vector2(0.4, 0.5));
+          // Transform the textures.
+          const sampler = element.model?.materials[0]
+                              .pbrMetallicRoughness['baseColorTexture']
+                              .texture?.sampler!;
+          sampler.setRotation(0.1);
+          sampler.setOffset(new Vector2(0.2, 0.3));
+          sampler.setScale(new Vector2(0.4, 0.5));
 
-      // Export model.
-      const exported = await element.exportScene({binary: true});
-      const url = URL.createObjectURL(exported);
+          // Export model.
+          const exported = await element.exportScene({binary: true});
+          const url = URL.createObjectURL(exported);
 
-      // Re-load model.
-      element.src = url;
-      await waitForEvent(element, 'load');
+          // Re-load model.
+          element.src = url;
+          await waitForEvent(element, 'load');
 
-      URL.revokeObjectURL(url);
+          URL.revokeObjectURL(url);
 
-      const exported_sampler = element.model?.materials[0].pbrMetallicRoughness['baseColorTexture'].texture?.sampler!;
-      expect(exported_sampler.rotation).to.be.eq(0.1, 'rotation');
-      expect(exported_sampler.offset).to.be.eql(new Vector2(0.2, 0.3), 'offset');
-      expect(exported_sampler.scale).to.be.eql(new Vector2(0.4, 0.5), 'scale');
-    });
+          const exported_sampler = element.model?.materials[0]
+                                       .pbrMetallicRoughness['baseColorTexture']
+                                       .texture?.sampler!;
+          expect(exported_sampler.rotation).to.be.eq(0.1, 'rotation');
+          expect(exported_sampler.offset)
+              .to.be.eql(new Vector2(0.2, 0.3), 'offset');
+          expect(exported_sampler.scale)
+              .to.be.eql(new Vector2(0.4, 0.5), 'scale');
+        });
   });
 });

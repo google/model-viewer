@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {Cache, CubeReflectionMapping, EquirectangularReflectionMapping, WebGLRenderer} from 'three';
 
 import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath} from '../helpers.js';
-
-
-const expect = chai.expect;
 
 // Reuse the same canvas as to not stress the WebGL
 // context limit

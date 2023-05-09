@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {$defaultPosterElement, $posterContainerElement} from '../../features/loading.js';
 import {$scene, $userInputElement} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
@@ -20,7 +22,6 @@ import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, pickShadowDescendant, rafPasses, until} from '../helpers.js';
 
-const expect = chai.expect;
 const CUBE_GLB_PATH = assetPath('models/cube.gltf');
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 
@@ -32,7 +33,6 @@ suite('Loading', () => {
     element = new ModelViewerElement();
     firstChild = document.body.firstChild;
     document.body.insertBefore(element, firstChild);
-    element.poster = assetPath('../screenshot.png');
 
     // Wait at least a microtask for size calculations
     await timePasses();

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
 import {Group, Mesh, MeshStandardMaterial, Object3D} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
@@ -20,10 +21,6 @@ import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {Material, PBRMetallicRoughness, Texture, TextureInfo} from '../../../three-components/gltf-instance/gltf-2.0.js';
 import {assetPath, loadThreeGLTF} from '../../helpers.js';
-
-
-
-const expect = chai.expect;
 
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');

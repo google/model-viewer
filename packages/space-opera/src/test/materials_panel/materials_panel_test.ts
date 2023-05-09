@@ -15,6 +15,7 @@
  *
  */
 
+import {expect} from '@esm-bundle/chai';
 import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/api';
 
 import {MaterialPanel} from '../../components/materials_panel/materials_panel.js';
@@ -25,10 +26,11 @@ import {dispatchReset} from '../../reducers.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {waitForEvent} from '../utils/test_utils.js';
 
-const TEXTURE_CUBE_GLTF_PATH = '../base/shared-assets/models/textureCubes.gltf';
-const CUBES_GLTF_PATH = '../base/shared-assets/models/cubes.gltf';
-const TRIANGLE_GLTF_PATH = '../base/shared-assets/models/Triangle.gltf';
-const TEXTURE_PATH = 'base/shared-assets/models/ORM.png';
+const TEXTURE_CUBE_GLTF_PATH =
+    'packages/shared-assets/models/textureCubes.gltf';
+const CUBES_GLTF_PATH = 'packages/shared-assets/models/cubes.gltf';
+const TRIANGLE_GLTF_PATH = 'packages/shared-assets/models/Triangle.gltf';
+const TEXTURE_PATH = 'packages/shared-assets/models/ORM.png';
 
 async function checkUpload(
     panel: MaterialPanel,
@@ -37,7 +39,7 @@ async function checkUpload(
   const imageList = texturePicker.shadowRoot!.querySelector('.TextureList')!;
   const listLength = texturePicker.images.length;
 
-  expect(imageList.children.length).toEqual(listLength + 1);
+  expect(imageList.children.length).to.be.equal(listLength + 1);
 
   texturePicker.dispatchEvent(new CustomEvent(
       'texture-uploaded', {detail: {url: TEXTURE_PATH, type: 'image/png'}}));
@@ -46,16 +48,16 @@ async function checkUpload(
 
   // Check that the uri of the texture at material 0 is the newly uploaded
   // texture.
-  expect(getTextureId(textureInfo.texture!.source)).toContain(TEXTURE_PATH);
-  expect(texturePicker.images.length).toEqual(listLength + 1);
-  expect(imageList.children.length).toEqual(listLength + 2);
+  expect(getTextureId(textureInfo.texture!.source)).to.contain(TEXTURE_PATH);
+  expect(texturePicker.images.length).to.be.equal(listLength + 1);
+  expect(imageList.children.length).to.be.equal(listLength + 2);
 }
 
-describe('material panel test', () => {
+suite('material panel test', () => {
   let preview: ModelViewerPreview;
   let panel: MaterialPanel;
 
-  beforeEach(async () => {
+  setup(async () => {
     reduxStore.dispatch(dispatchReset());
     preview = new ModelViewerPreview();
     document.body.appendChild(preview);
@@ -70,46 +72,48 @@ describe('material panel test', () => {
     await panel.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(panel);
     document.body.removeChild(preview);
   });
 
-  it('selector reflects materials in GLTF, including defaults where undefined',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       expect(panel.baseColorPicker.selectedColorHex).toEqual('#ff00ff');
-       expect(panel.selectedRoughnessFactor).toEqual(0.2);
-       expect(panel.selectedMetallicFactor).toEqual(1);
+  test(
+      'selector reflects materials in GLTF, including defaults where undefined',
+      async () => {
+        panel.selectedMaterialIndex = 0;
+        await panel.updateComplete;
+        expect(panel.baseColorPicker.selectedColorHex).to.be.equal('#ff00ff');
+        expect(panel.selectedRoughnessFactor).to.be.equal(0.2);
+        expect(panel.selectedMetallicFactor).to.be.equal(1);
 
-       panel.selectedMaterialIndex = 1;
-       await panel.updateComplete;
-       expect(panel.baseColorPicker.selectedColorHex).toEqual('#ffff00');
-       expect(panel.selectedRoughnessFactor).toEqual(1);
-       expect(panel.selectedMetallicFactor).toEqual(1);
-     });
+        panel.selectedMaterialIndex = 1;
+        await panel.updateComplete;
+        expect(panel.baseColorPicker.selectedColorHex).to.be.equal('#ffff00');
+        expect(panel.selectedRoughnessFactor).to.be.equal(1);
+        expect(panel.selectedMetallicFactor).to.be.equal(1);
+      });
 
-  it('Model with variants has visible variant selector', async () => {
+  test('Model with variants has visible variant selector', async () => {
     reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
     await preview.loadComplete;
     await panel.updateComplete;
 
     const section = panel.shadowRoot?.getElementById('variant-selector');
-    expect(section!.style.display).not.toEqual('none');
+    expect(section!.style.display).not.to.be.equal('none');
   });
 
-  it('Model without variants does not have visible variant selector',
-     async () => {
-       reduxStore.dispatch(dispatchGltfUrl(TRIANGLE_GLTF_PATH));
-       await preview.loadComplete;
-       await panel.updateComplete;
+  test(
+      'Model without variants does not have visible variant selector',
+      async () => {
+        reduxStore.dispatch(dispatchGltfUrl(TRIANGLE_GLTF_PATH));
+        await preview.loadComplete;
+        await panel.updateComplete;
 
-       const section = panel.shadowRoot?.getElementById('variant-selector');
-       expect(section?.style.display).toEqual('none');
-     });
+        const section = panel.shadowRoot?.getElementById('variant-selector');
+        expect(section?.style.display).to.be.equal('none');
+      });
 
-  it('selecting a variant changes the material at index 0', async () => {
+  test('selecting a variant changes the material at index 0', async () => {
     reduxStore.dispatch(dispatchGltfUrl(CUBES_GLTF_PATH));
     await preview.loadComplete;
     await panel.updateComplete;
@@ -118,7 +122,8 @@ describe('material panel test', () => {
     const onVariantApplied = async () => {
       panel.selectedMaterialIndex = 0;
       await panel.updateComplete;
-      expect(panel.selectableMaterials[0].name).toEqual(expectedMaterialName);
+      expect(panel.selectableMaterials[0].name)
+          .to.be.equal(expectedMaterialName);
     };
     preview.addEventListener('variant-applied', onVariantApplied);
 
@@ -134,35 +139,36 @@ describe('material panel test', () => {
     preview.removeEventListener('variant-applied', onVariantApplied);
   });
 
-  it('reflects textures in GLTF', async () => {
+  test('reflects textures in GLTF', async () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
 
     const texturePicker = panel.shadowRoot!.querySelector('me-texture-picker')!;
     await texturePicker.updateComplete;
-    expect(texturePicker!.images.length).toBe(2);
+    expect(texturePicker!.images.length).to.be.equal(2);
   });
 
   // Input/click
-  it('applies changes to model textures on base color texture picker input',
-     async () => {
-       panel.selectedMaterialIndex = 1;
-       await panel.updateComplete;
-       const texturePicker = panel.baseColorTexturePicker!;
-       texturePicker.selectedIndex = 0;
-       await texturePicker.updateComplete;
+  test(
+      'applies changes to model textures on base color texture picker input',
+      async () => {
+        panel.selectedMaterialIndex = 1;
+        await panel.updateComplete;
+        const texturePicker = panel.baseColorTexturePicker!;
+        texturePicker.selectedIndex = 0;
+        await texturePicker.updateComplete;
 
-       const textureOptionInput =
-           texturePicker.shadowRoot!.querySelector('input')!;
-       textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedBaseColorTextureId!;
+        const textureOptionInput =
+            texturePicker.shadowRoot!.querySelector('input')!;
+        textureOptionInput.dispatchEvent(new Event('click'));
+        const expectedTextureId = panel.selectedBaseColorTextureId!;
 
-       const {baseColorTexture} = panel.getMaterial().pbrMetallicRoughness;
-       expect(getTextureId(baseColorTexture.texture!.source))
-           .toEqual(expectedTextureId);
-     });
+        const {baseColorTexture} = panel.getMaterial().pbrMetallicRoughness;
+        expect(getTextureId(baseColorTexture.texture!.source))
+            .to.be.equal(expectedTextureId);
+      });
 
-  it('clears model textures on base color null texture input', async () => {
+  test('clears model textures on base color null texture input', async () => {
     panel.selectedMaterialIndex = 1;
     await panel.updateComplete;
     const texturePicker = panel.baseColorTexturePicker!;
@@ -173,29 +179,30 @@ describe('material panel test', () => {
     textureOptionInput.dispatchEvent(new Event('click'));
 
     const {baseColorTexture} = panel.getMaterial().pbrMetallicRoughness;
-    expect(baseColorTexture.texture).toEqual(null);
+    expect(baseColorTexture.texture).to.be.equal(null);
   });
 
-  it('applies changes to model textures on MR texture picker input',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       const texturePicker = panel.metallicRoughnessTexturePicker!;
-       texturePicker.selectedIndex = 1;
-       await texturePicker.updateComplete;
+  test(
+      'applies changes to model textures on MR texture picker input',
+      async () => {
+        panel.selectedMaterialIndex = 0;
+        await panel.updateComplete;
+        const texturePicker = panel.metallicRoughnessTexturePicker!;
+        texturePicker.selectedIndex = 1;
+        await texturePicker.updateComplete;
 
-       const textureOptionInput =
-           texturePicker.shadowRoot!.querySelector('input')!;
-       textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedMetallicRoughnessTextureId!;
+        const textureOptionInput =
+            texturePicker.shadowRoot!.querySelector('input')!;
+        textureOptionInput.dispatchEvent(new Event('click'));
+        const expectedTextureId = panel.selectedMetallicRoughnessTextureId!;
 
-       const {metallicRoughnessTexture} =
-           panel.getMaterial().pbrMetallicRoughness;
-       expect(getTextureId(metallicRoughnessTexture.texture!.source))
-           .toEqual(expectedTextureId);
-     });
+        const {metallicRoughnessTexture} =
+            panel.getMaterial().pbrMetallicRoughness;
+        expect(getTextureId(metallicRoughnessTexture.texture!.source))
+            .to.be.equal(expectedTextureId);
+      });
 
-  it('clears model textures on MR null texture input', async () => {
+  test('clears model textures on MR null texture input', async () => {
     panel.selectedMaterialIndex = 1;
     await panel.updateComplete;
     const texturePicker = panel.metallicRoughnessTexturePicker!;
@@ -206,10 +213,10 @@ describe('material panel test', () => {
     clearTextureOption.dispatchEvent(new Event('click'));
 
     const {metallicRoughnessTexture} = panel.getMaterial().pbrMetallicRoughness;
-    expect(metallicRoughnessTexture.texture).toEqual(null);
+    expect(metallicRoughnessTexture.texture).to.be.equal(null);
   });
 
-  it('normal texture picker input can change and clear texture', async () => {
+  test('normal texture picker input can change and clear texture', async () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
     const texturePicker = panel.normalTexturePicker!;
@@ -223,150 +230,161 @@ describe('material panel test', () => {
 
     const {normalTexture} = panel.getMaterial();
     expect(getTextureId(normalTexture.texture!.source))
-        .toEqual(expectedTextureId);
+        .to.be.equal(expectedTextureId);
 
     const clearTextureOption =
         texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
     clearTextureOption.dispatchEvent(new Event('click'));
 
-    expect(normalTexture.texture).toEqual(null);
+    expect(normalTexture.texture).to.be.equal(null);
   });
 
-  it('emissive texture picker input can change and clear texture', async () => {
-    panel.selectedMaterialIndex = 1;
-    await panel.updateComplete;
-    const texturePicker = panel.emissiveTexturePicker!;
-    texturePicker.selectedIndex = 0;
-    await texturePicker.updateComplete;
+  test(
+      'emissive texture picker input can change and clear texture',
+      async () => {
+        panel.selectedMaterialIndex = 1;
+        await panel.updateComplete;
+        const texturePicker = panel.emissiveTexturePicker!;
+        texturePicker.selectedIndex = 0;
+        await texturePicker.updateComplete;
 
-    const textureOptionInput =
-        texturePicker.shadowRoot!.querySelector('input')!;
-    textureOptionInput.dispatchEvent(new Event('click'));
-    const expectedTextureId = panel.selectedEmissiveTextureId!;
+        const textureOptionInput =
+            texturePicker.shadowRoot!.querySelector('input')!;
+        textureOptionInput.dispatchEvent(new Event('click'));
+        const expectedTextureId = panel.selectedEmissiveTextureId!;
 
-    const {emissiveTexture} = panel.getMaterial();
-    expect(getTextureId(emissiveTexture.texture!.source))
-        .toEqual(expectedTextureId);
+        const {emissiveTexture} = panel.getMaterial();
+        expect(getTextureId(emissiveTexture.texture!.source))
+            .to.be.equal(expectedTextureId);
 
-    const clearTextureOption =
-        texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
-    clearTextureOption.dispatchEvent(new Event('click'));
+        const clearTextureOption =
+            texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
+        clearTextureOption.dispatchEvent(new Event('click'));
 
-    expect(emissiveTexture.texture).toEqual(null);
-  });
+        expect(emissiveTexture.texture).to.be.equal(null);
+      });
 
-  it('occlusion texture picker input can change and clear texture',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       const texturePicker = panel.occlusionTexturePicker!;
-       texturePicker.selectedIndex = 0;
-       await texturePicker.updateComplete;
+  test(
+      'occlusion texture picker input can change and clear texture',
+      async () => {
+        panel.selectedMaterialIndex = 0;
+        await panel.updateComplete;
+        const texturePicker = panel.occlusionTexturePicker!;
+        texturePicker.selectedIndex = 0;
+        await texturePicker.updateComplete;
 
-       const textureOptionInput =
-           texturePicker.shadowRoot!.querySelector('input')!;
-       textureOptionInput.dispatchEvent(new Event('click'));
-       const expectedTextureId = panel.selectedOcclusionTextureId!;
+        const textureOptionInput =
+            texturePicker.shadowRoot!.querySelector('input')!;
+        textureOptionInput.dispatchEvent(new Event('click'));
+        const expectedTextureId = panel.selectedOcclusionTextureId!;
 
-       const {occlusionTexture} = panel.getMaterial();
-       expect(getTextureId(occlusionTexture.texture!.source))
-           .toEqual(expectedTextureId);
+        const {occlusionTexture} = panel.getMaterial();
+        expect(getTextureId(occlusionTexture.texture!.source))
+            .to.be.equal(expectedTextureId);
 
-       const clearTextureOption =
-           texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
-       clearTextureOption.dispatchEvent(new Event('click'));
+        const clearTextureOption =
+            texturePicker.shadowRoot!.querySelector('div#nullTextureSquare')!;
+        clearTextureOption.dispatchEvent(new Event('click'));
 
-       expect(occlusionTexture.texture).toEqual(null);
-     });
+        expect(occlusionTexture.texture).to.be.equal(null);
+      });
 
-  it('applies changes to model textures on double sided change', async () => {
+  test('applies changes to model textures on double sided change', async () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
     const {doubleSidedCheckbox} = panel;
-    expect(doubleSidedCheckbox.checked).toBeFalse();
+    expect(doubleSidedCheckbox.checked).to.be.false;
 
     doubleSidedCheckbox.checked = true;
     doubleSidedCheckbox.dispatchEvent(new Event('change'));
 
-    expect(panel.getMaterial().getDoubleSided()).toBeTrue();
+    expect(panel.getMaterial().getDoubleSided()).to.be.true;
   });
 
   // Upload
-  it('adds a base color texture to model textures on base color texture upload',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       await checkUpload(
-           panel,
-           panel.baseColorTexturePicker!,
-           panel.getMaterial().pbrMetallicRoughness.baseColorTexture);
-     });
+  test(
+      'adds a base color texture to model textures on base color texture upload',
+      async () => {
+        panel.selectedMaterialIndex = 0;
+        await panel.updateComplete;
+        await checkUpload(
+            panel,
+            panel.baseColorTexturePicker!,
+            panel.getMaterial().pbrMetallicRoughness.baseColorTexture);
+      });
 
-  it('adds a normal texture to model textures on normal texture upload',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       await checkUpload(
-           panel,
-           panel.normalTexturePicker!,
-           panel.getMaterial().normalTexture);
-     });
+  test(
+      'adds a normal texture to model textures on normal texture upload',
+      async () => {
+        panel.selectedMaterialIndex = 0;
+        await panel.updateComplete;
+        await checkUpload(
+            panel,
+            panel.normalTexturePicker!,
+            panel.getMaterial().normalTexture);
+      });
 
-  it('adds a metallic-roughness texture to model textures on MR texture upload',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       await checkUpload(
-           panel,
-           panel.metallicRoughnessTexturePicker!,
-           panel.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
-     });
+  test(
+      'adds a metallic-roughness texture to model textures on MR texture upload',
+      async () => {
+        panel.selectedMaterialIndex = 0;
+        await panel.updateComplete;
+        await checkUpload(
+            panel,
+            panel.metallicRoughnessTexturePicker!,
+            panel.getMaterial().pbrMetallicRoughness.metallicRoughnessTexture);
+      });
 
-  it('adds a emissive texture to model textures on emissive texture upload',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       await checkUpload(
-           panel,
-           panel.emissiveTexturePicker!,
-           panel.getMaterial().emissiveTexture);
-     });
+  test(
+      'adds a emissive texture to model textures on emissive texture upload',
+      async () => {
+        panel.selectedMaterialIndex = 0;
+        await panel.updateComplete;
+        await checkUpload(
+            panel,
+            panel.emissiveTexturePicker!,
+            panel.getMaterial().emissiveTexture);
+      });
 
-  it('adds a occlusion texture to model textures on occlusion texture upload',
-     async () => {
-       panel.selectedMaterialIndex = 0;
-       await panel.updateComplete;
-       await checkUpload(
-           panel,
-           panel.occlusionTexturePicker!,
-           panel.getMaterial().occlusionTexture);
-     });
+  test(
+      'adds a occlusion texture to model textures on occlusion texture upload',
+      async () => {
+        panel.selectedMaterialIndex = 0;
+        await panel.updateComplete;
+        await checkUpload(
+            panel,
+            panel.occlusionTexturePicker!,
+            panel.getMaterial().occlusionTexture);
+      });
 
-  it('applies changes to model textures on emissiveFactor change', async () => {
-    panel.selectedMaterialIndex = 0;
-    await panel.updateComplete;
+  test(
+      'applies changes to model textures on emissiveFactor change',
+      async () => {
+        panel.selectedMaterialIndex = 0;
+        await panel.updateComplete;
 
-    panel.emissiveFactorPicker.selectedColorHex = '#ff0000';
-    panel.emissiveFactorPicker.dispatchEvent(new Event('change'));
+        panel.emissiveFactorPicker.selectedColorHex = '#ff0000';
+        panel.emissiveFactorPicker.dispatchEvent(new Event('change'));
 
-    const {emissiveFactor} = panel.getMaterial();
-    expect(emissiveFactor).toEqual([1, 0, 0]);
-  });
+        const {emissiveFactor} = panel.getMaterial();
+        expect(emissiveFactor).to.be.eql([1, 0, 0]);
+      });
 
-  it('applies changes to model textures on alpha mode change', async () => {
+  test('applies changes to model textures on alpha mode change', async () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
 
     const {alphaModePicker} = panel;
-    expect(alphaModePicker.selectedItem.getAttribute('value')).toBe('OPAQUE');
+    expect(alphaModePicker.selectedItem.getAttribute('value'))
+        .to.be.equal('OPAQUE');
     const maskItem = alphaModePicker.querySelector(
                          'paper-item[value="MASK"]') as HTMLElement;
     maskItem.click();
 
-    expect(panel.getMaterial().getAlphaMode()).toEqual('MASK');
+    expect(panel.getMaterial().getAlphaMode()).to.be.equal('MASK');
   });
 
-  it('applies changes to model textures on alpha cutoff change', async () => {
+  test('applies changes to model textures on alpha cutoff change', async () => {
     panel.selectedMaterialIndex = 0;
     await panel.updateComplete;
 
@@ -380,7 +398,7 @@ describe('material panel test', () => {
 
     // Alpha cutoff should not be present on 'OPAQUE' alpha mode
     expect(alphaCutoffSlider.parentElement?.parentElement?.style.display)
-        .toBe('none');
+        .to.be.equal('none');
 
     const maskItem = alphaModePicker.querySelector(
                          'paper-item[value="MASK"]') as HTMLElement;
@@ -389,13 +407,13 @@ describe('material panel test', () => {
     await panel.updateComplete;
 
     expect(alphaCutoffSlider.parentElement?.parentElement?.style.display)
-        .toBe('');
-    expect(alphaCutoffSlider.value).toBe(0.5);
-    expect(panel.getMaterial().getAlphaCutoff()).toEqual(0.5);
+        .to.be.equal('');
+    expect(alphaCutoffSlider.value).to.be.equal(0.5);
+    expect(panel.getMaterial().getAlphaCutoff()).to.be.equal(0.5);
 
     alphaCutoffSlider.value = 1;
     alphaCutoffSlider.dispatchEvent(new Event('change'));
 
-    expect(panel.getMaterial().getAlphaCutoff()).toEqual(1);
+    expect(panel.getMaterial().getAlphaCutoff()).to.be.equal(1);
   });
 });

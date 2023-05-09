@@ -17,24 +17,25 @@
 import 'js-beautify/js/lib/beautify-html.js';
 import 'js-beautify/js/lib/beautify-css.js';
 
+import {expect} from '@esm-bundle/chai';
 import {html} from 'lit';
 
 import {SnippetViewer} from '../../components/shared/snippet_viewer/snippet_viewer.js';
 
-describe('snippet viewer test', () => {
+suite('snippet viewer test', () => {
   let snippetViewer: SnippetViewer;
 
-  beforeEach(async () => {
+  setup(async () => {
     snippetViewer = new SnippetViewer();
     document.body.appendChild(snippetViewer);
     await snippetViewer.updateComplete;
   });
 
-  afterEach(() => {
+  teardown(() => {
     document.body.removeChild(snippetViewer);
   });
 
-  it('formatted HTML strips Lit comments', async () => {
+  test('formatted HTML strips Lit comments', async () => {
     // clang-format off
 
     // Pulled from real DOM of astronaut example.
@@ -66,10 +67,10 @@ View in your space
 </model-viewer>`;
 
     await snippetViewer.updateComplete;
-    expect(snippetViewer.formattedHtml).toBe(goldenFormattedHTML);
+    expect(snippetViewer.formattedHtml).to.be.equal(goldenFormattedHTML);
   });
 
-  it('formatted HTML does not greedily strip comments', async () => {
+  test('formatted HTML does not greedily strip comments', async () => {
     // clang-format off
 
     // Pulled from real DOM of astronaut example with a hotspot.
@@ -105,6 +106,6 @@ View in your space
 </model-viewer>`;
 
     await snippetViewer.updateComplete;
-    expect(snippetViewer.formattedHtml).toBe(goldenFormattedHTML);
+    expect(snippetViewer.formattedHtml).to.be.equal(goldenFormattedHTML);
   });
 });

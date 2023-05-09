@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
+import {expect} from '@esm-bundle/chai';
+
 import {IS_ANDROID, IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer} from '../../features/ar.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses, spy} from '../helpers.js';
-
-const expect = chai.expect;
 
 suite('AR', () => {
   let element: ModelViewerElement;
@@ -97,8 +97,8 @@ suite('AR', () => {
       expect(intentUrls.length).to.be.equal(1);
 
       const search = new URLSearchParams(new URL(intentUrls[0]).search);
-      const file = new URL( search.get('file') as any );
-      
+      const file = new URL(search.get('file') as any);
+
       expect(file.hash).to.equal('');
     });
 
@@ -111,13 +111,12 @@ suite('AR', () => {
       expect(intentUrls.length).to.be.equal(1);
 
       const search = new URLSearchParams(new URL(intentUrls[0]).search);
-      const file = new URL( search.get('file') as any );
-      
+      const file = new URL(search.get('file') as any);
+
       expect(file.hash).to.equal('');
       expect(search.get('title')).to.equal('bar');
       expect(search.get('link')).to.equal('http://linkme.com/');
     });
-
   });
 
   suite('openQuickLook', () => {
@@ -196,14 +195,12 @@ suite('AR', () => {
       await waitForEvent(element, 'poster-dismissed');
     });
 
-    // This fails on Android when karma.conf has hostname: 'bs-local.com',
-    // possibly due to not serving over HTTPS (which disables WebXR)? However,
-    // Browserstack is unstable without this hostname.
-    test('if on a WebXR platform', () => {
-      expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);
+    test('on Android', () => {
+      expect(element.canActivateAR).to.be.equal(IS_ANDROID);
     });
 
-    test('with an ios-src on iOS', async () => {
+    // This only works on a physical iOS device, not an emulated one.
+    test.skip('with an ios-src on iOS', async () => {
       element.iosSrc = assetPath('models/Astronaut.usdz');
       await rafPasses();
       expect(element.canActivateAR).to.be.equal(IS_ANDROID || IS_IOS);
