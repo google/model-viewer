@@ -18,7 +18,7 @@
       {
         "name": "alt",
         "htmlName": "alt",
-        "description": "Configures the model with custom text that will be used to suite the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.",
+        "description": "Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.",
         "links": [
           "<a href=\"../examples/loading\">Related examples</a>"
         ],

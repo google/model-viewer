@@ -20,11 +20,9 @@ export default {
       <script type="module" src="${testFramework}"></script>
     </body>
   </html>`,
-  testsFinishTimeout: 300000,
   testFramework: {
     config: {
       ui: 'tdd',
-      timeout: '240000',
     },
   },
   // plugins: [esbuildPlugin({ts: true})],
