@@ -43,19 +43,20 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest \
   shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \
   shared-assets/models/glTF-Sample-Models/2.0/BoomBox \
+  shared-assets/models/glTF-Sample-Models/2.0/BoxTextured \
+  shared-assets/models/glTF-Sample-Models/2.0/Buggy \
   shared-assets/models/glTF-Sample-Models/2.0/BrainStem \
   shared-assets/models/glTF-Sample-Models/2.0/Corset \
   shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet \
   shared-assets/models/glTF-Sample-Models/2.0/Duck \
   shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet \
   shared-assets/models/glTF-Sample-Models/2.0/Lantern \
+  shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe \
   shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres \
   shared-assets/models/glTF-Sample-Models/2.0/Suzanne \
   shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
-  shared-assets/models/glTF-Sample-Models/2.0/WaterBottle \
-  shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe \
-  shared-assets/models/glTF-Sample-Models/2.0/Buggy \
   shared-assets/models/glTF-Sample-Models/2.0/ToyCar \
+  shared-assets/models/glTF-Sample-Models/2.0/WaterBottle \
   shared-assets/environments \
   shared-assets/icons \
 )
