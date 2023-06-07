@@ -941,7 +941,7 @@
       "orbit": {
         "theta": 30,
         "phi": 60,
-        "radius": 2.38
+        "radius": 3
       },
       "exclude": [
         "stellar"
