@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, sRGBEncoding, Vector2, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, Vector2, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -144,7 +144,6 @@ export class Renderer extends EventDispatcher {
         preserveDrawingBuffer: true,
       });
       this.threeRenderer.autoClear = true;
-      this.threeRenderer.outputEncoding = sRGBEncoding;
       this.threeRenderer.useLegacyLights = false;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 

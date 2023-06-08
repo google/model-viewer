@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {LinearEncoding, MeshStandardMaterial, sRGBEncoding, Texture as ThreeTexture, TextureEncoding, Vector2, VideoTexture} from 'three';
+import {ColorSpace, LinearSRGBColorSpace, MeshStandardMaterial, SRGBColorSpace, Texture as ThreeTexture, Vector2, VideoTexture} from 'three';
 
 import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
 
@@ -135,7 +135,7 @@ export class TextureInfo implements TextureInfoInterface {
       texture.source.animation.addEventListener('enterFrame', this[$onUpdate]);
     }
 
-    let encoding: TextureEncoding = sRGBEncoding;
+    let colorSpace: ColorSpace = SRGBColorSpace;
     if (this[$materials]) {
       for (const material of this[$materials]!) {
         switch (this[$usage]) {
@@ -143,16 +143,16 @@ export class TextureInfo implements TextureInfoInterface {
             material.map = threeTexture;
             break;
           case TextureUsage.MetallicRoughness:
-            encoding = LinearEncoding;
+            colorSpace = LinearSRGBColorSpace;
             material.metalnessMap = threeTexture;
             material.roughnessMap = threeTexture;
             break;
           case TextureUsage.Normal:
-            encoding = LinearEncoding;
+            colorSpace = LinearSRGBColorSpace;
             material.normalMap = threeTexture;
             break;
           case TextureUsage.Occlusion:
-            encoding = LinearEncoding;
+            colorSpace = LinearSRGBColorSpace;
             material.aoMap = threeTexture;
             break;
           case TextureUsage.Emissive:
@@ -165,8 +165,8 @@ export class TextureInfo implements TextureInfoInterface {
     }
 
     if (threeTexture) {
-      // Updates the encoding for the texture, affects all references.
-      threeTexture.encoding = encoding;
+      // Updates the colorSpace for the texture, affects all references.
+      threeTexture.colorSpace = colorSpace;
       threeTexture.rotation = this[$transform].rotation;
       threeTexture.repeat = this[$transform].scale;
       threeTexture.offset = this[$transform].offset;
