@@ -22,7 +22,6 @@ import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
-import {Debugger} from './Debugger.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from './ModelScene.js';
 import TextureUtils from './TextureUtils.js';
@@ -99,7 +98,6 @@ export class Renderer extends EventDispatcher {
   public height = 0;
   public dpr = 1;
 
-  protected debugger: Debugger|null = null;
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;
   private lastTick = performance.now();
@@ -150,9 +148,8 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.useLegacyLights = false;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 
-      this.debugger = !!options.debug ? new Debugger(this) : null;
       this.threeRenderer.debug = {
-        checkShaderErrors: !!this.debugger,
+        checkShaderErrors: !!options.debug,
         onShaderError: null
       };
 
@@ -189,10 +186,6 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setAnimationLoop(
           (time: number, frame?: any) => this.render(time, frame));
     }
-
-    if (this.debugger != null) {
-      this.debugger.addScene(scene);
-    }
   }
 
   unregisterScene(scene: ModelScene) {
@@ -204,10 +197,6 @@ export class Renderer extends EventDispatcher {
 
     if (this.canRender && this.scenes.size === 0) {
       this.threeRenderer.setAnimationLoop(null);
-    }
-
-    if (this.debugger != null) {
-      this.debugger.removeScene(scene);
     }
   }
 
