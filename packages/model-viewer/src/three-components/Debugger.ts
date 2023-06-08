@@ -49,7 +49,10 @@ export interface ModelViewerSceneDetails {
 export class Debugger {
   constructor(renderer: Renderer) {
     // Force WebGL shader debugging on:
-    renderer.threeRenderer.debug = {checkShaderErrors: true};
+    renderer.threeRenderer.debug = {
+      checkShaderErrors: true,
+      onShaderError: null
+    };
     // Announce debug details at microtask timing to give the `Renderer`
     // constructor time to complete its initialization, just to be on the safe
     // side:

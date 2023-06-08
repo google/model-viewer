@@ -151,7 +151,10 @@ export class Renderer extends EventDispatcher {
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 
       this.debugger = !!options.debug ? new Debugger(this) : null;
-      this.threeRenderer.debug = {checkShaderErrors: !!this.debugger};
+      this.threeRenderer.debug = {
+        checkShaderErrors: !!this.debugger,
+        onShaderError: null
+      };
 
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
