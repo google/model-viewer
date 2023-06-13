@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Intersection, Material as ThreeMaterial, Mesh, MeshStandardMaterial, Object3D} from 'three';
+import {Intersection, Material as ThreeMaterial, Mesh, MeshPhysicalMaterial, Object3D} from 'three';
 
 import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {GLTF, GLTFElement, Material as GLTFMaterial} from '../../three-components/gltf-instance/gltf-2.0.js';
@@ -91,7 +91,7 @@ export class Model implements ModelInterface {
 
     for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
-          gltfElementMap.get(material) as Set<MeshStandardMaterial>;
+          gltfElementMap.get(material) as Set<MeshPhysicalMaterial>;
 
       if (correlatedMaterial != null) {
         this[$materials].push(new Material(
@@ -111,11 +111,11 @@ export class Model implements ModelInterface {
         const materialLoadCallback = async () => {
           const threeMaterial =
               await threeGLTF.parser.getDependency(
-                  'material', capturedMatIndex) as MeshStandardMaterial;
+                  'material', capturedMatIndex) as MeshPhysicalMaterial;
 
           // Adds correlation, maps the variant gltf-def to the
           // three material set containing the variant material.
-          const threeMaterialSet = new Set<MeshStandardMaterial>();
+          const threeMaterialSet = new Set<MeshPhysicalMaterial>();
           gltfElementMap.set(gltfMaterialDef, threeMaterialSet);
           threeMaterialSet.add(threeMaterial);
 
@@ -279,7 +279,7 @@ export class Model implements ModelInterface {
     }
 
     const threeMaterialSet =
-        material[$correlatedObjects] as Set<MeshStandardMaterial>;
+        material[$correlatedObjects] as Set<MeshPhysicalMaterial>;
 
     // clones the gltf material data and updates the material name.
     const gltfSourceMaterial =
@@ -289,9 +289,9 @@ export class Model implements ModelInterface {
     const gltf = this[$correlatedSceneGraph].gltf;
     gltf.materials!.push(gltfSourceMaterial);
 
-    const clonedSet = new Set<MeshStandardMaterial>();
+    const clonedSet = new Set<MeshPhysicalMaterial>();
     for (const [i, threeMaterial] of threeMaterialSet.entries()) {
-      const clone = threeMaterial.clone() as MeshStandardMaterial;
+      const clone = threeMaterial.clone() as MeshPhysicalMaterial;
       clone.name =
           newMaterialName + (threeMaterialSet.size > 1 ? '_inst' + i : '');
       clonedSet.add(clone);

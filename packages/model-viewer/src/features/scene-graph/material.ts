@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Color, ColorRepresentation, DoubleSide, FrontSide, MeshStandardMaterial} from 'three';
+import {Color, ColorRepresentation, DoubleSide, FrontSide, MeshPhysicalMaterial} from 'three';
 
 import {AlphaMode, GLTF, Material as GLTFMaterial, RGB} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Material as DefaultedMaterial} from '../../three-components/gltf-instance/gltf-defaulted.js';
@@ -44,6 +44,13 @@ export const $variantSet = Symbol('variantSet');
 const $modelVariants = Symbol('modelVariants');
 
 /**
+ * PBR Next properties.
+ */
+const $clearcoatTexture = Symbol('clearcoatTexture');
+const $clearcoatRoughnessTexture = Symbol('clearcoatRoughnessTexture');
+const $clearcoatNormalTexture = Symbol('clearcoatNormalTexture');
+
+/**
  * Material facade implementation for Three.js materials
  */
 export class Material extends ThreeDOMElement implements MaterialInterface {
@@ -57,8 +64,15 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$variantSet] = new Set<number>();
   readonly[$modelVariants]: Map<string, VariantData>;
 
-  get[$backingThreeMaterial](): MeshStandardMaterial {
-    return (this[$correlatedObjects] as Set<MeshStandardMaterial>)
+  /**
+   * PBR Next properties.
+   */
+  private[$clearcoatTexture]!: TextureInfo;
+  private[$clearcoatRoughnessTexture]!: TextureInfo;
+  private[$clearcoatNormalTexture]!: TextureInfo;
+
+  get[$backingThreeMaterial](): MeshPhysicalMaterial {
+    return (this[$correlatedObjects] as Set<MeshPhysicalMaterial>)
         .values()
         .next()
         .value;
@@ -68,7 +82,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       onUpdate: () => void, gltf: GLTF, gltfMaterial: GLTFMaterial,
       gltfIndex: number, isActive: boolean,
       modelVariants: Map<string, VariantData>,
-      correlatedMaterials: Set<MeshStandardMaterial>,
+      correlatedMaterials: Set<MeshPhysicalMaterial>,
       lazyLoadInfo: LazyLoader|undefined = undefined) {
     super(onUpdate, gltfMaterial, correlatedMaterials);
     this[$gltfIndex] = gltfIndex;
@@ -86,7 +100,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     const onUpdate = this[$onUpdate] as () => void;
     const gltfMaterial = this[$sourceObject] as GLTFMaterial;
     const correlatedMaterials =
-        this[$correlatedObjects] as Set<MeshStandardMaterial>;
+        this[$correlatedObjects] as Set<MeshPhysicalMaterial>;
 
     if (gltfMaterial.extensions &&
         gltfMaterial.extensions['KHR_materials_pbrSpecularGlossiness']) {
@@ -154,21 +168,48 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         gltf,
         gltfEmissiveTexture ? gltfEmissiveTexture : null,
     );
+
+    this[$clearcoatTexture] = new TextureInfo(
+        onUpdate,
+        TextureUsage.Clearcoat,
+        null,
+        correlatedMaterials,
+        gltf,
+        null,
+    );
+
+    this[$clearcoatRoughnessTexture] = new TextureInfo(
+      onUpdate,
+      TextureUsage.ClearcoatRoughness,
+      null,
+      correlatedMaterials,
+      gltf,
+      null,
+    );
+
+    this[$clearcoatNormalTexture] = new TextureInfo(
+      onUpdate,
+      TextureUsage.ClearcoatNormal,
+      null,
+      correlatedMaterials,
+      gltf,
+      null,
+    );
   }
 
-  async[$getLoadedMaterial](): Promise<MeshStandardMaterial> {
+  async[$getLoadedMaterial](): Promise<MeshPhysicalMaterial> {
     if (this[$lazyLoadGLTFInfo] != null) {
       const {set, material} = await this[$lazyLoadGLTFInfo]!.doLazyLoad();
 
       // Fills in the missing data.
-      this[$correlatedObjects] = set as Set<MeshStandardMaterial>;
+      this[$correlatedObjects] = set as Set<MeshPhysicalMaterial>;
 
       this[$initialize](this[$lazyLoadGLTFInfo]!.gltf);
       // Releases lazy load info.
       this[$lazyLoadGLTFInfo] = undefined;
       // Redefines the method as a noop method.
       this.ensureLoaded = async () => {};
-      return material as MeshStandardMaterial;
+      return material as MeshPhysicalMaterial;
     }
     return this[$correlatedObjects]!.values().next().value;
   }
@@ -261,7 +302,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       color.set(rgb as ColorRepresentation);
     }
     for (const material of this[$correlatedObjects] as
-         Set<MeshStandardMaterial>) {
+         Set<MeshPhysicalMaterial>) {
       material.emissive.set(color);
     }
     (this[$sourceObject] as DefaultedMaterial).emissiveFactor =
@@ -273,7 +314,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     this[$ensureMaterialIsLoaded]();
     const gltfMaterial = this[$sourceObject] as DefaultedMaterial;
     for (const material of this[$correlatedObjects] as
-         Set<MeshStandardMaterial>) {
+         Set<MeshPhysicalMaterial>) {
       if ((this[$sourceObject] as DefaultedMaterial).alphaMode === 'MASK') {
         material.alphaTest = gltfMaterial.alphaCutoff;
       } else {
@@ -299,7 +340,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   setDoubleSided(doubleSided: boolean): void {
     this[$ensureMaterialIsLoaded]();
     for (const material of this[$correlatedObjects] as
-         Set<MeshStandardMaterial>) {
+         Set<MeshPhysicalMaterial>) {
       // When double-sided is disabled gltf spec dictates that Back-Face culling
       // must be disabled, in three.js parlance that would mean FrontSide
       // rendering only.
@@ -319,7 +360,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   setAlphaMode(alphaMode: AlphaMode): void {
     this[$ensureMaterialIsLoaded]();
     const enableTransparency =
-        (material: MeshStandardMaterial, enabled: boolean): void => {
+        (material: MeshPhysicalMaterial, enabled: boolean): void => {
           material.transparent = enabled;
           material.depthWrite = !enabled;
         };
@@ -327,7 +368,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     (this[$sourceObject] as DefaultedMaterial).alphaMode = alphaMode;
 
     for (const material of this[$correlatedObjects] as
-         Set<MeshStandardMaterial>) {
+         Set<MeshPhysicalMaterial>) {
       enableTransparency(material, alphaMode === 'BLEND');
       this[$applyAlphaCutoff]();
       material.needsUpdate = true;
@@ -339,5 +380,65 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   getAlphaMode(): AlphaMode {
     this[$ensureMaterialIsLoaded]();
     return (this[$sourceObject] as DefaultedMaterial).alphaMode;
+  }
+
+  /**
+   * PBR Next properties.
+   */
+  get emissiveStrength(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].emissiveIntensity;
+  }
+
+  get clearcoatFactor(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].clearcoat;
+  }
+
+  get clearcoatRoughnessFactor(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].clearcoatRoughness;
+  }
+
+  get clearcoatTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$clearcoatTexture];
+  }
+
+  get clearcoatRoughnessTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$clearcoatRoughnessTexture];
+  }
+
+  get clearcoatNormalTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$clearcoatNormalTexture];
+  }
+
+  setEmissiveStrength(emissiveStrength: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.emissiveIntensity = emissiveStrength;
+    }
+    this[$onUpdate]();
+  }
+
+  setClearcoatFactor(clearcoatFactor: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.clearcoat = clearcoatFactor;
+    }
+    this[$onUpdate]();
+  }
+
+  setClearcoatRoughnessFactor(clearcoatRoughnessFactor: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.clearcoatRoughness = clearcoatRoughnessFactor;
+    }
+    this[$onUpdate]();
   }
 }

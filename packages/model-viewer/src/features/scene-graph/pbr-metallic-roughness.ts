@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Color, ColorRepresentation, MeshStandardMaterial} from 'three';
+import {Color, ColorRepresentation, MeshPhysicalMaterial} from 'three';
 
 import {GLTF, PBRMetallicRoughness as GLTFPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {PBRMetallicRoughness as DefaultedPBRMetallicRoughness} from '../../three-components/gltf-instance/gltf-defaulted.js';
@@ -36,14 +36,14 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
   private[$baseColorTexture]: TextureInfo;
   private[$metallicRoughnessTexture]: TextureInfo;
 
-  private get[$threeMaterials](): Set<MeshStandardMaterial> {
-    return this[$correlatedObjects] as Set<MeshStandardMaterial>;
+  private get[$threeMaterials](): Set<MeshPhysicalMaterial> {
+    return this[$correlatedObjects] as Set<MeshPhysicalMaterial>;
   }
 
   constructor(
       onUpdate: () => void, gltf: GLTF,
       pbrMetallicRoughness: GLTFPBRMetallicRoughness,
-      correlatedMaterials: Set<MeshStandardMaterial>) {
+      correlatedMaterials: Set<MeshPhysicalMaterial>) {
     super(onUpdate, pbrMetallicRoughness, correlatedMaterials);
 
     // Assign glTF default values

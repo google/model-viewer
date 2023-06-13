@@ -117,6 +117,20 @@ export declare interface Material {
   getAlphaMode(): AlphaMode;
 
   /**
+   * PBR Next properties.
+   */
+  readonly emissiveStrength: number;
+  readonly clearcoatFactor: number;
+  readonly clearcoatRoughnessFactor: number;
+  readonly clearcoatTexture: TextureInfo|null;
+  readonly clearcoatRoughnessTexture: TextureInfo|null;
+  readonly clearcoatNormalTexture: TextureInfo|null;
+
+  setEmissiveStrength(emissiveStrength: number): void;
+  setClearcoatFactor(clearcoatFactor: number): void;
+  setClearcoatRoughnessFactor(clearcoatRoughnessFactor: number): void;
+
+  /**
    * The PBRMetallicRoughness configuration of the material.
    */
   readonly pbrMetallicRoughness: PBRMetallicRoughness;
