@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Color, ColorRepresentation, DoubleSide, FrontSide, MeshPhysicalMaterial} from 'three';
+import {Color, ColorRepresentation, DoubleSide, FrontSide, MeshPhysicalMaterial, Vector2} from 'three';
 
 import {AlphaMode, GLTF, Material as GLTFMaterial, RGB} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Material as DefaultedMaterial} from '../../three-components/gltf-instance/gltf-defaulted.js';
@@ -415,6 +415,11 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return this[$clearcoatNormalTexture];
   }
 
+  get clearcoatNormalScale(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].clearcoatNormalScale.x;
+  }
+
   setEmissiveStrength(emissiveStrength: number) {
     this[$ensureMaterialIsLoaded]();
     for (const material of this[$correlatedObjects] as
@@ -438,6 +443,15 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     for (const material of this[$correlatedObjects] as
          Set<MeshPhysicalMaterial>) {
       material.clearcoatRoughness = clearcoatRoughnessFactor;
+    }
+    this[$onUpdate]();
+  }
+
+  setClearcoatNormalScale(clearcoatNormalScale: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.clearcoatNormalScale = new Vector2(clearcoatNormalScale, clearcoatNormalScale);
     }
     this[$onUpdate]();
   }

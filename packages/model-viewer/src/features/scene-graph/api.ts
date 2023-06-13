@@ -125,10 +125,12 @@ export declare interface Material {
   readonly clearcoatTexture: TextureInfo|null;
   readonly clearcoatRoughnessTexture: TextureInfo|null;
   readonly clearcoatNormalTexture: TextureInfo|null;
+  readonly clearcoatNormalScale: number;
 
   setEmissiveStrength(emissiveStrength: number): void;
   setClearcoatFactor(clearcoatFactor: number): void;
   setClearcoatRoughnessFactor(clearcoatRoughnessFactor: number): void;
+  setClearcoatNormalScale(clearcoatNormalScale: number): void;
 
   /**
    * The PBRMetallicRoughness configuration of the material.
