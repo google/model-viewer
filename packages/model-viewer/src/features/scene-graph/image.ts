@@ -16,18 +16,17 @@
 import {Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene, Texture as ThreeTexture, WebGLRenderTarget} from 'three';
 
 import {blobCanvas} from '../../model-viewer-base.js';
-import {Image as GLTFImage} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Renderer} from '../../three-components/Renderer.js';
 
 import {Image as ImageInterface} from './api.js';
-import {$correlatedObjects, $onUpdate, $sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, $onUpdate, ThreeDOMElement} from './three-dom-element.js';
 
 
 const quadMaterial = new MeshBasicMaterial();
 const quad = new PlaneGeometry(2, 2);
-let adhocNum = 0;
 
 export const $threeTexture = Symbol('threeTexture');
+export const $threeTextures = Symbol('threeTextures');
 export const $applyTexture = Symbol('applyTexture');
 
 /**
@@ -41,30 +40,25 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return this[$correlatedObjects]?.values().next().value as ThreeTexture;
   }
 
+  get[$threeTextures](): Set<ThreeTexture> {
+    return this[$correlatedObjects] as Set<ThreeTexture>;
+  }
+
   constructor(
-      onUpdate: () => void, texture: ThreeTexture|null,
-      gltfImage: GLTFImage|null) {
-    gltfImage = gltfImage ?? {
-      name: (texture && texture.image && texture.image.src) ?
-          texture.image.src.split('/').pop() :
-          'adhoc_image',
-      uri: (texture && texture.image && texture.image.src) ?
-          texture.image.src :
-          'adhoc_image' + adhocNum++
-    };
-    super(onUpdate, gltfImage, new Set<ThreeTexture>(texture ? [texture] : []));
+      onUpdate: () => void, texture: ThreeTexture|null) {
+    super(onUpdate, new Set<ThreeTexture>(texture ? [texture] : []));
   }
 
   get name(): string {
-    return (this[$sourceObject] as GLTFImage).name || '';
+    return this[$threeTexture].image.name || '';
   }
 
   get uri(): string|undefined {
-    return (this[$sourceObject] as GLTFImage).uri;
+    return this[$threeTexture].image.src;
   }
 
   get bufferView(): number|undefined {
-    return (this[$sourceObject] as GLTFImage).bufferView;
+    return this[$threeTexture].image.bufferView;
   }
 
   get element(): HTMLVideoElement|HTMLCanvasElement|undefined {
@@ -88,7 +82,9 @@ export class Image extends ThreeDOMElement implements ImageInterface {
   }
 
   set name(name: string) {
-    (this[$sourceObject] as GLTFImage).name = name;
+    for (const texture of this[$threeTextures]) {
+      texture.image.name = name;
+    }
   }
 
   update() {

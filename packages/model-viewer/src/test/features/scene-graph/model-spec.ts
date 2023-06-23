@@ -150,6 +150,7 @@ suite('scene-graph/model', () => {
 
       test('getMaterialByName returns material when name exists', async () => {
         await loadModel(CUBES_GLTF_PATH);
+        await model.materials[2].ensureLoaded();
         const material = model.getMaterialByName('red')!;
         expect(material).to.be.ok;
         expect(material.name).to.be.equal('red');

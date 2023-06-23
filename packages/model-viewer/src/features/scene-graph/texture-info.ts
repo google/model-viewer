@@ -15,8 +15,6 @@
 
 import {LinearEncoding, MeshPhysicalMaterial, sRGBEncoding, Texture as ThreeTexture, TextureEncoding, Vector2, VideoTexture} from 'three';
 
-import {GLTF, TextureInfo as GLTFTextureInfo} from '../../three-components/gltf-instance/gltf-2.0.js';
-
 import {TextureInfo as TextureInfoInterface} from './api.js';
 import {$threeTexture} from './image.js';
 import {Texture} from './texture.js';
@@ -68,25 +66,15 @@ export class TextureInfo implements TextureInfoInterface {
 
   constructor(
       onUpdate: () => void, usage: TextureUsage,
-      threeTexture: ThreeTexture|null, material: Set<MeshPhysicalMaterial>,
-      gltf: GLTF, gltfTextureInfo: GLTFTextureInfo|null) {
+      threeTexture: ThreeTexture|null, material: Set<MeshPhysicalMaterial>) {
     // Creates image, sampler, and texture if valid texture info is provided.
-    if (gltfTextureInfo && threeTexture) {
-      const gltfTexture =
-          gltf.textures ? gltf.textures[gltfTextureInfo.index] : null;
-      const sampler = gltfTexture ?
-          (gltf.samplers ? gltf.samplers[gltfTexture.sampler!] : null) :
-          null;
-      const image = gltfTexture ?
-          (gltf.images ? gltf.images[gltfTexture.source!] : null) :
-          null;
-
+    if (threeTexture) {
       this[$transform].rotation = threeTexture.rotation;
       this[$transform].scale.copy(threeTexture.repeat);
       this[$transform].offset.copy(threeTexture.offset);
 
       this[$texture] =
-          new Texture(onUpdate, threeTexture, gltfTexture, sampler, image);
+          new Texture(onUpdate, threeTexture);
     }
 
     this[$onUpdate] = onUpdate;
