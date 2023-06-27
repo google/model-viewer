@@ -282,7 +282,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     for (const material of this[$correlatedObjects] as
          Set<MeshPhysicalMaterial>) {
       if (this[$getAlphaMode]() === 'MASK') {
-        if (material.alphaTest === undefined) {
+        if (material.alphaTest == undefined) {
           material.alphaTest = 0.5;
         }
       } else {
@@ -341,7 +341,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     for (const material of this[$correlatedObjects] as
          Set<MeshPhysicalMaterial>) {
       enableTransparency(material, alphaMode === 'BLEND');
-      if (alphaMode === 'MASK' && material.alphaTest === undefined) {
+      if (alphaMode === 'MASK') {
         material.alphaTest = 0.5;
       } else {
         (material.alphaTest as number | undefined) = undefined;

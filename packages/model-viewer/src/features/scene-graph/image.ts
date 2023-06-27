@@ -24,6 +24,7 @@ import {$correlatedObjects, $onUpdate, ThreeDOMElement} from './three-dom-elemen
 
 const quadMaterial = new MeshBasicMaterial();
 const quad = new PlaneGeometry(2, 2);
+let adhocNum = 0;
 
 export const $threeTexture = Symbol('threeTexture');
 export const $threeTextures = Symbol('threeTextures');
@@ -44,9 +45,12 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
-  constructor(
-      onUpdate: () => void, texture: ThreeTexture|null) {
+  constructor(onUpdate: () => void, texture: ThreeTexture|null) {
     super(onUpdate, new Set<ThreeTexture>(texture ? [texture] : []));
+
+    if (!this[$threeTexture].image.src) {
+      this[$threeTexture].image.src = 'adhoc_image' + adhocNum++;
+    }
   }
 
   get name(): string {

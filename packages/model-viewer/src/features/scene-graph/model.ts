@@ -90,13 +90,10 @@ export class Model implements ModelInterface {
       const correlatedMaterial =
           gltfElementMap.get(material) as Set<MeshPhysicalMaterial>;
 
-      console.log(i);
       if (correlatedMaterial != null) {
-        console.log('correlated');
         this[$materials].push(new Material(
             onUpdate, i, true, this[$variantData], correlatedMaterial, material.name));
       } else {
-        console.log('uncorrelated');
         const elementArray = gltf['materials'] || [];
         const gltfMaterialDef = elementArray[i];
 
