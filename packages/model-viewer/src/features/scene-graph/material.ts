@@ -232,9 +232,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   get emissiveFactor(): RGB {
     this[$ensureMaterialIsLoaded]();
-    return (
-        this[$backingThreeMaterial]
-            .emissive.toArray() as [number, number, number]);
+    return (this[$backingThreeMaterial].emissive.toArray() as RGB);
   }
 
   get index(): number {
@@ -326,8 +324,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   getDoubleSided(): boolean {
     this[$ensureMaterialIsLoaded]();
-    // 0 for FrontSide, 2 for DoubleSide.
-    return this[$backingThreeMaterial].side == 2;
+    return this[$backingThreeMaterial].side == DoubleSide;
   }
 
   setAlphaMode(alphaMode: AlphaMode): void {

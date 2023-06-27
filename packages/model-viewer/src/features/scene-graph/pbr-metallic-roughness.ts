@@ -40,7 +40,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
   private get[$threeMaterial]() {
     console.assert(
         this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
-        'Sampler correlated object is undefined');
+        'Material correlated object is undefined');
     return this[$correlatedObjects]?.values().next().value as
         MeshPhysicalMaterial;
   }
