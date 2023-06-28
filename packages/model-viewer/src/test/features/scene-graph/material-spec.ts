@@ -17,6 +17,7 @@ import {expect} from '@esm-bundle/chai';
 import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
 import {$threeTexture} from '../../../features/scene-graph/image.js';
+import {$lazyLoadGLTFInfo} from '../../../features/scene-graph/material.js';
 import {Model} from '../../../features/scene-graph/model.js';
 import {Texture} from '../../../features/scene-graph/texture.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
@@ -246,6 +247,11 @@ suite('scene-graph/material', () => {
 
     teardown(() => {
       document.body.removeChild(element);
+    });
+
+    test('Accessing the name getter does not cause throw error.', async () => {
+      expect(model.materials[2].name).to.equal('red');
+      expect(model.materials[2][$lazyLoadGLTFInfo]).to.be.ok;
     });
 
     test(
