@@ -73,8 +73,7 @@ export class TextureInfo implements TextureInfoInterface {
       this[$transform].scale.copy(threeTexture.repeat);
       this[$transform].offset.copy(threeTexture.offset);
 
-      this[$texture] =
-          new Texture(onUpdate, threeTexture);
+      this[$texture] = new Texture(onUpdate, threeTexture);
     }
 
     this[$onUpdate] = onUpdate;

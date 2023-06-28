@@ -34,13 +34,10 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   private[$sampler]: Sampler;
 
   private get[$threeTexture]() {
-    console.assert(
-        this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
-        'Sampler correlated object is undefined');
     return this[$correlatedObjects]?.values().next().value as ThreeTexture;
   }
 
-  constructor(onUpdate: () => void, threeTexture: ThreeTexture|null) {
+  constructor(onUpdate: () => void, threeTexture: ThreeTexture) {
     super(onUpdate, new Set<ThreeTexture>(threeTexture ? [threeTexture] : []));
 
     this[$sampler] = new Sampler(onUpdate, threeTexture);

@@ -35,9 +35,6 @@ export const $applyTexture = Symbol('applyTexture');
  */
 export class Image extends ThreeDOMElement implements ImageInterface {
   get[$threeTexture]() {
-    console.assert(
-        this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
-        'Image correlated object is undefined');
     return this[$correlatedObjects]?.values().next().value as ThreeTexture;
   }
 
@@ -45,7 +42,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
-  constructor(onUpdate: () => void, texture: ThreeTexture|null) {
+  constructor(onUpdate: () => void, texture: ThreeTexture) {
     super(onUpdate, new Set<ThreeTexture>(texture ? [texture] : []));
 
     if (!this[$threeTexture].image.src) {

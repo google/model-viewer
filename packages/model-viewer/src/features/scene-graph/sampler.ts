@@ -78,20 +78,14 @@ const $setProperty = Symbol('setProperty');
  */
 export class Sampler extends ThreeDOMElement implements SamplerInterface {
   private get[$threeTexture]() {
-    console.assert(
-        this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
-        'Sampler correlated object is undefined');
     return this[$correlatedObjects]?.values().next().value as ThreeTexture;
   }
 
   private get[$threeTextures]() {
-    console.assert(
-        this[$correlatedObjects] != null && this[$correlatedObjects]!.size > 0,
-        'Sampler correlated object is undefined');
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
-  constructor(onUpdate: () => void, texture: ThreeTexture|null) {
+  constructor(onUpdate: () => void, texture: ThreeTexture) {
     super(onUpdate, new Set<ThreeTexture>(texture ? [texture] : []));
   }
 
