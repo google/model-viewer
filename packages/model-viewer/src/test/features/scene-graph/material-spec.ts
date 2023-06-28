@@ -265,6 +265,7 @@ suite('scene-graph/material', () => {
         'Accessing a getter of a loaded material has valid data.', async () => {
           await model.materials[2].ensureLoaded();
           expect(model.materials[2].isLoaded).to.be.true;
+          expect(model.materials[2].name).to.equal('red');
           const pbr = model.materials[2].pbrMetallicRoughness;
           expect(pbr).to.be.ok;
         });
