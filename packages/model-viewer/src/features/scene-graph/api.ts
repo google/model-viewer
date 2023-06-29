@@ -126,11 +126,35 @@ export declare interface Material {
   readonly clearcoatRoughnessTexture: TextureInfo|null;
   readonly clearcoatNormalTexture: TextureInfo|null;
   readonly clearcoatNormalScale: number;
+  readonly ior: number;
+  readonly sheenColorFactor: Readonly<RGB>;
+  readonly sheenColorTexture: TextureInfo|null;
+  readonly sheenRoughnessFactor: number;
+  readonly sheenRoughnessTexture: TextureInfo|null;
+  readonly transmissionFactor: number;
+  readonly transmissionTexture: TextureInfo|null;
+  readonly thicknessFactor: number;
+  readonly thicknessTexture: TextureInfo|null;
+  readonly attenuationDistance: number;
+  readonly attenuationColor: Readonly<RGB>;
+  readonly specularFactor: number;
+  readonly specularTexture: TextureInfo|null;
+  readonly specularColorFactor: Readonly<RGB>;
+  readonly specularColorTexture: TextureInfo|null;
 
   setEmissiveStrength(emissiveStrength: number): void;
   setClearcoatFactor(clearcoatFactor: number): void;
   setClearcoatRoughnessFactor(clearcoatRoughnessFactor: number): void;
   setClearcoatNormalScale(clearcoatNormalScale: number): void;
+  setIor(ior: number): void;
+  setSheenColorFactor(rgb: RGB|string): void;
+  setSheenRoughnessFactor(roughness: number): void;
+  setTransmissionFactor(transmission: number): void;
+  setThicknessFactor(thickness: number): void;
+  setAttenuationDistance(attenuationDistance: number): void;
+  setAttenuationColor(rgb: RGB|string): void;
+  setSpecularFactor(specularFactor: number): void;
+  setSpecularColorFactor(rgb: RGB|string): void;
 
   /**
    * The PBRMetallicRoughness configuration of the material.
