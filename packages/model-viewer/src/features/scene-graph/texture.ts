@@ -15,17 +15,16 @@
 
 import {Texture as ThreeTexture} from 'three';
 
-import {Image as GLTFImage, Sampler as GLTFSampler, Texture as GLTFTexture} from '../../three-components/gltf-instance/gltf-2.0.js';
-
 import {Texture as TextureInterface} from './api.js';
 import {Image} from './image.js';
 import {Sampler} from './sampler.js';
-import {$sourceObject, ThreeDOMElement} from './three-dom-element.js';
+import {$correlatedObjects, ThreeDOMElement} from './three-dom-element.js';
 
 
 
 const $image = Symbol('image');
 const $sampler = Symbol('sampler');
+const $threeTexture = Symbol('threeTexture');
 
 /**
  * Material facade implementation for Three.js materials
@@ -34,28 +33,25 @@ export class Texture extends ThreeDOMElement implements TextureInterface {
   private[$image]: Image;
   private[$sampler]: Sampler;
 
-  constructor(
-      onUpdate: () => void,
-      threeTexture: ThreeTexture|null,
-      gltfTexture: GLTFTexture|null = null,
-      gltfSampler: GLTFSampler|null = null,
-      gltfImage: GLTFImage|null = null,
-  ) {
-    super(
-        onUpdate,
-        gltfTexture ? gltfTexture : {} as GLTFTexture,
-        new Set<ThreeTexture>(threeTexture ? [threeTexture] : []));
+  private get[$threeTexture]() {
+    return this[$correlatedObjects]?.values().next().value as ThreeTexture;
+  }
 
-    this[$sampler] = new Sampler(onUpdate, threeTexture, gltfSampler);
-    this[$image] = new Image(onUpdate, threeTexture, gltfImage);
+  constructor(onUpdate: () => void, threeTexture: ThreeTexture) {
+    super(onUpdate, new Set<ThreeTexture>(threeTexture ? [threeTexture] : []));
+
+    this[$sampler] = new Sampler(onUpdate, threeTexture);
+    this[$image] = new Image(onUpdate, threeTexture);
   }
 
   get name(): string {
-    return (this[$sourceObject] as any).name || '';
+    return this[$threeTexture].name || '';
   }
 
   set name(name: string) {
-    (this[$sourceObject] as any).name = name;
+    for (const texture of this[$correlatedObjects] as Set<ThreeTexture>) {
+      texture.name = name;
+    }
   }
 
   get sampler(): Sampler {
