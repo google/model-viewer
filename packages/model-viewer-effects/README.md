@@ -52,7 +52,7 @@ npm install three @google/model-viewer @google/model-viewer-effects
 <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@^0.152.1/build/three.module.min.js"
+      "three": "https://cdn.jsdelivr.net/npm/three@^0.154.0/build/three.module.min.js"
     }
   }
 </script>
