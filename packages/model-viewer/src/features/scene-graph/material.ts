@@ -82,6 +82,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     this[$isActive] = isActive;
     this[$modelVariants] = modelVariants;
     this[$name] = name;
+    this[$pbrTextures] = new Map<TextureUsage, TextureInfo>();
 
     if (lazyLoadInfo == null) {
       this[$initialize]();
