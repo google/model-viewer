@@ -59,7 +59,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$variantSet] = new Set<number>();
   private[$name]?: string;
   readonly[$modelVariants]: Map<string, VariantData>;
-  private[$pbrTextures]!: Map<TextureUsage, TextureInfo>;
+  private[$pbrTextures] = new Map<TextureUsage, TextureInfo>();
 
   get[$backingThreeMaterial](): MeshPhysicalMaterial {
     return (this[$correlatedObjects] as Set<MeshPhysicalMaterial>)
@@ -82,7 +82,6 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     this[$isActive] = isActive;
     this[$modelVariants] = modelVariants;
     this[$name] = name;
-    this[$pbrTextures] = new Map<TextureUsage, TextureInfo>();
 
     if (lazyLoadInfo == null) {
       this[$initialize]();
@@ -123,7 +122,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         correlatedMaterials,
     );
 
-    const textureInfoFromUsage = (usage: TextureUsage) => {
+    const createTextureInfo = (usage: TextureUsage) => {
       this[$pbrTextures].set(
           usage,
           new TextureInfo(
@@ -134,15 +133,15 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
               ));
     };
 
-    textureInfoFromUsage(TextureUsage.Clearcoat);
-    textureInfoFromUsage(TextureUsage.ClearcoatRoughness);
-    textureInfoFromUsage(TextureUsage.ClearcoatNormal);
-    textureInfoFromUsage(TextureUsage.SheenColor);
-    textureInfoFromUsage(TextureUsage.SheenRoughness);
-    textureInfoFromUsage(TextureUsage.Transmission);
-    textureInfoFromUsage(TextureUsage.Thickness);
-    textureInfoFromUsage(TextureUsage.Specular);
-    textureInfoFromUsage(TextureUsage.SpecularColor);
+    createTextureInfo(TextureUsage.Clearcoat);
+    createTextureInfo(TextureUsage.ClearcoatRoughness);
+    createTextureInfo(TextureUsage.ClearcoatNormal);
+    createTextureInfo(TextureUsage.SheenColor);
+    createTextureInfo(TextureUsage.SheenRoughness);
+    createTextureInfo(TextureUsage.Transmission);
+    createTextureInfo(TextureUsage.Thickness);
+    createTextureInfo(TextureUsage.Specular);
+    createTextureInfo(TextureUsage.SpecularColor);
   }
 
   async[$getLoadedMaterial](): Promise<MeshPhysicalMaterial> {
