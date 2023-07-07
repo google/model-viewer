@@ -592,4 +592,71 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   // KHR_materials_iridescence
+  get iridescenceFactor(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].iridescence;
+  }
+
+  get iridescenceTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$pbrTextures].get(TextureUsage.Iridescence)!;
+  }
+
+  get iridescenceIor(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].iridescenceIOR;
+  }
+
+  get iridescenceThicknessMinimum(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].iridescenceThicknessRange[0];
+  }
+
+  get iridescenceThicknessMaximum(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].iridescenceThicknessRange[1];
+  }
+
+  get iridescenceThicknessTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$pbrTextures].get(TextureUsage.IridescenceThickness)!;
+  }
+
+  setIridescenceFactor(iridescence: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.iridescence = iridescence;
+    }
+    this[$onUpdate]();
+  }
+
+  setIridescenceIor(ior: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.iridescenceIOR = ior;
+    }
+    this[$onUpdate]();
+  }
+
+  setIridescenceThicknessMinimum(thicknessMin: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.iridescenceThicknessRange[0] = thicknessMin;
+    }
+    this[$onUpdate]();
+  }
+
+  setIridescenceThicknessMaximum(thicknessMax: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.iridescenceThicknessRange[1] = thicknessMax;
+    }
+    this[$onUpdate]();
+  }
+
+  // KHR_materials_anisotropy
 }

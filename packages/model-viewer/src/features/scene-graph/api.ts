@@ -141,6 +141,12 @@ export declare interface Material {
   readonly specularTexture: TextureInfo|null;
   readonly specularColorFactor: Readonly<RGB>;
   readonly specularColorTexture: TextureInfo|null;
+  readonly iridescenceFactor: number;
+  readonly iridescenceTexture: TextureInfo|null;
+  readonly iridescenceIor: number;
+  readonly iridescenceThicknessMinimum: number;
+  readonly iridescenceThicknessMaximum: number;
+  readonly iridescenceThicknessTexture: TextureInfo|null;
 
   setEmissiveStrength(emissiveStrength: number): void;
   setClearcoatFactor(clearcoatFactor: number): void;
@@ -155,6 +161,10 @@ export declare interface Material {
   setAttenuationColor(rgb: RGB|string): void;
   setSpecularFactor(specularFactor: number): void;
   setSpecularColorFactor(rgb: RGB|string): void;
+  setIridescenceFactor(iridescence: number): void;
+  setIridescenceIor(ior: number): void;
+  setIridescenceThicknessMinimum(thicknessMin: number): void;
+  setIridescenceThicknessMaximum(thicknessMax: number): void;
 
   /**
    * The PBRMetallicRoughness configuration of the material.
