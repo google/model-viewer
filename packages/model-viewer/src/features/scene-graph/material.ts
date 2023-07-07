@@ -43,13 +43,7 @@ const $isActive = Symbol('isActive');
 export const $variantSet = Symbol('variantSet');
 const $modelVariants = Symbol('modelVariants');
 const $name = Symbol('name');
-
-/**
- * PBR Next properties.
- */
-const $clearcoatTexture = Symbol('clearcoatTexture');
-const $clearcoatRoughnessTexture = Symbol('clearcoatRoughnessTexture');
-const $clearcoatNormalTexture = Symbol('clearcoatNormalTexture');
+const $pbrTextures = Symbol('pbrTextures');
 
 /**
  * Material facade implementation for Three.js materials
@@ -65,13 +59,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$variantSet] = new Set<number>();
   private[$name]?: string;
   readonly[$modelVariants]: Map<string, VariantData>;
-
-  /**
-   * PBR Next properties.
-   */
-  private[$clearcoatTexture]!: TextureInfo;
-  private[$clearcoatRoughnessTexture]!: TextureInfo;
-  private[$clearcoatNormalTexture]!: TextureInfo;
+  private[$pbrTextures] = new Map<TextureUsage, TextureInfo>();
 
   get[$backingThreeMaterial](): MeshPhysicalMaterial {
     return (this[$correlatedObjects] as Set<MeshPhysicalMaterial>)
@@ -134,26 +122,26 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         correlatedMaterials,
     );
 
-    this[$clearcoatTexture] = new TextureInfo(
-        onUpdate,
-        TextureUsage.Clearcoat,
-        null,
-        correlatedMaterials,
-    );
+    const createTextureInfo = (usage: TextureUsage) => {
+      this[$pbrTextures].set(
+          usage,
+          new TextureInfo(
+              onUpdate,
+              usage,
+              null,
+              correlatedMaterials,
+              ));
+    };
 
-    this[$clearcoatRoughnessTexture] = new TextureInfo(
-        onUpdate,
-        TextureUsage.ClearcoatRoughness,
-        null,
-        correlatedMaterials,
-    );
-
-    this[$clearcoatNormalTexture] = new TextureInfo(
-        onUpdate,
-        TextureUsage.ClearcoatNormal,
-        null,
-        correlatedMaterials,
-    );
+    createTextureInfo(TextureUsage.Clearcoat);
+    createTextureInfo(TextureUsage.ClearcoatRoughness);
+    createTextureInfo(TextureUsage.ClearcoatNormal);
+    createTextureInfo(TextureUsage.SheenColor);
+    createTextureInfo(TextureUsage.SheenRoughness);
+    createTextureInfo(TextureUsage.Transmission);
+    createTextureInfo(TextureUsage.Thickness);
+    createTextureInfo(TextureUsage.Specular);
+    createTextureInfo(TextureUsage.SpecularColor);
   }
 
   async[$getLoadedMaterial](): Promise<MeshPhysicalMaterial> {
@@ -171,6 +159,16 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       return material as MeshPhysicalMaterial;
     }
     return this[$correlatedObjects]!.values().next().value;
+  }
+
+  private colorFromRgb(rgb: RGB|string): Color {
+    const color = new Color();
+    if (rgb instanceof Array) {
+      color.fromArray(rgb);
+    } else {
+      color.set(rgb as ColorRepresentation);
+    }
+    return color;
   }
 
   [$ensureMaterialIsLoaded]() {
@@ -250,12 +248,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   setEmissiveFactor(rgb: RGB|string) {
     this[$ensureMaterialIsLoaded]();
-    const color = new Color();
-    if (rgb instanceof Array) {
-      color.fromArray(rgb);
-    } else {
-      color.set(rgb as ColorRepresentation);
-    }
+    const color = this.colorFromRgb(rgb);
     for (const material of this[$correlatedObjects] as
          Set<MeshPhysicalMaterial>) {
       material.emissive.set(color);
@@ -356,11 +349,23 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   /**
    * PBR Next properties.
    */
+
+  // KHR_materials_emissive_strength
   get emissiveStrength(): number {
     this[$ensureMaterialIsLoaded]();
     return this[$backingThreeMaterial].emissiveIntensity;
   }
 
+  setEmissiveStrength(emissiveStrength: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.emissiveIntensity = emissiveStrength;
+    }
+    this[$onUpdate]();
+  }
+
+  // KHR_materials_clearcoat
   get clearcoatFactor(): number {
     this[$ensureMaterialIsLoaded]();
     return this[$backingThreeMaterial].clearcoat;
@@ -373,31 +378,22 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   get clearcoatTexture(): TextureInfo {
     this[$ensureMaterialIsLoaded]();
-    return this[$clearcoatTexture];
+    return this[$pbrTextures].get(TextureUsage.Clearcoat)!;
   }
 
   get clearcoatRoughnessTexture(): TextureInfo {
     this[$ensureMaterialIsLoaded]();
-    return this[$clearcoatRoughnessTexture];
+    return this[$pbrTextures].get(TextureUsage.ClearcoatRoughness)!;
   }
 
   get clearcoatNormalTexture(): TextureInfo {
     this[$ensureMaterialIsLoaded]();
-    return this[$clearcoatNormalTexture];
+    return this[$pbrTextures].get(TextureUsage.ClearcoatNormal)!;
   }
 
   get clearcoatNormalScale(): number {
     this[$ensureMaterialIsLoaded]();
     return this[$backingThreeMaterial].clearcoatNormalScale.x;
-  }
-
-  setEmissiveStrength(emissiveStrength: number) {
-    this[$ensureMaterialIsLoaded]();
-    for (const material of this[$correlatedObjects] as
-         Set<MeshPhysicalMaterial>) {
-      material.emissiveIntensity = emissiveStrength;
-    }
-    this[$onUpdate]();
   }
 
   setClearcoatFactor(clearcoatFactor: number) {
@@ -427,4 +423,173 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     }
     this[$onUpdate]();
   }
+
+  // KHR_materials_ior
+  get ior(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].ior;
+  }
+
+  setIor(ior: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.ior = ior;
+    }
+    this[$onUpdate]();
+  }
+
+  // KHR_materials_sheen
+  get sheenColorFactor(): RGB {
+    this[$ensureMaterialIsLoaded]();
+    return (this[$backingThreeMaterial].sheenColor.toArray() as RGB);
+  }
+  get sheenColorTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$pbrTextures].get(TextureUsage.SheenColor)!;
+  }
+
+  get sheenRoughnessFactor(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].sheenRoughness;
+  }
+
+  get sheenRoughnessTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$pbrTextures].get(TextureUsage.SheenRoughness)!;
+  }
+
+  setSheenColorFactor(rgb: RGB|string) {
+    this[$ensureMaterialIsLoaded]();
+    const color = this.colorFromRgb(rgb);
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.sheenColor.set(color);
+      // Three.js GLTFExporter checks for internal sheen value.
+      material.sheen = 1;
+    }
+    this[$onUpdate]();
+  }
+
+  setSheenRoughnessFactor(roughness: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.sheenRoughness = roughness;
+      // Three.js GLTFExporter checks for internal sheen value.
+      material.sheen = 1;
+    }
+    this[$onUpdate]();
+  }
+
+  // KHR_materials_transmission
+  get transmissionFactor(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].transmission;
+  }
+
+  get transmissionTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$pbrTextures].get(TextureUsage.Transmission)!;
+  }
+
+  setTransmissionFactor(transmission: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.transmission = transmission;
+    }
+    this[$onUpdate]();
+  }
+
+  // KHR_materials_volume
+  get thicknessFactor(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].thickness;
+  }
+
+  get thicknessTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$pbrTextures].get(TextureUsage.Thickness)!;
+  }
+
+  get attenuationDistance(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].attenuationDistance;
+  }
+
+  get attenuationColor(): RGB {
+    this[$ensureMaterialIsLoaded]();
+    return (this[$backingThreeMaterial].attenuationColor.toArray() as RGB);
+  }
+
+  setThicknessFactor(thickness: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.thickness = thickness;
+    }
+    this[$onUpdate]();
+  }
+
+  setAttenuationDistance(attenuationDistance: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.attenuationDistance = attenuationDistance;
+    }
+    this[$onUpdate]();
+  }
+
+  setAttenuationColor(rgb: RGB|string) {
+    this[$ensureMaterialIsLoaded]();
+    const color = this.colorFromRgb(rgb);
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.attenuationColor.set(color);
+    }
+    this[$onUpdate]();
+  }
+
+  // KHR_materials_specular
+  get specularFactor(): number {
+    this[$ensureMaterialIsLoaded]();
+    return this[$backingThreeMaterial].specularIntensity;
+  }
+
+  get specularTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$pbrTextures].get(TextureUsage.Specular)!;
+  }
+
+  get specularColorFactor(): RGB {
+    this[$ensureMaterialIsLoaded]();
+    return (this[$backingThreeMaterial].specularColor.toArray() as RGB);
+  }
+
+  get specularColorTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$pbrTextures].get(TextureUsage.SheenColor)!;
+  }
+
+  setSpecularFactor(specularFactor: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.specularIntensity = specularFactor;
+    }
+    this[$onUpdate]();
+  }
+
+  setSpecularColorFactor(rgb: RGB|string) {
+    this[$ensureMaterialIsLoaded]();
+    const color = this.colorFromRgb(rgb);
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      material.specularColor.set(color);
+    }
+    this[$onUpdate]();
+  }
+
+  // KHR_materials_iridescence
 }

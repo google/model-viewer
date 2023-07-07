@@ -36,6 +36,12 @@ export enum TextureUsage {
   Clearcoat,
   ClearcoatRoughness,
   ClearcoatNormal,
+  SheenColor,
+  SheenRoughness,
+  Transmission,
+  Thickness,
+  Specular,
+  SpecularColor,
 }
 
 interface TextureTransform {
@@ -156,6 +162,24 @@ export class TextureInfo implements TextureInfoInterface {
             break;
           case TextureUsage.ClearcoatNormal:
             material.clearcoatNormalMap = threeTexture;
+            break;
+          case TextureUsage.SheenColor:
+            material.sheenColorMap = threeTexture;
+            break;
+          case TextureUsage.SheenRoughness:
+            material.sheenRoughnessMap = threeTexture;
+            break;
+          case TextureUsage.Transmission:
+            material.transmissionMap = threeTexture;
+            break;
+          case TextureUsage.Thickness:
+            material.thicknessMap = threeTexture;
+            break;
+          case TextureUsage.Specular:
+            material.specularIntensityMap = threeTexture;
+            break;
+          case TextureUsage.SpecularColor:
+            material.specularColorMap = threeTexture;
             break;
           default:
         }
