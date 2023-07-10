@@ -72,7 +72,7 @@ export default class TextureUtils extends EventDispatcher {
 
   async getLottieLoader(): Promise<any> {
     if (this._lottieLoader == null) {
-      const {LottieLoader} = await import(this.lottieLoaderUrl);
+      const {LottieLoader} = await import(/* webpackIgnore: true */ this.lottieLoaderUrl);
       this._lottieLoader = new LottieLoader() as Loader;
     }
     this._lottieLoader.setWithCredentials(this.withCredentials);
