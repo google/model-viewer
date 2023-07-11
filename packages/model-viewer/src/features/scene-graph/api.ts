@@ -147,6 +147,9 @@ export declare interface Material {
   readonly iridescenceThicknessMinimum: number;
   readonly iridescenceThicknessMaximum: number;
   readonly iridescenceThicknessTexture: TextureInfo;
+  readonly anisotropyStrength: number;
+  readonly anisotropyRotation: number;
+  readonly anisotropyTexture: TextureInfo;
 
   setEmissiveStrength(emissiveStrength: number): void;
   setClearcoatFactor(clearcoatFactor: number): void;
@@ -165,6 +168,8 @@ export declare interface Material {
   setIridescenceIor(ior: number): void;
   setIridescenceThicknessMinimum(thicknessMin: number): void;
   setIridescenceThicknessMaximum(thicknessMax: number): void;
+  setAnisotropyStrength(strength: number): void;
+  setAnisotropyRotation(rotation: number): void;
 
   /**
    * The PBRMetallicRoughness configuration of the material.

@@ -142,6 +142,9 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     createTextureInfo(TextureUsage.Thickness);
     createTextureInfo(TextureUsage.Specular);
     createTextureInfo(TextureUsage.SpecularColor);
+    createTextureInfo(TextureUsage.Iridescence);
+    createTextureInfo(TextureUsage.IridescenceThickness);
+    createTextureInfo(TextureUsage.Anisotropy);
   }
 
   async[$getLoadedMaterial](): Promise<MeshPhysicalMaterial> {
@@ -659,4 +662,36 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   }
 
   // KHR_materials_anisotropy
+  get anisotropyStrength(): number {
+    this[$ensureMaterialIsLoaded]();
+    return (this[$backingThreeMaterial] as any).anisotropy;
+  }
+
+  get anisotropyRotation(): number {
+    this[$ensureMaterialIsLoaded]();
+    return (this[$backingThreeMaterial] as any).anisotropyRotation;
+  }
+
+  get anisotropyTexture(): TextureInfo {
+    this[$ensureMaterialIsLoaded]();
+    return this[$pbrTextures].get(TextureUsage.Anisotropy)!;
+  }
+
+  setAnisotropyStrength(strength: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      (material as any).anisotropy = strength;
+    }
+    this[$onUpdate]();
+  }
+
+  setAnisotropyRotation(rotation: number) {
+    this[$ensureMaterialIsLoaded]();
+    for (const material of this[$correlatedObjects] as
+         Set<MeshPhysicalMaterial>) {
+      (material as any).anisotropyRotation = rotation;
+    }
+    this[$onUpdate]();
+  }
 }

@@ -44,6 +44,7 @@ export enum TextureUsage {
   SpecularColor,
   Iridescence,
   IridescenceThickness,
+  Anisotropy,
 }
 
 interface TextureTransform {
@@ -188,6 +189,9 @@ export class TextureInfo implements TextureInfoInterface {
             break;
           case TextureUsage.IridescenceThickness:
             material.iridescenceThicknessMap = threeTexture;
+            break;
+          case TextureUsage.Anisotropy:
+            (material as any).anisotropyMap = threeTexture;
             break;
           default:
         }
