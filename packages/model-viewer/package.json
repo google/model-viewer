@@ -47,7 +47,7 @@
   "typings": "lib/model-viewer.d.ts",
   "types": "lib/model-viewer.d.ts",
   "scripts": {
-    "postinstall": "node ../../scripts/postinstall.js",
+    "postinstall": "if [ -f '../../scripts/postinstall.js' ]; then node ../../scripts/postinstall.js; fi",
     "clean": "rm -rf ./lib ./dist",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-samples.sh",
     "build": "npm run build:tsc && npm run build:rollup",
