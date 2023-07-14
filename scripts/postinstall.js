@@ -2,11 +2,12 @@ const fs = require('fs');
 const THREE_REGEX = /three@[~^]?([\dvx*]+(?:[-.](?:[\dx*]+|alpha|beta))*)/gm;
 let NEW_THREE_VERSION;
 const THREE_PACKAGE_REGEX = /"three": ".*"/g;
-fs.readFile('package.json', {encoding: 'utf8'}, (err, data) => {
-  NEW_THREE_VERSION = `three@${
-      THREE_PACKAGE_REGEX.exec(data)[0].split(' ')[1].replaceAll('"', '')}`;
-  console.log(NEW_THREE_VERSION);
-});
+fs.readFile(
+    'packages/model-viewer/package.json', {encoding: 'utf8'}, (err, data) => {
+      NEW_THREE_VERSION = `three@${
+          THREE_PACKAGE_REGEX.exec(data)[0].split(' ')[1].replaceAll('"', '')}`;
+      console.log(NEW_THREE_VERSION);
+    });
 
 function updateThreeVersion(filePath) {
   fs.readFile(filePath, {encoding: 'utf8'}, (err, data) => {
@@ -28,5 +29,6 @@ function updateThreeVersion(filePath) {
   });
 }
 
-updateThreeVersion('../model-viewer-effects/README.md');
-updateThreeVersion('../modelviewer.dev/examples/postprocessing/index.html');
+updateThreeVersion('packages/model-viewer-effects/README.md');
+updateThreeVersion(
+    'packages/modelviewer.dev/examples/postprocessing/index.html');
