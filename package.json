@@ -11,7 +11,7 @@
     "clean": "npm run clean --workspaces",
     "build": "npm run build --workspaces",
     "serve": "./node_modules/.bin/http-server -c-1",
-    "update:package-lock": "npm install && npm run clean && node ./scripts/postinstall.js"
+    "update:package-lock": "npm install --save && npm run clean && node ./scripts/postinstall.js"
   },
   "husky": {
     "hooks": {
@@ -23,7 +23,11 @@
     "url": "git+https://github.com/google/model-viewer.git"
   },
   "workspaces": [
-    "./packages/*"
+    "./packages/model-viewer",
+    "./packages/model-viewer-effects",
+    "./packages/modelviewer.dev",
+    "./packages/render-fidelity-tools",
+    "./packages/space-opera"
   ],
   "author": "DevXR Contributors",
   "license": "Apache-2.0",
