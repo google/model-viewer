@@ -23,9 +23,6 @@ jobs:
     # - name: Lint TypeScript sources
     #   run: npm run lint
 
-    - name: Bootstrap packages
-      run: npm run bootstrap
-
     - name: Build packages
       run: npm run build
 
