@@ -3,7 +3,7 @@
   "private": true,
   "description": "The repository for all <model-viewer> packages",
   "scripts": {
-    "test": "npm test --workspaces",
+    "test": "npm run test --workspaces",
     "format": "find packages/**/src -name '*.ts' | grep -v .d.ts | xargs ./node_modules/.bin/clang-format --verbose -i",
     "lint": "./node_modules/.bin/eslint \"packages/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
