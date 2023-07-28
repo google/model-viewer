@@ -25,6 +25,12 @@ jobs:
     - name: Build packages
       run: npm run build
 
+    - name: Generate fidelity artifacts 
+      continue-on-error: true
+      uses: GabrielBB/xvfb-action@v1.0
+      with:
+        run: npm run --scope @google/model-viewer-render-fidelity-tools test --stream
+
     - name: Stage documentation artifacts
       run: ./packages/modelviewer.dev/scripts/ci-before-deploy.sh
 

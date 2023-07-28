@@ -18,3 +18,13 @@ jobs:
 
     # - name: Lint TypeScript sources
     #   run: npm run lint
+
+    - name: Build packages
+      run: |
+       npm run --scope @google/model-viewer build --stream
+       npm run --scope @google/model-viewer-render-fidelity-tools build --stream
+
+    - name: Fidelity tests
+      uses: GabrielBB/xvfb-action@v1.0
+      with:
+        run: npm run --scope @google/model-viewer-render-fidelity-tools test --stream
