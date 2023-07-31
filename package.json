@@ -3,9 +3,13 @@
   "private": true,
   "description": "The repository for all <model-viewer> packages",
   "scripts": {
+    "test": "npm run test --workspaces",
+    "test:ci": "npm run test:ci --workspaces",
     "format": "find packages/**/src -name '*.ts' | grep -v .d.ts | xargs ./node_modules/.bin/clang-format --verbose -i",
     "lint": "./node_modules/.bin/eslint \"packages/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
+    "clean": "npm run clean --workspaces",
+    "build": "npm run build --workspaces",
     "serve": "./node_modules/.bin/http-server -c-1",
     "update:package-lock": "npm install --save && npm run clean --workspaces && node ./scripts/postinstall.js"
   },
@@ -19,11 +23,11 @@
     "url": "git+https://github.com/google/model-viewer.git"
   },
   "workspaces": [
-    "./packages/model-viewer",
-    "./packages/model-viewer-effects",
-    "./packages/modelviewer.dev",
-    "./packages/render-fidelity-tools",
-    "./packages/space-opera"
+    "packages/model-viewer",
+    "packages/model-viewer-effects",
+    "packages/modelviewer.dev",
+    "packages/render-fidelity-tools",
+    "packages/space-opera"
   ],
   "author": "DevXR Contributors",
   "license": "Apache-2.0",

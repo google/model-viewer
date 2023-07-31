@@ -21,9 +21,9 @@ jobs:
 
     - name: Build packages
       run: |
-       npm run build --workspace=model-viewer --workspace=render-fidelity-tools
+       npm run build --workspace=@google/model-viewer --workspace=@google/model-viewer-render-fidelity-tools
 
     - name: Fidelity tests
       uses: GabrielBB/xvfb-action@v1.0
       with:
-        run: npm run test --workspace=render-fidelity-tools
+        run: npm run test --workspace=@google/model-viewer-render-fidelity-tools
