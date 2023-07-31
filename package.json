@@ -3,15 +3,11 @@
   "private": true,
   "description": "The repository for all <model-viewer> packages",
   "scripts": {
-    "test": "npm test --workspaces",
-    "test:ci": "npm test:ci --workspaces",
     "format": "find packages/**/src -name '*.ts' | grep -v .d.ts | xargs ./node_modules/.bin/clang-format --verbose -i",
     "lint": "./node_modules/.bin/eslint \"packages/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
-    "clean": "npm run clean --workspaces",
-    "build": "npm run build --workspaces",
     "serve": "./node_modules/.bin/http-server -c-1",
-    "update:package-lock": "npm install --save && npm run clean && node ./scripts/postinstall.js"
+    "update:package-lock": "npm install --save && npm run clean --workspaces && node ./scripts/postinstall.js"
   },
   "husky": {
     "hooks": {
