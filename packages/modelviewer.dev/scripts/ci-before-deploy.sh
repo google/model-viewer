@@ -119,8 +119,8 @@ cp ../space-opera/editor/view/index.html $DEPLOY_ROOT/editor/view/
 cp ../space-opera/dist/space-opera.js $DEPLOY_ROOT/dist/
 cp ../model-viewer/dist/* $DEPLOY_ROOT/node_modules/@google/model-viewer/dist/
 cp ../model-viewer-effects/dist/* $DEPLOY_ROOT/node_modules/@google/model-viewer-effects/dist/
-cp ../../node_modules/js-beautify/* $DEPLOY_ROOT/node_modules/js-beautify
-cp ../../node_modules/web-animations-js/* $DEPLOY_ROOT/node_modules/web-animations-js
+cp -r ../../node_modules/js-beautify/* $DEPLOY_ROOT/node_modules/js-beautify
+cp -r ../../node_modules/web-animations-js/* $DEPLOY_ROOT/node_modules/web-animations-js
 
 FILES_TO_PATCH_WITH_MINIFIED_BUNDLE=($(find $DEPLOY_ROOT \( -type d -name node_modules -prune \) -o -type f | grep \.html))
 
