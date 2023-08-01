@@ -22,9 +22,6 @@ jobs:
     # - name: Lint TypeScript sources
     #   run: npm run lint
 
-    - name: Bootstrap packages
-      run: npm run bootstrap
-
     - name: Build packages
       run: npm run build
 
@@ -32,7 +29,7 @@ jobs:
       continue-on-error: true
       uses: GabrielBB/xvfb-action@v1.0
       with:
-        run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test --stream
+        run: npm run test --workspace=@google/model-viewer-render-fidelity-tools
 
     - name: Stage documentation artifacts
       run: ./packages/modelviewer.dev/scripts/ci-before-deploy.sh
