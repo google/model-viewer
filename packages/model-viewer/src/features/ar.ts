@@ -197,7 +197,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     async activateAR() {
       switch (this[$arMode]) {
         case ARMode.QUICK_LOOK:
-          this[$openIOSARQuickLook]();
+          await this[$openIOSARQuickLook]();
           break;
         case ARMode.WEBXR:
           await this[$enterARWithWebXR]();
