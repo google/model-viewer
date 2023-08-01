@@ -19,15 +19,11 @@ jobs:
     # - name: Lint TypeScript sources
     #   run: npm run lint
 
-    - name: Bootstrap packages
-      run: npm run bootstrap
-
     - name: Build packages
       run: |
-       ./node_modules/.bin/lerna run --scope @google/model-viewer build --stream
-       ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools build --stream
+       npm run build --workspace=@google/model-viewer --workspace=@google/model-viewer-render-fidelity-tools
 
     - name: Fidelity tests
       uses: GabrielBB/xvfb-action@v1.0
       with:
-        run: ./node_modules/.bin/lerna run --scope @google/model-viewer-render-fidelity-tools test --stream
+        run: npm run test --workspace=@google/model-viewer-render-fidelity-tools

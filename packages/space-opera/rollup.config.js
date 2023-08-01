@@ -18,16 +18,13 @@
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 
-const watchFiles = [
-  'lib/**',
-  '../model-viewer/lib/**'
-];
+const watchFiles = ['lib/**', '../model-viewer/lib/**'];
 
 const plugins = [
   {
     resolveId: (id) => {
       if (id === 'jszip') {
-        return './node_modules/jszip/dist/jszip.min.js';
+        return '../../node_modules/jszip/dist/jszip.min.js';
       }
       return null;
     },
