@@ -28,10 +28,7 @@
     "@types/prismjs": "^1.16.6",
     "focus-visible": "^5.2.0",
     "lit": "^2.7.2",
-    "prismjs": "^1.24.1",
-    "simple-dropzone": "^0.8.1",
-    "js-beautify": "^1.14.0",
-    "web-animations-js": "^2.3.2"
+    "prismjs": "^1.24.1"
   },
   "devDependencies": {
     "rollup": "^2.77.2",
