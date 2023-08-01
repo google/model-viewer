@@ -33,10 +33,6 @@ DEPLOYABLE_STATIC_FILES=( \
   CNAME \
   LICENSE \
   README.md \
-  node_modules/@google/model-viewer/dist \
-  node_modules/@google/model-viewer-effects/dist \
-  node_modules/js-beautify \
-  node_modules/web-animations-js \
   shared-assets/models/*.* \
   shared-assets/models/twitter \
   shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine \
@@ -110,6 +106,10 @@ mkdir -p $DEPLOY_ROOT/node_modules
 mkdir -p $DEPLOY_ROOT/node_modules/@google
 mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer
 mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer/dist
+mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer-effects
+mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer-effects/dist
+mkdir -p $DEPLOY_ROOT/node_modules/js-beautify
+mkdir -p $DEPLOY_ROOT/node_modules/web-animations-js
 
 mv ../render-fidelity-tools/test/results $DEPLOY_ROOT/fidelity/results
 cp ../render-fidelity-tools/test/results-viewer.html $DEPLOY_ROOT/fidelity/index.html
@@ -117,19 +117,21 @@ cp ../render-fidelity-tools/dist/* $DEPLOY_ROOT/dist/
 cp ../space-opera/editor/index.html $DEPLOY_ROOT/editor/
 cp ../space-opera/editor/view/index.html $DEPLOY_ROOT/editor/view/
 cp ../space-opera/dist/space-opera.js $DEPLOY_ROOT/dist/
-cp ../model-viewer/dist/* $DEPLOY_ROOT/dist/
-cp ../model-viewer-effects/dist/* $DEPLOY_ROOT/dist/
 cp ../model-viewer/dist/* $DEPLOY_ROOT/node_modules/@google/model-viewer/dist/
-cp ../model-viewer-effects/dist/* $DEPLOY_ROOT/node_modules/@google/model-viewer/dist/
+cp ../model-viewer-effects/dist/* $DEPLOY_ROOT/node_modules/@google/model-viewer-effects/dist/
+cp ../../node_modules/js-beautify/* $DEPLOY_ROOT/node_modules/js-beautify
+cp ../../node_modules/web-animations-js/* $DEPLOY_ROOT/node_modules/web-animations-js
 
 FILES_TO_PATCH_WITH_MINIFIED_BUNDLE=($(find $DEPLOY_ROOT \( -type d -name node_modules -prune \) -o -type f | grep \.html))
 
 for file_to_patch in "${FILES_TO_PATCH_WITH_MINIFIED_BUNDLE[@]}"; do
-  sed -i.bak 's ../../node_modules/@google/model-viewer/dist/model-viewer.js dist/model-viewer.min.js g' $file_to_patch
+  sed -i.bak 's model-viewer.js model-viewer.min.js g' $file_to_patch
   rm $file_to_patch.bak
-  sed -i.bak 's ../../node_modules/@google/model-viewer/dist/model-viewer-module.js dist/model-viewer-module.min.js g' $file_to_patch
+  sed -i.bak 's model-viewer-module.js model-viewer-module.min.js g' $file_to_patch
   rm $file_to_patch.bak
-  sed -i.bak 's ../../node_modules/@google/model-viewer-effects/dist/model-viewer-effects.js dist/model-viewer-effects.min.js g' $file_to_patch
+  sed -i.bak 's model-viewer-effects.js model-viewer-effects.min.js g' $file_to_patch
+  rm $file_to_patch.bak
+  sed -i.bak 's ../../node_modules/ node_modules/ g' $file_to_patch
   rm $file_to_patch.bak
 done
 
