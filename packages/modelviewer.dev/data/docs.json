@@ -495,6 +495,24 @@
         }
       },
       {
+        "name": "zoom-sensitivity",
+        "htmlName": "zoomSensitivity",
+        "description": "Adjusts the speed of zoom interactions.",
+        "default": {
+          "default": "1",
+          "options": "any number"
+        }
+      },
+      {
+        "name": "pan-sensitivity",
+        "htmlName": "panSensitivity",
+        "description": "Adjusts the speed of pan interactions.",
+        "default": {
+          "default": "1",
+          "options": "any number"
+        }
+      },
+      {
         "name": "auto-rotate",
         "htmlName": "autoRotate",
         "description": "Enables the auto-rotation of the model.",

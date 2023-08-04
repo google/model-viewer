@@ -241,6 +241,8 @@ export declare interface ControlsInterface {
   interactionPromptStyle: InteractionPromptStyle;
   interactionPromptThreshold: number;
   orbitSensitivity: number;
+  zoomSensitivity: number;
+  panSensitivity: number;
   touchAction: TouchAction;
   interpolationDecay: number;
   disableZoom: boolean;
@@ -335,6 +337,12 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: Number, attribute: 'orbit-sensitivity'})
     orbitSensitivity: number = 1;
+
+    @property({type: Number, attribute: 'zoom-sensitivity'})
+    zoomSensitivity: number = 1;
+
+    @property({type: Number, attribute: 'pan-sensitivity'})
+    panSensitivity: number = 1;
 
     @property({type: String, attribute: 'touch-action'})
     touchAction: TouchAction = TouchAction.NONE;
@@ -521,6 +529,14 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('orbitSensitivity')) {
         controls.orbitSensitivity = this.orbitSensitivity;
+      }
+
+      if (changedProperties.has('zoomSensitivity')) {
+        controls.zoomSensitivity = this.zoomSensitivity;
+      }
+
+      if (changedProperties.has('panSensitivity')) {
+        controls.panSensitivity = this.panSensitivity;
       }
 
       if (changedProperties.has('interpolationDecay')) {
