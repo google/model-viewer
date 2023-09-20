@@ -149,6 +149,7 @@ suite('ARRenderer', () => {
 
         readonly environmentBlendMode = {} as XREnvironmentBlendMode;
         readonly visibilityState = {} as XRVisibilityState;
+        readonly isSystemKeyboardSupported = false;
         async updateTargetFrameRate(_rate: number) {
           return;
         }
