@@ -525,8 +525,8 @@ modelViewerTexture2.addEventListener("load", () => {
 
   scaleSlider.addEventListener('input', (event) => {
     const scale = {
-      x: scaleSlider.value,
-      y: scaleSlider.value
+      u: scaleSlider.value,
+      v: scaleSlider.value
     };
     sampler.setScale(scale);
     scaleDisplay.textContent = scale.x;
@@ -534,8 +534,8 @@ modelViewerTexture2.addEventListener("load", () => {
 
   offsetSlider.addEventListener('input', (event) => {
     const offset = {
-      x: offsetSlider.value,
-      y: -offsetSlider.value
+      u: offsetSlider.value,
+      v: -offsetSlider.value
     };
     sampler.setOffset(offset);
   });
