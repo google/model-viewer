@@ -32,9 +32,9 @@ export declare interface ThreeDOMElementMap {
 }
 
 /** A 2D Cartesian coordinate */
-export interface Vector2D {
-  x: number;
-  y: number;
+export interface Vector2DInterface {
+  u: number;
+  v: number;
 }
 
 /**
@@ -334,12 +334,12 @@ export declare interface Sampler {
   /**
    * The texture scale.
    */
-  readonly scale: Vector2D|null;
+  readonly scale: Vector2DInterface|null;
 
   /**
    * The texture offset.
    */
-  readonly offset: Vector2D|null;
+  readonly offset: Vector2DInterface|null;
 
   /**
    * Configure the minFilter value of the Sampler.
@@ -371,12 +371,12 @@ export declare interface Sampler {
    * Sets the texture scale, or resets it to (1, 1) if argument is null.
    * As the scale value increases, the repetition of the texture will increase.
    */
-  setScale(scale: Vector2D|null): void;
+  setScale(scale: Vector2DInterface|null): void;
 
   /**
    * Sets the texture offset, or resets it to (0, 0) if argument is null.
    */
-  setOffset(offset: Vector2D|null): void;
+  setOffset(offset: Vector2DInterface|null): void;
 }
 
 
