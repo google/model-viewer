@@ -98,8 +98,10 @@ suite('scene-graph/texture-info', () => {
                                        .pbrMetallicRoughness['baseColorTexture']
                                        .texture?.sampler!;
           expect(exported_sampler.rotation).to.be.eq(0.1, 'rotation');
-          expect(exported_sampler.offset).to.be.eql({u: 0.2, v: 0.3}, 'offset');
-          expect(exported_sampler.scale).to.be.eql({u: 0.4, v: 0.5}, 'scale');
+          expect(exported_sampler.offset!.u).to.be.eql(0.2, 'offset_u');
+          expect(exported_sampler.offset!.v).to.be.eql(0.3, 'offset_v');
+          expect(exported_sampler.scale!.u).to.be.eql(0.4, 'scale_u');
+          expect(exported_sampler.scale!.v).to.be.eql(0.5, 'scale_v');
         });
   });
 });

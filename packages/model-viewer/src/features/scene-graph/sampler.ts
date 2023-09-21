@@ -15,7 +15,7 @@
 
 import {Texture as ThreeTexture, Vector2} from 'three';
 
-import {toVector2D} from '../../model-viewer-base.js';
+import {toVector2D, Vector2D} from '../../model-viewer-base.js';
 import {Filter, MagFilter, MinFilter, Wrap, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Sampler as DefaultedSampler} from '../../three-components/gltf-instance/gltf-defaulted.js';
 
@@ -114,11 +114,11 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     return this[$threeTexture].rotation;
   }
 
-  get scale(): Vector2DInterface {
+  get scale(): Vector2D {
     return toVector2D(this[$threeTexture].repeat);
   }
 
-  get offset(): Vector2DInterface|null {
+  get offset(): Vector2D|null {
     return toVector2D(this[$threeTexture].offset);
   }
 
