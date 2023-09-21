@@ -18,7 +18,7 @@ import {Texture as ThreeTexture, Vector2} from 'three';
 import {Filter, MagFilter, MinFilter, Wrap, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
 import {Sampler as DefaultedSampler} from '../../three-components/gltf-instance/gltf-defaulted.js';
 
-import {Sampler as SamplerInterface, Vector2 as Vector2Interface} from './api.js';
+import {Sampler as SamplerInterface} from './api.js';
 import {$correlatedObjects, $onUpdate, ThreeDOMElement} from './three-dom-element.js';
 
 
@@ -113,11 +113,11 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     return this[$threeTexture].rotation;
   }
 
-  get scale(): Vector2Interface {
+  get scale(): Vector2 {
     return this[$threeTexture].repeat;
   }
 
-  get offset(): Vector2Interface|null {
+  get offset(): Vector2|null {
     return this[$threeTexture].offset;
   }
 
@@ -145,20 +145,20 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
     this[$setProperty]('rotation', rotation);
   }
 
-  setScale(scale: Vector2Interface|null): void {
+  setScale(scale: Vector2|null): void {
     if (scale == null) {
       // Reset scale.
       scale = new Vector2(1, 1);
     }
-    this[$setProperty]('repeat', new Vector2(scale.x, scale.y));
+    this[$setProperty]('repeat', scale);
   }
 
-  setOffset(offset: Vector2Interface|null): void {
+  setOffset(offset: Vector2|null): void {
     if (offset == null) {
       // Reset offset.
       offset = new Vector2(0, 0);
     }
-    this[$setProperty]('offset', new Vector2(offset.x, offset.y));
+    this[$setProperty]('offset', offset);
   }
 
   private[$setProperty]<P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'|
