@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Sphere} from 'three';
+import {FrontSide, Material, Mesh, MeshStandardMaterial, Object3D, Sphere, SpotLight} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {$clone, $prepare, $preparedGLTF, GLTFInstance, PreparedGLTF} from '../GLTFInstance.js';
@@ -132,6 +132,13 @@ export class ModelViewerGLTFInstance extends GLTFInstance {
           mesh.material = material.clone() as MeshStandardMaterial;
           sourceUUIDToClonedMaterial.set(material.uuid, mesh.material);
         }
+      }
+
+      const light = node as SpotLight;
+      if (light.target !== undefined) {
+        // The target's parent is lost in the cloning process, but in
+        // GLTFLoader, all light targets are children of their light.
+        light.add(light.target);
       }
     });
 

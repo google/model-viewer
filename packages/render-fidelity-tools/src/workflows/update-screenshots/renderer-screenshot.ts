@@ -14,6 +14,7 @@
  */
 
 import HTTPServer from 'http-server';
+
 import {ArtifactCreator} from '../../artifact-creator.js';
 import {ImageComparisonConfig} from '../../common.js';
 
@@ -29,14 +30,15 @@ export const rendererScreenshot = async(
     width: number = 10,
     height: number = 10): Promise<void> => {
   const dimensions = {width, height};
-  const server = HTTPServer.createServer({root: './', cache: -1});
+  const server = HTTPServer.createServer({root: '../../', cache: -1});
 
   server.listen(port);
 
   const screenshotCreator = new ArtifactCreator(
       config,
       rootDirectory,
-      `http://localhost:${port}/test/renderers/${renderer}/`);
+      `http://localhost:${port}/packages/render-fidelity-tools/test/renderers/${
+          renderer}/`);
 
   if (scenarioName == null) {
     throw new Error(' Scenario name not specified!');

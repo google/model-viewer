@@ -144,7 +144,6 @@ export class Renderer extends EventDispatcher {
         preserveDrawingBuffer: true,
       });
       this.threeRenderer.autoClear = true;
-      this.threeRenderer.useLegacyLights = false;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 
       this.threeRenderer.debug = {
