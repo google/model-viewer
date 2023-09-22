@@ -14,7 +14,6 @@
  */
 
 import {expect} from '@esm-bundle/chai';
-import {Vector2} from 'three';
 
 import {TextureInfo} from '../../../features/scene-graph/texture-info.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
@@ -82,8 +81,8 @@ suite('scene-graph/texture-info', () => {
                               .pbrMetallicRoughness['baseColorTexture']
                               .texture?.sampler!;
           sampler.setRotation(0.1);
-          sampler.setOffset(new Vector2(0.2, 0.3));
-          sampler.setScale(new Vector2(0.4, 0.5));
+          sampler.setOffset({u: 0.2, v: 0.3});
+          sampler.setScale({u: 0.4, v: 0.5});
 
           // Export model.
           const exported = await element.exportScene({binary: true});
@@ -99,10 +98,10 @@ suite('scene-graph/texture-info', () => {
                                        .pbrMetallicRoughness['baseColorTexture']
                                        .texture?.sampler!;
           expect(exported_sampler.rotation).to.be.eq(0.1, 'rotation');
-          expect(exported_sampler.offset)
-              .to.be.eql(new Vector2(0.2, 0.3), 'offset');
-          expect(exported_sampler.scale)
-              .to.be.eql(new Vector2(0.4, 0.5), 'scale');
+          expect(exported_sampler.offset!.u).to.be.eql(0.2, 'offset_u');
+          expect(exported_sampler.offset!.v).to.be.eql(0.3, 'offset_v');
+          expect(exported_sampler.scale!.u).to.be.eql(0.4, 'scale_u');
+          expect(exported_sampler.scale!.v).to.be.eql(0.5, 'scale_v');
         });
   });
 });
