@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Material as ThreeMaterial, Mesh} from 'three';
-import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {Material as ThreeMaterial, Mesh, MeshPhysicalMaterial} from 'three';
+import {GLTFParser, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {CorrelatedSceneGraph} from '../../../three-components/gltf-instance/correlated-scene-graph.js';
 import {KHRMaterialsVariants, Primitive} from '../../../three-components/gltf-instance/gltf-2.0.js';
@@ -41,6 +41,7 @@ export class PrimitiveNode extends Node {
   public initialMaterialIdx = 0;
   private activeMaterialIdx = 0;
   private modelVariants: Map<string, VariantData>;
+  private parser: GLTFParser;
 
   constructor(
       mesh: Mesh, mvMaterials: Material[],
@@ -49,6 +50,7 @@ export class PrimitiveNode extends Node {
     super(mesh.name);
     this.mesh = mesh;
     const {gltf, threeGLTF, threeObjectMap} = correlatedSceneGraph;
+    this.parser = threeGLTF.parser;
     this.modelVariants = modelVariants;
     this.mesh.userData.variantData = modelVariants;
     // Captures the primitive's initial material.
@@ -127,8 +129,17 @@ export class PrimitiveNode extends Node {
 
   async setActiveMaterial(material: number): Promise<ThreeMaterial|null> {
     const mvMaterial = this.materials.get(material);
-    if (mvMaterial != null) {
+    if (mvMaterial != null && material !== this.activeMaterialIdx) {
       this.mesh.material = await mvMaterial[$getLoadedMaterial]();
+      const {normalScale} = this.mesh.material as MeshPhysicalMaterial;
+      // TODO: remove this hack in favor of properly storing the different
+      // three.js materials that are potentially created for different meshes
+      // that share a glTF material.
+      if (normalScale != null &&
+          (normalScale.y * normalScale.x < 0) !=
+              (this.mesh.geometry.attributes.tangent == null)) {
+        this.parser.assignFinalMaterial(this.mesh);
+      }
       this.activeMaterialIdx = material;
     }
     return this.mesh.material as ThreeMaterial;
