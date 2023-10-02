@@ -5,3 +5,6 @@ lib
 node_modules
 dist
 .idea
+
+# suggested virtual python environment
+packages/render-fidelity-tools/penv310

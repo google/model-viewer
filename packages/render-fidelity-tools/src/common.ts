@@ -115,7 +115,8 @@ export interface RendererConfig {
   command?: {
     executable?: string, 
     args?: string[]
-  }
+  },
+  ignore: boolean
 }
 
 export interface GoldenConfig extends RendererConfig {

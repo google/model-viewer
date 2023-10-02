@@ -2,41 +2,46 @@
   "renderers": [
     {
       "name": "model-viewer",
-      "description": "<model-viewer>"
+      "description": "<model-viewer>",
+      "ignore": false
     },
     {
       "name": "filament",
       "description": "Filament",
       "scripts": {
         "setup": "prepare-ibl.sh"
-      }
+      },
+      "ignore": false
     },
     {
       "name": "babylon",
-      "description": "Babylon"
+      "description": "Babylon",
+      "ignore": false
     },
     {
       "name": "gltf-sample-viewer",
-      "description": "gltf-sample-viewer"
+      "description": "gltf-sample-viewer",
+      "ignore": false
     },
     {
       "name": "three-gpu-pathtracer",
-      "description": "three-gpu-pathtracer"
+      "description": "three-gpu-pathtracer",
+      "ignore": false
     },
     {
       "name": "stellar",
       "description": "Dassault Systèmes STELLAR",
-      "command": {}
+      "command": {},
+      "ignore": false
     },
     {
       "name": "vray",
       "description": "V-Ray",
       "command": {
-        "executable": "python3",
-        "args": [
-          "test/renderers/vray/render.py"
-        ]
-      }
+        "executable": "python3.10",
+        "args": ["test/renderers/vray/render.py"]
+      },
+      "ignore": false
     }
   ],
   "scenarios": [
@@ -46,9 +51,7 @@
       "orbit": {
         "radius": 5
       },
-      "exclude": [
-        "vray"
-      ]
+      "exclude": []
     },
     {
       "name": "khronos-IridescentDishWithOlives",
@@ -65,10 +68,7 @@
       "target": {
         "y": 0.11
       },
-      "exclude": [
-        "babylon",
-        "vray"
-      ]
+      "exclude": ["babylon"]
     },
     {
       "name": "khronos-ToyCar",
@@ -98,9 +98,7 @@
       "dimensions": {
         "height": 450
       },
-      "exclude": [
-        "vray"
-      ]
+      "exclude": []
     },
     {
       "name": "khronos-MaterialsVariantsShoe",
@@ -117,9 +115,7 @@
       "dimensions": {
         "height": 500
       },
-      "exclude": [
-        "vray"
-      ]
+      "exclude": []
     },
     {
       "name": "khronos-BoomBox",
@@ -166,9 +162,7 @@
         "height": 600,
         "width": 1000
       },
-      "exclude": [
-        "vray"
-      ]
+      "exclude": []
     },
     {
       "name": "khronos-IridescenceLamp",
@@ -186,11 +180,7 @@
         "height": 800,
         "width": 620
       },
-      "exclude": [
-        "three-gpu-pathtracer",
-        "stellar",
-        "vray"
-      ]
+      "exclude": ["three-gpu-pathtracer", "stellar"]
     },
     {
       "name": "khronos-LightsPunctualLamp",
@@ -223,9 +213,7 @@
         "height": 700,
         "width": 700
       },
-      "exclude": [
-        "vray"
-      ]
+      "exclude": []
     },
     {
       "name": "khronos-EmissiveStrengthTest",
@@ -239,9 +227,7 @@
         "height": 600,
         "width": 1000
       },
-      "exclude": [
-        "vray"
-      ]
+      "exclude": []
     },
     {
       "name": "khronos-IridescenceDielectricSpheres",
@@ -258,10 +244,7 @@
         "height": 700,
         "width": 700
       },
-      "exclude": [
-        "stellar",
-        "vray"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-IridescenceMetallicSpheres",
@@ -278,10 +261,7 @@
         "height": 700,
         "width": 700
       },
-      "exclude": [
-        "stellar",
-        "vray"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-IridescenceSuzanne",
@@ -294,10 +274,7 @@
         "height": 400,
         "width": 1000
       },
-      "exclude": [
-        "stellar",
-        "vray"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-AntiqueCamera",
@@ -375,9 +352,7 @@
         "phi": 70.0,
         "radius": 2.45
       },
-      "exclude": [
-        "vray"
-      ]
+      "exclude": []
     },
     {
       "name": "khronos-SheenCloth",
@@ -405,10 +380,7 @@
       "orbit": {
         "radius": 0.5
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-Sponza",
@@ -420,11 +392,7 @@
         "theta": 90,
         "radius": 0
       },
-      "exclude": [
-        "model-viewer",
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["model-viewer", "stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-CesiumMan",
@@ -499,10 +467,7 @@
         "z": 0.01
       },
       "renderSkybox": true,
-      "exclude": [
-        "model-viewer",
-        "stellar"
-      ]
+      "exclude": ["model-viewer", "stellar"]
     },
     {
       "name": "khronos-EnvironmentTest",
@@ -516,9 +481,7 @@
       "orbit": {
         "radius": 20
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "AlphaBlendLitmusTest",
@@ -526,9 +489,7 @@
       "orbit": {
         "radius": 11
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-AlphaBlendModeTest",
@@ -543,9 +504,7 @@
       "orbit": {
         "radius": 6
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-TransmissionTest",
@@ -560,10 +519,7 @@
       "dimensions": {
         "height": 700
       },
-      "exclude": [
-        "three-gpu-pathtracer",
-        "vray"
-      ]
+      "exclude": ["three-gpu-pathtracer"]
     },
     {
       "name": "khronos-TransmissionRoughnessTest",
@@ -577,9 +533,7 @@
       "target": {
         "y": -0.09
       },
-      "exclude": [
-        "vray"
-      ]
+      "exclude": []
     },
     {
       "name": "khronos-AttenuationTest",
@@ -588,11 +542,9 @@
         "width": 1024
       },
       "orbit": {
-        "radius": 22.00
+        "radius": 22.0
       },
-      "exclude": [
-        "vray"
-      ]
+      "exclude": []
     },
     {
       "name": "khronos-SpecularTest",
@@ -606,10 +558,7 @@
       "target": {
         "x": -0.18
       },
-      "exclude": [
-        "stellar",
-        "vray"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-ClearCoatTest",
@@ -624,10 +573,7 @@
       "orbit": {
         "radius": 4.25
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-NormalTangentTest",
@@ -635,10 +581,7 @@
       "orbit": {
         "radius": 4.25
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-BoomBoxWithAxes",
@@ -649,9 +592,7 @@
       "orbit": {
         "radius": 0.05
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-2CylinderEngine",
@@ -663,9 +604,7 @@
       "orbit": {
         "radius": 800
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-BrainStem",
@@ -676,9 +615,7 @@
       "orbit": {
         "radius": 3.6
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-Buggy",
@@ -716,9 +653,7 @@
         "theta": -60,
         "radius": 124
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-GearboxAssy",
@@ -735,9 +670,7 @@
       "orbit": {
         "radius": 25
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-ReciprocatingSaw",
@@ -755,9 +688,7 @@
         "phi": 60,
         "radius": 300
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-TextureTransformMultiTest",
@@ -769,11 +700,7 @@
       "target": {
         "y": -0.28
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer",
-        "vray"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-TextureEncodingTest",
@@ -787,9 +714,7 @@
       "target": {
         "y": 0.3
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-RecursiveSkeletons",
@@ -804,9 +729,7 @@
       "dimensions": {
         "width": 680
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-TextureLinearInterpolationTest",
@@ -817,9 +740,7 @@
       "target": {
         "y": 0.5
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-TwoSidedPlane",
@@ -828,9 +749,7 @@
         "phi": 60,
         "radius": 3.5
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-RiggedFigure",
@@ -841,9 +760,7 @@
       "orbit": {
         "radius": 2
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-AnimatedCube",
@@ -853,9 +770,7 @@
         "phi": 60,
         "radius": 4.75
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-BoxAnimated",
@@ -865,9 +780,7 @@
         "phi": 60,
         "radius": 2.38
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-InterpolationTest",
@@ -878,9 +791,7 @@
       "orbit": {
         "radius": 18.4
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-AnimatedMorphCube",
@@ -890,9 +801,7 @@
         "phi": 60,
         "radius": 4.75
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-OrientationTest",
@@ -902,9 +811,7 @@
         "phi": 60,
         "radius": 23
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-AnimatedMorphSphere",
@@ -912,9 +819,7 @@
       "orbit": {
         "radius": 3
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-AnimatedTriangle",
@@ -926,10 +831,7 @@
       "orbit": {
         "radius": 1.5
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-Box",
@@ -939,9 +841,7 @@
         "phi": 60,
         "radius": 2.38
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-BoxInterleaved",
@@ -951,10 +851,7 @@
         "phi": 60,
         "radius": 2.38
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-BoxTextured",
@@ -964,9 +861,7 @@
         "phi": 60,
         "radius": 2.38
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-BoxTexturedNonPowerOfTwo",
@@ -976,9 +871,7 @@
         "phi": 60,
         "radius": 2.38
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-BoxVertexColors",
@@ -988,9 +881,7 @@
         "phi": 60,
         "radius": 3
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-SimpleSkin",
@@ -1004,10 +895,7 @@
       "dimensions": {
         "width": 400
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-MorphPrimitivesTest",
@@ -1020,9 +908,7 @@
         "phi": 60,
         "radius": 1.2
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-MorphStressTest",
@@ -1033,9 +919,7 @@
       "orbit": {
         "radius": 2.5
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-MultiUVTest",
@@ -1043,10 +927,7 @@
       "orbit": {
         "radius": 4.25
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-RiggedSimple",
@@ -1058,9 +939,7 @@
         "theta": 90,
         "radius": 13
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-SimpleMeshes",
@@ -1074,10 +953,7 @@
       "orbit": {
         "radius": 3
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-SimpleMorph",
@@ -1089,10 +965,7 @@
       "orbit": {
         "radius": 3.5
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-SimpleSparseAccessor",
@@ -1104,10 +977,7 @@
       "orbit": {
         "radius": 9
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-TextureCoordinateTest",
@@ -1115,9 +985,7 @@
       "orbit": {
         "radius": 4
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-TextureSettingsTest",
@@ -1125,9 +993,7 @@
       "orbit": {
         "radius": 15
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-TextureTransformTest",
@@ -1135,9 +1001,7 @@
       "orbit": {
         "radius": 4
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "khronos-Triangle",
@@ -1149,10 +1013,7 @@
       "orbit": {
         "radius": 1.5
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-TriangleWithoutIndices",
@@ -1164,10 +1025,7 @@
       "orbit": {
         "radius": 1.5
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-UnlitTest",
@@ -1175,11 +1033,7 @@
       "orbit": {
         "radius": 7
       },
-      "exclude": [
-        "stellar",
-        "three-gpu-pathtracer",
-        "vray"
-      ]
+      "exclude": ["stellar", "three-gpu-pathtracer"]
     },
     {
       "name": "khronos-VertexColorTest",
@@ -1187,9 +1041,7 @@
       "orbit": {
         "radius": 4
       },
-      "exclude": [
-        "stellar"
-      ]
+      "exclude": ["stellar"]
     },
     {
       "name": "FurnaceTest",
@@ -1201,9 +1053,7 @@
       "orbit": {
         "radius": 10
       },
-      "exclude": [
-        "stellar"
-      ],
+      "exclude": ["stellar"],
       "renderSkybox": true
     },
     {
@@ -1219,9 +1069,7 @@
       "orbit": {
         "radius": 20
       },
-      "exclude": [
-        "stellar"
-      ],
+      "exclude": ["stellar"],
       "renderSkybox": true
     }
   ]

@@ -52,7 +52,7 @@ export class ConfigReader {
     const {renderers} = this.config;
 
     for (const renderer of renderers) {
-      if (renderer.name === name) {
+      if (renderer.name === name && renderer.ignore === false) {
         return renderer;
       }
     }
