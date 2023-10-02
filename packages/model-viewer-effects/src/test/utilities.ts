@@ -189,10 +189,10 @@ export const waitForEvent = <T extends AnyEvent = Event>(
       function handler(event: AnyEvent) {
         if (!predicate || predicate(event as T)) {
           resolve(event as T);
-          target.removeEventListener(eventName, handler);
+          target.removeEventListener(eventName, handler as any);
         }
       }
-      target.addEventListener(eventName, handler);
+      target.addEventListener(eventName, handler as any);
     });
 
 export interface TypedArray<T = unknown> {
