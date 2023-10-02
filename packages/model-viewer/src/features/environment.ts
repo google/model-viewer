@@ -130,7 +130,6 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
         this[$scene].setEnvironmentAndSkybox(
             this[$currentEnvironmentMap], this[$currentBackground]);
-        this[$scene].dispatchEvent({type: 'envmap-update'});
       } catch (errorOrPromise) {
         if (errorOrPromise instanceof Error) {
           this[$scene].setEnvironmentAndSkybox(null, null);

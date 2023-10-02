@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, EventDispatcher, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
@@ -33,7 +33,7 @@ const MAX_SAMPLES = 20;
 
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 
-export default class TextureUtils extends EventDispatcher {
+export default class TextureUtils {
   public lottieLoaderUrl = '';
   public withCredentials = false;
 
@@ -50,7 +50,6 @@ export default class TextureUtils extends EventDispatcher {
   private blurScene: Scene|null = null;
 
   constructor(private threeRenderer: WebGLRenderer) {
-    super();
   }
 
   get ldrLoader(): TextureLoader {
@@ -72,7 +71,8 @@ export default class TextureUtils extends EventDispatcher {
 
   async getLottieLoader(): Promise<any> {
     if (this._lottieLoader == null) {
-      const {LottieLoader} = await import(/* webpackIgnore: true */ this.lottieLoaderUrl);
+      const {LottieLoader} =
+          await import(/* webpackIgnore: true */ this.lottieLoaderUrl);
       this._lottieLoader = new LottieLoader() as Loader;
     }
     this._lottieLoader.setWithCredentials(this.withCredentials);

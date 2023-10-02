@@ -251,15 +251,16 @@ export const timePasses = (ms: number = 0): Promise<void> =>
  * @param {?Function} predicate
  */
 export const waitForEvent = <T extends AnyEvent = Event>(
-    target: EventTarget|EventDispatcher,
+    target: EventTarget|
+    EventDispatcher<Record<string, {[key: string]: unknown}>>,
     eventName: string,
     predicate: PredicateFunction<T>|null = null): Promise<T> =>
     new Promise(resolve => {
       function handler(event: AnyEvent) {
         if (!predicate || predicate(event as T)) {
           resolve(event as T);
-          target.removeEventListener(eventName, handler);
+          target.removeEventListener(eventName, handler as any);
         }
       }
-      target.addEventListener(eventName, handler);
+      target.addEventListener(eventName, handler as any);
     });
