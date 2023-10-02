@@ -19,7 +19,7 @@ import pyquaternion as pyq
 import base64
 
 #debug
-import testUtils
+from .. import testUtils
 
 #gltf textures need to be flipped around the Y axis for opengl to vray coords
 TEXTURE_FLIP_TRANSFORM = vray.Transform(vray.Matrix(vray.Vector(1.0, 0.0, 0.0),
@@ -120,7 +120,9 @@ class GltfParser:
 		self.thick_glass = False
 		self.thin_glass = False
 		self.trace_depth = 8
-		self.environment_scene=None
+		self.environment_scene = None
+		self.lighting = None
+		self.render_skybox = False
 
 	def set_options(self, args = None):
 		self.animation_fps = args.animation_fps
@@ -139,6 +141,7 @@ class GltfParser:
 		self.thin_glass = args.thin_glass
 		self.trace_depth = args.trace_depth
 		self.environment_scene=args.environment_scene
+		self.lighting = args.lighting
 
 		if args.default_cam_look_at != None:
 			self.average_scene_pos_or = vray.Vector(args.default_cam_look_at[0],args.default_cam_look_at[1],args.default_cam_look_at[2])
@@ -1337,8 +1340,33 @@ class GltfParser:
 				zoom = self.default_cam_zoom,
 				view = self.default_cam_view
 			)
-			
-		if len(self.lights) < 1:
+
+		if self.lighting:
+			# load HDR file and use spherical mapping
+			uvwgen = vrenderer.classes.UVWGenEnvironment()
+			uvwgen.mapping_type = 'spherical'
+			uvwgen.uvw_matrix = vray.Matrix(
+					vray.Vector(-1, 0, 0),
+					vray.Vector(0, 0, 1),
+					vray.Vector(0, 1, 0))
+
+			bitmap = vrenderer.classes.BitmapBuffer()
+			bitmap.transfer_function = 0
+			bitmap.file = self.lighting
+
+			texture = vrenderer.classes.TexBitmap()
+			texture.uvwgen = uvwgen
+			texture.bitmap = bitmap
+
+			light = vrenderer.classes.LightDome()
+			light.dome_spherical = True
+			light.intensity = 1
+			light.invisible = not self.render_skybox
+
+			light.dome_tex = texture
+			light.use_dome_tex = True
+
+		if len(self.lights) < 1 and self.lighting is None:
 			# Default lights
 			print("[parserInfo] Scene has no lights, creating default lights")
 

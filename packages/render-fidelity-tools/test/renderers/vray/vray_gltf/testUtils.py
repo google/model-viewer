@@ -1,6 +1,6 @@
 import vray
 import math
-import Gltf_Parser.cameraUtils as camUtils
+from .Gltf_Parser import cameraUtils as camUtils
 
 
 def _set_testing_material(renderer,node):
