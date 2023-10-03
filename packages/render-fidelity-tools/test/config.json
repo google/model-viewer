@@ -597,6 +597,42 @@
       ]
     },
     {
+      "name": "khronos-AnisotropyBarnLamp",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/AnisotropyBarnLamp/glTF/AnisotropyBarnLamp.gltf",
+      "target": {
+        "y": -0.1
+      },
+      "orbit": {
+        "radius": 0.45
+      },
+      "exclude": [
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-AnisotropyRotationTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/AnisotropyRotationTest/glTF/AnisotropyRotationTest.gltf",
+      "orbit": {
+        "radius": 18
+      },
+      "exclude": [
+        "stellar"
+      ]
+    },
+    {
+      "name": "khronos-AnisotropyStrengthTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/AnisotropyStrengthTest/glTF/AnisotropyStrengthTest.gltf",
+      "target": {
+        "y": 2.5
+      },
+      "orbit": {
+        "radius": 12
+      },
+      "exclude": [
+        "stellar"
+      ]
+    },
+    {
       "name": "khronos-BoomBoxWithAxes",
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
       "target": {

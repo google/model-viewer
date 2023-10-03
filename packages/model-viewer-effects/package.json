@@ -33,7 +33,7 @@
   "types": "lib/model-viewer-effects.d.ts",
   "scripts": {
     "clean": "rm -rf ./lib ./dist",
-    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-samples.sh",
+    "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-models.sh && ../shared-assets/scripts/fetch-khronos-gltf-assets.sh",
     "build": "npm run build:tsc && npm run build:rollup",
     "build:dev": "npm run build:tsc && npm run build:rollup:dev",
     "build:tsc": "tsc --incremental",
