@@ -94,7 +94,7 @@ Alternative error:
 ! was unexpected at this time.
 npm ERR! code ELIFECYCLE
 npm ERR! errno 1
-npm ERR! @google/model-viewer@1.10.1 prepare: `if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-samples.sh`
+npm ERR! @google/model-viewer@1.10.1 prepare: `if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi && ../shared-assets/scripts/fetch-khronos-gltf-models.sh && && ../shared-assets/scripts/fetch-khronos-gltf-assets.sh`
 ```
 
 **Solution**
@@ -102,7 +102,7 @@ This is caused by incorrect line endings in some of the .sh files due to git cha
 
 As a workaround, you can re-write line endings using the following command:  
 ```
-sed -i -e 's/\r$//' ../shared-assets/scripts/fetch-khronos-gltf-samples.sh
+sed -i -e 's/\r$//' ../shared-assets/scripts/fetch-khronos-gltf-assets.sh
 ```
 
 ### Error: `ERROR:browser_main_loop.cc(1409)] Unable to open X display.`
