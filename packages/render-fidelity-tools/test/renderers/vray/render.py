@@ -111,9 +111,22 @@ def main():
     renderer.size = (width, height)
     renderer.setInteractiveNoiseThreshold(0.01)
 
+
     # White background
     environment = renderer.classes.SettingsEnvironment.getInstanceOrCreate()
     environment.bg_color = vray.AColor(1.0, 1.0, 1.0, 1.0)
+
+    # Optimal speed/quality settings from here:
+    # https://docs.chaos.com/display/APPSDK/Introduction+to+Global+Illumination#heading-LightCache-2
+    
+     # Set the sampler type to adaptive(buckets).
+    sis = renderer.classes.SettingsImageSampler.getInstanceOrCreate()
+    sis.type = 1
+
+    # Disable light cache so we get buckets straight away.
+    sgi = renderer.classes.SettingsGI.getInstanceOrCreate()
+    sgi.primary_engine = 0
+    sgi.secondary_engine = 3
 
     # Set the units settings
     photometricSettings = renderer.classes.SettingsUnitsInfo.getInstanceOrCreate()
