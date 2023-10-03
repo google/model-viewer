@@ -160,7 +160,7 @@ def main():
     targetObj = bpy.context.object
     targetObj.name = "target"
 
-    # Add a camera
+    # Add the camera
     bpy.ops.object.camera_add(
         enter_editmode=False,
         align="VIEW",
@@ -207,7 +207,7 @@ def main():
     camera.data.clip_start = 2 * radius / 1000
     camera.data.clip_end = 2 * radius
 
-    # setup background
+    # setup environment
     scn = bpy.context.scene
     world = bpy.data.worlds.new("World")  # Create a new world
     bpy.context.scene.world = world
@@ -231,22 +231,23 @@ def main():
     node_tree.links.new(hdriNode.outputs[0], defNode.inputs[0])
     node_tree.links.new(defNode.outputs[0], outputNode.inputs[0])
 
+    # setup transparent background
+    bpy.context.scene.render.film_transparent = not render_skybox
     # setup renderer
     bpy.context.scene.render.resolution_x = width
     bpy.context.scene.render.resolution_y = height
-    bpy.context.scene.render.film_transparent = not render_skybox
     bpy.context.scene.render.engine = "CYCLES"
     bpy.context.scene.cycles.device = "GPU"
     bpy.context.scene.cycles.samples = 128
     bpy.context.scene.cycles.use_adaptive_sampling = True
     bpy.context.scene.cycles.use_denoising = True
-    # bpy.context.scene.cycles.time_limit = 30
+    # bpy.context.scene.cycles.time_limit = 30 #30 seconds
 
     # setup output file settings
     bpy.context.scene.view_settings.view_transform = "Standard"
     bpy.context.scene.render.image_settings.file_format = "OPEN_EXR"
     bpy.context.scene.render.image_settings.color_mode = "RGBA"
-    bpy.context.scene.render.image_settings.color_depth = "16"
+    bpy.context.scene.render.image_settings.color_depth = "32"
     exr_path = directory + "/temp.exr"
     bpy.context.scene.render.filepath = exr_path
 
@@ -257,7 +258,6 @@ def main():
     bpy_image = bpy.data.images.load(exr_path)
 
     local_pixels = list(bpy_image.pixels[:])
-    print("exr loaded", len(local_pixels))
     image = np.asarray(local_pixels).reshape((height, width, 4))
     image = np.flipud(image)  # flip Y
 
