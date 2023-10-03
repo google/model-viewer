@@ -27,6 +27,14 @@
       "name": "stellar",
       "description": "Dassault Systèmes STELLAR",
       "command": {}
+    },
+    {
+      "name": "blender-cycles",
+      "description": "Blender's Cycles render engine",
+      "command": {
+        "executable": "python3",
+        "args": ["test/renderers/blender-cycles/render.py"]
+      }
     }
   ],
   "scenarios": [
