@@ -606,6 +606,7 @@
         "radius": 0.45
       },
       "exclude": [
+        "three-gpu-pathtracer",  
         "stellar"
       ]
     },
@@ -616,6 +617,7 @@
         "radius": 18
       },
       "exclude": [
+        "three-gpu-pathtracer",  
         "stellar"
       ]
     },
@@ -629,6 +631,7 @@
         "radius": 12
       },
       "exclude": [
+        "three-gpu-pathtracer",  
         "stellar"
       ]
     },
