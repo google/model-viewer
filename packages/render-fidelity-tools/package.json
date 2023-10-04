@@ -43,7 +43,7 @@
     "pngjs": "^6.0.0",
     "puppeteer": "^21.3.4",
     "rimraf": "^3.0.2",
-    "three": "^0.148.0",
+    "three": "^0.157.0",
     "three-gpu-pathtracer": "^0.0.13"
   },
   "devDependencies": {
