@@ -29,7 +29,7 @@ import {customElement, query, state} from 'lit/decorators.js';
 import {reduxStore} from '../../space_opera_base.js';
 import {fileModalStyles, iblSelectorStyles} from '../../styles.css.js';
 import {ModelViewerConfig, State} from '../../types.js';
-import {dispatchEnvrionmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../config/reducer.js';
+import {dispatchEnvironmentImage, dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchToneMapping, dispatchUseEnvAsSkybox, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchSetEnvironmentName} from '../relative_file_paths/reducer.js';
 import {CheckboxElement} from '../shared/checkbox/checkbox.js';
@@ -84,7 +84,7 @@ export class IblSelector extends ConnectedLitElement {
     // filter that out
     const value = dropdownElement.selectedItem.getAttribute('value');
     if (value !== this.config.environmentImage) {
-      reduxStore.dispatch(dispatchEnvrionmentImage(value || undefined));
+      reduxStore.dispatch(dispatchEnvironmentImage(value || undefined));
       // dropdown value equals null when "Default" is selected
       if (value === null) {
         reduxStore.dispatch(dispatchSetEnvironmentName(undefined));
@@ -93,6 +93,16 @@ export class IblSelector extends ConnectedLitElement {
         const envImageName = envImageList![envImageList!.length - 1];
         reduxStore.dispatch(dispatchSetEnvironmentName(envImageName));
       }
+    }
+  }
+
+  onSelectToneMapping(event: CustomEvent) {
+    const dropdownElement = event.target as Dropdown;
+    // Polymer dropdown emits an deselect event before selection, we need to
+    // filter that out
+    const value = dropdownElement.selectedItem.getAttribute('value');
+    if (value !== this.config.toneMapping) {
+      reduxStore.dispatch(dispatchToneMapping(value || undefined));
     }
   }
 
@@ -127,7 +137,7 @@ export class IblSelector extends ConnectedLitElement {
 
     reduxStore.dispatch(
         dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
-    reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
+    reduxStore.dispatch(dispatchEnvironmentImage(unsafeUrl));
     reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
   }
 
@@ -146,7 +156,7 @@ export class IblSelector extends ConnectedLitElement {
           <div class="HeaderLabel">Environment Image:</div>
           <div style="display: flex; justify-content: space-between">
             <me-dropdown
-              class="EnvironmnetImageDropdown"
+              class="EnvironmentImageDropdown"
               selectedIndex=${selectedIndex}
               style="align-self: center; width: 70%;"
               @select=${this.onSelectEnvironmentImage}>
@@ -193,6 +203,14 @@ export class IblSelector extends ConnectedLitElement {
               @change="${this.onShadowSoftnessChange}"
               value="${this.config.shadowSoftness ?? DEFAULT_SHADOW_SOFTNESS}">
             </me-slider-with-input>
+          </me-section-row>
+          <me-section-row class="Row" label="Tone Mapping">
+            <me-dropdown
+              style="align-self: center; width: 70%;"
+              @select=${this.onSelectToneMapping}>
+              <paper-item>ACES</paper-item>
+              <paper-item value="commerce">Commerce</paper-item>
+            </me-dropdown>
           </me-section-row>
         </div>
       </me-expandable-tab>

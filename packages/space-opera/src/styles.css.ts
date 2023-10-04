@@ -107,7 +107,7 @@ export const iblSelectorStyles: CSSResult = css`
   color: #FF0000;
 }
 
-.EnvironmnetImageDropdown,
+.EnvironmentImageDropdown,
 .UploadHDRButton,
 .Row {
   margin-top: 10px;

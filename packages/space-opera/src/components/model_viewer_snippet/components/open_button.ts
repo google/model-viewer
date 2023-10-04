@@ -19,10 +19,10 @@ import '@material/mwc-button';
 
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {html, LitElement} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 import {SimpleDropzone} from 'simple-dropzone';
 
-import {dispatchConfig, dispatchEnvrionmentImage, getConfig} from '../../../components/config/reducer.js';
+import {dispatchConfig, dispatchEnvironmentImage, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {fileModalStyles, openModalStyles} from '../../../styles.css.js';
 import {ArConfigState, extractStagingConfig, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
@@ -267,7 +267,7 @@ export class ImportCard extends LitElement {
         return;
       }
       reduxStore.dispatch(dispatchAddEnvironmentImage({uri, name: file.name}));
-      reduxStore.dispatch(dispatchEnvrionmentImage(uri));
+      reduxStore.dispatch(dispatchEnvironmentImage(uri));
       reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
     }
   }
