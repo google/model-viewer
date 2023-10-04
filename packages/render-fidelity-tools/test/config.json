@@ -53,7 +53,10 @@
       "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/DragonAttenuation/glTF/DragonAttenuation.gltf",
       "orbit": {
         "radius": 5
-      }
+      },
+      "exclude": [
+        "vray"
+      ]
     },
     {
       "name": "khronos-IridescentDishWithOlives",
@@ -71,7 +74,8 @@
         "y": 0.11
       },
       "exclude": [
-        "babylon"
+        "babylon",
+        "vray"
       ]
     },
     {
@@ -101,7 +105,10 @@
       },
       "dimensions": {
         "height": 450
-      }
+      },
+      "exclude": [
+        "vray"
+      ]
     },
     {
       "name": "khronos-MaterialsVariantsShoe",
@@ -117,7 +124,10 @@
       },
       "dimensions": {
         "height": 500
-      }
+      },
+      "exclude": [
+        "vray"
+      ]
     },
     {
       "name": "khronos-BoomBox",
@@ -163,7 +173,10 @@
       "dimensions": {
         "height": 600,
         "width": 1000
-      }
+      },
+      "exclude": [
+        "vray"
+      ]
     },
     {
       "name": "khronos-IridescenceLamp",
@@ -183,7 +196,8 @@
       },
       "exclude": [
         "three-gpu-pathtracer",
-        "stellar"
+        "stellar",
+        "vray"
       ]
     },
     {
@@ -216,7 +230,10 @@
       "dimensions": {
         "height": 700,
         "width": 700
-      }
+      },
+      "exclude": [
+        "vray"
+      ]
     },
     {
       "name": "khronos-EmissiveStrengthTest",
@@ -229,7 +246,10 @@
       "dimensions": {
         "height": 600,
         "width": 1000
-      }
+      },
+      "exclude": [
+        "vray"
+      ]
     },
     {
       "name": "khronos-IridescenceDielectricSpheres",
@@ -247,7 +267,8 @@
         "width": 700
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "vray"
       ]
     },
     {
@@ -266,7 +287,8 @@
         "width": 700
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "vray"
       ]
     },
     {
@@ -281,7 +303,8 @@
         "width": 1000
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "vray"
       ]
     },
     {
@@ -359,7 +382,10 @@
         "theta": 2,
         "phi": 70.0,
         "radius": 2.45
-      }
+      },
+      "exclude": [
+        "vray"
+      ]
     },
     {
       "name": "khronos-SheenCloth",
@@ -543,7 +569,8 @@
         "height": 700
       },
       "exclude": [
-        "three-gpu-pathtracer"
+        "three-gpu-pathtracer",
+        "vray"
       ]
     },
     {
@@ -557,7 +584,10 @@
       },
       "target": {
         "y": -0.09
-      }
+      },
+      "exclude": [
+        "vray"
+      ]
     },
     {
       "name": "khronos-AttenuationTest",
@@ -567,7 +597,10 @@
       },
       "orbit": {
         "radius": 22.00
-      }
+      },
+      "exclude": [
+        "vray"
+      ]
     },
     {
       "name": "khronos-SpecularTest",
@@ -582,7 +615,8 @@
         "x": -0.18
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "vray"
       ]
     },
     {
@@ -745,7 +779,8 @@
       },
       "exclude": [
         "stellar",
-        "three-gpu-pathtracer"
+        "three-gpu-pathtracer",
+        "vray"
       ]
     },
     {
@@ -1150,7 +1185,8 @@
       },
       "exclude": [
         "stellar",
-        "three-gpu-pathtracer"
+        "three-gpu-pathtracer",
+        "vray"
       ]
     },
     {
