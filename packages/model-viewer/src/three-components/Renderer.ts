@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, Vector2, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, CustomToneMapping, Event, EventDispatcher, ShaderChunk, Vector2, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -57,7 +57,8 @@ export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
  * Canvas2DRenderingContext if supported for cheaper transferring of
  * the texture.
  */
-export class Renderer extends EventDispatcher<{contextlost:{sourceEvent:WebGLContextEvent}}> {
+export class Renderer extends
+    EventDispatcher<{contextlost: {sourceEvent: WebGLContextEvent}}> {
   private static _singleton = new Renderer({
     powerPreference:
         (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
@@ -134,6 +135,30 @@ export class Renderer extends EventDispatcher<{contextlost:{sourceEvent:WebGLCon
     this.canvas3D = document.createElement('canvas');
     this.canvas3D.id = 'webgl-canvas';
     this.canvas3D.classList.add('show');
+
+    // Emmett's new 3D Commerce tone mapping function
+    ShaderChunk.tonemapping_pars_fragment =
+        ShaderChunk.tonemapping_pars_fragment.replace(
+            'vec3 CustomToneMapping( vec3 color ) { return color; }', `
+      float startCompression = 0.8;
+      float desaturation = 0.5;
+      vec3 CustomToneMapping( vec3 color ) {
+        color *= toneMappingExposure;
+        
+        float d = 1. - startCompression;
+
+        float peak = max(color.r, max(color.g, color.b));
+        if (peak < startCompression) return color;
+
+        float newPeak = 1. - d * d / (peak + d - startCompression);
+        float invPeak = 1. / peak;
+        
+        float extraBrightness = dot(color * (1. - startCompression * invPeak), vec3(1, 1, 1));
+        
+        color *= newPeak * invPeak;
+        float g = 1. - 3. / (desaturation * extraBrightness + 3.);
+        return mix(color, vec3(1, 1, 1), g);
+      }`);
 
     try {
       this.threeRenderer = new WebGLRenderer({
@@ -487,6 +512,9 @@ export class Renderer extends EventDispatcher<{contextlost:{sourceEvent:WebGLCon
       } else {
         this.threeRenderer.autoClear =
             true;  // this might get reset by the effectRenderer
+        this.threeRenderer.toneMapping = scene.toneMapping === 'commerce' ?
+            CustomToneMapping :
+            ACESFilmicToneMapping;
         this.threeRenderer.render(scene, scene.camera);
       }
       if (this.multipleScenesVisible ||

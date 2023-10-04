@@ -18,6 +18,7 @@ import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 // @ts-ignore
 import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
 
+import {ToneMappingValue} from '../features/environment.js';
 import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
 import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
 import ModelViewerElementBase, {$renderer, EffectComposerInterface, RendererInterface} from '../model-viewer-base.js';
@@ -97,6 +98,7 @@ export class ModelScene extends Scene {
   public bakedShadows = new Set<Mesh>();
 
   public exposure = 1;
+  public toneMapping: ToneMappingValue = 'auto';
   public canScale = true;
 
   private isDirty = false;

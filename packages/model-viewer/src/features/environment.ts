@@ -24,6 +24,8 @@ const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
 
+export type ToneMappingValue = 'auto'|'aces'|'commerce';
+
 export const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 export const $currentBackground = Symbol('currentBackground');
 export const $updateEnvironment = Symbol('updateEnvironment');
@@ -53,10 +55,10 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'shadow-softness'})
     shadowSoftness: number = DEFAULT_SHADOW_SOFTNESS;
 
-    @property({
-      type: Number,
-    })
-    exposure: number = DEFAULT_EXPOSURE;
+    @property({type: Number}) exposure: number = DEFAULT_EXPOSURE;
+
+    @property({type: String, attribute: 'tone-mapping'})
+    toneMapping: ToneMappingValue = 'auto';
 
     protected[$currentEnvironmentMap]: Texture|null = null;
     protected[$currentBackground]: Texture|null = null;
@@ -78,6 +80,11 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('exposure')) {
         this[$scene].exposure = this.exposure;
+        this[$needsRender]();
+      }
+
+      if (changedProperties.has('toneMapping')) {
+        this[$scene].toneMapping = this.toneMapping;
         this[$needsRender]();
       }
 
