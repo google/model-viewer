@@ -14,7 +14,6 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {Event as ThreeEvent} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
@@ -117,7 +116,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       this.activateAR();
     };
 
-    private[$onARStatus] = ({status}: ThreeEvent) => {
+    private[$onARStatus] = ({status}: {status: ARStatus}) => {
       if (status === ARStatus.NOT_PRESENTING ||
           this[$renderer].arRenderer.presentedScene === this[$scene]) {
         this.setAttribute('ar-status', status);
@@ -131,7 +130,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     };
 
-    private[$onARTracking] = ({status}: ThreeEvent) => {
+    private[$onARTracking] = ({status}: {status: ARTracking}) => {
       this.setAttribute('ar-tracking', status);
       this.dispatchEvent(new CustomEvent<ARTrackingDetails>(
           'ar-tracking', {detail: {status}}));
@@ -306,7 +305,8 @@ configuration or device capabilities');
       const location = self.location.toString();
       const locationUrl = new URL(location);
       const modelUrl = new URL(this.src!, location);
-      if( modelUrl.hash ) modelUrl.hash = '';
+      if (modelUrl.hash)
+        modelUrl.hash = '';
       const params = new URLSearchParams(modelUrl.search);
 
       locationUrl.hash = noArViewerSigil;
@@ -399,9 +399,11 @@ configuration or device capabilities');
         anchor.setAttribute('download', 'model.usdz');
       }
 
-      // attach anchor to shadow DOM to ensure iOS16 ARQL banner click message event propagation 
+      // attach anchor to shadow DOM to ensure iOS16 ARQL banner click message
+      // event propagation
       anchor.style.display = 'none';
-      if(!anchor.isConnected) this.shadowRoot!.appendChild(anchor);
+      if (!anchor.isConnected)
+        this.shadowRoot!.appendChild(anchor);
 
       console.log('Attempting to present in AR with Quick Look...');
       anchor.click();

@@ -57,7 +57,7 @@ export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
  * Canvas2DRenderingContext if supported for cheaper transferring of
  * the texture.
  */
-export class Renderer extends EventDispatcher {
+export class Renderer extends EventDispatcher<{contextlost:{sourceEvent:WebGLContextEvent}}> {
   private static _singleton = new Renderer({
     powerPreference:
         (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)

@@ -35,7 +35,7 @@
     "@types/pngjs": "^3.4.0",
     "@types/puppeteer": "^5.4.6",
     "@types/rimraf": "^3.0.1",
-    "@types/three": "^0.154.0",
+    "@types/three": "^0.156.0",
     "filament": "1.31.5",
     "http-server": "^14.1.1",
     "lit": "^2.7.2",
@@ -43,7 +43,7 @@
     "pngjs": "^6.0.0",
     "puppeteer": "^21.3.4",
     "rimraf": "^3.0.2",
-    "three": "^0.148.0",
+    "three": "^0.157.0",
     "three-gpu-pathtracer": "^0.0.13"
   },
   "devDependencies": {
