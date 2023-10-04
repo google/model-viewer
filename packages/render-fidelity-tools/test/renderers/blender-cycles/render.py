@@ -153,6 +153,19 @@ def main():
     # Import the GLTF model
     bpy.ops.import_scene.gltf(filepath=scenePath)
 
+    # reset armatures to resting pose instead of frame 1 pose
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.ops.object.select_by_type(type="ARMATURE")
+    for obj in bpy.context.selected_objects:
+        if obj.type == "ARMATURE":
+            obj.data.pose_position = "REST"
+
+    # Collections which are set to be hidden in viewport can be hidden in render as well
+    # applicable for: CesiumMan, RiggedSimple, Fox, BrainStem
+    for collection in bpy.data.collections:
+        if collection.hide_viewport:
+            collection.hide_render = True
+
     # setup camera & target
     bpy.ops.object.empty_add(
         type="SINGLE_ARROW", align="WORLD", location=(0, 0, 0), scale=(1, 1, 1)
