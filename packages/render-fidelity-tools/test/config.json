@@ -29,6 +29,16 @@
       "command": {}
     },
     {
+      "name": "vray",
+      "description": "V-Ray",
+      "command": {
+        "executable": "python3",
+        "args": [
+          "test/renderers/vray/render.py"
+        ]
+      }
+    },
+    {
       "name": "blender-cycles",
       "description": "Blender's Cycles render engine",
       "command": {
