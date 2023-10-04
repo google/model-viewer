@@ -284,7 +284,8 @@ export class ImportCard extends LitElement {
       'Astronaut': 1,
       'Horse': 2,
       'RobotExpressive': 3,
-      'alpha-blend-litmus': 4
+      'alpha-blend-litmus': 4,
+      'MacbethBalls': 11
     };
     const advancedMap: any = {
       'BoomBox': 5,
@@ -343,6 +344,7 @@ export class ImportCard extends LitElement {
         <paper-item value='DamagedHelmet'>Damaged Helmet</paper-item>
         <paper-item value='Lantern'>Lantern</paper-item>
         <paper-item value='SpecGlossVsMetalRough'>Water Bottles</paper-item>
+        <paper-item value='MacbethBalls'>Macbeth</paper-item>
       </me-dropdown>
       <mwc-button unelevated label="GLB" icon="file_upload" class="UploadButton">
         <label for="file-input" class="FileInputLabel"/>
