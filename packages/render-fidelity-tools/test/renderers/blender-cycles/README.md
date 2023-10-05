@@ -13,7 +13,7 @@ blender -b -P test/renderers/blender-cycles/render.py -- {"scenario": {...}, "ou
 **Command breakdown**
 1- `blender` is path to the blender executable
 2- `-b` is for background mode
-3- `-P` runs the python supplied script
+3- `-P` runs the python supplied script (case sensitive)
 4- `test/renderers/blender-cycles/render.py` is the path to the python file
 5- and last part is the config json ( accessed under `sys.argv[5]` in render.py )
 
