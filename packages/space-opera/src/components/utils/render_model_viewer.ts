@@ -110,6 +110,7 @@ export function renderModelViewer(
         environment-image=${ifDefined(config.environmentImage)}
         skybox-image=${ifDefined(skyboxImage)}
         exposure=${ifDefined(config.exposure)}
+        tone-mapping=${ifDefined(config.toneMapping)}
         poster=${ifDefined(config.poster)}
         reveal=${ifDefined(config.reveal)}
         interaction-prompt=${ifDefined(config.interactionPrompt)}

@@ -34,8 +34,9 @@ export interface ModelViewerConfig {
   fieldOfView?: string;
   environmentImage?: string;  // IBL/HDRI lighting
   exposure?: number;  // Environment for hdr environment, used as ibl intensity
-  poster?: string;    // Display an image before model finished loading
-  reveal?: string;    // Controls when the model should be revealed
+  toneMapping?: string;
+  poster?: string;  // Display an image before model finished loading
+  reveal?: string;  // Controls when the model should be revealed
   interactionPrompt?: string;
   shadowIntensity?: number;
   shadowSoftness?: number;
@@ -148,7 +149,7 @@ export function extractStagingConfig(config: ModelViewerConfig):
     ModelViewerConfig {
   return {
     environmentImage: config.environmentImage, exposure: config.exposure,
-        useEnvAsSkybox: config.useEnvAsSkybox,
+        toneMapping: config.toneMapping, useEnvAsSkybox: config.useEnvAsSkybox,
         shadowIntensity: config.shadowIntensity,
         shadowSoftness: config.shadowSoftness,
         cameraControls: config.cameraControls, autoRotate: config.autoRotate,

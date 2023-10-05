@@ -83,13 +83,18 @@ export function dispatchAnimationName(animationName?: string) {
 }
 
 const UPDATE_IBL = 'UPDATE_IBL';
-export function dispatchEnvrionmentImage(ibl?: string) {
+export function dispatchEnvironmentImage(ibl?: string) {
   return {type: UPDATE_IBL, payload: ibl};
 }
 
 const UPDATE_EXPOSURE = 'UPDATE_EXPOSURE';
 export function dispatchExposure(exposure?: number) {
   return {type: UPDATE_EXPOSURE, payload: exposure};
+}
+
+const UPDATE_TONE_MAPPING = 'UPDATE_TONE_MAPPING';
+export function dispatchToneMapping(toneMapping?: string) {
+  return {type: UPDATE_TONE_MAPPING, payload: toneMapping};
 }
 
 const SET_USE_ENV_AS_SKYBOX = 'SET_USE_ENV_AS_SKYBOX';
@@ -188,6 +193,8 @@ export function configReducer(
       return {...state, useEnvAsSkybox: action.payload};
     case UPDATE_EXPOSURE:
       return {...state, exposure: action.payload};
+    case UPDATE_TONE_MAPPING:
+      return {...state, toneMapping: action.payload};
     case UPDATE_IBL:
       return {...state, environmentImage: action.payload};
     case SET_AUTOPLAY_ENABLED:

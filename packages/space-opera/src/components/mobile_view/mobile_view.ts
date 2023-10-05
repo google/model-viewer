@@ -212,6 +212,7 @@ export class MobileView extends LitElement {
           environment-image=${ifDefined(this.envImageUrl)}
           skybox-image=${ifDefined(skyboxImage)}
           exposure=${ifDefined(config.exposure)}
+          tone-mapping=${ifDefined(config.toneMapping)}
           poster=${this.posterUrl}
           reveal=${ifDefined(config.reveal)}
           shadow-intensity=${ifDefined(config.shadowIntensity)}
