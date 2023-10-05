@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Texture as ThreeTexture, Vector2} from 'three';
+import {ClampToEdgeWrapping, MirroredRepeatWrapping, RepeatWrapping, Texture as ThreeTexture, Vector2, Wrapping} from 'three';
 
 import {toVector2D, Vector2D} from '../../model-viewer-base.js';
 import {Filter, MagFilter, MinFilter, Wrap, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
@@ -22,7 +22,17 @@ import {Sampler as DefaultedSampler} from '../../three-components/gltf-instance/
 import {Sampler as SamplerInterface, Vector2DInterface} from './api.js';
 import {$correlatedObjects, $onUpdate, ThreeDOMElement} from './three-dom-element.js';
 
-
+// Convertion between gltf standards and threejs standards.
+const wrapModeToWrapping = new Map<WrapMode, Wrapping>([
+  [Wrap.Repeat, RepeatWrapping],
+  [Wrap.ClampToEdge, ClampToEdgeWrapping],
+  [Wrap.MirroredRepeat, MirroredRepeatWrapping]
+]);
+const wrappingToWrapMode = new Map<Wrapping, WrapMode>([
+  [RepeatWrapping, Wrap.Repeat],
+  [ClampToEdgeWrapping, Wrap.ClampToEdge],
+  [MirroredRepeatWrapping, Wrap.MirroredRepeat]
+]);
 
 const isMinFilter = (() => {
   const minFilterValues: Array<MinFilter> = [
@@ -103,11 +113,11 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   get wrapS(): WrapMode {
-    return this[$threeTexture].wrapS;
+    return wrappingToWrapMode.get(this[$threeTexture].wrapS)!;
   }
 
   get wrapT(): WrapMode {
-    return this[$threeTexture].wrapT;
+    return wrappingToWrapMode.get(this[$threeTexture].wrapT)!;
   }
 
   get rotation(): number {
@@ -131,11 +141,11 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   setWrapS(mode: WrapMode) {
-    this[$setProperty]('wrapS', mode);
+    this[$setProperty]('wrapS', wrapModeToWrapping.get(mode)!);
   }
 
   setWrapT(mode: WrapMode) {
-    this[$setProperty]('wrapT', mode);
+    this[$setProperty]('wrapT', wrapModeToWrapping.get(mode)!);
   }
 
   setRotation(rotation: number|null): void {
@@ -164,10 +174,10 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
 
   private[$setProperty]<P extends 'minFilter'|'magFilter'|'wrapS'|'wrapT'|
                         'rotation'|'repeat'|'offset'>(
-      property: P, value: MinFilter|MagFilter|WrapMode|number|Vector2) {
+      property: P, value: MinFilter|MagFilter|Wrapping|number|Vector2) {
     if (isValidSamplerValue(property, value)) {
       for (const texture of this[$threeTextures]) {
-        (texture[property] as MinFilter | MagFilter | WrapMode | number |
+        (texture[property] as MinFilter | MagFilter | Wrapping | number |
          Vector2) = value;
         texture.needsUpdate = true;
       }

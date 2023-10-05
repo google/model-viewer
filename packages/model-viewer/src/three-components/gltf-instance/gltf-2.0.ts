@@ -1,4 +1,4 @@
-import {TextureFilter, Wrapping} from 'three';
+import {TextureFilter} from 'three';
 
 export type RGB = [number, number, number];
 
@@ -111,7 +111,7 @@ export type ClampToEdgeWrap = Wrap.ClampToEdge;
 export type MirroredRepeatWrap = Wrap.MirroredRepeat;
 export type RepeatWrap = Wrap.Repeat;
 
-export type WrapMode = RepeatWrap|ClampToEdgeWrap|MirroredRepeatWrap|Wrapping;
+export type WrapMode = RepeatWrap|ClampToEdgeWrap|MirroredRepeatWrap;
 
 export interface Sampler {
   name?: string;
