@@ -43,7 +43,9 @@
       "description": "Blender's Cycles render engine",
       "command": {
         "executable": "python3",
-        "args": ["test/renderers/blender-cycles/render.py"]
+        "args": [
+          "blender -b -P test/renderers/blender-cycles/render.py"
+        ]
       }
     }
   ],
