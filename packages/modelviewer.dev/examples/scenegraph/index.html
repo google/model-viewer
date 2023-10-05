@@ -499,6 +499,12 @@ modelViewerTexture1.addEventListener("load", () => {
       <input type="range" min="0.5" max="1.5" value="1" step="0.01" id="scaleSlider">
       <p>Offset</p>
       <input type="range" min="0" max="1" value="0" step="0.01" id="offsetSlider">
+      <p>WrapMode</p>
+      <select id="wrapMode">
+        <option value="10497">Repeat</option>
+        <option value="33071">ClampToEdge</option>
+        <option value="33648">MirroredRepeat</option>
+      </select>
     </div>
 </model-viewer>
 <script type="module">
@@ -538,6 +544,11 @@ modelViewerTexture2.addEventListener("load", () => {
       v: -offsetSlider.value
     };
     sampler.setOffset(offset);
+  });
+
+  document.querySelector('#wrapMode').addEventListener('input', (event) => {
+    sampler.setWrapS(Number(event.target.value));
+    sampler.setWrapT(Number(event.target.value));
   });
 });
 
