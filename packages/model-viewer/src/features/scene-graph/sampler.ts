@@ -53,11 +53,11 @@ const isMagFilter = (() => {
              magFilterValues.indexOf(value as MagFilter) > -1;
 })();
 
-const isWrapMode = (() => {
-  const wrapModes: Array<WrapMode> =
-      [Wrap.ClampToEdge, Wrap.MirroredRepeat, Wrap.Repeat];
-  return (value: unknown): value is WrapMode =>
-             wrapModes.indexOf(value as WrapMode) > -1;
+const isWrapping = (() => {
+  const wrappingArray: Array<Wrapping> =
+      [RepeatWrapping, ClampToEdgeWrapping, MirroredRepeatWrapping];
+  return (value: unknown): value is Wrapping =>
+             wrappingArray.indexOf(value as Wrapping) > -1;
 })();
 
 const isValidSamplerValue =
@@ -70,7 +70,7 @@ const isValidSamplerValue =
           return isMagFilter(value);
         case 'wrapS':
         case 'wrapT':
-          return isWrapMode(value);
+          return isWrapping(value);
         case 'rotation':
         case 'repeat':
         case 'offset':
