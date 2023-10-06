@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {CanvasTexture, RepeatWrapping, sRGBEncoding, Texture, VideoTexture} from 'three';
+import {CanvasTexture, RepeatWrapping, SRGBColorSpace, Texture, VideoTexture} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
@@ -122,7 +122,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     private[$buildTexture](texture: Texture): ModelViewerTexture {
       // Applies glTF default settings.
-      texture.encoding = sRGBEncoding;
+      texture.colorSpace = SRGBColorSpace;
       texture.wrapS = RepeatWrapping;
       texture.wrapT = RepeatWrapping;
       return new ModelViewerTexture(this[$getOnUpdateMethod](), texture);

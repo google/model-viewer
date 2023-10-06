@@ -491,7 +491,7 @@ modelViewerTexture1.addEventListener("load", () => {
           </div>
           <example-snippet stamp-to="transformTexturesExample" highlight-as="html">
             <template>
-<model-viewer id="box" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb" ar alt="A 3D model of a helmet">
+<model-viewer id="box" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf" ar alt="A 3D model of a helmet">
   <div class="controls">
       <p>Rotation: <span id="texture-rotation"></span></p>
       <input type="range" min="0" max="3.14" value="0" step="0.01" id="rotationSlider">
@@ -547,12 +547,6 @@ modelViewerTexture2.addEventListener("load", () => {
   });
 
   document.querySelector('#wrapMode').addEventListener('input', (event) => {
-    // These values should match values from WrapMode.
-    // enum WrapMode {
-    //   ClampToEdge = 33071,
-    //   MirroredRepeat = 33648,
-    //   Repeat = 10497,
-    // } 
     sampler.setWrapS(Number(event.target.value));
     sampler.setWrapT(Number(event.target.value));
   });
@@ -829,9 +823,9 @@ interface Image {
   update(): void;
 }
 
-interface Vector2 {
-  readonly x: number;
-  readonly y: number;
+interface Vector2D {
+  readonly u: number;
+  readonly v: number;
 }
 
 type RGBA = [number, number, number, number];
@@ -853,7 +847,7 @@ enum MinFilter {
   LinearMipmapLinear = 9987,
 }
 
-enum MaxFilter {
+enum MagFilter {
   Nearest = 9728,
   Linear = 9729,
 }

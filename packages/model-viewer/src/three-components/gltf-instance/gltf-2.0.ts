@@ -110,6 +110,7 @@ export type MirroredRepeatWrap = Wrap.MirroredRepeat;
 export type RepeatWrap = Wrap.Repeat;
 
 export type WrapMode = RepeatWrap|ClampToEdgeWrap|MirroredRepeatWrap;
+export type WrapMode = RepeatWrap|ClampToEdgeWrap|MirroredRepeatWrap;
 
 export interface Sampler {
   name?: string;
