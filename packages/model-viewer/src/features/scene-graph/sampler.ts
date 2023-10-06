@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ClampToEdgeWrapping, MirroredRepeatWrapping, RepeatWrapping, Texture as ThreeTexture, Vector2, Wrapping} from 'three';
+import {ClampToEdgeWrapping, LinearFilter, LinearMipmapLinearFilter, LinearMipmapNearestFilter, MagnificationTextureFilter, MinificationTextureFilter, MirroredRepeatWrapping, NearestFilter, NearestMipmapLinearFilter, NearestMipmapNearestFilter, RepeatWrapping, Texture as ThreeTexture, Vector2, Wrapping} from 'three';
 
 import {toVector2D, Vector2D} from '../../model-viewer-base.js';
 import {Filter, MagFilter, MinFilter, Wrap, WrapMode} from '../../three-components/gltf-instance/gltf-2.0.js';
@@ -33,24 +33,46 @@ const wrappingToWrapMode = new Map<Wrapping, WrapMode>([
   [ClampToEdgeWrapping, Wrap.ClampToEdge],
   [MirroredRepeatWrapping, Wrap.MirroredRepeat]
 ]);
+const minFilterToMinification = new Map<MinFilter, MinificationTextureFilter>([
+  [Filter.Nearest, NearestFilter],
+  [Filter.Linear, LinearFilter],
+  [Filter.NearestMipmapNearest, NearestMipmapNearestFilter],
+  [Filter.LinearMipmapNearest, LinearMipmapNearestFilter],
+  [Filter.NearestMipmapLinear, NearestMipmapLinearFilter],
+  [Filter.LinearMipmapLinear, LinearMipmapLinearFilter]
+]);
+const minificationToMinFilter = new Map<MinificationTextureFilter, MinFilter>([
+  [NearestFilter, Filter.Nearest],
+  [LinearFilter, Filter.Linear],
+  [NearestMipmapNearestFilter, Filter.NearestMipmapNearest],
+  [LinearMipmapNearestFilter, Filter.LinearMipmapNearest],
+  [NearestMipmapLinearFilter, Filter.NearestMipmapLinear],
+  [LinearMipmapLinearFilter, Filter.LinearMipmapLinear]
+]);
+const magFilterToMagnification = new Map<MagFilter, MagnificationTextureFilter>(
+    [[Filter.Nearest, NearestFilter], [Filter.Linear, LinearFilter]]);
+const magnificationToMagFilter = new Map<MagnificationTextureFilter, MagFilter>(
+    [[NearestFilter, Filter.Nearest], [LinearFilter, Filter.Linear]]);
 
+// Checks for threejs standards.
 const isMinFilter = (() => {
-  const minFilterValues: Array<MinFilter> = [
-    Filter.Nearest,
-    Filter.Linear,
-    Filter.NearestMipmapNearest,
-    Filter.LinearMipmapLinear,
-    Filter.NearestMipmapLinear,
-    Filter.LinearMipmapLinear
+  const minFilterValues: Array<MinificationTextureFilter> = [
+    NearestFilter,
+    LinearFilter,
+    NearestMipmapNearestFilter,
+    LinearMipmapNearestFilter,
+    NearestMipmapLinearFilter,
+    LinearMipmapLinearFilter
   ];
-  return (value: unknown): value is MinFilter =>
-             minFilterValues.indexOf(value as MinFilter) > -1;
+  return (value: unknown): value is MinificationTextureFilter =>
+             minFilterValues.indexOf(value as MinificationTextureFilter) > -1;
 })();
 
 const isMagFilter = (() => {
-  const magFilterValues: Array<MagFilter> = [Filter.Nearest, Filter.Linear];
-  return (value: unknown): value is MagFilter =>
-             magFilterValues.indexOf(value as MagFilter) > -1;
+  const magFilterValues: Array<MagnificationTextureFilter> =
+      [NearestFilter, LinearFilter];
+  return (value: unknown): value is MagnificationTextureFilter =>
+             magFilterValues.indexOf(value as MagnificationTextureFilter) > -1;
 })();
 
 const isWrapping = (() => {
@@ -105,11 +127,11 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   get minFilter(): MinFilter {
-    return this[$threeTexture].minFilter;
+    return minificationToMinFilter.get(this[$threeTexture].minFilter)!;
   }
 
   get magFilter(): MagFilter {
-    return this[$threeTexture].magFilter;
+    return magnificationToMagFilter.get(this[$threeTexture].magFilter)!;
   }
 
   get wrapS(): WrapMode {
@@ -133,11 +155,11 @@ export class Sampler extends ThreeDOMElement implements SamplerInterface {
   }
 
   setMinFilter(filter: MinFilter) {
-    this[$setProperty]('minFilter', filter);
+    this[$setProperty]('minFilter', minFilterToMinification.get(filter)!);
   }
 
   setMagFilter(filter: MagFilter) {
-    this[$setProperty]('magFilter', filter);
+    this[$setProperty]('magFilter', magFilterToMagnification.get(filter)!);
   }
 
   setWrapS(mode: WrapMode) {

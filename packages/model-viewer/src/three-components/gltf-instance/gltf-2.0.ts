@@ -1,5 +1,3 @@
-import {TextureFilter} from 'three';
-
 export type RGB = [number, number, number];
 
 export type RGBA = [number, number, number, number];
@@ -96,10 +94,10 @@ export type LinearMipmapNearestFilter = Filter.LinearMipmapNearest;
 export type NearestMipmapLinearFilter = Filter.NearestMipmapLinear;
 export type LinearMipmapLinearFilter = Filter.LinearMipmapLinear;
 
-export type MagFilter = NearestFilter|LinearFilter|TextureFilter;
+export type MagFilter = NearestFilter|LinearFilter;
 export type MinFilter = NearestFilter|LinearFilter|NearestMipmapNearestFilter|
     LinearMipmapNearestFilter|NearestMipmapLinearFilter|
-    LinearMipmapLinearFilter|TextureFilter;
+    LinearMipmapLinearFilter;
 
 export enum Wrap {
   ClampToEdge = 33071,
