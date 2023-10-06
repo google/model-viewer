@@ -547,6 +547,12 @@ modelViewerTexture2.addEventListener("load", () => {
   });
 
   document.querySelector('#wrapMode').addEventListener('input', (event) => {
+    // These values should match values from WrapMode.
+    // enum WrapMode {
+    //   ClampToEdge = 33071,
+    //   MirroredRepeat = 33648,
+    //   Repeat = 10497,
+    // } 
     sampler.setWrapS(Number(event.target.value));
     sampler.setWrapT(Number(event.target.value));
   });
