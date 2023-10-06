@@ -160,12 +160,6 @@ def main():
         if obj.type == "ARMATURE":
             obj.data.pose_position = "REST"
 
-    # Collections which are set to be hidden in viewport can be hidden in render as well
-    # applicable for: CesiumMan, RiggedSimple, Fox, BrainStem
-    for collection in bpy.data.collections:
-        if collection.hide_viewport:
-            collection.hide_render = True
-
     # setup camera & target
     bpy.ops.object.empty_add(
         type="SINGLE_ARROW", align="WORLD", location=(0, 0, 0), scale=(1, 1, 1)
