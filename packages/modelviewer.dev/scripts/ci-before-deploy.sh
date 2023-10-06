@@ -43,6 +43,7 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Models/2.0/Buggy \
   shared-assets/models/glTF-Sample-Models/2.0/BrainStem \
   shared-assets/models/glTF-Sample-Models/2.0/Corset \
+  shared-assets/models/glTF-Sample-Models/2.0/Cube \
   shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet \
   shared-assets/models/glTF-Sample-Models/2.0/Duck \
   shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet \
