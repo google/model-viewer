@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, sRGBEncoding, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, SRGBColorSpace, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
@@ -117,7 +117,7 @@ export default class TextureUtils {
       texture.mapping = EquirectangularReflectionMapping;
 
       if (!isHDR) {
-        texture.encoding = sRGBEncoding;
+        texture.colorSpace = SRGBColorSpace;
       }
 
       return texture;
