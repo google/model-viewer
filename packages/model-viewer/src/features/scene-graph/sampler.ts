@@ -56,30 +56,18 @@ const magnificationToMagFilter = new Map<MagnificationTextureFilter, MagFilter>(
 
 // Checks for threejs standards.
 const isMinFilter = (() => {
-  const minFilterValues: Array<MinificationTextureFilter> = [
-    NearestFilter,
-    LinearFilter,
-    NearestMipmapNearestFilter,
-    LinearMipmapNearestFilter,
-    NearestMipmapLinearFilter,
-    LinearMipmapLinearFilter
-  ];
   return (value: unknown): value is MinificationTextureFilter =>
-             minFilterValues.indexOf(value as MinificationTextureFilter) > -1;
+             minificationToMinFilter.has(value as MinificationTextureFilter);
 })();
 
 const isMagFilter = (() => {
-  const magFilterValues: Array<MagnificationTextureFilter> =
-      [NearestFilter, LinearFilter];
   return (value: unknown): value is MagnificationTextureFilter =>
-             magFilterValues.indexOf(value as MagnificationTextureFilter) > -1;
+             magnificationToMagFilter.has(value as MagnificationTextureFilter);
 })();
 
 const isWrapping = (() => {
-  const wrappingArray: Array<Wrapping> =
-      [RepeatWrapping, ClampToEdgeWrapping, MirroredRepeatWrapping];
   return (value: unknown): value is Wrapping =>
-             wrappingArray.indexOf(value as Wrapping) > -1;
+             wrappingToWrapMode.has(value as Wrapping);
 })();
 
 const isValidSamplerValue =
