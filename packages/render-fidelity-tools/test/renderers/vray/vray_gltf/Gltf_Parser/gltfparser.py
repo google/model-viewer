@@ -769,6 +769,7 @@ class GltfParser:
 		material = renderer.classes.MtlSingleBRDF()
 		#material.double_sided=True
 		brdf = renderer.classes.BRDFVRayMtl()
+		emissive_strength = 1.0
 
 		# fresnel should be true at all times
 		brdf.fresnel = True
@@ -801,6 +802,8 @@ class GltfParser:
 					self._create_KHR_materials_clearcoat(renderer, prim, gltf_mat.extensions.get('KHR_materials_clearcoat'), brdf)
 				if gltf_ext=='KHR_materials_sheen':
 					self._create_KHR_materials_sheen(renderer, prim, gltf_mat.extensions.get('KHR_materials_sheen'), brdf)
+				if gltf_ext=='KHR_materials_emissive_strength':
+					emissive_strength = gltf_mat.extensions.get('KHR_materials_emissive_strength').get('emissiveStrength')
 
 		# Apply vertex color to the diffuse texture
 		applyVertexColor(renderer, brdf, channel_names)
@@ -819,14 +822,22 @@ class GltfParser:
 			brdf.bump_type=1
 
 		#emissive tex
-		emissive_tex = self._make_texture(renderer,prim,gltf_mat.emissiveTexture, transfer_func = 2)
+		emissive_tex = self._make_texture(renderer, prim, gltf_mat.emissiveTexture, transfer_func = 2)
+		emissive_factor = gltf_mat.emissiveFactor
 		if emissive_tex != None:
-			emissive_factor = gltf_mat.emissiveFactor
 			if emissive_factor != None:
-				emissive_tex.color_mult = vray.AColor(emissive_factor[0], emissive_factor[1], emissive_factor[2], 1)
+				emissive_tex.color_mult = vray.AColor(
+					emissive_factor[0] * emissive_strength,
+					emissive_factor[1] * emissive_strength,
+					emissive_factor[2] * emissive_strength, 1)
 			
 			brdf.self_illumination = emissive_tex
-			# brdf.self_illumination_gi=True
+		else:
+			if emissive_factor != None:
+				brdf.self_illumination = vray.AColor(
+					emissive_factor[0] * emissive_strength,
+					emissive_factor[1] * emissive_strength,
+					emissive_factor[2] * emissive_strength, 1)
 
 		#occlusion tex
 		useOcclusion = False
