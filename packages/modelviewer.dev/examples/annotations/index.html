@@ -180,6 +180,8 @@
     tailRect = document.querySelector('#tail').getBoundingClientRect();
   }
 
+  window.addEventListener("resize", onResize);
+
   modelViewer1.addEventListener('ar-status', onResize);
 
   modelViewer1.addEventListener('load', () => {
