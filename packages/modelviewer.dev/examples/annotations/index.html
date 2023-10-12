@@ -331,19 +331,24 @@
 
   const checkbox = modelViewer.querySelector('#show-dimensions');
 
-  function setVisibility(element) {
-    if (checkbox.checked) {
-      element.classList.remove('hide');
-    } else {
-      element.classList.add('hide');
-    }
+  const dimElements = [...modelViewer.querySelectorAll('button'), modelViewer.querySelector('#dimLines')];
+
+  function setVisibility(visible) {
+    dimElements.forEach((element) => {
+      if (visible) {
+        element.classList.remove('hide');
+      } else {
+        element.classList.add('hide');
+      }
+    });
   }
 
   checkbox.addEventListener('change', () => {
-    setVisibility(modelViewer.querySelector('#dimLines'));
-    modelViewer.querySelectorAll('button').forEach((hotspot) => {
-      setVisibility(hotspot);
-    });
+    setVisibility(checkbox.checked);
+  });
+
+  modelViewer.addEventListener('ar-status', (event) => {
+    setVisibility(event.detail.status !== 'session-started');
   });
 
   // update svg
