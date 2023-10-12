@@ -374,8 +374,6 @@
     drawLine(dimLines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
   };
 
-  modelViewer.addEventListener('camera-change', renderSVG);
-
   modelViewer.addEventListener('load', () => {
     const center = modelViewer.getBoundingBoxCenter();
     const size = modelViewer.getDimensions();
@@ -449,6 +447,8 @@
     });
 
     renderSVG();
+
+    modelViewer.addEventListener('camera-change', renderSVG);
   });
 </script>
 <style>
