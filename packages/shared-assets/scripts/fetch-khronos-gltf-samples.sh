@@ -24,5 +24,3 @@ echo '🐶 Fetching Khronos glTF sample models.
 git submodule update --init --recursive
 
 echo '🎾 Sample models are now available'
-
-popd
