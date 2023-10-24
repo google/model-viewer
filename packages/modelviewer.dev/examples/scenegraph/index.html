@@ -561,6 +561,111 @@ modelViewerTexture2.addEventListener("load", () => {
 
 
     <div class="sample">
+      <div id="hideShowMeshVariantsExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Toggle between Mesh Variants</h2>
+            <p>If you have a few mesh variants, you can hide and show them by changing textures opacity.</p>
+          </div>
+          <example-snippet stamp-to="hideShowMeshVariantsExample" highlight-as="html">
+            <template>
+<model-viewer id="manifold" camera-controls touch-action="pan-y" src="../../shared-assets/models/manifold.glb" ar alt="A 3D model of a helmet">
+  <div class="controls">
+    <div>Mesh Variants: <select id="textures"></select>
+    </div>
+</model-viewer>
+<script type="module">
+const mvTextures = document.querySelector("model-viewer#manifold");
+const textures = document.querySelector('#textures');
+
+mvTextures.addEventListener("load", () => {
+  const materials = mvTextures.model.materials
+  for(const material of materials) {
+    const option = document.createElement('option')
+    option.value = material.name;
+    option.textContent = material.name;
+    textures.appendChild(option);
+  }
+
+  let startTimestamp;
+  const animationDuration = 1000; // 1 second
+  let alpha0 = 1;
+  let alpha1 = 0;
+
+  function updateAlphaValues(texture0, texture1, elapsed) {
+      alpha0 = 1 - (elapsed / animationDuration);
+      alpha1 = elapsed / animationDuration;
+      texture0.pbrMetallicRoughness.setBaseColorFactor([
+        texture0.pbrMetallicRoughness.baseColorFactor[0],
+        texture0.pbrMetallicRoughness.baseColorFactor[1],
+        texture0.pbrMetallicRoughness.baseColorFactor[2],
+        alpha0,
+      ]);
+      texture1.pbrMetallicRoughness.setBaseColorFactor([
+        texture1.pbrMetallicRoughness.baseColorFactor[0],
+        texture1.pbrMetallicRoughness.baseColorFactor[1],
+        texture1.pbrMetallicRoughness.baseColorFactor[2],
+        alpha1,
+      ]);
+    }
+
+    mvTextures.addEventListener("load", () => {
+      const materials = mvTextures.model.materials;
+      for (const material of materials) {
+        const option = document.createElement('option');
+        option.value = material.name;
+        option.textContent = material.name;
+        textures.appendChild(option);
+      }
+    });
+
+    textures.addEventListener('input', (event) => {
+      const selectedValue = event.target.value;
+      const ball = mvTextures.model.materials[0];
+      ball.setAlphaMode('BLEND')
+      const stick = mvTextures.model.materials[1];
+      let texture0, texture1;
+
+      if (selectedValue === 'ball') {
+        texture0 = stick;
+        texture1 = ball;
+      } else {
+        texture0 = ball;
+        texture1 = stick;
+      }
+
+      startTimestamp = null; // Reset the start timestamp
+
+      function animate(currentTimestamp) {
+        if (!startTimestamp) {
+          startTimestamp = currentTimestamp;
+        }
+        const elapsed = currentTimestamp - startTimestamp;
+
+        updateAlphaValues(texture0, texture1, elapsed);
+
+        if (elapsed < animationDuration) {
+          requestAnimationFrame(animate);
+        } else {
+          startTimestamp = null;
+        }
+      }
+
+      requestAnimationFrame(animate);
+    });
+  });
+
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="sample">
       <div id="animatedTexturesExample" class="demo"></div>
       <div class="content">
         <div class="wrapper">
