@@ -418,6 +418,7 @@
       },
       "exclude": [
         "stellar",
+        "vray",
         "three-gpu-pathtracer"
       ]
     },
@@ -433,6 +434,7 @@
       },
       "exclude": [
         "stellar",
+        "vray",
         "three-gpu-pathtracer"
       ]
     },
@@ -645,7 +647,12 @@
       },
       "orbit": {
         "radius": 2
-      }
+      },
+      "exclude": [
+        "stellar",
+        "vray",
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-ClearCoatTest",
@@ -663,7 +670,12 @@
       },
       "orbit": {
         "radius": 2
-      }
+      },
+      "exclude": [
+        "stellar",
+        "vray",
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-NegativeScaleTest",
@@ -673,6 +685,7 @@
       },
       "exclude": [
         "stellar",
+        "vray",
         "three-gpu-pathtracer"
       ]
     },
@@ -775,7 +788,8 @@
         "radius": 8
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "three-gpu-pathtracer"
       ]
     },
     {
