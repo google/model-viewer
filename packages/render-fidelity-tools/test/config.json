@@ -760,7 +760,8 @@
         "radius": 0.45
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "vray"
       ]
     },
     {
@@ -784,7 +785,8 @@
         "radius": 18
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "vray"
       ]
     },
     {
@@ -797,7 +799,9 @@
         "radius": 12
       },
       "exclude": [
-        "stellar"
+        "stellar",
+        "vray",
+        "three-gpu-pathtracer"
       ]
     },
     {
