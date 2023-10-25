@@ -572,7 +572,11 @@ modelViewerTexture2.addEventListener("load", () => {
             <template>
 <model-viewer id="manifold" camera-controls touch-action="pan-y" src="../../shared-assets/models/manifold.glb" ar alt="A 3D model of a stick and ball">
   <div class="controls">
-    <div>Mesh Variants: <select id="textures"></select>
+    <div>Mesh Variants:
+      <select id="textures">
+        <option value="ball">ball</option>
+        <option value="stick">stick</option>
+      </select>
     </div>
 </model-viewer>
 <script type="module">
@@ -580,51 +584,18 @@ const mvTextures = document.querySelector("model-viewer#manifold");
 const textures = document.querySelector('#textures');
 
 mvTextures.addEventListener("load", () => {
-  const materials = mvTextures.model.materials
-  for(const material of materials) {
-    const option = document.createElement('option')
-    option.value = material.name;
-    option.textContent = material.name;
-    textures.appendChild(option);
-  }
-
-  let startTimestamp;
-  const animationDuration = 1000; // 1 second
-  let alpha0 = 1;
-  let alpha1 = 0;
-
-  function updateAlphaValues(texture0, texture1, elapsed) {
-      alpha0 = 1 - (elapsed / animationDuration);
-      alpha1 = elapsed / animationDuration;
-      texture0.pbrMetallicRoughness.setBaseColorFactor([
-        texture0.pbrMetallicRoughness.baseColorFactor[0],
-        texture0.pbrMetallicRoughness.baseColorFactor[1],
-        texture0.pbrMetallicRoughness.baseColorFactor[2],
-        alpha0,
-      ]);
-      texture1.pbrMetallicRoughness.setBaseColorFactor([
-        texture1.pbrMetallicRoughness.baseColorFactor[0],
-        texture1.pbrMetallicRoughness.baseColorFactor[1],
-        texture1.pbrMetallicRoughness.baseColorFactor[2],
-        alpha1,
-      ]);
+  function updateAlphaValue(texture, alpha) {
+      const pbr = texture.pbrMetallicRoughness;
+      const baseColor = pbr.baseColorFactor;
+      baseColor[3] = alpha;
+      pbr.setBaseColorFactor(baseColor);
     }
-
-    mvTextures.addEventListener("load", () => {
-      const materials = mvTextures.model.materials;
-      for (const material of materials) {
-        const option = document.createElement('option');
-        option.value = material.name;
-        option.textContent = material.name;
-        textures.appendChild(option);
-      }
-    });
 
     textures.addEventListener('input', (event) => {
       const selectedValue = event.target.value;
-      const ball = mvTextures.model.materials[0];
+      const ball = mvTextures.model.getMaterialByName('ball')
       ball.setAlphaMode('BLEND')
-      const stick = mvTextures.model.materials[1];
+      const stick = mvTextures.model.getMaterialByName('stick')
       let texture0, texture1;
 
       if (selectedValue === 'ball') {
@@ -635,7 +606,8 @@ mvTextures.addEventListener("load", () => {
         texture1 = stick;
       }
 
-      startTimestamp = null; // Reset the start timestamp
+      const animationDuration = 1000; // 1 second
+      let startTimestamp = null; // Reset the start timestamp
 
       function animate(currentTimestamp) {
         if (!startTimestamp) {
@@ -643,7 +615,10 @@ mvTextures.addEventListener("load", () => {
         }
         const elapsed = currentTimestamp - startTimestamp;
 
-        updateAlphaValues(texture0, texture1, elapsed);
+        const alpha0 = 1 - (elapsed / animationDuration);
+        const alpha1 = elapsed / animationDuration;
+        updateAlphaValue(texture0, alpha0)
+        updateAlphaValue(texture1, alpha1)
 
         if (elapsed < animationDuration) {
           requestAnimationFrame(animate);
