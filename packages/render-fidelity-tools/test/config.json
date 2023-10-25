@@ -764,20 +764,6 @@
       ]
     },
     {
-      "name": "khronos-AnisotropyBarnLamp",
-      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/AnisotropyBarnLamp/glTF/AnisotropyBarnLamp.gltf",
-      "target": {
-        "y": -0.1
-      },
-      "orbit": {
-        "radius": 0.45
-      },
-      "exclude": [
-        "stellar",
-        "vray"
-      ]
-    },
-    {
       "name": "khronos-AnisotropyDiscTest",
       "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/AnisotropyDiscTest/glTF/AnisotropyDiscTest.gltf",
       "target": {
