@@ -137,11 +137,18 @@ async function main() {
   if( args.scenario.length > 0 ) {
     scenarioWhitelist = new Set();
     args.scenario.forEach( (scenarioName: string) => {
-      if (config.scenarios.find( (scenario: any) => scenario.name === scenarioName )) {
-        scenarioWhitelist!.add(scenarioName);
-      }
-      else {
-        warn(`Requested scenario "${scenarioName}" not found in config`);
+      const scenarioNameLower = scenarioName.toLowerCase();
+      let numMatches = 0;
+      config.scenarios.forEach( (scenario: any) => {
+        if( scenario.name.toLowerCase().indexOf( scenarioNameLower ) >= 0 ) {
+          if( ! scenarioWhitelist!.has( scenario.name ) ) {
+            scenarioWhitelist!.add(scenario.name);
+          }
+          numMatches++;
+        }
+      });
+      if( numMatches) {
+        warn(`Requested scenario "${scenarioName}" does not match any names found in config`);
       }
     });
   }
