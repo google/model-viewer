@@ -279,9 +279,9 @@ export class ArtifactCreator {
       return;
     }
 
-    console.log(`🚀 Launching browser`);
-
+  
     if( this.browser == undefined) {
+      console.log(`🚀 Launching browser`);
       this.browser = await puppeteer.launch({
         headless: false,          
       });
