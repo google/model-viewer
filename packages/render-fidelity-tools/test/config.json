@@ -697,7 +697,8 @@
       },
       "exclude": [
         "stellar",
-        "vray"
+        "vray",
+        "three-gpu-pathtracer"
       ]
     },
     {
