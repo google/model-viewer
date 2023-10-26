@@ -7,7 +7,7 @@
   "scripts": {
     "test": "node --experimental-modules ./lib/workflows/test-fidelity.js ./test/config.json",
     "test:ci": "./scripts/ci-check-fidelity.sh",
-    "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
+    "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js --config=./test/config.json",
     "build": "tsc && rollup -c",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi",
     "clean": "rm -rf ./dist ./lib ./test/results ./test/renderers/filament/{cmgen,ktx}"
@@ -44,12 +44,14 @@
     "puppeteer": "^21.3.4",
     "rimraf": "^3.0.2",
     "three": "^0.157.0",
-    "three-gpu-pathtracer": "^0.0.13"
+    "three-gpu-pathtracer": "^0.0.13",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
+    "@types/yargs": "^17.0.29",
     "polymer-build": "^3.1.4",
     "rollup": "^2.77.2",
     "rollup-plugin-external-globals": "^0.6.1",

@@ -252,7 +252,7 @@ export class ArtifactCreator {
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
       outputPath: string = join(this.outputDirectory, 'model-viewer.png'),
-      maxTimeInSec: number = -1) {
+      maxTimeInSec: number = -1, quiet: boolean = false) {
     const scaledWidth = dimensions.width;
     const scaledHeight = dimensions.height;
     const rendererConfig = this[$configReader].rendererConfig(renderer);
@@ -271,7 +271,7 @@ export class ArtifactCreator {
         height: scaledHeight,
         deviceScaleFactor: DEVICE_PIXEL_RATIO
       },
-      headless: false
+      headless: quiet ? 'new' :false
     });
 
     const page = await browser.newPage();
