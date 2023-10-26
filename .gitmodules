@@ -1,0 +1,3 @@
+[submodule "packages/shared-assets/models/glTF-Sample-Assets"]
+	path = packages/shared-assets/models/glTF-Sample-Assets
+	url = git@github.com:KhronosGroup/glTF-Sample-Assets
