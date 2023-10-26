@@ -31,6 +31,7 @@ type CommandLineArgs = {
   config: string;
   renderer: string[];
   scenario: string[];
+  port: number;
   missingOnly: boolean;
   dryRun: boolean;
   quiet: boolean;
@@ -59,6 +60,12 @@ async function main() {
         description: 'Limit to specific scenarios',
         demandOption: false, // Makes it mandatory. Adjust as per your needs.
       },
+      'port': {
+        type: 'number',
+        alias: 'p',
+        description: 'Port for web server',
+        default: 9040,
+      },
       'missing-only': {
         type: 'boolean',
         alias: 'm',
@@ -86,6 +93,7 @@ async function main() {
     config: argv.config as string,
     renderer: ( argv.renderer  || [] )as string[],
     scenario: ( argv.scenario  || [] ) as string[],
+    port: argv.port as number,
     missingOnly: argv['missing-only'],
     dryRun: argv['dry-run'],
     quiet: argv.quiet,
@@ -264,6 +272,7 @@ async function main() {
               goldenPath,
               width,
               height,
+              args.port,
               args.quiet);
           }
           catch (error) {
