@@ -63,7 +63,7 @@ async function main() {
       'dry-run': {
         type: 'boolean',
         alias: 'd',
-        description: 'Lists which images would be rendered but doesn\'t render',
+        description: 'Checks that all comparison images exist',
         default: false,
       },
       'quiet': {
