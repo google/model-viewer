@@ -103,24 +103,72 @@
     as real-time rendering at this level of quality is still very much an area
     of active research with improvements being made constantly. This site
     demonstrates where we are on that path to convergence and highlights areas
-    that could still use improvement. We are comparing the most popular web
-    renderers: <a href="https://threejs.org/" target="_blank" rel="noopener">three.js</a>
-    (represented by &lt;model-viewer&gt;), <a
-    href="https://google.github.io/filament/webgl/"
-    target="_blank" rel="noopener">filament.js</a>, <a href="https://www.babylonjs.com/"
-    target="_blank" rel="noopener">babylon.js</a>, <a href="https://github.khronos.org/glTF-Sample-Viewer-Release/"
-    target="_blank" rel="noopener">gltf-sample-viewer</a>, and <a href="https://github.com/gkjohnson/three-gpu-pathtracer/"
-    target="_blank" rel="noopener">three-gpu-pathtracer</a>. If any other renderers would like to be
+    that could still use improvement. We are comparing the most popular real-time web
+    renderers as well as path tracers (a rendering technique that uses far fewer approximations than are required by real-time renderers):</p>
+    <table class="browser-support">
+      <tr>
+        <th>Name</th>
+        <th>Rendering Type</th>
+        <th>Platform</th>
+     <tr>
+        <td><a href="https://threejs.org/" target="_blank" rel="noopener">three.js</a>
+          (represented by <a
+          href="https://modelviewer.dev"
+          target="_blank" rel="noopener">&lt;model-viewer&gt;)</a></td>
+        <td>Real-Time</td>
+        <td>Web</td>
+        </tr>
+            <tr>
+            <td><a
+          href="https://google.github.io/filament/webgl/"
+          target="_blank" rel="noopener">filament.js</a></td>
+          <td>Real-Time</td>
+          <td>Web, Android</td>
+          </tr>
+        <tr>
+            <td><a href="https://www.babylonjs.com/"
+          target="_blank" rel="noopener">babylon.js</a></td>
+          <td>Real-Time</td>
+          <td>Web</td>
+      </tr>
+        <tr>
+            <td><a href="https://github.khronos.org/glTF-Sample-Viewer-Release/"
+          target="_blank" rel="noopener">gltf-sample-viewer</a></td>
+          <td>Real-Time</td>
+          <td>Web</td>
+    </tr> 
+    <tr>
+      <td><a
+        href="https://www.3ds.com/products-services/3dexcite/resource-center/stellar-physically-correct/"
+        target="_blank" rel="noopener">Dassault STELLAR</a></td>
+    <td>Path Tracing</td>
+    <td>Windows, Linux</td>
+</tr> 
+<tr>
+  <td><a
+    href="https://www.chaos.com/3d-rendering-software"
+    target="_blank" rel="noopener">Chaos Group V-Ray</a> (via <a
+    href="https://github.com/ChaosGroup/vray_gltf"
+    target="_blank" rel="noopener">vray_gltf</a>)</td>
+<td>Path Tracing</td>
+<td>Linx, Windows, MacOS</td>
+</tr> 
+<tr>
+  <td><a href="https://github.com/gkjohnson/three-gpu-pathtracer/"
+    target="_blank" rel="noopener">three-gpu-pathtracer</a></td>
+<td>Path Tracing</td>
+<td>Web</td>
+</tr> 
+
+</table>
+
+    <p>If any other renderers would like to be
     included, please open a PR adding them to the <a
     href="https://github.com/google/model-viewer/tree/master/packages/render-fidelity-tools/src/components/renderers"
     target="_blank" rel="noopener">render-fidelity-tools</a>
     package.</p>
 
-    <p>In addition, we are showing a ground-truth render provided by <a
-    href="https://www.3ds.com/products-services/3dexcite/resource-center/stellar-physically-correct/"
-    target="_blank" rel="noopener">Dassault STELLAR</a>, which is a professional
-    path-tracing renderer and approaches the physical result with far fewer
-    approximations than are necessary in real-time renderers.</p>
+    
 
     <p>The first set of scenarios are for demonstrating material capabilities,
     so these are primarily fidelity tests. Following these are simpler cases
