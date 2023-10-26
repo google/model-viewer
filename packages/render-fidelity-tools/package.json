@@ -5,7 +5,7 @@
   "version": "0.0.1",
   "description": "<model-viewer> rendering fidelity test suite and tools",
   "scripts": {
-    "test": "node --experimental-modules ./lib/workflows/test-fidelity.js ./test/config.json",
+    "test": "node --experimental-modules ./lib/workflows/test-fidelity.js --config=./test/config.json",
     "test:ci": "./scripts/ci-check-fidelity.sh",
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js ./test/config.json",
     "build": "tsc && rollup -c",
@@ -44,7 +44,8 @@
     "puppeteer": "^21.3.4",
     "rimraf": "^3.0.2",
     "three": "^0.157.0",
-    "three-gpu-pathtracer": "^0.0.13"
+    "three-gpu-pathtracer": "^0.0.13",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
