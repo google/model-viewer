@@ -53,5 +53,6 @@ export const rendererScreenshot = async(
         renderer, scenarioName, dimensions, outputFile);
   } finally {
     server.close();
+    screenshotCreator.close();
   }
 };
