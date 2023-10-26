@@ -39,7 +39,6 @@ type CommandLineArgs = {
 
 async function main() {
 
-  console.log( 'process.argv', process.argv);
   const argv = await yargs(hideBin(process.argv))
     .options({
       'config': {
@@ -91,9 +90,6 @@ async function main() {
     dryRun: argv['dry-run'],
     quiet: argv.quiet,
   };
-
-  // Log to verify
-  console.log(args);
 
   const require = module.createRequire(import.meta.url);
 
