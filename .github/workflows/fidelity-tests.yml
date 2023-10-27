@@ -29,4 +29,4 @@ jobs:
     - name: Fidelity tests
       uses: GabrielBB/xvfb-action@v1.0
       with:
-        run: npm run test --workspace=@google/model-viewer-render-fidelity-tools
+        run: npm run test --workspace=@google/model-viewer-render-fidelity-tools -- --quiet
