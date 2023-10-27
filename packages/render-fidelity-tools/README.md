@@ -29,7 +29,23 @@ Command                         | Description
 
 ### Fidelity Test CLI
 
-You can specify the scenarios when running `npm run test` by appending scenarios. (e.g. `npm run test khronos-BoomBox khronos-FlightHelmet` will only update screenshots of these two scenarios.)
+For `npm run test`, we support these command line options:
+
+Command            | Default             | Description
+--------------------|----------- | -----------
+  -c, --config      |  | Path to configuration json.
+  -s, --scenario    |  | Limit to specific scenarios. This now also allows you to specify multiple scenarios in the whitelist.  You can use a full name or a partial name of scenarios and it will match against all that contain that scenario substring.
+  -p, --port        | 9040  | Port for web server.
+  -d, --dry-run      | false | Lists which images would be rendered but doesn't render.  Useful when trying to figure out which tests will run given that command line.
+  -q, --quiet        | false | Hide the puppeteer controlled browser.  This can allow you to work on the computer while it is running in the background.
+
+To run a subset of scenarios do something like this:
+
+```
+% npm run test -- --scenario=texture --quiet
+```
+
+*NOTE: In the above example, the `--` is required to separate the arguments to `npm run update-screenshots` from the arguments to the script itself.*
 
 After running `npm run test`, you can look at the results by starting a local web server (e.g. `npx http-server`) in this folder, then opening `test/results-viewer.html` in a browser.
 
