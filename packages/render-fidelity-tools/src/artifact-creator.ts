@@ -128,7 +128,7 @@ export class ArtifactCreator {
         JSON.stringify(scenarioRecord));
   }
 
-  async captureAndAnalyzeScreenshot(scenario: ScenarioConfig):
+  async captureAndAnalyzeScreenshot(scenario: ScenarioConfig, quiet: boolean = false):
       Promise<ImageComparisonAnalysis> {
     const {rootDirectory, goldens} = this;
     const {name: scenarioName, dimensions, exclude} = scenario;
@@ -141,7 +141,7 @@ export class ArtifactCreator {
       // set the output path to an empty string to tell puppeteer to not save
       // the screenshot image
       screenshot = await this.captureScreenshot(
-          'model-viewer', scenarioName, dimensions, '', 60);
+          'model-viewer', scenarioName, dimensions, '', 60, quiet);
     } catch (error) {
       throw new Error(`❌ Failed to capture model-viewer's screenshot of ${
           scenarioName}. Error message: ${error.message}`);
@@ -187,7 +187,7 @@ export class ArtifactCreator {
     return result;
   }
 
-  async fidelityTest(scenarioWhitelist: Set<string>|null = null) {
+  async fidelityTest(scenarioWhitelist: Set<string>|null = null, dryRun: boolean = false, quiet: boolean = false) {
     const {scenarios} = this.config;
     const {outputDirectory} = this;
     const analyzedScenarios: Array<ScenarioConfig> = [];
@@ -218,18 +218,21 @@ export class ArtifactCreator {
         compareRenderersErrors.push(errorMessage);
       }
 
-      try {
-        const autoTestResult = await this.captureAndAnalyzeScreenshot(scenario);
-        fidelityRegressionResults.results.push(autoTestResult);
-      } catch (error) {
-        const message = `❌Fail to analyze scenario :${
-            scenarioName}! Error message: ${error.message}`;
+      if( ! dryRun ) {
+        try {
+          const autoTestResult = await this.captureAndAnalyzeScreenshot(scenario, quiet);
+          fidelityRegressionResults.results.push(autoTestResult);
+        } catch (error) {
+          const message = `❌Fail to analyze scenario :${
+              scenarioName}! Error message: ${error.message}`;
 
-        fidelityRegressionResults.errors.push(message);
+          fidelityRegressionResults.errors.push(message);
+        }
+
+        analyzedScenarios.push(scenario);
       }
-
-      analyzedScenarios.push(scenario);
     }
+
 
     console.log('💾 Recording configuration');
 
@@ -268,7 +271,7 @@ export class ArtifactCreator {
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
       outputPath: string = join(this.outputDirectory, 'model-viewer.png'),
-      maxTimeInSec: number = -1, quiet: boolean = false) {
+      maxTimeInSec: number = -1, quiet: boolean = false ) {
     const scaledWidth = dimensions.width;
     const scaledHeight = dimensions.height;
     const rendererConfig = this[$configReader].rendererConfig(renderer);
@@ -283,7 +286,7 @@ export class ArtifactCreator {
     if( this.browser == undefined ) {
       console.log(`🚀 Launching browser`);
       this.browser = await puppeteer.launch({
-        headless: quiet ? 'new' :false          
+        headless: quiet ? 'new' : false
       });
       this.pagePromise = this.browser.newPage();
     }

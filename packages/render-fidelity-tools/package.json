@@ -5,7 +5,7 @@
   "version": "0.0.1",
   "description": "<model-viewer> rendering fidelity test suite and tools",
   "scripts": {
-    "test": "node --experimental-modules ./lib/workflows/test-fidelity.js ./test/config.json",
+    "test": "node --experimental-modules ./lib/workflows/test-fidelity.js --config=./test/config.json",
     "test:ci": "./scripts/ci-check-fidelity.sh",
     "update-screenshots": "node --experimental-modules ./lib/workflows/update-screenshots.js --config=./test/config.json",
     "build": "tsc && rollup -c",
