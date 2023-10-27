@@ -52,8 +52,9 @@ async function main() {
       'renderer': {
         type: 'string',
         alias: 'r',
-        description: 'Name of renderer to test',
-        default: 'model-viewer'
+        description: 'Name of web-based renderer to test',
+        default: 'model-viewer',
+        choices: ['filament', 'babylon', 'gltf-sample-viewer', 'three-gpu-renderer', 'model-viewer']
       },
       'scenario': {
         type: 'array',
