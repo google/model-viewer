@@ -206,8 +206,8 @@ async function main() {
   }
   finally {
     server.close();
+    screenshotCreator.close();
   }
 }
-
 
 main();
