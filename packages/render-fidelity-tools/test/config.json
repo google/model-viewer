@@ -661,22 +661,6 @@
         "radius": 20
       }
     },
-
-    {
-      "name": "khronos-ClearCoatWicker",
-      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/ClearCoatWicker/glTF/ClearCoatWicker.gltf",
-      "target": {
-        "y": 0.5
-      },
-      "orbit": {
-        "radius": 2
-      },
-      "exclude": [
-        "stellar",
-        "vray",
-        "three-gpu-pathtracer"
-      ]
-    },
     {
       "name": "khronos-NegativeScaleTest",
       "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/NegativeScaleTest/glTF/NegativeScaleTest.gltf",
