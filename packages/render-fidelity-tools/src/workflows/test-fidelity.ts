@@ -24,6 +24,7 @@ import { hideBin } from 'yargs/helpers';
 
  type CommandLineArgs = {
    config: string;
+   renderer: string;
    scenario: string[];
    port: number;
    dryRun: boolean;
@@ -47,6 +48,12 @@ async function main() {
         alias: 'c',
         description: 'Path to configuration json',
         demandOption: true, // Makes it mandatory. Adjust as per your needs.
+      },
+      'renderer': {
+        type: 'string',
+        alias: 'r',
+        description: 'Name of renderer to test',
+        default: 'model-viewer'
       },
       'scenario': {
         type: 'array',
@@ -79,6 +86,7 @@ async function main() {
 
   const args: CommandLineArgs = {
     config: argv.config as string,
+    renderer: argv.renderer as string,
     scenario: ( argv.scenario  || [] ) as string[],
     port: argv.port as number,
     dryRun: argv['dry-run'],
@@ -95,7 +103,7 @@ async function main() {
       config,
       rootDirectory,
       `http://localhost:${
-        args.port}/packages/render-fidelity-tools/test/renderers/model-viewer/`);
+        args.port}/packages/render-fidelity-tools/test/renderers/${args.renderer}/`);
   const server = HTTPServer.createServer({root: '../../', cache: -1});
   server.listen(args.port);
 
@@ -129,7 +137,7 @@ async function main() {
   }
 
   try {
-    await screenshotCreator.fidelityTest(scenarioWhitelist, args.dryRun, args.quiet);
+    await screenshotCreator.fidelityTest(scenarioWhitelist, args.renderer, args.dryRun, args.quiet);
 
     console.log(`✅ Results recorded to ${outputDirectory}`);
   
@@ -162,7 +170,7 @@ async function main() {
     }
 
     if (fidelityRegressionWarningCount > 0) {
-      console.log(`Warnings on ${fidelityRegressionWarningCount} senarios❗️`);
+      console.log(`Warnings on ${fidelityRegressionWarningCount} scenarios❗️`);
       console.log('\n🔍 Logging warning scenarios: ');
       for (const warning of fidelityRegressionWarnings) {
         console.log(warning);
@@ -198,7 +206,7 @@ async function main() {
 
     if (fidelityRegressionErrorCount > 0 || compareRendererErrorCount > 0) {
       throw new Error(
-          ' ❌ Fidelity test failed! Please fix the errors listed above before mering this pr!');
+          ' ❌ Fidelity test failed! Please fix the errors listed above before merging this pr!');
     }
   }
   catch(error: any) {

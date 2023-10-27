@@ -63,41 +63,41 @@ export class ArtifactCreator {
         renderer => ({...renderer, file: `${renderer.name}-golden.png`}));
   }
 
-  async compareRenderers(scenario: ScenarioConfig) {
+  async compareRenderers(scenario: ScenarioConfig, renderer: string) {
     const analysisResults: AnalysisResults = [];
     const {rootDirectory, outputDirectory, goldens} = this;
     const {name: scenarioName, exclude, dimensions} = scenario;
 
     console.log(
-        `Start to compare model-viewer's golden with other renderers' goldens:`);
+        `Start to compare ${renderer}'s golden with other renderers' goldens:`);
 
-    const modelViewerIndex = 0;
-    const modelViewerGoldenPath = join(
-        rootDirectory, 'goldens', scenarioName, goldens[modelViewerIndex].file);
-    let modelViewerGolden;
+    const rendererIndex = 0;
+    const rendererGoldenPath = join(
+        rootDirectory, 'goldens', scenarioName, goldens[rendererIndex].file);
+    let rendererGolden;
     try {
-      modelViewerGolden = await fs.readFile(modelViewerGoldenPath);
+      rendererGolden = await fs.readFile(rendererGoldenPath);
     } catch (error) {
-      throw new Error(`❌ Failed to read model-viewer's ${
+      throw new Error(`❌ Failed to read ${renderer}'s ${
           scenarioName} golden! Error message: ${error.message}`);
     }
 
     // save goldens images to result folder which will be used to show in the
     // result-viewer page.
     await fs.writeFile(
-        join(outputDirectory, scenarioName, goldens[modelViewerIndex].file),
-        modelViewerGolden);
+        join(outputDirectory, scenarioName, goldens[rendererIndex].file),
+        rendererGolden);
 
-    const modelViewerGoldenImage =
-        new Uint8ClampedArray(pngjs.PNG.sync.read(modelViewerGolden).data);
+    const rendererGoldenImage =
+        new Uint8ClampedArray(pngjs.PNG.sync.read(rendererGolden).data);
 
     for (const golden of goldens) {
-      if (golden.name === 'model-viewer' ||
+      if (golden.name === renderer ||
           (exclude != null && exclude.includes(golden.name))) {
         continue;
       }
 
-      console.log(`\n🔍 Comparing <model-viewer> to ${golden.description}`);
+      console.log(`\n🔍 Comparing ${renderer} to ${golden.description}`);
 
       const candidateGoldenPath =
           join(rootDirectory, 'goldens', scenarioName, golden.file);
@@ -117,7 +117,7 @@ export class ArtifactCreator {
       const candidateGoldenImage =
           new Uint8ClampedArray(pngjs.PNG.sync.read(candidateGolden).data);
       const analysisResult = await this.analyze(
-          modelViewerGoldenImage, candidateGoldenImage, dimensions);
+          rendererGoldenImage, candidateGoldenImage, dimensions);
       analysisResults.push(analysisResult);
     }
     const scenarioRecord = {analysisResults, scenario};
@@ -128,54 +128,54 @@ export class ArtifactCreator {
         JSON.stringify(scenarioRecord));
   }
 
-  async captureAndAnalyzeScreenshot(scenario: ScenarioConfig, quiet: boolean = false):
+  async captureAndAnalyzeScreenshot(scenario: ScenarioConfig, renderer: string, quiet: boolean = false):
       Promise<ImageComparisonAnalysis> {
     const {rootDirectory, goldens} = this;
     const {name: scenarioName, dimensions, exclude} = scenario;
 
     console.log(
-        `start compare model-viewer's golden with model-viewer's screenshot generated from fidelity test:`);
+        `start compare ${renderer}'s golden with ${renderer}'s screenshot generated from fidelity test:`);
 
     let screenshot;
     try {
       // set the output path to an empty string to tell puppeteer to not save
       // the screenshot image
       screenshot = await this.captureScreenshot(
-          'model-viewer', scenarioName, dimensions, '', 60, quiet);
+          renderer, scenarioName, dimensions, '', 60, quiet);
     } catch (error) {
-      throw new Error(`❌ Failed to capture model-viewer's screenshot of ${
+      throw new Error(`❌ Failed to capture ${renderer}'s screenshot of ${
           scenarioName}. Error message: ${error.message}`);
     }
 
     if (screenshot == null) {
-      throw new Error(`❌ Model-viewer's screenshot of ${
+      throw new Error(`❌ ${renderer}'s screenshot of ${
           scenarioName} is not captured correctly (value is null).`);
     }
     const screenshotImage =
         new Uint8ClampedArray(pngjs.PNG.sync.read(screenshot as Buffer).data);
 
-    const modelViewerIndex = 0;
-    const modelViewerGoldenPath = join(
-        rootDirectory, 'goldens', scenarioName, goldens[modelViewerIndex].file);
-    let modelViewerGolden;
+    const rendererIndex = 0;
+    const rendererGoldenPath = join(
+        rootDirectory, 'goldens', scenarioName, goldens[rendererIndex].file);
+    let rendererGolden;
     try {
-      modelViewerGolden = await fs.readFile(modelViewerGoldenPath);
+      rendererGolden = await fs.readFile(rendererGoldenPath);
     } catch (error) {
-      throw new Error(`❌ Failed to read model-viewer's ${
+      throw new Error(`❌ Failed to read ${renderer}'s ${
           scenarioName} golden! Error message: ${error.message}`);
     }
-    const modelViewerGoldenImage =
-        new Uint8ClampedArray(pngjs.PNG.sync.read(modelViewerGolden).data);
+    const rendererGoldenImage =
+        new Uint8ClampedArray(pngjs.PNG.sync.read(rendererGolden).data);
 
     const result =
-        await this.analyze(screenshotImage, modelViewerGoldenImage, dimensions);
+        await this.analyze(screenshotImage, rendererGoldenImage, dimensions);
 
     const rmsInDb = toDecibel(result.rmsDistanceRatio);
 
     // the rmsInDb is negative, and the less negative means the less closer the
     // two images are
     if (rmsInDb > FIDELITY_TEST_THRESHOLD) {
-      if (exclude?.includes('model-viewer')) {
+      if (exclude?.includes(renderer)) {
         console.log(`❌ Skipped! Senario name: ${
             scenario.name}, rms distance ratio: ${rmsInDb.toFixed(2)} dB.`);
       } else {
@@ -187,7 +187,7 @@ export class ArtifactCreator {
     return result;
   }
 
-  async fidelityTest(scenarioWhitelist: Set<string>|null = null, dryRun: boolean = false, quiet: boolean = false) {
+  async fidelityTest(scenarioWhitelist: Set<string>|null = null, renderer: string, dryRun: boolean = false, quiet: boolean = false) {
     const {scenarios} = this.config;
     const {outputDirectory} = this;
     const analyzedScenarios: Array<ScenarioConfig> = [];
@@ -210,17 +210,17 @@ export class ArtifactCreator {
       mkdirp.sync(scenarioOutputDirectory);
 
       try {
-        await this.compareRenderers(scenario);
+        await this.compareRenderers(scenario, renderer);
       } catch (error) {
         const errorMessage =
-            `❌Fail to compare model-viewer with other renderers of scenario ${
+            `❌Fail to compare ${renderer} with other renderers of scenario ${
                 scenarioName}. Error message: ${error.message}`;
         compareRenderersErrors.push(errorMessage);
       }
 
       if( ! dryRun ) {
         try {
-          const autoTestResult = await this.captureAndAnalyzeScreenshot(scenario, quiet);
+          const autoTestResult = await this.captureAndAnalyzeScreenshot(scenario, renderer, quiet);
           fidelityRegressionResults.results.push(autoTestResult);
         } catch (error) {
           const message = `❌Fail to analyze scenario :${
