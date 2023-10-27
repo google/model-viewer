@@ -34,6 +34,7 @@ For `npm run test`, we support these command line options:
 Command            | Default             | Description
 --------------------|----------- | -----------
   -c, --config      |  | Path to configuration json.
+  -r, --renderer    | model-viewer | The renderer to fidelity test, must be a web-based renderer.
   -s, --scenario    |  | Limit to specific scenarios. This now also allows you to specify multiple scenarios in the whitelist.  You can use a full name or a partial name of scenarios and it will match against all that contain that scenario substring.
   -p, --port        | 9040  | Port for web server.
   -d, --dry-run      | false | Lists which images would be rendered but doesn't render.  Useful when trying to figure out which tests will run given that command line.
