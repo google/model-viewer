@@ -17,10 +17,11 @@ import {promises as fs} from 'fs';
 import mkdirp from 'mkdirp';
 import {join, resolve} from 'path';
 import pngjs from 'pngjs';
-import puppeteer from 'puppeteer';
+import puppeteer, { Browser } from 'puppeteer';
 
 import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, FidelityRegressionResults, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel} from './common.js';
 import {ConfigReader} from './config-reader.js';
+
 
 const $configReader = Symbol('configReader');
 
@@ -32,6 +33,8 @@ export interface ScenarioRecord extends ScenarioConfig {
 
 export class ArtifactCreator {
   private[$configReader]: ConfigReader = new ConfigReader(this.config);
+  private browser: Browser | undefined = undefined;
+  private pagePromise: Promise<any> | undefined = undefined;
 
   constructor(
       protected config: ImageComparisonConfig, protected rootDirectory: string,
@@ -39,6 +42,18 @@ export class ArtifactCreator {
     console.log('🌈 Preparing to capture screenshots for fidelity comparison');
   }
 
+  async close() {
+    if( this.pagePromise !== undefined ) {
+      const page = await this.pagePromise;
+      await page.close();
+      this.pagePromise = undefined;
+    }
+
+    if (this.browser !== undefined) {
+      await this.browser.close();
+      this.browser = undefined;
+    }
+  }
   protected get outputDirectory(): string {
     return join(resolve(this.rootDirectory), 'results');
   }
@@ -248,6 +263,7 @@ export class ArtifactCreator {
 
     return analysis;
   }
+  
 
   async captureScreenshot(
       renderer: string, scenarioName: string, dimensions: Dimensions,
@@ -263,20 +279,25 @@ export class ArtifactCreator {
       return;
     }
 
-    console.log(`🚀 Launching browser`);
+  
+    if( this.browser == undefined) {
+      console.log(`🚀 Launching browser`);
+      this.browser = await puppeteer.launch({
+        headless: false,          
+      });
+      this.pagePromise = this.browser.newPage();
+    }
 
-    const browser = await puppeteer.launch({
-      defaultViewport: {
-        width: scaledWidth,
-        height: scaledHeight,
-        deviceScaleFactor: DEVICE_PIXEL_RATIO
-      },
-      headless: false
-    });
-
-    const page = await browser.newPage();
+    const page = await this.pagePromise;
+    this.pagePromise = undefined;
     const url = `${this.baseUrl}?hide-ui&config=../../config.json&scenario=${
         encodeURIComponent(scenarioName)}`;
+
+    await page.setViewport({
+      width: scaledWidth,
+      height: scaledHeight,
+      deviceScaleFactor: DEVICE_PIXEL_RATIO
+    });
 
     page.on('error', (error: any) => {
       console.log(`🚨 ${error}`);
@@ -303,7 +324,7 @@ export class ArtifactCreator {
     // variables are captured in its closure scope. TypeScript compiler
     // currently has no mechanism to detect this and will happily tell you
     // your code is correct when it isn't.
-    const evaluateError = await page.evaluate(async (maxTimeInSec) => {
+    const evaluateError = await page.evaluate(async (maxTimeInSec: number) => {
       const modelBecomesReady = new Promise<void>((resolve, reject) => {
         let timeout: NodeJS.Timeout;
         if (maxTimeInSec > 0) {
@@ -331,7 +352,8 @@ export class ArtifactCreator {
 
     if (evaluateError) {
       console.log(evaluateError);
-      await browser.close();
+      await this.browser.close();
+      this.browser = undefined;
       throw new Error(evaluateError);
     }
 
@@ -346,8 +368,9 @@ export class ArtifactCreator {
     const screenshot =
         await page.screenshot({path: outputPath, omitBackground: true});
 
-    await browser.close();
-
+    page.close();
+    this.pagePromise = this.browser.newPage();
+    
     return screenshot;
   }
 }
