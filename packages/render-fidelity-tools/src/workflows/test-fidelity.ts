@@ -94,7 +94,6 @@ async function main() {
     quiet: argv.quiet,
   };
 
-  console.log( args );
   const configPath = resolve(args.config);
   const rootDirectory = resolve(dirname(configPath));
   const config = require(configPath);
@@ -107,7 +106,6 @@ async function main() {
         args.port}/packages/render-fidelity-tools/test/renderers/${args.renderer}/`);
   const server = HTTPServer.createServer({root: '../../', cache: -1});
   server.listen(args.port);
-
 
   try {
     rimraf.sync(outputDirectory);
