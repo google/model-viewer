@@ -305,7 +305,7 @@ export class ImportCard extends LitElement {
     }
 
     const rootPath = 'https://modelviewer.dev/shared-assets/models/' +
-        (key in advancedMap ? `glTF-Sample-Models/2.0/${key}/glTF-Binary/` :
+        (key in advancedMap ? `glTF-Sample-Assets/Models/${key}/glTF-Binary/` :
                               '');
     const fileName = `${key}.glb`;
 

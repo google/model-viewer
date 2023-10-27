@@ -82,7 +82,7 @@ def main():
               "verticalFoV": 45,
               "renderSkybox": False,
               "name": "khronos-SheenChair",
-              "model": "../../../shared-assets/models/glTF-Sample-Models/2.0/SheenChair/glTF-Binary/SheenChair.glb"
+              "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/SheenChair/glTF-Binary/SheenChair.glb"
             },
             "outputFile": "../../../test/goldens/khronos-SheenChair/stellar-golden.png"
           }

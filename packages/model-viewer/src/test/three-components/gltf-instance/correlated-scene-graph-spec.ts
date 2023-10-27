@@ -25,9 +25,9 @@ import {assetPath, loadThreeGLTF} from '../../helpers.js';
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
 const ORDER_TEST_GLB_PATH = assetPath('models/order-test/order-test.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
-    assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
-const ENGINE_GLB_PATH = assetPath(
-    'models/glTF-Sample-Models/2.0/2CylinderEngine/glTF-Binary/2CylinderEngine.glb');
+    assetPath('models/glTF-Sample-Assets/Models/Triangle/glTF/Triangle.gltf');
+const BRAINSTEM_GLB_PATH = assetPath(
+    'models/glTF-Sample-Assets/Models/BrainStem/glTF-Binary/BrainStem.glb');
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const getObject3DByName =
@@ -97,7 +97,7 @@ suite('correlated-scene-graph', () => {
     });
 
     test('has a mapping for each node in scene', async () => {
-      const threeGLTF = await loadThreeGLTF(ENGINE_GLB_PATH);
+      const threeGLTF = await loadThreeGLTF(BRAINSTEM_GLB_PATH);
       const correlatedSceneGraph = CorrelatedSceneGraph.from(threeGLTF);
 
       threeGLTF.scene.traverse(node => {

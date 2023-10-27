@@ -94,7 +94,7 @@ button {
           </div>
           <example-snippet stamp-to="variants" highlight-as="html">
             <template>
-<model-viewer id="shoe" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb" ar alt="A 3D model of a Shoe">
+<model-viewer id="shoe" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Assets/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb" ar alt="A 3D model of a Shoe">
   <div class="controls">
     <div>Variant: <select id="variant"></select></div>
   </div>
@@ -322,14 +322,14 @@ modelViewerParameters.addEventListener("load", (ev) => {
           </div>
           <example-snippet stamp-to="createTexturesExample" highlight-as="html">
             <template>
-<model-viewer id="duck" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb" ar alt="A 3D model of a duck">
+<model-viewer id="duck" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Assets/Models/Duck/glTF-Binary/Duck.glb" ar alt="A 3D model of a duck">
   <div class="controls">
       <p>Normals</p>
       <select id="normals2">
         <option>None</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
       </select>
       <p>Custom texture name</p>
       <p id="texture-name">None</p>
@@ -391,45 +391,45 @@ modelViewerTexture.addEventListener("load", () => {
           </div>
           <example-snippet stamp-to="swapTexturesExample" highlight-as="html">
             <template>
-<model-viewer id="helmet" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar alt="A 3D model of a helmet">
+<model-viewer id="helmet" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar alt="A 3D model of a helmet">
   <div class="controls">
     <div>
       <p>Diffuse</p>
       <select id="diffuse">
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_albedo.jpg">Damaged helmet</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_baseColor.png">Lantern Pole</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_baseColor.png">Water Bottle</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_albedo.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_baseColor.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_baseColor.png">Water Bottle</option>
       </select>
     </div>
     <div>
       <p>Metallic-roughness</p>
       <select id="metallicRoughness">
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_metalRoughness.jpg">Damaged helmet</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_roughnessMetallic.png">Lantern Pole</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_metalRoughness.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_roughnessMetallic.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
       </select>
     </div>
     <div>
       <p>Normals</p>
       <select id="normals">
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
       </select>
     </div>
     <div>
       <p>Occlusion</p>
       <select id="occlusion">
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_AO.jpg">Damaged helmet</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_AO.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
       </select>
     </div>
     <div>
       <p>Emission</p>
       <select id="emission">
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_emissive.jpg">Damaged helmet</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/Lantern/glTF/Lantern_emissive.png">Lantern Pole</option>
-        <option value="../../shared-assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle_emissive.png">Water Bottle</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_emissive.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_emissive.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_emissive.png">Water Bottle</option>
       </select>
     </div>
   </div>
@@ -491,7 +491,7 @@ modelViewerTexture1.addEventListener("load", () => {
           </div>
           <example-snippet stamp-to="transformTexturesExample" highlight-as="html">
             <template>
-<model-viewer id="box" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf" ar alt="A 3D model of a helmet">
+<model-viewer id="box" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Assets/Models/Cube/glTF/Cube.gltf" ar alt="A 3D model of a helmet">
   <div class="controls">
       <p>Rotation: <span id="texture-rotation"></span></p>
       <input type="range" min="0" max="3.14" value="0" step="0.01" id="rotationSlider">
@@ -688,7 +688,7 @@ modelViewerAnimated.addEventListener("load", async () => {
           </div>
           <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
             <template>
-<model-viewer id="pickMaterial" shadow-intensity="1" camera-controls touch-action="pan-y" disable-tap src="../../shared-assets/models/glTF-Sample-Models/2.0/Buggy/glTF-Binary/Buggy.glb" ar ar-modes="webxr scene-viewer" scale="0.001 0.001 0.001" alt="A Material Picking Example">
+<model-viewer id="pickMaterial" shadow-intensity="1" camera-controls touch-action="pan-y" disable-tap src="../../shared-assets/models/glTF-Sample-Assets/Models/MetalRoughSpheresNoTextures/glTF-Binary/MetalRoughSpheresNoTextures.glb" ar ar-modes="webxr" scale="100 100 100" alt="A Material Picking Example">
 </model-viewer>
 <script type="module">
 const modelViewer = document.querySelector("model-viewer#pickMaterial");
@@ -920,10 +920,6 @@ enum MagFilter {
         <li class="attribution">
           <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/Duck">Duck</a> by Sony Computer Entertainment Inc.,
           licensed under <a href="https://web.archive.org/web/20160320123355/http://research.scea.com/scea_shared_source_license.html">the SCEA Shared Source License, Version 1.0</a>.
-        </li>
-        <li class="attribution">
-          <a href="https://github.com/dataarts/3-dreams-of-black/tree/master/deploy/files/models/soup">Buggy</a> by Okino Computer Graphics,
-          Data conversion from original JT to COLLADA has been kindly performed by Okino Computer Graphics, using <a href="http://www.okino.com/conv/conv.htm">Okino Polytrans Software</a>.
         </li>
       </ul>
       <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
