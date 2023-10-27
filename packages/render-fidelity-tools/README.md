@@ -12,7 +12,7 @@ on [modelviewer.dev](https://modelviewer.dev).
 
 To get started, follow the instructions in [the main README.md file](../../README.md).
 
-In order to run `npm run update-screenshots`, you must have `imagemagick` installed.
+In order to run `npm run render-goldens`, you must have `imagemagick` installed.
 
 On macOS, you can install `imagemagick` with homebrew: `brew install imagemagick`
 
@@ -25,7 +25,7 @@ Command                         | Description
 `npm run build`                 | Build artifacts required to run testing and review tools
 `npm run clean`                 | Deletes all build artifacts
 `npm run test`                  | Run a render fidelity check comparing `<model-viewer>` to other renderers
-`npm run update-screenshots`    | Update the "golden" screenshots for all renderers
+`npm run render-goldens`        | Render the "golden" images for all renderers
 
 ### Fidelity Test CLI
 
@@ -45,13 +45,13 @@ To run a subset of scenarios do something like this:
 % npm run test -- --scenario=texture --quiet
 ```
 
-*NOTE: In the above example, the `--` is required to separate the arguments to `npm run update-screenshots` from the arguments to the script itself.*
+*NOTE: In the above example, the `--` is required to separate the arguments to `npm run test` from the arguments to the script itself.*
 
 After running `npm run test`, you can look at the results by starting a local web server (e.g. `npx http-server`) in this folder, then opening `test/results-viewer.html` in a browser.
 
-### Update Screenshots CLI
+### Render Goldens CLI
 
-For `npm run update-screenshots`, we support these command line options:
+For `npm run render-goldens`, we support these command line options:
 
 Command            | Default             | Description
 --------------------|----------- | -----------
@@ -66,7 +66,7 @@ Command            | Default             | Description
 To run a subset of renders or scenarios do something like this:
 
 ```
-% npm run update-screenshots -- --renderer=filament --renderer=model-viewer --scenario=clearcoat -q 
+% npm run render-goldens -- --renderer=filament --renderer=model-viewer --scenario=clearcoat -q 
 ```
 
-*NOTE: In the above example, the `--` is required to separate the arguments to `npm run update-screenshots` from the arguments to the script itself.*
+*NOTE: In the above example, the `--` is required to separate the arguments to `npm run render-goldens` from the arguments to the script itself.*

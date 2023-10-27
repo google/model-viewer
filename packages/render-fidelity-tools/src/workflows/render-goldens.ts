@@ -21,8 +21,8 @@ import {dirname, join, resolve} from 'path';
 import {ImageComparisonConfig} from '../common.js';
 import {ConfigReader} from '../config-reader.js';
 
-import {rendererScreenshot} from './update-screenshots/renderer-screenshot.js';
-import {rendererOffline} from './update-screenshots/renderer-offline.js';
+import {rendererScreenshot} from './render-goldens/renderer-screenshot.js';
+import {rendererOffline} from './render-goldens/renderer-offline.js';
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -36,7 +36,6 @@ type CommandLineArgs = {
   dryRun: boolean;
   quiet: boolean;
 }
-
 
 async function main() {
 
