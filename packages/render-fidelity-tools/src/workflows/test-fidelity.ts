@@ -62,6 +62,7 @@ screenshotCreator.fidelityTest(scenarioWhitelist)
     .then(() => {
       console.log(`✅ Results recorded to ${outputDirectory}`);
       server.close();
+      screenshotCreator.close();
 
       const fidelityRegressionPath =
           join(outputDirectory, 'fidelityRegressionResults.json');
