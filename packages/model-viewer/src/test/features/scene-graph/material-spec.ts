@@ -27,11 +27,11 @@ import {assetPath} from '../../helpers.js';
 
 const CUBES_GLTF_PATH = assetPath('models/cubes.gltf');
 const HELMET_GLB_PATH = assetPath(
-    'models/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+    'models/glTF-Sample-Assets/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
 const ALPHA_BLEND_MODE_TEST = assetPath(
-    'models/glTF-Sample-Models/2.0/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb');
+    'models/glTF-Sample-Assets/Models/AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb');
 const REPLACEMENT_TEXTURE_PATH = assetPath(
-    'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png');
+    'models/glTF-Sample-Assets/Models/BoxTextured/glTF/CesiumLogoFlat.png');
 suite('scene-graph/material', () => {
   suite('Test Texture Slots', () => {
     let element: ModelViewerElement;

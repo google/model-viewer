@@ -21,9 +21,9 @@ import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
 const DUCK_GLB_PATH =
-    assetPath('models/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb');
+    assetPath('models/glTF-Sample-Assets/Models/Duck/glTF-Binary/Duck.glb');
 const TEXTURED_CUBE_GLB_PATH = assetPath(
-    'models/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb');
+    'models/glTF-Sample-Assets/Models/BoxTextured/glTF-Binary/BoxTextured.glb');
 
 suite('scene-graph/texture-info', () => {
   suite('texture-info', () => {
@@ -58,7 +58,7 @@ suite('scene-graph/texture-info', () => {
 
     test('call setTexture', async () => {
       const texture = await element.createTexture(assetPath(
-          'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png'));
+          'models/glTF-Sample-Assets/Models/BoxTextured/glTF/CesiumLogoFlat.png'));
 
       // Setting a texture, the normal texture should _not_ be null.
       emptyTextureInfo.setTexture(texture);

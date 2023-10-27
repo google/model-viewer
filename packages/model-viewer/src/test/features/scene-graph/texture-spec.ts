@@ -36,7 +36,7 @@ suite('scene-graph/texture', () => {
       await waitForEvent(element, 'load');
 
       texture = await element.createTexture(assetPath(
-          'models/glTF-Sample-Models/2.0/BoxTextured/glTF/CesiumLogoFlat.png'));
+          'models/glTF-Sample-Assets/Models/BoxTextured/glTF/CesiumLogoFlat.png'));
 
       element.model!.materials[0]
           .pbrMetallicRoughness.baseColorTexture!.setTexture(texture);
