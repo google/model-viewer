@@ -257,7 +257,8 @@
       },
       "exclude": [
         "stellar",
-        "vray"
+        "vray",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -745,6 +746,22 @@
       },
       "exclude": [
         "stellar"
+      ]
+    },
+    {
+      "name": "khronos-AnisotropyBarnLamp",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/AnisotropyBarnLamp/glTF/AnisotropyBarnLamp.gltf",
+      "target": {
+        "y": -0.10
+      },
+      "orbit": {
+        "radius": 0.5
+      },
+      "exclude": [
+        "stellar",
+        "vray",
+        "model-viewer",
+        "three-gpu-pathtracer"
       ]
     },
     {
