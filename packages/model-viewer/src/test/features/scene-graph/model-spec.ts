@@ -28,7 +28,7 @@ import {assetPath, loadThreeGLTF, rafPasses} from '../../helpers.js';
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
-    assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
+    assetPath('models/glTF-Sample-Assets/Models/Triangle/glTF/Triangle.gltf');
 const CUBES_GLTF_PATH = assetPath('models/cubes.gltf');
 
 suite('scene-graph/model', () => {

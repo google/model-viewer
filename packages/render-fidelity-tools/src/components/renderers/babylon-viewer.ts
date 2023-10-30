@@ -14,8 +14,8 @@
  */
 
 import '@babylonjs/loaders/glTF';
-
-import {ArcRotateCamera, Axis, Color4, Constants, Engine, HDRCubeTexture, ImageProcessingConfiguration, Material, Matrix, PBRMaterial, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
+import { GLTFFileLoader } from '@babylonjs/loaders/glTF';
+import {ArcRotateCamera, Axis, Color4, Constants, Engine, HDRCubeTexture, ISceneLoaderPlugin, ISceneLoaderPluginAsync, ImageProcessingConfiguration, Material, Matrix, PBRMaterial, Scene, SceneLoader, Space, Tools, Vector3} from '@babylonjs/core';
 import {css, html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js'
 
@@ -115,6 +115,14 @@ export class BabylonViewer extends LitElement {
     // in babylon, camera use VERTICAL_FIXED mode by default, so fov here is
     // equal to vertical fov
     camera.fov = this[$degToRadians](verticalFoV);
+
+    // Enable `transparencyAsCoverage` to be spec-comformant.
+    SceneLoader.OnPluginActivatedObservable.addOnce((plugin: ISceneLoaderPlugin | ISceneLoaderPluginAsync) => {
+        if (plugin.name === "gltf") {
+            const loader = (plugin as GLTFFileLoader);
+            loader.transparencyAsCoverage = true;
+        }
+    });
 
     const lastSlashIndex = scenario.model.lastIndexOf('/');
     const modelRootPath = scenario.model.substring(0, lastSlashIndex + 1);

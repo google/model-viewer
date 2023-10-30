@@ -256,6 +256,10 @@
         "name": "Transform Textures"
       },
       {
+        "htmlId": "hideShowMeshVariantsExample",
+        "name": "Hide/Show Mesh Variants"
+      },
+      {
         "htmlId": "animatedTexturesExample",
         "name": "Animated Textures"
       },
