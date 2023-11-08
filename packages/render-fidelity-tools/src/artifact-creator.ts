@@ -68,6 +68,11 @@ export class ArtifactCreator {
     const {rootDirectory, outputDirectory, goldens} = this;
     const {name: scenarioName, exclude, dimensions} = scenario;
 
+    // skip if this renderer is excluded from this scenario
+    if(exclude != null && exclude.includes(renderer) ) {
+      return;
+    }
+
     console.log(
         `Start to compare ${renderer}'s golden with other renderers' goldens:`);
 
@@ -200,7 +205,13 @@ export class ArtifactCreator {
       const scenarioName = scenarioBase.name;
       const scenario = this[$configReader].scenarioConfig(scenarioName)!;
 
+      // skip if white lists exists and this scenario isn't in it
       if (scenarioWhitelist != null && !scenarioWhitelist.has(scenarioName)) {
+        continue;
+      }
+
+      // skip if this renderer is excluded from this scenario
+      if(scenario.exclude != null && scenario.exclude.includes(renderer) ) {
         continue;
       }
 
@@ -240,6 +251,9 @@ export class ArtifactCreator {
         {},
         this.config,
         {scenarios: analyzedScenarios, errors: compareRenderersErrors});
+
+    // ensure directory exists, this can happen if all scenarios are ignored
+    await fs.mkdir(outputDirectory, {recursive: true});
 
     await fs.writeFile(
         join(outputDirectory, 'config.json'), JSON.stringify(finalConfig));

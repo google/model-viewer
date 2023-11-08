@@ -257,7 +257,8 @@
       },
       "exclude": [
         "stellar",
-        "vray"
+        "vray",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -404,6 +405,37 @@
       },
       "exclude": [
         "stellar",
+        "three-gpu-pathtracer"
+      ]
+    },
+    {
+      "name": "khronos-GlassHurricaneCandleHolder",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/GlassHurricaneCandleHolder/glTF-Binary/GlassHurricaneCandleHolder.glb",
+      "target": {
+        "y": 0.13
+      },
+      "orbit": {
+        "radius": 0.75
+      },
+      "exclude": [
+        "stellar",
+        "vray",
+        "three-gpu-pathtracer"
+      ]
+    },
+    {
+      "name": "khronos-GlassVaseFlowers",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/GlassVaseFlowers/glTF-Binary/GlassVaseFlowers.glb",
+      "target": {
+        "y": 0.1,
+        "x": 0.05
+      },
+     "orbit": {
+        "radius": 0.5
+      },
+      "exclude": [
+        "stellar",
+        "vray",
         "three-gpu-pathtracer"
       ]
     },
@@ -609,11 +641,38 @@
       ]
     },
     {
+      "name": "khronos-ClearCoatCarPaint",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/ClearCoatCarPaint/glTF/ClearCoatCarPaint.gltf",
+      "target": {
+        "y": 0.5
+      },
+      "orbit": {
+        "radius": 2
+      },
+      "exclude": [
+        "stellar",
+        "vray",
+        "three-gpu-pathtracer"
+      ]
+    },
+    {
       "name": "khronos-ClearCoatTest",
       "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/ClearCoatTest/glTF/ClearCoatTest.gltf",
       "orbit": {
         "radius": 20
       }
+    },
+    {
+      "name": "khronos-NegativeScaleTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/NegativeScaleTest/glTF/NegativeScaleTest.gltf",
+      "orbit": {
+        "radius": 13
+      },
+      "exclude": [
+        "stellar",
+        "vray",
+        "three-gpu-pathtracer"
+      ]
     },
     {
       "name": "khronos-NormalTangentMirrorTest",
@@ -687,6 +746,49 @@
       },
       "exclude": [
         "stellar"
+      ]
+    },
+    {
+      "name": "khronos-AnisotropyBarnLamp",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/AnisotropyBarnLamp/glTF/AnisotropyBarnLamp.gltf",
+      "target": {
+        "y": -0.10
+      },
+      "orbit": {
+        "radius": 0.5
+      },
+      "exclude": [
+        "stellar",
+        "vray",
+        "model-viewer",
+        "three-gpu-pathtracer"
+      ]
+    },
+    {
+      "name": "khronos-AnisotropyRotationTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/AnisotropyRotationTest/glTF/AnisotropyRotationTest.gltf",
+      "orbit": {
+        "radius": 18
+      },
+      "exclude": [
+        "stellar",
+        "vray",
+        "three-gpu-pathtracer"
+      ]
+    },
+    {
+      "name": "khronos-AnisotropyStrengthTest",
+      "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/AnisotropyStrengthTest/glTF/AnisotropyStrengthTest.gltf",
+      "target": {
+        "y": 2.5
+      },
+      "orbit": {
+        "radius": 12
+      },
+      "exclude": [
+        "stellar",
+        "vray",
+        "three-gpu-pathtracer"
       ]
     },
     {
