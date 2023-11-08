@@ -47,7 +47,7 @@ DEPLOYABLE_STATIC_FILES=( \
   shared-assets/models/glTF-Sample-Assets/Models/FlightHelmet \
   shared-assets/models/glTF-Sample-Assets/Models/Lantern \
   shared-assets/models/glTF-Sample-Assets/Models/MaterialsVariantsShoe \
-  shared-assets/models/glTF-Sample-Assets/Models/MetalRoughSpheres \
+  shared-assets/models/glTF-Sample-Assets/Models/MetalRoughSpheresNoTextures \
   shared-assets/models/glTF-Sample-Assets/Models/Suzanne \
   shared-assets/models/glTF-Sample-Assets/Models/SpecGlossVsMetalRough \
   shared-assets/models/glTF-Sample-Assets/Models/ToyCar \
