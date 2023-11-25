@@ -127,16 +127,25 @@ def main():
           "outputFile": "../../../test/goldens/khronos-SheenChair/stellar-golden.png"
         }
     """
-    config = json.loads(sys.argv[5])
+    config = json.loads(sys.argv[4])
 
     scenario = config["scenario"]
     outpath = config["outputFile"]
     directory = os.path.dirname(outpath)
+    packages_directory = directory.split("render-fidelity-tools")[0]
     # parse scenario
     width = scenario["dimensions"]["width"]  # * 2
     height = scenario["dimensions"]["height"]  # * 2
-    scenePath = "shared-assets" + scenario["model"].split("shared-assets")[1]
-    iblPath = "shared-assets" + scenario["lighting"].split("shared-assets")[1]
+    scenePath = (
+        packages_directory
+        + "shared-assets"
+        + scenario["model"].split("shared-assets")[1]
+    )
+    iblPath = (
+        packages_directory
+        + "shared-assets"
+        + scenario["lighting"].split("shared-assets")[1]
+    )
     render_skybox = scenario["renderSkybox"]
     target = np.array(
         [scenario["target"]["x"], scenario["target"]["y"], scenario["target"]["z"]]
