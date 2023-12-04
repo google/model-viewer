@@ -90,9 +90,8 @@ export class CorrelatedSceneGraph {
     // Creates a reverse look up map (gltf-object to Three-object)
     for (const [threeObject, gltfMappings] of associations) {
       if (gltfMappings) {
-        const objWithUserData = threeObject as {userData: {associations: {}}};
-        objWithUserData.userData = objWithUserData.userData || {};
-        objWithUserData.userData.associations = gltfMappings;
+        threeObject.userData = threeObject.userData || {};
+        threeObject.userData.associations = gltfMappings;
       }
 
       for (const mapping in gltfMappings) {
