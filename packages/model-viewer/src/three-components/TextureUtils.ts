@@ -82,11 +82,11 @@ export default class TextureUtils {
 
   async loadImage(url: string): Promise<Texture> {
     const texture: Texture = await new Promise<Texture>(
-        (resolve, reject) => this.imageLoader.load(
-            url,
-            (result) => resolve(result.renderTarget.texture),
-            () => {},
-            reject));
+        (resolve, reject) => this.imageLoader.load(url, (result) => {
+          const {texture} = result.renderTarget;
+          result.dispose(false);
+          resolve(texture)
+        }, () => {}, reject));
     texture.name = url;
     texture.flipY = false;
 
@@ -116,7 +116,9 @@ export default class TextureUtils {
                 const {renderTarget} =
                     result as QuadRenderer<1016, GainMapDecoderMaterial>;
                 if (renderTarget != null) {
-                  resolve(renderTarget.texture);
+                  const {texture} = renderTarget;
+                  result.dispose(false);
+                  resolve(texture);
                 } else {
                   resolve(result as DataTexture);
                 }
