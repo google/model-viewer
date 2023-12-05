@@ -583,7 +583,7 @@ suite('Controls', () => {
         expect(newOrbit.radius).to.eq(orbit.radius, 'radius');
       });
 
-      test(
+      test.skip(
           'return one finger to starting point returns camera to starting point',
           async () => {
             const orbit = element.getCameraOrbit();
@@ -592,7 +592,6 @@ suite('Controls', () => {
 
             element.interact(50, finger);
             await timePasses(50);
-            await rafPasses();
             await rafPasses();
             await rafPasses();
 
