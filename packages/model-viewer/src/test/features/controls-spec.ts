@@ -594,6 +594,7 @@ suite('Controls', () => {
             await timePasses(50);
             await rafPasses();
             await rafPasses();
+            await rafPasses();
 
             const newOrbit = element.getCameraOrbit();
             expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
