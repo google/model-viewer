@@ -83,7 +83,8 @@
     "3d"
   ],
   "dependencies": {
-    "lit": "^2.7.2"
+    "lit": "^2.7.2",
+    "@monogrid/gainmap-js": "^3.0.1"
   },
   "peerDependencies": {
     "three": "^0.159.0"
