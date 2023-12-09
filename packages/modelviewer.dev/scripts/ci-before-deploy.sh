@@ -35,24 +35,23 @@ DEPLOYABLE_STATIC_FILES=( \
   README.md \
   shared-assets/models/*.* \
   shared-assets/models/twitter \
-  shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine \
-  shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest \
-  shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \
-  shared-assets/models/glTF-Sample-Models/2.0/BoomBox \
-  shared-assets/models/glTF-Sample-Models/2.0/BoxTextured \
-  shared-assets/models/glTF-Sample-Models/2.0/Buggy \
-  shared-assets/models/glTF-Sample-Models/2.0/BrainStem \
-  shared-assets/models/glTF-Sample-Models/2.0/Corset \
-  shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet \
-  shared-assets/models/glTF-Sample-Models/2.0/Duck \
-  shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet \
-  shared-assets/models/glTF-Sample-Models/2.0/Lantern \
-  shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe \
-  shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres \
-  shared-assets/models/glTF-Sample-Models/2.0/Suzanne \
-  shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
-  shared-assets/models/glTF-Sample-Models/2.0/ToyCar \
-  shared-assets/models/glTF-Sample-Models/2.0/WaterBottle \
+  shared-assets/models/glTF-Sample-Assets/Models/AlphaBlendModeTest \
+  shared-assets/models/glTF-Sample-Assets/Models/AntiqueCamera \
+  shared-assets/models/glTF-Sample-Assets/Models/BoomBox \
+  shared-assets/models/glTF-Sample-Assets/Models/BoxTextured \
+  shared-assets/models/glTF-Sample-Assets/Models/BrainStem \
+  shared-assets/models/glTF-Sample-Assets/Models/Corset \
+  shared-assets/models/glTF-Sample-Assets/Models/Cube \
+  shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet \
+  shared-assets/models/glTF-Sample-Assets/Models/Duck \
+  shared-assets/models/glTF-Sample-Assets/Models/FlightHelmet \
+  shared-assets/models/glTF-Sample-Assets/Models/Lantern \
+  shared-assets/models/glTF-Sample-Assets/Models/MaterialsVariantsShoe \
+  shared-assets/models/glTF-Sample-Assets/Models/MetalRoughSpheresNoTextures \
+  shared-assets/models/glTF-Sample-Assets/Models/Suzanne \
+  shared-assets/models/glTF-Sample-Assets/Models/SpecGlossVsMetalRough \
+  shared-assets/models/glTF-Sample-Assets/Models/ToyCar \
+  shared-assets/models/glTF-Sample-Assets/Models/WaterBottle \
   shared-assets/environments \
   shared-assets/icons \
 )

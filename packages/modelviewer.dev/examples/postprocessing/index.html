@@ -32,7 +32,7 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@^0.156.1/build/three.module.min.js"
+        "three": "https://cdn.jsdelivr.net/npm/three@^0.159.0/build/three.module.min.js"
       }
     }
   </script>
@@ -104,7 +104,7 @@ button {
 <script type="importmap-noexecute">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@^0.156.1/build/three.module.min.js"
+    "three": "https://cdn.jsdelivr.net/npm/three@^0.159.0/build/three.module.min.js"
   }
 }
 </script>
@@ -125,7 +125,7 @@ button {
           <example-snippet stamp-to="setup" highlight-as="html">
             <template>
 <!-- Use the <effect-composer> component inside the <model-viewer> element -->
-<model-viewer autoplay ar camera-controls touch-action="pan-y" src="../../shared-assets/models/Horse.glb" alt="A 3D model of a horse galloping.">
+<model-viewer autoplay ar camera-controls touch-action="pan-y" src="../../shared-assets/models/Horse.glb" scale="0.01 0.01 0.01" alt="A 3D model of a horse galloping.">
   <effect-composer>
     <pixelate-effect></pixelate-effect>
   </effect-composer>

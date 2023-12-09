@@ -1,6 +1,6 @@
 {
   "name": "@google/model-viewer",
-  "version": "3.2.1",
+  "version": "3.3.0",
   "description": "Easily display interactive 3D models on the web and in AR!",
   "repository": "https://github.com/google/model-viewer",
   "bugs": {
@@ -83,10 +83,11 @@
     "3d"
   ],
   "dependencies": {
-    "lit": "^2.7.2"
+    "lit": "^2.7.2",
+    "@monogrid/gainmap-js": "^3.0.1"
   },
   "peerDependencies": {
-    "three": "^0.156.1"
+    "three": "^0.159.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
@@ -95,7 +96,7 @@
     "@types/chai": "^4.3.1",
     "@types/mocha": "^9.1.1",
     "@types/pngjs": "^6.0.1",
-    "@types/three": "^0.154.0",
+    "@types/three": "^0.159.0",
     "@ungap/event-target": "^0.2.3",
     "@web/test-runner": "^0.16.1",
     "@web/test-runner-playwright": "^0.10.0",
@@ -109,7 +110,7 @@
     "rollup-plugin-polyfill": "^3.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "4.8.4",
-    "three": "^0.156.1"
+    "three": "^0.159.0"
   },
   "publishConfig": {
     "access": "public"

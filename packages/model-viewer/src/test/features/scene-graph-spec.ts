@@ -33,7 +33,7 @@ const MESH_PRIMITIVES_GLB_PATH =
     assetPath('models/MeshPrimitivesVariants.glb');   // has variants
 const CUBE_GLB_PATH = assetPath('models/cube.gltf');  // has UV coords
 const RIGGEDFIGURE_GLB_PATH = assetPath(
-    'models/glTF-Sample-Models/2.0/RiggedFigure/glTF-Binary/RiggedFigure.glb');
+    'models/glTF-Sample-Assets/Models/RiggedFigure/glTF-Binary/RiggedFigure.glb');
 
 function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
   // TODO: export is putting in an extra node layer, because the loader
@@ -278,7 +278,7 @@ suite('SceneGraph', () => {
           await rafPasses();
 
           const url = assetPath(
-              'models/glTF-Sample-Models/2.0/DamagedHelmet/glTF/Default_albedo.jpg');
+              'models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_albedo.jpg');
           const blob = await fetch(url).then(r => r.blob());
           const objectUrl = URL.createObjectURL(blob);
           const texture = await element.createTexture(objectUrl, 'image/jpeg');

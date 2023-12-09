@@ -34,7 +34,7 @@ const MODEL_URL = assetPath('models/reflective-sphere.gltf');
  */
 const waitForLoadAndEnvMap = (element: ModelViewerElementBase) => {
   const load = waitForEvent(element, 'poster-dismissed');
-  const envMap = waitForEvent(element[$scene], 'envmap-update');
+  const envMap = waitForEvent(element, 'environment-change');
   return Promise.all([load, envMap]);
 };
 
@@ -77,7 +77,7 @@ suite('Environment', () => {
         document.body.insertBefore(element, document.body.firstChild);
 
         environmentChanges = 0;
-        scene.addEventListener('envmap-update', () => {
+        element.addEventListener('environment-change', () => {
           environmentChanges++;
         });
         await onLoad;
@@ -162,7 +162,7 @@ suite('Environment', () => {
 
     suite('and environment-image subsequently removed', () => {
       setup(async () => {
-        const envMapChanged = waitForEvent(scene, 'envmap-update');
+        const envMapChanged = waitForEvent(element, 'environment-change');
         element.removeAttribute('environment-image');
         await envMapChanged;
       });
@@ -220,9 +220,9 @@ suite('Environment', () => {
 
       suite('and skybox-image subsequently removed', () => {
         setup(async () => {
-          const envMapChanged = waitForEvent(scene, 'envmap-update');
           element.removeAttribute('skybox-image');
-          await envMapChanged;
+          await element.updateComplete;
+          await rafPasses();
         });
 
         test('continues using environment-image as environment map', () => {
@@ -237,7 +237,7 @@ suite('Environment', () => {
 
     suite('and skybox-image subsequently removed', () => {
       setup(async () => {
-        const envMapChanged = waitForEvent(scene, 'envmap-update');
+        const envMapChanged = waitForEvent(element, 'environment-change');
         element.removeAttribute('skybox-image');
         await envMapChanged;
       });

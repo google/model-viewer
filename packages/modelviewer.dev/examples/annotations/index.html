@@ -180,6 +180,8 @@
     tailRect = document.querySelector('#tail').getBoundingClientRect();
   }
 
+  window.addEventListener("resize", onResize);
+
   modelViewer1.addEventListener('ar-status', onResize);
 
   modelViewer1.addEventListener('load', () => {
@@ -329,19 +331,24 @@
 
   const checkbox = modelViewer.querySelector('#show-dimensions');
 
-  function setVisibility(element) {
-    if (checkbox.checked) {
-      element.classList.remove('hide');
-    } else {
-      element.classList.add('hide');
-    }
+  const dimElements = [...modelViewer.querySelectorAll('button'), modelViewer.querySelector('#dimLines')];
+
+  function setVisibility(visible) {
+    dimElements.forEach((element) => {
+      if (visible) {
+        element.classList.remove('hide');
+      } else {
+        element.classList.add('hide');
+      }
+    });
   }
 
   checkbox.addEventListener('change', () => {
-    setVisibility(modelViewer.querySelector('#dimLines'));
-    modelViewer.querySelectorAll('button').forEach((hotspot) => {
-      setVisibility(hotspot);
-    });
+    setVisibility(checkbox.checked);
+  });
+
+  modelViewer.addEventListener('ar-status', (event) => {
+    setVisibility(event.detail.status !== 'session-started');
   });
 
   // update svg
@@ -371,8 +378,6 @@
     drawLine(dimLines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
     drawLine(dimLines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
   };
-
-  modelViewer.addEventListener('camera-change', renderSVG);
 
   modelViewer.addEventListener('load', () => {
     const center = modelViewer.getBoundingBoxCenter();
@@ -447,6 +452,8 @@
     });
 
     renderSVG();
+
+    modelViewer.addEventListener('camera-change', renderSVG);
   });
 </script>
 <style>

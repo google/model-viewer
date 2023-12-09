@@ -26,6 +26,7 @@ const ATTRIBUTE_LIST: string[] = [
   'environment-image',
   'skybox-image',
   'exposure',
+  'tone-mapping',
   'poster',
   'reveal',
   'shadow-intensity',
@@ -108,6 +109,7 @@ export function parseSnippet(snippet: string): ModelViewerConfig {
   config.useEnvAsSkybox = config.environmentImage !== undefined &&
       modelViewer.getAttribute('skybox-image') === config.environmentImage;
   config.exposure = tryParseNumberAttribute(modelViewer, 'exposure');
+  config.toneMapping = modelViewer.getAttribute('tone-mapping') || undefined;
   config.poster = modelViewer.getAttribute('poster') || undefined;
   config.reveal = modelViewer.getAttribute('reveal') || undefined;
   config.shadowIntensity =

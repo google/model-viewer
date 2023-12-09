@@ -32,7 +32,7 @@ import {ArConfigState, BestPracticesState, extractStagingConfig, ModelViewerConf
 import {getBestPractices} from '../best_practices/reducer.js';
 import {arButtonCSS, progressBarCSS} from '../best_practices/styles.css.js';
 import {dispatchCameraIsDirty} from '../camera_settings/reducer.js';
-import {dispatchAutoplayEnabled, dispatchCameraControlsEnabled, dispatchConfig, dispatchEnvrionmentImage, getConfig} from '../config/reducer.js';
+import {dispatchAutoplayEnabled, dispatchCameraControlsEnabled, dispatchConfig, dispatchEnvironmentImage, getConfig} from '../config/reducer.js';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element.js';
 import {dispatchAddHotspot, dispatchSetHotspots, dispatchUpdateHotspotMode, generateUniqueHotspotName, getHotspotMode, getHotspots} from '../hotspot_panel/reducer.js';
 import {HotspotConfig} from '../hotspot_panel/types.js';
@@ -224,7 +224,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
             const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
             reduxStore.dispatch(
                 dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
-            reduxStore.dispatch(dispatchEnvrionmentImage(unsafeUrl));
+            reduxStore.dispatch(dispatchEnvironmentImage(unsafeUrl));
             reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
           }
     }

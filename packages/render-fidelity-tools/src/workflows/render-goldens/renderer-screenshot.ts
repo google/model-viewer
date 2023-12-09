@@ -18,17 +18,17 @@ import HTTPServer from 'http-server';
 import {ArtifactCreator} from '../../artifact-creator.js';
 import {ImageComparisonConfig} from '../../common.js';
 
-const port = 9040;
 
 export const rendererScreenshot = async(
     config: ImageComparisonConfig,
     rootDirectory: string,
-
     renderer: string,
     scenarioName: string,
     outputFile: string,
     width: number = 10,
-    height: number = 10): Promise<void> => {
+    height: number = 10,
+    port: number = 9040,
+    quiet: boolean = false): Promise<void> => {
   const dimensions = {width, height};
   const server = HTTPServer.createServer({root: '../../', cache: -1});
 
@@ -49,9 +49,10 @@ export const rendererScreenshot = async(
   }
 
   try {
-    await screenshotCreator.captureScreenshot(
-        renderer, scenarioName, dimensions, outputFile);
+    await screenshotCreator.captureScreenshot( 
+        renderer, scenarioName, dimensions, outputFile, -1, quiet);
   } finally {
     server.close();
+    screenshotCreator.close();
   }
 };

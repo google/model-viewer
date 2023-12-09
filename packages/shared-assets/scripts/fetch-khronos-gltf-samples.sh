@@ -18,31 +18,9 @@
 # This script is responsible for cloning and / or updating the local repository
 # of Khronos glTF sample models
 
-REPO_URL=https://github.com/KhronosGroup/glTF-Sample-Models.git
-CLONE_PATH=$(dirname $0)/../models/glTF-Sample-Models
-
-if [ ! -d "$CLONE_PATH/.git" ]; then
-  git clone --depth=1 $REPO_URL $CLONE_PATH
-fi
-
-pushd $CLONE_PATH
-ORIGIN_URL=`git config remote.origin.url`;
-
 echo '🐶 Fetching Khronos glTF sample models.
 🐕 WARNING: This might result in hundreds of megabytes of data usage!'
 
-if [ -z "$ORIGIN_URL" ]; then
-  git remote add origin $REPO_URL
-else
-  if [ ! "$REPO_URL" == "$ORIGIN_URL" ]; then
-    git remote rm origin
-    git remote add origin $REPO_URL
-  fi
-fi
-
-git fetch origin
-git reset --hard origin/master
+git submodule update --init --recursive
 
 echo '🎾 Sample models are now available'
-
-popd

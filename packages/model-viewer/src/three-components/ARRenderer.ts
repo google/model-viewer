@@ -77,7 +77,8 @@ const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
 const camera = new PerspectiveCamera(45, 1, 0.1, 100);
 
-export class ARRenderer extends EventDispatcher {
+export class ARRenderer extends EventDispatcher<
+    {status: {status: ARStatus}, tracking: {status: ARTracking}}> {
   public threeRenderer: WebGLRenderer;
   public currentSession: XRSession|null = null;
   public placeOnWall = false;

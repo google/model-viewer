@@ -19,10 +19,10 @@ import '@material/mwc-button';
 
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {html, LitElement} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 import {SimpleDropzone} from 'simple-dropzone';
 
-import {dispatchConfig, dispatchEnvrionmentImage, getConfig} from '../../../components/config/reducer.js';
+import {dispatchConfig, dispatchEnvironmentImage, getConfig} from '../../../components/config/reducer.js';
 import {reduxStore} from '../../../space_opera_base.js';
 import {fileModalStyles, openModalStyles} from '../../../styles.css.js';
 import {ArConfigState, extractStagingConfig, ModelViewerConfig, RelativeFilePathsState, State} from '../../../types.js';
@@ -267,7 +267,7 @@ export class ImportCard extends LitElement {
         return;
       }
       reduxStore.dispatch(dispatchAddEnvironmentImage({uri, name: file.name}));
-      reduxStore.dispatch(dispatchEnvrionmentImage(uri));
+      reduxStore.dispatch(dispatchEnvironmentImage(uri));
       reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
     }
   }
@@ -284,7 +284,8 @@ export class ImportCard extends LitElement {
       'Astronaut': 1,
       'Horse': 2,
       'RobotExpressive': 3,
-      'alpha-blend-litmus': 4
+      'alpha-blend-litmus': 4,
+      'MacbethBalls': 11
     };
     const advancedMap: any = {
       'BoomBox': 5,
@@ -304,7 +305,7 @@ export class ImportCard extends LitElement {
     }
 
     const rootPath = 'https://modelviewer.dev/shared-assets/models/' +
-        (key in advancedMap ? `glTF-Sample-Models/2.0/${key}/glTF-Binary/` :
+        (key in advancedMap ? `glTF-Sample-Assets/Models/${key}/glTF-Binary/` :
                               '');
     const fileName = `${key}.glb`;
 
@@ -343,6 +344,7 @@ export class ImportCard extends LitElement {
         <paper-item value='DamagedHelmet'>Damaged Helmet</paper-item>
         <paper-item value='Lantern'>Lantern</paper-item>
         <paper-item value='SpecGlossVsMetalRough'>Water Bottles</paper-item>
+        <paper-item value='MacbethBalls'>Macbeth</paper-item>
       </me-dropdown>
       <mwc-button unelevated label="GLB" icon="file_upload" class="UploadButton">
         <label for="file-input" class="FileInputLabel"/>
