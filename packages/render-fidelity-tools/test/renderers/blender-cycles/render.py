@@ -133,9 +133,9 @@ def main():
     outpath = config["outputFile"]
     directory = os.path.dirname(outpath)
     packages_directory = directory.split("render-fidelity-tools")[0]
-    # parse scenario
-    width = scenario["dimensions"]["width"]  # * 2
-    height = scenario["dimensions"]["height"]  # * 2
+    # multiply resolution by 2 to match other renderers
+    width = scenario["dimensions"]["width"] * 2
+    height = scenario["dimensions"]["height"] * 2
     scenePath = (
         packages_directory
         + "shared-assets"
