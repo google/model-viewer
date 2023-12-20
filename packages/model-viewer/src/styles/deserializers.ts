@@ -47,13 +47,7 @@ export const enumerationDeserializer = <T extends string>(allowedNames: T[]) =>
                           .map(valueNode => valueNode.value as T)
                           .filter(name => allowedNames.indexOf(name) > -1);
 
-        // NOTE(cdata): IE11 does not support constructing a Set directly from
-        // an iterable, so we need to manually add all the items:
-        const result = new Set<T>();
-        for (const name of names) {
-          result.add(name);
-        }
-        return result;
+        return new Set<T>(names);
       } catch (_error) {
       }
       return new Set();

@@ -888,11 +888,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     [$onPointerChange] = (event: PointerChangeEvent) => {
-      if (event.type === 'pointer-change-start') {
-        this[$container].classList.add('pointer-tumbling');
-      } else {
-        this[$container].classList.remove('pointer-tumbling');
-      }
+      this[$container].classList.toggle('pointer-tumbling', event.type === 'pointer-change-start');
     };
   }
 
