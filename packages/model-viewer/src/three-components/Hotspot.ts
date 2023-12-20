@@ -175,12 +175,7 @@ export class Hotspot extends CSS2DObject {
   }
 
   updateVisibility(show: boolean) {
-    // NOTE: IE11 doesn't support a second arg for classList.toggle
-    if (show) {
-      this.element.classList.remove('hide');
-    } else {
-      this.element.classList.add('hide');
-    }
+    this.element.classList.toggle('hide', !show);
 
     // NOTE: ShadyDOM doesn't support slot.assignedElements, otherwise we could
     // use that here.
@@ -196,12 +191,7 @@ export class Hotspot extends CSS2DObject {
       if (visibilityAttribute != null) {
         const attributeName = `data-${visibilityAttribute}`;
 
-        // NOTE: IE11 doesn't support toggleAttribute
-        if (show) {
-          element.setAttribute(attributeName, '');
-        } else {
-          element.removeAttribute(attributeName);
-        }
+        element.toggleAttribute(attributeName, show);
       }
 
       element.dispatchEvent(new CustomEvent('hotspot-visibility', {
