@@ -207,34 +207,6 @@ export const isDebugMode = (() => {
 
 
 /**
- * Returns the first key in a Map in iteration order.
- *
- * NOTE(cdata): This is necessary because IE11 does not implement iterator
- * methods of Map, and polymer-build does not polyfill these methods for
- * compatibility and performance reasons. This helper proposes that it is
- * a reasonable compromise to sacrifice a very small amount of runtime
- * performance in IE11 for the sake of code clarity.
- */
-export const getFirstMapKey = <T = any, U = any>(map: Map<T, U>): T|null => {
-  if (map.keys != null) {
-    return map.keys().next().value || null;
-  }
-
-  let firstKey: T|null = null;
-
-  try {
-    map.forEach((_value: U, key: T, _map: Map<T, U>) => {
-      firstKey = key;
-      // Stop iterating the Map with forEach:
-      throw new Error();
-    });
-  } catch (_error) {
-  }
-
-  return firstKey;
-};
-
-/**
  * Three.js EventDispatcher and DOM EventTarget use different event patterns,
  * so AnyEvent covers the shape of both event types.
  */
