@@ -57,10 +57,9 @@ window.oscillate = function(min, max, period, time) {
       <div class="content">
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Lighting &amp; Environment. </span>Control the lighting and the environment surrounding &lt;model-viewer&gt;. This page showcases the skybox-image attribute, which links to an equirectangular projection image which is used as the skybox, and applied as an environment map to the model.</h4>
-          <h4>Since the environment map represents scene lighting, it requires extremely high dynamic range to realistically represent either natural or artificial scenes. Traditionally the .hdr image format was used for this purpose (and is supported here), but it has poor compression. Recently, the UltraHDR image format was introduced which is backwards-compatible with JPEG, still called .jpg but efficiently compresses HDR image data. The examples on this page use UltraHDR to showcase its 10x - 30x savings over .hdr. You can use this free <a href=https://gainmap-creator.monogrid.com>converter</a> to compress your .hdr and .exr environment images - choose save as JPEG.</h4>
           <div class="heading">
             <h2 class="demo-title">An equirectangular HDR <span class="attribute">skybox-image</span></h2>
-            <h4></h4>
+            <p>Since the environment map represents scene lighting, it requires extremely high dynamic range to realistically represent either natural or artificial scenes. Traditionally the .hdr image format was used for this purpose (and is supported here), but it has poor compression. Recently, the UltraHDR image format was introduced which is backwards-compatible with JPEG, still called .jpg but efficiently compresses HDR image data. The examples on this page use UltraHDR to showcase its 10x - 30x savings over .hdr. You can use this free <a href=https://gainmap-creator.monogrid.com>converter</a> to compress your .hdr and .exr environment images - choose save as JPEG.</p>
           </div>
           <example-snippet stamp-to="hdrSkyboxImage" highlight-as="html">
             <template>
@@ -76,12 +75,13 @@ window.oscillate = function(min, max, period, time) {
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">An equirectangular <span class="attribute">skybox-image</span> projected onto the ground using a 1.5 meter <span class="attribute">skybox-height</span>, denoting the height of the camera that took the image.</h2>
-            <h4></h4>
+            <h2 class="demo-title">Ground-projected Skybox</h2>
+            <p>This is an example of an equirectangular <span class="attribute">skybox-image</span> projected onto the ground using a 1.5 meter <span class="attribute">skybox-height</span>, denoting the height of the camera that took the image. If the camera's height is unknown, a larger value will cause the image below the model to expand. Generally it is best to have a height similar to the size of your model.</p>
+            <p>Note that ground-projected skyboxes work best with images where the ground is fairly flat and devoid of objects, and the horizon is distant. Indoor images will generally give poor results.</p>
           </div>
           <example-snippet stamp-to="groundedSkybox" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/whipple_creek_regional_park_04_1k.jpg" skybox-height="1.5m" shadow-intensity="2" max-camera-orbit="auto 90deg auto" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" skybox-height="1.5m" shadow-intensity="2" max-camera-orbit="auto 90deg auto" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -93,12 +93,12 @@ window.oscillate = function(min, max, period, time) {
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">An equirectangular ground-projected <span class="attribute">skybox-image</span> with an unlit model</h2>
-            <h4></h4>
+            <h2 class="demo-title">Unlit Model</h2>
+            <p>An equirectangular ground-projected <span class="attribute">skybox-image</span> with an unlit model</p>
           </div>
           <example-snippet stamp-to="unlitModel" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/whipple_creek_regional_park_04_1k.jpg" skybox-height="1.5m" shadow-intensity="2" alt="An unlit 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut-Unlit.glb"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" skybox-height="1.5m" shadow-intensity="2" alt="An unlit 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut-Unlit.glb"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -115,7 +115,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="environmentLighting" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" environment-image="../../shared-assets/environments/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a sphere reflecting a forest" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" environment-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" alt="A 3D model of a sphere reflecting a forest" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -128,14 +128,14 @@ window.oscillate = function(min, max, period, time) {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Showing the difference between our two baked-in lighting environments</h2>
-            <h4>If no environment or skybox is specified, we have a baked-in
+            <p>If no environment or skybox is specified, we have a baked-in
             default scene that is faster to load. It is designed as a neutral
             lighting environment that is evenly lit on all sides, but there is
             also a baked-in legacy lighting primarily for frontward viewing, and
             can be activated by setting 
             <span class="attribute">environment-image="legacy"</span>. Our
             default neutral lighting has been roughly calibrated to render
-            colors at nearly their baseColorMap RGB values.</h4>
+            colors at nearly their baseColorMap RGB values.</p>
           </div>
           <example-snippet stamp-to="neutralLighting" highlight-as="html">
             <template>
@@ -199,7 +199,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="shadows" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" environment-image="../../shared-assets/environments/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" environment-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
 <script>
 (() => {
   const modelViewer = document.querySelector('#shadow-intensity-demo');
@@ -242,14 +242,14 @@ window.oscillate = function(min, max, period, time) {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">An equirectangular LDR <span class="attribute">skybox-image</span></h2>
-            <h4>Note that if you have multiple &lt;model-viewer&gt; elements
+            <p>Note that if you have multiple &lt;model-viewer&gt; elements
             visible on a page with skyboxes, it is important to be consistent in
             using either HDR, LDR, or separate environment and skybox for all
             visible elements. When combining them (as in these examples), there is
             a serious performance problem, which you will probably notice
             depending on which examples are currently in your viewport. As this
             edge case is unlikely anywhere outside of these example pages, it may
-            be some time before it is fixed in three.js.</h4>
+            be some time before it is fixed in three.js.</p>
           </div>
           <example-snippet stamp-to="ldrEnvironmentImage" highlight-as="html">
             <template>
@@ -266,7 +266,7 @@ window.oscillate = function(min, max, period, time) {
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Supports different resolutions of <span class="attribute">skybox-image</span> and <span class="attribute">environment-image</span> images</h2>
-            <h4>Environment images should be no more than 1k (1024x512) as they
+            <p>Environment images should be no more than 1k (1024x512) as they
             are clamped to this resolution internally. If one needs a higher
             resolution skybox, then two images must be supplied: a high-res JPEG for the
             <span class="attribute">skybox-image</span> and a matching 1k (or
@@ -275,7 +275,7 @@ window.oscillate = function(min, max, period, time) {
             each about 1.5Mb, despite the JPEG having 16 times as many pixels.
             However, HDR is still recommended for lighting as it yields much more
             realistic results. 
-            </h4>
+            </p>
           </div>
           <example-snippet stamp-to="skyboxAndEnvironment" highlight-as="html">
             <template>
