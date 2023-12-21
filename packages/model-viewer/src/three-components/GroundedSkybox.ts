@@ -44,6 +44,7 @@ export class GroundedSkybox extends Mesh {
       this.radius = radius;
       this.resolution = resolution;
       if (height > 0 && radius > 0) {
+        this.geometry.dispose();
         this.geometry = makeGeometry(height, radius, resolution);
       }
     }

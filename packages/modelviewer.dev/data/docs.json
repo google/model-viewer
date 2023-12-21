@@ -841,10 +841,22 @@
       {
         "name": "skybox-image",
         "htmlName": "skyboxImage",
-        "description": "Sets the background image of the scene. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, jpg and hdr (recommended) images.",
+        "description": "Sets the background image of the scene. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, hdr, and jpg (including UltraHDR) images. HDR images are strongly recommended to adequately represent lighting, and the UltraHDR JPEG format is particularly recommended for its high compression of HDR data - try it yourself using this free online <a href=\"https://gainmap-creator.monogrid.com\">converter</a>.",
         "links": [
           "<a href=\"../examples/lightingandenv/\">Related examples</a>"
         ]
+      },
+      {
+        "name": "skybox-height",
+        "htmlName": "skyboxHeight",
+        "description": "Causes the skybox to be projected onto the ground plane. The height indicates the camera's distance above the ground and acts to scale the image at ground level to the correct size. Accepts units in meters (\"m\"), centimeters (\"cm\"), or millimeters (\"mm\"). The default value of 0m disables ground projection.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#groundedSkybox\">Related examples</a>"
+        ],
+        "default": {
+          "default": "0m",
+          "options": "any positive value"
+        }
       },
       {
         "name": "environment-image",
