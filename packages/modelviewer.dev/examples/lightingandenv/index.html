@@ -57,6 +57,7 @@ window.oscillate = function(min, max, period, time) {
       <div class="content">
         <div class="wrapper">
           <h4 id="intro"><span class="font-medium">Lighting &amp; Environment. </span>Control the lighting and the environment surrounding &lt;model-viewer&gt;. This page showcases the skybox-image attribute, which links to an equirectangular projection image which is used as the skybox, and applied as an environment map to the model.</h4>
+          <h4>Since the environment map represents scene lighting, it requires extremely high dynamic range to realistically represent either natural or artificial scenes. Traditionally the .hdr image format was used for this purpose (and is supported here), but it has poor compression. Recently, the UltraHDR image format was introduced which is backwards-compatible with JPEG, still using .jpg but efficiently compresses HDR image data. The examples on this page use UltraHDR to showcase its 10x - 30x savings over .hdr.</h4>
           <div class="heading">
             <h2 class="demo-title">An equirectangular HDR <span class="attribute">skybox-image</span></h2>
             <h4></h4>
@@ -71,16 +72,16 @@ window.oscillate = function(min, max, period, time) {
     </div>
 
     <div class="sample">
-      <div id="litModel" class="demo"></div>
+      <div id="groundedSkybox" class="demo"></div>
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">An equirectangular <span class="attribute">skybox-image</span> with a lit model</h2>
+            <h2 class="demo-title">An equirectangular <span class="attribute">skybox-image</span> projected onto the ground using a 1.5 meter <span class="attribute">skybox-height</span>, denoting the height of the camera that took the image.</h2>
             <h4></h4>
           </div>
-          <example-snippet stamp-to="litModel" highlight-as="html">
+          <example-snippet stamp-to="groundedSkybox" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/whipple_creek_regional_park_04_1k.jpg" skybox-height="1.5m" shadow-intensity="2" max-camera-orbit="auto 90deg auto" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -92,12 +93,12 @@ window.oscillate = function(min, max, period, time) {
       <div class="content">
         <div class="wrapper">
           <div class="heading">
-            <h2 class="demo-title">An equirectangular <span class="attribute">skybox-image</span> with an unlit model</h2>
+            <h2 class="demo-title">An equirectangular ground-projected <span class="attribute">skybox-image</span> with an unlit model</h2>
             <h4></h4>
           </div>
           <example-snippet stamp-to="unlitModel" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" skybox-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="An unlit 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut-Unlit.glb"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/whipple_creek_regional_park_04_1k.jpg" skybox-height="1.5m" shadow-intensity="2" alt="An unlit 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut-Unlit.glb"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -114,7 +115,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="environmentLighting" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest, on a pink background" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" environment-image="../../shared-assets/environments/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a sphere reflecting a forest" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -198,7 +199,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="shadows" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" environment-image="../../assets/whipple_creek_regional_park_04_1k.hdr" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" environment-image="../../shared-assets/environments/whipple_creek_regional_park_04_1k.jpg" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
 <script>
 (() => {
   const modelViewer = document.querySelector('#shadow-intensity-demo');

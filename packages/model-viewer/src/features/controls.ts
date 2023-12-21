@@ -799,8 +799,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
      * orbiting at the supplied radius.
      */
     [$updateCameraForRadius](radius: number) {
-      const maximumRadius =
-          Math.max(this[$scene].boundingSphere.radius, radius);
+      const maximumRadius = Math.max(this[$scene].farRadius(), radius);
 
       const near = 0;
       const far = Math.abs(2 * maximumRadius);
