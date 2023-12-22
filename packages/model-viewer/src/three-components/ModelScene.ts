@@ -547,7 +547,13 @@ export class ModelScene extends Scene {
 
   setBackground(skybox: Texture|null) {
     this.groundedSkybox.map = skybox;
-    this.background = this.groundedSkybox.parent != null ? null : skybox;
+    if (this.groundedSkybox.isUsable()) {
+      this.target.add(this.groundedSkybox);
+      this.background = null;
+    } else {
+      this.target.remove(this.groundedSkybox);
+      this.background = skybox;
+    }
   }
 
   farRadius() {
@@ -565,11 +571,6 @@ export class ModelScene extends Scene {
     this.groundedSkybox.position.y =
         height - (this.shadow ? 2 * this.shadow.gap() : 0);
 
-    if (this.groundedSkybox.getHeight() > 0) {
-      this.target.add(this.groundedSkybox);
-    } else {
-      this.target.remove(this.groundedSkybox);
-    }
     this.setBackground(this.groundedSkybox.map);
   }
 

@@ -33,8 +33,9 @@ export class GroundedSkybox extends Mesh {
     (this.material as MeshBasicMaterial).map = skybox;
   }
 
-  getHeight() {
-    return this.height;
+  isUsable() {
+    return this.height > 0 && this.radius > 0 && this.geometry != null &&
+        this.map != null;
   }
 
   updateGeometry(height = this.height, radius = this.radius, resolution = 128) {
