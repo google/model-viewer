@@ -194,6 +194,33 @@ suite('Environment', () => {
       expect(scene.environment!.name).to.be.eq(element.skyboxImage);
     });
 
+    test('has tight radius', async function() {
+      expect(scene.farRadius()).to.be.lessThan(2);
+    });
+
+    suite('with skybox-height property', () => {
+      setup(async () => {
+        element.setAttribute('skybox-height', '1m');
+        await element.updateComplete;
+      });
+
+      test('switches background', async function() {
+        expect(scene.background).to.be.null;
+      });
+
+      test('has wide radius', async function() {
+        expect(scene.farRadius()).to.be.greaterThan(2);
+      });
+
+      test('no skybox-image disables grounded skybox', async function() {
+        element.setAttribute('skybox-image', '');
+        await element.updateComplete;
+        await rafPasses();
+        await rafPasses();
+        expect(scene.farRadius()).to.be.lessThan(2);
+      });
+    });
+
     suite('with an environment-image', () => {
       setup(async () => {
         const environmentChanged = waitForEvent(element, 'environment-change');

@@ -160,8 +160,8 @@
         "name": "HDR skybox-image"
       },
       {
-        "htmlId": "litModel",
-        "name": "Lit Model"
+        "htmlId": "groundedSkybox",
+        "name": "Grounded Skybox"
       },
       {
         "htmlId": "unlitModel",

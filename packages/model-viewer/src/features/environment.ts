@@ -34,6 +34,7 @@ const $cancelEnvironmentUpdate = Symbol('cancelEnvironmentUpdate');
 export declare interface EnvironmentInterface {
   environmentImage: string|null;
   skyboxImage: string|null;
+  skyboxHeight: string;
   shadowIntensity: number;
   shadowSoftness: number;
   exposure: number;
@@ -59,6 +60,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     @property({type: String, attribute: 'tone-mapping'})
     toneMapping: ToneMappingValue = 'auto';
+
+    @property({type: String, attribute: 'skybox-height'})
+    skyboxHeight: string = '0';
 
     protected[$currentEnvironmentMap]: Texture|null = null;
     protected[$currentBackground]: Texture|null = null;
@@ -92,6 +96,11 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
            changedProperties.has('skyboxImage')) &&
           this[$shouldAttemptPreload]()) {
         this[$updateEnvironment]();
+      }
+
+      if (changedProperties.has('skyboxHeight')) {
+        this[$scene].setGroundedSkybox();
+        this[$needsRender]();
       }
     }
 
