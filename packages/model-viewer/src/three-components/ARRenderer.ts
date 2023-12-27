@@ -226,7 +226,7 @@ export class ARRenderer extends EventDispatcher<
     this.goalYaw = scene.yaw;
     this.goalScale = 1;
 
-    scene.background = null;
+    scene.setBackground(null);
 
     this.oldShadowIntensity = scene.shadowIntensity;
     scene.setShadowIntensity(0.01);  // invisible, but not changing the shader
