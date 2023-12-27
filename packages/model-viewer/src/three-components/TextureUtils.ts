@@ -43,6 +43,7 @@ export default class TextureUtils {
 
   private generatedEnvironmentMap: Promise<CubeTexture>|null = null;
   private generatedEnvironmentMapAlt: Promise<CubeTexture>|null = null;
+  private generatedEnvironmentMapCommerce: Promise<CubeTexture>|null = null;
 
   private skyboxCache = new Map<string, Promise<Texture>>();
 
@@ -154,8 +155,10 @@ export default class TextureUtils {
       skyboxUrl: string|null = null, environmentMapUrl: string|null = null,
       progressCallback: (progress: number) => void = () => {}):
       Promise<EnvironmentMapAndSkybox> {
+    const useCommerceEnvironment = environmentMapUrl === 'commerce';
     const useAltEnvironment = environmentMapUrl !== 'legacy';
-    if (environmentMapUrl === 'legacy' || environmentMapUrl === 'neutral') {
+    if (environmentMapUrl === 'legacy' || environmentMapUrl === 'neutral' ||
+        environmentMapUrl === 'commerce') {
       environmentMapUrl = null;
     }
     environmentMapUrl = deserializeUrl(environmentMapUrl);
@@ -178,9 +181,10 @@ export default class TextureUtils {
           this.loadEquirectFromUrl(skyboxUrl, progressCallback);
     } else {
       // Fallback to generating the environment map
-      environmentMapLoads = useAltEnvironment ?
-          this.loadGeneratedEnvironmentMapAlt() :
-          this.loadGeneratedEnvironmentMap();
+      environmentMapLoads = useCommerceEnvironment ?
+          this.loadGeneratedEnvironmentMapCommerce() :
+          useAltEnvironment ? this.loadGeneratedEnvironmentMapAlt() :
+                              this.loadGeneratedEnvironmentMap();
     }
 
     const [environmentMap, skybox] =
@@ -260,6 +264,19 @@ export default class TextureUtils {
           new EnvironmentScene('neutral'), 'neutral');
     }
     return this.generatedEnvironmentMapAlt;
+  }
+
+  /**
+   * Loads a dynamically generated environment map, designed to be neutral and
+   * color-preserving. Shows more contrast around the different sides of the
+   * object.
+   */
+  private async loadGeneratedEnvironmentMapCommerce(): Promise<CubeTexture> {
+    if (this.generatedEnvironmentMapCommerce == null) {
+      this.generatedEnvironmentMapCommerce = this.GenerateEnvironmentMap(
+          new EnvironmentScene('commerce'), 'commerce');
+    }
+    return this.generatedEnvironmentMapCommerce;
   }
 
   private blurCubemap(cubeTarget: WebGLCubeRenderTarget, sigma: number) {

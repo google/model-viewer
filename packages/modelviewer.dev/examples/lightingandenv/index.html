@@ -139,17 +139,23 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="neutralLighting" highlight-as="html">
             <template>
-<model-viewer id="neutral-demo" camera-controls touch-action="pan-y" auto-rotate alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
-  <label for="neutral">Neutral Lighting: </label>
-  <input id="neutral" type="checkbox" checked="true">
+<model-viewer id="neutral-demo" camera-controls environment-image="commerce" tone-mapping="commerce" touch-action="pan-y" alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
+  <div class="controls">
+    <p>Lighting</p>
+    <select id="type">
+      <option value="commerce">Commerce</option>
+      <option value="neutral">Neutral</option>
+      <option value="legacy">Legacy</option>
+    </select>
+  </div>
 </model-viewer>
 <script>
 (() => {
   const modelViewer = document.querySelector('#neutral-demo');
-  const checkbox = document.querySelector('#neutral');
   
-  checkbox.addEventListener('change',() => {
-    modelViewer.environmentImage = checkbox.checked ? '' : 'legacy';
+  document.querySelector('#type').addEventListener('input', async (event) => {
+    modelViewer.environmentImage = event.target.value;
+    modelViewer.toneMapping = event.target.value == 'commerce' ? 'commerce' : 'aces';
   });
 })();
 </script>
