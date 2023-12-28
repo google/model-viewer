@@ -195,68 +195,8 @@ const neutral = {
   ]
 } as Env;
 
-const commerce = {
-  topLight: {
-    intensity: 400,
-    position: [0.5, 14.0, 0.5],
-  },
-  room: {
-    position: [0.0, 13.2, 0.0],
-    scale: [31.5, 28.5, 31.5],
-  },
-  boxes: [
-    {
-      position: [-10.906, -1.0, 1.846],
-      rotation: -0.195,
-      scale: [2.328, 7.905, 4.651],
-    },
-    {
-      position: [-5.607, -0.754, -0.758],
-      rotation: 0.994,
-      scale: [1.970, 1.534, 3.955],
-    },
-    {
-      position: [6.167, -0.16, 7.803],
-      rotation: 0.561,
-      scale: [3.927, 6.285, 3.687],
-    },
-    {
-      position: [-2.017, 0.018, 6.124],
-      rotation: 0.333,
-      scale: [2.002, 4.566, 2.064],
-    },
-    {
-      position: [2.291, -0.756, -2.621],
-      rotation: -0.286,
-      scale: [1.546, 1.552, 1.496],
-    },
-    {
-      position: [-2.193, -0.369, -5.547],
-      rotation: 0.516,
-      scale: [3.875, 3.487, 2.986],
-    },
-  ],
-  lights: [
-    {
-      intensity: 50,
-      position: [-14, 12, -7],
-      scale: [0.1, 5, 5],
-    },
-    {
-      intensity: 50,
-      position: [14, 8, -7],
-      scale: [0.1, 5, 5],
-    },
-    {
-      intensity: 50,
-      position: [0, 12, 14],
-      scale: [5, 5, 0.1],
-    },
-  ]
-} as Env;
-
 export default class EnvironmentScene extends Scene {
-  constructor(name: 'legacy'|'neutral'|'commerce') {
+  constructor(name: 'legacy'|'neutral') {
     super();
 
     this.position.y = -3.5;
@@ -268,9 +208,7 @@ export default class EnvironmentScene extends Scene {
         new MeshStandardMaterial({metalness: 0, side: BackSide});
     const boxMaterial = new MeshStandardMaterial({metalness: 0});
 
-    const data = name == 'legacy' ? legacy :
-        name == 'neutral'         ? neutral :
-                                    commerce;
+    const data = name == 'legacy' ? legacy : neutral;
 
     const mainLight = new PointLight(0xffffff, data.topLight.intensity, 28, 2);
     mainLight.position.set(...data.topLight.position);
