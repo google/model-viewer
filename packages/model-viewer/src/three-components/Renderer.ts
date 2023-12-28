@@ -141,22 +141,25 @@ export class Renderer extends
         ShaderChunk.tonemapping_pars_fragment.replace(
             'vec3 CustomToneMapping( vec3 color ) { return color; }', `
       float startCompression = 0.8;
-      float desaturation = 0.5;
+      float desaturation = 0.1666;
       vec3 CustomToneMapping( vec3 color ) {
         color *= toneMappingExposure;
-        
-        float d = 1. - startCompression;
+
+        float x = min(color.r, min(color.g, color.b));
+        float offset = x < 0.08 ? x - 6.25 * x * x : 0.04;
+        color -= offset;
 
         float peak = max(color.r, max(color.g, color.b));
         if (peak < startCompression) return color;
 
-        float newPeak = 1. - d * d / (peak + d - startCompression);
         float invPeak = 1. / peak;
-        
         float extraBrightness = dot(color * (1. - startCompression * invPeak), vec3(1, 1, 1));
         
+        float d = 1. - startCompression;
+        float newPeak = 1. - d * d / (peak + d - startCompression);
         color *= newPeak * invPeak;
-        float g = 1. - 3. / (desaturation * extraBrightness + 3.);
+
+        float g = 1. - 1. / (desaturation * extraBrightness + 1.);
         return mix(color, vec3(1, 1, 1), g);
       }`);
 
