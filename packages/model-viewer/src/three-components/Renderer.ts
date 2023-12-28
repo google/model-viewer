@@ -45,6 +45,7 @@ const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
 const DEFAULT_LAST_STEP = 3;
 
 export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
+const COMMERCE_EXPOSURE = 1.3;
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -141,7 +142,7 @@ export class Renderer extends
         ShaderChunk.tonemapping_pars_fragment.replace(
             'vec3 CustomToneMapping( vec3 color ) { return color; }', `
       float startCompression = 0.8;
-      float desaturation = 0.1666;
+      float desaturation = 0.15;
       vec3 CustomToneMapping( vec3 color ) {
         color *= toneMappingExposure;
 
@@ -430,13 +431,18 @@ export class Renderer extends
    * the time that has passed since the last rendered frame.
    */
   preRender(scene: ModelScene, t: number, delta: number) {
-    const {element, exposure} = scene;
+    const {element, exposure, toneMapping} = scene;
 
     element[$tick](t, delta);
 
     const exposureIsNumber =
         typeof exposure === 'number' && !Number.isNaN(exposure);
-    this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
+    const env = element.environmentImage;
+    const compensateExposure = toneMapping === 'commerce' &&
+        (env == null || env === 'neutral' || env === 'legacy');
+    this.threeRenderer.toneMappingExposure =
+        (exposureIsNumber ? exposure : 1.0) *
+        (compensateExposure ? COMMERCE_EXPOSURE : 1.0);
   }
 
   render(t: number, frame?: XRFrame) {
