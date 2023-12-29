@@ -208,8 +208,9 @@ export class IblSelector extends ConnectedLitElement {
             <me-dropdown
               style="align-self: center; width: 70%;"
               @select=${this.onSelectToneMapping}>
-              <paper-item>ACES</paper-item>
               <paper-item value="commerce">Commerce</paper-item>
+              <paper-item>ACES</paper-item>
+              <paper-item value="agx">AgX</paper-item>
             </me-dropdown>
           </me-section-row>
         </div>

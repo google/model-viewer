@@ -125,7 +125,8 @@ export const INITIAL_STATE: State = {
     modelViewerSnippet: {
       arConfig: {ar: true, arModes: 'webxr scene-viewer quick-look'},
       bestPractices: {progressBar: true, arButton: true, arPrompt: true},
-      config: {cameraControls: true, shadowIntensity: 1},
+      config:
+          {cameraControls: true, shadowIntensity: 1, toneMapping: 'commerce'},
       poster: {height: 512, mimeType: 'image/webp'},
       hotspots: [],
       relativeFilePaths: {posterName: 'poster.webp'},

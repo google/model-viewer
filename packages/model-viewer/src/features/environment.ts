@@ -24,7 +24,7 @@ const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
 
-export type ToneMappingValue = 'auto'|'aces'|'commerce';
+export type ToneMappingValue = 'auto'|'aces'|'agx'|'commerce';
 
 export const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 export const $currentBackground = Symbol('currentBackground');
