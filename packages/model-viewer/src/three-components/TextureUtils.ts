@@ -20,7 +20,6 @@ import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 import {deserializeUrl, timePasses} from '../utilities.js';
 
 import EnvironmentScene from './EnvironmentScene.js';
-import EnvironmentSceneAlt from './EnvironmentSceneAlt.js';
 
 export interface EnvironmentMapAndSkybox {
   environmentMap: Texture;
@@ -245,7 +244,7 @@ export default class TextureUtils {
   private async loadGeneratedEnvironmentMap(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMap == null) {
       this.generatedEnvironmentMap =
-          this.GenerateEnvironmentMap(new EnvironmentScene(), 'legacy');
+          this.GenerateEnvironmentMap(new EnvironmentScene('legacy'), 'legacy');
     }
     return this.generatedEnvironmentMap;
   }
@@ -257,8 +256,8 @@ export default class TextureUtils {
    */
   private async loadGeneratedEnvironmentMapAlt(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMapAlt == null) {
-      this.generatedEnvironmentMapAlt =
-          this.GenerateEnvironmentMap(new EnvironmentSceneAlt(), 'neutral');
+      this.generatedEnvironmentMapAlt = this.GenerateEnvironmentMap(
+          new EnvironmentScene('neutral'), 'neutral');
     }
     return this.generatedEnvironmentMapAlt;
   }
