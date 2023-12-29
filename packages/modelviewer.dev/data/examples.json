@@ -176,6 +176,10 @@
         "name": "Neutral Lighting"
       },
       {
+        "htmlId": "toneMapping",
+        "name": "Tone Mapping"
+      },
+      {
         "htmlId": "renderExposure",
         "name": "Render Exposure"
       },
