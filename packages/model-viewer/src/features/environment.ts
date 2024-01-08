@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {Texture} from 'three';
+import {ACESFilmicToneMapping, AgXToneMapping, CustomToneMapping, Texture} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload} from '../model-viewer-base.js';
 import {clamp, Constructor, deserializeUrl} from '../utilities.js';
@@ -88,7 +88,10 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('toneMapping')) {
-        this[$scene].toneMapping = this.toneMapping;
+        this[$scene].toneMapping = this.toneMapping === 'commerce' ?
+            CustomToneMapping :
+            this.toneMapping === 'agx' ? AgXToneMapping :
+                                         ACESFilmicToneMapping;
         this[$needsRender]();
       }
 
