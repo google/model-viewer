@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, BufferAttribute, Mesh, MeshBasicMaterial, SphereGeometry, Texture, Vector3} from 'three';
+import {BufferAttribute, Mesh, MeshBasicMaterial, SphereGeometry, Texture, Vector3} from 'three';
 
 export class GroundedSkybox extends Mesh {
   private height = 0;
@@ -21,7 +21,7 @@ export class GroundedSkybox extends Mesh {
   private resolution = 0;
 
   constructor() {
-    super(undefined, new MeshBasicMaterial({side: BackSide}));
+    super(undefined, new MeshBasicMaterial({depthWrite: false}));
     this.userData.noHit = true;
   }
 
@@ -54,6 +54,7 @@ export class GroundedSkybox extends Mesh {
 
 function makeGeometry(height: number, radius: number, resolution: number) {
   const geometry = new SphereGeometry(radius, 2 * resolution, resolution);
+  geometry.scale(1, 1, -1);
 
   const pos = geometry.getAttribute('position') as BufferAttribute;
   const tmp = new Vector3();
