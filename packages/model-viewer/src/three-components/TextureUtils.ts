@@ -14,7 +14,7 @@
  */
 
 import {GainMapDecoderMaterial, HDRJPGLoader, QuadRenderer} from '@monogrid/gainmap-js';
-import {BackSide, BoxGeometry, CubeCamera, CubeTexture, DataTexture, EquirectangularReflectionMapping, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, SRGBColorSpace, Texture, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {BackSide, BoxGeometry, CubeCamera, CubeTexture, DataTexture, EquirectangularReflectionMapping, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, SRGBColorSpace, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
@@ -37,6 +37,7 @@ export default class TextureUtils {
   public lottieLoaderUrl = '';
   public withCredentials = false;
 
+  private _ldrLoader: TextureLoader|null = null;
   private _imageLoader: HDRJPGLoader|null = null;
   private _hdrLoader: RGBELoader|null = null;
   private _lottieLoader: Loader|null = null;
@@ -50,6 +51,14 @@ export default class TextureUtils {
   private blurScene: Scene|null = null;
 
   constructor(private threeRenderer: WebGLRenderer) {
+  }
+
+  get ldrLoader(): TextureLoader {
+    if (this._ldrLoader == null) {
+      this._ldrLoader = new TextureLoader();
+    }
+    this._ldrLoader.setWithCredentials(this.withCredentials);
+    return this._ldrLoader;
   }
 
   get imageLoader(): HDRJPGLoader {
@@ -81,11 +90,8 @@ export default class TextureUtils {
 
   async loadImage(url: string): Promise<Texture> {
     const texture: Texture = await new Promise<Texture>(
-        (resolve, reject) => this.imageLoader.load(url, (result) => {
-          const {texture} = result.renderTarget;
-          result.dispose(false);
-          resolve(texture)
-        }, () => {}, reject));
+        (resolve, reject) =>
+            this.ldrLoader.load(url, resolve, () => {}, reject));
     texture.name = url;
     texture.flipY = false;
 
