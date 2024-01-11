@@ -212,7 +212,7 @@ mode.addEventListener('change', (e) => blendEffect.blendMode = e.target.value);
           </div>
           <example-snippet stamp-to="colorgrade" highlight-as="html">
             <template>
-<model-viewer id="colorViewer" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/EmissiveStrengthTest.glb" alt="A 3D model of an astronaut">
+<model-viewer id="colorViewer" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/EmissiveStrengthTest.glb" scale="0.1 0.1 0.1" alt="A 3D model of an astronaut">
   <effect-composer render-mode="quality" msaa="8">
     <bloom-effect></bloom-effect>
     <color-grade-effect></color-grade-effect>
