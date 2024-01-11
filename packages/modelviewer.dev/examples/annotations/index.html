@@ -348,7 +348,7 @@
   });
 
   modelViewer.addEventListener('ar-status', (event) => {
-    setVisibility(event.detail.status !== 'session-started');
+    setVisibility(checkbox.checked && event.detail.status !== 'session-started');
   });
 
   // update svg
