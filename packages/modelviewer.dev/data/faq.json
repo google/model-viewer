@@ -40,8 +40,10 @@
       {
         "name": "Can I have X feature from three.js?",
         "htmlName": "three",
-        "description": "Probably not. We intentionally keep our API at a higher level than three.js, which is a full game engine. You're welcome to file a feature request if you have an idea that can be explained easily to lay users. You are also welcome to hack/fork us. You can use <code>mvElement[Object.getOwnPropertySymbols(mvElement).find(e => e.description === 'scene')];</code> to get access to our internal three.js scene and do whatever you want. However, this is outside the scope of our public API, so we make no effort to avoid breaking changes or to provide support.",
-        "links": []
+        "description": "Probably not. We intentionally keep our API at a higher level than three.js, which is a full game engine. You're welcome to file a feature request if you have an idea that can be explained easily to lay users. You are also welcome to hack/fork us. You can use <code>mvElement[Object.getOwnPropertySymbols(mvElement).find(e => e.description === 'scene')];</code> to get access to our internal three.js scene and do whatever you want. You can use our unbundled build and hook up Three.js with an import map as demonstrated in the link below to e.g. hook up other file loaders. However, this is all outside the scope of our public API, so we make no effort to avoid breaking changes or to provide support.",
+        "links": [
+          "<a href='../examples/postprocessing/#setup'>Import map example</a>"
+        ]
       },
       {
         "name": "Can I embed a 3D model in Twitter?",
@@ -102,6 +104,15 @@
         "description": "Three.js used to be marked as our dependency, which meant it was duplicated if you used it in another part of your code base too. As of v3.0.2, it is marked as our peer dependency, allowing you to share it. Note that we pin its version due to frequent breaking changes, so you will not have much version flexibility. This can be worked around using npm's --legacy-peer-deps mode, but please do not file issues if you do this, as we can only ensure our tested quality on one version of three.js at a time. If you are working directly with our bundle, then you may prefer to use the <code>model-viewer-module.min.js</code> bundle, and bring Three.js manually using an import-map.",
         "links": [
           "<a href='https://docs.npmjs.com/cli/v7/using-npm/config#legacy-peer-deps'>NPM legacy-peer-deps documentation</a>"
+        ]
+      },
+      {
+        "name": "How do I ensure &lt;model-viewer&gt; is self-contained?",
+        "htmlName": "remote",
+        "description": "When packaging an app or extension using &lt;model-viewer&gt;, it is important that everything you need is included in your package, but not more. We have several lazy-loaded modules for decoders that only some users need: DRACO, KTX2, Meshopt, and Lottie. These are loaded by URL and the defaults point to stable, external CDNs to make sure they \"just work\". If you don't use these features, those links will never be accessed, but a static checker can't know that and may flag these external resources. For any feature you need, you should change the Location to a relative URL within your project and copy the files there. If you don't need the feature, do the same thing, but make the file empty - since you'll never access its contents anyway, this will minimize your bundle size.",
+        "links": [
+          "<a href='../docs/#entrydocs-loading-staticproperties-dracoDecoderLocation'>Decoder location static properties</a>",
+          "<a href='../examples/loading/#dracoSupport'>Details on setting static properties</a>"
         ]
       }
     ]
