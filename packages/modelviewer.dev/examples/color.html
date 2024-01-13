@@ -421,9 +421,8 @@
             <option value="commerce">Commerce</option>
             <option value="aces">ACES</option>
             <option value="agx">AgX</option>
-          </select>
-        </p>
-        <p>Model:
+          </select><br/>
+          Model:
           <select id="model">
             <option value="Mixer">Mixer</option>
             <option value="GeoPlanter">GeoPlanter</option>
@@ -635,46 +634,6 @@
     document.querySelector('#exposure').addEventListener('input', (event) => {
       expMV.exposure = Number(event.target.value);
       exposureDisplay.textContent = expMV.exposure;
-    });
-
-    const toneMV = document.querySelector("#toneMapping");
-    let threeRenderer;
-    let scene;
-    for (let p = toneMV; p != null; p = Object.getPrototypeOf(p)) {
-      const privateAPI = Object.getOwnPropertySymbols(p);
-      const renderer = privateAPI.find((value) => value.toString() == 'Symbol(renderer)');
-      const sceneSym = privateAPI.find((value) => value.toString() == 'Symbol(scene)');
-      if(renderer != null){
-        threeRenderer = toneMV[renderer].threeRenderer;
-      }
-      if(sceneSym != null){
-        scene = toneMV[sceneSym];
-      }
-      if(threeRenderer != null && scene != null){
-        break;
-      }
-    }
-
-    const makeToneMapped = (enabled) => {
-      const {materials} = toneMV.model;
-      const privateAPI = Object.getOwnPropertySymbols(materials[0]);
-      const threeMaterials = privateAPI.find((value) => value.toString() == 'Symbol(correlatedObjects)');
-      
-      for(const material of materials){
-        for(const threeMaterial of material[threeMaterials]){
-          threeMaterial.toneMapped = enabled;
-        }
-      }
-      scene.isDirty = true;
-    };
-
-    const checkbox = document.querySelector('#toneMapped');
-
-    toneMV.addEventListener('load', () => {
-      makeToneMapped(false);
-      checkbox.addEventListener('change', () => {
-        makeToneMapped(checkbox.checked);
-      });
     });
 
     const envMV = document.querySelector("#environments");

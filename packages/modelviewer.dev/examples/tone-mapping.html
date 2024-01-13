@@ -135,7 +135,7 @@
       <a href="#tradeoffs">Tradeoffs</a><br/>
       <a href="#needs">The needs of e-commerce</a><br/>
       <a href="#commerce">Commerce tone mapper</a><br/>
-      <a href="#guarantees">Guarantees</a><br/>
+      <a href="#white">White point</a><br/>
     </p>
   
     <h3 id="purpose">The purpose of tone mapping</h3>
@@ -180,8 +180,8 @@
         camera-controls
         alt="3D model of six example material spheres"
       >
-      <label for="toneMapped">Tone Mapped: </label>
-      <input id="toneMapped" type="checkbox">
+      <p><label for="toneMapped">Tone Mapped: </label>
+      <input id="toneMapped" type="checkbox" checked></p>
       </model-viewer>
       <figcaption>Toggle ACES tone mapping to see the difference it makes.</figcaption>
     </figure>
@@ -270,7 +270,6 @@
 
     <figure>
       <model-viewer
-        id="toneMapping"
         src="../../shared-assets/models/silver-gold.gltf"
         tone-mapping="aces"
         camera-controls
@@ -344,10 +343,143 @@
 
     <p>The Commerce tone mapper is designed to be simple to implement, fast to
     run, and faithfully reproduce color as much as possible while eliminating
-    HDR artifacts around highlights.</p>
+    HDR artifacts around highlights. It is intended to be 1:1 for colors up to a
+    certain maximum value, with the remainder used as headroom for the
+    compressed highlights. It turns out 1:1 is a little trickier than it
+    sounds.</p>
 
-    <h3 id="#guarantees">Guarantees</h3>
-    <h3 id="#down">White point</h3>
+    <p>I found that an actual 1:1 tone mapping function led to slightly
+    desaturated colors, most noticeably for dark colors. I tracked this problem
+    down to PBR itself: for a common dielectric material with index of
+    refraction of 1.5, the normal Fresnel reflection adds 4% of the incident
+    light color (the highlight) to the material's colored diffuse reflection.
+    Assuming the lighting is even and white, this leads to a 4% desaturation of
+    the rendered color as compared to the baseColor. This is physically correct,
+    but confusing from a color-management perspective.</p>
+
+    <p>I correct our saturation by shifting the 1:1 portion of our tone mapping
+    curve down by 0.04. Even though this only exactly corrects the average case,
+    it does a very good job overall. This has the useful secondary effect of
+    giving us a place to add a contrast "toe", which is a common element of most
+    tone mapping functions that helps the blacks look better. I built this toe
+    by fitting a simple quadratic function to match our piecewise slope.</p>
+
+    <p>Since tone mapping is about fitting into the sRGB cube, I intentionally
+    avoid any use of luminance weights, as the edges of the sRGB cube are not at
+    all constant luminance. Instead I scale down colors by a simple multiplier,
+    thus preserving hue and saturation while reducing brightness (there are many
+    definitions for these terms, so please bear with my imprecision). The
+    brightness metric I use is the maximum value of R, G, and B, and the goal is
+    to smoothly reduce this metric to the 0-1 range.</p>
+
+    <p>I chose to fit a simple 1/x function and match the piecewise slope of our
+    1:1 portion, as this gives an asymptote with a reasonable tail. It has only
+    a single parameter: the value where we switch from the linear to the
+    nonlinear function. The purpose of the Commerce tone mapper is to be a
+    standard and thus without parameters, so I chose 0.8 after much testing.
+    However, this is likely the most natural place to adjust the curve for HDR
+    output rather than sRGB.</p>
+
+    <p>Converting 0.8 to sRGB gives 231, so any baseColor with R, B, and B
+    values below 231 will be faithfully reproduced under even, white lighting.
+    The compression reduces 255 to 243, so all highlights that would be clipped
+    end up mapped to the 243-255 range.</p>
+
+    <p>The final piece is to create the path to white for desaturating bright
+    highlights. This is particularly important for matte materials and shiny
+    metals, as they physically color the light they reflect, but perceptually
+    that color is lost when it is sufficiently bright. I accomplish this by
+    taking a convex combination of the compressed color and white, only in the
+    nonlinear compression region.</p>
+
+    <p>The convex parameter function I chose is another 1/x, this time based on
+    the amount of brightness removed in the compression step, which ensures it
+    starts smoothly with a zero derivative where it begins to take effect. The
+    only other parameter in this tone mapper controls the rate of desaturation,
+    which I chose as 0.15, which is significantly slower to approach its
+    asymptote than the compression function. This is what helps produce our
+    smoother gradients and hide the aggressiveness of our compression.</p>
+
+    <p>The complete shader code is quite small, with only three divides and
+    those only applied to colors over the 1:1 limit:<br/>
+    <code>
+  float startCompression = 0.8 - 0.04;
+  float desaturation = 0.15;
+
+  vec3 CommerceToneMapping( vec3 color ) {
+    float x = min(color.r, min(color.g, color.b));
+    float offset = x &lt; 0.08 ? x - 6.25 * x * x : 0.04;
+    color -= offset;
+
+    float peak = max(color.r, max(color.g, color.b));
+    if (peak &lt; startCompression) return color;
+
+    float d = 1. - startCompression;
+    float newPeak = 1. - d * d / (peak + d - startCompression);
+    color *= newPeak / peak;
+
+    float g = 1. - 1. / (desaturation * (peak - newPeak) + 1.);
+    return mix(color, vec3(1, 1, 1), g);
+  }
+    </code>
+    </p>
+
+    <figure>
+      <img src="../assets/commerce-linear.png"/>
+      <figcaption>The Commerce tone mapping function, which maps linear brightness to the [0, 1] range. The compression function is piecewise in three parts: blue for the contrast toe, green for the linear 1:1 region, and red for the compression region. The desaturation curve is purple.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="../assets/commerce-log.png"/>
+      <figcaption>Same as above, but with the input brightness in log scale.</figcaption>
+    </figure>
+
+    <p>The following demo uses a test model based on a Macbeth color chart. For each color,
+    there is a matte sphere, shiny dielectric sphere and an unlit sphere for
+    baseColor comparison. Along the top is an additional row with saturated
+    colors and shiny metallic spheres - this is useful for demonstrating the
+    problems with Linear/Clamped tone mapping. Along the left and right are
+    columns of shiny metals.</p>
+    <p>Try the different tone mappers under both
+    neutral and outdoor lighting. This test is intentionally designed to show
+    off HDR artifacts.</p>
+
+    <figure>
+      <model-viewer
+        id="demo"
+        src="https://cdn.glitch.global/93f14439-9407-4d48-8b56-aa0afd9b2886/MacbethBalls.glb?v=1704772991939"
+        tone-mapping="commerce"
+        ar
+        camera-controls
+        shadow-intensity="1"
+      >
+        <p>
+          <select id="tonemapper">
+            <option value="5">Commerce</option>
+            <option value="1">Linear/Clamped</option>
+            <option value="4">ACES</option>
+            <option value="6">AgX</option>
+            <option value="2">Reinhard</option>
+            <option value="3">Cineon</option>
+          </select>Tone Mapping Function<br/>
+          <select id="lighting">
+            <option value="neutral">Neutral</option>
+            <option value="../../shared-assets/environments/spruit_sunrise_1k_HDR.jpg">Sunrise</option>
+          </select>Lighting<br/>
+          <input
+            id="exposure"
+            type="range"
+            min="0.1"
+            max="10"
+            step="0.1"
+            value="1"
+          />Exposure: <span id="exposure-val">1</span>
+        </p>
+      </model-viewer>
+      <figcaption>Tone mapper test demo.</figcaption>
+    </figure>
+
+    <h3 id="#white">White point</h3>
 
     <p>The tl;dr of this section is that you can safely skip it. It is a
     discussion of the difference between physically correct and practical
@@ -384,7 +516,7 @@
     multiple colors, and introduced many places errors could subtly enter the
     pipeline.</p>
 
-    <p>We decided instead to take the practical approach, of using the
+    <p>We decided instead to take the practical approach of using the
     marketing-approved color as baseColor, with simple grayscale lighting to
     avoid skewing it. This isn't exactly correct according to PBR and the sRGB
     white point, but I think you'll find it very hard to detect the error.
@@ -418,44 +550,37 @@
   </script>
 
   <script type="module">
-    const toneMV = document.querySelector("#toneMapping");
-    let threeRenderer;
-    let scene;
-    for (let p = toneMV; p != null; p = Object.getPrototypeOf(p)) {
-      const privateAPI = Object.getOwnPropertySymbols(p);
-      const renderer = privateAPI.find((value) => value.toString() == 'Symbol(renderer)');
-      const sceneSym = privateAPI.find((value) => value.toString() == 'Symbol(scene)');
-      if(renderer != null){
-        threeRenderer = toneMV[renderer].threeRenderer;
-      }
-      if(sceneSym != null){
-        scene = toneMV[sceneSym];
-      }
-      if(threeRenderer != null && scene != null){
-        break;
-      }
-    }
-    
-    const makeToneMapped = (enabled) => {
-      const {materials} = toneMV.model;
-      const privateAPI = Object.getOwnPropertySymbols(materials[0]);
-      const threeMaterials = privateAPI.find((value) => value.toString() == 'Symbol(correlatedObjects)');
-      
-      for(const material of materials){
-        for(const threeMaterial of material[threeMaterials]){
-          threeMaterial.toneMapped = enabled;
-        }
-      }
-      scene.isDirty = true;
+    const demoMV = document.querySelector("#demo");
+    const tonemapperInput = document.querySelector("#tonemapper");
+    const lightingInput = document.querySelector('#lighting');
+    const exposureInput = document.querySelector("#exposure");
+    const inputEl = document.querySelector("#input");
+    const exposureDisplay = document.querySelector("#exposure-val");
+
+    const updateToneMapper = (mv, tonemapper) => {
+      const scene = mv[Object.getOwnPropertySymbols(mv).find((x) => x.description === "scene")];
+      scene.toneMapping = Number(tonemapper);
+      scene.queueRender();
     };
 
+    tonemapperInput.addEventListener("input", () => {
+      updateToneMapper(demoMV, tonemapperInput.value);
+    });
+
+    lightingInput.addEventListener("input", () => {
+      demoMV.environmentImage = lightingInput.value;
+    });
+
+    exposureInput.addEventListener("input", (event) => {
+      demoMV.exposure = Number(exposureInput.value);
+      exposureDisplay.textContent = exposureInput.value;
+    });
+
+    const toneMV = document.querySelector("#toneMapping");
     const checkbox = document.querySelector('#toneMapped');
 
-    toneMV.addEventListener('load', () => {
-      makeToneMapped(false);
-      checkbox.addEventListener('change', () => {
-        makeToneMapped(checkbox.checked);
-      });
+    checkbox.addEventListener('change', () => {
+      updateToneMapper(toneMV, checkbox.checked ? "4" : "1");
     });
 
     const envMV = document.querySelector("#environments");
