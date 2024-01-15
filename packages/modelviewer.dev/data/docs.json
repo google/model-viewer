@@ -1122,9 +1122,9 @@
         ]
       },
       {
-        "name": "createVideoTexture(uri, options?)",
+        "name": "createVideoTexture(uri)",
         "htmlName": "createVideoTexture",
-        "description": "Returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The video element created is available through <code>texture.source.element</code> for controlling playback. for cross origin resources, you can set `options.crossOrigin` to `anonymous`.",
+        "description": "Returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The video element created is available through <code>texture.source.element</code> for controlling playback.",
         "links": [
           "<a href=\"../examples/scenegraph/#animatedTexturesExample\">Create animated textures example</a>"
         ]

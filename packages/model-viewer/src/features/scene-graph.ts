@@ -42,10 +42,6 @@ interface SceneExportOptions {
       forceIndices?: boolean
 }
 
-interface CreateVideoTextureOptions {
-  crossOrigin?: string
-}
-
 export interface SceneGraphInterface {
   readonly model?: Model;
   variantName: string|null;
@@ -57,7 +53,7 @@ export interface SceneGraphInterface {
   createTexture(uri: string, type?: string): Promise<ModelViewerTexture|null>;
   createLottieTexture(uri: string, quality?: number):
       Promise<ModelViewerTexture|null>;
-  createVideoTexture(uri: string, options?: CreateVideoTextureOptions): ModelViewerTexture;
+  createVideoTexture(uri: string): ModelViewerTexture;
   createCanvasTexture(): ModelViewerTexture;
   /**
    * Intersects a ray with the scene and returns a list of materials who's
@@ -150,11 +146,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$buildTexture](texture);
     }
 
-    createVideoTexture(uri: string, options?: CreateVideoTextureOptions): ModelViewerTexture {
+    createVideoTexture(uri: string): ModelViewerTexture {
       const video = document.createElement('video');
-      if(options?.crossOrigin) {
-        video.crossOrigin = options.crossOrigin;
-      }
+      video.crossOrigin = this.withCredentials ? 'use-credentials' : 'anonymous';
       video.src = uri;
       video.muted = true;
       video.playsInline = true;
