@@ -148,6 +148,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     createVideoTexture(uri: string): ModelViewerTexture {
       const video = document.createElement('video');
+      video.crossOrigin = this.withCredentials ? 'use-credentials' : 'anonymous';
       video.src = uri;
       video.muted = true;
       video.playsInline = true;
