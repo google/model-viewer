@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer} from 'three';
+import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer, Line, Raycaster, BufferGeometry} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
+import {XRControllerModelFactory} from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
 import {$currentBackground, $currentEnvironmentMap} from '../features/environment.js';
@@ -117,12 +118,42 @@ export class ARRenderer extends EventDispatcher<
   private yawDamper = new Damper();
   private scaleDamper = new Damper();
 
+  private controller1: any;
+  private controller2: any;
+  private controllerGrip1: any;
+  private controllerGrip2: any;
+  private intersected: any[] = [];
+
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
   constructor(private renderer: Renderer) {
     super();
     this.threeRenderer = renderer.threeRenderer;
     this.threeRenderer.xr.enabled = true;
+
+    this.controller1 = this.threeRenderer.xr.getController(0);
+    this.controller1.addEventListener('selectstart', (e: any) => this.onControllerSelectStart(e));
+    this.controller1.addEventListener('selectend', (e: any) => this.onControllerSelectEnd(e));
+
+    this.controller2 = this.threeRenderer.xr.getController(1);
+    this.controller2.addEventListener('selectstart', (e: any) => this.onControllerSelectStart(e));
+    this.controller2.addEventListener('selectend', (e: any) => this.onControllerSelectEnd(e));
+
+    const controllerModelFactory = new XRControllerModelFactory();
+
+    this.controllerGrip1 = this.threeRenderer.xr.getControllerGrip(0);
+    this.controllerGrip1.add(controllerModelFactory.createControllerModel(this.controllerGrip1));
+
+    this.controllerGrip2 = this.threeRenderer.xr.getControllerGrip(1);
+    this.controllerGrip2.add(controllerModelFactory.createControllerModel(this.controllerGrip2));
+
+    const geometry = new BufferGeometry().setFromPoints([new Vector3(0, 0, 0), new Vector3(0, 0, -1)]);
+    const line = new Line(geometry);
+    line.name = 'line';
+    line.scale.z = 5;
+
+    this.controller1.add(line.clone());
+    this.controller2.add(line.clone());
   }
 
   async resolveARSession(): Promise<XRSession> {
@@ -175,6 +206,11 @@ export class ARRenderer extends EventDispatcher<
     if (this.isPresenting) {
       console.warn('Cannot present while a model is already presenting');
     }
+
+    scene.add(this.controller1);
+    scene.add(this.controller2);
+    scene.add(this.controllerGrip1);
+    scene.add(this.controllerGrip2);
 
     let waitForAnimationFrame = new Promise<void>((resolve, _reject) => {
       requestAnimationFrame(() => resolve());
@@ -254,6 +290,84 @@ export class ARRenderer extends EventDispatcher<
 
     this.lastTick = performance.now();
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
+  }
+
+  private intersectObjects(controller: any) {
+    // Do not highlight in mobile-ar
+    if (controller.userData.targetRayMode === 'screen') return;
+
+    // Do not highlight when already selected
+    if (controller.userData.selected !== undefined) return;
+
+    const line = controller.getObjectByName('line');
+    const intersections = this.getIntersections(controller);
+
+    if (intersections.length > 0) {
+      const intersection = intersections[0];
+
+      const object = intersection.object;
+      // @ts-ignore
+      object.material.emissive.setHex(0x333333);
+
+      this.intersected.push(object);
+
+      line.scale.z = intersection.distance;
+    } else {
+      line.scale.z = 5;
+    }
+  }
+
+  private getIntersections(controller: any) {
+    controller.updateMatrixWorld();
+
+    const tempMatrix = new Matrix4();
+
+    tempMatrix.identity().extractRotation(controller.matrixWorld);
+
+    const raycaster: Raycaster = new Raycaster();
+
+    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+
+    const group = this.presentedScene!.model;
+    // @ts-ignore
+    return raycaster.intersectObjects(group.children, false);
+  }
+
+  private cleanIntersected() {
+    while (this.intersected.length) {
+      const object = this.intersected.pop();
+      object.material.emissive.setHex(0x000000);
+    }
+  }
+
+  private onControllerSelectStart(event: any) {
+    const controller = event.target;
+
+    const intersections = this.getIntersections(controller);
+
+    if (intersections.length > 0) {
+      const intersection = intersections[0];
+      const object = intersection.object;
+      controller.attach(object);
+      controller.userData.selected = object;
+    }
+
+    controller.userData.targetRayMode = event.data.targetRayMode;
+  }
+
+  private onControllerSelectEnd(event: any) {
+    const controller = event.target;
+
+    if (controller.userData.selected !== undefined) {
+      const object = controller.userData.selected;
+
+      const group = this.presentedScene!.model;
+      // @ts-ignore
+      group.attach(object);
+
+      controller.userData.selected = undefined;
+    }
   }
 
   /**
@@ -734,6 +848,10 @@ export class ARRenderer extends EventDispatcher<
    * Only public to make it testable.
    */
   public onWebXRFrame(time: number, frame: XRFrame) {
+    this.cleanIntersected();
+    this.intersectObjects(this.controller1);
+    this.intersectObjects(this.controller2);
+
     this.frame = frame;
     ++this.frames;
     const refSpace = this.threeRenderer.xr.getReferenceSpace()!;
