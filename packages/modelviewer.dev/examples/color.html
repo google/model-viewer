@@ -23,7 +23,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
-  <script type='module' src='https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js'></script>
+  <script type='module' src='../../../node_modules/@google/model-viewer/dist/model-viewer.js'></script>
   <script defer src="https://web3dsurvey.com/collector.js"></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
@@ -404,9 +404,9 @@
     skews (blue to purple, red to orange) and saturation loss. AgX is a newer
     and better tone mapper that holds hue better, but still has significant
     contrast and saturation loss, which is desirable for its intended use cases
-    in games and film. For detail, please see our <a
-    href="tone-mapping.html">technical document</a> on the tradeoffs in tone
-    mapping and how our Commerce tone mapper was designed.</p>
+    in games and film. For detail, please see our technical document on the
+    tradeoffs in <a href="tone-mapping.html">tone mapping</a> and how our
+    Commerce tone mapper was designed.</p>
 
     <figure>
       <model-viewer
@@ -414,7 +414,7 @@
         src="../assets/ShopifyModels/Mixer.glb"
         tone-mapping="commerce"
         camera-controls
-        alt="Tone mapping comparisons for difference 3D models"
+        alt="Tone mapping comparisons for different 3D models"
       >
         <p>Tone Mapping:
           <select id="tone">
@@ -432,7 +432,7 @@
           </select>
         </p>
       </model-viewer>
-      <figcaption>Comparison of tone mapping functions for difference models.</figcaption>
+      <figcaption>Comparison of tone mapping functions for different models.</figcaption>
     </figure>
 
     <h3 id="validate-render">How do we validate a glTF 3D render?</h3>
@@ -471,7 +471,7 @@
     post-processing step. Some things don't apply to rendering, like masking out
     shadows to make them semi-transparent - a 3D renderer can do this
     automatically. In addition to color-neutral tone mapping, sometimes the
-    colors are intentionally "corrected". Why? After all, if the measured light
+    colors are intentionally "corrected". Why? After all, if the captured light
     from the actual scene is not correct, what is?</p>
 
     <p>It may be that some of the post-processing color correction is simply a
@@ -479,7 +479,7 @@
     lighting and scene had to be adjusted, which involves manual labor. Digital
     post-processing can allow the lighting to be less precise. However in 3D
     rendering, the lighting is equally digital, so it is generally a better
-    practice to keep the post-processing step simple (e.g. just ACES tone
+    practice to keep the post-processing step simple (e.g. just tone
     mapping) and adjust the environment image if necessary. Since 3D rendering is
     happening completely automatically in real time, there is no way to make
     manual bespoke color adjustments for each frame.</p>
@@ -577,7 +577,7 @@
     material baseColor, which is what allows the demo below to be compellingly
     realistic.</p>
 
-     <figure>
+    <figure>
       <model-viewer
         id="environments"
         src="../assets/ShopifyModels/Mixer.glb"
@@ -591,6 +591,26 @@
       environment, yet how that is exactly what makes it appear
       realistic.</figcaption>
     </figure>
+
+    <p>Still, for most e-commerce vendors that are likely managing separate
+    contracts for 3D model generation and interactive website design, simplicity
+    is key to cost-effectiveness. My recommendation is to use our Commerce tone
+    mapping and if you already have approved marketing colors for your products,
+    then tell your artists to use those for the baseColor. Use a grayscale
+    lighting environment, adjusting if necessary to place highlights and change
+    exposure.</p>
+    
+    <p>If the color is not known, but being matched by eye, then ensure the
+    artist's tools also use the Commerce tone mapper and a lighting environment
+    that is as close as possible to the production grayscale lighting
+    environment. Since our Commerce tone mapper is relatively new, it may not be
+    available in tools; in this case the next best thing is to turn off tone
+    mapping entirely. Make sure to educate your artists on the differences they
+    can expect - blown out highlights with hue skews, and saturation loss for
+    dark colors. Ensure they also frequently test their output in a
+    near-production environment, hopefully using &lt;model-viewer&gt; with
+    <code>tone-mapping="commerce"</code>. This way they can calibrate and ensure
+    the end user will see realistic colors.</p>
 
   </div>
   <div style="margin-top:24px"></div>
