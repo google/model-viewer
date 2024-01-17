@@ -125,7 +125,7 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
         return;
       }
 
-      const updateEnvProgress = this[$progressTracker].beginActivity();
+      const updateEnvProgress = this[$progressTracker].beginActivity('environment-update');
 
       try {
         const {environmentMap, skybox} =

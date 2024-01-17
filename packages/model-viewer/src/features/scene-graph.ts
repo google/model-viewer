@@ -169,7 +169,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('variantName')) {
-        const updateVariantProgress = this[$progressTracker].beginActivity();
+        const updateVariantProgress = this[$progressTracker].beginActivity('variant-update');
         updateVariantProgress(0.1);
         const model = this[$model];
         const {variantName} = this;
