@@ -437,7 +437,7 @@ export class Renderer extends
     const env = element.environmentImage;
     const sky = element.skyboxImage;
     const compensateExposure = toneMapping === CustomToneMapping &&
-        (env === 'neutral' || env === 'legacy' || (env == null && sky == null));
+        (env === 'neutral' || env === 'legacy' || (!env && !sky));
     this.threeRenderer.toneMappingExposure =
         (exposureIsNumber ? exposure : 1.0) *
         (compensateExposure ? COMMERCE_EXPOSURE : 1.0);
