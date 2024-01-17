@@ -135,6 +135,7 @@
       <a href="#tradeoffs">Tradeoffs</a><br/>
       <a href="#needs">The needs of e-commerce</a><br/>
       <a href="#commerce">Commerce tone mapper</a><br/>
+      <a href="#validation">Validation</a><br/>
       <a href="#white">White point</a><br/>
     </p>
   
@@ -252,7 +253,7 @@
     the level of ambient lighting around it, but this data is unlikely to be
     available.</p>
 
-    <h3 id="#tradeoffs">Tradeoffs</h3>
+    <h3 id="tradeoffs">Tradeoffs</h3>
 
     <p>The difficulty with compressing a nearly infinite HDR range down to sRGB
     is the necessary loss of information. For the highlights to be discernable,
@@ -299,10 +300,10 @@
     system to compensate for the loss of saturation, allowing the image to still
     look good, instead of washed-out.</p>
 
-    <h3 id="#needs">The needs of e-commerce</h3>
+    <h3 id="needs">The needs of e-commerce</h3>
 
     <p>Unfortunately, the needs of e-commerce are quite different than the needs
-    of film or gaming. On a website, a 3D product model will side-by-side with
+    of film or gaming. On a website, a 3D product model will be side-by-side with
     sRGB product photos, and a user may often compare the image on their screen
     to a printed image in a catalogue or to the physical product they have
     received. Of course it is exceedingly difficult to succeed in these
@@ -348,7 +349,7 @@
     these situations, but there will be additional challenges beyond tone
     mapping as well.</p>
 
-    <h3 id="#commerce">Commerce tone mapper</h3>
+    <h3 id="commerce">Commerce tone mapper</h3>
 
     <p>The Commerce tone mapper is designed to be simple to implement, fast to
     run, and faithfully reproduce color as much as possible while eliminating
@@ -375,7 +376,7 @@
 
     <p>Since tone mapping is about fitting into the sRGB cube, I intentionally
     avoid any use of luminance weights, as the edges of the sRGB cube are not at
-    all constant luminance. Instead I scale down colors by a simple multiplier,
+    all constant luminance. Instead I scale down colors by a scalar multiplier,
     thus preserving hue and saturation while reducing brightness (there are many
     definitions for these terms, so please bear with my imprecision). The
     brightness metric I use is the maximum value of R, G, and B, and the goal is
@@ -386,10 +387,10 @@
     a single parameter: the value where we switch from the linear to the
     nonlinear function. The purpose of the Commerce tone mapper is to be a
     standard and thus without parameters, so I chose 0.8 after much testing.
-    However, this is likely the most natural place to adjust the curve for HDR
-    output rather than sRGB.</p>
+    However, this is likely the most natural place to adjust the curve to HDR
+    output from sRGB.</p>
 
-    <p>Converting 0.8 to sRGB gives 231, so any baseColor with R, B, and B
+    <p>Converting 0.8 to sRGB gives 231, so any baseColor with R, G, and B
     values below 231 will be faithfully reproduced under even, white lighting.
     The compression reduces 255 to 243, so all highlights that would be clipped
     end up mapped to the 243-255 range.</p>
@@ -407,7 +408,7 @@
     only other parameter in this tone mapper controls the rate of desaturation,
     which I chose as 0.15, which is significantly slower to approach its
     asymptote than the compression function. This is what helps produce our
-    smoother gradients and hide the aggressiveness of our compression. In some
+    smoother gradients and hide the aggressiveness of our compression. In a
     sense I am replacing the lost brightness with desaturation, thus giving the
     brain an alternate perceptual cue, which smoothly encodes several orders of
     magnitude more brightness than is available in the output screen.</p>
@@ -446,12 +447,14 @@
       <figcaption>Same as above, but with the input brightness in log scale.</figcaption>
     </figure>
 
-    <p>The following demo uses a test model based on a Macbeth color chart. For each color,
-    there is a matte sphere, shiny dielectric sphere and an unlit sphere for
-    baseColor comparison. Along the top is an additional row with saturated
-    colors and shiny metallic spheres - this is useful for demonstrating the
-    problems with Linear/Clamped tone mapping. Along the left and right are
-    columns of shiny metals.</p>
+    <p>The following demo uses a test model based on a Macbeth color chart. For
+    each color, there is a matte sphere, shiny dielectric sphere and an unlit
+    sphere for baseColor comparison. Along the top is an additional row with
+    saturated colors and shiny metallic spheres - this is useful for
+    demonstrating the problems with Linear/Clamped tone mapping - note the
+    extreme hue skews of the highlights. Along the left and right are columns of
+    shiny metals.</p>
+
     <p>Try the different tone mappers under both
     neutral and outdoor lighting. This test is intentionally designed to show
     off HDR artifacts.</p>
@@ -491,7 +494,7 @@
       <figcaption>Tone mapper test demo.</figcaption>
     </figure>
 
-    <h3 id="#validation">Validation</h3>
+    <h3 id="validation">Validation</h3>
 
     <p>The best end-to-end validation we have for color accuracy is to apply an
     unrealistic, analytic lighting environment: a white furnace test, where the
@@ -517,25 +520,25 @@
         shadow-intensity="1"
       >
       </model-viewer>
-      <figcaption>Commerce tone mapper validation.</figcaption>
+      <figcaption>Commerce tone mapper white furnace validation.</figcaption>
     </figure>
 
-    <p>The first difference is from the Fresnel effect: on shiny materials, the
+    <p>The first difference is due to multi-scattering, which causes the
+    dark-colored matte (front) spheres to be slightly darker than their unlit
+    comparisons. This is intentional, as matte materials are rough, thus
+    forming microscopic cavities that cause slight ambient occlusion and allow
+    dark materials more light bounces to absorb energy. Accurate PBR renderers
+    include this effect because a single material will in fact become brighter
+    as it is polished.</p>
+
+    <p>The second difference is from the Fresnel effect: on shiny materials, the
     reflection loses material color near grazing angles. This is a physical
     reality and causes the white halos on the edges of the shiny (back) spheres.
     If you turn the model until the unlit spheres overlap the middle of the
     shiny spheres, you'll see that the color match is exact at normal (center)
     reflection.</p>
 
-    <p>The second effect is multi-scattering, which causes the dark-colored
-    matte (front) spheres to be slightly darker than their unlit comparisons.
-    This is also intentional, as matte materials are rough, thus forming
-    microscopic cavities that cause slight ambient occlusion and allow dark
-    materials more light bounces to absorb energy. Accurate PBR renderers
-    include this effect because a single material will in fact become brighter
-    as it is polished.</p>
-
-    <h3 id="#white">White point</h3>
+    <h3 id="white">White point</h3>
 
     <p>The tl;dr of this section is that you can safely skip it. It is a
     discussion of the difference between physically correct and practical
