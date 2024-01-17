@@ -613,7 +613,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     // throw exceptions and/or behave in unexpected ways:
     scene.stopAnimation();
 
-    const updateSourceProgress = this[$progressTracker].beginActivity();
+    const updateSourceProgress = this[$progressTracker].beginActivity('model-load');
     const source = this.src;
     try {
       const srcUpdated = scene.setSource(
