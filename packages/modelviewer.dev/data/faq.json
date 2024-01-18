@@ -68,6 +68,16 @@
         ]
       },
       {
+        "name": "How do I ensure accurate colors?",
+        "htmlName": "color",
+        "description": "The short answer is to use neutral (grayscale) lighting and our new 'commerce' tone-mapping function, which is designed specifically to ensure faithful rendering of the glTF's colors. This is a complicated topic, so follow the links for much more in-depth explanations. The single biggest problem with color in 3D e-commerce is the industry-standard ACES tone mapper, so please consider using our commerce alternative.",
+        "links": [
+          "<a href='../examples/lightingandenv/#toneMapping'><span class='attribute'>tone-mapping</span> example</a>",
+          "<a href='../examples/color'>Achieving Color-Accurate Presentation with glTF</a>",
+          "<a href='../examples/tone-mapping'>Tone Mapping Considerations for Physically-Based Rendering</a>"
+        ]
+      },
+      {
         "name": "Why am I getting CORS errors?",
         "htmlName": "cors",
         "description": "CORS is a browser security policy, Cross-Origin Resource Sharing, which by default limits scripts (like &lt;model-viewer&gt;) from fetching resources (like 3D models) from a different origin than they are served from. In order to allow this, your server that hosts your 3D models must be set up to respond with CORS headers that permit your site origin where &lt;model-viewer&gt; is used.<br/><br/>For instance, if you use an Amazon S3 bucket, you may want to go to the 'CORS' section under 'Permissions' and set: <code>[{'AllowedHeaders': ['*'], 'AllowedMethods': ['GET'], 'AllowedOrigins': ['*'], 'ExposeHeaders': []}]</code>",

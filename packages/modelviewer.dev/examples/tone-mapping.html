@@ -23,7 +23,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
-  <script type='module' src='https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js'></script>
+  <script type='module' src='../../../node_modules/@google/model-viewer/dist/model-viewer.js'></script>
   <script defer src="https://web3dsurvey.com/collector.js"></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
@@ -135,6 +135,7 @@
       <a href="#tradeoffs">Tradeoffs</a><br/>
       <a href="#needs">The needs of e-commerce</a><br/>
       <a href="#commerce">Commerce tone mapper</a><br/>
+      <a href="#validation">Validation</a><br/>
       <a href="#white">White point</a><br/>
     </p>
   
@@ -146,19 +147,19 @@
     and even things like sepia can all be combined into a single resulting
     function that here we're calling tone mapping. However, we are only
     interested in hue-neutral functions and those are the only type of
-    tone mapping functions we'll be discussing here. Therefore the focus will be
-    primarily on luma, or brightness.</p>
+    tone mapping functions we'll be discussing here.</p>
 
-    <p>The tone mapping function used by <code>&lt;model-viewer&gt;</code> is
-    ACES, which is a standard developed by the film industry and is widely used
-    for 3D rendering. Like most tone mapping curves, it is fairly linear in the
-    central focus of its contrast range, then asymptotes out to smoothly
+    <p>The default tone mapping function used by
+    <code>&lt;model-viewer&gt;</code> has been ACES, which is a standard
+    developed by the film industry and is widely used for 3D rendering, though
+    it has some problems. Like most tone mapping curves, it is fairly linear in
+    the central focus of its contrast range, then asymptotes out to smoothly
     compress the long tails of brights and darks into the required zero to one
     output range, the idea being that humans perceive less difference between
     over-bright and over-dark zones as compared to the bulk of the scene.
     However, since some output range is reserved for these extra-bright
     highlights, the range left over to represent the input range of matte
-    baseColors is also reduced somewhat. This is why the paper-white sphere does
+    baseColors is also reduced. This is why a paper-white material does
     not produce white pixels.</p>
 
     <p>Sometimes when working with matte objects and trying to compare output
@@ -186,28 +187,30 @@
       <figcaption>Toggle ACES tone mapping to see the difference it makes.</figcaption>
     </figure>
 
-    <p>Note that once again the shiny and matte white plastic spheres are
-    indistinguishable, even without cranking up the exposure. Since half of the
-    matte white sphere is now rendering pure white, there is no headroom for
-    shiny highlights. Likewise, the top half of the sphere loses its 3D
-    appearance since the shading was removed by clamping the values. Tick the
-    checkbox to go back to ACES tone mapping for a quick comparison. Remember to
-    look away and back again after switching; another trick of human perception
-    is how dependent it is on anchoring. The yellow will look washed-out
-    immediately after switching from saturated yellow, but this perception fades
-    after looking around.</p>
+    <p>This model has six spheres with uniform materials: The top row are white
+    (baseColor RGB: [1, 1, 1]), while the bottom row are yellow (baseColor RGB:
+    [1, 1, 0]). From left to right they are shiny metal (metalness: 1,
+    roughness: 0), shiny plastic (metalness: 0, roughness: 0), and matte plastic
+    (metalness: 0, roughness: 1). The left-most can be thought of approximately
+    as polished silver and gold.</p>
+
+    <p>Tick the checkbox to remove tone mapping for a quick comparison. Note
+    that the shiny and matte white plastic spheres are now indistinguishable.
+    Since half of the matte white sphere is now rendering pure white, there is
+    no headroom for shiny highlights. Likewise, the top half of the sphere loses
+    its 3D appearance since the shading was removed by clamping the values.
+    </p>
 
     <p>This example also highlights a second key element of good tone mapping
     functions: desaturating overexposed colors. Look at the golden sphere
-    (lower-left) and compare to the previous version with ACES tone mapping
-    applied. The baseColor of a metal multiplies the incoming light, so a white
-    light on a golden sphere produces a yellow reflection (fully saturated
-    yellow, in this case of a fully saturated baseColor). With clamped tone
-    mapping, the highlight is indeed saturated yellow, but this does not look
-    perceptually right, even though you could make the argument it is physically
-    correct.</p>
+    (lower-left) and compare to when ACES tone mapping is applied. The baseColor
+    of a metal multiplies the incoming light, so a white light on a golden
+    sphere produces a yellow reflection (fully saturated yellow, in this case of
+    a fully saturated baseColor). With clamped tone mapping, the highlight is
+    indeed saturated yellow, but this does not look perceptually right, even
+    though you could make the argument it is physically correct.</p>
 
-    <p>Good tone mapping curves like ACES not only compress the luma, but also
+    <p>Tone mapping curves like ACES not only compress the luma, but also
     push colors toward white the brighter they are. This is why the highlights
     on the golden sphere become white instead of yellow. This follows both the
     behavior of camera sensors and our eyes when responding to overexposed
@@ -250,7 +253,7 @@
     the level of ambient lighting around it, but this data is unlikely to be
     available.</p>
 
-    <h3 id="#tradeoffs">Tradeoffs</h3>
+    <h3 id="tradeoffs">Tradeoffs</h3>
 
     <p>The difficulty with compressing a nearly infinite HDR range down to sRGB
     is the necessary loss of information. For the highlights to be discernable,
@@ -270,13 +273,20 @@
 
     <figure>
       <model-viewer
-        src="../../shared-assets/models/silver-gold.gltf"
-        tone-mapping="aces"
+        id="reachable"
+        src="../assets/ACESset.glb"
+        camera-orbit="150deg auto auto"
         camera-controls
-        alt="3D model of six example material spheres"
+        alt="3D model of ACES/Commerce tone mapping reachable colors."
       >
+      <p>
+        <select id="set">
+          <option value="../assets/ACESset.glb">ACES</option>
+          <option value="../assets/CommerceSet.glb">Commerce</option>
+        </select>Tone Mapping Function
+      </p>
       </model-viewer>
-      <figcaption>The ACES reachable colors.</figcaption>
+      <figcaption>Comparison of the ACES and Commerce tone mapping reachable colors. The cube represents the [0, 1] space in linear light - no sRGB curve has been applied.</figcaption>
     </figure>
 
     <p>Note that canary yellow, bright greens and blues are all impossible to
@@ -290,10 +300,10 @@
     system to compensate for the loss of saturation, allowing the image to still
     look good, instead of washed-out.</p>
 
-    <h3 id="#needs">The needs of e-commerce</h3>
+    <h3 id="needs">The needs of e-commerce</h3>
 
     <p>Unfortunately, the needs of e-commerce are quite different than the needs
-    of film or gaming. On a website, a 3D product model will side-by-side with
+    of film or gaming. On a website, a 3D product model will be side-by-side with
     sRGB product photos, and a user may often compare the image on their screen
     to a printed image in a catalogue or to the physical product they have
     received. Of course it is exceedingly difficult to succeed in these
@@ -339,7 +349,7 @@
     these situations, but there will be additional challenges beyond tone
     mapping as well.</p>
 
-    <h3 id="#commerce">Commerce tone mapper</h3>
+    <h3 id="commerce">Commerce tone mapper</h3>
 
     <p>The Commerce tone mapper is designed to be simple to implement, fast to
     run, and faithfully reproduce color as much as possible while eliminating
@@ -366,7 +376,7 @@
 
     <p>Since tone mapping is about fitting into the sRGB cube, I intentionally
     avoid any use of luminance weights, as the edges of the sRGB cube are not at
-    all constant luminance. Instead I scale down colors by a simple multiplier,
+    all constant luminance. Instead I scale down colors by a scalar multiplier,
     thus preserving hue and saturation while reducing brightness (there are many
     definitions for these terms, so please bear with my imprecision). The
     brightness metric I use is the maximum value of R, G, and B, and the goal is
@@ -377,10 +387,10 @@
     a single parameter: the value where we switch from the linear to the
     nonlinear function. The purpose of the Commerce tone mapper is to be a
     standard and thus without parameters, so I chose 0.8 after much testing.
-    However, this is likely the most natural place to adjust the curve for HDR
-    output rather than sRGB.</p>
+    However, this is likely the most natural place to adjust the curve to HDR
+    output from sRGB.</p>
 
-    <p>Converting 0.8 to sRGB gives 231, so any baseColor with R, B, and B
+    <p>Converting 0.8 to sRGB gives 231, so any baseColor with R, G, and B
     values below 231 will be faithfully reproduced under even, white lighting.
     The compression reduces 255 to 243, so all highlights that would be clipped
     end up mapped to the 243-255 range.</p>
@@ -398,7 +408,10 @@
     only other parameter in this tone mapper controls the rate of desaturation,
     which I chose as 0.15, which is significantly slower to approach its
     asymptote than the compression function. This is what helps produce our
-    smoother gradients and hide the aggressiveness of our compression.</p>
+    smoother gradients and hide the aggressiveness of our compression. In a
+    sense I am replacing the lost brightness with desaturation, thus giving the
+    brain an alternate perceptual cue, which smoothly encodes several orders of
+    magnitude more brightness than is available in the output screen.</p>
 
     <p>The complete shader code is quite small, with only three divides and
     those only applied to colors over the 1:1 limit:<br/>
@@ -434,12 +447,14 @@
       <figcaption>Same as above, but with the input brightness in log scale.</figcaption>
     </figure>
 
-    <p>The following demo uses a test model based on a Macbeth color chart. For each color,
-    there is a matte sphere, shiny dielectric sphere and an unlit sphere for
-    baseColor comparison. Along the top is an additional row with saturated
-    colors and shiny metallic spheres - this is useful for demonstrating the
-    problems with Linear/Clamped tone mapping. Along the left and right are
-    columns of shiny metals.</p>
+    <p>The following demo uses a test model based on a Macbeth color chart. For
+    each color, there is a matte sphere, shiny dielectric sphere and an unlit
+    sphere for baseColor comparison. Along the top is an additional row with
+    saturated colors and shiny metallic spheres - this is useful for
+    demonstrating the problems with Linear/Clamped tone mapping - note the
+    extreme hue skews of the highlights. Along the left and right are columns of
+    shiny metals.</p>
+
     <p>Try the different tone mappers under both
     neutral and outdoor lighting. This test is intentionally designed to show
     off HDR artifacts.</p>
@@ -447,7 +462,7 @@
     <figure>
       <model-viewer
         id="demo"
-        src="https://cdn.glitch.global/93f14439-9407-4d48-8b56-aa0afd9b2886/MacbethBalls.glb?v=1704772991939"
+        src="../../shared-assets/models/MacbethBalls.glb"
         tone-mapping="commerce"
         ar
         camera-controls
@@ -479,7 +494,51 @@
       <figcaption>Tone mapper test demo.</figcaption>
     </figure>
 
-    <h3 id="#white">White point</h3>
+    <h3 id="validation">Validation</h3>
+
+    <p>The best end-to-end validation we have for color accuracy is to apply an
+    unrealistic, analytic lighting environment: a white furnace test, where the
+    lighting is exactly uniform [1, 1, 1] white everywhere. This allows us to
+    expect a nearly-exact reproduction of baseColor to the output render, and
+    thus ensure our tone mapping function is not introducing further
+    changes.</p>
+
+    <p>Our 3D Macbeth chart model is ideal for this validation because tone
+    mapping is not applied at all to unlit materials, so the unlit spheres serve
+    as ground truth color comparisons for the PBR spheres. As you can see, they match
+    very well, in fact as close as is possible to match for PBR: there are
+    two expected sources of difference.</p>
+
+    <figure>
+      <model-viewer
+        id="demo"
+        src="../../shared-assets/models/MacbethBalls.glb"
+        skybox-image="../../shared-assets/environments/white_furnace.hdr"
+        tone-mapping="commerce"
+        ar
+        camera-controls
+        shadow-intensity="1"
+      >
+      </model-viewer>
+      <figcaption>Commerce tone mapper white furnace validation.</figcaption>
+    </figure>
+
+    <p>The first difference is due to multi-scattering, which causes the
+    dark-colored matte (front) spheres to be slightly darker than their unlit
+    comparisons. This is intentional, as matte materials are rough, thus
+    forming microscopic cavities that cause slight ambient occlusion and allow
+    dark materials more light bounces to absorb energy. Accurate PBR renderers
+    include this effect because a single material will in fact become brighter
+    as it is polished.</p>
+
+    <p>The second difference is from the Fresnel effect: on shiny materials, the
+    reflection loses material color near grazing angles. This is a physical
+    reality and causes the white halos on the edges of the shiny (back) spheres.
+    If you turn the model until the unlit spheres overlap the middle of the
+    shiny spheres, you'll see that the color match is exact at normal (center)
+    reflection.</p>
+
+    <h3 id="white">White point</h3>
 
     <p>The tl;dr of this section is that you can safely skip it. It is a
     discussion of the difference between physically correct and practical
@@ -583,21 +642,10 @@
       updateToneMapper(toneMV, checkbox.checked ? "4" : "1");
     });
 
-    const envMV = document.querySelector("#environments");
-    const envCycle = [
-      "../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr",
-      "../../shared-assets/environments/whipple_creek_regional_park_04_1k.hdr",
-      "../../shared-assets/environments/lebombo_1k.hdr",
-      "../../shared-assets/environments/aircraft_workshop_01_1k.hdr",
-      "../../shared-assets/environments/music_hall_01_1k.hdr",
-      "../../shared-assets/environments/pillars_1k.hdr",
-      "../../shared-assets/environments/neutral.hdr"
-    ];
-
-    setInterval(() => {
-      const cycleIndex = envCycle.indexOf(envMV.skyboxImage);
-      envMV.skyboxImage = envCycle[(cycleIndex + 1) % envCycle.length];
-    }, 3000);
+    const reachMV = document.querySelector("#reachable");
+    document.querySelector('#set').addEventListener("input", (event) => {
+      reachMV.src = event.target.value;
+    });
   </script>
 </body>
 </html>

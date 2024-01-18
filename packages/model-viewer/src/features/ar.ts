@@ -415,7 +415,7 @@ configuration or device capabilities');
     }
 
     async prepareUSDZ(): Promise<string> {
-      const updateSourceProgress = this[$progressTracker].beginActivity();
+      const updateSourceProgress = this[$progressTracker].beginActivity('usdz-conversion');
 
       await this[$triggerLoad]();
 

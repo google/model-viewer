@@ -248,7 +248,7 @@
       {
         "name": "progress",
         "htmlName": "progress",
-        "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress."
+        "description": "This event fires while a model, environment, skybox, variant, and/or a usdz conversion is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress. It also provides the reason why the event is fired ('model-load', 'environment-update', 'variant-update', 'usdz-conversion'): event.detail.reason."
       },
       {
         "name": "render-scale",
@@ -887,7 +887,7 @@
         "htmlName": "toneMapping",
         "description": "Selects the function that compresses the HDR rendering to an SDR image on your screen. ACES is a film industry standard that is commonly used, though it has serious color-accuracy problems. AgX is a new and improved tone mapper seeing broad adoption in film and games.Commerce is a function designed specifically for accurate color reproduction in e-commerce. Our current default is and has been ACES, but in v4.0 this default will change to Commerce.",
         "links": [
-          "<a href=\"../examples/lightingandenv/#renderExposure\"><span class='attribute'>exposure</span> example</a>"
+          "<a href=\"../examples/lightingandenv/#toneMapping\"><span class='attribute'>tone-mapping</span> example</a>"
         ],
         "default": {
           "default": "aces",
