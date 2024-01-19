@@ -28,7 +28,7 @@ export const modelViewerTemplate = `<!doctype html>
     <!-- <model-viewer> HTML element -->
     REPLACEME
     <!-- Loads <model-viewer> for browsers: -->
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.2.0/model-viewer.min.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
   </body>
 </html>`;
 
