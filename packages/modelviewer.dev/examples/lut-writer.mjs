@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
+// Running:
+// node lut-writer.mjs
+// produces: commerce.cube
+
 import * as fs from 'fs';
 
 const size = 57;
+// must match the lg2 vars in config.ocio
+const log2Min = -6;
+const log2Max = 12;
 
 const text = [
   `TITLE "Commerce sRGB"`,
@@ -25,17 +32,65 @@ const text = [
   `LUT_3D_SIZE ${size}`,
 ];
 
+function clamp(x) {
+  return Math.min(Math.max(x, 0), 1);
+}
+
 function round(x) {
-  return x.toFixed(7).replace(/\.?0*$/, '');
+  return clamp(x).toFixed(7).replace(/\.?0*$/, '');
+}
+
+function inverseLog(x) {
+  const log2 = (x / (size - 1)) * (log2Max - log2Min) + log2Min;
+  return Math.pow(2, log2);
+}
+
+function rgb2string(r, g, b) {
+  return `${round(r)} ${round(g)} ${round(b)}`;
+}
+
+function commerce(r, g, b) {
+  const startCompression = 0.8 - 0.04;
+  const desaturation = 0.15;
+
+  // invert the lg2 transform in the OCIO config - used to more evenly-space the
+  // LUT points
+  let R = inverseLog(r);
+  let G = inverseLog(g);
+  let B = inverseLog(b);
+
+  const x = Math.min(R, G, B);
+  const offset = x < 0.08 ? x - 6.25 * x * x : 0.04;
+  R -= offset;
+  G -= offset;
+  B -= offset;
+
+  const peak = Math.max(R, G, B);
+  if (peak < startCompression) {
+    return rgb2string(R, G, B);
+  }
+
+  const d = 1 - startCompression;
+  const newPeak = 1 - d * d / (peak + d - startCompression);
+  const scale = newPeak / peak;
+  R *= scale;
+  G *= scale;
+  B *= scale;
+
+  const f = 1 - 1 / (desaturation * (peak - newPeak) + 1);
+  R = (1 - f) * R + f;
+  G = (1 - f) * G + f;
+  B = (1 - f) * B + f;
+  return rgb2string(R, G, B);
 }
 
 for (let b = 0; b < size; ++b) {
   for (let g = 0; g < size; ++g) {
     for (let r = 0; r < size; ++r) {
-      text.push(`${round(r / (size - 1))} ${round(g / (size - 1))} ${
-          round(b / (size - 1))}`);
+      text.push(commerce(r, g, b));
     }
   }
 }
+text.push('');
 
 fs.writeFileSync('commerce.cube', text.join('\n'));
