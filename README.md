@@ -1,6 +1,6 @@
 # The `<model-viewer>` project
 
-This is the main Github repository for the `<model-viewer>` web component and
+This is the main GitHub repository for the `<model-viewer>` web component and
 all of its related projects.
 
 **Getting started?** Check out the [`<model-viewer>`](packages/model-viewer) project!
