@@ -136,6 +136,7 @@
       <a href="#needs">The needs of e-commerce</a><br/>
       <a href="#commerce">Commerce tone mapper</a><br/>
       <a href="#validation">Validation</a><br/>
+      <a href="#ocio">OpenColorIO profile</a><br/>
       <a href="#white">White point</a><br/>
     </p>
   
@@ -145,9 +146,10 @@
     conversion function. Even separate operations that a photographer might
     apply in post processing, such as gamma correction, saturation, contrast,
     and even things like sepia can all be combined into a single resulting
-    function that here we're calling tone mapping. However, we are only
-    interested in hue-neutral functions and those are the only type of
-    tone mapping functions we'll be discussing here.</p>
+    function that here we're calling tone mapping. Setting aside artistic color
+    grading, we are looking at generic, neutral tone mappers designed to pull
+    out-of-range colors back into the limits of our display device in a
+    perceptually-pleasing way.</p>
 
     <p>The default tone mapping function used by
     <code>&lt;model-viewer&gt;</code> has been ACES, which is a standard
@@ -340,14 +342,24 @@
     compression of the range of these highlights is much more reasonable than in
     film.</p>
 
-    <p>We are focused on sRGB for both input (glTF) and output
-    (web browsers), to meet the industry where it is today, which simplifies the
-    tone mapping problem somewhat compared to the film industry. However,
-    wider-gamut colorspaces and HDR monitors are working their way into the
-    mainstream and we will need to address these challenges soon. The approach
-    to tone mapping outlined in the following section should be generalizable to
-    these situations, but there will be additional challenges beyond tone
-    mapping as well.</p>
+    <p>We are focused on sRGB for both input (glTF) and output (web browsers),
+    to meet the industry where it is today, which simplifies the tone mapping
+    problem considerably compared to the film industry. This is because one of
+    the most difficult aspects of tone mapping is gamut mapping, where colors
+    from a larger input gamut like P3 must be squeezed into a smaller gamut like
+    sRGB. Conveniently, the glTF standard (like most 3D model workflows)
+    specifies that all color textures and lights are in the sRGB gamut. This
+    means that regardless of the colorspace used internally, all rendered colors
+    will automatically be inside the sRGB gamut (Rec.709), though potentially at
+    much higher brightness. Even if the display device is not sRGB, since sRGB
+    uses the smallest color gamut, no gamut mapping will ever be required, until
+    3D models contain larger-gamut textures. </p>
+
+    <p>HDR monitors are working their way into the mainstream and we will need
+    to adjust our curves appropriately to support their higher contrast. The
+    approach to tone mapping outlined in the following section should be
+    generalizable to these situations, but there will be additional challenges
+    beyond tone mapping as well.</p>
 
     <h3 id="commerce">Commerce tone mapper</h3>
 
@@ -537,6 +549,59 @@
     If you turn the model until the unlit spheres overlap the middle of the
     shiny spheres, you'll see that the color match is exact at normal (center)
     reflection.</p>
+
+    <h3 id="ocio">OpenColorIO profile</h3>
+
+    <p><a href="https://opencolorio.org/">OpenColorIO</a> Is a standard for
+    representing color space conversions and color grading, supported by many 3D
+    authoring tools. To represent the most general possible functions, instead
+    of specifying equations they use 3D lookup tables (LUTs). To help authors
+    try out Commerce tone mapping within their existing workflows, I have
+    generated an equivalent OCIO config and a LUT in the common .cube format.
+    You can download <a href="commerce.cube">commerce.cube</a> and <a
+    href="config.ocio">config.ocio</a>, which is modified from the
+    <a href="https://www.blender.org/">Blender</a> config to add Commerce as a
+    view transform for color management with an sRGB display device.</p>
+
+    <p>In order to try Commerce tone mapping in Blender, you need to replace the
+    config.ocio file with the above version. The original file can be found in
+    the Blender install directory, e.g.
+    <code>Blender/Contents/Resources/4.0/datafiles/colormanagement</code> on a
+    Mac install. You will also need to add <code>commerce.cube</code> to the
+    <code>luts</code> directory on the same path. Then start Blender and at the
+    bottom of the Render tab, under Color Management, select sRGB for Display
+    Device and Commerce for View Transform.</p>
+
+    <p>I have tested this on a Macbook Pro, which uses a P3 display, but found
+    that I achieved consistent colors when setting the display device to sRGB.
+    This was to achieve consistency with Chrome and Safari rendering on the same
+    device, so this may change in the future as color management on the web
+    improves. Note that Blender is not glTF-compliant for unlit materials,
+    because it applies its view transform to the entire scene, when it should
+    not be applied to unlit materials. This makes the 3D Macbeth model above a
+    little harder to use, as the unlit spheres can no longer be used as a
+    reference.</p>
+
+    <p>The critical addition to the Blender OCIO config is the following, but
+    this will likely need some modification to fit into an existing OCIO config
+    in a different tool that has colorspaces defined under different names.</p>
+
+    <p><code>
+- !&lt;ColorSpace&gt;
+  name: Commerce sRGB
+  family: Commerce
+  equalitygroup:
+  bitdepth: 32f
+  description: |
+    Commerce Image Encoding for sRGB Display
+  isdata: false
+  from_scene_reference: !&lt;GroupTransform&gt;
+    children:
+      - !&lt;ColorSpaceTransform&gt; {src: Linear CIE-XYZ E, dst: Linear Rec.709}
+      - !&lt;AllocationTransform&gt; {allocation: lg2, vars: [-6, 12]}
+      - !&lt;FileTransform&gt; {src: commerce.cube, interpolation: tetrahedral}
+      - !&lt;ColorSpaceTransform&gt; {src: Linear Rec.709, dst: sRGB}
+    </code></p>
 
     <h3 id="white">White point</h3>
 
