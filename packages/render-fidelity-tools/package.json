@@ -44,7 +44,8 @@
     "puppeteer": "^21.3.4",
     "rimraf": "^3.0.2",
     "three": "^0.160.0",
-    "three-gpu-pathtracer": "^0.0.13",
+    "three-gpu-pathtracer": "^0.0.20",
+    "three-mesh-bvh": "^0.7.3",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
