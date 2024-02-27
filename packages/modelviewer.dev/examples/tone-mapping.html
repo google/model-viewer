@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>PBR Tone Mapping</title>
+  <title>PBR Neutral Tone Mapping</title>
   <meta charset="utf-8">
   <meta name="description" content="Performance optimization for &lt;model-viewer&gt;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -134,7 +134,7 @@
       <a href="#purpose">The purpose of tone mapping</a><br/>
       <a href="#tradeoffs">Tradeoffs</a><br/>
       <a href="#needs">The needs of e-commerce</a><br/>
-      <a href="#commerce">Commerce tone mapper</a><br/>
+      <a href="#commerce">Khronos PBR Neutral tone mapper</a><br/>
       <a href="#validation">Validation</a><br/>
       <a href="#ocio">OpenColorIO profile</a><br/>
       <a href="#white">White point</a><br/>
@@ -279,16 +279,16 @@
         src="../assets/ACESset.glb"
         camera-orbit="150deg auto auto"
         camera-controls
-        alt="3D model of ACES/Commerce tone mapping reachable colors."
+        alt="3D model of ACES/Neutral tone mapping reachable colors."
       >
       <p>
         <select id="set">
           <option value="../assets/ACESset.glb">ACES</option>
-          <option value="../assets/CommerceSet.glb">Commerce</option>
+          <option value="../assets/CommerceSet.glb">PBR Neutral</option>
         </select>Tone Mapping Function
       </p>
       </model-viewer>
-      <figcaption>Comparison of the ACES and Commerce tone mapping reachable colors. The cube represents the [0, 1] space in linear light - no sRGB curve has been applied.</figcaption>
+      <figcaption>Comparison of the ACES and PBR Neutral tone mapping reachable colors. The cube represents the [0, 1] space in linear light - no sRGB curve has been applied.</figcaption>
     </figure>
 
     <p>Note that canary yellow, bright greens and blues are all impossible to
@@ -361,9 +361,9 @@
     generalizable to these situations, but there will be additional challenges
     beyond tone mapping as well.</p>
 
-    <h3 id="commerce">Commerce tone mapper</h3>
+    <h3 id="commerce">Khronos PBR Neutral tone mapper</h3>
 
-    <p>The Commerce tone mapper is designed to be simple to implement, fast to
+    <p>The Khronos PBR Neutral tone mapper is designed to be simple to implement, fast to
     run, and faithfully reproduce color as much as possible while eliminating
     HDR artifacts around highlights. It is intended to be 1:1 for colors up to a
     certain maximum value, with the remainder used as headroom for the
@@ -397,7 +397,7 @@
     <p>I chose to fit a simple 1/x function and match the piecewise slope of our
     1:1 portion, as this gives an asymptote with a reasonable tail. It has only
     a single parameter: the value where we switch from the linear to the
-    nonlinear function. The purpose of the Commerce tone mapper is to be a
+    nonlinear function. The purpose of the Khronos PBR Neutral tone mapper is to be a
     standard and thus without parameters, so I chose 0.8 after much testing.
     However, this is likely the most natural place to adjust the curve to HDR
     output from sRGB.</p>
@@ -451,7 +451,7 @@
 
     <figure>
       <img src="../assets/commerce-linear.png"/>
-      <figcaption>The Commerce tone mapping function, which maps linear brightness to the [0, 1] range. The compression function is piecewise in three parts: blue for the contrast toe, green for the linear 1:1 region, and red for the compression region. The desaturation curve is purple.</figcaption>
+      <figcaption>The Khronos PBR Neutral tone mapping function, which maps linear brightness to the [0, 1] range. The compression function is piecewise in three parts: blue for the contrast toe, green for the linear 1:1 region, and red for the compression region. The desaturation curve is purple.</figcaption>
     </figure>
 
     <figure>
@@ -482,7 +482,7 @@
       >
         <p>
           <select id="tonemapper">
-            <option value="5">Commerce</option>
+            <option value="5">PBR Neutral</option>
             <option value="1">Linear/Clamped</option>
             <option value="4">ACES</option>
             <option value="6">AgX</option>
@@ -532,7 +532,7 @@
         shadow-intensity="1"
       >
       </model-viewer>
-      <figcaption>Commerce tone mapper white furnace validation.</figcaption>
+      <figcaption>Khronos PBR Neutral tone mapper white furnace validation.</figcaption>
     </figure>
 
     <p>The first difference is due to multi-scattering, which causes the
@@ -556,21 +556,21 @@
     representing color space conversions and color grading, supported by many 3D
     authoring tools. To represent the most general possible functions, instead
     of specifying equations they use 3D lookup tables (LUTs). To help authors
-    try out Commerce tone mapping within their existing workflows, I have
+    try out Khronos PBR Neutral tone mapping within their existing workflows, I have
     generated an equivalent OCIO config and a LUT in the common .cube format.
-    You can download <a href="commerce.cube">commerce.cube</a> and <a
+    You can download <a href="pbrNeutral.cube">pbrNeutral.cube</a> and <a
     href="config.ocio">config.ocio</a>, which is modified from the
-    <a href="https://www.blender.org/">Blender</a> config to add Commerce as a
+    <a href="https://www.blender.org/">Blender</a> config to add PBR Neutral as a
     view transform for color management with an sRGB display device.</p>
 
-    <p>In order to try Commerce tone mapping in Blender, you need to replace the
+    <p>In order to try PBR Neutral tone mapping in Blender, you need to replace the
     config.ocio file with the above version. The original file can be found in
     the Blender install directory, e.g.
     <code>Blender/Contents/Resources/4.0/datafiles/colormanagement</code> on a
-    Mac install. You will also need to add <code>commerce.cube</code> to the
+    Mac install. You will also need to add <code>pbrNeutral.cube</code> to the
     <code>luts</code> directory on the same path. Then start Blender and at the
     bottom of the Render tab, under Color Management, select sRGB for Display
-    Device and Commerce for View Transform.</p>
+    Device and PBR Neutral for View Transform.</p>
 
     <p>I have tested this on a Macbook Pro, which uses a P3 display, but found
     that I achieved consistent colors when setting the display device to sRGB.
@@ -588,18 +588,18 @@
 
     <p><code>
 - !&lt;ColorSpace&gt;
-  name: Commerce sRGB
-  family: Commerce
+  name: PBR Neutral sRGB
+  family: PBR Neutral
   equalitygroup:
   bitdepth: 32f
   description: |
-    Commerce Image Encoding for sRGB Display
+    Khronos PBR Neutral Image Encoding for sRGB Display
   isdata: false
   from_scene_reference: !&lt;GroupTransform&gt;
     children:
       - !&lt;ColorSpaceTransform&gt; {src: Linear CIE-XYZ E, dst: Linear Rec.709}
       - !&lt;AllocationTransform&gt; {allocation: lg2, vars: [-6, 12]}
-      - !&lt;FileTransform&gt; {src: commerce.cube, interpolation: tetrahedral}
+      - !&lt;FileTransform&gt; {src: pbrNeutral.cube, interpolation: tetrahedral}
       - !&lt;ColorSpaceTransform&gt; {src: Linear Rec.709, dst: sRGB}
     </code></p>
 

@@ -15,7 +15,7 @@
 
 // Running:
 // node lut-writer.mjs
-// produces: commerce.cube
+// produces: pbrNeutral.cube
 
 import * as fs from 'fs';
 
@@ -25,8 +25,8 @@ const log2Min = -6;
 const log2Max = 12;
 
 const text = [
-  `TITLE "Commerce sRGB"`,
-  `# Commerce sRGB LUT`,
+  `TITLE "PBR Neutral sRGB"`,
+  `# PBR Neutral sRGB LUT`,
   `DOMAIN_MIN 0 0 0`,
   `DOMAIN_MAX 1 1 1`,
   `LUT_3D_SIZE ${size}`,
@@ -49,7 +49,7 @@ function rgb2string(r, g, b) {
   return `${round(r)} ${round(g)} ${round(b)}`;
 }
 
-function commerce(r, g, b) {
+function pbrNeutral(r, g, b) {
   const startCompression = 0.8 - 0.04;
   const desaturation = 0.15;
 
@@ -87,10 +87,10 @@ function commerce(r, g, b) {
 for (let b = 0; b < size; ++b) {
   for (let g = 0; g < size; ++g) {
     for (let r = 0; r < size; ++r) {
-      text.push(commerce(r, g, b));
+      text.push(pbrNeutral(r, g, b));
     }
   }
 }
 text.push('');
 
-fs.writeFileSync('commerce.cube', text.join('\n'));
+fs.writeFileSync('pbrNeutral.cube', text.join('\n'));
