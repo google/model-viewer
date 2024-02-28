@@ -137,6 +137,7 @@
       <a href="#commerce">Khronos PBR Neutral tone mapper</a><br/>
       <a href="#validation">Validation</a><br/>
       <a href="#ocio">OpenColorIO profile</a><br/>
+      <a href="#adoption">Adoption</a><br/>
       <a href="#white">White point</a><br/>
     </p>
   
@@ -363,12 +364,14 @@
 
     <h3 id="commerce">Khronos PBR Neutral tone mapper</h3>
 
-    <p>The Khronos PBR Neutral tone mapper is designed to be simple to implement, fast to
-    run, and faithfully reproduce color as much as possible while eliminating
-    HDR artifacts around highlights. It is intended to be 1:1 for colors up to a
-    certain maximum value, with the remainder used as headroom for the
-    compressed highlights. It turns out 1:1 is a little trickier than it
-    sounds.</p>
+    <p>The Khronos PBR Neutral tone mapper is designed to be simple to
+    implement, fast to run, and faithfully reproduce color as much as possible
+    while eliminating HDR artifacts around highlights. It is intended to be 1:1
+    for colors up to a certain maximum value, with the remainder used as
+    headroom for the compressed highlights. I developed it under the auspices of
+    the Khronos 3D Commerce working group to create an industry standard for
+    e-commerce and an improved alternative for any PBR render that currently
+    disables tone mapping.</p>
 
     <p>I found that an actual 1:1 tone mapping function led to slightly
     desaturated colors, most noticeably for dark colors. I tracked this problem
@@ -425,8 +428,11 @@
     brain an alternate perceptual cue, which smoothly encodes several orders of
     magnitude more brightness than is available in the output screen.</p>
 
-    <p>The complete shader code is quite small, with only three divides and
-    those only applied to colors over the 1:1 limit:<br/>
+    <p>Careful use of the minimum and maximum of the three color channel values
+    ensures that this tone mapping function has continuous gradients everywhere
+    and in all dimensions, which is key to avoiding eye-catching artifacts in
+    the output renders. The complete shader code is quite small, with only three
+    divides and those only applied to colors over the 1:1 limit:<br/>
     <code>
   float startCompression = 0.8 - 0.04;
   float desaturation = 0.15;
@@ -576,9 +582,8 @@
     that I achieved consistent colors when setting the display device to sRGB.
     This was to achieve consistency with Chrome and Safari rendering on the same
     device, so this may change in the future as color management on the web
-    improves. Note that Blender is not glTF-compliant for unlit materials,
-    because it applies its view transform to the entire scene, when it should
-    not be applied to unlit materials. This makes the 3D Macbeth model above a
+    improves. Note that unlike &lt;model-viewer&gt;, Blender also applies its
+    view transform to unlit materials. This makes the 3D Macbeth model above a
     little harder to use, as the unlit spheres can no longer be used as a
     reference.</p>
 
@@ -602,6 +607,28 @@
       - !&lt;FileTransform&gt; {src: pbrNeutral.cube, interpolation: tetrahedral}
       - !&lt;ColorSpaceTransform&gt; {src: Linear Rec.709, dst: sRGB}
     </code></p>
+
+    <h3 id="adoption">Adoption</h3>
+
+    <p>Of course a standardized color-accurate tone mapper is most useful when
+    it is universally available, so that everyone from artists to marketers to
+    end users can see the product the same way and ensure quality. This is
+    precisely why Khronos is pushing this as an industry standard for renderers
+    and authoring tools alike to adopt, as an option for tools that support
+    multiple tone mappers, and as the default for those that don't. This section
+    will be occasionally updated to reflect our progress in adoption across
+    industry tools.</p>
+
+    <p>So far two major open-source renderers have added PBR Neutral tone
+    mapping, and both should be available in public releases in March 2024: <a
+    href="https://github.com/mrdoob/three.js/pull/27668">Three.js</a> and <a
+    href="https://github.com/google/filament/pull/7597">Filament</a>.
+    <a href="lightingandenv/#toneMapping">&lt;model-viewer&gt;</a> already
+    supports it, currently under the name "commerce", and it will become default
+    in v4. It is already the default in the &lt;model-viewer&gt; <a
+    href="../editor">editor</a>. A proposal has been made to add it to <a
+    href="https://projects.blender.org/blender/blender/issues/118824">Blender</a>,
+    and discussions are ongoing with other major 3D authoring tools.</p>
 
     <h3 id="white">White point</h3>
 
