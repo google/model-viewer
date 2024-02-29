@@ -797,9 +797,9 @@
     ],
     "Methods": [
       {
-        "name": "updateHotspot({name, position, normal})",
+        "name": "updateHotspot({name, position?, normal?, surface?})",
         "htmlName": "updateHotspot",
-        "description": "Updates the position and/or normal of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position and normal are given in the same string format as the hotspot attributes <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span>, which are also in the same format as the <span class='attribute'>camera-target</span> attribute."
+        "description": "Updates the position, norma, and/or surface of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position, normal, and surface are given in the same string format as the hotspot attributes <span class='attribute'>data-position</span>,  <span class='attribute'>data-normal</span>, and <span class='attribute'>data-surface</span> from the slot <a href=\"#annotations-slots\">definition</a>."
       },
       {
         "name": "queryHotspot(name)",
@@ -830,7 +830,7 @@
       {
         "name": "hotspot-*",
         "htmlName": "hotspot",
-        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes in model coordinates. Alternately, the <span class='attribute'>data-surface</span> attribute can be used to instead specify the glTF mesh, primitive, three vertex indices and three barycentric coordinates to specify a surface point that will animate along with the mesh. It is recommended to use the <a href=\"./#entrydocs-annotations-methods-surfaceFromPoint\">surfaceFromPoint</a> method to generate this string interactively. See the <a href=\"../examples/annotations/#animatedHotspots\">annotations example</a> for details."
+        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes in model coordinates, in the same format as <span class='attribute'>camera-target</span>. Alternately, the <span class='attribute'>data-surface</span> attribute can be used to instead specify the glTF mesh, primitive, three vertex indices and three barycentric coordinates to specify a surface point that will animate along with the mesh. It is recommended to use the <a href=\"./#entrydocs-annotations-methods-surfaceFromPoint\">surfaceFromPoint</a> method to generate this string interactively. See the <a href=\"../examples/annotations/#animatedHotspots\">annotations example</a> for details."
       }
     ]
   },

@@ -90,8 +90,8 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
     }
     for (const material of this[$threeMaterials]) {
       material.color.set(color);
-      if (rgba instanceof Array) {
-        material.opacity = (rgba)[3];
+      if (rgba instanceof Array && rgba.length > 3) {
+        material.opacity = rgba[3];
       } else {
         rgba = [0, 0, 0, material.opacity];
         color.toArray(rgba);
