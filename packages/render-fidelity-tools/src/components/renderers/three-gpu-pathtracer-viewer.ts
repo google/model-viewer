@@ -14,7 +14,7 @@
  */
 
 import {PathTracingRenderer, PathTracingSceneGenerator, PhysicalPathTracingMaterial} from 'three-gpu-pathtracer';
-import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, sRGBEncoding, CustomBlending, MathUtils, Sphere, Box3, Object3D, Mesh, BufferAttribute, Group, DirectionalLight} from 'three';
+import {WebGLRenderer, MeshBasicMaterial, PerspectiveCamera, ACESFilmicToneMapping, CustomBlending, MathUtils, Sphere, Box3, Object3D, Mesh, BufferAttribute, Group, DirectionalLight} from 'three';
 import {FullScreenQuad} from 'three/examples/jsm/postprocessing/Pass';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader';
@@ -75,10 +75,11 @@ export class ThreePathTracerViewer extends LitElement {
 
     this[$renderer] = new WebGLRenderer({canvas: this[$canvas] || undefined});
     this[$renderer].toneMapping = ACESFilmicToneMapping;
-    this[$renderer].outputEncoding = sRGBEncoding;
 
     this[$pathtracer] = new PathTracingRenderer(this[$renderer]);
-    this[$pathtracer].material = new PhysicalPathTracingMaterial();
+    this[$pathtracer].material = new PhysicalPathTracingMaterial( {
+      filterGlossyFactor: 0.5,
+    } );
     this[$pathtracer].camera = this[$camera];
     this[$pathtracer].alpha = true;
 
@@ -202,7 +203,7 @@ export class ThreePathTracerViewer extends LitElement {
 
     this[$updateSize]();
 
-    const MAX_SAMPLES = 100;
+    const MAX_SAMPLES = 64;
     let eventBroadcast = false;
     renderer.setAnimationLoop(() => {
       const camera = this[$camera];

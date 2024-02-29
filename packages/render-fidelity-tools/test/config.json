@@ -294,7 +294,8 @@
       },
       "exclude": [
         "stellar",
-        "vray"
+        "vray",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -607,7 +608,8 @@
         "y": -0.09
       },
       "exclude": [
-        "vray"
+        "vray",
+        "three-gpu-pathtracer"
       ]
     },
     {
