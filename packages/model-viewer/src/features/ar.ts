@@ -434,13 +434,34 @@ configuration or device capabilities');
 
       updateSourceProgress(0.2);
 
-      const exporter = new USDZExporter();
-      const arraybuffer = await exporter.parse(model);
+      const usdzOptions = {
+        ar: {
+          anchoring: { type: 'plane' },
+          planeAnchoring: {
+            alignment: this.arPlacement === 'wall' ? 'vertical' : 'horizontal',
+          },
+        },
+      };
+
+      // necessary because quicklook internally rotates model when placing vertical. 
+      // See https://github.com/google/model-viewer/issues/3989
+      if (usdzOptions.ar.planeAnchoring.alignment === 'vertical') {
+        model.rotateX((-90 * Math.PI) / 180);
+        model.updateMatrixWorld();
+      }
+
+      const exporter = new USDZExporter() as any;
+      const arraybuffer = await exporter.parse(model, usdzOptions);
       const blob = new Blob([arraybuffer], {
         type: 'model/vnd.usdz+zip',
       });
 
       const url = URL.createObjectURL(blob);
+      
+      if (usdzOptions.ar.planeAnchoring.alignment === 'vertical') {
+        model.rotateX((90 * Math.PI) / 180);
+        model.updateMatrixWorld();
+      }
 
       updateSourceProgress(1);
 
