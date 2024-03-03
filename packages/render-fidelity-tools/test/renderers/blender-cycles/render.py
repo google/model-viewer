@@ -127,7 +127,7 @@ def main():
           "outputFile": "../../../test/goldens/khronos-SheenChair/stellar-golden.png"
         }
     """
-    config = json.loads(sys.argv[4])
+    config = json.loads(sys.argv[6])
 
     scenario = config["scenario"]
     outpath = config["outputFile"]
