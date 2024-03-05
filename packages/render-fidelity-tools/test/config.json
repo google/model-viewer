@@ -257,8 +257,7 @@
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
@@ -420,8 +419,7 @@
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
@@ -436,8 +434,7 @@
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
@@ -653,8 +650,7 @@
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
@@ -672,8 +668,7 @@
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
