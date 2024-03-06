@@ -360,6 +360,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
+      const reason = (event as any).detail.reason;
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
@@ -373,7 +374,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$updateProgressBar](progress);
 
       this.dispatchEvent(
-          new CustomEvent('progress', {detail: {totalProgress: progress}}));
+          new CustomEvent('progress', {detail: {totalProgress: progress, reason}}));
     };
 
     [$shouldAttemptPreload](): boolean {
