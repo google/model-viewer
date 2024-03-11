@@ -21,8 +21,8 @@ import * as fs from 'fs';
 
 const size = 57;
 // must match the lg2 vars in config.ocio
-const log2Min = -6;
-const log2Max = 12;
+const log2Min = -9;
+const log2Max = 10;
 
 const text = [
   `TITLE "PBR Neutral sRGB"`,

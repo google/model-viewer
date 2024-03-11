@@ -497,7 +497,7 @@ colorspaces:
     from_scene_reference: !<GroupTransform>
       children:
         - !<ColorSpaceTransform> {src: Linear CIE-XYZ E, dst: Linear Rec.709}
-        - !<AllocationTransform> {allocation: lg2, vars: [-6, 12]}
+        - !<AllocationTransform> {allocation: lg2, vars: [-9, 10]}
         - !<FileTransform> {src: pbrNeutral.cube, interpolation: tetrahedral}
         - !<ColorSpaceTransform> {src: Linear Rec.709, dst: sRGB}
 
