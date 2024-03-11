@@ -21,7 +21,7 @@ import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
-import GLTFMaterialsVariantsExtension from './gltf-instance/VariantMaterialLoaderPlugin';
+import GLTFMaterialsVariantsExtension from './gltf-instance/VariantMaterialLoaderPlugin.js';
 import {GLTFInstance, GLTFInstanceConstructor} from './GLTFInstance.js';
 
 export type ProgressCallback = (progress: number) => void;

@@ -18,7 +18,7 @@ import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurSha
 import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
 import {lerp} from 'three/src/math/MathUtils.js';
 
-import {ModelScene} from './ModelScene';
+import {ModelScene} from './ModelScene.js';
 
 export type Side = 'back'|'bottom';
 

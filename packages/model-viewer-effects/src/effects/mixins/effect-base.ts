@@ -15,10 +15,10 @@
 
 import { LitElement, ReactiveElement } from 'lit';
 import { BlendFunction, BlendMode, Effect } from 'postprocessing';
-import { $effectComposer, MVEffectComposer } from '../../effect-composer';
-import { Constructor } from '../../utilities';
-import { BlendModeMixin } from './blend-mode';
-import { getComponentName } from '../utilities';
+import { $effectComposer, MVEffectComposer } from '../../effect-composer.js';
+import { Constructor } from '../../utilities.js';
+import { BlendModeMixin } from './blend-mode.js';
+import { getComponentName } from '../utilities.js';
 
 export const $updateProperties = Symbol('updateProperties');
 export const $effectOptions = Symbol('effectOptions');

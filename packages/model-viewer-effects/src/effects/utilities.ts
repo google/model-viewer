@@ -15,7 +15,7 @@
 
 import { KernelSize } from 'postprocessing';
 import { PerspectiveCamera } from 'three';
-import { clamp } from '../utilities';
+import { clamp } from '../utilities.js';
 import { MVEffectBase } from './mixins/effect-base.js';
 
 /**

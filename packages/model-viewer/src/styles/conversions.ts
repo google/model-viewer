@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {NumberNode, ZERO} from './parsers';
+import {NumberNode, ZERO} from './parsers.js';
 
 /**
  * Ensures that a given number is expressed in radians. If the number is already
