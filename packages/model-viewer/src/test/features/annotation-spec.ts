@@ -16,12 +16,12 @@
 import {expect} from '@esm-bundle/chai';
 import {Vector3} from 'three';
 
-import {ModelViewerElement} from '../../model-viewer';
-import {$needsRender, $scene, toVector3D, Vector2D, Vector3D} from '../../model-viewer-base';
+import {ModelViewerElement} from '../../model-viewer.js';
+import {$needsRender, $scene, toVector3D, Vector2D, Vector3D} from '../../model-viewer-base.js';
 import {Hotspot} from '../../three-components/Hotspot.js';
-import {ModelScene} from '../../three-components/ModelScene';
-import {timePasses, waitForEvent} from '../../utilities';
-import {assetPath, rafPasses} from '../helpers';
+import {ModelScene} from '../../three-components/ModelScene.js';
+import {timePasses, waitForEvent} from '../../utilities.js';
+import {assetPath, rafPasses} from '../helpers.js';
 
 const sceneContainsHotspot =
     (scene: ModelScene, element: HTMLElement): boolean => {

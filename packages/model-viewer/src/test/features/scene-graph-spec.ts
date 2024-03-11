@@ -22,7 +22,7 @@ import {PrimitiveNode} from '../../features/scene-graph/nodes/primitive-node.js'
 import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
-import {ModelScene} from '../../three-components/ModelScene';
+import {ModelScene} from '../../three-components/ModelScene.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
 
