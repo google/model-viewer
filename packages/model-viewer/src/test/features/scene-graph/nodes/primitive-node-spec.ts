@@ -14,7 +14,7 @@
  */
 
 import {expect} from '@esm-bundle/chai';
-import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial';
+import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 
 import {$primitivesList, $variantData, Model} from '../../../../features/scene-graph/model.js';
 import {ModelViewerElement} from '../../../../model-viewer.js';

@@ -14,7 +14,7 @@
  */
 
 import {ModelViewerElement} from '@google/model-viewer';
-import {Renderer} from '@google/model-viewer/lib/three-components/Renderer';
+import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
 import {EventDispatcher, HSL} from 'three';
 
 import {getOwnPropertySymbolValue} from '../utilities.js';

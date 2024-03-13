@@ -1,6 +1,6 @@
 import {Vector2} from 'three';
 
-import {Accessor, AlphaMode, AnimationSampler, Asset, Camera, ExtensionDictionary, Extras, MagFilter, Mesh, MinFilter, RGB, RGBA, Scene, WrapMode} from './gltf-2.0';
+import {Accessor, AlphaMode, AnimationSampler, Asset, Camera, ExtensionDictionary, Extras, MagFilter, Mesh, MinFilter, RGB, RGBA, Scene, WrapMode} from './gltf-2.0.js';
 
 
 export interface Sampler {
