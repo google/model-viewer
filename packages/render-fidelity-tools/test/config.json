@@ -37,6 +37,20 @@
           "test/renderers/vray/render.py"
         ]
       }
+    },
+    {
+      "name": "blender-cycles",
+      "description": "Blender's Cycles render engine",
+      "command": {
+        "executable": "blender",
+        "args": [
+          "-b",
+          "--factory-startup",
+          "-noaudio",
+          "-P",
+          "test/renderers/blender-cycles/render.py"
+        ]
+      }
     }
   ],
   "scenarios": [
