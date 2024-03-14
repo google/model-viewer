@@ -306,5 +306,15 @@
         "name": "Custom Effects"
       }
     ]
+  },
+  {
+    "name": "WCAG Compliance",
+    "htmlName": "wcag",
+    "examples": [
+      {
+        "htmlId": "useA11y",
+        "name": "Use A11y"
+      }
+    ]
   }
 ]

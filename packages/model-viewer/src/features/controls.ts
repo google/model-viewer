@@ -17,7 +17,7 @@ import {property} from 'lit/decorators.js';
 import {Event, PerspectiveCamera, Spherical, Vector3} from 'three';
 
 import {style} from '../decorators.js';
-import ModelViewerElementBase, {$ariaLabel, $container, $getModelIsVisible, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $updateStatus, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ariaLabel, $container, $getModelIsVisible, $loadedTime, $needsRender, $onModelLoad, $onResize, $renderer, $scene, $tick, $userInputElement, toVector3D, Vector3D} from '../model-viewer-base.js';
 import {degreesToRadians, normalizeUnit} from '../styles/conversions.js';
 import {EvaluatedStyle, Intrinsics, SphericalIntrinsics, StyleEvaluator, Vector3Intrinsics} from '../styles/evaluators.js';
 import {IdentNode, NumberNode, numberNode, parseExpressions} from '../styles/parsers.js';
@@ -66,9 +66,6 @@ const DEFAULT_CAMERA_TARGET = 'auto auto auto';
 const DEFAULT_FIELD_OF_VIEW = 'auto';
 
 const MINIMUM_RADIUS_RATIO = 2.2;
-
-const AZIMUTHAL_QUADRANT_LABELS = ['front', 'right', 'back', 'left'];
-const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 
 export const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
 export const INTERACTION_PROMPT = '. Use mouse, touch or arrow keys to move.';
@@ -189,11 +186,6 @@ export const cameraTargetIntrinsics = (element: ModelViewerElementBase) => {
   };
 };
 
-const HALF_PI = Math.PI / 2.0;
-const THIRD_PI = Math.PI / 3.0;
-const QUARTER_PI = HALF_PI / 2.0;
-const TAU = 2.0 * Math.PI;
-
 export const $controls = Symbol('controls');
 export const $panElement = Symbol('panElement');
 export const $promptElement = Symbol('promptElement');
@@ -201,7 +193,6 @@ export const $promptAnimatedContainer = Symbol('promptAnimatedContainer');
 export const $fingerAnimatedContainers = Symbol('fingerAnimatedContainers');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
-const $updateAria = Symbol('updateAria');
 const $updateCameraForRadius = Symbol('updateCameraForRadius');
 
 const $cancelPrompts = Symbol('cancelPrompts');
@@ -806,23 +797,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$controls].updateNearFar(near, far);
     }
 
-    [$updateAria]() {
-      const {theta, phi} =
-          this[$controls]!.getCameraSpherical(this[$lastSpherical]);
-
-      const azimuthalQuadrant =
-          (4 + Math.floor(((theta % TAU) + QUARTER_PI) / HALF_PI)) % 4;
-
-      const polarTrient = Math.floor(phi / THIRD_PI);
-
-      const azimuthalQuadrantLabel =
-          AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
-      const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
-
-      this[$updateStatus](
-          `View from stage ${polarTrientLabel}${azimuthalQuadrantLabel}`);
-    }
-
     get[$ariaLabel]() {
       return super[$ariaLabel].replace(/\.$/, '') +
           (this.cameraControls ? INTERACTION_PROMPT : '');
@@ -878,7 +852,6 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     [$onChange] = () => {
-      this[$updateAria]();
       this[$needsRender]();
       const source = this[$controls].changeSource;
 

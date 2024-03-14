@@ -1,0 +1,14 @@
+{
+  "front": "The front of the 3D model",
+  "back": "The back of the 3D model",
+  "left": "The left side of the 3D model",
+  "right": "The right side of the 3D model",
+  "upper-left": "The upper left side of the 3D model",
+  "upper-right": "The upper right side of the 3D model",
+  "upper-front": "The upper front side of the 3D model",
+  "upper-back": "The upper back side of the 3D model",
+  "lower-left": "The lower left side of the 3D model",
+  "lower-right": "The lower right side of the 3D model",
+  "lower-front": "The lower front side of the 3D model",
+  "lower-back": "The lower back side of the 3D model"
+}
