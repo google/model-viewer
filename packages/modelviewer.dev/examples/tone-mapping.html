@@ -415,7 +415,9 @@
     metals, as they physically color the light they reflect, but perceptually
     that color is lost when it is sufficiently bright. I accomplish this by
     taking a convex combination of the compressed color and white, only in the
-    nonlinear compression region.</p>
+    nonlinear compression region. In fact, "white" is slightly darkened in order
+    to maintain constant brightness with the compressed color, which makes this
+    tone mapper easily invertible.</p>
 
     <p>The convex parameter function I chose is another 1/x, this time based on
     the amount of brightness removed in the compression step, which ensures it
@@ -450,7 +452,7 @@
     color *= newPeak / peak;
 
     float g = 1. - 1. / (desaturation * (peak - newPeak) + 1.);
-    return mix(color, vec3(1, 1, 1), g);
+    return mix(color, newPeak * vec3(1, 1, 1), g);
   }
     </code>
     </p>
