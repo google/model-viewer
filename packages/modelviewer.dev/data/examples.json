@@ -50,6 +50,10 @@
       {
         "htmlId": "cyclingModels",
         "name": "Cycling Models"
+      },
+      {
+        "htmlId": "useA11y",
+        "name": "Use a11y"
       }
     ]
   },
@@ -304,16 +308,6 @@
       {
         "htmlId": "custom-effects",
         "name": "Custom Effects"
-      }
-    ]
-  },
-  {
-    "name": "WCAG Compliance",
-    "htmlName": "wcag",
-    "examples": [
-      {
-        "htmlId": "useA11y",
-        "name": "Use A11y"
       }
     ]
   }

@@ -465,6 +465,37 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://cdn.jsdelivr.net/npm/m
       </div>
     </div>
 
+    <div class="sample">
+      <div id="useA11y" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro">
+            <span class="font-medium">Use a11y.</span>
+            Improve accessibility, by adding a11y attribute to the
+            model-viewer element. To have more descriptive translations to
+            improve screen reader capability.
+          </h4>
+          <div class="heading">
+            <h2 class="demo-title">A11Y defined translations</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="useA11y" highlight-as="html">
+            <template>
+              <model-viewer
+                loading="eager"
+                camera-controls
+                touch-action="pan-y"
+                src="../../shared-assets/models/Astronaut.glb"
+                shadow-intensity="1"
+                alt="A 3D model of a astronaut"
+                a11y='{"front": "The front of an 3D modeled astronaut with ports for different equipments and some controlls for the suit", "back": "The back of an 3D modeled astronaut showing its backpack with environmental system", "left": "The left side of an 3D modeled astronaut showing mission patch", "right": "The right side of an 3D modeled astronaut usally has the flag of the country of the astronaut"}'
+              ></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
     <div class="footer">
       <ul>
         <li class="attribution">
