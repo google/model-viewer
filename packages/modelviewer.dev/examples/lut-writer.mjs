@@ -45,19 +45,15 @@ function inverseLog(x) {
   return Math.pow(2, log2);
 }
 
-function rgb2string(r, g, b) {
-  return `${round(r)} ${round(g)} ${round(b)}`;
+function rgb2string(rgb) {
+  return `${round(rgb.R)} ${round(rgb.G)} ${round(rgb.B)}`;
 }
 
-function pbrNeutral(r, g, b) {
+function pbrNeutral(rgb) {
   const startCompression = 0.8 - 0.04;
   const desaturation = 0.15;
 
-  // invert the lg2 transform in the OCIO config - used to more evenly-space the
-  // LUT points
-  let R = inverseLog(r);
-  let G = inverseLog(g);
-  let B = inverseLog(b);
+  let {R, G, B} = rgb;
 
   const x = Math.min(R, G, B);
   const offset = x < 0.08 ? x - 6.25 * x * x : 0.04;
@@ -67,7 +63,7 @@ function pbrNeutral(r, g, b) {
 
   const peak = Math.max(R, G, B);
   if (peak < startCompression) {
-    return rgb2string(R, G, B);
+    return {R, G, B};
   }
 
   const d = 1 - startCompression;
@@ -77,20 +73,76 @@ function pbrNeutral(r, g, b) {
   G *= scale;
   B *= scale;
 
-  const f = 1 - 1 / (desaturation * (peak - newPeak) + 1);
-  R = (1 - f) * R + f;
-  G = (1 - f) * G + f;
-  B = (1 - f) * B + f;
-  return rgb2string(R, G, B);
+  const f = 1 / (desaturation * (peak - newPeak) + 1);
+  R = f * R + (1 - f) * newPeak;
+  G = f * G + (1 - f) * newPeak;
+  B = f * B + (1 - f) * newPeak;
+
+  return {R, G, B};
 }
 
+function inverseNeutral(rgb) {
+  const startCompression = 0.8 - 0.04;
+  const desaturation = 0.15;
+
+  let {R, G, B} = rgb;
+
+  const peak = Math.max(R, G, B);
+  if (peak > startCompression) {
+    const d = 1 - startCompression;
+    const oldPeak = d * d / (1 - peak) - d + startCompression;
+    const fInv = desaturation * (oldPeak - peak) + 1;
+    const f = 1 / fInv;
+    R = (R + (f - 1) * peak) * fInv;
+    G = (G + (f - 1) * peak) * fInv;
+    B = (B + (f - 1) * peak) * fInv;
+    const scale = oldPeak / peak;
+    R *= scale;
+    G *= scale;
+    B *= scale;
+  }
+
+  const y = Math.min(R, G, B);
+  let offset = 0.04;
+  if (y < 0.04) {
+    const x = Math.sqrt(y / 6.25);
+    offset = x - 6.25 * x * x;
+  }
+  R += offset;
+  G += offset;
+  B += offset;
+
+  return {R, G, B};
+}
+
+function relativeError(rgbBase, rgbCheck) {
+  const {R, G, B} = rgbBase;
+  const dR = rgbCheck.R - R;
+  const dG = rgbCheck.G - G;
+  const dB = rgbCheck.B - B;
+  const dMag = Math.sqrt(dR * dR + dG * dG + dB * dB);
+  const dBase = Math.max(Math.sqrt(R * R + G * G + B * B), 1e-20);
+  return dMag / dBase;
+}
+
+let maxError = 0;
 for (let b = 0; b < size; ++b) {
   for (let g = 0; g < size; ++g) {
     for (let r = 0; r < size; ++r) {
-      text.push(pbrNeutral(r, g, b));
+      // invert the lg2 transform in the OCIO config - used to more evenly-space
+      // the LUT points
+      const rgbIn = {R: inverseLog(r), G: inverseLog(g), B: inverseLog(b)};
+      const rgbOut = pbrNeutral(rgbIn);
+      text.push(rgb2string(rgbOut));
+      // verify inverse
+      const rgbIn2 = inverseNeutral(rgbOut);
+      const error = relativeError(rgbIn, rgbIn2);
+      maxError = Math.max(maxError, error);
     }
   }
 }
 text.push('');
+
+console.log('Maximum relative error of inverse = ', maxError);
 
 fs.writeFileSync('pbrNeutral.cube', text.join('\n'));
