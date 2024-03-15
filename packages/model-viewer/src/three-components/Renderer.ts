@@ -158,7 +158,7 @@ export class Renderer extends
         color *= newPeak / peak;
 
         float g = 1. - 1. / (desaturation * (peak - newPeak) + 1.);
-        return mix(color, vec3(1, 1, 1), g);
+        return mix(color, newPeak * vec3(1, 1, 1), g);
       }`);
 
     try {
