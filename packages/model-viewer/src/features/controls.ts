@@ -102,6 +102,7 @@ export interface A11yTranslationsInterface {
   'lower-right': string;
   'lower-front': string;
   'lower-back': string;
+  'interaction-prompt': string;
 }
 
 export type InteractionPromptStrategy = 'auto'|'none';
@@ -218,6 +219,7 @@ export const $fingerAnimatedContainers = Symbol('fingerAnimatedContainers');
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
 const $a11y = Symbol('a11y');
+const $updateA11y = Symbol('updateA11y');
 const $updateCameraForRadius = Symbol('updateCameraForRadius');
 
 const $cancelPrompts = Symbol('cancelPrompts');
@@ -565,7 +567,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('a11y')) {
-        this.updateA11y();
+        this[$updateA11y]();
       }
 
       if (this[$jumpCamera] === true) {
@@ -854,8 +856,13 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     get[$ariaLabel]() {
+      let interactionPrompt = INTERACTION_PROMPT;
+      if ('interaction-prompt' in this[$a11y]) {
+        interactionPrompt = `. ${this[$a11y]['interaction-prompt']}`;
+      }
+
       return super[$ariaLabel].replace(/\.$/, '') +
-          (this.cameraControls ? INTERACTION_PROMPT : '');
+          (this.cameraControls ? interactionPrompt : '');
     }
 
     async[$onResize](event: any) {
@@ -920,7 +927,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$container].classList.toggle('pointer-tumbling', event.type === 'pointer-change-start');
     };
 
-    private async updateA11y() {
+    [$updateA11y]() {
       if (typeof this.a11y === 'string') {
         if (this.a11y.startsWith('{')) {
           try {
@@ -929,15 +936,13 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             console.warn('Error parsing a11y JSON:', error);
           }
         } else {
-          try {
-            this[$a11y] = await (await fetch(this.a11y)).json();;
-          } catch (error) {
-            console.warn('Error loading a11y JSON:', error);
-          }
+          console.warn('Error not supported format, should be a JSON string:', this.a11y);
         }
       } else if (this.a11y != null) {
-        this[$a11y] = this.a11y;
+        this[$a11y] = Object.assign({}, this.a11y);
       }
+      
+      this[$userInputElement].setAttribute('aria-label', this[$ariaLabel]);
     }
   }
 

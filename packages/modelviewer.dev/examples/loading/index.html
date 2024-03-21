@@ -482,6 +482,7 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://cdn.jsdelivr.net/npm/m
           <example-snippet stamp-to="useA11y" highlight-as="html">
             <template>
               <model-viewer
+                id="a11y-viewer"
                 loading="eager"
                 camera-controls
                 touch-action="pan-y"
@@ -489,7 +490,73 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://cdn.jsdelivr.net/npm/m
                 shadow-intensity="1"
                 alt="A 3D model of a astronaut"
                 a11y='{"front": "The front of an 3D modeled astronaut with ports for different equipments and some controlls for the suit", "back": "The back of an 3D modeled astronaut showing its backpack with environmental system", "left": "The left side of an 3D modeled astronaut showing mission patch", "right": "The right side of an 3D modeled astronaut usally has the flag of the country of the astronaut"}'
-              ></model-viewer>
+              >
+                <div class="a11y-container">
+                  <button class="a11y-btn selected" onclick="switchA11y(this, {
+                    front: 'The front of an 3D modeled astronaut with ports for different equipments and some controlls for the suit', 
+                    back: 'The back of an 3D modeled astronaut showing its backpack with environmental system', 
+                    left: 'The left side of an 3D modeled astronaut showing mission patch', 
+                    right: 'The right side of an 3D modeled astronaut usally has the flag of the country of the astronaut',
+                    'interaction-prompt': 'Use mouse, touch or arrow keys to move'
+                  }, 'A 3D model of a astronaut')">English <span class="a11y-icon">🇺🇸</span></button>
+                  <button class="a11y-btn" onclick="switchA11y(this, {
+                    front: 'Framsidan av den 3D-modellerade astronauten, med portar för olika utrustningar och några kontroller för dräkten', 
+                    back: 'Baksidan av den 3D-modellerad astronauten som visar sin ryggsäck med miljösystemet', 
+                    left: 'Den vänstra sidan av den 3D-modellerade astronauten, som visar uppdragslappen', 
+                    right: 'Den högra sidan av den 3D-modellerade astronauten, har vanligtvis flaggan för astronautens land',
+                    'interaction-prompt': 'Använd mus, touch eller piltangenter för att röra'
+                  }, 'En 3D model av en astronaut')">Svenska <span class="a11y-icon">🇸🇪</span></button>
+                </div>
+              </model-viewer>
+
+              <script type="module">
+                const a11yViewer = document.querySelector("#a11y-viewer");
+                window.switchA11y = (element, translation, alt) => {
+                  a11yViewer.a11y = translation;
+                  a11yViewer.alt = alt;
+
+                  const slides = document.querySelectorAll(".a11y-btn");
+                  slides.forEach((element) => {element.classList.remove("selected");});
+                  element.classList.add("selected");
+                };
+              </script>
+              <style>
+                .a11y-container {
+                  display: flex;
+                  justify-content: space-evenly;
+                  gap: 1rem;
+                  position: absolute;
+                  bottom: 1rem;
+                  left: 1rem;
+                }
+                .a11y-btn {
+                  background-color: #f6f6f6;
+                  border: 1px solid #f6f6f604;
+                  color: rgba(0, 0, 0, .87);
+                  padding: 0 0.5rem;
+                  font-size: 16px;
+                  cursor: pointer;
+                  display: inline-flex;
+                  justify-content: center;
+                  align-items: center;
+                  gap: 0.5rem
+                }
+                .a11y-btn.selected {
+                  border: 1px solid #4285f4;
+                }
+                .a11y-btn:hover {
+                  border: 1px solid #4285f4;
+                }
+                .a11y-icon {
+                  text-decoration: none;
+                  color: #ccc;
+                  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji",
+                  Times, Symbola, Aegyptus, Code2000, Code2001, Code2002, Musica, serif,
+                  LastResort;
+                  font-size: 36px;
+                  text-align: center;
+                }
+              </style>
             </template>
           </example-snippet>
         </div>
