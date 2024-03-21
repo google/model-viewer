@@ -331,11 +331,11 @@ configuration or device capabilities');
         params.set('link', linkUrl.toString());
       }
 
-      const intent = `intent://arvr.google.com/scene-viewer/1.0?${
+      const intent = `intent://arvr.google.com/scene-viewer/1.2?${
           params.toString() + '&file=' +
           encodeURIComponent(
               modelUrl
-                  .toString())}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
+                  .toString())}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=${
           encodeURIComponent(locationUrl.toString())};end;`;
 
       const undoHashChange = () => {
@@ -415,7 +415,8 @@ configuration or device capabilities');
     }
 
     async prepareUSDZ(): Promise<string> {
-      const updateSourceProgress = this[$progressTracker].beginActivity('usdz-conversion');
+      const updateSourceProgress =
+          this[$progressTracker].beginActivity('usdz-conversion');
 
       await this[$triggerLoad]();
 
