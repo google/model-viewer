@@ -28,7 +28,7 @@ import ModelViewerElementBase from './model-viewer-base.js';
 export {CanvasTexture, FileLoader, Loader, NearestFilter} from 'three';
 
 export const ModelViewerElement =
-    AnnotationMixin(SceneGraphMixin(StagingMixin(EnvironmentMixin(ControlsMixin(
+AnnotationMixin(SceneGraphMixin(StagingMixin(EnvironmentMixin(ControlsMixin(
         ARMixin(LoadingMixin(AnimationMixin(ModelViewerElementBase))))))));
 
 export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
