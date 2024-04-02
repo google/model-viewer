@@ -78,7 +78,7 @@
       {
         "name": "a11y",
         "htmlName": "a11y",
-        "description": "Add unique translations for the model wcag compliance. Use this attribute, you must provide a JSON object with the following keys: front, back, left, right, upper-front, upper-back, upper-left, upper-right, lower-front, lower-back, lower-left, lower-right. The values of these keys should be the translations for the model's orientation. This attribute is useful for screen readers and other assistive technologies.",
+        "description": "Add unique translations for the model wcag compliance. Use this attribute, you must provide a JSON object with the following keys: front, back, left, right, upper-front, upper-back, upper-left, upper-right, lower-front, lower-back, lower-left, lower-right, interaction-prompt. The values of these keys should be the translations for the model's orientation. This attribute is useful for screen readers and other assistive technologies.",
         "links": ["<a href=\"../examples/loading/#useA11y\">Related examples</a>"],
         "default": {
           "default": "null",

@@ -935,11 +935,15 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           } catch (error) {
             console.warn('Error parsing a11y JSON:', error);
           }
-        } else {
+        } else if (this.a11y.length > 0) {
           console.warn('Error not supported format, should be a JSON string:', this.a11y);
+        } else {
+          this[$a11y] = <A11yTranslationsInterface>{};
         }
-      } else if (this.a11y != null) {
+      } else if (typeof this.a11y === 'object' && this.a11y != null) {
         this[$a11y] = Object.assign({}, this.a11y);
+      } else {
+        this[$a11y] = <A11yTranslationsInterface>{};
       }
       
       this[$userInputElement].setAttribute('aria-label', this[$ariaLabel]);
