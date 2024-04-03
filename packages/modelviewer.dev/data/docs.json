@@ -74,6 +74,16 @@
           "default": "false",
           "options": "true, false"
         }
+      },
+      {
+        "name": "a11y",
+        "htmlName": "a11y",
+        "description": "Add unique translations for the model wcag compliance. Use this attribute, you must provide a JSON object with the following keys: front, back, left, right, upper-front, upper-back, upper-left, upper-right, lower-front, lower-back, lower-left, lower-right, interaction-prompt. The values of these keys should be the translations for the model's orientation. This attribute is useful for screen readers and other assistive technologies.",
+        "links": ["<a href=\"../examples/loading/#useA11y\">Related examples</a>"],
+        "default": {
+          "default": "null",
+          "options": "{&quot;front&quot;: &quot;Front of 3D model&quot;,&quot;back&quot;: &quot;Back of 3D model&quot;,&quot;left&quot;: &quot;Left of 3D model&quot;,&quot;right&quot;: &quot;Right of 3D model&quot;,&quot;upper-front&quot;: &quot;Upper front of 3D model&quot;,&quot;upper-back&quot;: &quot;Upper back of 3D model&quot;,&quot;upper-left&quot;: &quot;Upper left of 3D model&quot;,&quot;upper-right&quot;: &quot;Upper right of 3D model&quot;,&quot;lower-front&quot;: &quot;Lower front of 3D model&quot;,&quot;lower-back&quot;: &quot;Lower back of 3D model&quot;,&quot;lower-left&quot;: &quot;Lower left of 3D model&quot;,&quot;lower-right&quot;: &quot;Lower right of 3D model&quot;,&quot;interaction-prompt&quot;: &quot;'Use mouse, touch or arrow keys to move&quot;}"
+        }
       }
     ],
     "Properties": [
