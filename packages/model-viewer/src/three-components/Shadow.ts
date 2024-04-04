@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, Box3, Material, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
+import {BackSide, Box3, Material, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RenderTargetOptions, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
 import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
 import {lerp} from 'three/src/math/MathUtils.js';
@@ -220,7 +220,7 @@ export class Shadow extends Object3D {
     }
 
     if (this.renderTarget == null) {
-      const params: WebGLRenderTargetOptions = {format: RGBAFormat};
+      const params: RenderTargetOptions = {format: RGBAFormat};
       this.renderTarget = new WebGLRenderTarget(width, height, params);
       this.renderTargetBlur = new WebGLRenderTarget(width, height, params);
 
