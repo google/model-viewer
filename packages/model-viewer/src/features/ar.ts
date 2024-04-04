@@ -222,8 +222,13 @@ configuration or device capabilities');
               arMode = ARMode.WEBXR;
               break;
             }
-            if (value === 'scene-viewer' && IS_SCENEVIEWER_CANDIDATE &&
-                !isSceneViewerBlocked) {
+            if (value === 'scene-viewer' && !isSceneViewerBlocked &&
+                (IS_SCENEVIEWER_CANDIDATE ||
+                 ((navigator as any).userAgentData &&
+                  (navigator as any).userAgentData.getHighEntropyValues &&
+                  (await (navigator as any).userAgentData.getHighEntropyValues([
+                    'formFactor'
+                  ])).formFactor?.includes('XR')))) {
               arMode = ARMode.SCENE_VIEWER;
               break;
             }
