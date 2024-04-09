@@ -360,6 +360,8 @@
           <div class="heading">
             <h2 class="demo-title">Placing on a Wall</h2>
             <h4>This demonstrates the <code>ar-placement</code> attribute, which defaults to "floor", but using "wall" gives a different AR placement experience.</h4>
+            <p>QuickLook will ignore this attribute if a .usdz or .reality model is supplied through <code>ios-src</code> and instead look at the <code>planeAnchoring:alignment</code> option
+              inside the USDZ file.</p>
           </div>
           <example-snippet stamp-to="wall" highlight-as="html">
             <template>
