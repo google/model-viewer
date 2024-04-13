@@ -61,7 +61,7 @@ function parseHotspotConfig(element: HTMLElement): HotspotConfig {
         element.getAttribute('slot')}"`);
   }
   const annotation =
-      element.querySelector('.HotspotAnnotation')?.innerHTML || undefined;
+      element.querySelector('.HotspotAnnotation')?.innerText || undefined;
   return {name, surface, position, normal, annotation};
 }
 
