@@ -78,7 +78,7 @@ ${css_beautify(this.renderedStyle)}
   get formattedHtml() {
     // Removes LitElement render artifacts e.g. <!--?lit$515089429$-->
     // the `?` in `.*?` is a non-greedy match.
-    let html = this.shadowTag.innerHTML.replace(/<!--.*?-->/g, '');
+    let html = this.shadowTag.innerText.replace(/<!--.*?-->/g, '');
     // Removes empty lines that may result from the previous line
     html = html.replace(/\n\s*\n/g, '');
     // Remove the ar-status runtime-added tag
