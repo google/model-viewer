@@ -616,6 +616,8 @@ export class ModelScene extends Scene {
       x = this.targetDamperX.update(x, goal.x, delta, normalization);
       y = this.targetDamperY.update(y, goal.y, delta, normalization);
       z = this.targetDamperZ.update(z, goal.z, delta, normalization);
+      this.groundedSkybox.position.x = -x;
+      this.groundedSkybox.position.z = -z;
       this.target.position.set(x, y, z);
       this.target.updateMatrixWorld();
       this.queueRender();
@@ -643,6 +645,7 @@ export class ModelScene extends Scene {
    */
   set yaw(radiansY: number) {
     this.rotation.y = radiansY;
+    this.groundedSkybox.rotation.y = -radiansY;
     this.queueRender();
   }
 
