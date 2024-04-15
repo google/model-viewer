@@ -60,10 +60,10 @@ function parseHotspotConfig(element: HTMLElement): HotspotConfig {
     throw new Error(`no surface or position for hotspot at slot "${
         element.getAttribute('slot')}"`);
   }
-  const annotation =
-      element.querySelector('.HotspotAnnotation')?.innerHTML || undefined;
+  const annotation = (element.querySelector('.HotspotAnnotation') as HTMLElement)?.innerText || undefined; // Update here
   return {name, surface, position, normal, annotation};
 }
+
 
 /**
  * Returns the slot name of the element without 'hotspot-'. Returns undefined if
