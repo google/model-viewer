@@ -72,7 +72,7 @@
   ],
   "dependencies": {
     "lit": "^2.2.3",
-    "postprocessing": "^6.33.3"
+    "postprocessing": "^6.35.3"
   },
   "peerDependencies": {
     "@google/model-viewer": "^3.4.0"
