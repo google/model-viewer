@@ -36,22 +36,17 @@ suite('snippet viewer test', () => {
   });
 
   test('formatted HTML strips Lit comments', async () => {
-    // clang-format off
-
-    // Pulled from real DOM of astronaut example.
-    snippetViewer.renderedSnippet = snippetViewer.renderedSnippet.innerText.replace(/<!--.*?-->/g, '');`<!--?lit$343342268$--><model-viewer src="Astronaut.glb" ar="" camera-controls="" poster="poster.webp" shadow-intensity="1" ar-status="not-presenting">
-    <!--?lit$128424273$--><!---->
-<div class="progress-bar hide" slot="progress-bar">
-<div class="update-bar"></div>
-</div><!----><!---->
-<button slot="ar-button" id="ar-button">
-View in your space
-</button><!----><!---->
-<div id="ar-prompt">
-<img>
-</div><!---->
+    snippetViewer.renderedSnippet = html`<model-viewer src="Astronaut.glb" ar="" camera-controls="" poster="poster.webp" shadow-intensity="1" ar-status="not-presenting">
+    <div class="progress-bar hide" slot="progress-bar">
+    <div class="update-bar"></div>
+    </div>
+    <button slot="ar-button" id="ar-button">
+    View in your space
+    </button>
+    <div id="ar-prompt">
+    <img>
+    </div>
     </model-viewer>`;
-    // clang-format on
 
     const goldenFormattedHTML =
         `<model-viewer src="Astronaut.glb" ar camera-controls poster="poster.webp" shadow-intensity="1">
@@ -71,23 +66,20 @@ View in your space
   });
 
   test('formatted HTML does not greedily strip comments', async () => {
-    // clang-format off
-
-    // Pulled from real DOM of astronaut example with a hotspot.
-    // hotspot <button> is beteen two comments on the same line
-    snippetViewer.renderedSnippet = snippetViewer.renderedSnippet.innerText.replace(/<!--.*?-->/g, '');`<!--?lit$128424273$--><model-viewer src="Astronaut.glb" ar="" camera-controls="" poster="poster.webp" shadow-intensity="1" ar-status="not-presenting">
-    <!--?lit$128424273$--><!----><button class="Hotspot" slot="hotspot-1" data-position="-0.043973778464142396m 1.2075171453793048m 0.29653766978435936m" data-normal="-0.4260645307016329m -0.06968452861538316m 0.9020050344369756m" data-visibility-attribute="visible"><div class="HotspotAnnotation">asdf</div></button><!----><!---->
-<div class="progress-bar hide" slot="progress-bar">
-<div class="update-bar"></div>
-</div><!----><!---->
-<button slot="ar-button" id="ar-button">
-View in your space
-</button><!----><!---->
-<div id="ar-prompt">
-<img>
-</div><!---->
+    snippetViewer.renderedSnippet = html`<model-viewer src="Astronaut.glb" ar="" camera-controls="" poster="poster.webp" shadow-intensity="1" ar-status="not-presenting">
+    <button class="Hotspot" slot="hotspot-1" data-position="-0.043973778464142396m 1.2075171453793048m 0.29653766978435936m" data-normal="-0.4260645307016329m -0.06968452861538316m 0.9020050344369756m" data-visibility-attribute="visible">
+    <div class="HotspotAnnotation">asdf</div>
+    </button>
+    <div class="progress-bar hide" slot="progress-bar">
+    <div class="update-bar"></div>
+    </div>
+    <button slot="ar-button" id="ar-button">
+    View in your space
+    </button>
+    <div id="ar-prompt">
+    <img>
+    </div>
     </model-viewer>`;
-    // clang-format on
 
     const goldenFormattedHTML =
         `<model-viewer src="Astronaut.glb" ar camera-controls poster="poster.webp" shadow-intensity="1">
