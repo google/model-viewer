@@ -201,7 +201,9 @@ export class Renderer extends
   }
 
   displayCanvas(scene: ModelScene): HTMLCanvasElement {
-    return this.multipleScenesVisible ? scene.element[$canvas] : this.canvas3D;
+    return scene.element.modelIsVisible && !this.multipleScenesVisible ?
+        this.canvas3D :
+        scene.element[$canvas];
   }
 
   /**
