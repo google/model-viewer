@@ -87,7 +87,7 @@ export function starterSidebar(docsOrExample: string) {
       isExample ? getCurrentExample(category) : getCurrentDocs();
   const isPostprocesssing = docsOrExample === 'mve' || category === 'postprocessing';
   const href = isExample ? '../../' : '../';
-  nav.innerHTML = `
+  nav.innerText = `
 <div class="home lockup">
   <a href=${href} class="sidebar-mv inner-home">
     <div class="icon-button icon-modelviewer-black inner-home"></div>
