@@ -312,11 +312,11 @@
         <div class="wrapper">
           <div class="heading">
             <h2 class="demo-title">Scene Viewer</h2>
-            <h4>Here the Scene Viewer app is given priority, to make it easier to compare with the default WebXR, above.</h4>
+            <h4>Here the Scene Viewer app is given priority, to make it easier to compare with the default WebXR, above. This also uses USDZ auto-generation for AR Quick Look on iOS, as compared to the separate ios-src file given above.</h4>
           </div>
           <example-snippet stamp-to="sceneViewer" highlight-as="html">
             <template>
-<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer" camera-controls touch-action="pan-y" alt="A 3D model of an astronaut" shadow-intensity="2" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.jpg" skybox-height="2m" max-camera-orbit="auto 90deg auto">
+<model-viewer id="model-viewer" src="../../shared-assets/models/Astronaut.glb" ar ar-modes="scene-viewer quick-look" camera-controls touch-action="pan-y" alt="A 3D model of an astronaut" shadow-intensity="2" auto-rotate disable-pan skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.jpg" skybox-height="2m" max-camera-orbit="auto 90deg auto">
   <div id="error" class="hide">AR is not supported on this device</div>
 </model-viewer>
 <script>
