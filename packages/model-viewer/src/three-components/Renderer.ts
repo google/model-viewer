@@ -60,15 +60,18 @@ const COMMERCE_EXPOSURE = 1.3;
  */
 export class Renderer extends
     EventDispatcher<{contextlost: {sourceEvent: WebGLContextEvent}}> {
-  private static _singleton = new Renderer({
-    powerPreference:
-        (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
-            .powerPreference ||
-        DEFAULT_POWER_PREFERENCE,
-    debug: isDebugMode()
-  });
+  private static _singleton: Renderer;
 
   static get singleton() {
+    if (!this._singleton) {
+      this._singleton = new Renderer({
+        powerPreference:
+            (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
+                .powerPreference ||
+            DEFAULT_POWER_PREFERENCE,
+        debug: isDebugMode()
+      });
+    }
     return this._singleton;
   }
 
