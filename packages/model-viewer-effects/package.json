@@ -75,10 +75,10 @@
     "postprocessing": "^6.35.3"
   },
   "peerDependencies": {
-    "@google/model-viewer": "^3.4.0"
+    "@google/model-viewer": "^3.5.0"
   },
   "devDependencies": {
-    "@google/model-viewer": "^3.4.0",
+    "@google/model-viewer": "^3.5.0",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
