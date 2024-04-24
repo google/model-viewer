@@ -81,7 +81,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="groundedSkybox" highlight-as="html">
             <template>
-<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" skybox-height="1.5m" shadow-intensity="2" max-camera-orbit="auto 90deg auto" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
+<model-viewer camera-controls touch-action="pan-y" disable-pan skybox-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" skybox-height="1.5m" shadow-intensity="2" max-camera-orbit="auto 90deg auto" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
             </template>
           </example-snippet>
         </div>
@@ -139,7 +139,7 @@ window.oscillate = function(min, max, period, time) {
           </div>
           <example-snippet stamp-to="neutralLighting" highlight-as="html">
             <template>
-<model-viewer id="neutral-demo" tone-mapping="commerce" camera-controls touch-action="pan-y" auto-rotate alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/GeoPlanter.glb">
+<model-viewer id="neutral-demo" tone-mapping="neutral" camera-controls touch-action="pan-y" auto-rotate alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/GeoPlanter.glb">
   <label for="neutral">Neutral Lighting: </label>
   <input id="neutral" type="checkbox" checked="true">
 </model-viewer>
@@ -166,17 +166,17 @@ window.oscillate = function(min, max, period, time) {
           <div class="heading">
             <h2 class="demo-title">Comparing tone mapping</h2>
             <p>Tone mapping is the critical last stage of the rendering pipeline that controls the final look of your model. It is necessary because the reflections are often much brighter than a screen can reproduce, so they must be smoothly mapped into the sRGB range, ideally while avoiding clipping artifacts or hue shifts. The image sensor and processing on a digital camera performs a similar step. </p>
-            <p>Commerce in our new tone mapper, designed specifically for the color accuracy needs of e-commerce. It is guaranteed to avoid all hue shifts, has a relatively sharp rolloff in intensity, and a slower progression to white. This is designed to pass the widest range of base color values through unchanged to the screen, while preserving enough headroom for highlights to show well. Commerce will become our default in our next major release, v4.0.</p>
+            <p>Khronos PBR Neutral is our new tone mapper, designed specifically for the color accuracy needs of e-commerce. It is guaranteed to avoid all hue shifts, has a relatively sharp rolloff in intensity, and a slower progression to white. This is designed to pass the widest range of base color values through unchanged to the screen, while preserving enough headroom for highlights to show well. Neutral will become our default in our next major release, v4.0.</p>
             <p>ACES is a film industry standard that is widely used in graphics and is and has been our default tone mapper. However, it produces serious hue shifts and extreme desaturation, making bright yellow and cyan unattainable under any lighting. See for yourself in this example.</p>
             <p>AgX is a relatively new tone mapper that is getting a lot of adoption in graphics. It has less hue shifting than ACES and may be a good option for matching existing artist workflows, but has the same drawback of significant desaturation. However, in more artistic scenes this can be beneficial since it allows for a slower intensity rolloff.</p>
-            <p>For an apples-to-apples comparison of ACES to Commerce with custom lighting, set the Commerce exposure to 1 and the ACES exposure to 0.77 to account for ACES being artificially bright. This compensation is automatic for our built-in lighting.</p>
+            <p>For an apples-to-apples comparison of ACES to Neutral with custom lighting, set the Neutral exposure to 1 and the ACES exposure to 0.77 to account for ACES being artificially bright. This compensation is automatic for our built-in lighting.</p>
           </div>
           <example-snippet stamp-to="toneMapping" highlight-as="html">
             <template>
-<model-viewer id="tone-demo" tone-mapping="commerce" camera-controls touch-action="pan-y" auto-rotate alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
+<model-viewer id="tone-demo" tone-mapping="neutral" camera-controls touch-action="pan-y" auto-rotate alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
   <p>Tone Mapping:</p>
   <select id="tone">
-    <option value="commerce">Commerce</option>
+    <option value="neutral">Neutral</option>
     <option value="aces">ACES</option>
     <option value="agx">AgX</option>
   </select>

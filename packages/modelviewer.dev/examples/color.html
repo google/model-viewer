@@ -144,7 +144,7 @@
       <model-viewer
           src="../assets/ShopifyModels/GeoPlanter.glb"
           poster="../assets/ShopifyModels/GeoPlanter.webp"
-          tone-mapping="commerce"
+          tone-mapping="neutral"
           shadow-intensity="1"
           camera-controls
           alt="3D model of a cactus"
@@ -392,10 +392,10 @@
     <p>Tone mapping comes at the difficult intersection between art and science.
     We have found through painful experience that the existing tone mapping
     functions do not meet the needs of e-commerce for color-accuracy, and so we
-    have developed a Commerce tone mapper for exactly this purpose. If you have
+    have developed the Khronos PBR Neutral tone mapper for exactly this purpose. If you have
     precise sRGB color swatches that you have used to create your glTF materials
     and want them to come through as unaltered as possible, we strongly
-    recommend using our "commerce" tone-mapping function and our default
+    recommend using our "neutral" tone-mapping function and our default
     lighting or another suitable grayscale lighting environment.</p>
 
     <p>Below is an example where you can see first-hand how much difference tone
@@ -412,13 +412,13 @@
       <model-viewer
         id="tone-mapping"
         src="../assets/ShopifyModels/Mixer.glb"
-        tone-mapping="commerce"
+        tone-mapping="neutral"
         camera-controls
         alt="Tone mapping comparisons for different 3D models"
       >
         <p>Tone Mapping:
           <select id="tone">
-            <option value="commerce">Commerce</option>
+            <option value="neutral">PBR Neutral</option>
             <option value="aces">ACES</option>
             <option value="agx">AgX</option>
           </select><br/>
@@ -579,22 +579,22 @@
 
     <p>Still, for most e-commerce vendors that are likely managing separate
     contracts for 3D model creation and interactive website design, simplicity
-    is key to cost-effectiveness. My recommendation is to use our Commerce tone
+    is key to cost-effectiveness. My recommendation is to use our PBR Neutral tone
     mapping and if you already have approved marketing colors for your products,
     then tell your artists to use those for the baseColor. Use a grayscale
     lighting environment (like our default), adjusting if necessary to place
     highlights and change exposure.</p>
     
     <p>If the color is not known, but being matched by eye, then ensure the
-    artist's tools also use the Commerce tone mapper and a lighting environment
+    artist's tools also use the Khronos PBR Neutral tone mapper and a lighting environment
     that is as close as possible to the production grayscale lighting
-    environment. Since our Commerce tone mapper is relatively new, it may not be
+    environment. Since our PBR Neutral tone mapper is relatively new, it may not be
     available in tools; in this case the next best thing is to turn off tone
     mapping entirely. Make sure to educate your artists on the differences they
     can expect - blown out highlights with hue skews, and saturation loss for
     dark colors. Ensure they also frequently test their output in a
     near-production environment, hopefully using &lt;model-viewer&gt; with
-    <code>tone-mapping="commerce"</code>. This way they can calibrate and ensure
+    <code>tone-mapping="neutral"</code>. This way they can calibrate and ensure
     the end user will see realistic colors.</p>
 
     <figure>
@@ -602,7 +602,7 @@
         id="environments"
         src="../assets/ShopifyModels/Mixer.glb"
         skybox-image="../../shared-assets/environments/neutral.hdr"
-        tone-mapping="commerce"
+        tone-mapping="neutral"
         camera-controls
         alt="3D model of a blender"
       >
