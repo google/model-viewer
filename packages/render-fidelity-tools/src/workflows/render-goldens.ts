@@ -15,83 +15,86 @@
 
 import {spawn} from 'child_process';
 import {promises as fs} from 'fs';
+import HTTPServer from 'http-server';
 import module from 'module';
 import {dirname, join, resolve} from 'path';
+import yargs from 'yargs';
+import {hideBin} from 'yargs/helpers';
 
+import {ArtifactCreator} from '../artifact-creator.js';
 import {ImageComparisonConfig} from '../common.js';
 import {ConfigReader} from '../config-reader.js';
 
-import {rendererScreenshot} from './render-goldens/renderer-screenshot.js';
-import {rendererOffline} from './render-goldens/renderer-offline.js';
-
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
-
-type CommandLineArgs = {
-  config: string;
-  renderer: string[];
-  scenario: string[];
-  port: number;
-  missingOnly: boolean;
-  dryRun: boolean;
-  quiet: boolean;
-}
+type CommandLineArgs =
+    {
+      config: string,
+      renderer: string[],
+      scenario: string[],
+      port: number,
+      missingOnly: boolean,
+      dryRun: boolean,
+      quiet: boolean
+    }
 
 async function main() {
-
-  const argv = await yargs(hideBin(process.argv))
-    .options({
-      'config': {
-        type: 'string',
-        alias: 'c',
-        description: 'Path to configuration json',
-        demandOption: true, // Makes it mandatory. Adjust as per your needs.
-      },
-      'renderer': {
-        type: 'array',
-        alias: 'r',
-        description: 'Limit to specific renderers',
-        demandOption: false, // Makes it mandatory. Adjust as per your needs.
-      },
-      'scenario': {
-        type: 'array',
-        alias: 's',
-        description: 'Limit to specific scenarios',
-        demandOption: false, // Makes it mandatory. Adjust as per your needs.
-      },
-      'port': {
-        type: 'number',
-        alias: 'p',
-        description: 'Port for web server',
-        default: 9040,
-      },
-      'missing-only': {
-        type: 'boolean',
-        alias: 'm',
-        description: 'Only render if an output image is missing',
-        default: false,
-      },
-      'dry-run': {
-        type: 'boolean',
-        alias: 'd',
-        description: 'Lists which images would be rendered but doesn\'t render',
-        default: false,
-      },
-      'quiet': {
-        type: 'boolean',
-        alias: 'q',
-        description: 'Hide the puppeteer controlled browser',
-        default: false,
-      },
-    })
-    .help()
-    .alias('help', 'h')
-    .argv;
+  const argv =
+      await yargs(hideBin(process.argv))
+          .options({
+            'config': {
+              type: 'string',
+              alias: 'c',
+              description: 'Path to configuration json',
+              demandOption:
+                  true,  // Makes it mandatory. Adjust as per your needs.
+            },
+            'renderer': {
+              type: 'array',
+              alias: 'r',
+              description: 'Limit to specific renderers',
+              demandOption:
+                  false,  // Makes it mandatory. Adjust as per your needs.
+            },
+            'scenario': {
+              type: 'array',
+              alias: 's',
+              description: 'Limit to specific scenarios',
+              demandOption:
+                  false,  // Makes it mandatory. Adjust as per your needs.
+            },
+            'port': {
+              type: 'number',
+              alias: 'p',
+              description: 'Port for web server',
+              default: 9040,
+            },
+            'missing-only': {
+              type: 'boolean',
+              alias: 'm',
+              description: 'Only render if an output image is missing',
+              default: false,
+            },
+            'dry-run': {
+              type: 'boolean',
+              alias: 'd',
+              description:
+                  'Lists which images would be rendered but doesn\'t render',
+              default: false,
+            },
+            'quiet': {
+              type: 'boolean',
+              alias: 'q',
+              description: 'Hide the puppeteer controlled browser',
+              default: false,
+            },
+          })
+          .help()
+          .alias('help', 'h')
+          .argv;
 
   const args: CommandLineArgs = {
     config: argv.config as string,
-    renderer: ( argv.renderer  || [] )as string[],
-    scenario: ( argv.scenario  || [] ) as string[],
+    renderer: (argv.renderer || []) as string[],
+    scenario: (argv.scenario || []) as string[],
     port: argv.port as number,
     missingOnly: argv['missing-only'],
     dryRun: argv['dry-run'],
@@ -121,33 +124,33 @@ async function main() {
   }));
 
   // user has specify either scenarios or renderers
-  if( args.renderer.length > 0 ) {
+  if (args.renderer.length > 0) {
     rendererWhitelist = new Set();
-    args.renderer.forEach( (rendererName: string) => {
+    args.renderer.forEach((rendererName: string) => {
       if (rendererList.has(rendererName)) {
         rendererWhitelist!.add(rendererName);
-      }
-      else {
+      } else {
         warn(`Requested renderer "${rendererName}" not found in config`);
       }
     });
   }
 
-  if( args.scenario.length > 0 ) {
+  if (args.scenario.length > 0) {
     scenarioWhitelist = new Set();
-    args.scenario.forEach( (scenarioName: string) => {
+    args.scenario.forEach((scenarioName: string) => {
       const scenarioNameLower = scenarioName.toLowerCase();
       let numMatches = 0;
-      config.scenarios.forEach( (scenario: any) => {
-        if( scenario.name.toLowerCase().indexOf( scenarioNameLower ) >= 0 ) {
-          if( ! scenarioWhitelist!.has( scenario.name ) ) {
+      config.scenarios.forEach((scenario: any) => {
+        if (scenario.name.toLowerCase().indexOf(scenarioNameLower) >= 0) {
+          if (!scenarioWhitelist!.has(scenario.name)) {
             scenarioWhitelist!.add(scenario.name);
           }
           numMatches++;
         }
       });
-      if( numMatches) {
-        warn(`Requested scenario "${scenarioName}" does not match any names found in config`);
+      if (numMatches) {
+        warn(`Requested scenario "${
+            scenarioName}" does not match any names found in config`);
       }
     });
   }
@@ -190,22 +193,36 @@ async function main() {
 
     const configReader = new ConfigReader(config);
 
-    for (const scenarioBase of scenarios) {
-      const scenarioName = scenarioBase.name;
-      const scenario = configReader.scenarioConfig(scenarioName);
-      const {model, lighting, dimensions, exclude} = scenario!;
-      const scenarioGoldensDirectory = join(goldensDirectory, scenarioName);
-      const {width, height} = dimensions;
+    const server = HTTPServer.createServer({root: '../../', cache: -1});
+    server.listen(args.port);
 
-      try {
-        await fs.mkdir(scenarioGoldensDirectory);
-      } catch (error) {
-        // Ignored...
-      }
+    for (const renderer of renderers) {
+      const {
+        name: rendererName,
+        description: rendererDescription,
+        scripts: scripts
+      } = renderer;
 
-      for (const renderer of renderers) {
-        const {name: rendererName, description: rendererDescription, scripts: scripts, command: rendererCommand} = renderer;
-    
+      const screenshotCreator = new ArtifactCreator(
+          config,
+          rootDirectory,
+          `http://localhost:${
+              args.port}/packages/render-fidelity-tools/test/renderers/${
+              rendererName}/`);
+
+      for (const scenarioBase of scenarios) {
+        const scenarioName = scenarioBase.name;
+        const scenario = configReader.scenarioConfig(scenarioName);
+        const {model, lighting, dimensions, exclude} = scenario!;
+        const scenarioGoldensDirectory = join(goldensDirectory, scenarioName);
+        const {width, height} = dimensions;
+
+        try {
+          await fs.mkdir(scenarioGoldensDirectory);
+        } catch (error) {
+          // Ignored...
+        }
+
         if (exclude != null && exclude.includes(rendererName) ||
             rendererWhitelist != null && !rendererWhitelist.has(rendererName)) {
           continue;
@@ -220,13 +237,12 @@ async function main() {
           continue;
         }
 
-        if( args.missingOnly ) {
+        if (args.missingOnly) {
           try {
             await fs.access(goldenPath);
             console.log(`⏭  Skipping ${scenarioName} as render exists...`);
             continue;
-          }
-          catch (error) {
+          } catch (error) {
             // ignored
           }
         }
@@ -248,54 +264,36 @@ async function main() {
               rendererDirectory);
         }
 
-        if( args.dryRun ) {
-          process.stdout.write(rendererName + `: Rendering ` + scenarioName + "... -- skipping, dry-run");
+        if (args.dryRun) {
+          process.stdout.write(
+              rendererName + `: Rendering ` + scenarioName +
+              '... -- skipping, dry-run');
           continue;
         }
 
-        if(rendererCommand) {
-          if(rendererCommand.executable) {
-            try {
-              process.stdout.write(rendererName + `: Rendering ` + scenarioName + "...");
-              await rendererOffline(
-                scenario,
-                rendererCommand.executable,
-                rendererCommand.args,
-                goldenPath);
-            }
-            catch (error) {
-              throw new Error(`Offline rendering process for ${rendererDescription} failed: ${
-                  error.message}`);
-            }
-          }
-        } else {
-          try {         
-            await rendererScreenshot(
-              config,
-              resolve(dirname(configPath)),
+        try {
+          await screenshotCreator.captureScreenshot(
               rendererName,
               scenarioName,
+              dimensions,
               goldenPath,
-              width,
-              height,
-              args.port,
+              -1,
               args.quiet);
-          }
-          catch (error) {
-              throw new Error(`Failed to update ${rendererDescription} screenshot: ${
-                  error.message}`);
-          }
+        } catch (error) {
+          throw new Error(`Failed to update ${
+              rendererDescription} screenshot: ${error.message}`);
         }
       }
+
+      screenshotCreator.close();
     }
+    server.close();
   };
 
   updateScreenshots(config).then(() => exit(0)).catch((error) => {
     console.error(error);
     exit(1);
   });
-
-
 }
 
 main();
