@@ -62,9 +62,9 @@
       {
         "name": "How high is our rendering quality?",
         "htmlName": "quality",
-        "description": "&lt;model-viewer&gt; uses three.js for rendering, which is high-quality and rapidly supports the most recent PBR glTF extensions. The advantage of glTF is that it is widely-supported with consistent rendering (assuming the render parameters are set up the same way). We track convergence of the most popular glTF renderers to demonstrate the state of the industry and to file bugs to drive further improvement; see for yourself at the following link.",
+        "description": "&lt;model-viewer&gt; uses three.js for rendering, which is high-quality and rapidly supports the most recent PBR glTF extensions. The advantage of glTF is that it is widely-supported with consistent rendering (assuming the render parameters are set up the same way). We track convergence of the most popular glTF renderers to demonstrate the state of the industry and to file bugs to drive further improvement; see for yourself at the following Khronos link.",
         "links": [
-          "<a href='../fidelity'>glTF fidelity comparison</a>"
+          "<a href='https://github.khronos.org/glTF-Render-Fidelity/comparison/'>Khronos glTF fidelity comparison</a>"
         ]
       },
       {

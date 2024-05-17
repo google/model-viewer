@@ -1,8 +1,7 @@
 # Render fidelity tools
 
 This package contains tools and testing processes that enable the
-`<model-viewer>` project to ensure high-fidelity 3D model rendering as well
-as compare its rendering qualities to those of other renderers.
+`<model-viewer>` project to ensure high-fidelity 3D model rendering.
 
 If you are looking for the `<model-viewer>` web component, please refer to the
 [`<model-viewer>` package](../model-viewer) and also the live docs and examples
@@ -34,7 +33,6 @@ For `npm run test`, we support these command line options:
 Command            | Default             | Description
 --------------------|----------- | -----------
   -c, --config      |  | Path to configuration json.
-  -r, --renderer    | model-viewer | The renderer to fidelity test, must be a web-based renderer.
   -s, --scenario    |  | Limit to specific scenarios. This now also allows you to specify multiple scenarios in the whitelist.  You can use a full name or a partial name of scenarios and it will match against all that contain that scenario substring.
   -p, --port        | 9040  | Port for web server.
   -d, --dry-run      | false | Lists which images would be rendered but doesn't render.  Useful when trying to figure out which tests will run given that command line.
@@ -57,7 +55,6 @@ For `npm run render-goldens`, we support these command line options:
 Command            | Default             | Description
 --------------------|----------- | -----------
   -c, --config      |  | Path to configuration json.
-  -r, --renderer    |  | Limit to specific renderers. This now allows you to specify multiple renderers in the whitelist, rather than only one.
   -s, --scenario    |  | Limit to specific scenarios. This now also allows you to specify multiple scenarios in the whitelist.  You can use a full name or a partial name of scenarios and it will match against all that contain that scenario substring.
   -p, --port        | 9040  | Port for web server.
   -m, --missing-only | false | Only render if an output image is missing.  Very useful when adding new tests.
@@ -67,7 +64,7 @@ Command            | Default             | Description
 To run a subset of renders or scenarios do something like this:
 
 ```
-% npm run render-goldens -- --renderer=filament --renderer=model-viewer --scenario=clearcoat -q 
+% npm run render-goldens -- --scenario=clearcoat -q 
 ```
 
 *NOTE: In the above example, the `--` is required to separate the arguments to `npm run render-goldens` from the arguments to the script itself.*
