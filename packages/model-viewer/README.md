@@ -15,7 +15,7 @@ As new standards and APIs become available `<model-viewer>` will be improved
 to take advantage of them. If possible, fallbacks and polyfills will be
 supported to provide a seamless development experience.
 
-[Demo](https://model-viewer.glitch.me) • [Documentation](https://modelviewer.dev/) • [Quality Tests](https://modelviewer.dev/fidelity/)
+[Demo](https://model-viewer.glitch.me) • [Documentation](https://modelviewer.dev/) • [Quality Comparisons](https://github.khronos.org/glTF-Render-Fidelity/comparison/) (courtesy of Khronos)
 
 
 ## Installing
