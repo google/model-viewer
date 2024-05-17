@@ -97,6 +97,7 @@ done
 set -x
 
 # Copy the latest fidelity testing results:
+mkdir -p $DEPLOY_ROOT/fidelity
 mkdir -p $DEPLOY_ROOT/editor
 mkdir -p $DEPLOY_ROOT/editor/view
 mkdir -p $DEPLOY_ROOT/dist
@@ -109,6 +110,7 @@ mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer-effects/dist
 mkdir -p $DEPLOY_ROOT/node_modules/js-beautify
 mkdir -p $DEPLOY_ROOT/node_modules/web-animations-js
 
+cp examples/fidelity.html $DEPLOY_ROOT/fidelity/index.html
 cp ../space-opera/editor/index.html $DEPLOY_ROOT/editor/
 cp ../space-opera/editor/view/index.html $DEPLOY_ROOT/editor/view/
 cp ../space-opera/dist/space-opera.js $DEPLOY_ROOT/dist/
