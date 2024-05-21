@@ -446,7 +446,7 @@ configuration or device capabilities');
       model.position.copy(target.position);
       model.updateWorldMatrix(false, true);
 
-      const arraybuffer = await exporter.parse(model);
+      const arraybuffer = await exporter.parseAsync(model);
 
       model.position.set(0, 0, 0);
       target.add(model);
