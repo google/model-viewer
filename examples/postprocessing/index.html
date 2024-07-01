@@ -1,0 +1,445 @@
+<!--
+/*
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; PostProcessing Examples</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer-effects&gt; post processing examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
+  
+  <!-- ES-Shims for older browsers -->
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.1/dist/es-module-shims.js"></script>
+
+  <!-- Import Three.js using an import-map -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@^0.164.1/build/three.module.min.js"
+      }
+    }
+  </script>
+
+  <!-- Import the <model-viewer> component without three bundled -->
+  <script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer-module.min.js"></script>
+
+  <!-- Import the <model-viewer-effects> addon -->
+  <script type="module" src="../../node_modules/@google/model-viewer-effects/dist/model-viewer-effects.min.js"></script>
+  
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+  <style>
+.controls {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  bottom: 8px;
+  left: 8px;
+}
+
+#texture-name,
+#image-name {
+  font-size: 0.8em;
+}
+
+button {
+  font-size: 1.3em;
+  margin: 0 0.25em;
+}
+  </style>
+</head>
+<body>
+<div class="examples-page">
+  <div class="sidebar" id="sidenav"></div>
+  <div id="toggle"></div>
+
+  <div class="examples-container">
+    <div class="sample">
+      <div id="setup" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Setup Post Processing</h2>
+            <p>The <code>&lt;model-viewer-effects&gt;</code> library addon for <code>&lt;model-viewer&gt;</code> provides
+            you with a easy-to-use postprocessing workflow for spicing up your models. <br/>The list of currently
+            support effects is: SMAA, FXAA, Pixelate, Outline, Glitch, SSAO, Bloom (Global/Selective), and Color Grade.<br/><br/>
+            In order to avoid package collisions, you will be required to add an 
+            <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap" target='_blank'>import-map</a>
+            for the <a href="https://threejs.org/" target='_blank'>Three.js</a> package, and use the <i>module</i> version of <code>&lt;model-viewer&gt;</code>.</p>
+            <p>Safari does not support <code>import maps</code>, the following script will make your code work universally: </p>
+            <example-snippet stamp-to="setup" highlight-as="html">
+              <template>
+  <script type="noexecute" async src="https://ga.jspm.io/npm:es-module-shims@1.7.1/dist/es-module-shims.js"></script>
+              </template>
+            </example-snippet>
+            <p>Bring <code>Three.js</code> from any cdn - cdnjs, unpkg, or jsdelivr:</p>
+            <example-snippet stamp-to="setup" highlight-as="html">
+              <template>
+<script type="importmap-noexecute">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@^0.164.1/build/three.module.min.js"
+  }
+}
+</script>
+              </template>
+            </example-snippet stamp-to="setup" highlight-as="html">
+            <p>Now import the <code>&lt;model-viewer&gt;</code> module version which doesn't package three, and the <code>&lt;model-viewer-effects&gt;</code> addon:</p>
+            <example-snippet stamp-to="setup" highlight-as="html">
+              <template>
+<script type="module-noexecute" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-module.min.js"></script>
+  
+<script type="module-noexecute" src="https://cdn.jsdelivr.net/npm/@google/model-viewer-effects/dist/model-viewer-effects.min.js"></script>
+              </template>
+            </example-snippet>
+            <p>Setting up post-processing effects is as simple as adding an <code>&lt;effect-composer&gt;</code> component inside your <code>&lt;model-viewer&gt;</code> element.
+              From here, simply add any of the supported effects inside the <code>&lt;effect-composer&gt;</code>.<br>See the
+            <a href="../../docs/mve.html">API Reference</a> for a list of all supported effects.</p>
+          </div>
+          <example-snippet stamp-to="setup" highlight-as="html">
+            <template>
+<!-- Use the <effect-composer> component inside the <model-viewer> element -->
+<model-viewer autoplay ar camera-controls touch-action="pan-y" src="../../shared-assets/models/Horse.glb" scale="0.01 0.01 0.01" alt="A 3D model of a horse galloping.">
+  <effect-composer>
+    <pixelate-effect></pixelate-effect>
+  </effect-composer>
+</model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="effects" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">The Effects API</h2>
+            <a href="../../docs/mve#effectcomposer"><h3>Effect Composer</h3></a>
+            <p>The <code>&lt;effect-composer&gt;</code> component has two main properties: <code>render-mode</code> and <code>msaa</code>.<br><br>
+            The default value for <code>renderMode</code> is <code>'performance'</code>. By switching to <code>'quality'</code>, the <code>&lt;effect-composer&gt;</code>
+            will use high-precision linear buffers for rendering, allowing for HDR-like workflows, at a performance cost. <code>renderMode</code> can only be set once,
+            before the Effect Composer instantiates. Updating it after that is not possible.<br>
+            <i>Note: the default 'performance' <code>renderMode</code> is prone to banding in dark scenes, which is especially noticeable with 
+            <code>&lt;bloom-effect&gt;</code>.</i><br><br>
+            <code>msaa</code> uses a performant algorithm for anti-aliasing on WebGL2 enabled browsers. Set this to a factor of 2 to enable - it is disabled by default.<br>
+            <i>Note: <code>msaa</code> may introduce visual artifacts when used with depth-based effects such as <code>&lt;ssao-effect&gt;</code>, in which case
+              it would be preferred to use the <code>&lt;smaa-effect&gt;</code>.</i>
+            </p><br>
+            <a href="../../docs/mve#bloom"><h3>Effects</h3></a>
+            <p>All Effects are reactive components, so all properties can be changed during runtime. 
+            This example demonstrates the <a href='../../docs/mve#blendmodemixin'><code>BlendMode API</code></a>, which allows you to blend effects like you would
+            layers in Photoshop. We use a <a href="../../docs/mve#colorgrade"><code>&lt;color-grade-effect&gt;</code></a>, which allows you to alter the look of your model.
+            </p>
+          </div>
+          <example-snippet stamp-to="effects" highlight-as="html">
+            <template>
+<model-viewer id="blendViewer" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+  <effect-composer render-mode="quality" msaa="8">
+    <color-grade-effect contrast="0.5" saturation="-1" opacity="1" blend-mode="default"></color-grade-effect>
+  </effect-composer>
+  <div class="controls">
+    <label for="opacity">Opacity</label>
+    <input id="opacity" type="range" min="0" max="1" step="0.01" value="1">
+    <label for="blend-mode">Blend Mode:</label>
+    <select id="blend-mode">
+        <option value="default">Default</option>
+        <option value="skip">Skip</option>
+        <option value="add">Add</option>
+        <option value="subtract">Subtract</option>
+        <option value="divide">Divide</option>
+        <option value="negation">Negation</option>
+    </select>
+  </div>
+</model-viewer>
+<script type="module">
+const blendViewer = document.querySelector("model-viewer#blendViewer");
+const blendEffect = blendViewer.querySelector('color-grade-effect');
+const opacity = blendViewer.querySelector('#opacity');
+const mode = blendViewer.querySelector('#blend-mode');
+
+opacity.addEventListener('input', (e) => blendEffect.opacity = e.target.value);
+mode.addEventListener('change', (e) => blendEffect.blendMode = e.target.value);
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="colorgrade" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Color Grading</h2>
+            <p>The default <code>tonemapping</code> provided by <code>&lt;model-viewer&gt;</code> is <code>Aces Filmic</code> tonemapping,
+              which provides the most pleasing image, similar to Filament's gltf-viewer. However the this tonemapping is not applied to
+            <code>&lt;model-viewer-effects&gt;</code> postprocessing. To overcome this, it is recommended to always add the <code>&lt;color-grade-effect&gt;</code> 
+              at the end of your postprocess pipeline, which similarly sets the default tonemapping to <code>Aces Filmic</code>.<br>
+              The example below showcases the rendering difference with and without the <code>&lt;color-grade-effect&gt;</code> when &lt;bloom-effect&gt; is applied, as well as 
+              allows you to select any of the other tonemapping modes.
+            </p>
+          </div>
+          <example-snippet stamp-to="colorgrade" highlight-as="html">
+            <template>
+<model-viewer id="colorViewer" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/EmissiveStrengthTest.glb" scale="0.1 0.1 0.1" alt="A 3D model of an astronaut">
+  <effect-composer render-mode="quality" msaa="8">
+    <bloom-effect></bloom-effect>
+    <color-grade-effect></color-grade-effect>
+  </effect-composer>
+  <div class="controls">
+    <label for="colorgrading">Color Grading</label>
+    <input type="checkbox" id="colorgrading" checked>
+    <label for="tonemapping">Tonemapping:</label>
+    <select id="tonemapping">
+        <option value="aces_filmic">Aces Filmic</option>
+        <option value="reinhard">Reinhard</option>
+        <option value="reinhard2">Reinhard2</option>
+        <option value="reinhard2_adaptive">Reinhard2 Adaptive</option>
+        <option value="optimized_cineon">Optimized Cineon</option>
+    </select>
+  </div>
+</model-viewer>
+<script type="module">
+const colorViewer = document.querySelector("model-viewer#colorViewer");
+const colorGradeEffect = colorViewer.querySelector('color-grade-effect');
+const colorGrading = colorViewer.querySelector('#colorgrading');
+const tonemapping = colorViewer.querySelector('#tonemapping');
+
+colorGrading.addEventListener('change', (e) => colorGradeEffect.blendMode = e.target.checked ? 'default' : 'skip');
+tonemapping.addEventListener('input', (e) => colorGradeEffect.tonemapping = e.target.value);
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="selective-effects" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Selective Effects</h2>
+            <p>Some of the implemented effects are selective and may be applied to only certain meshes in your model. 
+            Currently, this is exclusive to <a href="../../docs/mve#selectivebloom"><code>&lt;selective-bloom-effect&gt;</code></a> 
+            and <a href="../../docs/mve#outline"><code>&lt;outline-effect&gt;</code></a>. The default behavior for selective
+            effects is to use the default <code>selection</code> provided by the <code>&lt;effect-composer&gt;</code>, which contains a set of
+            all meshes in the model.<br/>
+            By providing an array of mesh names to the <code>selection</code> attribute, you may enable the effects only for those meshes.<br/>
+            This example demonstrates the application of the <code>&lt;selective-bloom-effect&gt;</code> exclusively to Meshes with an emissive material:</p>
+          </div>
+          <example-snippet stamp-to="selective-effects" highlight-as="html">
+            <template>
+<model-viewer camera-orbit="45deg 115deg auto" camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RocketShip.glb" ar alt="A 3D model of a Rocket Ship">
+  <effect-composer id="selectiveComposer" render-mode="quality">
+    <selective-bloom-effect strength="5" radius="0.7" threshold="0"></selective-bloom-effect>
+    <color-grade-effect></color-grade-effect>
+  </effect-composer>
+</model-viewer>
+<script type="module">
+  const selectiveComposer = document.querySelector("effect-composer#selectiveComposer");
+  const selectiveBloom = selectiveComposer.querySelector("selective-bloom-effect");
+
+  selectiveComposer.addEventListener('updated-selection', () => {
+    const selection = [];
+    selectiveComposer.selection.forEach((obj) => 
+      (obj.material.emissive.r > 0 
+      || obj.material.emissive.g > 0 
+      || obj.material.emissive.b > 0) &&
+        selection.push(obj)
+    );
+    selectiveBloom.selection = selection;
+  });
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="combining-effects" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Combining Effects</h2>
+            <p>&lt;model-viewer-effects&gt;</code> will attempt to join as many of your effects as possible into a single
+            <code>EffectPass</code>, which has a significant performance benefit as opposed to keeping all the effects
+            in separates Passes. Effects can be disabled by setting the <code>blend-mode</code> to <code>skip</code>.
+            <br>
+            It is recommended to follow the official <a href="https://github.com/pmndrs/postprocessing/wiki/Effect-Merging#effect-execution-order" target='_blank'>Postprocessing Wiki</a>
+            for best practices in combining effects. The <code>&lt;model-viewer-effects&gt;</code> handles effect compatibility issues by 
+            placing incompatible effects in a separate Pass.
+            </p>
+          </div>
+          <example-snippet stamp-to="combining-effects" highlight-as="html">
+            <template>
+<model-viewer id="effectsViewer" camera-controls touch-action="pan-y" src="../../shared-assets/models/EmissiveStrengthTest.glb" ar alt="A 3D ">
+  <effect-composer render-mode="quality">
+    <outline-effect color="blue" blend-mode="skip"></outline-effect>
+    <ssao-effect blend-mode="skip"></ssao-effect>
+    <glitch-effect blend-mode="skip"></glitch-effect>
+    <smaa-effect blend-mode="skip"></smaa-effect>
+    <bloom-effect blend-mode="skip"></bloom-effect>
+    <pixelate-effect granularity="5" blend-mode="skip"></pixelate-effect>
+    <color-grade-effect blend-mode="default"></color-grade-effect>
+  </effect-composer>
+  <div class="controls">
+    <label for="outline">Outline Effect</label>
+    <input type="checkbox" id="outline">
+    <label for="ssao">SSAO Effect</label>
+    <input type="checkbox" id="ssao">
+    <label for="glitch">Glitch Effect</label>
+    <input type="checkbox" id="glitch">
+    <label for="smaa">SMAA Effect</label>
+    <input type="checkbox" id="smaa">
+    <label for="bloom">Bloom Effect</label>
+    <input type="checkbox" id="bloom">
+    <label for="pixelate">Pixelate Effect</label>
+    <input type="checkbox" id="pixelate">
+    <label for="colorgrade">Color Grade Effect</label>
+    <input type="checkbox" id="colorgrade" checked>
+  </div>
+</model-viewer>
+<script type="module">
+  const effectsViewer = document.querySelector("model-viewer#effectsViewer");
+  const effects = effectsViewer.querySelector("effect-composer").children;
+  const inputs = effectsViewer.querySelectorAll("input");
+
+  for (let i = 0; i < effects.length; i++) {
+    inputs[i].addEventListener('change', (e) => effects[i].blendMode = e.target.checked ? 'default' : 'skip');
+  }
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="custom-effects" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Custom Effects</h2>
+            <p>Using the <a href="../../docs/mve.html#entrydocs-effectcomposer-methods-addPass"><code>addPass()</code></a> method on the <code>&lt;effect-composer&gt;</code>, you can add custom 
+            PostProcessing effects that are not provided by the base library. If you would like to implement
+            your own effects from scratch, refer to the <a href="https://github.com/pmndrs/postprocessing/wiki/Custom-Effects" target='_blank'>Postprocessing Wiki</a>.<br/><br/>
+            
+            If your Pass requires the scene or camera instance, they are set automatically. Similarly, 
+            if any of the effects in the pass require a <code>normalBuffer</code> or <code>selection</code>,
+            you can access them from the <code>&lt;effect-composer&gt;</code>.<br/>
+
+            If any property of your effect changes, you must call the <a href="../../docs/mve.html#entrydocs-effectcomposer-methods-queueRender"><code>queueRender()</code></a> 
+            method so that the <code>&lt;effect-composer&gt;</code> knows to re-render with your new changes.<br/><br/> 
+
+            <i>Note: If your pass uses the normalBuffer, you must specify as such in the <code>addPass</code> method, as the normals 
+            are disabled by default unless they are used. Similarly, if your pass requires to be re-rendered each frame, 
+            you must pass the </i><code>requireDirtyRender</code><i> parameter.</i></p>
+          </div>
+          <example-snippet stamp-to="custom-effects" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" autoplay src="../../shared-assets/models/RobotExpressive.glb" ar alt="A 3D model of a Lantern">
+  <effect-composer id="customComposer" msaa="8">
+  </effect-composer>
+  <div class="controls">
+    <label for="scale">Grid Scale</label>
+    <input id="scale" type="range" min="0" max="2" step="0.01" value="1">
+  </div>
+</model-viewer>
+<script type="module">
+  import * as PostProcessing from 'https://cdn.jsdelivr.net/npm/postprocessing@6.35.3/build/index.js';
+  const customComposer = document.querySelector("effect-composer#customComposer");
+
+  const grid = new PostProcessing.GridEffect();
+  const sepia = new PostProcessing.SepiaEffect();
+  // The camera is set automatically when added to the <effect-composer>
+  const noisePass = new PostProcessing.EffectPass(undefined, grid, sepia);
+  customComposer.addPass(noisePass);
+
+  customComposer.nextElementSibling.addEventListener('input', (e) => {
+    grid.scale = e.target.value;
+    // Request a render frame, to update
+    customComposer.queueRender();
+  });
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <ul>
+        <li class="attribution">
+          <a href="https://github.com/dataarts/3-dreams-of-black/tree/master/deploy/files/models/soup">Horse</a> by <a href="https://github.com/dataarts">Google Data Arts Team</a>,
+          licensed under <a href="https://github.com/dataarts/3-dreams-of-black/blob/master/deploy/files/models/soup/LICENSE.txt">Creative Commons Attribution-NonCommercial-ShareAlike</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://poly.pizza/m/9dyJn4gp7U8">Rocket Ship</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Daniel Melchior</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/3.0/">CC-BY</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/EmissiveStrengthTest">EmissiveStrengthTest</a> by <a href="https://github.com/emackey">Ed Mackey</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a> by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+          licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+        </li>
+      </ul>
+      <div style="margin-top:24px;" class="copyright">©Copyright 2023 Google Inc. Licensed under the Apache License 2.0.</div>
+      <div id='footer-links'></div>
+    </div>
+  </div>
+</div>
+
+  <script type="module" src="../../examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { init('examples-postprocessing'); })();
+    (() => { initFooterLinks();})();
+  </script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="../built/dependencies.js">
+  </script>
+</body>
+</html>

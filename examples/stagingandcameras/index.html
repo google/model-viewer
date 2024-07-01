@@ -1,0 +1,460 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Staging &amp; Camera Control</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; staging &amp; camera control examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
+
+
+
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+</head>
+<body>
+<div class="examples-page">  
+  <div class="sidebar" id="sidenav"></div>
+  <div id="toggle"></div>
+  
+  <div class="examples-container">
+    <div class="sample">
+      <div id="enableInteraction" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Staging &amp; Camera Control. </span>Use these features to frame the perfect shot for your model</h4>
+          <div class="heading">
+            <h2 class="demo-title">Use the <span class="attribute">camera-controls</span> attribute to enable user interaction</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="enableInteraction" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="cameraOrbit" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Set the <span class="attribute">camera-orbit</span> change the initial angle and position of the camera</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="cameraOrbit" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" camera-orbit="45deg 55deg 4m" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="orbitAndScroll" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Use CSS-like <span class="attribute">calc()</span> to sync camera orbit with scroll position</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="orbitAndScroll" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" camera-orbit="calc(-1.5rad + env(window-scroll-y) * 4rad) calc(0deg + env(window-scroll-y) * 180deg) calc(5m - env(window-scroll-y) * 10m)" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="disableZoom" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Disable user zoom so that wheel and pinch interactions have the browser's default behavior.</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="disableZoom" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" disable-zoom src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="interpolation" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">The camera automatically interpolates between orbits (even when controls are disabled)</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="interpolation" highlight-as="html">
+            <template>
+<model-viewer id="orbit-demo" interpolation-decay=200 src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#orbit-demo');
+  const orbitCycle = [
+    '45deg 55deg 4m',
+    '-60deg 110deg 2m',
+    modelViewer.cameraOrbit
+  ];
+
+  setInterval(() => {
+    const currentOrbitIndex = orbitCycle.indexOf(modelViewer.cameraOrbit);
+    modelViewer.cameraOrbit =
+        orbitCycle[(currentOrbitIndex + 1) % orbitCycle.length];
+  }, 3000);
+})();
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="defaultTarget" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">By default, the camera targets the center of the model's bounding box</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="defaultTarget" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="cameraTarget" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Use the <span class="attribute">camera-target</span> attribute to orbit a different coordinate</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="cameraTarget" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" camera-target="0m 0m 0m" auto-rotate src="../../shared-assets/models/odd-shape-labeled.glb" alt="An abstract 3D model with labeled origin and center" shadow-intensity="1" ar></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="panning" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Disable Tap</h2>
+            <p>Pan is enabled by default via two fingers on touch or using
+            right-click or any modifier key with mouse drag. When panning, the
+            center point is shown visually (and can be suppressed/changed using
+            the <a
+            href="../../docs/index.html#entrydocs-stagingandcameras-slots-panTarget">pan-target</a>
+            slot) and when the pan gesture ends, the camera is focused on that
+            model point (if there was a surface under the dot), so that the
+            camera doesn't orbit around a random point in space. Clicking on the
+            model focuses on that point, while clicking off the model returns to
+            the default center.</p>
+
+            <p>There is a  <span class="attribute">disable-pan</span> attribute
+            to turn all of this off, but here we demonstrate only turning off
+            the click/tap behaviors via the  <span
+            class="attribute">disable-tap</span>
+            attribute. Note that after panning and rotating the model, it can be
+            very hard to get back to the original centering, so it's recommended
+            to implement your own re-centering logic via  <span
+            class="attribute">camera-target</span>
+              if you decide to go this route.</p>
+          </div>
+          <example-snippet stamp-to="panning" highlight-as="html">
+            <template>
+<model-viewer id="pan-demo" disable-tap auto-rotate shadow-intensity="1" camera-controls touch-action="pan-y" src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="turnSkybox" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Add other interactions like rotating the skybox</h2>
+            <h4>Event listeners can cooperate with camera-controls</h4>
+            <p>By using capture on your event listeners you can make sure the
+              events are also passed in as usual to the built in camera controls.
+              This can be selectively disabled by calling stopPropagation() on the
+              event.</p>
+            <p>Using shift-drag or two-finger drag on mobile, one can rotate the
+            skybox to see how the environment would cast light onto the object
+            from different angles.</p>
+          </div>
+          <example-snippet stamp-to="turnSkybox" highlight-as="html">
+            <template>
+<model-viewer id="envlight-demo" camera-controls touch-action="pan-y" disable-pan oncontextmenu="return false;" src="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/DamagedHelmet.gltf"  skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.hdr" alt="A 3D model of a damaged helmet"></model-viewer>
+
+<script type="module">
+  const modelViewer = document.querySelector("#envlight-demo");
+  
+  let lastX;
+  let panning = false;
+  let skyboxAngle = 0;
+  let radiansPerPixel;
+      
+  const startPan = () => {
+    const orbit = modelViewer.getCameraOrbit();
+    const { radius } = orbit;
+    radiansPerPixel = -1 * radius / modelViewer.getBoundingClientRect().height;
+    modelViewer.interactionPrompt = 'none';
+  };
+  
+  const updatePan = (thisX) => {      
+    const delta = (thisX - lastX) * radiansPerPixel;
+    lastX = thisX;
+    skyboxAngle += delta;
+    const orbit = modelViewer.getCameraOrbit();
+    orbit.theta += delta;
+    modelViewer.cameraOrbit = orbit.toString();
+    modelViewer.resetTurntableRotation(skyboxAngle);
+    modelViewer.jumpCameraToGoal();
+  }
+  
+  modelViewer.addEventListener('mousedown', (event) => {
+    panning = event.button === 2 || event.ctrlKey || event.metaKey || event.shiftKey;
+    if (!panning)
+      return;
+
+    lastX = event.clientX;
+    startPan();
+    event.stopPropagation();
+  }, true);
+
+  modelViewer.addEventListener('touchstart', (event) => {
+    const {targetTouches, touches} = event;
+    panning = targetTouches.length === 2 && targetTouches.length === touches.length;
+    if (!panning)
+      return;
+
+    lastX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
+    startPan();
+  }, true);
+
+  self.addEventListener('mousemove', (event) => {
+    if (!panning)
+      return;
+
+    updatePan(event.clientX);
+    event.stopPropagation();
+  }, true);
+
+  modelViewer.addEventListener('touchmove', (event) => {
+    if (!panning || event.targetTouches.length !== 2)
+      return;
+
+    const {targetTouches} = event;
+    const thisX = 0.5 * (targetTouches[0].clientX + targetTouches[1].clientX);
+    updatePan(thisX);
+  }, true);
+
+  self.addEventListener('mouseup', (event) => {
+    panning = false;
+  }, true);
+  
+  modelViewer.addEventListener('touchend', (event) => {
+    panning = false;
+  }, true);
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>	
+
+    <div class="sample">
+      <div id="customPrompt" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Create your own custom interaction prompts with one or two touch points.</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="customPrompt" highlight-as="html">
+            <template>
+<style>
+  .dot{
+    display: block;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    transform: translateX(-50%) translateY(-50%);
+    border-radius: 50%;
+    box-shadow: 0px 0px 10px 3px rgba(0, 0, 0, 0.7), 0px 0px 5px 1px rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+</style>
+<model-viewer id="prompt-demo" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/NeilArmstrong.glb" alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" shadow-intensity="1" ar>
+  <div class="dot" slot="finger0"></div>
+  <div class="dot" slot="finger1"></div>
+</model-viewer>
+
+<script>
+  const modelViewerPrompt = document.querySelector("#prompt-demo");
+  
+  const PROMT_MS = 3000;
+  const REPEAT_MS = 5000;
+
+  const finger0 = {
+    x: {
+      initialValue: 0.6,
+      keyframes: [
+        {frames: 1, value: 0.7},
+        {frames: 1, value: 0.5},
+        {frames: 1, value: 0.7},
+        {frames: 1, value: 0.6},
+      ]
+    },
+    y: {
+      initialValue: 0.45,
+      keyframes: [
+        {frames: 1, value: 0.4},
+        {frames: 1, value: 0.3},
+        {frames: 1, value: 0.4},
+        {frames: 1, value: 0.45},
+      ]
+    }
+  };
+
+  const finger1 = {
+    x: {
+      initialValue: 0.4,
+      keyframes: [
+        {frames: 1, value: 0.3},
+        {frames: 1, value: 0.1},
+        {frames: 1, value: 0.3},
+        {frames: 1, value: 0.4},
+      ]
+    },
+    y: {
+      initialValue: 0.55,
+      keyframes: [
+        {frames: 1, value: 0.6},
+        {frames: 1, value: 0.5},
+        {frames: 1, value: 0.6},
+        {frames: 1, value: 0.55},
+      ]
+    }
+  };
+
+  let hasInteracted = false;
+
+  const prompt = () => {
+    if (!hasInteracted) {
+      modelViewerPrompt.interact(PROMT_MS, finger0, finger1);
+      setTimeout(prompt, REPEAT_MS);
+    }
+  };
+
+  modelViewerPrompt.addEventListener('poster-dismissed', () => {
+    prompt();
+  }, {once: true});
+
+  const interacted = (event) => {
+    if (event.detail.source === 'user-interaction') {
+      hasInteracted = true;
+      modelViewerPrompt.removeEventListener('camera-change', interacted);
+    }
+  };
+
+  modelViewerPrompt.addEventListener('camera-change', interacted);
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <ul>
+        <li class="attribution">
+          <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://3d.si.edu/object/3d/neil-armstrong-spacesuit:d8c63ba6-4ebc-11ea-b77f-2e728ce88125">Neil Armstrong Space Suit</a> 
+          provided by the Smithsonian Digitization Programs Office and the National Air and Space Museum; <a href=https://www.si.edu/Termsofuse>Usage Conditions Apply</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
+        </li>
+      </ul>
+      <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+      <div id='footer-links'></div>
+    </div>
+    </div>
+ </div>
+
+ <script type="module" src="../../examples/built/docs-and-examples.js">
+ </script>
+ <script type="module">
+   (() => { init('examples-stagingandcameras'); })();
+   (() => { initFooterLinks();})();
+ </script>
+  
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="../built/dependencies.js">
+  </script>
+
+  <!-- Loads <model-viewer> on modern browsers: -->
+  <script type="module"
+      src="../../node_modules/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+</body>
+</html>
