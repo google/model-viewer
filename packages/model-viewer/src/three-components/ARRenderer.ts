@@ -33,6 +33,7 @@ const INIT_FRAMES = 30;
 // estimation, which will be used once available in WebXR.
 const AR_SHADOW_INTENSITY = 0.8;
 const ROTATION_RATE = 1.5;
+const ROTATION_THRESHOLD = 0.05;
 // Angle down (towards bottom of screen) from camera center ray to use for hit
 // testing against the floor. This makes placement faster and more intuitive
 // assuming the phone is in portrait mode. This seems to be a reasonable
@@ -104,6 +105,7 @@ export class ARRenderer extends EventDispatcher<
   private placementComplete = false;
   private isTranslating = false;
   private isRotating = false;
+  private isScaling = false;
   private isTwoFingering = false;
   private lastDragPosition = new Vector3();
   private firstRatio = 0;
@@ -506,7 +508,7 @@ export class ARRenderer extends EventDispatcher<
         null;
   }
 
-  public moveToFloor(frame: XRFrame) {
+  public moveToPlane(frame: XRFrame) {
     const hitSource = this.initialHitSource;
     if (hitSource == null) {
       return;
@@ -566,19 +568,18 @@ export class ARRenderer extends EventDispatcher<
     } else if (fingers.length === 2) {
       box.show = true;
       this.isTwoFingering = true;
-      const {separation} = this.fingerPolar(fingers);
-      this.firstRatio = separation / scene.scale.x;
     }
   };
 
   private onSelectEnd = () => {
     this.isTranslating = false;
     this.isRotating = false;
+    this.isScaling = false;
     this.isTwoFingering = false;
     this.inputSource = null;
     this.goalPosition.y +=
         this.placementBox!.offsetHeight * this.presentedScene!.scale.x;
-    this.placementBox!.show = false
+    this.placementBox!.show = false;
   };
 
   private fingerPolar(fingers: XRTransientInputHitTestResult[]):
@@ -622,10 +623,17 @@ export class ARRenderer extends EventDispatcher<
         this.isTwoFingering = false;
       } else {
         const {separation, deltaYaw} = this.fingerPolar(fingers);
-        if (this.placeOnWall === false) {
+        if (Math.abs(deltaYaw) > ROTATION_THRESHOLD) {
+          this.isScaling = false;
+          this.isRotating = true;
+        } else if (!this.isScaling) {
+          this.isScaling = true;
+          this.firstRatio = separation / scene.scale.x;
+        }
+        if (this.placeOnWall === false && this.isRotating) {
           this.goalYaw += deltaYaw;
         }
-        if (scene.canScale) {
+        if (scene.canScale && this.isScaling) {
           const scale = separation / this.firstRatio;
           this.goalScale =
               (scale < SCALE_SNAP_HIGH && scale > SCALE_SNAP_LOW) ? 1 : scale;
@@ -637,6 +645,7 @@ export class ARRenderer extends EventDispatcher<
       // to scaling instead.
       this.isTranslating = false;
       this.isRotating = false;
+      this.isScaling = true;
       this.isTwoFingering = true;
       const {separation} = this.fingerPolar(fingers);
       this.firstRatio = separation / scale;
@@ -764,7 +773,7 @@ export class ARRenderer extends EventDispatcher<
       this.updateView(view);
 
       if (isFirstView) {
-        this.moveToFloor(frame);
+        this.moveToPlane(frame);
 
         this.processInput(frame);
 
