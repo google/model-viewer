@@ -37,26 +37,33 @@ let commonPlugins = [
 
 const watchFiles = ['lib/**'];
 
-const createModelViewerOutput = (file, format, globals = {}, plugins = commonPlugins, external = []) => ({
-  input: './lib/model-viewer.js',
-  output: {
-    file,
-    format,
-    sourcemap: true,
-    name: 'ModelViewerElement',
-    globals
-  },
-  external,
-  watch: {
-    include: watchFiles
-  },
-  plugins,
-  onwarn
-});
+const createModelViewerOutput = (file, format, plugins = commonPlugins, external = []) => {
+  const globals = external.reduce((acc, mod) => {
+    acc[mod] = mod; // Assuming global variable names are the same as module names
+    return acc;
+  }, {});
+
+  return {
+    input: './lib/model-viewer.js',
+    output: {
+      file,
+      format,
+      sourcemap: true,
+      name: 'ModelViewerElement',
+      globals
+    },
+    external,
+    watch: {
+      include: watchFiles
+    },
+    plugins,
+    onwarn
+  };
+};
 
 const outputOptions = [
   createModelViewerOutput('./dist/model-viewer.js', 'esm'),
-  createModelViewerOutput('./dist/model-viewer-module.js', 'esm', { 'three': 'three' }, commonPlugins, ['three'])
+  createModelViewerOutput('./dist/model-viewer-module.js', 'esm', commonPlugins, ['three'])
 ];
 
 if (NODE_ENV !== 'development') {
@@ -75,19 +82,19 @@ if (NODE_ENV !== 'development') {
   // IE11 does not support modules, so they are removed here, as well as in a
   // dedicated unit test build which is needed for the same reason.
   outputOptions.push(
-    createModelViewerOutput('./dist/model-viewer-umd.js', 'umd', {}, pluginsIE11),
+    createModelViewerOutput('./dist/model-viewer-umd.js', 'umd', pluginsIE11),
       /** Bundled w/o three */
-    createModelViewerOutput('./dist/model-viewer-module-umd.js', 'umd', { 'three': 'three' }, pluginsIE11, ['three'])
+    createModelViewerOutput('./dist/model-viewer-module-umd.js', 'umd', pluginsIE11, ['three'])
   );
 
   // Minified Versions
   const minifiedPlugins = [...commonPlugins, terser()];
 
   outputOptions.push(
-    createModelViewerOutput('./dist/model-viewer.min.js', 'esm', {}, minifiedPlugins),
-    createModelViewerOutput('./dist/model-viewer-umd.min.js', 'umd', {}, minifiedPlugins),
-    createModelViewerOutput('./dist/model-viewer-module.min.js', 'esm', { 'three': 'three' }, minifiedPlugins, ['three']),
-    createModelViewerOutput('./dist/model-viewer-module-umd.min.js', 'umd', { 'three': 'three' }, minifiedPlugins, ['three'])
+    createModelViewerOutput('./dist/model-viewer.min.js', 'esm', minifiedPlugins),
+    createModelViewerOutput('./dist/model-viewer-umd.min.js', 'umd', minifiedPlugins),
+    createModelViewerOutput('./dist/model-viewer-module.min.js', 'esm', minifiedPlugins, ['three']),
+    createModelViewerOutput('./dist/model-viewer-module-umd.min.js', 'umd', minifiedPlugins, ['three'])
   );
 
   outputOptions.push({
