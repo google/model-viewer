@@ -30,48 +30,38 @@ const onwarn = (warning, warn) => {
   }
 };
 
-let plugins = [resolve({ dedupe: 'three' }), replace({ 'Reflect.decorate': 'undefined' })];
+let commonPlugins = [
+  resolve({ dedupe: 'three' }),
+  replace({ 'Reflect.decorate': 'undefined' })
+];
 
 const watchFiles = ['lib/**'];
 
-const outputOptions = [
-  {
-    input: './lib/model-viewer.js',
-    output: {
-      file: './dist/model-viewer.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'ModelViewerElement',
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
+const createModelViewerOutput = (file, format, globals = {}, plugins = commonPlugins, external = []) => ({
+  input: './lib/model-viewer.js',
+  output: {
+    file,
+    format,
+    sourcemap: true,
+    name: 'ModelViewerElement',
+    globals
   },
-  {
-    input: './lib/model-viewer.js',
-    output: {
-      file: './dist/model-viewer-module.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'ModelViewerElement',
-      globals: {
-        'three': 'three',
-      },
-    },
-    external: ['three'],
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  }
+  external,
+  watch: {
+    include: watchFiles
+  },
+  plugins,
+  onwarn
+});
+
+const outputOptions = [
+  createModelViewerOutput('./dist/model-viewer.js', 'esm'),
+  createModelViewerOutput('./dist/model-viewer-module.js', 'esm', { 'three': 'three' }, commonPlugins, ['three'])
 ];
 
 if (NODE_ENV !== 'development') {
   const pluginsIE11 = [
-    ...plugins,
+    ...commonPlugins,
     commonjs(),
     polyfill(['object.values/auto']),
     cleanup({
@@ -84,114 +74,21 @@ if (NODE_ENV !== 'development') {
 
   // IE11 does not support modules, so they are removed here, as well as in a
   // dedicated unit test build which is needed for the same reason.
-  outputOptions.push({
-    input: './lib/model-viewer.js',
-    output: {
-      file: './dist/model-viewer-umd.js',
-      sourcemap: true,
-      format: 'umd',
-      name: 'ModelViewerElement',
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins: pluginsIE11,
-    onwarn,
-  });
-
-  /** Bundled w/o three */
-
-  // IE11 does not support modules, so they are removed here, as well as in a
-  // dedicated unit test build which is needed for the same reason.
-  outputOptions.push({
-    input: './lib/model-viewer.js',
-    output: {
-      file: './dist/model-viewer-module-umd.js',
-      sourcemap: true,
-      format: 'umd',
-      name: 'ModelViewerElement',
-      globals: {
-        'three': 'three',
-      },
-    },
-    external: ['three'],
-    watch: {
-      include: watchFiles,
-    },
-    plugins: pluginsIE11,
-    onwarn,
-  });
+  outputOptions.push(
+    createModelViewerOutput('./dist/model-viewer-umd.js', 'umd', {}, pluginsIE11),
+      /** Bundled w/o three */
+    createModelViewerOutput('./dist/model-viewer-module-umd.js', 'umd', { 'three': 'three' }, pluginsIE11, ['three'])
+  );
 
   // Minified Versions
-  plugins = [...plugins, terser()];
+  const minifiedPlugins = [...commonPlugins, terser()];
 
-  outputOptions.push({
-    input: './dist/model-viewer.js',
-    output: {
-      file: './dist/model-viewer.min.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'ModelViewerElement',
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  });
-
-  outputOptions.push({
-    input: './dist/model-viewer-umd.js',
-    output: {
-      file: './dist/model-viewer-umd.min.js',
-      sourcemap: true,
-      format: 'umd',
-      name: 'ModelViewerElement',
-    },
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  });
-
-  outputOptions.push({
-    input: './dist/model-viewer-module.js',
-    output: {
-      file: './dist/model-viewer-module.min.js',
-      sourcemap: true,
-      format: 'esm',
-      name: 'ModelViewerElement',
-      globals: {
-        'three': 'three',
-      },
-    },
-    external: ['three'],
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  });
-
-  outputOptions.push({
-    input: './dist/model-viewer-module-umd.js',
-    output: {
-      file: './dist/model-viewer-module-umd.min.js',
-      sourcemap: true,
-      format: 'umd',
-      name: 'ModelViewerElement',
-      globals: {
-        'three': 'three',
-      },
-    },
-    external: ['three'],
-    watch: {
-      include: watchFiles,
-    },
-    plugins,
-    onwarn,
-  });
+  outputOptions.push(
+    createModelViewerOutput('./dist/model-viewer.min.js', 'esm', {}, minifiedPlugins),
+    createModelViewerOutput('./dist/model-viewer-umd.min.js', 'umd', {}, minifiedPlugins),
+    createModelViewerOutput('./dist/model-viewer-module.min.js', 'esm', { 'three': 'three' }, minifiedPlugins, ['three']),
+    createModelViewerOutput('./dist/model-viewer-module-umd.min.js', 'umd', { 'three': 'three' }, minifiedPlugins, ['three'])
+  );
 
   outputOptions.push({
     input: './lib/model-viewer.d.ts',
