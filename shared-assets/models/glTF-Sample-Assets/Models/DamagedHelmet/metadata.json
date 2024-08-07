@@ -1,0 +1,38 @@
+{
+    "version": 2,
+    "legal": [
+        {
+            "license": "CC-BY",
+            "licenseUrl": "https://creativecommons.org/licenses/by/4.0/legalcode",
+            "artist": "ctxwing",
+            "year": "2018",
+            "owner": "ctxwing",
+            "what": "Rebuild and conversion to glTF",
+            "text": "CC BY 4.0 International",
+            "spdx": "CC-BY-4.0",
+            "icon": "https://licensebuttons.net/l/by/3.0/88x31.png"
+        },
+        {
+            "license": "CC-BY-NC",
+            "licenseUrl": "https://creativecommons.org/licenses/by-nc/4.0/legalcode",
+            "artist": "theblueturtle_",
+            "year": "2016",
+            "owner": "theblueturtle_",
+            "what": "Earlier version of model",
+            "text": "CC BY-NC 4.0 International",
+            "spdx": "CC-BY-NC-4.0",
+            "icon": "https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc.png"
+        }
+    ],
+    "tags": [
+        "core",
+        "showcase",
+        "testing",
+        "video"
+    ],
+    "screenshot": "screenshot/screenshot.png",
+    "name": "Damaged Helmet",
+    "path": "./Models/DamagedHelmet",
+    "summary": "Flight helmet with damage",
+    "createReadme": false
+}

@@ -1,0 +1,9 @@
+commit 626e975b20870710304e96828560af5c4cef4767
+Author: Samaneh <3915613+samaneh-kazemi@users.noreply.github.com>
+Date:   Wed Aug 7 15:07:50 2024 -0700
+
+    Modularize rollup.config.js to improve readability (#4852)
+    
+    * Modularize rollup.config.js to improve readability
+    
+    * globals and externals are related for our uses so removing an extra input
