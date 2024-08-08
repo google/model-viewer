@@ -165,10 +165,10 @@ function removeActiveEntry(sidebarIds: SidebarIds) {
 
 function updateHeader() {
   const sidebarIds = getSidebarIdsFromSidebarName(previouslyActive);
-  const subCat = document.querySelector(`h4[id=${sidebarIds.subcategory}]`)
-                     ?.firstElementChild!.innerHTML;
-  const cat = document.querySelector(`h3[id=${
-      sidebarIds.category}]`)!.firstElementChild!.innerHTML;
+  
+  const subCat = document.querySelector(`h4[id=${sidebarIds.subcategory}]`)?.firstElementChild?.textContent ?? '';
+  const cat = document.querySelector(`h3[id=${sidebarIds.category}]`)?.firstElementChild?.textContent ?? '';
+
   const outerHeaderId = sidebarIds.category.split('-')[0];
   const outerHeader = document.querySelector(`h1[id=${outerHeaderId}]`)!;
   if (subCat) {
