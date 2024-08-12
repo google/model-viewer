@@ -16,7 +16,7 @@
 
 import {Matrix4, Vector3} from 'three';
 
-import ModelViewerElementBase, {$needsRender, $scene, $tick, toVector2D, toVector3D, Vector2D, Vector3D} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene, $tick, toVector2D, toVector3D, Vector2D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
 import {Constructor} from '../utilities.js';
 
@@ -101,6 +101,15 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
+    [$onModelLoad]() {
+      super[$onModelLoad]();
+
+      const scene = this[$scene];
+      scene.forHotspots((hotspot) => {
+        scene.updateSurfaceHotspot(hotspot);
+      });
+    }
+
     [$tick](time: number, delta: number) {
       super[$tick](time, delta);
       const scene = this[$scene];
@@ -108,7 +117,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       const camera = scene.getCamera();
 
       if (scene.shouldRender()) {
-        scene.updateSurfaceHotspots();
+        scene.animateSurfaceHotspots();
         scene.updateHotspotsVisibility(camera.position);
         annotationRenderer.domElement.style.display = '';
         annotationRenderer.render(scene, camera);
@@ -131,6 +140,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
       hotspot.surface = config.surface;
+      this[$scene].updateSurfaceHotspot(hotspot);
       this[$needsRender]();
     }
 

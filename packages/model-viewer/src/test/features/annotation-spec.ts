@@ -16,8 +16,8 @@
 import {expect} from '@esm-bundle/chai';
 import {Vector3} from 'three';
 
-import {ModelViewerElement} from '../../model-viewer.js';
 import {$needsRender, $scene, toVector3D, Vector2D, Vector3D} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
 import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
@@ -154,11 +154,11 @@ suite('Annotation', () => {
       });
 
       test('updateHotspot does change the surface', () => {
+        const hotspot = scene.target.children[numSlots - 1] as Hotspot;
+        const {x} = hotspot.position;
         const surface = '0 0 1 2 3 0.217 0.341 0.442';
         element.updateHotspot({name: 'hotspot-1', surface});
-        const {surface: internalSurface} =
-            (scene.target.children[numSlots - 1] as Hotspot);
-        expect(internalSurface).to.be.deep.equal(surface);
+        expect(x).to.not.be.equal(hotspot.position.x);
       });
 
       test('and removing it does not remove the slot', async () => {
