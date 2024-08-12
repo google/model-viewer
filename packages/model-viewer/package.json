@@ -87,7 +87,7 @@
     "@monogrid/gainmap-js": "^3.0.1"
   },
   "peerDependencies": {
-    "three": "^0.164.1"
+    "three": "^0.167.1"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
@@ -110,7 +110,7 @@
     "rollup-plugin-polyfill": "^3.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "4.8.4",
-    "three": "^0.164.1"
+    "three": "^0.167.1"
   },
   "publishConfig": {
     "access": "public"
