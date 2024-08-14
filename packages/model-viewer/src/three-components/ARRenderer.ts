@@ -655,7 +655,7 @@ export class ARRenderer extends EventDispatcher<
 
         let hit = null;
         if (finger.results.length > 0) {
-          hit = this.getHitPoint(finger.results[0])
+          hit = this.getHitPoint(finger.results[0]);
         }
         if (hit == null) {
           hit = this.getTouchLocation();
