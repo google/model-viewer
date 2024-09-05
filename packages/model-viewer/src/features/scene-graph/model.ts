@@ -15,7 +15,7 @@
 
 import {Intersection, Material as ThreeMaterial, Mesh, MeshPhysicalMaterial, Object3D} from 'three';
 
-import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap, ThreeObjectSet} from '../../three-components/gltf-instance/correlated-scene-graph.js';
+import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap} from '../../three-components/gltf-instance/correlated-scene-graph.js';
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Model as ModelInterface} from './api.js';
@@ -46,12 +46,10 @@ export class LazyLoader {
   gltf: GLTF;
   gltfElementMap: GLTFElementToThreeObjectMap;
   mapKey: GLTFElement;
-  doLazyLoad: () => Promise<{set: ThreeObjectSet, material: ThreeMaterial}>;
+  doLazyLoad: () => Promise<ThreeMaterial>;
   constructor(
       gltf: GLTF, gltfElementMap: GLTFElementToThreeObjectMap,
-      mapKey: GLTFElement,
-      doLazyLoad:
-          () => Promise<{set: ThreeObjectSet, material: ThreeMaterial}>) {
+      mapKey: GLTFElement, doLazyLoad: () => Promise<ThreeMaterial>) {
     this.gltf = gltf;
     this.gltfElementMap = gltfElementMap;
     this.mapKey = mapKey;
@@ -88,29 +86,28 @@ export class Model implements ModelInterface {
 
     for (const [i, material] of gltf.materials!.entries()) {
       const correlatedMaterial =
-          gltfElementMap.get(material) as Set<MeshPhysicalMaterial>;
+          gltfElementMap.get(material) as Set<MeshPhysicalMaterial>| null;
 
       if (correlatedMaterial != null) {
         this[$materials].push(new Material(
-            onUpdate, i, true, this[$variantData], correlatedMaterial, material.name));
+            onUpdate,
+            i,
+            true,
+            this[$variantData],
+            correlatedMaterial,
+            material.name));
       } else {
         const elementArray = gltf['materials'] || [];
         const gltfMaterialDef = elementArray[i];
 
-        // Loads the three.js material.
-        const capturedMatIndex = i;
+        const threeMaterialSet = new Set<MeshPhysicalMaterial>();
+        gltfElementMap.set(gltfMaterialDef, threeMaterialSet);
         const materialLoadCallback = async () => {
-          const threeMaterial =
-              await threeGLTF.parser.getDependency(
-                  'material', capturedMatIndex) as MeshPhysicalMaterial;
-
-          // Adds correlation, maps the variant gltf-def to the
-          // three material set containing the variant material.
-          const threeMaterialSet = new Set<MeshPhysicalMaterial>();
-          gltfElementMap.set(gltfMaterialDef, threeMaterialSet);
+          const threeMaterial = await threeGLTF.parser.getDependency(
+                                    'material', i) as MeshPhysicalMaterial;
           threeMaterialSet.add(threeMaterial);
 
-          return {set: threeMaterialSet, material: threeMaterial};
+          return threeMaterial;
         };
 
         // Configures the material for lazy loading.
@@ -119,7 +116,7 @@ export class Model implements ModelInterface {
             i,
             false,
             this[$variantData],
-            correlatedMaterial,
+            threeMaterialSet,
             material.name,
             new LazyLoader(
                 gltf, gltfElementMap, gltfMaterialDef, materialLoadCallback)));

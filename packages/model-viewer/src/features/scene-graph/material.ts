@@ -147,12 +147,9 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     createTextureInfo(TextureUsage.Anisotropy);
   }
 
-  async[$getLoadedMaterial](): Promise<MeshPhysicalMaterial> {
+  async[$getLoadedMaterial](): Promise<MeshPhysicalMaterial|null> {
     if (this[$lazyLoadGLTFInfo] != null) {
-      const {set, material} = await this[$lazyLoadGLTFInfo]!.doLazyLoad();
-
-      // Fills in the missing data.
-      this[$correlatedObjects] = set as Set<MeshPhysicalMaterial>;
+      const material = await this[$lazyLoadGLTFInfo]!.doLazyLoad();
 
       this[$initialize]();
       // Releases lazy load info.
@@ -161,7 +158,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
       this.ensureLoaded = async () => {};
       return material as MeshPhysicalMaterial;
     }
-    return this[$correlatedObjects]!.values().next().value;
+    return null;
   }
 
   private colorFromRgb(rgb: RGB|string): Color {

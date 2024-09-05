@@ -128,18 +128,20 @@ export class PrimitiveNode extends Node {
   }
 
   async setActiveMaterial(material: number): Promise<ThreeMaterial|null> {
-    const mvMaterial = this.materials.get(material);
-    if (mvMaterial != null && material !== this.activeMaterialIdx) {
-      this.mesh.material = await mvMaterial[$getLoadedMaterial]();
-      const {normalScale} = this.mesh.material as MeshPhysicalMaterial;
-      // TODO: remove this hack in favor of properly storing the different
-      // three.js materials that are potentially created for different meshes
-      // that share a glTF material.
-      if (normalScale != null &&
-          (normalScale.y * normalScale.x < 0) !=
-              (this.mesh.geometry.attributes.tangent == null)) {
-        this.parser.assignFinalMaterial(this.mesh);
+    const mvMaterial = this.materials.get(material)!;
+    if (material !== this.activeMaterialIdx) {
+      const backingMaterials =
+          mvMaterial[$correlatedObjects] as Set<MeshPhysicalMaterial>;
+
+      const baseMaterial = await mvMaterial[$getLoadedMaterial]();
+      if (baseMaterial != null) {
+        this.mesh.material = baseMaterial;
+      } else {
+        this.mesh.material = backingMaterials.values().next().value;
       }
+
+      this.parser.assignFinalMaterial(this.mesh);
+      backingMaterials.add(this.mesh.material as MeshPhysicalMaterial);
       this.activeMaterialIdx = material;
     }
     return this.mesh.material as ThreeMaterial;
