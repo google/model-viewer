@@ -83,12 +83,12 @@ suite('scene-graph/model', () => {
       test('Switch variant and lazy load', async () => {
         const threeGLTF = await loadThreeGLTF(CUBES_GLTF_PATH);
         const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
-        expect(model[$materials][2][$correlatedObjects]).to.be.null;
+        expect(model[$materials][2][$correlatedObjects]).to.be.empty;
         expect(model[$materials][2][$lazyLoadGLTFInfo]).to.be.ok;
 
         await model[$switchVariant]('Yellow Red');
 
-        expect(model[$materials][2][$correlatedObjects]).to.not.be.null;
+        expect(model[$materials][2][$correlatedObjects]).to.not.be.empty;
         expect(model[$materials][2][$lazyLoadGLTFInfo]).to.not.be.ok;
       });
 
