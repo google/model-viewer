@@ -19,7 +19,7 @@ import {CorrelatedSceneGraph, GLTFElementToThreeObjectMap} from '../../three-com
 import {GLTF, GLTFElement} from '../../three-components/gltf-instance/gltf-2.0.js';
 
 import {Model as ModelInterface} from './api.js';
-import {$setActive, $variantSet, Material} from './material.js';
+import {$setActive, $variantIndices, Material} from './material.js';
 import {Node, PrimitiveNode} from './nodes/primitive-node.js';
 import {$correlatedObjects} from './three-dom-element.js';
 
@@ -384,7 +384,7 @@ export class Model implements ModelInterface {
 
     for (const material of this.materials) {
       if (material.hasVariant(variantName)) {
-        material[$variantSet].delete(variant.index);
+        material[$variantIndices].delete(variant.index);
       }
     }
 

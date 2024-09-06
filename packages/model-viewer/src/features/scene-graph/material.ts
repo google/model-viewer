@@ -40,7 +40,6 @@ export const $gltfIndex = Symbol('gltfIndex');
 export const $setActive = Symbol('setActive');
 export const $variantIndices = Symbol('variantIndices');
 const $isActive = Symbol('isActive');
-export const $variantSet = Symbol('variantSet');
 const $modelVariants = Symbol('modelVariants');
 const $name = Symbol('name');
 const $pbrTextures = Symbol('pbrTextures');
@@ -56,7 +55,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$lazyLoadGLTFInfo]?: LazyLoader;
   private[$gltfIndex]: number;
   private[$isActive]: boolean;
-  private[$variantSet] = new Set<number>();
+  public[$variantIndices] = new Set<number>();
   private[$name]?: string;
   readonly[$modelVariants]: Map<string, VariantData>;
   private[$pbrTextures] = new Map<TextureUsage, TextureInfo>();
@@ -237,13 +236,9 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return this[$gltfIndex];
   }
 
-  [$variantIndices]() {
-    return this[$variantSet];
-  }
-
   hasVariant(name: string): boolean {
     const variantData = this[$modelVariants].get(name);
-    return variantData != null && this[$variantSet].has(variantData.index);
+    return variantData != null && this[$variantIndices].has(variantData.index);
   }
 
   setEmissiveFactor(rgb: RGB|string) {

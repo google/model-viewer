@@ -117,7 +117,7 @@ export class PrimitiveNode extends Node {
           const {name} = variantNames[variant];
           this.variantToMaterialMap.set(variant, mvMaterial);
           // Provides variant info for material self lookup.
-          mvMaterial[$variantIndices]().add(variant);
+          mvMaterial[$variantIndices].add(variant);
           // Updates the models variant data.
           if (!modelVariants.has(name)) {
             modelVariants.set(name, {name, index: variant} as VariantData);
@@ -212,7 +212,7 @@ export class PrimitiveNode extends Node {
     const variantIndex = modelVariantData.index;
 
     // Updates materials mapped to the variant.
-    materialVariant[$variantIndices]().add(variantIndex);
+    materialVariant[$variantIndices].add(variantIndex);
 
     // Updates internal mappings.
     this.variantToMaterialMap.set(variantIndex, materialVariant);
@@ -238,7 +238,7 @@ export class PrimitiveNode extends Node {
   private updateVariantUserData(
       variantIndex: number, materialVariant: Material) {
     // Adds variants name to material variants set.
-    materialVariant[$variantIndices]().add(variantIndex);
+    materialVariant[$variantIndices].add(variantIndex);
 
     this.mesh.userData.variantData = this.modelVariants;
     // Updates import data (see VariantMaterialLoaderPlugin.ts).
