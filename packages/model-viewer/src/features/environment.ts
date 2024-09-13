@@ -88,11 +88,10 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('toneMapping')) {
-        this[$scene].toneMapping = (this.toneMapping === 'commerce' ||
-                                    this.toneMapping === 'neutral') ?
-            NeutralToneMapping :
+        this[$scene].toneMapping = this.toneMapping === 'aces' ?
+            ACESFilmicToneMapping :
             this.toneMapping === 'agx' ? AgXToneMapping :
-                                         ACESFilmicToneMapping;
+                                         NeutralToneMapping;
         this[$needsRender]();
       }
 
