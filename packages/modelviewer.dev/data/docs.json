@@ -64,18 +64,6 @@
         }
       },
       {
-        "name": "with-credentials",
-        "htmlName": "withCredentials",
-        "description": "This attribute makes the browser include credentials (cookies, authorization headers or TLS client certificates) in the request to fetch the 3D model. It's useful if the 3D model file is stored on another server that require authentication. By default the file will be fetch without credentials. Note that this has no effect if you are loading files locally or from the same domain.",
-        "links": [
-          "<a href=\"https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials\">MDN documentation</a>"
-        ],
-        "default": {
-          "default": "false",
-          "options": "true, false"
-        }
-      },
-      {
         "name": "a11y",
         "htmlName": "a11y",
         "description": "Add unique translations for the model wcag compliance. Use this attribute, you must provide a JSON object with the following keys: front, back, left, right, upper-front, upper-back, upper-left, upper-right, lower-front, lower-back, lower-left, lower-right, interaction-prompt. The values of these keys should be the translations for the model's orientation. This attribute is useful for screen readers and other assistive technologies.",
@@ -137,6 +125,18 @@
         "name": "lottieLoaderLocation",
         "htmlName": "lottieLoaderLocation",
         "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s LottieLoader location URL. The default URL is <code>https://cdn.jsdelivr.net/npm/three@0.146.0/examples/jsm/loaders/LottieLoader.js</code>. It will also require the server to provide the lottie canvas module at <code>../libs/lottie_canvas.module.js</code>."
+      },
+      {
+        "name": "with-credentials",
+        "htmlName": "withCredentials",
+        "description": "This attribute makes the browser include credentials (cookies, authorization headers or TLS client certificates) in the request to fetch each 3D model. It's useful if the 3D model file is stored on another server that require authentication. By default the file will be fetch without credentials. Note that this has no effect if you are loading files locally or from the same domain.",
+        "links": [
+          "<a href=\"https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials\">MDN documentation</a>"
+        ],
+        "default": {
+          "default": "false",
+          "options": "true, false"
+        }
       },
       {
         "name": "minimumRenderScale",

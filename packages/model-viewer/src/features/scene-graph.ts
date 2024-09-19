@@ -18,6 +18,7 @@ import {CanvasTexture, RepeatWrapping, SRGBColorSpace, Texture, VideoTexture} fr
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
+import {CachingGLTFLoader} from '../three-components/CachingGLTFLoader.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin.js';
@@ -148,7 +149,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     createVideoTexture(uri: string): ModelViewerTexture {
       const video = document.createElement('video');
-      video.crossOrigin = this.withCredentials ? 'use-credentials' : 'anonymous';
+      video.crossOrigin =
+          CachingGLTFLoader.withCredentials ? 'use-credentials' : 'anonymous';
       video.src = uri;
       video.muted = true;
       video.playsInline = true;
@@ -170,7 +172,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('variantName')) {
-        const updateVariantProgress = this[$progressTracker].beginActivity('variant-update');
+        const updateVariantProgress =
+            this[$progressTracker].beginActivity('variant-update');
         updateVariantProgress(0.1);
         const model = this[$model];
         const {variantName} = this;
