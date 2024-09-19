@@ -27,9 +27,9 @@
 
 import {Material, Mesh, Object3D} from 'three';
 
-import {VariantData} from '../../features/scene-graph/model';
+import {VariantData} from '../../features/scene-graph/model.js';
 
-import {UserDataVariantMapping} from './VariantMaterialLoaderPlugin';
+import {UserDataVariantMapping} from './VariantMaterialLoaderPlugin.js';
 
 
 

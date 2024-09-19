@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import {normalizeUnit} from './conversions';
-import {ExpressionNode, ExpressionTerm, FunctionNode, IdentNode, NumberNode, numberNode, OperatorNode, Percentage, Unit, ZERO} from './parsers';
+import {normalizeUnit} from './conversions.js';
+import {ExpressionNode, ExpressionTerm, FunctionNode, IdentNode, NumberNode, numberNode, OperatorNode, Percentage, Unit, ZERO} from './parsers.js';
 
 export type Evaluatable<T> = Evaluator<T>|T;
 

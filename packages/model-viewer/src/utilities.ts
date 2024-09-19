@@ -164,6 +164,12 @@ export const resolveDpr: () => number = (() => {
       return true;
     }
 
+    if (window.self !== window.top) {
+      // iframes can't detect the meta viewport tag, so assume the top-level
+      // page has one.
+      return true;
+    }
+
     const metas = document.head != null ?
         Array.from(document.head.querySelectorAll('meta')) :
         [];

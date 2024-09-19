@@ -117,7 +117,7 @@ export class PrimitiveNode extends Node {
           const {name} = variantNames[variant];
           this.variantToMaterialMap.set(variant, mvMaterial);
           // Provides variant info for material self lookup.
-          mvMaterial[$variantIndices]().add(variant);
+          mvMaterial[$variantIndices].add(variant);
           // Updates the models variant data.
           if (!modelVariants.has(name)) {
             modelVariants.set(name, {name, index: variant} as VariantData);
@@ -128,18 +128,20 @@ export class PrimitiveNode extends Node {
   }
 
   async setActiveMaterial(material: number): Promise<ThreeMaterial|null> {
-    const mvMaterial = this.materials.get(material);
-    if (mvMaterial != null && material !== this.activeMaterialIdx) {
-      this.mesh.material = await mvMaterial[$getLoadedMaterial]();
-      const {normalScale} = this.mesh.material as MeshPhysicalMaterial;
-      // TODO: remove this hack in favor of properly storing the different
-      // three.js materials that are potentially created for different meshes
-      // that share a glTF material.
-      if (normalScale != null &&
-          (normalScale.y * normalScale.x < 0) !=
-              (this.mesh.geometry.attributes.tangent == null)) {
-        this.parser.assignFinalMaterial(this.mesh);
+    const mvMaterial = this.materials.get(material)!;
+    if (material !== this.activeMaterialIdx) {
+      const backingMaterials =
+          mvMaterial[$correlatedObjects] as Set<MeshPhysicalMaterial>;
+
+      const baseMaterial = await mvMaterial[$getLoadedMaterial]();
+      if (baseMaterial != null) {
+        this.mesh.material = baseMaterial;
+      } else {
+        this.mesh.material = backingMaterials.values().next().value;
       }
+
+      this.parser.assignFinalMaterial(this.mesh);
+      backingMaterials.add(this.mesh.material as MeshPhysicalMaterial);
       this.activeMaterialIdx = material;
     }
     return this.mesh.material as ThreeMaterial;
@@ -210,7 +212,7 @@ export class PrimitiveNode extends Node {
     const variantIndex = modelVariantData.index;
 
     // Updates materials mapped to the variant.
-    materialVariant[$variantIndices]().add(variantIndex);
+    materialVariant[$variantIndices].add(variantIndex);
 
     // Updates internal mappings.
     this.variantToMaterialMap.set(variantIndex, materialVariant);
@@ -236,7 +238,7 @@ export class PrimitiveNode extends Node {
   private updateVariantUserData(
       variantIndex: number, materialVariant: Material) {
     // Adds variants name to material variants set.
-    materialVariant[$variantIndices]().add(variantIndex);
+    materialVariant[$variantIndices].add(variantIndex);
 
     this.mesh.userData.variantData = this.modelVariants;
     // Updates import data (see VariantMaterialLoaderPlugin.ts).

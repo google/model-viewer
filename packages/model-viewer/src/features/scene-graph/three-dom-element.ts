@@ -29,10 +29,9 @@ type CorrelatedObjects = Set<Object3D>|Set<Material>|Set<Texture>;
 export class ThreeDOMElement {
   readonly[$onUpdate]: () => void;
   // The Three.js scene graph construct for this element.
-  [$correlatedObjects]: CorrelatedObjects|null;
+  [$correlatedObjects]: CorrelatedObjects;
 
-  constructor(
-      onUpdate: () => void, correlatedObjects: CorrelatedObjects|null = null) {
+  constructor(onUpdate: () => void, correlatedObjects: CorrelatedObjects) {
     this[$onUpdate] = onUpdate;
     this[$correlatedObjects] = correlatedObjects;
   }

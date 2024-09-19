@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>PBR Tone Mapping</title>
+  <title>PBR Neutral Tone Mapping</title>
   <meta charset="utf-8">
   <meta name="description" content="Performance optimization for &lt;model-viewer&gt;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -134,8 +134,10 @@
       <a href="#purpose">The purpose of tone mapping</a><br/>
       <a href="#tradeoffs">Tradeoffs</a><br/>
       <a href="#needs">The needs of e-commerce</a><br/>
-      <a href="#commerce">Commerce tone mapper</a><br/>
+      <a href="#commerce">Khronos PBR Neutral tone mapper</a><br/>
       <a href="#validation">Validation</a><br/>
+      <a href="#ocio">OpenColorIO profile</a><br/>
+      <a href="#adoption">Adoption</a><br/>
       <a href="#white">White point</a><br/>
     </p>
   
@@ -145,9 +147,10 @@
     conversion function. Even separate operations that a photographer might
     apply in post processing, such as gamma correction, saturation, contrast,
     and even things like sepia can all be combined into a single resulting
-    function that here we're calling tone mapping. However, we are only
-    interested in hue-neutral functions and those are the only type of
-    tone mapping functions we'll be discussing here.</p>
+    function that here we're calling tone mapping. Setting aside artistic color
+    grading, we are looking at generic, neutral tone mappers designed to pull
+    out-of-range colors back into the limits of our display device in a
+    perceptually-pleasing way.</p>
 
     <p>The default tone mapping function used by
     <code>&lt;model-viewer&gt;</code> has been ACES, which is a standard
@@ -277,16 +280,16 @@
         src="../assets/ACESset.glb"
         camera-orbit="150deg auto auto"
         camera-controls
-        alt="3D model of ACES/Commerce tone mapping reachable colors."
+        alt="3D model of ACES/Neutral tone mapping reachable colors."
       >
       <p>
         <select id="set">
           <option value="../assets/ACESset.glb">ACES</option>
-          <option value="../assets/CommerceSet.glb">Commerce</option>
+          <option value="../assets/CommerceSet.glb">PBR Neutral</option>
         </select>Tone Mapping Function
       </p>
       </model-viewer>
-      <figcaption>Comparison of the ACES and Commerce tone mapping reachable colors. The cube represents the [0, 1] space in linear light - no sRGB curve has been applied.</figcaption>
+      <figcaption>Comparison of the ACES and PBR Neutral tone mapping reachable colors. The cube represents the [0, 1] space in linear light - no sRGB curve has been applied.</figcaption>
     </figure>
 
     <p>Note that canary yellow, bright greens and blues are all impossible to
@@ -340,23 +343,35 @@
     compression of the range of these highlights is much more reasonable than in
     film.</p>
 
-    <p>We are focused on sRGB for both input (glTF) and output
-    (web browsers), to meet the industry where it is today, which simplifies the
-    tone mapping problem somewhat compared to the film industry. However,
-    wider-gamut colorspaces and HDR monitors are working their way into the
-    mainstream and we will need to address these challenges soon. The approach
-    to tone mapping outlined in the following section should be generalizable to
-    these situations, but there will be additional challenges beyond tone
-    mapping as well.</p>
+    <p>We are focused on sRGB for both input (glTF) and output (web browsers),
+    to meet the industry where it is today, which simplifies the tone mapping
+    problem considerably compared to the film industry. This is because one of
+    the most difficult aspects of tone mapping is gamut mapping, where colors
+    from a larger input gamut like P3 must be squeezed into a smaller gamut like
+    sRGB. Conveniently, the glTF standard (like most 3D model workflows)
+    specifies that all color textures and lights are in the sRGB gamut. This
+    means that regardless of the colorspace used internally, all rendered colors
+    will automatically be inside the sRGB gamut (Rec.709), though potentially at
+    much higher brightness. Even if the display device is not sRGB, since sRGB
+    uses the smallest color gamut, no gamut mapping will ever be required, until
+    3D models contain larger-gamut textures. </p>
 
-    <h3 id="commerce">Commerce tone mapper</h3>
+    <p>HDR monitors are working their way into the mainstream and we will need
+    to adjust our curves appropriately to support their higher contrast. The
+    approach to tone mapping outlined in the following section should be
+    generalizable to these situations, but there will be additional challenges
+    beyond tone mapping as well.</p>
 
-    <p>The Commerce tone mapper is designed to be simple to implement, fast to
-    run, and faithfully reproduce color as much as possible while eliminating
-    HDR artifacts around highlights. It is intended to be 1:1 for colors up to a
-    certain maximum value, with the remainder used as headroom for the
-    compressed highlights. It turns out 1:1 is a little trickier than it
-    sounds.</p>
+    <h3 id="commerce">Khronos PBR Neutral tone mapper</h3>
+
+    <p>The Khronos PBR Neutral tone mapper is designed to be simple to
+    implement, fast to run, and faithfully reproduce color as much as possible
+    while eliminating HDR artifacts around highlights. It is intended to be 1:1
+    for colors up to a certain maximum value, with the remainder used as
+    headroom for the compressed highlights. I developed it under the auspices of
+    the Khronos 3D Commerce working group to create an industry standard for
+    e-commerce and an improved alternative for any PBR render that currently
+    disables tone mapping.</p>
 
     <p>I found that an actual 1:1 tone mapping function led to slightly
     desaturated colors, most noticeably for dark colors. I tracked this problem
@@ -385,7 +400,7 @@
     <p>I chose to fit a simple 1/x function and match the piecewise slope of our
     1:1 portion, as this gives an asymptote with a reasonable tail. It has only
     a single parameter: the value where we switch from the linear to the
-    nonlinear function. The purpose of the Commerce tone mapper is to be a
+    nonlinear function. The purpose of the Khronos PBR Neutral tone mapper is to be a
     standard and thus without parameters, so I chose 0.8 after much testing.
     However, this is likely the most natural place to adjust the curve to HDR
     output from sRGB.</p>
@@ -400,7 +415,9 @@
     metals, as they physically color the light they reflect, but perceptually
     that color is lost when it is sufficiently bright. I accomplish this by
     taking a convex combination of the compressed color and white, only in the
-    nonlinear compression region.</p>
+    nonlinear compression region. In fact, "white" is slightly darkened in order
+    to maintain constant brightness with the compressed color, which makes this
+    tone mapper easily invertible.</p>
 
     <p>The convex parameter function I chose is another 1/x, this time based on
     the amount of brightness removed in the compression step, which ensures it
@@ -413,8 +430,11 @@
     brain an alternate perceptual cue, which smoothly encodes several orders of
     magnitude more brightness than is available in the output screen.</p>
 
-    <p>The complete shader code is quite small, with only three divides and
-    those only applied to colors over the 1:1 limit:<br/>
+    <p>Careful use of the minimum and maximum of the three color channel values
+    ensures that this tone mapping function has continuous gradients everywhere
+    and in all dimensions, which is key to avoiding eye-catching artifacts in
+    the output renders. The complete shader code is quite small, with only three
+    divides and those only applied to colors over the 1:1 limit:<br/>
     <code>
   float startCompression = 0.8 - 0.04;
   float desaturation = 0.15;
@@ -432,14 +452,14 @@
     color *= newPeak / peak;
 
     float g = 1. - 1. / (desaturation * (peak - newPeak) + 1.);
-    return mix(color, vec3(1, 1, 1), g);
+    return mix(color, newPeak * vec3(1, 1, 1), g);
   }
     </code>
     </p>
 
     <figure>
       <img src="../assets/commerce-linear.png"/>
-      <figcaption>The Commerce tone mapping function, which maps linear brightness to the [0, 1] range. The compression function is piecewise in three parts: blue for the contrast toe, green for the linear 1:1 region, and red for the compression region. The desaturation curve is purple.</figcaption>
+      <figcaption>The Khronos PBR Neutral tone mapping function, which maps linear brightness to the [0, 1] range. The compression function is piecewise in three parts: blue for the contrast toe, green for the linear 1:1 region, and red for the compression region. The desaturation curve is purple.</figcaption>
     </figure>
 
     <figure>
@@ -463,14 +483,14 @@
       <model-viewer
         id="demo"
         src="../../shared-assets/models/MacbethBalls.glb"
-        tone-mapping="commerce"
+       
         ar
         camera-controls
         shadow-intensity="1"
       >
         <p>
           <select id="tonemapper">
-            <option value="5">Commerce</option>
+            <option value="7">PBR Neutral</option>
             <option value="1">Linear/Clamped</option>
             <option value="4">ACES</option>
             <option value="6">AgX</option>
@@ -514,13 +534,13 @@
         id="demo"
         src="../../shared-assets/models/MacbethBalls.glb"
         skybox-image="../../shared-assets/environments/white_furnace.hdr"
-        tone-mapping="commerce"
+       
         ar
         camera-controls
         shadow-intensity="1"
       >
       </model-viewer>
-      <figcaption>Commerce tone mapper white furnace validation.</figcaption>
+      <figcaption>Khronos PBR Neutral tone mapper white furnace validation.</figcaption>
     </figure>
 
     <p>The first difference is due to multi-scattering, which causes the
@@ -537,6 +557,80 @@
     If you turn the model until the unlit spheres overlap the middle of the
     shiny spheres, you'll see that the color match is exact at normal (center)
     reflection.</p>
+
+    <h3 id="ocio">OpenColorIO profile</h3>
+
+    <p><a href="https://opencolorio.org/">OpenColorIO</a> Is a standard for
+    representing color space conversions and color grading, supported by many 3D
+    authoring tools. To represent the most general possible functions, instead
+    of specifying equations they use 3D lookup tables (LUTs). To help authors
+    try out Khronos PBR Neutral tone mapping within their existing workflows, I have
+    generated an equivalent OCIO config and a LUT in the common .cube format.
+    You can download <a href="pbrNeutral.cube">pbrNeutral.cube</a> and <a
+    href="config.ocio">config.ocio</a>, which is modified from the
+    <a href="https://www.blender.org/">Blender</a> config to add PBR Neutral as a
+    view transform for color management with an sRGB display device.</p>
+
+    <p>In order to try PBR Neutral tone mapping in Blender, you need to replace the
+    config.ocio file with the above version. The original file can be found in
+    the Blender install directory, e.g.
+    <code>Blender/Contents/Resources/4.0/datafiles/colormanagement</code> on a
+    Mac install. You will also need to add <code>pbrNeutral.cube</code> to the
+    <code>luts</code> directory on the same path. Then start Blender and at the
+    bottom of the Render tab, under Color Management, select sRGB for Display
+    Device and PBR Neutral for View Transform.</p>
+
+    <p>I have tested this on a Macbook Pro, which uses a P3 display, but found
+    that I achieved consistent colors when setting the display device to sRGB.
+    This was to achieve consistency with Chrome and Safari rendering on the same
+    device, so this may change in the future as color management on the web
+    improves. Note that unlike &lt;model-viewer&gt;, Blender also applies its
+    view transform to unlit materials. This makes the 3D Macbeth model above a
+    little harder to use, as the unlit spheres can no longer be used as a
+    reference.</p>
+
+    <p>The critical addition to the Blender OCIO config is the following, but
+    this will likely need some modification to fit into an existing OCIO config
+    in a different tool that has colorspaces defined under different names.</p>
+
+    <p><code>
+- !&lt;ColorSpace&gt;
+  name: PBR Neutral sRGB
+  family: PBR Neutral
+  equalitygroup:
+  bitdepth: 32f
+  description: |
+    Khronos PBR Neutral Image Encoding for sRGB Display
+  isdata: false
+  from_scene_reference: !&lt;GroupTransform&gt;
+    children:
+      - !&lt;ColorSpaceTransform&gt; {src: Linear CIE-XYZ E, dst: Linear Rec.709}
+      - !&lt;AllocationTransform&gt; {allocation: lg2, vars: [-6, 12]}
+      - !&lt;FileTransform&gt; {src: pbrNeutral.cube, interpolation: tetrahedral}
+      - !&lt;ColorSpaceTransform&gt; {src: Linear Rec.709, dst: sRGB}
+    </code></p>
+
+    <h3 id="adoption">Adoption</h3>
+
+    <p>Of course a standardized color-accurate tone mapper is most useful when
+    it is universally available, so that everyone from artists to marketers to
+    end users can see the product the same way and ensure quality. This is
+    precisely why Khronos is pushing this as an industry standard for renderers
+    and authoring tools alike to adopt, as an option for tools that support
+    multiple tone mappers, and as the default for those that don't. This section
+    will be occasionally updated to reflect our progress in adoption across
+    industry tools.</p>
+
+    <p>So far two major open-source renderers have added PBR Neutral tone
+    mapping, and both should be available in public releases in March 2024: <a
+    href="https://github.com/mrdoob/three.js/pull/27668">Three.js</a> and <a
+    href="https://github.com/google/filament/pull/7597">Filament</a>.
+    <a href="lightingandenv/#toneMapping">&lt;model-viewer&gt;</a> already
+    supports it, currently under the name "commerce", and it will become default
+    in v4. It is already the default in the &lt;model-viewer&gt; <a
+    href="../editor">editor</a>. A proposal has been made to add it to <a
+    href="https://projects.blender.org/blender/blender/issues/118824">Blender</a>,
+    and discussions are ongoing with other major 3D authoring tools.</p>
 
     <h3 id="white">White point</h3>
 

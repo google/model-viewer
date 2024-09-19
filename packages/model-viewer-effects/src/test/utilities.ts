@@ -14,10 +14,10 @@
  */
 
 import {ModelViewerElement} from '@google/model-viewer';
-import {Renderer} from '@google/model-viewer/lib/three-components/Renderer';
+import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
 import {EventDispatcher, HSL} from 'three';
 
-import {getOwnPropertySymbolValue} from '../utilities';
+import {getOwnPropertySymbolValue} from '../utilities.js';
 
 export const timePasses = (ms: number = 0): Promise<void> =>
     new Promise((resolve) => setTimeout(resolve, ms));

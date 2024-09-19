@@ -35,6 +35,11 @@ class MockXRFrame implements XRFrame {
     return {} as XRPose;
   }
 
+  // We don't use getDepthInformation()
+  getDepthInformation(_view: XRView): XRCPUDepthInformation|null|undefined {
+    return;
+  }
+
   getViewerPose(_referenceSpace?: XRReferenceSpace): XRViewerPose {
     // Rotate 180 degrees on Y (so it's not the default)
     // and angle 45 degrees towards the ground, like a phone.

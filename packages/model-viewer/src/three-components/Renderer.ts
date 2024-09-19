@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, CustomToneMapping, Event, EventDispatcher, ShaderChunk, Vector2, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, NeutralToneMapping, Vector2, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -60,15 +60,18 @@ const COMMERCE_EXPOSURE = 1.3;
  */
 export class Renderer extends
     EventDispatcher<{contextlost: {sourceEvent: WebGLContextEvent}}> {
-  private static _singleton = new Renderer({
-    powerPreference:
-        (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
-            .powerPreference ||
-        DEFAULT_POWER_PREFERENCE,
-    debug: isDebugMode()
-  });
+  private static _singleton: Renderer;
 
   static get singleton() {
+    if (!this._singleton) {
+      this._singleton = new Renderer({
+        powerPreference:
+            (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
+                .powerPreference ||
+            DEFAULT_POWER_PREFERENCE,
+        debug: isDebugMode()
+      });
+    }
     return this._singleton;
   }
 
@@ -137,30 +140,6 @@ export class Renderer extends
     this.canvas3D.id = 'webgl-canvas';
     this.canvas3D.classList.add('show');
 
-    // Emmett's new 3D Commerce tone mapping function
-    ShaderChunk.tonemapping_pars_fragment =
-        ShaderChunk.tonemapping_pars_fragment.replace(
-            'vec3 CustomToneMapping( vec3 color ) { return color; }', `
-      float startCompression = 0.8 - 0.04;
-      float desaturation = 0.15;
-      vec3 CustomToneMapping( vec3 color ) {
-        color *= toneMappingExposure;
-
-        float x = min(color.r, min(color.g, color.b));
-        float offset = x < 0.08 ? x - 6.25 * x * x : 0.04;
-        color -= offset;
-
-        float peak = max(color.r, max(color.g, color.b));
-        if (peak < startCompression) return color;
-
-        float d = 1. - startCompression;
-        float newPeak = 1. - d * d / (peak + d - startCompression);
-        color *= newPeak / peak;
-
-        float g = 1. - 1. / (desaturation * (peak - newPeak) + 1.);
-        return mix(color, vec3(1, 1, 1), g);
-      }`);
-
     try {
       this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
@@ -225,7 +204,9 @@ export class Renderer extends
   }
 
   displayCanvas(scene: ModelScene): HTMLCanvasElement {
-    return this.multipleScenesVisible ? scene.element[$canvas] : this.canvas3D;
+    return scene.element.modelIsVisible && !this.multipleScenesVisible ?
+        this.canvas3D :
+        scene.element[$canvas];
   }
 
   /**
@@ -436,7 +417,7 @@ export class Renderer extends
         typeof exposure === 'number' && !Number.isNaN(exposure);
     const env = element.environmentImage;
     const sky = element.skyboxImage;
-    const compensateExposure = toneMapping === CustomToneMapping &&
+    const compensateExposure = toneMapping === NeutralToneMapping &&
         (env === 'neutral' || env === 'legacy' || (!env && !sky));
     this.threeRenderer.toneMappingExposure =
         (exposureIsNumber ? exposure : 1.0) *

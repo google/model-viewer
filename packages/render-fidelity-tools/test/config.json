@@ -3,40 +3,6 @@
     {
       "name": "model-viewer",
       "description": "<model-viewer>"
-    },
-    {
-      "name": "filament",
-      "description": "Filament",
-      "scripts": {
-        "setup": "prepare-ibl.sh"
-      }
-    },
-    {
-      "name": "babylon",
-      "description": "Babylon"
-    },
-    {
-      "name": "gltf-sample-viewer",
-      "description": "gltf-sample-viewer"
-    },
-    {
-      "name": "three-gpu-pathtracer",
-      "description": "three-gpu-pathtracer"
-    },
-    {
-      "name": "stellar",
-      "description": "Dassault Systèmes STELLAR",
-      "command": {}
-    },
-    {
-      "name": "vray",
-      "description": "V-Ray",
-      "command": {
-        "executable": "python3",
-        "args": [
-          "test/renderers/vray/render.py"
-        ]
-      }
     }
   ],
   "scenarios": [
@@ -257,8 +223,7 @@
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
@@ -294,7 +259,8 @@
       },
       "exclude": [
         "stellar",
-        "vray"
+        "vray",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -419,8 +385,7 @@
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
@@ -430,13 +395,12 @@
         "y": 0.1,
         "x": 0.05
       },
-     "orbit": {
+      "orbit": {
         "radius": 0.5
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
@@ -607,7 +571,8 @@
         "y": -0.09
       },
       "exclude": [
-        "vray"
+        "vray",
+        "three-gpu-pathtracer"
       ]
     },
     {
@@ -651,8 +616,7 @@
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
@@ -670,8 +634,7 @@
       },
       "exclude": [
         "stellar",
-        "vray",
-        "three-gpu-pathtracer"
+        "vray"
       ]
     },
     {
