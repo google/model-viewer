@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.4",
-    "@google/model-viewer": "^3.5.0",
+    "@google/model-viewer": "^4.0.0",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
     "@polymer/paper-slider": "^3.0.1",
