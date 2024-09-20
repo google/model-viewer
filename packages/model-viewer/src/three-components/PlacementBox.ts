@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, MeshBasicMaterial, PlaneGeometry, Vector2, Vector3} from 'three';
+import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, MeshBasicMaterial, PlaneGeometry, Vector2, Vector3, XRTargetRaySpace} from 'three';
 
 import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
@@ -140,6 +140,13 @@ export class PlacementBox extends Mesh {
     this.hitPlane.updateMatrixWorld();
     const hitResult = this.getHit(scene, screenX, screenY);
     this.hitPlane.scale.set(1, 1, 1);
+    return hitResult;
+  }
+
+  controllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
+    this.hitPlane.visible = true;
+    const hitResult = scene.hitFromController(controller, this.hitPlane);
+    this.hitPlane.visible = false;
     return hitResult;
   }
 

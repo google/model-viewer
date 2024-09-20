@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, Mesh, MeshPhysicalMaterial, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
+import {BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
 import {XRControllerModelFactory} from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
@@ -126,7 +126,7 @@ export class ARRenderer extends EventDispatcher<
   private controller2: XRTargetRaySpace;
   private controllerGrip1: XRTargetRaySpace;
   private controllerGrip2: XRTargetRaySpace;
-  private intersected: Mesh[] = [];
+  private selectedController: XRTargetRaySpace|null = null;
 
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
@@ -305,86 +305,45 @@ export class ARRenderer extends EventDispatcher<
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
   }
 
-  private intersectObjects(controller: XRTargetRaySpace) {
+  private hover(controller: XRTargetRaySpace) {
     // Do not highlight in mobile-ar
-    if (controller.userData.targetRayMode === 'screen')
-      return;
+    if (controller.userData.targetRayMode === 'screen') {
+      return false;
+    }
 
-    // Do not highlight when already selected
-    if (controller.userData.selected !== undefined)
-      return;
-
+    const scene = this.presentedScene!;
     const line = controller.getObjectByName('line')!;
-    const intersections = this.getIntersections(controller);
-
-    if (intersections.length > 0) {
-      const intersection = intersections[0];
-
-      const object = intersection.object as Mesh;
-      const material = object.material as MeshPhysicalMaterial;
-      if (material && material.emissive) {
-        material.emissive.setHex(0x333333);
-        this.intersected.push(object);
-      }
-
-      line.scale.z = intersection.distance;
-    } else {
-      line.scale.z = 5;
-    }
+    const intersection =
+        this.placementBox!.controllerIntersection(scene, controller)
+    line.scale.z = intersection == null ? 5 : intersection.distance;
+    return intersection != null;
   }
 
-  private getIntersections(controller: XRTargetRaySpace) {
-    controller.updateMatrixWorld();
-
-    const tempMatrix = new Matrix4();
-
-    tempMatrix.identity().extractRotation(controller.matrixWorld);
-
-    const raycaster: Raycaster = new Raycaster();
-
-    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-
-    const group = this.presentedScene!.model!;
-    return raycaster.intersectObjects(group.children, false);
-  }
-
-  private cleanIntersected() {
-    while (this.intersected.length) {
-      const object = this.intersected.pop()!;
-      const material = object.material as MeshPhysicalMaterial;
-      if (material && material.emissive) {
-        material.emissive.setHex(0x000000);
-      }
-    }
-  }
+  // private dropOnFloor(){
+  // }
 
   private onControllerSelectStart(event: XRControllerEvent) {
-    const controller = event.target;
-
-    const intersections = this.getIntersections(controller);
-
-    if (intersections.length > 0) {
-      const intersection = intersections[0];
-      const object = intersection.object;
-      controller.attach(object);
-      controller.userData.selected = object;
+    if (this.selectedController != null) {
+      return;
     }
-
+    const scene = this.presentedScene!;
+    const controller = event.target;
     controller.userData.targetRayMode = event.data.targetRayMode;
+
+    if (this.placementBox!.controllerIntersection(scene, controller) != null) {
+      controller.attach(scene.pivot);
+      this.selectedController = controller;
+      this.placementBox!.show = false;
+    }
   }
 
   private onControllerSelectEnd(event: XRControllerEvent) {
-    const controller = event.target;
-
-    if (controller.userData.selected !== undefined) {
-      const object = controller.userData.selected;
-
-      const group = this.presentedScene!.model!;
-      group.attach(object);
-
-      controller.userData.selected = undefined;
+    if (event.target != this.selectedController) {
+      return;
     }
+    const scene = this.presentedScene!;
+    scene.attach(scene.pivot);
+    this.selectedController = null;
   }
 
   /**
@@ -822,11 +781,16 @@ export class ARRenderer extends EventDispatcher<
   private moveScene(delta: number) {
     const scene = this.presentedScene!;
     const {pivot, yaw} = scene;
+    const box = this.placementBox!;
+    box.updateOpacity(delta);
+    if (pivot.parent !== scene) {
+      return;  // attached to controller instead
+    }
     const {position} = pivot;
     const boundingRadius = scene.boundingSphere.radius;
     const goal = this.goalPosition;
     const oldScale = scene.pivot.scale.x;
-    const box = this.placementBox!;
+
     let source = ChangeSource.NONE;
 
     if (!goal.equals(position) || this.goalScale !== oldScale) {
@@ -853,7 +817,6 @@ export class ARRenderer extends EventDispatcher<
         }
       }
     }
-    box.updateOpacity(delta);
     scene.updateTarget(delta);
     // yaw must be updated last, since this also updates the shadow position.
     scene.yaw = this.yawDamper.update(yaw, this.goalYaw, delta, Math.PI);
@@ -867,9 +830,8 @@ export class ARRenderer extends EventDispatcher<
    * Only public to make it testable.
    */
   public onWebXRFrame(time: number, frame: XRFrame) {
-    this.cleanIntersected();
-    this.intersectObjects(this.controller1);
-    this.intersectObjects(this.controller2);
+    this.placementBox!.show = this.selectedController == null &&
+        (this.hover(this.controller1) || this.hover(this.controller2));
 
     this.frame = frame;
     ++this.frames;
