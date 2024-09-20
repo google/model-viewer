@@ -115,11 +115,15 @@ export class ARRenderer extends EventDispatcher<
   private lastAngle = 0;
   private goalPosition = new Vector3();
   private goalYaw = 0;
+  private goalPitch = 0;
+  private goalRoll = 0;
   private goalScale = 1;
   private xDamper = new Damper();
   private yDamper = new Damper();
   private zDamper = new Damper();
   private yawDamper = new Damper();
+  private pitchDamper = new Damper();
+  private rollDamper = new Damper();
   private scaleDamper = new Damper();
 
   private controller1: XRTargetRaySpace;
@@ -344,6 +348,11 @@ export class ARRenderer extends EventDispatcher<
     const scene = this.presentedScene!;
     scene.attach(scene.pivot);
     this.selectedController = null;
+    this.goalYaw = scene.yaw;
+    this.goalPitch = 0;
+    this.goalRoll = 0;
+    this.goalPosition.x = scene.pivot.position.x;
+    this.goalPosition.z = scene.pivot.position.z;
   }
 
   /**
@@ -820,6 +829,10 @@ export class ARRenderer extends EventDispatcher<
     scene.updateTarget(delta);
     // yaw must be updated last, since this also updates the shadow position.
     scene.yaw = this.yawDamper.update(yaw, this.goalYaw, delta, Math.PI);
+    scene.pivot.rotation.x = this.pitchDamper.update(
+        scene.pivot.rotation.x, this.goalPitch, delta, Math.PI);
+    scene.pivot.rotation.z = this.rollDamper.update(
+        scene.pivot.rotation.z, this.goalRoll, delta, Math.PI);
     // camera changes on every frame - user-interaction only if touching the
     // screen, plus damping time.
     scene.element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
