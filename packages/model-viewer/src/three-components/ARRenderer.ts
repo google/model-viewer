@@ -311,7 +311,8 @@ export class ARRenderer extends EventDispatcher<
 
   private hover(controller: XRTargetRaySpace) {
     // Do not highlight in mobile-ar
-    if (controller.userData.targetRayMode === 'screen') {
+    if (controller.userData.targetRayMode === 'screen' ||
+        this.selectedController == controller) {
       return false;
     }
 
@@ -323,13 +324,7 @@ export class ARRenderer extends EventDispatcher<
     return intersection != null;
   }
 
-  // private dropOnFloor(){
-  // }
-
   private onControllerSelectStart(event: XRControllerEvent) {
-    if (this.selectedController != null) {
-      return;
-    }
     const scene = this.presentedScene!;
     const controller = event.target;
     controller.userData.targetRayMode = event.data.targetRayMode;
@@ -346,6 +341,7 @@ export class ARRenderer extends EventDispatcher<
       return;
     }
     const scene = this.presentedScene!;
+    // drop on floor
     scene.attach(scene.pivot);
     this.selectedController = null;
     this.goalYaw = scene.yaw;
@@ -843,8 +839,8 @@ export class ARRenderer extends EventDispatcher<
    * Only public to make it testable.
    */
   public onWebXRFrame(time: number, frame: XRFrame) {
-    this.placementBox!.show = this.selectedController == null &&
-        (this.hover(this.controller1) || this.hover(this.controller2));
+    this.placementBox!.show =
+        this.hover(this.controller1) || this.hover(this.controller2);
 
     this.frame = frame;
     ++this.frames;
