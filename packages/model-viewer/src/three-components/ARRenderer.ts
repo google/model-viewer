@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {Event as ThreeEvent, EventDispatcher, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer, Line, Raycaster, BufferGeometry} from 'three';
-import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
+import {BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
 import {XRControllerModelFactory} from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
+import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
 import {$currentBackground, $currentEnvironmentMap} from '../features/environment.js';
@@ -132,22 +132,29 @@ export class ARRenderer extends EventDispatcher<
     this.threeRenderer.xr.enabled = true;
 
     this.controller1 = this.threeRenderer.xr.getController(0);
-    this.controller1.addEventListener('selectstart', (e: any) => this.onControllerSelectStart(e));
-    this.controller1.addEventListener('selectend', (e: any) => this.onControllerSelectEnd(e));
+    this.controller1.addEventListener(
+        'selectstart', (e: any) => this.onControllerSelectStart(e));
+    this.controller1.addEventListener(
+        'selectend', (e: any) => this.onControllerSelectEnd(e));
 
     this.controller2 = this.threeRenderer.xr.getController(1);
-    this.controller2.addEventListener('selectstart', (e: any) => this.onControllerSelectStart(e));
-    this.controller2.addEventListener('selectend', (e: any) => this.onControllerSelectEnd(e));
+    this.controller2.addEventListener(
+        'selectstart', (e: any) => this.onControllerSelectStart(e));
+    this.controller2.addEventListener(
+        'selectend', (e: any) => this.onControllerSelectEnd(e));
 
     const controllerModelFactory = new XRControllerModelFactory();
 
     this.controllerGrip1 = this.threeRenderer.xr.getControllerGrip(0);
-    this.controllerGrip1.add(controllerModelFactory.createControllerModel(this.controllerGrip1));
+    this.controllerGrip1.add(
+        controllerModelFactory.createControllerModel(this.controllerGrip1));
 
     this.controllerGrip2 = this.threeRenderer.xr.getControllerGrip(1);
-    this.controllerGrip2.add(controllerModelFactory.createControllerModel(this.controllerGrip2));
+    this.controllerGrip2.add(
+        controllerModelFactory.createControllerModel(this.controllerGrip2));
 
-    const geometry = new BufferGeometry().setFromPoints([new Vector3(0, 0, 0), new Vector3(0, 0, -1)]);
+    const geometry = new BufferGeometry().setFromPoints(
+        [new Vector3(0, 0, 0), new Vector3(0, 0, -1)]);
     const line = new Line(geometry);
     line.name = 'line';
     line.scale.z = 5;
@@ -294,10 +301,12 @@ export class ARRenderer extends EventDispatcher<
 
   private intersectObjects(controller: any) {
     // Do not highlight in mobile-ar
-    if (controller.userData.targetRayMode === 'screen') return;
+    if (controller.userData.targetRayMode === 'screen')
+      return;
 
     // Do not highlight when already selected
-    if (controller.userData.selected !== undefined) return;
+    if (controller.userData.selected !== undefined)
+      return;
 
     const line = controller.getObjectByName('line');
     const intersections = this.getIntersections(controller);
@@ -448,8 +457,8 @@ export class ARRenderer extends EventDispatcher<
         this.xrLight = null;
       }
 
-      scene.position.set(0, 0, 0);
-      scene.scale.set(1, 1, 1);
+      scene.pivot.position.set(0, 0, 0);
+      scene.pivot.scale.set(1, 1, 1);
       scene.setShadowOffset(0);
       const yaw = this.turntableRotation;
       if (yaw != null) {
@@ -551,7 +560,8 @@ export class ARRenderer extends EventDispatcher<
 
   private placeInitially() {
     const scene = this.presentedScene!;
-    const {position, element} = scene;
+    const {pivot, element} = scene;
+    const {position} = pivot;
     const xrCamera = scene.getCamera();
 
     const {width, height} = this.overlay!.getBoundingClientRect();
@@ -562,6 +572,7 @@ export class ARRenderer extends EventDispatcher<
     const {theta, radius} =
         (element as ModelViewerElementBase & ControlsInterface)
             .getCameraOrbit();
+
     // Orient model to match the 3D camera view
     const cameraDirection = xrCamera.getWorldDirection(vector3);
     scene.yaw = Math.atan2(-cameraDirection.x, -cameraDirection.z) - theta;
@@ -638,7 +649,6 @@ export class ARRenderer extends EventDispatcher<
     }
 
     this.placementBox!.show = true;
-
     // If the user is translating, let the finger hit-ray take precedence and
     // ignore this hit result.
     if (!this.isTranslating) {
@@ -681,7 +691,7 @@ export class ARRenderer extends EventDispatcher<
       box.show = true;
       this.isTwoFingering = true;
       const {separation} = this.fingerPolar(fingers);
-      this.firstRatio = separation / scene.scale.x;
+      this.firstRatio = separation / scene.pivot.scale.x;
     }
   };
 
@@ -725,7 +735,7 @@ export class ARRenderer extends EventDispatcher<
     }
     const fingers = frame.getHitTestResultsForTransientInput(hitSource);
     const scene = this.presentedScene!;
-    const scale = scene.scale.x;
+    const scale = scene.pivot.scale.x;
 
     // Rotating, translating and scaling are mutually exclusive operations; only
     // one can happen at a time, but we can switch during a gesture.
@@ -803,10 +813,11 @@ export class ARRenderer extends EventDispatcher<
 
   private moveScene(delta: number) {
     const scene = this.presentedScene!;
-    const {position, yaw} = scene;
+    const {pivot, yaw} = scene;
+    const {position} = pivot;
     const boundingRadius = scene.boundingSphere.radius;
     const goal = this.goalPosition;
-    const oldScale = scene.scale.x;
+    const oldScale = scene.pivot.scale.x;
     const box = this.placementBox!;
     let source = ChangeSource.NONE;
 
@@ -820,7 +831,7 @@ export class ARRenderer extends EventDispatcher<
 
       const newScale =
           this.scaleDamper.update(oldScale, this.goalScale, delta, 1);
-      scene.scale.set(newScale, newScale, newScale);
+      scene.pivot.scale.set(newScale, newScale, newScale);
 
       if (!this.isTranslating) {
         const offset = goal.y - y;
