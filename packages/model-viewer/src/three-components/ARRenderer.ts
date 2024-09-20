@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer} from 'three';
+import {BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, Mesh, MeshPhysicalMaterial, PerspectiveCamera, Raycaster, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
 import {XRControllerModelFactory} from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
@@ -73,6 +73,10 @@ export interface ARTrackingEvent extends ThreeEvent {
   status: ARTracking,
 }
 
+interface XRControllerEvent {
+  type: XRControllerEventType, data: XRInputSource, target: XRTargetRaySpace
+}
+
 const vector3 = new Vector3();
 const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
@@ -118,11 +122,11 @@ export class ARRenderer extends EventDispatcher<
   private yawDamper = new Damper();
   private scaleDamper = new Damper();
 
-  private controller1: any;
-  private controller2: any;
-  private controllerGrip1: any;
-  private controllerGrip2: any;
-  private intersected: any[] = [];
+  private controller1: XRTargetRaySpace;
+  private controller2: XRTargetRaySpace;
+  private controllerGrip1: XRTargetRaySpace;
+  private controllerGrip2: XRTargetRaySpace;
+  private intersected: Mesh[] = [];
 
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
@@ -133,15 +137,17 @@ export class ARRenderer extends EventDispatcher<
 
     this.controller1 = this.threeRenderer.xr.getController(0);
     this.controller1.addEventListener(
-        'selectstart', (e: any) => this.onControllerSelectStart(e));
+        'selectstart',
+        (e: XRControllerEvent) => this.onControllerSelectStart(e));
     this.controller1.addEventListener(
-        'selectend', (e: any) => this.onControllerSelectEnd(e));
+        'selectend', (e: XRControllerEvent) => this.onControllerSelectEnd(e));
 
     this.controller2 = this.threeRenderer.xr.getController(1);
     this.controller2.addEventListener(
-        'selectstart', (e: any) => this.onControllerSelectStart(e));
+        'selectstart',
+        (e: XRControllerEvent) => this.onControllerSelectStart(e));
     this.controller2.addEventListener(
-        'selectend', (e: any) => this.onControllerSelectEnd(e));
+        'selectend', (e: XRControllerEvent) => this.onControllerSelectEnd(e));
 
     const controllerModelFactory = new XRControllerModelFactory();
 
@@ -299,7 +305,7 @@ export class ARRenderer extends EventDispatcher<
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
   }
 
-  private intersectObjects(controller: any) {
+  private intersectObjects(controller: XRTargetRaySpace) {
     // Do not highlight in mobile-ar
     if (controller.userData.targetRayMode === 'screen')
       return;
@@ -308,17 +314,18 @@ export class ARRenderer extends EventDispatcher<
     if (controller.userData.selected !== undefined)
       return;
 
-    const line = controller.getObjectByName('line');
+    const line = controller.getObjectByName('line')!;
     const intersections = this.getIntersections(controller);
 
     if (intersections.length > 0) {
       const intersection = intersections[0];
 
-      const object = intersection.object;
-      // @ts-ignore
-      object.material.emissive.setHex(0x333333);
-
-      this.intersected.push(object);
+      const object = intersection.object as Mesh;
+      const material = object.material as MeshPhysicalMaterial;
+      if (material && material.emissive) {
+        material.emissive.setHex(0x333333);
+        this.intersected.push(object);
+      }
 
       line.scale.z = intersection.distance;
     } else {
@@ -326,7 +333,7 @@ export class ARRenderer extends EventDispatcher<
     }
   }
 
-  private getIntersections(controller: any) {
+  private getIntersections(controller: XRTargetRaySpace) {
     controller.updateMatrixWorld();
 
     const tempMatrix = new Matrix4();
@@ -338,19 +345,21 @@ export class ARRenderer extends EventDispatcher<
     raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const group = this.presentedScene!.model;
-    // @ts-ignore
+    const group = this.presentedScene!.model!;
     return raycaster.intersectObjects(group.children, false);
   }
 
   private cleanIntersected() {
     while (this.intersected.length) {
-      const object = this.intersected.pop();
-      object.material.emissive.setHex(0x000000);
+      const object = this.intersected.pop()!;
+      const material = object.material as MeshPhysicalMaterial;
+      if (material && material.emissive) {
+        material.emissive.setHex(0x000000);
+      }
     }
   }
 
-  private onControllerSelectStart(event: any) {
+  private onControllerSelectStart(event: XRControllerEvent) {
     const controller = event.target;
 
     const intersections = this.getIntersections(controller);
@@ -365,14 +374,13 @@ export class ARRenderer extends EventDispatcher<
     controller.userData.targetRayMode = event.data.targetRayMode;
   }
 
-  private onControllerSelectEnd(event: any) {
+  private onControllerSelectEnd(event: XRControllerEvent) {
     const controller = event.target;
 
     if (controller.userData.selected !== undefined) {
       const object = controller.userData.selected;
 
-      const group = this.presentedScene!.model;
-      // @ts-ignore
+      const group = this.presentedScene!.model!;
       group.attach(object);
 
       controller.userData.selected = undefined;
