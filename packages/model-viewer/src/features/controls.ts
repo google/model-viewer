@@ -266,7 +266,7 @@ export declare interface ControlsInterface {
   disableZoom: boolean;
   disablePan: boolean;
   disableTap: boolean;
-  a11y: A11yTranslationsInterface | string | null;
+  a11y: A11yTranslationsInterface|string|null;
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
@@ -378,7 +378,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'interpolation-decay'})
     interpolationDecay: number = DECAY_MILLISECONDS;
 
-    @property() a11y: A11yTranslationsInterface | string | null = null;
+    @property() a11y: A11yTranslationsInterface|string|null = null;
 
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
@@ -430,7 +430,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     getCameraTarget(): Vector3D {
       return toVector3D(
           this[$renderer].isPresenting ? this[$renderer].arRenderer.target :
-                                         this[$scene].getTarget());
+                                         this[$scene].getDynamicTarget());
     }
 
     getFieldOfView(): number {
@@ -835,23 +835,22 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$updateAria]() {
       const {theta, phi} =
           this[$controls]!.getCameraSpherical(this[$lastSpherical]);
-  
+
       const azimuthalQuadrant =
           (4 + Math.floor(((theta % TAU) + QUARTER_PI) / HALF_PI)) % 4;
-  
+
       const polarTrient = Math.floor(phi / THIRD_PI);
-  
+
       const azimuthalQuadrantLabel =
           AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
       const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
       const position = `${polarTrientLabel}${azimuthalQuadrantLabel}`;
-  
+
       const key = position as keyof A11yTranslationsInterface;
       if (key in this[$a11y]) {
         this[$updateStatus](this[$a11y][key]);
       } else {
-        this[$updateStatus](
-            `View from stage ${position}`);
+        this[$updateStatus](`View from stage ${position}`);
       }
     }
 
@@ -924,7 +923,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     [$onPointerChange] = (event: PointerChangeEvent) => {
-      this[$container].classList.toggle('pointer-tumbling', event.type === 'pointer-change-start');
+      this[$container].classList.toggle(
+          'pointer-tumbling', event.type === 'pointer-change-start');
     };
 
     [$updateA11y]() {
@@ -936,7 +936,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
             console.warn('Error parsing a11y JSON:', error);
           }
         } else if (this.a11y.length > 0) {
-          console.warn('Error not supported format, should be a JSON string:', this.a11y);
+          console.warn(
+              'Error not supported format, should be a JSON string:',
+              this.a11y);
         } else {
           this[$a11y] = <A11yTranslationsInterface>{};
         }
@@ -945,7 +947,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       } else {
         this[$a11y] = <A11yTranslationsInterface>{};
       }
-      
+
       this[$userInputElement].setAttribute('aria-label', this[$ariaLabel]);
     }
   }
