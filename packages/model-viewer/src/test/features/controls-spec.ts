@@ -576,10 +576,11 @@ suite('Controls', () => {
       test('one finger rotates', async () => {
         const orbit = element.getCameraOrbit();
 
-        element.interact(50, finger);
+        element.interact(500, finger);
+        await timePasses(50);
         await rafPasses();
-        await rafPasses();
-        await rafPasses();
+        element.jumpCameraToGoal();
+        await element.updateComplete;
 
         const newOrbit = element.getCameraOrbit();
         expect(newOrbit.theta).to.be.lessThan(orbit.theta, 'theta');
@@ -597,7 +598,8 @@ suite('Controls', () => {
             element.interact(50, finger);
             await timePasses(50);
             await rafPasses();
-            await rafPasses();
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             const newOrbit = element.getCameraOrbit();
             expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
@@ -611,9 +613,11 @@ suite('Controls', () => {
         await element.updateComplete;
         const target = element.getCameraTarget();
 
-        element.interact(50, finger, finger);
+        element.interact(500, finger, finger);
+        await timePasses(50);
         await rafPasses();
-        await rafPasses();
+        element.jumpCameraToGoal();
+        await element.updateComplete;
 
         const newTarget = element.getCameraTarget();
         expect(newTarget.x).to.be.lessThan(target.x, 'X');
@@ -629,9 +633,11 @@ suite('Controls', () => {
         await element.updateComplete;
         const target = element.getCameraTarget();
 
-        element.interact(50, finger, finger);
+        element.interact(500, finger, finger);
+        await timePasses(50);
         await rafPasses();
-        await rafPasses();
+        element.jumpCameraToGoal();
+        await element.updateComplete;
 
         const newTarget = element.getCameraTarget();
         expect(newTarget.x).to.be.eq(target.x, 'X');
@@ -646,9 +652,10 @@ suite('Controls', () => {
 
             // Long enough duration to not be considered a re-centering tap.
             element.interact(500, finger, finger);
-            await timePasses(500);  // interaction
-            await timePasses(500);  // settle target
+            await timePasses(500);
             await rafPasses();
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             const newTarget = element.getCameraTarget();
             expect(newTarget.x).to.be.closeTo(target.x, 0.001, 'X');
@@ -753,10 +760,12 @@ suite('Controls', () => {
         const target = element.getCameraTarget();
         const orbit = element.getCameraOrbit();
 
-        element.interact(50, finger, finger);
-        element.interact(50, finger);
+        element.interact(500, finger, finger);
+        element.interact(500, finger);
+        await timePasses(50);
         await rafPasses();
-        await rafPasses();
+        element.jumpCameraToGoal();
+        await element.updateComplete;
 
         const newTarget = element.getCameraTarget();
         expect(newTarget.x).to.be.lessThan(target.x, 'X');
