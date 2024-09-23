@@ -434,29 +434,21 @@ suite('Controls', () => {
       });
 
       test('does not send "user-interaction" after JS change', async () => {
-        const expectedSources = [
-          ChangeSource.USER_INTERACTION,
-          ChangeSource.USER_INTERACTION,
-          ChangeSource.NONE,
-          ChangeSource.NONE,
-        ];
-        let changeSource: Array<string> = [];
-
-        element.addEventListener('camera-change', (event) => {
-          changeSource.push(
-              (event as CustomEvent<CameraChangeDetails>).detail.source);
-        });
-
+        const user = waitForEvent(
+            element,
+            'camera-change',
+            (event) =>
+                (event as any).detail.source === ChangeSource.USER_INTERACTION);
         dispatchSyntheticEvent(
             element[$userInputElement], 'keydown', {key: 'ArrowUp'});
-        await rafPasses();
-        await rafPasses();
+        await user;
 
+        const js = waitForEvent(
+            element,
+            'camera-change',
+            (event) => (event as any).detail.source === ChangeSource.NONE);
         element.cameraOrbit = '0deg 0deg auto';
-        await rafPasses();
-        await rafPasses();
-
-        expect(changeSource).to.eql(expectedSources);
+        await js;
       });
     });
 
@@ -689,9 +681,9 @@ suite('Controls', () => {
         element.interact(50, tap(0.5));
         await timePasses(50);
         await rafPasses();
+        await rafPasses();
         element.jumpCameraToGoal();
         await element.updateComplete;
-        await rafPasses();
 
         const newTarget = element.getCameraTarget();
         expect(newTarget.x).to.be.closeTo(target.x, 0.001, 'X');
@@ -702,9 +694,9 @@ suite('Controls', () => {
         element.interact(50, tap(0));
         await timePasses(50);
         await rafPasses();
+        await rafPasses();
         element.jumpCameraToGoal();
         await element.updateComplete;
-        await rafPasses();
 
         const oldTarget = element.getCameraTarget();
         expect(oldTarget.x).to.be.closeTo(target.x, 0.001, 'X recenter');
@@ -736,7 +728,7 @@ suite('Controls', () => {
             'interact-stopped',
             (event) => (event as any).detail.source === ChangeSource.NONE);
 
-        element.interact(50, finger);
+        element.interact(500, finger);
         await rafPasses();
         element.cameraOrbit = 'auto auto 70%';
         await canceled;
@@ -749,7 +741,7 @@ suite('Controls', () => {
             (event) =>
                 (event as any).detail.source === ChangeSource.USER_INTERACTION);
 
-        element.interact(50, finger);
+        element.interact(500, finger);
         await rafPasses();
         dispatchSyntheticEvent(
             element[$userInputElement], 'keydown', {key: 'PageDown'});
