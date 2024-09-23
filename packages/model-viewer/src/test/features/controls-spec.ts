@@ -724,30 +724,26 @@ suite('Controls', () => {
       });
 
       test('camera-orbit cancels synthetic interaction', async () => {
-        element.interact(50, finger);
-        await rafPasses();
-        await rafPasses();
-
         const canceled = waitForEvent(
             element,
             'interact-stopped',
             (event) => (event as any).detail.source === ChangeSource.NONE);
 
+        element.interact(50, finger);
+        await rafPasses();
         element.cameraOrbit = 'auto auto 70%';
         await canceled;
       });
 
       test('user interaction cancels synthetic interaction', async () => {
-        element.interact(50, finger);
-        await rafPasses();
-        await rafPasses();
-
         const canceled = waitForEvent(
             element,
             'interact-stopped',
             (event) =>
                 (event as any).detail.source === ChangeSource.USER_INTERACTION);
 
+        element.interact(50, finger);
+        await rafPasses();
         dispatchSyntheticEvent(
             element[$userInputElement], 'keydown', {key: 'PageDown'});
         await canceled;
