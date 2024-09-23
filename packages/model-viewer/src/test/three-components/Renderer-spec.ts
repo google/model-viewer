@@ -21,7 +21,7 @@ import {$intersectionObserver, $isElementInViewport, $onResize, $renderer, $scen
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
-import {resolveDpr, waitForEvent} from '../../utilities.js';
+import {waitForEvent} from '../../utilities.js';
 import {assetPath} from '../helpers.js';
 
 let externalCamera: Camera;
@@ -148,7 +148,7 @@ suite('Renderer with two scenes', () => {
       const height = 400;
       externalElement[$onResize]({width, height});
 
-      const dpr = resolveDpr();
+      const dpr = window.devicePixelRatio;
       expect(externalWidth).to.be.eq(width * dpr);
       expect(externalHeight).to.be.eq(height * dpr);
     });
