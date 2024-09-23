@@ -77,7 +77,6 @@ export declare interface LoadingStaticInterface {
   ktx2TranscoderLocation: string;
   meshoptDecoderLocation: string;
   lottieLoaderLocation: string;
-  withCredentials: boolean;
   mapURLs(callback: (url: string) => string): void;
 }
 
@@ -172,15 +171,6 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     static get lottieLoaderLocation() {
       return Renderer.singleton.textureUtils!.lottieLoaderUrl
-    }
-
-    static set withCredentials(value: boolean) {
-      CachingGLTFLoader.withCredentials = value;
-      Renderer.singleton.textureUtils!.withCredentials = value;
-    }
-
-    static get withCredentials() {
-      return CachingGLTFLoader.withCredentials;
     }
 
     /**
@@ -305,8 +295,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           parentNode.appendChild(this[$defaultProgressBarElement]);
         }
 
-        this[$defaultProgressBarElement].classList.toggle(
-            'hide', progress === 1.0);
+        this[$defaultProgressBarElement].classList.toggle('hide', progress === 1.0);
       });
     }, PROGRESS_BAR_UPDATE_THRESHOLD);
 
@@ -384,8 +373,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$updateProgressBar](progress);
 
-      this.dispatchEvent(new CustomEvent(
-          'progress', {detail: {totalProgress: progress, reason}}));
+      this.dispatchEvent(
+          new CustomEvent('progress', {detail: {totalProgress: progress, reason}}));
     };
 
     [$shouldAttemptPreload](): boolean {

@@ -117,7 +117,7 @@ export default class TextureUtils {
       const texture: Texture = await new Promise<Texture>(
           (resolve, reject) => loader.load(
               url,
-              (result: any) => {
+              (result) => {
                 const {renderTarget} =
                     result as QuadRenderer<1016, GainMapDecoderMaterial>;
                 if (renderTarget != null) {
