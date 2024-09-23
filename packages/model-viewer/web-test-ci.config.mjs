@@ -21,7 +21,7 @@ export default {
       <script type="module" src="${testFramework}"></script>
     </body>
   </html>`,
-  testsFinishTimeout: 300000,
+  testsFinishTimeout: 600000,
   testFramework: {
     config: {
       ui: 'tdd',

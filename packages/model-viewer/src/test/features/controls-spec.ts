@@ -534,6 +534,11 @@ suite('Controls', () => {
     });
 
     suite('synthetic interaction', () => {
+      setup(async () => {
+        element.interactionPrompt = 'none';
+        await element.updateComplete;
+      });
+
       const finger = {
         x: {
           initialValue: 0.6,
