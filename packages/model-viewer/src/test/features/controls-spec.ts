@@ -569,10 +569,9 @@ suite('Controls', () => {
         const orbit = element.getCameraOrbit();
 
         element.interact(500, finger);
+        await rafPasses();
         await timePasses(50);
         await rafPasses();
-        element.jumpCameraToGoal();
-        await element.updateComplete;
 
         const newOrbit = element.getCameraOrbit();
         expect(newOrbit.theta).to.be.lessThan(orbit.theta, 'theta');
@@ -606,10 +605,9 @@ suite('Controls', () => {
         const target = element.getCameraTarget();
 
         element.interact(500, finger, finger);
+        await rafPasses();
         await timePasses(50);
         await rafPasses();
-        element.jumpCameraToGoal();
-        await element.updateComplete;
 
         const newTarget = element.getCameraTarget();
         expect(newTarget.x).to.be.lessThan(target.x, 'X');
@@ -626,10 +624,9 @@ suite('Controls', () => {
         const target = element.getCameraTarget();
 
         element.interact(500, finger, finger);
+        await rafPasses();
         await timePasses(50);
         await rafPasses();
-        element.jumpCameraToGoal();
-        await element.updateComplete;
 
         const newTarget = element.getCameraTarget();
         expect(newTarget.x).to.be.eq(target.x, 'X');
@@ -644,6 +641,7 @@ suite('Controls', () => {
 
             // Long enough duration to not be considered a re-centering tap.
             element.interact(500, finger, finger);
+            await rafPasses();
             await timePasses(500);
             await rafPasses();
             element.jumpCameraToGoal();
@@ -679,8 +677,8 @@ suite('Controls', () => {
 
         // tap on the model
         element.interact(50, tap(0.5));
-        await timePasses(50);
         await rafPasses();
+        await timePasses(50);
         await rafPasses();
         element.jumpCameraToGoal();
         await element.updateComplete;
@@ -692,8 +690,8 @@ suite('Controls', () => {
 
         // tap off the model
         element.interact(50, tap(0));
-        await timePasses(50);
         await rafPasses();
+        await timePasses(50);
         await rafPasses();
         element.jumpCameraToGoal();
         await element.updateComplete;
@@ -712,8 +710,9 @@ suite('Controls', () => {
         await element.updateComplete;
         const target = element.getCameraTarget();
 
-        element.interact(5, tap(0.5));
+        element.interact(50, tap(0.5));
         await rafPasses();
+        await timePasses(50);
         await rafPasses();
 
         const newTarget = element.getCameraTarget();
