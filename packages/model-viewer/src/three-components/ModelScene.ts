@@ -596,6 +596,14 @@ export class ModelScene extends Scene {
   }
 
   /**
+   * Gets the current target point, which may not equal the goal returned by
+   * getTarget() due to finite input decay smoothing.
+   */
+  getDynamicTarget(): Vector3 {
+    return this.target.position.clone().multiplyScalar(-1);
+  }
+
+  /**
    * Shifts the model to the target point immediately instead of easing in.
    */
   jumpToGoal() {
