@@ -133,7 +133,8 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
             await textureUtils.generateEnvironmentMapAndSkybox(
                 deserializeUrl(skyboxImage),
                 environmentImage,
-                (progress: number) => updateEnvProgress(clamp(progress, 0, 1)));
+                (progress: number) => updateEnvProgress(clamp(progress, 0, 1)),
+                this.withCredentials);
 
         if (this[$currentEnvironmentMap] !== environmentMap) {
           this[$currentEnvironmentMap] = environmentMap;
