@@ -14,7 +14,8 @@
  */
 
 import {BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
-import {XRControllerModelFactory} from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
+// import {XRControllerModelFactory} from
+// 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
@@ -83,6 +84,8 @@ const vector3 = new Vector3();
 const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
 const camera = new PerspectiveCamera(45, 1, 0.1, 100);
+const lineGeometry = new BufferGeometry().setFromPoints(
+    [new Vector3(0, 0, 0), new Vector3(0, 0, -1)]);
 
 export class ARRenderer extends EventDispatcher<
     {status: {status: ARStatus}, tracking: {status: ARTracking}}> {
@@ -103,6 +106,12 @@ export class ARRenderer extends EventDispatcher<
   private exitWebXRButtonContainer: HTMLElement|null = null;
   private overlay: HTMLElement|null = null;
   private xrLight: XREstimatedLight|null = null;
+  private xrMode: 'screen-space'|'world-space'|null = null;
+  private controller1: XRTargetRaySpace|null = null;
+  private controller2: XRTargetRaySpace|null = null;
+  // private controllerGrip1: XRTargetRaySpace|null = null;
+  // private controllerGrip2: XRTargetRaySpace|null = null;
+  private selectedController: XRTargetRaySpace|null = null;
 
   private tracking = true;
   private frames = 0;
@@ -128,51 +137,12 @@ export class ARRenderer extends EventDispatcher<
   private rollDamper = new Damper(DECAY);
   private scaleDamper = new Damper(DECAY);
 
-  private controller1: XRTargetRaySpace;
-  private controller2: XRTargetRaySpace;
-  private controllerGrip1: XRTargetRaySpace;
-  private controllerGrip2: XRTargetRaySpace;
-  private selectedController: XRTargetRaySpace|null = null;
-
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
   constructor(private renderer: Renderer) {
     super();
     this.threeRenderer = renderer.threeRenderer;
     this.threeRenderer.xr.enabled = true;
-
-    this.controller1 = this.threeRenderer.xr.getController(0);
-    this.controller1.addEventListener(
-        'selectstart',
-        (e: XRControllerEvent) => this.onControllerSelectStart(e));
-    this.controller1.addEventListener(
-        'selectend', (e: XRControllerEvent) => this.onControllerSelectEnd(e));
-
-    this.controller2 = this.threeRenderer.xr.getController(1);
-    this.controller2.addEventListener(
-        'selectstart',
-        (e: XRControllerEvent) => this.onControllerSelectStart(e));
-    this.controller2.addEventListener(
-        'selectend', (e: XRControllerEvent) => this.onControllerSelectEnd(e));
-
-    const controllerModelFactory = new XRControllerModelFactory();
-
-    this.controllerGrip1 = this.threeRenderer.xr.getControllerGrip(0);
-    this.controllerGrip1.add(
-        controllerModelFactory.createControllerModel(this.controllerGrip1));
-
-    this.controllerGrip2 = this.threeRenderer.xr.getControllerGrip(1);
-    this.controllerGrip2.add(
-        controllerModelFactory.createControllerModel(this.controllerGrip2));
-
-    const geometry = new BufferGeometry().setFromPoints(
-        [new Vector3(0, 0, 0), new Vector3(0, 0, -1)]);
-    const line = new Line(geometry);
-    line.name = 'line';
-    line.scale.z = 5;
-
-    this.controller1.add(line.clone());
-    this.controller2.add(line.clone());
   }
 
   async resolveARSession(): Promise<XRSession> {
@@ -226,11 +196,6 @@ export class ARRenderer extends EventDispatcher<
       console.warn('Cannot present while a model is already presenting');
     }
 
-    scene.add(this.controller1);
-    scene.add(this.controller2);
-    scene.add(this.controllerGrip1);
-    scene.add(this.controllerGrip2);
-
     let waitForAnimationFrame = new Promise<void>((resolve, _reject) => {
       requestAnimationFrame(() => resolve());
     });
@@ -273,6 +238,8 @@ export class ARRenderer extends EventDispatcher<
 
     const viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
 
+    this.xrMode = (currentSession as any).interactionMode;
+
     this.tracking = true;
     this.frames = 0;
     this.initialized = false;
@@ -290,17 +257,21 @@ export class ARRenderer extends EventDispatcher<
 
     scene.element.addEventListener('load', this.onUpdateScene);
 
-    const radians = HIT_ANGLE_DEG * Math.PI / 180;
-    const ray = this.placeOnWall === true ?
-        undefined :
-        new XRRay(
-            new DOMPoint(0, 0, 0),
-            {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
-    currentSession
-        .requestHitTestSource!
-        ({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
-          this.initialHitSource = hitTestSource;
-        });
+    if (this.xrMode === 'screen-space') {
+      const radians = HIT_ANGLE_DEG * Math.PI / 180;
+      const ray = this.placeOnWall === true ?
+          undefined :
+          new XRRay(
+              new DOMPoint(0, 0, 0),
+              {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
+      currentSession
+          .requestHitTestSource!
+          ({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
+            this.initialHitSource = hitTestSource;
+          });
+    } else {
+      this.setupControllers();
+    }
 
     this.currentSession = currentSession;
     this.placementBox =
@@ -311,9 +282,48 @@ export class ARRenderer extends EventDispatcher<
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
   }
 
+  private setupControllers() {
+    this.controller1 = this.threeRenderer.xr.getController(0);
+    this.controller1.addEventListener(
+        'selectstart',
+        (e: XRControllerEvent) => this.onControllerSelectStart(e));
+    this.controller1.addEventListener(
+        'selectend', (e: XRControllerEvent) => this.onControllerSelectEnd(e));
+
+    this.controller2 = this.threeRenderer.xr.getController(1);
+    this.controller2.addEventListener(
+        'selectstart',
+        (e: XRControllerEvent) => this.onControllerSelectStart(e));
+    this.controller2.addEventListener(
+        'selectend', (e: XRControllerEvent) => this.onControllerSelectEnd(e));
+
+    // const controllerModelFactory = new XRControllerModelFactory();
+
+    // this.controllerGrip1 = this.threeRenderer.xr.getControllerGrip(0);
+    // this.controllerGrip1.add(
+    //     controllerModelFactory.createControllerModel(this.controllerGrip1));
+
+    // this.controllerGrip2 = this.threeRenderer.xr.getControllerGrip(1);
+    // this.controllerGrip2.add(
+    //     controllerModelFactory.createControllerModel(this.controllerGrip2));
+
+    const line = new Line(lineGeometry);
+    line.name = 'line';
+    line.scale.z = 5;
+
+    this.controller1.add(line);
+    this.controller2.add(line.clone());
+
+    const scene = this.presentedScene!;
+    scene.add(this.controller1);
+    scene.add(this.controller2);
+    // scene.add(this.controllerGrip1);
+    // scene.add(this.controllerGrip2);
+  }
+
   private hover(controller: XRTargetRaySpace) {
     // Do not highlight in mobile-ar
-    if (controller.userData.targetRayMode === 'screen' ||
+    if (this.xrMode === 'screen-space' ||
         this.selectedController == controller) {
       return false;
     }
@@ -329,7 +339,6 @@ export class ARRenderer extends EventDispatcher<
   private onControllerSelectStart(event: XRControllerEvent) {
     const scene = this.presentedScene!;
     const controller = event.target;
-    controller.userData.targetRayMode = event.data.targetRayMode;
 
     if (this.placementBox!.controllerIntersection(scene, controller) != null) {
       controller.attach(scene.pivot);
@@ -489,6 +498,13 @@ export class ARRenderer extends EventDispatcher<
       this.placementBox = null;
     }
 
+    if (this.xrMode !== 'screen-space') {
+      this.controller1?.removeFromParent();
+      this.controller2?.removeFromParent();
+      this.controller1 = null;
+      this.controller2 = null;
+    }
+
     this.lastTick = null;
     this.turntableRotation = null;
     this.oldShadowIntensity = null;
@@ -563,14 +579,16 @@ export class ARRenderer extends EventDispatcher<
 
     scene.setHotspotsVisibility(true);
 
-    const {session} = this.frame!;
-    session.addEventListener('selectstart', this.onSelectStart);
-    session.addEventListener('selectend', this.onSelectEnd);
-    session
-        .requestHitTestSourceForTransientInput!
-        ({profile: 'generic-touchscreen'})!.then(hitTestSource => {
-          this.transientHitTestSource = hitTestSource;
-        });
+    if (this.xrMode === 'screen-space') {
+      const {session} = this.frame!;
+      session.addEventListener('selectstart', this.onSelectStart);
+      session.addEventListener('selectend', this.onSelectEnd);
+      session
+          .requestHitTestSourceForTransientInput!
+          ({profile: 'generic-touchscreen'})!.then(hitTestSource => {
+            this.transientHitTestSource = hitTestSource;
+          });
+    }
   }
 
   private getTouchLocation(): Vector3|null {
@@ -841,8 +859,11 @@ export class ARRenderer extends EventDispatcher<
    * Only public to make it testable.
    */
   public onWebXRFrame(time: number, frame: XRFrame) {
-    this.placementBox!.show =
-        this.hover(this.controller1) || this.hover(this.controller2);
+    if (this.xrMode !== 'screen-space') {
+      const over1 = this.hover(this.controller1!);
+      const over2 = this.hover(this.controller2!);
+      this.placementBox!.show = over1 || over2;
+    }
 
     this.frame = frame;
     ++this.frames;
