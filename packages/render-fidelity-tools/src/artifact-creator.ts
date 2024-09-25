@@ -17,7 +17,7 @@ import {promises as fs} from 'fs';
 import {mkdirp} from 'mkdirp';
 import {join, resolve} from 'path';
 import pngjs from 'pngjs';
-import puppeteer, {Browser} from 'puppeteer';
+import puppeteer, {Browser, Page} from 'puppeteer';
 
 import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, FidelityRegressionResults, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel} from './common.js';
 import {ConfigReader} from './config-reader.js';
@@ -142,7 +142,7 @@ export class ArtifactCreator {
     console.log(`start compare ${renderer}'s golden with ${
         renderer}'s screenshot generated from fidelity test:`);
 
-    let screenshot;
+    let screenshot: Uint8Array|undefined;
     try {
       // set the output path to an empty string to tell puppeteer to not save
       // the screenshot image
@@ -157,8 +157,9 @@ export class ArtifactCreator {
       throw new Error(`❌ ${renderer}'s screenshot of ${
           scenarioName} is not captured correctly (value is null).`);
     }
+    const buffer = Buffer.from(screenshot);
     const screenshotImage =
-        new Uint8ClampedArray(pngjs.PNG.sync.read(screenshot as Buffer).data);
+        new Uint8ClampedArray(pngjs.PNG.sync.read(buffer).data);
 
     const rendererIndex = 0;
     const rendererGoldenPath = join(
@@ -307,7 +308,7 @@ export class ArtifactCreator {
       this.pagePromise = this.browser.newPage();
     }
 
-    const page = await this.pagePromise;
+    const page = await this.pagePromise as Page;
     this.pagePromise = undefined;
 
     const url = `${this.baseUrl}?hide-ui&config=../../config.json&scenario=${
