@@ -16,21 +16,16 @@
 import HTTPServer from 'http-server';
 import module from 'module';
 import {dirname, join, resolve} from 'path';
-import rimraf from 'rimraf';
-
-
+import {rimraf} from 'rimraf';
 import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
+import {hideBin} from 'yargs/helpers';
 
- type CommandLineArgs = {
-   config: string;
-   renderer: string;
-   scenario: string[];
-   port: number;
-   dryRun: boolean;
-   quiet: boolean;
- }
- 
+type CommandLineArgs = {
+  config: string; renderer: string; scenario: string[]; port: number;
+  dryRun: boolean;
+  quiet: boolean;
+}
+
 
 const require = module.createRequire(import.meta.url);
 // actions/core can only be imported using commonJS's require here
@@ -40,55 +35,63 @@ import {ArtifactCreator} from '../artifact-creator.js';
 import {FIDELITY_TEST_THRESHOLD, toDecibel} from '../common.js';
 
 async function main() {
-
-  const argv = await yargs(hideBin(process.argv))
-    .options({
-      'config': {
-        type: 'string',
-        alias: 'c',
-        description: 'Path to configuration json',
-        demandOption: true, // Makes it mandatory. Adjust as per your needs.
-      },
-      'renderer': {
-        type: 'string',
-        alias: 'r',
-        description: 'Name of web-based renderer to test',
-        default: 'model-viewer',
-        choices: ['filament', 'babylon', 'gltf-sample-viewer', 'three-gpu-renderer', 'model-viewer']
-      },
-      'scenario': {
-        type: 'array',
-        alias: 's',
-        description: 'Limit to specific scenarios',
-        demandOption: false, // Makes it mandatory. Adjust as per your needs.
-      },
-      'port': {
-        type: 'number',
-        alias: 'p',
-        description: 'Port for web server',
-        default: 9030,
-      },
-      'dry-run': {
-        type: 'boolean',
-        alias: 'd',
-        description: 'Checks that all comparison images exist',
-        default: false,
-      },
-      'quiet': {
-        type: 'boolean',
-        alias: 'q',
-        description: 'Hide the puppeteer controlled browser',
-        default: false,
-      },
-    })
-    .help()
-    .alias('help', 'h')
-    .argv;
+  const argv =
+      await yargs(hideBin(process.argv))
+          .options({
+            'config': {
+              type: 'string',
+              alias: 'c',
+              description: 'Path to configuration json',
+              demandOption:
+                  true,  // Makes it mandatory. Adjust as per your needs.
+            },
+            'renderer': {
+              type: 'string',
+              alias: 'r',
+              description: 'Name of web-based renderer to test',
+              default: 'model-viewer',
+              choices: [
+                'filament',
+                'babylon',
+                'gltf-sample-viewer',
+                'three-gpu-renderer',
+                'model-viewer'
+              ]
+            },
+            'scenario': {
+              type: 'array',
+              alias: 's',
+              description: 'Limit to specific scenarios',
+              demandOption:
+                  false,  // Makes it mandatory. Adjust as per your needs.
+            },
+            'port': {
+              type: 'number',
+              alias: 'p',
+              description: 'Port for web server',
+              default: 9030,
+            },
+            'dry-run': {
+              type: 'boolean',
+              alias: 'd',
+              description: 'Checks that all comparison images exist',
+              default: false,
+            },
+            'quiet': {
+              type: 'boolean',
+              alias: 'q',
+              description: 'Hide the puppeteer controlled browser',
+              default: false,
+            },
+          })
+          .help()
+          .alias('help', 'h')
+          .argv;
 
   const args: CommandLineArgs = {
     config: argv.config as string,
     renderer: argv.renderer as string,
-    scenario: ( argv.scenario  || [] ) as string[],
+    scenario: (argv.scenario || []) as string[],
     port: argv.port as number,
     dryRun: argv['dry-run'],
     quiet: argv.quiet,
@@ -103,7 +106,8 @@ async function main() {
       config,
       rootDirectory,
       `http://localhost:${
-        args.port}/packages/render-fidelity-tools/test/renderers/${args.renderer}/`);
+          args.port}/packages/render-fidelity-tools/test/renderers/${
+          args.renderer}/`);
   const server = HTTPServer.createServer({root: '../../', cache: -1});
   server.listen(args.port);
 
@@ -116,30 +120,32 @@ async function main() {
   let scenarioWhitelist: Set<string>|null = null;
 
   // user has specified scenarios to test
-  if( args.scenario.length > 0 ) {
+  if (args.scenario.length > 0) {
     scenarioWhitelist = new Set();
-    args.scenario.forEach( (scenarioName: string) => {
+    args.scenario.forEach((scenarioName: string) => {
       const scenarioNameLower = scenarioName.toLowerCase();
       let numMatches = 0;
-      config.scenarios.forEach( (scenario: any) => {
-        if( scenario.name.toLowerCase().indexOf( scenarioNameLower ) >= 0 ) {
-          if( ! scenarioWhitelist!.has( scenario.name ) ) {
+      config.scenarios.forEach((scenario: any) => {
+        if (scenario.name.toLowerCase().indexOf(scenarioNameLower) >= 0) {
+          if (!scenarioWhitelist!.has(scenario.name)) {
             scenarioWhitelist!.add(scenario.name);
           }
           numMatches++;
         }
       });
-      if( numMatches) {
-        console.warn(`Requested scenario "${scenarioName}" does not match any names found in config`);
+      if (numMatches) {
+        console.warn(`Requested scenario "${
+            scenarioName}" does not match any names found in config`);
       }
     });
   }
 
   try {
-    await screenshotCreator.fidelityTest(scenarioWhitelist, args.renderer, args.dryRun, args.quiet);
+    await screenshotCreator.fidelityTest(
+        scenarioWhitelist, args.renderer, args.dryRun, args.quiet);
 
     console.log(`✅ Results recorded to ${outputDirectory}`);
-  
+
     const fidelityRegressionPath =
         join(outputDirectory, 'fidelityRegressionResults.json');
     const {
@@ -207,11 +213,9 @@ async function main() {
       throw new Error(
           ' ❌ Fidelity test failed! Please fix the errors listed above before merging this pr!');
     }
-  }
-  catch(error: any) {
+  } catch (error: any) {
     core.setFailed(error.message);
-  }
-  finally {
+  } finally {
     server.close();
     screenshotCreator.close();
   }
