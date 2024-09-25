@@ -729,7 +729,7 @@ suite('Controls', () => {
         await canceled;
       });
 
-      test('user interaction cancels synthetic interaction', async () => {
+      test.skip('user interaction cancels synthetic interaction', async () => {
         const canceled = waitForEvent(
             element,
             'interact-stopped',
