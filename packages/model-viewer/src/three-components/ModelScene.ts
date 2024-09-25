@@ -23,7 +23,6 @@ import ModelViewerElementBase, {$renderer, EffectComposerInterface, RendererInte
 import {ModelViewerElement} from '../model-viewer.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
-import {resolveDpr} from '../utilities.js';
 
 import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
@@ -344,7 +343,7 @@ export class ModelScene extends Scene {
     this.aspect = this.width / this.height;
 
     if (this.externalRenderer != null) {
-      const dpr = resolveDpr();
+      const dpr = window.devicePixelRatio;
       this.externalRenderer.resize(width * dpr, height * dpr);
     }
 
@@ -598,6 +597,14 @@ export class ModelScene extends Scene {
    */
   getTarget(): Vector3 {
     return this.goalTarget.clone().multiplyScalar(-1);
+  }
+
+  /**
+   * Gets the current target point, which may not equal the goal returned by
+   * getTarget() due to finite input decay smoothing.
+   */
+  getDynamicTarget(): Vector3 {
+    return this.target.position.clone().multiplyScalar(-1);
   }
 
   /**

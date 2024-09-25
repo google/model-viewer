@@ -131,7 +131,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     async createTexture(uri: string, type: string = 'image/png'):
         Promise<ModelViewerTexture> {
       const {textureUtils} = this[$renderer];
-      const texture = await textureUtils!.loadImage(uri);
+      const texture = await textureUtils!.loadImage(uri, this.withCredentials);
 
       texture.userData.mimeType = type;
 
@@ -141,14 +141,16 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     async createLottieTexture(uri: string, quality = 1):
         Promise<ModelViewerTexture> {
       const {textureUtils} = this[$renderer];
-      const texture = await textureUtils!.loadLottie(uri, quality);
+      const texture =
+          await textureUtils!.loadLottie(uri, quality, this.withCredentials);
 
       return this[$buildTexture](texture);
     }
 
     createVideoTexture(uri: string): ModelViewerTexture {
       const video = document.createElement('video');
-      video.crossOrigin = this.withCredentials ? 'use-credentials' : 'anonymous';
+      video.crossOrigin =
+          this.withCredentials ? 'use-credentials' : 'anonymous';
       video.src = uri;
       video.muted = true;
       video.playsInline = true;
@@ -170,7 +172,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('variantName')) {
-        const updateVariantProgress = this[$progressTracker].beginActivity('variant-update');
+        const updateVariantProgress =
+            this[$progressTracker].beginActivity('variant-update');
         updateVariantProgress(0.1);
         const model = this[$model];
         const {variantName} = this;

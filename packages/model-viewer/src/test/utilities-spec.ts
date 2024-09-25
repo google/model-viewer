@@ -15,7 +15,7 @@
 
 import {expect} from '@esm-bundle/chai';
 
-import {clamp, deserializeUrl, resolveDpr, step} from '../utilities.js';
+import {clamp, deserializeUrl, step} from '../utilities.js';
 
 suite('utils', () => {
   suite('deserializeUrl', () => {
@@ -31,31 +31,6 @@ suite('utils', () => {
       const {origin} = window.location;
 
       expect(deserializeUrl('foo')!.indexOf(origin)).to.be.equal(0);
-    });
-  });
-
-  suite('resolveDpr', () => {
-    suite('when <meta name="viewport"> is present', () => {
-      test('resolves the device pixel ratio', () => {
-        const resolvedDpr = resolveDpr();
-        // NOTE(cdata): The main test frame is assumed to have a
-        // <meta name="viewport">. If this changes, it is probably by
-        // accident.
-        const actualDpr = self.devicePixelRatio;
-
-        expect(resolvedDpr).to.be.equal(actualDpr);
-      });
-    });
-
-    suite('when <meta name="viewport"> is not present', () => {
-      test.skip(
-          'caps the device pixel ratio to 1',
-          () => {
-              // There is not a good way to test this given the current
-              // factoring and bundling constraints
-              // TODO:
-              // https://github.com/google/model-viewer/issues/262
-          });
     });
   });
 
