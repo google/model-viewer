@@ -98,6 +98,7 @@ export class ARRenderer extends EventDispatcher<
   private turntableRotation: number|null = null;
   private oldShadowIntensity: number|null = null;
   private frame: XRFrame|null = null;
+  private viewerRefSpace: XRReferenceSpace|XRBoundedReferenceSpace|null = null;
   private initialHitSource: XRHitTestSource|null = null;
   private transientHitTestSource: XRTransientInputHitTestSource|null = null;
   private inputSource: XRInputSource|null = null;
@@ -129,13 +130,13 @@ export class ARRenderer extends EventDispatcher<
   private goalPitch = 0;
   private goalRoll = 0;
   private goalScale = 1;
-  private xDamper = new Damper(DECAY);
-  private yDamper = new Damper(DECAY);
-  private zDamper = new Damper(DECAY);
-  private yawDamper = new Damper(DECAY);
-  private pitchDamper = new Damper(DECAY);
-  private rollDamper = new Damper(DECAY);
-  private scaleDamper = new Damper(DECAY);
+  private xDamper = new Damper();
+  private yDamper = new Damper();
+  private zDamper = new Damper();
+  private yawDamper = new Damper();
+  private pitchDamper = new Damper();
+  private rollDamper = new Damper();
+  private scaleDamper = new Damper();
 
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
@@ -236,7 +237,7 @@ export class ARRenderer extends EventDispatcher<
     exitButton.addEventListener('click', this.onExitWebXRButtonContainerClick);
     this.exitWebXRButtonContainer = exitButton;
 
-    const viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
+    this.viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
 
     this.xrMode = (currentSession as any).interactionMode;
 
@@ -266,11 +267,19 @@ export class ARRenderer extends EventDispatcher<
               {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
       currentSession
           .requestHitTestSource!
-          ({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
-            this.initialHitSource = hitTestSource;
-          });
+          ({space: this.viewerRefSpace, offsetRay: ray})!.then(
+              hitTestSource => {
+                this.initialHitSource = hitTestSource;
+              });
     } else {
       this.setupControllers();
+      this.xDamper.setDecayTime(DECAY);
+      this.yDamper.setDecayTime(DECAY);
+      this.zDamper.setDecayTime(DECAY);
+      this.yawDamper.setDecayTime(DECAY);
+      this.pitchDamper.setDecayTime(DECAY);
+      this.rollDamper.setDecayTime(DECAY);
+      this.scaleDamper.setDecayTime(DECAY);
     }
 
     this.currentSession = currentSession;
@@ -588,6 +597,14 @@ export class ARRenderer extends EventDispatcher<
           ({profile: 'generic-touchscreen'})!.then(hitTestSource => {
             this.transientHitTestSource = hitTestSource;
           });
+    } else {
+      const ray = new XRRay(position, {x: 0, y: -1, z: 0});
+      this.currentSession!
+          .requestHitTestSource!
+          ({space: this.viewerRefSpace!, offsetRay: ray})!.then(
+              hitTestSource => {
+                this.initialHitSource = hitTestSource;
+              });
     }
   }
 
