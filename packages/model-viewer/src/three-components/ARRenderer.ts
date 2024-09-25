@@ -47,6 +47,8 @@ const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
 const MIN_VIEWPORT_SCALE = 0.25;
 // Furthest away you can move an object (meters).
 const MAX_DISTANCE = 10;
+// Damper decay in milliseconds.
+const DECAY = 300;
 
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
@@ -118,13 +120,13 @@ export class ARRenderer extends EventDispatcher<
   private goalPitch = 0;
   private goalRoll = 0;
   private goalScale = 1;
-  private xDamper = new Damper();
-  private yDamper = new Damper();
-  private zDamper = new Damper();
-  private yawDamper = new Damper();
-  private pitchDamper = new Damper();
-  private rollDamper = new Damper();
-  private scaleDamper = new Damper();
+  private xDamper = new Damper(DECAY);
+  private yDamper = new Damper(DECAY);
+  private zDamper = new Damper(DECAY);
+  private yawDamper = new Damper(DECAY);
+  private pitchDamper = new Damper(DECAY);
+  private rollDamper = new Damper(DECAY);
+  private scaleDamper = new Damper(DECAY);
 
   private controller1: XRTargetRaySpace;
   private controller2: XRTargetRaySpace;
@@ -541,15 +543,15 @@ export class ARRenderer extends EventDispatcher<
 
     xrCamera.projectionMatrixInverse.copy(xrCamera.projectionMatrix).invert();
 
-    const {theta, radius} =
-        (element as ModelViewerElementBase & ControlsInterface)
-            .getCameraOrbit();
+    const {theta} = (element as ModelViewerElementBase & ControlsInterface)
+                        .getCameraOrbit();
 
     // Orient model to match the 3D camera view
     const cameraDirection = xrCamera.getWorldDirection(vector3);
     scene.yaw = Math.atan2(-cameraDirection.x, -cameraDirection.z) - theta;
     this.goalYaw = scene.yaw;
 
+    const radius = Math.max(1, 2 * scene.boundingSphere.radius);
     position.copy(xrCamera.position)
         .add(cameraDirection.multiplyScalar(radius));
 
