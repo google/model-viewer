@@ -49,7 +49,7 @@ const MIN_VIEWPORT_SCALE = 0.25;
 // Furthest away you can move an object (meters).
 const MAX_DISTANCE = 10;
 // Damper decay in milliseconds.
-const DECAY = 300;
+const DECAY = 150;
 
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
@@ -352,6 +352,7 @@ export class ARRenderer extends EventDispatcher<
       controller.attach(scene.pivot);
       this.selectedController = controller;
       this.placementBox!.show = false;
+      scene.setShadowIntensity(0.01);
     }
   }
 
@@ -845,7 +846,7 @@ export class ARRenderer extends EventDispatcher<
           this.scaleDamper.update(oldScale, this.goalScale, delta, 1);
       scene.pivot.scale.set(newScale, newScale, newScale);
 
-      if (!this.isTranslating) {
+      if (this.xrMode === 'screen-space' && !this.isTranslating) {
         const offset = goal.y - y;
         if (this.placementComplete && this.placeOnWall === false) {
           box.offsetHeight = offset / newScale;
@@ -855,6 +856,9 @@ export class ARRenderer extends EventDispatcher<
           box.show = false;
           scene.setShadowIntensity(AR_SHADOW_INTENSITY);
         }
+      }
+      if (this.xrMode !== 'screen-space' && goal.equals(position)) {
+        scene.setShadowIntensity(AR_SHADOW_INTENSITY);
       }
     }
     scene.updateTarget(delta);
