@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
+import {BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
 // import {XRControllerModelFactory} from
 // 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
@@ -81,6 +81,7 @@ interface XRControllerEvent {
 }
 
 const vector3 = new Vector3();
+const quaternion = new Quaternion();
 const matrix4 = new Matrix4();
 const hitPosition = new Vector3();
 const camera = new PerspectiveCamera(45, 1, 0.1, 100);
@@ -127,8 +128,6 @@ export class ARRenderer extends EventDispatcher<
   private lastAngle = 0;
   private goalPosition = new Vector3();
   private goalYaw = 0;
-  private goalPitch = 0;
-  private goalRoll = 0;
   private goalScale = 1;
   private xDamper = new Damper();
   private yDamper = new Damper();
@@ -364,9 +363,8 @@ export class ARRenderer extends EventDispatcher<
     // drop on floor
     scene.attach(scene.pivot);
     this.selectedController = null;
-    this.goalYaw = scene.yaw;
-    this.goalPitch = 0;
-    this.goalRoll = 0;
+    this.goalYaw = Math.atan2(
+        scene.pivot.matrix.elements[8], scene.pivot.matrix.elements[10]);
     this.goalPosition.x = scene.pivot.position.x;
     this.goalPosition.z = scene.pivot.position.z;
   }
@@ -822,7 +820,7 @@ export class ARRenderer extends EventDispatcher<
 
   private moveScene(delta: number) {
     const scene = this.presentedScene!;
-    const {pivot, yaw} = scene;
+    const {pivot} = scene;
     const box = this.placementBox!;
     box.updateOpacity(delta);
     if (pivot.parent !== scene) {
@@ -861,11 +859,10 @@ export class ARRenderer extends EventDispatcher<
     }
     scene.updateTarget(delta);
     // yaw must be updated last, since this also updates the shadow position.
-    scene.yaw = this.yawDamper.update(yaw, this.goalYaw, delta, Math.PI);
-    scene.pivot.rotation.x = this.pitchDamper.update(
-        scene.pivot.rotation.x, this.goalPitch, delta, Math.PI);
-    scene.pivot.rotation.z = this.rollDamper.update(
-        scene.pivot.rotation.z, this.goalRoll, delta, Math.PI);
+    quaternion.setFromAxisAngle(vector3.set(0, 1, 0), this.goalYaw);
+    const angle = scene.pivot.quaternion.angleTo(quaternion);
+    const angleStep = angle - this.yawDamper.update(angle, 0, delta, Math.PI);
+    scene.pivot.quaternion.rotateTowards(quaternion, angleStep);
     // camera changes on every frame - user-interaction only if touching the
     // screen, plus damping time.
     scene.element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
