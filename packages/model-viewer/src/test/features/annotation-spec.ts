@@ -267,7 +267,7 @@ suite('Annotation', () => {
       expect(wrapper.classList.contains('hide')).to.be.false;
 
       element[$scene].yaw = Math.PI;
-      element[$scene].updateMatrixWorld(true);
+      element[$scene].updateMatrixWorld();
       element[$needsRender]();
 
       await waitForEvent(hotspot, 'hotspot-visibility');
