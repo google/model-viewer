@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer, XRTargetRaySpace} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
 
@@ -83,6 +83,7 @@ export class ModelScene extends Scene {
   public xrCamera: Camera|null = null;
 
   public url: string|null = null;
+  public pivot = new Object3D();
   public target = new Object3D();
   public animationNames: Array<string> = [];
   public boundingBox = new Box3();
@@ -129,7 +130,10 @@ export class ModelScene extends Scene {
     this.camera = new PerspectiveCamera(45, 1, 0.1, 100);
     this.camera.name = 'MainCamera';
 
-    this.add(this.target);
+    this.add(this.pivot);
+    this.pivot.name = 'Pivot';
+
+    this.pivot.add(this.target);
 
     this.setSize(width, height);
 
@@ -651,13 +655,13 @@ export class ModelScene extends Scene {
    * center.
    */
   set yaw(radiansY: number) {
-    this.rotation.y = radiansY;
+    this.pivot.rotation.y = radiansY;
     this.groundedSkybox.rotation.y = -radiansY;
     this.queueRender();
   }
 
   get yaw(): number {
-    return this.rotation.y;
+    return this.pivot.rotation.y;
   }
 
   set animationTime(value: number) {
@@ -854,11 +858,19 @@ export class ModelScene extends Scene {
     }
   }
 
+  getHit(object: Object3D = this) {
+    const hits = raycaster.intersectObject(object, true);
+    return hits.find((hit) => hit.object.visible && !hit.object.userData.noHit);
+  }
+
+  hitFromController(controller: XRTargetRaySpace, object: Object3D = this) {
+    raycaster.setFromXRController(controller);
+    return this.getHit(object);
+  }
+
   hitFromPoint(ndcPosition: Vector2, object: Object3D = this) {
     raycaster.setFromCamera(ndcPosition, this.getCamera());
-    const hits = raycaster.intersectObject(object, true);
-
-    return hits.find((hit) => hit.object.visible && !hit.object.userData.noHit);
+    return this.getHit(object);
   }
 
   /**

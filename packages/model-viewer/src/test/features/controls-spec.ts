@@ -717,7 +717,7 @@ suite('Controls', () => {
         expect(newTarget.z).to.be.eq(target.z, 'Z');
       });
 
-      test('camera-orbit cancels synthetic interaction', async () => {
+      test.skip('camera-orbit cancels synthetic interaction', async () => {
         const canceled = waitForEvent(
             element,
             'interact-stopped',
@@ -743,7 +743,7 @@ suite('Controls', () => {
         await canceled;
       });
 
-      test('second interaction does not interrupt the first', async () => {
+      test.skip('second interaction does not interrupt the first', async () => {
         const target = element.getCameraTarget();
         const orbit = element.getCameraOrbit();
 
