@@ -139,6 +139,9 @@ export class ARRenderer extends EventDispatcher<
   private rollDamper = new Damper();
   private scaleDamper = new Damper();
 
+  private listenerStart = this.onControllerSelectStart.bind(this);
+  private listenerEnd = this.onControllerSelectEnd.bind(this);
+
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
   constructor(private renderer: Renderer) {
@@ -294,18 +297,12 @@ export class ARRenderer extends EventDispatcher<
 
   private setupControllers() {
     this.controller1 = this.threeRenderer.xr.getController(0);
-    this.controller1.addEventListener(
-        'selectstart',
-        (e: XRControllerEvent) => this.onControllerSelectStart(e));
-    this.controller1.addEventListener(
-        'selectend', (e: XRControllerEvent) => this.onControllerSelectEnd(e));
+    this.controller1.addEventListener('selectstart', this.listenerStart);
+    this.controller1.addEventListener('selectend', this.listenerEnd);
 
     this.controller2 = this.threeRenderer.xr.getController(1);
-    this.controller2.addEventListener(
-        'selectstart',
-        (e: XRControllerEvent) => this.onControllerSelectStart(e));
-    this.controller2.addEventListener(
-        'selectend', (e: XRControllerEvent) => this.onControllerSelectEnd(e));
+    this.controller2.addEventListener('selectstart', this.listenerStart);
+    this.controller2.addEventListener('selectend', this.listenerEnd);
 
     // const controllerModelFactory = new XRControllerModelFactory();
 
@@ -346,11 +343,20 @@ export class ARRenderer extends EventDispatcher<
     return intersection != null;
   }
 
+  private controllerSeparation() {
+    return this.controller1!.position.distanceTo(this.controller2!.position);
+  }
+
   private onControllerSelectStart(event: XRControllerEvent) {
     const scene = this.presentedScene!;
     const controller = event.target;
 
     if (this.placementBox!.controllerIntersection(scene, controller) != null) {
+      if (this.selectedController != null && scene.canScale) {
+        this.isTwoFingering = true;
+        this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
+      }
+
       controller.attach(scene.pivot);
       this.selectedController = controller;
       this.placementBox!.show = false;
@@ -365,6 +371,7 @@ export class ARRenderer extends EventDispatcher<
       this.relativeOrientation.copy(controller.quaternion)
           .invert()
           .multiply(scene.pivot.quaternion);
+
       if (this.selectedController == otherController) {
         this.lastOrientation.copy(otherController.quaternion);
       }
@@ -374,6 +381,7 @@ export class ARRenderer extends EventDispatcher<
   private onControllerSelectEnd(event: XRControllerEvent) {
     const controller = event.target;
     controller.userData.turning = false;
+    this.isTwoFingering = false;
     if (this.selectedController != null &&
         this.selectedController != controller) {
       return;
@@ -525,10 +533,18 @@ export class ARRenderer extends EventDispatcher<
     }
 
     if (this.xrMode !== 'screen-space') {
-      this.controller1?.removeFromParent();
-      this.controller2?.removeFromParent();
-      this.controller1 = null;
-      this.controller2 = null;
+      if (this.controller1 != null) {
+        this.controller1.removeEventListener('selectstart', this.listenerStart);
+        this.controller1.removeEventListener('selectend', this.listenerEnd);
+        this.controller1.removeFromParent();
+        this.controller1 = null;
+      }
+      if (this.controller2 != null) {
+        this.controller2.removeEventListener('selectstart', this.listenerStart);
+        this.controller2.removeEventListener('selectend', this.listenerEnd);
+        this.controller2.removeFromParent();
+        this.controller2 = null;
+      }
     }
 
     this.lastTick = null;
@@ -751,6 +767,12 @@ export class ARRenderer extends EventDispatcher<
     };
   }
 
+  private setScale(separation: number) {
+    const scale = separation / this.firstRatio;
+    this.goalScale =
+        (scale < SCALE_SNAP_HIGH && scale > SCALE_SNAP_LOW) ? 1 : scale;
+  }
+
   private processInput(frame: XRFrame) {
     const hitSource = this.transientHitTestSource;
     if (hitSource == null) {
@@ -776,9 +798,7 @@ export class ARRenderer extends EventDispatcher<
           this.goalYaw += deltaYaw;
         }
         if (scene.canScale) {
-          const scale = separation / this.firstRatio;
-          this.goalScale =
-              (scale < SCALE_SNAP_HIGH && scale > SCALE_SNAP_LOW) ? 1 : scale;
+          this.setScale(separation);
         }
       }
       return;
@@ -848,31 +868,39 @@ export class ARRenderer extends EventDispatcher<
           .multiply(this.relativeOrientation);
       if (this.selectedController &&
           this.selectedController === this.controller2) {
-        pivot.quaternion.premultiply(this.lastOrientation);
-        pivot.quaternion.premultiply(
-            quaternion.copy(this.controller2.quaternion).invert());
+        pivot.quaternion.premultiply(this.lastOrientation)
+            .premultiply(quaternion.copy(this.controller2.quaternion).invert());
       }
     } else if (this.controller2 && this.controller2.userData.turning) {
       pivot.quaternion.copy(this.controller2.quaternion)
           .multiply(this.relativeOrientation);
       if (this.selectedController &&
           this.selectedController === this.controller1) {
-        pivot.quaternion.premultiply(this.lastOrientation);
-        pivot.quaternion.premultiply(
-            quaternion.copy(this.controller1.quaternion).invert());
+        pivot.quaternion.premultiply(this.lastOrientation)
+            .premultiply(quaternion.copy(this.controller1.quaternion).invert());
       }
     }
+
+    if (this.controller1 && this.controller2 && this.isTwoFingering) {
+      this.setScale(this.controllerSeparation());
+    }
+
+    const oldScale = scene.pivot.scale.x;
+    if (this.goalScale !== oldScale) {
+      const newScale =
+          this.scaleDamper.update(oldScale, this.goalScale, delta, 1);
+      scene.pivot.scale.set(newScale, newScale, newScale);
+    }
+
     if (pivot.parent !== scene) {
       return;  // attached to controller instead
     }
     const {position} = pivot;
     const boundingRadius = scene.boundingSphere.radius;
     const goal = this.goalPosition;
-    const oldScale = scene.pivot.scale.x;
 
     let source = ChangeSource.NONE;
-
-    if (!goal.equals(position) || this.goalScale !== oldScale) {
+    if (!goal.equals(position)) {
       source = ChangeSource.USER_INTERACTION;
       let {x, y, z} = position;
       x = this.xDamper.update(x, goal.x, delta, boundingRadius);
@@ -880,14 +908,10 @@ export class ARRenderer extends EventDispatcher<
       z = this.zDamper.update(z, goal.z, delta, boundingRadius);
       position.set(x, y, z);
 
-      const newScale =
-          this.scaleDamper.update(oldScale, this.goalScale, delta, 1);
-      scene.pivot.scale.set(newScale, newScale, newScale);
-
       if (this.xrMode === 'screen-space' && !this.isTranslating) {
         const offset = goal.y - y;
         if (this.placementComplete && this.placeOnWall === false) {
-          box.offsetHeight = offset / newScale;
+          box.offsetHeight = offset / scene.pivot.scale.x;
           scene.setShadowOffset(offset);
         } else if (offset === 0) {
           this.placementComplete = true;
