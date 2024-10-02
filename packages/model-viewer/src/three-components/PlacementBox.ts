@@ -106,6 +106,8 @@ export class PlacementBox extends Mesh {
     (this.hitPlane.material as Material).side = DoubleSide;
     this.add(this.hitPlane);
 
+    // The box matches the dimensions of the plane (extra radius all around),
+    // but only the top is expanded by radius, not the bottom.
     this.hitBox = new Mesh(new BoxGeometry(
         size.x + 2 * RADIUS, size.y + RADIUS, size.z + 2 * RADIUS));
     this.hitBox.visible = false;

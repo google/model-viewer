@@ -50,6 +50,8 @@ const MIN_VIEWPORT_SCALE = 0.25;
 const MAX_DISTANCE = 10;
 // Damper decay in milliseconds.
 const DECAY = 150;
+// Longer controller/hand indicator line (meters).
+const MAX_LINE_LENGTH = 5;
 
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
@@ -111,8 +113,6 @@ export class ARRenderer extends EventDispatcher<
   private xrMode: 'screen-space'|'world-space'|null = null;
   private controller1: XRTargetRaySpace|null = null;
   private controller2: XRTargetRaySpace|null = null;
-  // private controllerGrip1: XRTargetRaySpace|null = null;
-  // private controllerGrip2: XRTargetRaySpace|null = null;
   private selectedController: XRTargetRaySpace|null = null;
 
   private tracking = true;
@@ -304,19 +304,9 @@ export class ARRenderer extends EventDispatcher<
     this.controller2.addEventListener('selectstart', this.listenerStart);
     this.controller2.addEventListener('selectend', this.listenerEnd);
 
-    // const controllerModelFactory = new XRControllerModelFactory();
-
-    // this.controllerGrip1 = this.threeRenderer.xr.getControllerGrip(0);
-    // this.controllerGrip1.add(
-    //     controllerModelFactory.createControllerModel(this.controllerGrip1));
-
-    // this.controllerGrip2 = this.threeRenderer.xr.getControllerGrip(1);
-    // this.controllerGrip2.add(
-    //     controllerModelFactory.createControllerModel(this.controllerGrip2));
-
     const line = new Line(lineGeometry);
     line.name = 'line';
-    line.scale.z = 5;
+    line.scale.z = MAX_LINE_LENGTH;
 
     this.controller1.add(line);
     this.controller2.add(line.clone());
@@ -324,8 +314,6 @@ export class ARRenderer extends EventDispatcher<
     const scene = this.presentedScene!;
     scene.add(this.controller1);
     scene.add(this.controller2);
-    // scene.add(this.controllerGrip1);
-    // scene.add(this.controllerGrip2);
   }
 
   private hover(controller: XRTargetRaySpace) {
@@ -339,7 +327,8 @@ export class ARRenderer extends EventDispatcher<
     const line = controller.getObjectByName('line')!;
     const intersection =
         this.placementBox!.controllerIntersection(scene, controller)
-    line.scale.z = intersection == null ? 5 : intersection.distance;
+    line.scale.z =
+        intersection == null ? MAX_LINE_LENGTH : intersection.distance;
     return intersection != null;
   }
 
