@@ -124,6 +124,8 @@ export class ARRenderer extends EventDispatcher<
   private isRotating = false;
   private isTwoFingering = false;
   private lastDragPosition = new Vector3();
+  private relativeOrientation = new Quaternion();
+  private lastOrientation = new Quaternion();
   private firstRatio = 0;
   private lastAngle = 0;
   private goalPosition = new Vector3();
@@ -353,11 +355,27 @@ export class ARRenderer extends EventDispatcher<
       this.selectedController = controller;
       this.placementBox!.show = false;
       scene.setShadowIntensity(0.01);
+    } else {
+      const otherController = controller === this.controller1 ?
+          this.controller2! :
+          this.controller1!;
+      controller.userData.turning = true;
+      otherController.userData.turning = false;
+
+      this.relativeOrientation.copy(controller.quaternion)
+          .invert()
+          .multiply(scene.pivot.quaternion);
+      if (this.selectedController == otherController) {
+        this.lastOrientation.copy(otherController.quaternion);
+      }
     }
   }
 
   private onControllerSelectEnd(event: XRControllerEvent) {
-    if (event.target != this.selectedController) {
+    const controller = event.target;
+    controller.userData.turning = false;
+    if (this.selectedController != null &&
+        this.selectedController != controller) {
       return;
     }
     const scene = this.presentedScene!;
@@ -824,6 +842,26 @@ export class ARRenderer extends EventDispatcher<
     const {pivot} = scene;
     const box = this.placementBox!;
     box.updateOpacity(delta);
+
+    if (this.controller1 && this.controller1.userData.turning) {
+      pivot.quaternion.copy(this.controller1.quaternion)
+          .multiply(this.relativeOrientation);
+      if (this.selectedController &&
+          this.selectedController === this.controller2) {
+        pivot.quaternion.premultiply(this.lastOrientation);
+        pivot.quaternion.premultiply(
+            quaternion.copy(this.controller2.quaternion).invert());
+      }
+    } else if (this.controller2 && this.controller2.userData.turning) {
+      pivot.quaternion.copy(this.controller2.quaternion)
+          .multiply(this.relativeOrientation);
+      if (this.selectedController &&
+          this.selectedController === this.controller1) {
+        pivot.quaternion.premultiply(this.lastOrientation);
+        pivot.quaternion.premultiply(
+            quaternion.copy(this.controller1.quaternion).invert());
+      }
+    }
     if (pivot.parent !== scene) {
       return;  // attached to controller instead
     }
