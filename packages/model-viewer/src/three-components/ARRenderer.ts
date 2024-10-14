@@ -39,8 +39,7 @@ const ROTATION_RATE = 1.5;
 // assumption for the start of the session and UI will lack landscape mode to
 // encourage upright use.
 const HIT_ANGLE_DEG = 20;
-const SCALE_SNAP_SCREEN = 0.25;
-const SCALE_SNAP_HEADSET = 0.1;
+const SCALE_SNAP = 0.2;
 // For automatic dynamic viewport scaling, don't let the scale drop below this
 // limit.
 const MIN_VIEWPORT_SCALE = 0.25;
@@ -346,7 +345,7 @@ export class ARRenderer extends EventDispatcher<
     }
   }
 
-  private hover(controller: XRTargetRaySpace) {
+  private hover(controller: XRTargetRaySpace): boolean {
     // Do not highlight in mobile-ar
     if (this.xrMode === 'screen-space' ||
         this.selectedController == controller) {
@@ -371,17 +370,16 @@ export class ARRenderer extends EventDispatcher<
 
     if (this.placementBox!.controllerIntersection(scene, controller) != null) {
       if (this.selectedController != null) {
-        this.selectedController.userData.line.visible = false;
+        controller.userData.line.visible = false;
         if (scene.canScale) {
           this.isTwoFingering = true;
           this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
           this.scaleLine.visible = true;
         }
+      } else {
+        controller.attach(scene.pivot);
+        this.selectedController = controller;
       }
-
-      controller.attach(scene.pivot);
-      this.selectedController = controller;
-      this.placementBox!.show = false;
       scene.setShadowIntensity(0.01);
     } else {
       const otherController = controller === this.controller1 ?
@@ -794,11 +792,7 @@ export class ARRenderer extends EventDispatcher<
 
   private setScale(separation: number) {
     const scale = separation / this.firstRatio;
-    this.goalScale = (Math.abs(scale - 1) < (this.xrMode === 'screen-space' ?
-                                                 SCALE_SNAP_SCREEN :
-                                                 SCALE_SNAP_HEADSET)) ?
-        1 :
-        scale;
+    this.goalScale = (Math.abs(scale - 1) < SCALE_SNAP) ? 1 : scale;
   }
 
   private processInput(frame: XRFrame) {
@@ -973,7 +967,7 @@ export class ARRenderer extends EventDispatcher<
     if (this.xrMode !== 'screen-space') {
       const over1 = this.hover(this.controller1!);
       const over2 = this.hover(this.controller2!);
-      this.placementBox!.show = over1 || over2;
+      this.placementBox!.show = (over1 || over2) && !this.isTwoFingering;
     }
 
     this.frame = frame;
