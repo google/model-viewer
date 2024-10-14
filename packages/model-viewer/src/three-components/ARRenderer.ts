@@ -39,8 +39,8 @@ const ROTATION_RATE = 1.5;
 // assumption for the start of the session and UI will lack landscape mode to
 // encourage upright use.
 const HIT_ANGLE_DEG = 20;
-const SCALE_SNAP_HIGH = 1.3;
-const SCALE_SNAP_LOW = 1 / SCALE_SNAP_HIGH;
+const SCALE_SNAP_SCREEN = 0.25;
+const SCALE_SNAP_HEADSET = 0.1;
 // For automatic dynamic viewport scaling, don't let the scale drop below this
 // limit.
 const MIN_VIEWPORT_SCALE = 0.25;
@@ -134,6 +134,7 @@ export class ARRenderer extends EventDispatcher<
   private isTwoFingering = false;
   private lastDragPosition = new Vector3();
   private relativeOrientation = new Quaternion();
+  private scaleLine = new Line(lineGeometry);
   private firstRatio = 0;
   private lastAngle = 0;
   private goalPosition = new Vector3();
@@ -291,7 +292,6 @@ export class ARRenderer extends EventDispatcher<
       this.yawDamper.setDecayTime(DECAY);
       this.pitchDamper.setDecayTime(DECAY);
       this.rollDamper.setDecayTime(DECAY);
-      this.scaleDamper.setDecayTime(DECAY);
     }
 
     this.currentSession = currentSession;
@@ -319,12 +319,16 @@ export class ARRenderer extends EventDispatcher<
     this.controller1.add(line);
     this.controller2.add(line.clone());
 
+    this.scaleLine.name = 'scale line';
+    this.scaleLine.visible = false;
+    this.controller1.add(this.scaleLine);
+
     const scene = this.presentedScene!;
     const {size} = scene;
     const scale = BOX_SIZE / Math.max(size.x, size.y, size.z);
     const box = new Mesh(boxGeometry);
     box.name = 'box';
-    box.scale.set(size.x, size.y, size.z).multiplyScalar(scale);
+    box.scale.copy(size).multiplyScalar(scale);
     box.visible = false;
 
     this.controller1.userData.box = box;
@@ -365,6 +369,7 @@ export class ARRenderer extends EventDispatcher<
       if (this.selectedController != null && scene.canScale) {
         this.isTwoFingering = true;
         this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
+        this.scaleLine.visible = true;
       }
 
       controller.attach(scene.pivot);
@@ -391,6 +396,7 @@ export class ARRenderer extends EventDispatcher<
     const controller = event.target;
     controller.userData.box.visible = false;
     this.isTwoFingering = false;
+    this.scaleLine.visible = false;
     if (this.selectedController != null &&
         this.selectedController != controller) {
       return;
@@ -778,8 +784,11 @@ export class ARRenderer extends EventDispatcher<
 
   private setScale(separation: number) {
     const scale = separation / this.firstRatio;
-    this.goalScale =
-        (scale < SCALE_SNAP_HIGH && scale > SCALE_SNAP_LOW) ? 1 : scale;
+    this.goalScale = (Math.abs(scale - 1) < (this.xrMode === 'screen-space' ?
+                                                 SCALE_SNAP_SCREEN :
+                                                 SCALE_SNAP_HEADSET)) ?
+        1 :
+        scale;
   }
 
   private processInput(frame: XRFrame) {
@@ -891,7 +900,10 @@ export class ARRenderer extends EventDispatcher<
     }
 
     if (this.controller1 && this.controller2 && this.isTwoFingering) {
-      this.setScale(this.controllerSeparation());
+      const dist = this.controllerSeparation();
+      this.setScale(dist);
+      this.scaleLine.scale.z = -dist;
+      this.scaleLine.lookAt(this.controller2.position);
     }
 
     const oldScale = scene.pivot.scale.x;
