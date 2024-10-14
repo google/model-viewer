@@ -79,7 +79,7 @@ export interface ARTrackingEvent extends ThreeEvent {
 }
 
 interface UserData {
-  box: Mesh
+  box: Mesh, line: Line
 }
 
 interface Controller extends XRTargetRaySpace {
@@ -316,8 +316,11 @@ export class ARRenderer extends EventDispatcher<
     line.name = 'line';
     line.scale.z = MAX_LINE_LENGTH;
 
+    this.controller1.userData.line = line;
     this.controller1.add(line);
-    this.controller2.add(line.clone());
+    const line2 = line.clone();
+    this.controller2.userData.line = line2;
+    this.controller2.add(line2);
 
     this.scaleLine.name = 'scale line';
     this.scaleLine.visible = false;
@@ -349,10 +352,9 @@ export class ARRenderer extends EventDispatcher<
     }
 
     const scene = this.presentedScene!;
-    const line = controller.getObjectByName('line')!;
     const intersection =
         this.placementBox!.controllerIntersection(scene, controller)
-    line.scale.z =
+    controller.userData.line.scale.z =
         intersection == null ? MAX_LINE_LENGTH : intersection.distance;
     return intersection != null;
   }
@@ -370,6 +372,7 @@ export class ARRenderer extends EventDispatcher<
         this.isTwoFingering = true;
         this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
         this.scaleLine.visible = true;
+        this.selectedController.userData.line.visible = false;
       }
 
       controller.attach(scene.pivot);
@@ -387,6 +390,7 @@ export class ARRenderer extends EventDispatcher<
 
       otherController.userData.box.visible = false;
       controller.userData.box.visible = true;
+      controller.userData.line.visible = false;
 
       controller.userData.box.quaternion.copy(this.relativeOrientation);
     }
@@ -395,6 +399,7 @@ export class ARRenderer extends EventDispatcher<
   private onControllerSelectEnd(event: XRControllerEvent) {
     const controller = event.target;
     controller.userData.box.visible = false;
+    controller.userData.line.visible = true;
     this.isTwoFingering = false;
     this.scaleLine.visible = false;
     if (this.selectedController != null &&
