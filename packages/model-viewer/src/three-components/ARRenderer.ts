@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
-// import {XRControllerModelFactory} from
-// 'three/examples/jsm/webxr/XRControllerModelFactory.js';
+import {BoxGeometry, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, Mesh, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
@@ -52,6 +50,8 @@ const MAX_DISTANCE = 10;
 const DECAY = 150;
 // Longer controller/hand indicator line (meters).
 const MAX_LINE_LENGTH = 5;
+// Maximum dimension of rotation indicator box on controller (meters).
+const BOX_SIZE = 0.1;
 
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
@@ -78,8 +78,16 @@ export interface ARTrackingEvent extends ThreeEvent {
   status: ARTracking,
 }
 
+interface UserData {
+  box: Mesh
+}
+
+interface Controller extends XRTargetRaySpace {
+  userData: UserData
+}
+
 interface XRControllerEvent {
-  type: XRControllerEventType, data: XRInputSource, target: XRTargetRaySpace
+  type: XRControllerEventType, data: XRInputSource, target: Controller
 }
 
 const vector3 = new Vector3();
@@ -89,6 +97,7 @@ const hitPosition = new Vector3();
 const camera = new PerspectiveCamera(45, 1, 0.1, 100);
 const lineGeometry = new BufferGeometry().setFromPoints(
     [new Vector3(0, 0, 0), new Vector3(0, 0, -1)]);
+const boxGeometry = new BoxGeometry();
 
 export class ARRenderer extends EventDispatcher<
     {status: {status: ARStatus}, tracking: {status: ARTracking}}> {
@@ -111,9 +120,9 @@ export class ARRenderer extends EventDispatcher<
   private overlay: HTMLElement|null = null;
   private xrLight: XREstimatedLight|null = null;
   private xrMode: 'screen-space'|'world-space'|null = null;
-  private controller1: XRTargetRaySpace|null = null;
-  private controller2: XRTargetRaySpace|null = null;
-  private selectedController: XRTargetRaySpace|null = null;
+  private controller1: Controller|null = null;
+  private controller2: Controller|null = null;
+  private selectedController: Controller|null = null;
 
   private tracking = true;
   private frames = 0;
@@ -125,7 +134,6 @@ export class ARRenderer extends EventDispatcher<
   private isTwoFingering = false;
   private lastDragPosition = new Vector3();
   private relativeOrientation = new Quaternion();
-  private lastOrientation = new Quaternion();
   private firstRatio = 0;
   private lastAngle = 0;
   private goalPosition = new Vector3();
@@ -296,11 +304,11 @@ export class ARRenderer extends EventDispatcher<
   }
 
   private setupControllers() {
-    this.controller1 = this.threeRenderer.xr.getController(0);
+    this.controller1 = this.threeRenderer.xr.getController(0) as Controller;
     this.controller1.addEventListener('selectstart', this.listenerStart);
     this.controller1.addEventListener('selectend', this.listenerEnd);
 
-    this.controller2 = this.threeRenderer.xr.getController(1);
+    this.controller2 = this.threeRenderer.xr.getController(1) as Controller;
     this.controller2.addEventListener('selectstart', this.listenerStart);
     this.controller2.addEventListener('selectend', this.listenerEnd);
 
@@ -312,6 +320,19 @@ export class ARRenderer extends EventDispatcher<
     this.controller2.add(line.clone());
 
     const scene = this.presentedScene!;
+    const {size} = scene;
+    const scale = BOX_SIZE / Math.max(size.x, size.y, size.z);
+    const box = new Mesh(boxGeometry);
+    box.name = 'box';
+    box.scale.set(size.x, size.y, size.z).multiplyScalar(scale);
+    box.visible = false;
+
+    this.controller1.userData.box = box;
+    this.controller1.add(box);
+    const box2 = box.clone();
+    this.controller2.userData.box = box2;
+    this.controller2.add(box2);
+
     scene.add(this.controller1);
     scene.add(this.controller2);
   }
@@ -354,22 +375,21 @@ export class ARRenderer extends EventDispatcher<
       const otherController = controller === this.controller1 ?
           this.controller2! :
           this.controller1!;
-      controller.userData.turning = true;
-      otherController.userData.turning = false;
 
       this.relativeOrientation.copy(controller.quaternion)
           .invert()
-          .multiply(scene.pivot.quaternion);
+          .multiply(scene.pivot.getWorldQuaternion(quaternion));
 
-      if (this.selectedController == otherController) {
-        this.lastOrientation.copy(otherController.quaternion);
-      }
+      otherController.userData.box.visible = false;
+      controller.userData.box.visible = true;
+
+      controller.userData.box.quaternion.copy(this.relativeOrientation);
     }
   }
 
   private onControllerSelectEnd(event: XRControllerEvent) {
     const controller = event.target;
-    controller.userData.turning = false;
+    controller.userData.box.visible = false;
     this.isTwoFingering = false;
     if (this.selectedController != null &&
         this.selectedController != controller) {
@@ -852,21 +872,21 @@ export class ARRenderer extends EventDispatcher<
     const box = this.placementBox!;
     box.updateOpacity(delta);
 
-    if (this.controller1 && this.controller1.userData.turning) {
+    if (this.controller1 && this.controller1.userData.box.visible) {
       pivot.quaternion.copy(this.controller1.quaternion)
           .multiply(this.relativeOrientation);
       if (this.selectedController &&
           this.selectedController === this.controller2) {
-        pivot.quaternion.premultiply(this.lastOrientation)
-            .premultiply(quaternion.copy(this.controller2.quaternion).invert());
+        pivot.quaternion.premultiply(
+            quaternion.copy(this.controller2.quaternion).invert());
       }
-    } else if (this.controller2 && this.controller2.userData.turning) {
+    } else if (this.controller2 && this.controller2.userData.box.visible) {
       pivot.quaternion.copy(this.controller2.quaternion)
           .multiply(this.relativeOrientation);
       if (this.selectedController &&
           this.selectedController === this.controller1) {
-        pivot.quaternion.premultiply(this.lastOrientation)
-            .premultiply(quaternion.copy(this.controller1.quaternion).invert());
+        pivot.quaternion.premultiply(
+            quaternion.copy(this.controller1.quaternion).invert());
       }
     }
 
