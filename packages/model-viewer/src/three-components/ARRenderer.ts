@@ -270,20 +270,19 @@ export class ARRenderer extends EventDispatcher<
 
     scene.element.addEventListener('load', this.onUpdateScene);
 
-    if (this.xrMode === 'screen-space') {
-      const radians = HIT_ANGLE_DEG * Math.PI / 180;
-      const ray = this.placeOnWall === true ?
-          undefined :
-          new XRRay(
-              new DOMPoint(0, 0, 0),
-              {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
-      currentSession
-          .requestHitTestSource!
-          ({space: this.viewerRefSpace, offsetRay: ray})!.then(
-              hitTestSource => {
-                this.initialHitSource = hitTestSource;
-              });
-    } else {
+    const radians = HIT_ANGLE_DEG * Math.PI / 180;
+    const ray = this.placeOnWall === true ?
+        undefined :
+        new XRRay(
+            new DOMPoint(0, 0, 0),
+            {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
+    currentSession
+        .requestHitTestSource!
+        ({space: this.viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
+          this.initialHitSource = hitTestSource;
+        });
+
+    if (this.xrMode !== 'screen-space') {
       this.setupControllers();
       this.xDamper.setDecayTime(DECAY);
       this.yDamper.setDecayTime(DECAY);
@@ -653,14 +652,6 @@ export class ARRenderer extends EventDispatcher<
           ({profile: 'generic-touchscreen'})!.then(hitTestSource => {
             this.transientHitTestSource = hitTestSource;
           });
-    } else {
-      const ray = new XRRay(position, {x: 0, y: -1, z: 0});
-      this.currentSession!
-          .requestHitTestSource!
-          ({space: this.viewerRefSpace!, offsetRay: ray})!.then(
-              hitTestSource => {
-                this.initialHitSource = hitTestSource;
-              });
     }
   }
 
