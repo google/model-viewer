@@ -46,7 +46,7 @@ const SCALE_SNAP_HEADSET = 0.1;
 const MIN_VIEWPORT_SCALE = 0.25;
 // Furthest away you can move an object (meters).
 const MAX_DISTANCE = 10;
-// Damper decay in milliseconds.
+// Damper decay in milliseconds for the headset - screen uses default.
 const DECAY = 150;
 // Longer controller/hand indicator line (meters).
 const MAX_LINE_LENGTH = 5;
@@ -312,36 +312,38 @@ export class ARRenderer extends EventDispatcher<
     this.controller2.addEventListener('selectstart', this.listenerStart);
     this.controller2.addEventListener('selectend', this.listenerEnd);
 
-    const line = new Line(lineGeometry);
-    line.name = 'line';
-    line.scale.z = MAX_LINE_LENGTH;
-
-    this.controller1.userData.line = line;
-    this.controller1.add(line);
-    const line2 = line.clone();
-    this.controller2.userData.line = line2;
-    this.controller2.add(line2);
-
-    this.scaleLine.name = 'scale line';
-    this.scaleLine.visible = false;
-    this.controller1.add(this.scaleLine);
-
     const scene = this.presentedScene!;
-    const {size} = scene;
-    const scale = BOX_SIZE / Math.max(size.x, size.y, size.z);
-    const box = new Mesh(boxGeometry);
-    box.name = 'box';
-    box.scale.copy(size).multiplyScalar(scale);
-    box.visible = false;
-
-    this.controller1.userData.box = box;
-    this.controller1.add(box);
-    const box2 = box.clone();
-    this.controller2.userData.box = box2;
-    this.controller2.add(box2);
-
     scene.add(this.controller1);
     scene.add(this.controller2);
+
+    if (!this.controller1.userData.line) {
+      const line = new Line(lineGeometry);
+      line.name = 'line';
+      line.scale.z = MAX_LINE_LENGTH;
+
+      this.controller1.userData.line = line;
+      this.controller1.add(line);
+      const line2 = line.clone();
+      this.controller2.userData.line = line2;
+      this.controller2.add(line2);
+
+      this.scaleLine.name = 'scale line';
+      this.scaleLine.visible = false;
+      this.controller1.add(this.scaleLine);
+
+      const {size} = scene;
+      const scale = BOX_SIZE / Math.max(size.x, size.y, size.z);
+      const box = new Mesh(boxGeometry);
+      box.name = 'box';
+      box.scale.copy(size).multiplyScalar(scale);
+      box.visible = false;
+
+      this.controller1.userData.box = box;
+      this.controller1.add(box);
+      const box2 = box.clone();
+      this.controller2.userData.box = box2;
+      this.controller2.add(box2);
+    }
   }
 
   private hover(controller: XRTargetRaySpace) {
@@ -368,11 +370,13 @@ export class ARRenderer extends EventDispatcher<
     const controller = event.target;
 
     if (this.placementBox!.controllerIntersection(scene, controller) != null) {
-      if (this.selectedController != null && scene.canScale) {
-        this.isTwoFingering = true;
-        this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
-        this.scaleLine.visible = true;
+      if (this.selectedController != null) {
         this.selectedController.userData.line.visible = false;
+        if (scene.canScale) {
+          this.isTwoFingering = true;
+          this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
+          this.scaleLine.visible = true;
+        }
       }
 
       controller.attach(scene.pivot);
@@ -565,6 +569,7 @@ export class ARRenderer extends EventDispatcher<
         this.controller2.removeFromParent();
         this.controller2 = null;
       }
+      this.selectedController = null;
     }
 
     this.lastTick = null;
