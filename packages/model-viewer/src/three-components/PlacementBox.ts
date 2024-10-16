@@ -210,7 +210,7 @@ export class PlacementBox extends Mesh {
     (this.hitBox.material as Material).dispose();
     this.geometry.dispose();
     (this.material as Material).dispose();
-    this.hitBox.parent?.remove(this.hitBox);
-    this.parent?.remove(this);
+    this.hitBox.removeFromParent();
+    this.removeFromParent();
   }
 }

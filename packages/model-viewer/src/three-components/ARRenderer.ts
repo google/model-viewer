@@ -109,7 +109,6 @@ export class ARRenderer extends EventDispatcher<
   private turntableRotation: number|null = null;
   private oldShadowIntensity: number|null = null;
   private frame: XRFrame|null = null;
-  private viewerRefSpace: XRReferenceSpace|XRBoundedReferenceSpace|null = null;
   private initialHitSource: XRHitTestSource|null = null;
   private transientHitTestSource: XRTransientInputHitTestSource|null = null;
   private inputSource: XRInputSource|null = null;
@@ -249,7 +248,7 @@ export class ARRenderer extends EventDispatcher<
     exitButton.addEventListener('click', this.onExitWebXRButtonContainerClick);
     this.exitWebXRButtonContainer = exitButton;
 
-    this.viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
+    const viewerRefSpace = await currentSession.requestReferenceSpace('viewer');
 
     this.xrMode = (currentSession as any).interactionMode;
 
@@ -278,7 +277,7 @@ export class ARRenderer extends EventDispatcher<
             {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
     currentSession
         .requestHitTestSource!
-        ({space: this.viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
+        ({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
           this.initialHitSource = hitTestSource;
         });
 
@@ -705,6 +704,7 @@ export class ARRenderer extends EventDispatcher<
     }
 
     this.placementBox!.show = true;
+
     // If the user is translating, let the finger hit-ray take precedence and
     // ignore this hit result.
     if (!this.isTranslating) {
