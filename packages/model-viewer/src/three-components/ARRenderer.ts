@@ -146,9 +146,6 @@ export class ARRenderer extends EventDispatcher<
   private rollDamper = new Damper();
   private scaleDamper = new Damper();
 
-  private listenerStart = this.onControllerSelectStart.bind(this);
-  private listenerEnd = this.onControllerSelectEnd.bind(this);
-
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
   constructor(private renderer: Renderer) {
@@ -302,12 +299,14 @@ export class ARRenderer extends EventDispatcher<
 
   private setupControllers() {
     this.controller1 = this.threeRenderer.xr.getController(0) as Controller;
-    this.controller1.addEventListener('selectstart', this.listenerStart);
-    this.controller1.addEventListener('selectend', this.listenerEnd);
+    this.controller1.addEventListener(
+        'selectstart', this.onControllerSelectStart);
+    this.controller1.addEventListener('selectend', this.onControllerSelectEnd);
 
     this.controller2 = this.threeRenderer.xr.getController(1) as Controller;
-    this.controller2.addEventListener('selectstart', this.listenerStart);
-    this.controller2.addEventListener('selectend', this.listenerEnd);
+    this.controller2.addEventListener(
+        'selectstart', this.onControllerSelectStart);
+    this.controller2.addEventListener('selectend', this.onControllerSelectEnd);
 
     const scene = this.presentedScene!;
     scene.add(this.controller1);
@@ -362,7 +361,7 @@ export class ARRenderer extends EventDispatcher<
     return this.controller1!.position.distanceTo(this.controller2!.position);
   }
 
-  private onControllerSelectStart(event: XRControllerEvent) {
+  private onControllerSelectStart = (event: XRControllerEvent) => {
     const scene = this.presentedScene!;
     const controller = event.target;
 
@@ -394,9 +393,9 @@ export class ARRenderer extends EventDispatcher<
 
       controller.userData.box.quaternion.copy(this.relativeOrientation);
     }
-  }
+  };
 
-  private onControllerSelectEnd(event: XRControllerEvent) {
+  private onControllerSelectEnd = (event: XRControllerEvent) => {
     const controller = event.target;
     controller.userData.box.visible = false;
     controller.userData.line.visible = true;
@@ -414,7 +413,7 @@ export class ARRenderer extends EventDispatcher<
         scene.pivot.matrix.elements[8], scene.pivot.matrix.elements[10]);
     this.goalPosition.x = scene.pivot.position.x;
     this.goalPosition.z = scene.pivot.position.z;
-  }
+  };
 
   /**
    * If currently presenting a scene in AR, stops presentation and exits AR.
@@ -494,6 +493,8 @@ export class ARRenderer extends EventDispatcher<
         this.xrLight = null;
       }
 
+      scene.add(scene.pivot);
+      scene.pivot.quaternion.set(0, 0, 0, 1);
       scene.pivot.position.set(0, 0, 0);
       scene.pivot.scale.set(1, 1, 1);
       scene.setShadowOffset(0);
@@ -554,20 +555,32 @@ export class ARRenderer extends EventDispatcher<
 
     if (this.xrMode !== 'screen-space') {
       if (this.controller1 != null) {
-        this.controller1.removeEventListener('selectstart', this.listenerStart);
-        this.controller1.removeEventListener('selectend', this.listenerEnd);
+        this.controller1.userData.box.visible = false;
+        this.controller1.userData.line.visible = true;
+        this.controller1.removeEventListener(
+            'selectstart', this.onControllerSelectStart);
+        this.controller1.removeEventListener(
+            'selectend', this.onControllerSelectEnd);
         this.controller1.removeFromParent();
         this.controller1 = null;
       }
       if (this.controller2 != null) {
-        this.controller2.removeEventListener('selectstart', this.listenerStart);
-        this.controller2.removeEventListener('selectend', this.listenerEnd);
+        this.controller2.userData.box.visible = false;
+        this.controller2.userData.line.visible = true;
+        this.controller2.removeEventListener(
+            'selectstart', this.onControllerSelectStart);
+        this.controller2.removeEventListener(
+            'selectend', this.onControllerSelectEnd);
         this.controller2.removeFromParent();
         this.controller2 = null;
       }
       this.selectedController = null;
+      this.scaleLine.visible = false;
     }
 
+    this.isTranslating = false;
+    this.isRotating = false;
+    this.isTwoFingering = false;
     this.lastTick = null;
     this.turntableRotation = null;
     this.oldShadowIntensity = null;
