@@ -18,7 +18,7 @@ import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
 import {$currentBackground, $currentEnvironmentMap} from '../features/environment.js';
-import ModelViewerElementBase, {$onResize} from '../model-viewer-base.js';
+import ModelViewerElementBase from '../model-viewer-base.js';
 import {assertIsArCandidate} from '../utilities.js';
 
 import {Damper} from './Damper.js';
@@ -515,9 +515,8 @@ export class ARRenderer extends EventDispatcher<
 
       scene.element.removeEventListener('load', this.onUpdateScene);
       scene.orientHotspots(0);
-      element.requestUpdate('cameraTarget');
-      element.requestUpdate('maxCameraOrbit');
-      element[$onResize](element.getBoundingClientRect());
+      const {width, height} = element.getBoundingClientRect();
+      scene.setSize(width, height);
 
       requestAnimationFrame(() => {
         scene.element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
