@@ -78,7 +78,7 @@ export interface ARTrackingEvent extends ThreeEvent {
 }
 
 interface UserData {
-  box: Mesh, line: Line
+  turning: boolean, box: Mesh, line: Line
 }
 
 interface Controller extends XRTargetRaySpace {
@@ -317,8 +317,11 @@ export class ARRenderer extends EventDispatcher<
       line.name = 'line';
       line.scale.z = MAX_LINE_LENGTH;
 
+      this.controller1.userData.turning = false;
       this.controller1.userData.line = line;
       this.controller1.add(line);
+
+      this.controller2.userData.turning = false;
       const line2 = line.clone();
       this.controller2.userData.line = line2;
       this.controller2.add(line2);
@@ -335,10 +338,10 @@ export class ARRenderer extends EventDispatcher<
       box.visible = false;
 
       this.controller1.userData.box = box;
-      this.controller1.add(box);
+      scene.add(box);
       const box2 = box.clone();
       this.controller2.userData.box = box2;
-      this.controller2.add(box2);
+      scene.add(box2);
     }
   }
 
@@ -352,6 +355,9 @@ export class ARRenderer extends EventDispatcher<
     const scene = this.presentedScene!;
     const intersection =
         this.placementBox!.controllerIntersection(scene, controller)
+    controller.userData.box.visible =
+        (intersection == null || controller.userData.turning) &&
+        !this.isTwoFingering;
     controller.userData.line.scale.z =
         intersection == null ? MAX_LINE_LENGTH : intersection.distance;
     return intersection != null;
@@ -388,17 +394,15 @@ export class ARRenderer extends EventDispatcher<
           .invert()
           .multiply(scene.pivot.getWorldQuaternion(quaternion));
 
-      otherController.userData.box.visible = false;
-      controller.userData.box.visible = true;
+      otherController.userData.turning = false;
+      controller.userData.turning = true;
       controller.userData.line.visible = false;
-
-      controller.userData.box.quaternion.copy(this.relativeOrientation);
     }
   };
 
   private onControllerSelectEnd = (event: XRControllerEvent) => {
     const controller = event.target;
-    controller.userData.box.visible = false;
+    controller.userData.turning = false;
     controller.userData.line.visible = true;
     this.isTwoFingering = false;
     this.scaleLine.visible = false;
@@ -555,6 +559,7 @@ export class ARRenderer extends EventDispatcher<
 
     if (this.xrMode !== 'screen-space') {
       if (this.controller1 != null) {
+        this.controller1.userData.turning = false;
         this.controller1.userData.box.visible = false;
         this.controller1.userData.line.visible = true;
         this.controller1.removeEventListener(
@@ -565,6 +570,7 @@ export class ARRenderer extends EventDispatcher<
         this.controller1 = null;
       }
       if (this.controller2 != null) {
+        this.controller2.userData.turning = false;
         this.controller2.userData.box.visible = false;
         this.controller2.userData.line.visible = true;
         this.controller2.removeEventListener(
@@ -889,22 +895,32 @@ export class ARRenderer extends EventDispatcher<
     const box = this.placementBox!;
     box.updateOpacity(delta);
 
-    if (this.controller1 && this.controller1.userData.box.visible) {
-      pivot.quaternion.copy(this.controller1.quaternion)
-          .multiply(this.relativeOrientation);
-      if (this.selectedController &&
-          this.selectedController === this.controller2) {
-        pivot.quaternion.premultiply(
-            quaternion.copy(this.controller2.quaternion).invert());
+    if (this.controller1) {
+      if (this.controller1.userData.turning) {
+        pivot.quaternion.copy(this.controller1.quaternion)
+            .multiply(this.relativeOrientation);
+        if (this.selectedController &&
+            this.selectedController === this.controller2) {
+          pivot.quaternion.premultiply(
+              quaternion.copy(this.controller2.quaternion).invert());
+        }
       }
-    } else if (this.controller2 && this.controller2.userData.box.visible) {
-      pivot.quaternion.copy(this.controller2.quaternion)
-          .multiply(this.relativeOrientation);
-      if (this.selectedController &&
-          this.selectedController === this.controller1) {
-        pivot.quaternion.premultiply(
-            quaternion.copy(this.controller1.quaternion).invert());
+      this.controller1.userData.box.position.copy(this.controller1.position);
+      pivot.getWorldQuaternion(this.controller1.userData.box.quaternion);
+    }
+
+    if (this.controller2) {
+      if (this.controller2.userData.turning) {
+        pivot.quaternion.copy(this.controller2.quaternion)
+            .multiply(this.relativeOrientation);
+        if (this.selectedController &&
+            this.selectedController === this.controller1) {
+          pivot.quaternion.premultiply(
+              quaternion.copy(this.controller1.quaternion).invert());
+        }
       }
+      this.controller2.userData.box.position.copy(this.controller2.position);
+      pivot.getWorldQuaternion(this.controller2.userData.box.quaternion);
     }
 
     if (this.controller1 && this.controller2 && this.isTwoFingering) {
