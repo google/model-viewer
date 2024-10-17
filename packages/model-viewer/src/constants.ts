@@ -73,26 +73,31 @@ export const IS_SCENEVIEWER_CANDIDATE = IS_ANDROID && !IS_FIREFOX && !IS_OCULUS;
 // Extend Window type with webkit property,
 // required to check if iOS is running within a WKWebView browser instance.
 declare global {
-    interface Window {
-      webkit?: any;
-    }
+  interface Window {
+    webkit?: any;
+  }
 }
 
-export const IS_WKWEBVIEW = Boolean(window.webkit && window.webkit.messageHandlers);
+export const IS_WKWEBVIEW =
+    Boolean(window.webkit && window.webkit.messageHandlers);
 
-// If running in iOS Safari proper, and not within a WKWebView component instance, check for ARQL feature support.
-// Otherwise, if running in a WKWebView instance, check for known ARQL compatible iOS browsers, including:
-// Chrome (CriOS), Edge (EdgiOS), Firefox (FxiOS), Google App (GSA), DuckDuckGo (DuckDuckGo).
-// All other iOS browsers / apps will fail by default.
+// If running in iOS Safari proper, and not within a WKWebView component
+// instance, check for ARQL feature support. Otherwise, if running in a
+// WKWebView instance, check for known ARQL compatible iOS browsers, including:
+// Chrome (CriOS), Edge (EdgiOS), Firefox (FxiOS), Google App (GSA), DuckDuckGo
+// (DuckDuckGo). All other iOS browsers / apps will fail by default.
 export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
-    if(IS_IOS){
-        if(!IS_WKWEBVIEW){            
-            const tempAnchor = document.createElement('a');
-            return Boolean(tempAnchor.relList && tempAnchor.relList.supports && tempAnchor.relList.supports('ar'));
-        } else {
-            return  Boolean(/CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(navigator.userAgent));
-        }
+  if (IS_IOS) {
+    if (!IS_WKWEBVIEW) {
+      const tempAnchor = document.createElement('a');
+      return Boolean(
+          tempAnchor.relList && tempAnchor.relList.supports &&
+          tempAnchor.relList.supports('ar'));
     } else {
-        return false;
+      return Boolean(/CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(
+          navigator.userAgent));
     }
+  } else {
+    return false;
+  }
 })();
