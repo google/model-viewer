@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-import { ReactiveElement } from 'lit';
-import { property } from 'lit/decorators.js';
-import { Camera as ThreeCamera, Event as ThreeEvent, Vector2, Vector3, WebGLRenderer } from 'three';
+import {ReactiveElement} from 'lit';
+import {property} from 'lit/decorators.js';
+import {Camera as ThreeCamera, Event as ThreeEvent, Vector2, Vector3, WebGLRenderer} from 'three';
 
-import { HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER } from './constants.js';
-import { ExtraModelElement } from './extra-model.js';
-import { $updateEnvironment } from './features/environment.js';
-import { makeTemplate } from './template.js';
-import { $evictionPolicy, CachingGLTFLoader } from './three-components/CachingGLTFLoader.js';
-import { ModelScene } from './three-components/ModelScene.js';
-import { ContextLostEvent, Renderer } from './three-components/Renderer.js';
-import { clamp, debounce } from './utilities.js';
-import { ProgressTracker } from './utilities/progress-tracker.js';
+import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
+import {ExtraModelElement} from './extra-model.js';
+import {$updateEnvironment} from './features/environment.js';
+import {makeTemplate} from './template.js';
+import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
+import {ModelScene} from './three-components/ModelScene.js';
+import {ContextLostEvent, Renderer} from './three-components/Renderer.js';
+import {clamp, debounce} from './utilities.js';
+import {ProgressTracker} from './utilities/progress-tracker.js';
 
 const CLEAR_MODEL_TIMEOUT_MS = 10;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
@@ -156,11 +156,11 @@ export default class ModelViewerElementBase extends ReactiveElement {
   static set minimumRenderScale(value: number) {
     if (value > 1) {
       console.warn(
-        '<model-viewer> minimumRenderScale has been clamped to a maximum value of 1.');
+          '<model-viewer> minimumRenderScale has been clamped to a maximum value of 1.');
     }
     if (value <= 0) {
       console.warn(
-        '<model-viewer> minimumRenderScale has been clamped to a minimum value of 0.25.');
+          '<model-viewer> minimumRenderScale has been clamped to a minimum value of 0.25.');
     }
     Renderer.singleton.minScale = value;
   }
@@ -170,11 +170,11 @@ export default class ModelViewerElementBase extends ReactiveElement {
     return Renderer.singleton.minScale;
   }
 
-  @property({ type: String }) alt: string | null = null;
+  @property({type: String}) alt: string|null = null;
 
-  @property({ type: String }) src: string | null = null;
+  @property({type: String}) src: string|null = null;
 
-  @property({ type: Boolean, attribute: 'with-credentials' })
+  @property({type: Boolean, attribute: 'with-credentials'})
   withCredentials: boolean = false;
 
   /**
@@ -182,38 +182,38 @@ export default class ModelViewerElementBase extends ReactiveElement {
    * the loaded src and inserts it into the header of the page for search
    * engines to crawl.
    */
-  @property({ type: Boolean, attribute: 'generate-schema' })
+  @property({type: Boolean, attribute: 'generate-schema'})
   generateSchema = false;
 
-  protected [$isElementInViewport] = false;
-  protected [$loaded] = false;
-  protected [$loadedTime] = 0;
-  protected [$scene]: ModelScene;
-  protected [$container]: HTMLDivElement;
-  protected [$userInputElement]: HTMLDivElement;
-  protected [$canvas]: HTMLCanvasElement;
-  protected [$statusElement]: HTMLSpanElement;
-  protected [$status] = '';
-  protected [$defaultAriaLabel]: string;
-  protected [$clearModelTimeout]: number | null = null;
+  protected[$isElementInViewport] = false;
+  protected[$loaded] = false;
+  protected[$loadedTime] = 0;
+  protected[$scene]: ModelScene;
+  protected[$container]: HTMLDivElement;
+  protected[$userInputElement]: HTMLDivElement;
+  protected[$canvas]: HTMLCanvasElement;
+  protected[$statusElement]: HTMLSpanElement;
+  protected[$status] = '';
+  protected[$defaultAriaLabel]: string;
+  protected[$clearModelTimeout]: number|null = null;
 
-  protected [$fallbackResizeHandler] = debounce(() => {
+  protected[$fallbackResizeHandler] = debounce(() => {
     const boundingRect = this.getBoundingClientRect();
     this[$updateSize](boundingRect);
   }, FALLBACK_SIZE_UPDATE_THRESHOLD_MS);
 
-  protected [$announceModelVisibility] = debounce((oldVisibility: boolean) => {
+  protected[$announceModelVisibility] = debounce((oldVisibility: boolean) => {
     const newVisibility = this.modelIsVisible;
     if (newVisibility !== oldVisibility) {
       this.dispatchEvent(new CustomEvent(
-        'model-visibility', { detail: { visible: newVisibility } }));
+          'model-visibility', {detail: {visible: newVisibility}}));
     }
   }, ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD);
 
-  protected [$resizeObserver]: ResizeObserver | null = null;
-  protected [$intersectionObserver]: IntersectionObserver | null = null;
+  protected[$resizeObserver]: ResizeObserver|null = null;
+  protected[$intersectionObserver]: IntersectionObserver|null = null;
 
-  protected [$progressTracker]: ProgressTracker = new ProgressTracker();
+  protected[$progressTracker]: ProgressTracker = new ProgressTracker();
 
   // private extraModels: ExtraModelElement[] = [];
 
@@ -222,7 +222,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     return this[$getLoaded]();
   }
 
-  get [$renderer]() {
+  get[$renderer]() {
     return Renderer.singleton;
   }
 
@@ -237,7 +237,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({mode: 'open'});
 
     const shadowRoot = this.shadowRoot!;
 
@@ -245,12 +245,12 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     this[$container] = shadowRoot.querySelector('.container') as HTMLDivElement;
     this[$userInputElement] =
-      shadowRoot.querySelector('.userInput') as HTMLDivElement;
+        shadowRoot.querySelector('.userInput') as HTMLDivElement;
     this[$canvas] = shadowRoot.querySelector('canvas') as HTMLCanvasElement;
     this[$statusElement] =
-      shadowRoot.querySelector('#status') as HTMLSpanElement;
+        shadowRoot.querySelector('#status') as HTMLSpanElement;
     this[$defaultAriaLabel] =
-      this[$userInputElement].getAttribute('aria-label')!;
+        this[$userInputElement].getAttribute('aria-label')!;
 
     // Because of potential race conditions related to invoking the constructor
     // we only use the bounding rect to set the initial size if the element is
@@ -267,7 +267,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     // Create the underlying ModelScene.
     this[$scene] =
-      new ModelScene({ canvas: this[$canvas], element: this, width, height });
+        new ModelScene({canvas: this[$canvas], element: this, width, height});
 
     // Update initial size on microtask timing so that subclasses have a
     // chance to initialize
@@ -279,20 +279,20 @@ export default class ModelViewerElementBase extends ReactiveElement {
       // Set up a resize observer so we can scale our canvas
       // if our <model-viewer> changes
       this[$resizeObserver] =
-        new ResizeObserver((entries: Array<ResizeObserverEntry>) => {
-          // Don't resize anything if in AR mode; otherwise the canvas
-          // scaling to fullscreen on entering AR will clobber the flat/2d
-          // dimensions of the element.
-          if (this[$renderer].isPresenting) {
-            return;
-          }
-
-          for (let entry of entries) {
-            if (entry.target === this) {
-              this[$updateSize](entry.contentRect);
+          new ResizeObserver((entries: Array<ResizeObserverEntry>) => {
+            // Don't resize anything if in AR mode; otherwise the canvas
+            // scaling to fullscreen on entering AR will clobber the flat/2d
+            // dimensions of the element.
+            if (this[$renderer].isPresenting) {
+              return;
             }
-          }
-        });
+
+            for (let entry of entries) {
+              if (entry.target === this) {
+                this[$updateSize](entry.contentRect);
+              }
+            }
+          });
     }
 
     if (HAS_INTERSECTION_OBSERVER) {
@@ -344,7 +344,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     const renderer = this[$renderer];
     renderer.addEventListener(
-      'contextlost', this[$onContextLost] as (event: ThreeEvent) => void);
+        'contextlost', this[$onContextLost] as (event: ThreeEvent) => void);
 
     renderer.registerScene(this[$scene]);
 
@@ -374,7 +374,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     const renderer = this[$renderer];
     renderer.removeEventListener(
-      'contextlost', this[$onContextLost] as (event: ThreeEvent) => void);
+        'contextlost', this[$onContextLost] as (event: ThreeEvent) => void);
 
     renderer.unregisterScene(this[$scene]);
 
@@ -384,7 +384,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
-  updated(changedProperties: Map<string | number | symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
 
     // NOTE(cdata): If a property changes from values A -> B -> A in the space
@@ -419,8 +419,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
   /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
     return this[$renderer]
-      .displayCanvas(this[$scene])
-      .toDataURL(type, encoderOptions);
+        .displayCanvas(this[$scene])
+        .toDataURL(type, encoderOptions);
   }
 
   /** @export */
@@ -429,8 +429,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const qualityArgument = options ? options.qualityArgument : undefined;
     const useIdealAspect = options ? options.idealAspect : undefined;
 
-    const { width, height, idealAspect, aspect } = this[$scene];
-    const { dpr, scaleFactor } = this[$renderer];
+    const {width, height, idealAspect, aspect} = this[$scene];
+    const {dpr, scaleFactor} = this[$renderer];
     let outputWidth = width * scaleFactor * dpr;
     let outputHeight = height * scaleFactor * dpr;
     let offsetX = 0;
@@ -451,15 +451,15 @@ export default class ModelViewerElementBase extends ReactiveElement {
     try {
       return new Promise<Blob>(async (resolve, reject) => {
         blobCanvas.getContext('2d')!.drawImage(
-          this[$renderer].displayCanvas(this[$scene]),
-          offsetX,
-          offsetY,
-          outputWidth,
-          outputHeight,
-          0,
-          0,
-          outputWidth,
-          outputHeight);
+            this[$renderer].displayCanvas(this[$scene]),
+            offsetX,
+            offsetY,
+            outputWidth,
+            outputHeight,
+            0,
+            0,
+            outputWidth,
+            outputHeight);
 
         blobCanvas.toBlob((blob) => {
           if (!blob) {
@@ -470,7 +470,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
         }, mimeType, qualityArgument);
       });
     } finally {
-      this[$updateSize]({ width, height });
+      this[$updateSize]({width, height});
     };
   }
 
@@ -503,13 +503,13 @@ export default class ModelViewerElementBase extends ReactiveElement {
     this[$scene].externalRenderer = null;
   }
 
-  get [$ariaLabel]() {
+  get[$ariaLabel]() {
     return this[$altDefaulted];
   }
 
-  get [$altDefaulted]() {
+  get[$altDefaulted]() {
     return (this.alt == null || this.alt === 'null') ? this[$defaultAriaLabel] :
-      this.alt;
+                                                       this.alt;
   }
 
   // NOTE(cdata): Although this may seem extremely redundant, it is required in
@@ -532,14 +532,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
   /**
    * Called on initialization and when the resize observer fires.
    */
-  [$updateSize]({ width, height }: { width: number, height: number }) {
+  [$updateSize]({width, height}: {width: number, height: number}) {
     if (width === 0 || height === 0) {
       return;
     }
     this[$container].style.width = `${width}px`;
     this[$container].style.height = `${height}px`;
 
-    this[$onResize]({ width, height });
+    this[$onResize]({width, height});
   }
 
   [$tick](time: number, delta: number) {
@@ -567,7 +567,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const rootNode = this.getRootNode() as Document | ShadowRoot | null;
     // Only change the aria-label if <model-viewer> is currently focused:
     if (rootNode != null && rootNode.activeElement === this &&
-      this[$statusElement].textContent != status) {
+        this[$statusElement].textContent != status) {
       this[$statusElement].textContent = status;
     }
   }
@@ -580,14 +580,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
     this[$statusElement].textContent = '';
   };
 
-  [$onResize](e: { width: number, height: number }) {
+  [$onResize](e: {width: number, height: number}) {
     this[$scene].setSize(e.width, e.height);
   }
 
   [$onContextLost] = (event: ContextLostEvent) => {
     this.dispatchEvent(new CustomEvent(
-      'error',
-      { detail: { type: 'webglcontextlost', sourceError: event.sourceEvent } }));
+        'error',
+        {detail: {type: 'webglcontextlost', sourceError: event.sourceEvent}}));
   };
 
   /**
@@ -597,7 +597,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   async[$updateSource]() {
     const scene = this[$scene];
     if (this.loaded || !this[$shouldAttemptPreload]() ||
-      this.src === scene.url) {
+        this.src === scene.url) {
       return;
     }
 
@@ -612,13 +612,13 @@ export default class ModelViewerElementBase extends ReactiveElement {
     scene.stopAnimation();
 
     const updateSourceProgress =
-      this[$progressTracker].beginActivity('model-load');
+        this[$progressTracker].beginActivity('model-load');
     const source = this.src;
     try {
       const srcUpdated = scene.setSource(
-        source,
-        (progress: number) =>
-          updateSourceProgress(clamp(progress, 0, 1) * 0.95));
+          source,
+          (progress: number) =>
+              updateSourceProgress(clamp(progress, 0, 1) * 0.95));
 
       const envUpdated = (this as any)[$updateEnvironment]();
 
@@ -636,14 +636,14 @@ export default class ModelViewerElementBase extends ReactiveElement {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             this.dispatchEvent(
-              new CustomEvent('load', { detail: { url: source } }));
+                new CustomEvent('load', {detail: {url: source}}));
             resolve();
           });
         });
       });
     } catch (error) {
       this.dispatchEvent(new CustomEvent(
-        'error', { detail: { type: 'loadfailure', sourceError: error } }));
+          'error', {detail: {type: 'loadfailure', sourceError: error}}));
     } finally {
       updateSourceProgress(1.0);
     }
