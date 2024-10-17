@@ -18,6 +18,7 @@ import { property } from 'lit/decorators.js';
 import { Camera as ThreeCamera, Event as ThreeEvent, Vector2, Vector3, WebGLRenderer } from 'three';
 
 import { HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER } from './constants.js';
+import { ExtraModelElement } from './extra-model.js';
 import { $updateEnvironment } from './features/environment.js';
 import { makeTemplate } from './template.js';
 import { $evictionPolicy, CachingGLTFLoader } from './three-components/CachingGLTFLoader.js';
@@ -25,7 +26,6 @@ import { ModelScene } from './three-components/ModelScene.js';
 import { ContextLostEvent, Renderer } from './three-components/Renderer.js';
 import { clamp, debounce } from './utilities.js';
 import { ProgressTracker } from './utilities/progress-tracker.js';
-import { ExtraModelElement } from './extra-model.js';
 
 const CLEAR_MODEL_TIMEOUT_MS = 10;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
@@ -650,7 +650,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   }
 
   async addExtraModel(extraModel: ExtraModelElement) {
-    console.log("Adding a new extra model with src: ", extraModel.src);
+    console.log('Adding a new extra model with src: ', extraModel.src);
     // this.extraModels.add(extraModel);
   }
 }
