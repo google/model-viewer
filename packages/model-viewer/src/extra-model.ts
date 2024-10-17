@@ -14,14 +14,17 @@
  */
 
 import {html, ReactiveElement} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {property} from 'lit/decorators.js';
+
+// customElement,
 
 import ModelViewerElementBase from './model-viewer-base.js';
+
 
 /**
  * Definition for a basic <extra-model> element.
  */
-@customElement('extra-model')
+// @customElement('extra-model')
 export class ExtraModelElement extends ReactiveElement {
   @property({type: String}) src: string|null = null;
 
@@ -29,7 +32,7 @@ export class ExtraModelElement extends ReactiveElement {
     return html`<slot> </slot>`;
   }
 
-  firstUpdated() {
+  connectedCallback() {
     // Get the parent <model-viewer> element
     const modelViewer = this.closest('model-viewer') as ModelViewerElementBase;
     if (modelViewer) {
@@ -38,11 +41,5 @@ export class ExtraModelElement extends ReactiveElement {
     } else {
       console.error('<extra-model> must be a child of <model-viewer>');
     }
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'extra-model': ExtraModelElement;
   }
 }
