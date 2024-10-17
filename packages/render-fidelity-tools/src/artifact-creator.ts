@@ -304,7 +304,8 @@ export class ArtifactCreator {
 
     if (this.browser == undefined) {
       console.log(`🚀 Launching browser`);
-      this.browser = await puppeteer.launch({headless: quiet});
+      this.browser =
+          await puppeteer.launch({headless: quiet, protocolTimeout: 1000000});
       this.pagePromise = this.browser.newPage();
     }
 
