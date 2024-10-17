@@ -367,16 +367,17 @@ export class ARRenderer extends EventDispatcher<
 
     if (this.placementBox!.controllerIntersection(scene, controller) != null) {
       if (this.selectedController != null) {
-        controller.userData.line.visible = false;
+        this.selectedController.userData.line.visible = false;
         if (scene.canScale) {
           this.isTwoFingering = true;
           this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
           this.scaleLine.visible = true;
         }
-      } else {
-        controller.attach(scene.pivot);
-        this.selectedController = controller;
       }
+
+      controller.attach(scene.pivot);
+      this.selectedController = controller;
+
       scene.setShadowIntensity(0.01);
     } else {
       const otherController = controller === this.controller1 ?
