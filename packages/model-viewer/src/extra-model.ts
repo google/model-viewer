@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import { ReactiveElement, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import {html, ReactiveElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
+
 import ModelViewerElementBase from './model-viewer-base.js';
 
 /**
@@ -22,7 +23,7 @@ import ModelViewerElementBase from './model-viewer-base.js';
  */
 @customElement('extra-model')
 export class ExtraModelElement extends ReactiveElement {
-  @property({ type: String }) src: string | null = null;
+  @property({type: String}) src: string|null = null;
 
   render() {
     return html`<slot> </slot>`;
@@ -45,4 +46,3 @@ declare global {
     'extra-model': ExtraModelElement;
   }
 }
-
