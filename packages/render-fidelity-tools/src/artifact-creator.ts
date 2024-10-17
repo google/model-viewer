@@ -305,12 +305,11 @@ export class ArtifactCreator {
     if (this.browser == undefined) {
       console.log(`🚀 Launching browser`);
       this.browser =
-          await puppeteer.launch({headless: quiet, protocolTimeout: 1000000});
+          await puppeteer.launch({headless: quiet, protocolTimeout: 0});
       this.pagePromise = this.browser.newPage();
     }
 
     const page = await this.pagePromise as Page;
-    page.setDefaultTimeout(1000000);
     this.pagePromise = undefined;
 
     const url = `${this.baseUrl}?hide-ui&config=../../config.json&scenario=${
