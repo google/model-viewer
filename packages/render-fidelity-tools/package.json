@@ -6,7 +6,6 @@
   "description": "<model-viewer> rendering fidelity test suite and tools",
   "scripts": {
     "test": "node --experimental-modules ./lib/workflows/test-fidelity.js --config=./test/config.json",
-    "test:ci": "./scripts/ci-check-fidelity.sh",
     "render-goldens": "node --experimental-modules ./lib/workflows/render-goldens.js --config=./test/config.json",
     "build": "tsc && rollup -c",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi",
