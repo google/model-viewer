@@ -27,4 +27,4 @@ jobs:
     - name: Fidelity tests
       uses: coactions/setup-xvfb@v1
       with:
-        run: npm run test --workspace=@google/model-viewer-render-fidelity-tools -- --quiet --scenario=lamp
+        run: npm run test --workspace=@google/model-viewer-render-fidelity-tools -- --quiet
