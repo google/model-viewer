@@ -33,7 +33,7 @@ export interface ScenarioRecord extends ScenarioConfig {
 
 export class ArtifactCreator {
   private[$configReader]: ConfigReader = new ConfigReader(this.config);
-  private browser: Browser|undefined = undefined;
+  private browser: Browser|null = null;
 
   constructor(
       protected config: ImageComparisonConfig, protected rootDirectory: string,
@@ -42,9 +42,9 @@ export class ArtifactCreator {
   }
 
   async close() {
-    if (this.browser !== undefined) {
+    if (this.browser != null) {
       await this.browser.close();
-      this.browser = undefined;
+      this.browser = null;
     }
   }
   protected get outputDirectory(): string {
@@ -142,6 +142,10 @@ export class ArtifactCreator {
       screenshot = await this.captureScreenshot(
           renderer, scenarioName, dimensions, '', 60, quiet);
     } catch (error) {
+      if (this.browser != null) {
+        await this.browser.close();
+        this.browser = null;
+      }
       throw new Error(`❌ Failed to capture ${renderer}'s screenshot of ${
           scenarioName}. Error message: ${error.message}`);
     }
@@ -294,7 +298,7 @@ export class ArtifactCreator {
       return;
     }
 
-    if (this.browser == undefined) {
+    if (this.browser == null) {
       console.log(`🚀 Launching browser`);
       this.browser = await puppeteer.launch({headless: quiet});
     }
@@ -364,7 +368,7 @@ export class ArtifactCreator {
     if (evaluateError) {
       console.log(evaluateError);
       await this.browser.close();
-      this.browser = undefined;
+      this.browser = null;
       throw new Error(evaluateError);
     }
 
