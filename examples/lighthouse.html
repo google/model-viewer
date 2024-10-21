@@ -1,0 +1,389 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Lighthouse Example</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Performance optimization for &lt;model-viewer&gt;">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+  <script type="application/ld+json">
+    {"@context":"http://schema.org/","@type":"3DModel","image":"../assets/ShopifyModels/ChairPoster.webp","name":"3D model of a chair with footrest","encoding":[{"@type":"MediaObject","contentUrl":"../assets/ShopifyModels/Chair.glb","encodingFormat":"model/gltf-binary"}]}
+  </script>
+   <style>
+    html {
+      height:100%;
+    }
+
+    body {
+      height: 100%;
+      margin: 0;
+      background-color: #f7f7f7;
+      font-family: 'Rubik', sans-serif;
+      font-size: 16px;
+      line-height: 24px;
+      color: rgba(0,0,0,.87);
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    p {
+      max-width: 700px;
+      margin: 1em;
+      text-align: left;
+    }
+
+    model-viewer {
+      display: block;
+      width: 100vw;
+      height: 100vw;
+      max-width: 600px;
+      max-height: 600px;
+    }
+
+    /* This keeps child nodes hidden while the element loads, except the poster */
+    :not(:defined) > :not(.poster) {
+      display: none;
+    }
+
+    :defined > .poster > .pre-prompt {
+      display: none;
+    }
+
+    /* This CSS should always be used at minimum for any slotted poster */
+    .poster {
+      display: flex;
+      justify-content: center;
+      align-items: center; 
+      height: 100%;
+      top: 0;
+      left: 0;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    @keyframes wiggle {	
+      10%, 12% { transform: translateX(-25px); }	 
+      30%, 32% { transform: translateX(25px); }	
+      0%, 45%, 100% { transform: translateX(0%); }
+    }	
+    
+    @keyframes fade {	
+      5%, 40% {	opacity: 1; }	
+      0%, 45%, 100% {	opacity: 0; }	 
+    }
+
+    .pre-prompt {
+      pointer-events: none;
+      animation-name: wiggle, fade;
+      animation-duration: 5s;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+    }
+
+    .progress-bar {
+      display: block;
+      width: 33%;
+      height: 10%;
+      max-height: 2%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate3d(-50%, -50%, 0);
+      border-radius: 25px;
+      box-shadow: 0px 3px 10px 3px rgba(0, 0, 0, 0.5), 0px 0px 5px 1px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+ 
+    .progress-bar.hide {
+      visibility: hidden;
+      transition: visibility 0.3s;
+    }
+ 
+    .update-bar {
+      background-color: rgba(255, 255, 255, 0.9);
+      width: 0%;
+      height: 100%;
+      border-radius: 25px;
+      float: left;
+      transition: width 0.3s;
+    }
+
+    .ar-button {
+      background-image: url(../assets/ic_view_in_ar_new_googblue_48dp.png);
+      background-repeat: no-repeat;
+      background-size: 20px 20px;
+      background-position: 12px 50%;
+      background-color: #fff;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      bottom: 16px;
+      padding: 0px 16px 0px 40px;
+      font-family: Roboto Regular, Helvetica Neue, sans-serif;
+      font-size: 14px;
+      color:#4285f4;
+      height: 36px;
+      line-height: 36px;
+      border-radius: 18px;
+      border: 1px solid #DADCE0;
+    }
+
+    .ar-button:active {
+      background-color: #E8EAED;
+    }
+
+    .ar-button:focus {
+      outline: none;
+    }
+
+    .ar-button:focus-visible {
+      outline: 1px solid #4285f4;
+    }
+
+    @keyframes circle {
+      from { transform: translateX(-50%) rotate(0deg) translateX(50px) rotate(0deg); }
+      to   { transform: translateX(-50%) rotate(360deg) translateX(50px) rotate(-360deg); }
+    }
+
+    @keyframes elongate {
+      from { transform: translateX(100px); }
+      to   { transform: translateX(-100px); }
+    }
+
+    model-viewer > .ar-prompt {
+      position: absolute;
+      left: 50%;
+      bottom: 175px;
+      animation: elongate 2s infinite ease-in-out alternate;
+      display: none;
+    }
+
+    model-viewer[ar-status="session-started"] > .ar-prompt {
+      display: block;
+    }
+
+    model-viewer > .ar-prompt > img {
+      animation: circle 4s linear infinite;
+    }
+    .icon-modelviewer-black {
+    background-image: url(../assets/ic_modelviewer.svg);
+    }
+    .icon-button {
+      margin-left: -4px;
+      margin-right: 8px;
+      width: 34px;
+      height: 34px;
+      background-size: 34px;
+    }
+    .inner-home {
+      display: flex;
+      align-items: center;
+      font-size: 1.1em;
+      text-decoration: none;
+    }
+    .home {
+      padding: 20px;
+      overflow: auto;
+      white-space: nowrap;
+    }
+    .lockup {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+      color: rgba(0,0,0,.87);
+    }
+    .attribute {
+      white-space: pre-wrap !important;
+      font-family: 'Roboto Mono', monospace;
+      color: black;
+    }
+    .attribute:hover {
+      text-decoration: underline;
+      color: #444444;
+    }
+  </style>
+</head>
+<body>
+  <div class="home lockup">
+    <a href="../" class="sidebar-mv inner-home">
+      <div class="icon-button icon-modelviewer-black inner-home"></div>
+      <div class="inner-home"><span class="attribute">&lt;model-viewer&gt;</span></div>
+    </a>
+  </div>
+  <div align="center">
+
+    <h2>Setting up <code>&lt;model-viewer&gt;</code> for good Lighthouse scores</h2>
+  
+    <model-viewer
+        id="first"
+        src="../assets/ShopifyModels/Chair.glb"
+        poster="../assets/ShopifyModels/ChairPoster.webp"
+        camera-orbit="1.2195rad 1.362rad 100%"
+        interaction-prompt-threshold="0"
+        shadow-intensity="1"
+        ar
+       
+        camera-controls
+        alt="3D model of a chair with footrest"
+      >
+
+      <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/ChairPoster.webp);">
+        <img class="pre-prompt" src="../assets/prompt.svg">
+      </div>
+
+      <div class="progress-bar" slot="progress-bar">
+        <div class="update-bar"></div>
+      </div>
+
+      <button slot="ar-button" class="ar-button">
+        View in your space
+      </button>
+    
+      <div class="ar-prompt">
+        <img src="../assets/hand.png">
+      </div>
+    </model-viewer>
+
+    <p>The rest of the <a href="https://modelviewer.dev/">modelviewer.dev</a>
+    pages are optimized for code readability, but not necessarily for best page
+    loading performance. This page, on the other hand, is designed to
+    demonstrate best practices to optimize your <a
+    href="https://developers.google.com/web/tools/lighthouse" target="_blank"
+    rel="noopener">Lighthouse</a> score when using
+    <code>&lt;model-viewer&gt;</code>.</p>
+
+    <p>You can inspect our best practices recommendations by "viewing source" on
+    this page. Note this example lazy-loads <code>model-viewer.min.js</code> as
+    soon as the user interacts with the page, but this keeps it out of the
+    lighthouse score. Of course you could easily choose any convenient time to
+    kick off this process. By using a custom slotted poster, we ensure the
+    poster is visible and seamless even before our script has loaded.</p>
+
+    <p>This page is also designed as a way for both our users and our developers
+    to verify <code>&lt;model-viewer&gt;</code>'s performance. From Chrome,
+    simply open dev tools, go to the lighthouse tab and click "generate report".
+    We're seeing scores of 100 across the board for both desktop and mobile
+    (shown below), which we intend to maintain henceforth.</p>
+
+    <img src="../assets/lighthouse.png" style="object-fit: contain; width:100%; max-width:700px;" alt="Lighthouse mobile scores">
+
+    <p>Note these scores are variable and the goal is to continue to reduce the
+    performance metrics even if the overall score is 100, since that will leave
+    more headroom for complicated sites to add <code>&lt;model-viewer&gt;</code>
+    without hurting their scores. To see the advantage of lazy-loading the whole
+    model-viewer library, see
+    <a href="lighthouse2.html">this example</a>, which lazy-loads only the 3D
+    models.</p>
+
+    <!-- Second Example -->
+    <model-viewer
+      id="second"
+      src="../assets/ShopifyModels/Mixer.glb"
+      poster="../assets/ShopifyModels/MixerPoster.webp"
+      camera-orbit="0.9677rad 1.2427rad 100%"
+      interaction-prompt-threshold="0"
+      shadow-intensity="1"
+      ar
+     
+      camera-controls
+      alt="3D model of a countertop mixer"
+    >
+
+      <div class="poster" slot="poster" style="background-image: url(../assets/ShopifyModels/MixerPoster.webp);"></div>
+
+      <div class="progress-bar" slot="progress-bar">
+        <div class="update-bar"></div>
+      </div>
+
+      <button slot="ar-button" class="ar-button">
+        View in your space
+      </button>
+
+      <div class="ar-prompt">
+        <img src="../assets/hand.png">
+      </div>
+    </model-viewer>
+  </div>
+  <div style="margin-top:24px"></div>
+  <div class="footer">
+    <ul>
+      <li>
+        Chair, Mixer ©Copyright 2020 <a href="https://www.shopify.com/">Shopify
+          Inc.</a>, licensed under <a
+          href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>.
+      </li>
+    </ul>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div id='footer-links'></div>
+  </div>
+
+  <script type="module" src="./built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { initFooterLinks();})();
+  </script>
+
+  <script type="module">
+    const body = document.body;
+    let loaded = false;
+
+    const onInteraction = () => {
+      if (loaded === true) {
+        return;
+      }
+      loaded = true;
+
+      const modelViewer = document.createElement('script'); 
+      modelViewer.type = 'module';
+      modelViewer.src = '../node_modules/@google/model-viewer/dist/model-viewer.min.js'; 
+      body.appendChild(modelViewer);
+    };
+
+    body.addEventListener('mouseover', onInteraction, {once:true});
+    body.addEventListener('touchmove', onInteraction, {once:true});
+    body.addEventListener('scroll', onInteraction, {once:true});
+    body.addEventListener('keydown', onInteraction, {once:true});
+
+    const onProgress = (event) => {
+      const progressBar = event.target.querySelector('.progress-bar');
+      const updatingBar = event.target.querySelector('.update-bar');
+      updatingBar.style.width = `${event.detail.totalProgress*100}%`;
+      if (event.detail.totalProgress == 1) {
+        progressBar.classList.add('hide');
+      }
+    };
+
+    document.querySelector('#first').addEventListener('progress', onProgress);
+    document.querySelector('#second').addEventListener('progress', onProgress);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1279 @@
+<!--
+/*
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Materials & Scene Examples</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; scene graph examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
+
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+  <script type="importmap-shim">
+    {
+      "imports": {
+        "three": "../../node_modules/@google/model-viewer/dist/model-viewer.min.js"
+      }
+    }
+  </script>
+
+
+
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+  <style>
+.controls {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  bottom: 40px;
+  background-color: #dddddd88;
+  left: 8px;
+}
+
+#texture-name,
+#image-name {
+  font-size: 0.8em;
+}
+
+button {
+  font-size: 1.3em;
+  margin: 0 0.25em;
+}
+  </style>
+</head>
+<body>
+<div class="examples-page">
+  <div class="sidebar" id="sidenav"></div>
+  <div id="toggle"></div>
+
+  <div class="examples-container">
+    <div class="sample">
+      <div id="variants" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Swap Model Variants</h2>
+            <p>This demonstrates the use of the glTF <a
+            href="https://www.khronos.org/blog/streamlining-3d-commerce-with-material-variant-support-in-gltf-assets">materials
+            variants extension</a> which allows multiple materials and textures
+            to be packed with a single geometry in a GLB. Our API exposes these
+            variant names as <code>availableVariants</code> and you can select
+            one using the <code>variantName</code> attribute. This is similar
+            functionality to the lower-level scene-graph API below, but in that
+            case it is up to you to choose the right texture URL, rather than
+            having that information stored in the GLB. <i>Note: setting <code>variantName</code>
+            to <code>null</code> reverts to the initial material.</i></p>
+          </div>
+          <example-snippet stamp-to="variants" highlight-as="html">
+            <template>
+<model-viewer id="shoe" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Assets/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb" ar alt="A 3D model of a Shoe">
+  <div class="controls">
+    <div>Variant: <select id="variant"></select></div>
+  </div>
+</model-viewer>
+<script>
+const modelViewerVariants = document.querySelector("model-viewer#shoe");
+const select = document.querySelector('#variant');
+
+modelViewerVariants.addEventListener('load', () => {
+  const names = modelViewerVariants.availableVariants;
+  for (const name of names) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  }
+  // Adds a default option.
+  const option = document.createElement('option');
+    option.value = 'default';
+    option.textContent = 'Default';
+    select.appendChild(option);
+});
+
+select.addEventListener('input', (event) => {
+  modelViewerVariants.variantName = event.target.value === 'default' ? null : event.target.value;
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="transforms" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Model Transformations</h2>
+            <p>This demonstrates the <code>orientation</code> and
+            <code>scale</code> attributes which allow the model to be
+            transformed. Note that if specified before the model loads, they
+            will be taken into account by the automatic camera framing. If they
+            are changed afterwards the camera will not move, so to get new
+            automatic framing the <code>updateFraming()</code> method must be
+            called.</p>
+            <p>Note that these changes can be made in AR as well, but only in
+            WebXR mode, as this is the only mode that remains in the browser.
+            Changes you made ahead of time will not be reflected in Scene
+            Viewer, since this app downloads the original model again from its
+            URL. iOS Quick Look will reflect your changes as long as
+            <code>ios-src</code> is not specified, since in this case a USDZ
+            will be generated on the fly from the current state.</p>
+          </div>
+          <example-snippet stamp-to="transforms" highlight-as="html">
+            <template>
+<model-viewer id="transform" orientation="20deg 0 0" shadow-intensity="1" camera-controls touch-action="pan-y" ar src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut">
+  <div class="controls">
+    <div>Roll: <input id="roll" value="20" size="3" class="number"> degrees</div>
+    <div>Pitch: <input id="pitch" value="0" size="3" class="number"> degrees</div>
+    <div>Yaw: <input id="yaw" value="0" size="3" class="number"> degrees</div>
+    <div>
+      Scale: X: <input id="x" value="1" size="3" class="number">,
+      Y: <input id="y" value="1" size="3" class="number">,
+      Z: <input id="z" value="1" size="3" class="number">
+    </div>
+    <button id="frame">Update Framing</button>
+  </div>
+</model-viewer>
+<script>
+const modelViewerTransform = document.querySelector("model-viewer#transform");
+const roll = document.querySelector('#roll');
+const pitch = document.querySelector('#pitch');
+const yaw = document.querySelector('#yaw');
+const x = document.querySelector('#x');
+const y = document.querySelector('#y');
+const z = document.querySelector('#z');
+const frame = document.querySelector('#frame');
+
+frame.addEventListener('click', () => {
+  modelViewerTransform.updateFraming();
+});
+
+const updateOrientation = () => {
+  modelViewerTransform.orientation = `${roll.value}deg ${pitch.value}deg ${yaw.value}deg`;
+};
+
+const updateScale = () => {
+  modelViewerTransform.scale = `${x.value} ${y.value} ${z.value}`;
+};
+
+roll.addEventListener('input', () => {
+  updateOrientation();
+});
+pitch.addEventListener('input', () => {
+  updateOrientation();
+});
+yaw.addEventListener('input', () => {
+  updateOrientation();
+});
+x.addEventListener('input', () => {
+  updateScale();
+});
+y.addEventListener('input', () => {
+  updateScale();
+});
+z.addEventListener('input', () => {
+  updateScale();
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="changeColor" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Directly manipulate the scene graph</span></h4>
+          <div class="heading">
+            <h2 class="demo-title">Change Material Base Color</h2>
+            <p>Note that color factors can be set two ways: [r, g, b, a] or a
+            CSS-style color string. For array input, the values are between 0
+            and 1 and represent a linear color space, identical to the glTF
+            spec. For string inputs, the values are internally converted from
+            the sRGB color space, so this is likely more user-friendly.</p>
+            <p>As above, you can change these values in AR, but only in WebXR
+            mode. iOS Quick Look does not reflect these color changes as USDZ
+            does not appear to support colors multiplied onto textures.</p>
+          </div>
+          <example-snippet stamp-to="changeColor" highlight-as="html">
+            <template>
+<model-viewer id="color" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/Astronaut.glb" ar alt="A 3D model of an astronaut">
+  <div class="controls" id="color-controls">
+    <button data-color="#ff0000">Red</button>
+    <button data-color="#00ff00">Green</button>
+    <button data-color="#0000ff">Blue</button>
+  </div>
+</model-viewer>
+<script>
+const modelViewerColor = document.querySelector("model-viewer#color");
+
+document.querySelector('#color-controls').addEventListener('click', (event) => {
+  const colorString = event.target.dataset.color;
+  const [material] = modelViewerColor.model.materials;
+  material.pbrMetallicRoughness.setBaseColorFactor(colorString);
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="changeMaterial" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Change Material Metalness and Roughness Factors</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+            mode. iOS Quick Look does reflect these property changes since they
+            are not also textured.</p>
+          </div>
+          <example-snippet stamp-to="changeMaterial" highlight-as="html">
+            <template>
+<model-viewer id="sphere" camera-controls touch-action="pan-y" interaction-prompt="none" src="../../shared-assets/models/reflective-sphere.gltf" ar alt="A 3D model of a sphere">
+  <div class="controls">
+    <div>
+      <p>Metalness: <span id="metalness-value"></span></p>
+      <input id="metalness" type="range" min="0" max="1" step="0.01" value="1" />
+    </div>
+    <div>
+      <p>Roughness: <span id="roughness-value"></span></p>
+      <input id="roughness" type="range" min="0" max="1" step="0.01" value="0" />
+    </div>
+  </div>
+</model-viewer>
+<script>
+const modelViewerParameters = document.querySelector("model-viewer#sphere");
+
+modelViewerParameters.addEventListener("load", (ev) => {
+
+  let material = modelViewerParameters.model.materials[0];
+
+  let metalnessDisplay = document.querySelector("#metalness-value");
+  let roughnessDisplay = document.querySelector("#roughness-value");
+
+  metalnessDisplay.textContent = material.pbrMetallicRoughness.metallicFactor;
+  roughnessDisplay.textContent = material.pbrMetallicRoughness.roughnessFactor;
+
+  // Defaults to gold
+  material.pbrMetallicRoughness.setBaseColorFactor([0.7294, 0.5333, 0.0392]);
+
+  document.querySelector('#metalness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setMetallicFactor(event.target.value);
+    metalnessDisplay.textContent = event.target.value;
+  });
+
+  document.querySelector('#roughness').addEventListener('input', (event) => {
+    material.pbrMetallicRoughness.setRoughnessFactor(event.target.value);
+    roughnessDisplay.textContent = event.target.value;
+  });
+});
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="createTexturesExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Create textures</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+              mode. iOS Quick Look reflects these texture changes so long as the
+              USDZ is auto-generated.</p>
+          </div>
+          <example-snippet stamp-to="createTexturesExample" highlight-as="html">
+            <template>
+<model-viewer id="duck" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Assets/Models/Duck/glTF-Binary/Duck.glb" ar alt="A 3D model of a duck">
+  <div class="controls">
+      <p>Normals</p>
+      <select id="normals2">
+        <option>None</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
+      </select>
+      <p>Custom texture name</p>
+      <p id="texture-name">None</p>
+      <p>Image name from file name</p>
+      <p id="image-name">None</p>
+    </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture = document.querySelector("model-viewer#duck");
+const textureName = document.querySelector('#texture-name');
+const imageName = document.querySelector('#image-name');
+
+modelViewerTexture.addEventListener("load", () => {
+
+  const material = modelViewerTexture.model.materials[0];
+
+  const createAndApplyTexture = async (channel, event) => {
+    if (event.target.value == "None") {
+      // Clears the texture.
+      material[channel].setTexture(null);
+      // Display the names values
+      textureName.innerText = "None";
+      imageName.innerText = "None";
+    } else if (event.target.value) {
+      // Creates a new texture.
+      const texture = await modelViewerTexture.createTexture(event.target.value);
+      // Set the texture name
+      texture.name = event.target.options[event.target.selectedIndex].text.replace(/ /g, "_").toLowerCase();
+      // Applies the new texture to the specified channel.
+      material[channel].setTexture(texture);
+      // Display the names values
+      textureName.innerText = texture.name;
+      imageName.innerText = texture.source.name;
+    }
+  }
+
+  document.querySelector('#normals2').addEventListener('input', (event) => {
+    createAndApplyTexture('normalTexture', event);
+  });
+});
+
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="swapTexturesExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Swap textures</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+              mode. iOS Quick Look reflects these texture changes so long as the
+              USDZ is auto-generated.</p>
+          </div>
+          <example-snippet stamp-to="swapTexturesExample" highlight-as="html">
+            <template>
+<model-viewer id="helmet" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb" ar alt="A 3D model of a helmet">
+  <div class="controls">
+    <div>
+      <p>Diffuse</p>
+      <select id="diffuse">
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_albedo.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_baseColor.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_baseColor.png">Water Bottle</option>
+      </select>
+    </div>
+    <div>
+      <p>Metallic-roughness</p>
+      <select id="metallicRoughness">
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_metalRoughness.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_roughnessMetallic.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
+      </select>
+    </div>
+    <div>
+      <p>Normals</p>
+      <select id="normals">
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_normal.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_normal.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_normal.png">Water Bottle</option>
+      </select>
+    </div>
+    <div>
+      <p>Occlusion</p>
+      <select id="occlusion">
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_AO.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">Water Bottle</option>
+      </select>
+    </div>
+    <div>
+      <p>Emission</p>
+      <select id="emission">
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_emissive.jpg">Damaged helmet</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/Lantern/glTF/Lantern_emissive.png">Lantern Pole</option>
+        <option value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_emissive.png">Water Bottle</option>
+      </select>
+    </div>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture1 = document.querySelector("model-viewer#helmet");
+
+modelViewerTexture1.addEventListener("load", () => {
+
+  const material = modelViewerTexture1.model.materials[0];
+
+  const createAndApplyTexture = async (channel, event) => {
+    const texture = await modelViewerTexture1.createTexture(event.target.value);
+    if (channel.includes('base') || channel.includes('metallic')) {
+      material.pbrMetallicRoughness[channel].setTexture(texture);
+    } else {
+      material[channel].setTexture(texture);
+    }
+  }
+
+  document.querySelector('#normals').addEventListener('input', (event) => {
+    createAndApplyTexture('normalTexture', event);
+  });
+
+  document.querySelector('#occlusion').addEventListener('input', (event) => {
+    createAndApplyTexture('occlusionTexture', event);
+  });
+
+  document.querySelector('#emission').addEventListener('input', (event) => {
+    createAndApplyTexture('emissiveTexture', event);
+  });
+
+  document.querySelector('#diffuse').addEventListener('input', (event) => {
+    createAndApplyTexture('baseColorTexture', event);
+  });
+
+  document.querySelector('#metallicRoughness').addEventListener('input', (event) => {
+    createAndApplyTexture('metallicRoughnessTexture', event);
+  });
+});
+
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="transformTexturesExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Transform textures</h2>
+            <p>As above, you can change these values in AR, but only in WebXR
+              mode. iOS Quick Look reflects these texture changes so long as the
+              USDZ is auto-generated.</p>
+          </div>
+          <example-snippet stamp-to="transformTexturesExample" highlight-as="html">
+            <template>
+<model-viewer id="box" camera-controls touch-action="pan-y" src="../../shared-assets/models/glTF-Sample-Assets/Models/Cube/glTF/Cube.gltf" ar alt="A 3D model of a helmet">
+  <div class="controls">
+      <p>Rotation: <span id="texture-rotation"></span></p>
+      <input type="range" min="0" max="3.14" value="0" step="0.01" id="rotationSlider">
+      <p>Scale: <span id="texture-scale"></span></p>
+      <input type="range" min="0.5" max="1.5" value="1" step="0.01" id="scaleSlider">
+      <p>Offset</p>
+      <input type="range" min="0" max="1" value="0" step="0.01" id="offsetSlider">
+      <p>WrapMode</p>
+      <select id="wrapMode">
+        <option value="10497">Repeat</option>
+        <option value="33071">ClampToEdge</option>
+        <option value="33648">MirroredRepeat</option>
+      </select>
+    </div>
+</model-viewer>
+<script type="module">
+const modelViewerTexture2 = document.querySelector("model-viewer#box");
+const rotationSlider = document.querySelector('#rotationSlider');
+const scaleSlider = document.querySelector('#scaleSlider');
+const offsetSlider = document.querySelector('#offsetSlider');
+
+modelViewerTexture2.addEventListener("load", () => {
+
+  const sampler = modelViewerTexture2.model.materials[0].pbrMetallicRoughness['baseColorTexture'].texture.sampler;
+
+  const rotationDisplay = document.querySelector('#texture-rotation');
+  const scaleDisplay = document.querySelector('#texture-scale');
+
+  rotationDisplay.textContent = rotationSlider.value;
+  scaleDisplay.textContent = scaleSlider.value;
+
+  rotationSlider.addEventListener('input', (event) => {
+    const rotation = rotationSlider.value;
+    sampler.setRotation(rotation);
+    rotationDisplay.textContent = rotation;
+  });
+
+  scaleSlider.addEventListener('input', (event) => {
+    const scale = {
+      u: scaleSlider.value,
+      v: scaleSlider.value
+    };
+    sampler.setScale(scale);
+    scaleDisplay.textContent = scale.x;
+  });
+
+  offsetSlider.addEventListener('input', (event) => {
+    const offset = {
+      u: offsetSlider.value,
+      v: -offsetSlider.value
+    };
+    sampler.setOffset(offset);
+  });
+
+  document.querySelector('#wrapMode').addEventListener('input', (event) => {
+    sampler.setWrapS(Number(event.target.value));
+    sampler.setWrapT(Number(event.target.value));
+  });
+});
+
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="hideShowMeshVariantsExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Toggle between Mesh Variants</h2>
+            <p>If you have a few mesh variants, you can hide and show them by changing textures opacity.</p>
+          </div>
+          <example-snippet stamp-to="hideShowMeshVariantsExample" highlight-as="html">
+            <template>
+<model-viewer id="manifold" camera-controls touch-action="pan-y" src="../../shared-assets/models/manifold.glb" ar alt="A 3D model of a stick and ball">
+  <div class="controls">
+    <div>Mesh Variants:
+      <select id="textures">
+        <option value="ball">ball</option>
+        <option value="stick">stick</option>
+      </select>
+    </div>
+</model-viewer>
+<script type="module">
+  const mvTextures = document.querySelector("model-viewer#manifold");
+  const textures = document.querySelector("#textures");
+
+  mvTextures.addEventListener("load", () => {
+    function updateAlphaValue(texture, alpha) {
+      const pbr = texture.pbrMetallicRoughness;
+      const baseColor = pbr.baseColorFactor;
+      baseColor[3] = alpha;
+      pbr.setBaseColorFactor(baseColor);
+    }
+
+    textures.addEventListener("input", (event) => {
+      const selectedValue = event.target.value;
+      const ball = mvTextures.model.getMaterialByName("ball");
+      ball.setAlphaMode("BLEND");
+      const stick = mvTextures.model.getMaterialByName("stick");
+
+      const animationDuration = 1000; // 1 second
+      const startTimestamp = performance.now();
+      function animate(currentTimestamp) {
+        const elapsed = currentTimestamp - startTimestamp;
+
+        const delta = elapsed / animationDuration;
+        const alpha = selectedValue === "ball" ? 1 - delta : delta;
+        updateAlphaValue(stick, alpha);
+        updateAlphaValue(ball, 1 - alpha);
+
+        if (elapsed < animationDuration) {
+          requestAnimationFrame(animate);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    });
+  });
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="sample">
+      <div id="animatedTexturesExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Create animated textures</h2>
+            <p>Though video textures are not part of the glTF spec yet, you can
+            create them and add them to your model after it loads. Video
+            elements, Canvas elements, and Lottie animations are all
+            supported.</p>
+            <p>For Lottie animations, an import map is required, pointing
+            "three" to the model-viewer library file you are loading, since
+            three.js is contained in the model-viewer bundle. Unfortunately this
+            cannot be done by our library automatically because the import map
+            must be specified before any libraries load. Put something like this
+            in your page's head:</p>
+            <pre><code>
+&lt;script type="importmap"&gt;
+{
+  "imports": {
+    "three": "path/to/your/model-viewer.min.js"
+  }
+}
+&lt;/script&gt;
+            </code></pre>
+            <p>Unfortunately, Safari does not yet support import maps, so to get
+            this to work universally, you will need the following code
+            instead:</p>
+            <pre><code>
+&lt;script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"&gt;&lt;/script&gt;
+
+&lt;script type="importmap-shim"&gt;
+{
+  "imports": {
+    "three": "path/to/your/model-viewer.min.js"
+  }
+}
+&lt;/script&gt;
+
+&lt;script type="module-shim" src="path/to/your/model-viewer.min.js"&gt;&lt;/script&gt;
+            </code></pre>
+          </div>
+          <example-snippet stamp-to="animatedTexturesExample" highlight-as="html">
+            <template>
+<model-viewer id="animated" camera-controls touch-action="pan-y" src="../../shared-assets/models/sphere.glb" ar alt="A 3D model of a duck">
+  <div class="controls">
+    <p>Texture Type</p>
+    <select id="type">
+      <option value="lottie">Lottie</option>
+      <option value="video">Video</option>
+      <option value="canvas">Canvas</option>
+    </select>
+  </div>
+</model-viewer>
+<script type="module">
+const modelViewerAnimated = document.querySelector("model-viewer#animated");
+
+let videoTexture = null;
+let canvasTexture = null;
+let lottieTexture = null;
+
+customElements.whenDefined('model-viewer').then(() => {
+  videoTexture = modelViewerAnimated.createVideoTexture("../../shared-assets/models/lottie-logo.mp4");
+});
+
+function getCanvasTexture() {
+  if(canvasTexture) return canvasTexture;
+  canvasTexture = modelViewerAnimated.createCanvasTexture();
+  const canvas = canvasTexture.source.element;
+  canvas.width = 1600;
+  canvas.height = 800;
+  const ctx = canvas.getContext('2d');
+  ctx.font = "250px sans-serif";
+  ctx.fillStyle = "#aaa";
+  ctx.fillText('Canvas 2D!', 0, 400);
+  canvasTexture.source.update();
+  return canvasTexture;
+}
+
+function getLottieTexture() {
+  if(lottieTexture) return lottieTexture;
+  lottieTexture = modelViewerAnimated.createLottieTexture("../../shared-assets/models/24017-lottie-logo-animation.json", 2);
+  return lottieTexture;
+}
+
+modelViewerAnimated.addEventListener("load", async () => {
+
+  const material = modelViewerAnimated.model.materials[0];
+  const {baseColorTexture} = material.pbrMetallicRoughness;
+
+  baseColorTexture.setTexture(await getLottieTexture());
+
+  document.querySelector('#type').addEventListener('input', async (event) => {
+    switch(event.target.value){
+      case "video":
+        baseColorTexture.setTexture(videoTexture);
+        break;
+      case "canvas":
+        baseColorTexture.setTexture(getCanvasTexture());
+        break;
+      case "lottie":
+        baseColorTexture.setTexture(await getLottieTexture());
+        break;
+    }
+  });
+});
+
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="pickMaterialExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Materials API</h2>
+            <p>The complete Materials interface is documented below, which is all accessible through the <a href="../../docs/index.html#entrydocs-scenegraph-properties-model">model property</a>.
+            The Materials API is designed to follow the <a href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#reference-material">glTF structure</a>, just as though you are navigating their JSON object. 
+            Only the materials and their children are exposed rather than the whole scene graph to keep the scope small for this high-level web component.
+            Not every glTF parameter is exposed, but more may be added in the future. Additionally, several methods have been added for useful operations.</p>
+            <p>This example demonstrates selecting a material with pointer input and changing its color. Note this also works in the WebXR AR mode. It also demonstrates the use of the scale attribute since this GLB was erroneously modeled in mm instead of meters.</p>
+          </div>
+          <example-snippet stamp-to="pickMaterialExample" highlight-as="html">
+            <template>
+<model-viewer id="pickMaterial" shadow-intensity="1" camera-controls touch-action="pan-y" disable-tap src="../../shared-assets/models/glTF-Sample-Assets/Models/MetalRoughSpheresNoTextures/glTF-Binary/MetalRoughSpheresNoTextures.glb" ar ar-modes="webxr" scale="100 100 100" alt="A Material Picking Example">
+</model-viewer>
+<script type="module">
+const modelViewer = document.querySelector("model-viewer#pickMaterial");
+
+modelViewer.addEventListener("load", () => {
+  const changeColor = (event) => {
+    if(modelViewer.modelIsVisible){
+      const material = modelViewer.materialFromPoint(event.clientX, event.clientY);
+      if (material != null) {
+        material.pbrMetallicRoughness.
+          setBaseColorFactor([Math.random(), Math.random(), Math.random()]);
+      }
+    }
+  };
+
+  document.addEventListener("click", changeColor);
+});
+</script>
+<script>
+/**
+ * This is not an actual script, but an API declaration made prettier with JS syntax highlighting.
+*/
+
+/** A 2D Cartesian coordinate */
+interface Vector2DInterface {
+  u: number;
+  v: number;
+}
+
+type RGBA = [number, number, number, number];
+type RGB = [number, number, number];
+
+/**
+ * A Model is the root element of a 3DOM scene graph. It gives scripts access
+ * to the sub-elements found without the graph.
+ */
+interface Model {
+  /**
+   * An ordered set of unique Materials found in this model. The Materials
+   * correspond to the listing of materials in the glTF, with the possible
+   * addition of a default material at the end.
+   */
+  readonly materials: Readonly<Material[]>;
+
+  /**
+   * Gets a material(s) by name.
+   * @param name the name of the material to return.
+   * @returns the first material to whose name matches `name`
+   */
+  getMaterialByName(name: string): Material|null;
+
+  /**
+   * Creates a new material variant from an existing material.
+   * @param originalMaterialIndex index of the material to clone the variant
+   *     from.
+   * @param materialName the name of the new material
+   * @param variantName the name of the variant
+   * @param activateVariant activates this material variant, i.e. the variant
+   *     material is rendered, not the existing material.
+   * @returns returns a clone of the original material, returns `null` if the
+   *     material instance for this variant already exists.
+   */
+  createMaterialInstanceForVariant(
+      originalMaterialIndex: number, newMaterialName: string,
+      variantName: string, activateVariant: boolean): Material|null;
+
+  /**
+   * Adds a variant name to the model.
+   * @param variantName
+   */
+  createVariant(variantName: string): void;
+
+  /**
+   * Adds an existing material to a variant name.
+   * @param materialIndex
+   * @param targetVariantName
+   */
+  setMaterialToVariant(materialIndex: number, targetVariantName: string): void;
+
+  /**
+   * Removes the variant name from the model.
+   * @param variantName the variant to remove.
+   */
+  deleteVariant(variantName: string): void;
+}
+
+/**
+ * A Material gives the script access to modify a single, unique material found
+ * in a model's scene graph.
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-material
+ */
+interface Material {
+  /**
+   * The name of the material, if any.
+   */
+  name: string;
+
+  readonly normalTexture: TextureInfo|null;
+  readonly occlusionTexture: TextureInfo|null;
+  readonly emissiveTexture: TextureInfo|null;
+
+  readonly emissiveFactor: Readonly<RGB>;
+  setEmissiveFactor(rgb: RGB|string): void;
+  setAlphaCutoff(cutoff: number): void;
+  getAlphaCutoff(): number;
+  setDoubleSided(doubleSided: boolean): void;
+  getDoubleSided(): boolean;
+  setAlphaMode(alphaMode: AlphaMode): void;
+  getAlphaMode(): AlphaMode;
+
+  /**
+   * PBR Next properties.
+   */
+  readonly emissiveStrength: number;
+  readonly clearcoatFactor: number;
+  readonly clearcoatRoughnessFactor: number;
+  readonly clearcoatTexture: TextureInfo;
+  readonly clearcoatRoughnessTexture: TextureInfo;
+  readonly clearcoatNormalTexture: TextureInfo;
+  readonly clearcoatNormalScale: number;
+  readonly ior: number;
+  readonly sheenColorFactor: Readonly<RGB>;
+  readonly sheenColorTexture: TextureInfo;
+  readonly sheenRoughnessFactor: number;
+  readonly sheenRoughnessTexture: TextureInfo;
+  readonly transmissionFactor: number;
+  readonly transmissionTexture: TextureInfo;
+  readonly thicknessFactor: number;
+  readonly thicknessTexture: TextureInfo;
+  readonly attenuationDistance: number;
+  readonly attenuationColor: Readonly<RGB>;
+  readonly specularFactor: number;
+  readonly specularTexture: TextureInfo;
+  readonly specularColorFactor: Readonly<RGB>;
+  readonly specularColorTexture: TextureInfo;
+  readonly iridescenceFactor: number;
+  readonly iridescenceTexture: TextureInfo;
+  readonly iridescenceIor: number;
+  readonly iridescenceThicknessMinimum: number;
+  readonly iridescenceThicknessMaximum: number;
+  readonly iridescenceThicknessTexture: TextureInfo;
+  readonly anisotropyStrength: number;
+  readonly anisotropyRotation: number;
+  readonly anisotropyTexture: TextureInfo;
+
+  setEmissiveStrength(emissiveStrength: number): void;
+  setClearcoatFactor(clearcoatFactor: number): void;
+  setClearcoatRoughnessFactor(clearcoatRoughnessFactor: number): void;
+  setClearcoatNormalScale(clearcoatNormalScale: number): void;
+  setIor(ior: number): void;
+  setSheenColorFactor(rgb: RGB|string): void;
+  setSheenRoughnessFactor(roughness: number): void;
+  setTransmissionFactor(transmission: number): void;
+  setThicknessFactor(thickness: number): void;
+  setAttenuationDistance(attenuationDistance: number): void;
+  setAttenuationColor(rgb: RGB|string): void;
+  setSpecularFactor(specularFactor: number): void;
+  setSpecularColorFactor(rgb: RGB|string): void;
+  setIridescenceFactor(iridescence: number): void;
+  setIridescenceIor(ior: number): void;
+  setIridescenceThicknessMinimum(thicknessMin: number): void;
+  setIridescenceThicknessMaximum(thicknessMax: number): void;
+  setAnisotropyStrength(strength: number): void;
+  setAnisotropyRotation(rotation: number): void;
+
+  /**
+   * The PBRMetallicRoughness configuration of the material.
+   */
+  readonly pbrMetallicRoughness: PBRMetallicRoughness;
+
+  /**
+   * Asynchronously loads the underlying material resource if it's currently
+   * unloaded, otherwise the method is a noop.
+   */
+  ensureLoaded(): void;
+
+  /**
+   * Returns true if the material participates in the variant.
+   * @param name the variant name.
+   */
+  hasVariant(name: string): boolean;
+
+  /**
+   * Returns true if the material is loaded.
+   */
+  readonly isLoaded: boolean;
+
+  /**
+   * Returns true if the material is participating in scene renders.
+   */
+  readonly isActive: boolean;
+
+  /**
+   * Returns the glTF index of this material.
+   */
+  readonly index: number;
+}
+
+/**
+ * The PBRMetallicRoughness encodes the PBR properties of a material
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-pbrmetallicroughness
+ */
+interface PBRMetallicRoughness {
+  /**
+   * The base color factor of the material, represented as RGBA values
+   */
+  readonly baseColorFactor: Readonly<RGBA>;
+
+  /**
+   * Metalness factor of the material, represented as number between 0 and 1
+   */
+  readonly metallicFactor: number;
+
+  /**
+   * Roughness factor of the material, represented as number between 0 and 1
+   */
+  readonly roughnessFactor: number;
+
+  /**
+   * A texture reference, associating an image with color information and
+   * a sampler for describing base color factor for a UV coordinate space.
+   */
+  readonly baseColorTexture: TextureInfo|null;
+
+  /**
+   * A texture reference, associating an image with color information and
+   * a sampler for describing metalness (B channel) and roughness (G channel)
+   * for a UV coordinate space.
+   */
+  readonly metallicRoughnessTexture: TextureInfo|null;
+
+  /**
+   * Changes the base color factor of the material to the given value.
+   */
+  setBaseColorFactor(rgba: RGBA|string): void;
+
+  /**
+   * Changes the metalness factor of the material to the given value.
+   */
+  setMetallicFactor(value: number): void;
+
+  /**
+   * Changes the roughness factor of the material to the given value.
+   */
+  setRoughnessFactor(value: number): void;
+}
+
+/**
+ * A TextureInfo is a pointer to a specific Texture in use on a Material
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-textureinfo
+ */
+interface TextureInfo {
+  /**
+   * The Texture being referenced by this TextureInfo.
+   */
+  readonly texture: Texture|null;
+
+  /**
+   * Sets the texture, or removes it if argument is null. Note you cannot build
+   * your own Texture object, but must either use one from another TextureInfo,
+   * or create one with the createTexture method.
+   */
+  setTexture(texture: Texture|null): void;
+}
+
+/**
+ * A Texture pairs an Image and a Sampler for use in a Material
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-texture
+ */
+interface Texture {
+  /**
+   * The name of the texture, if any.
+   */
+  readonly name: string;
+
+  /**
+   * The Sampler for this Texture
+   */
+  readonly sampler: Sampler;
+
+  /**
+   * The source Image for this Texture
+   */
+  readonly source: Image;
+}
+
+/**
+ * A Sampler describes how to filter and wrap textures
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-sampler
+ */
+interface Sampler {
+  /**
+   * The name of the sampler, if any.
+   */
+  readonly name: string;
+
+  /**
+   * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplerminfilter
+   */
+  readonly minFilter: MinFilter;
+
+  /**
+   * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplermagfilter
+   */
+  readonly magFilter: MagFilter;
+
+  /**
+   * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplerwraps
+   */
+  readonly wrapS: WrapMode;
+
+  /**
+   * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#samplerwrapt
+   */
+  readonly wrapT: WrapMode;
+
+  /**
+   * The texture rotation in radians.
+   */
+  readonly rotation: number|null;
+
+  /**
+   * The texture scale.
+   */
+  readonly scale: Vector2DInterface|null;
+
+  /**
+   * The texture offset.
+   */
+  readonly offset: Vector2DInterface|null;
+
+  /**
+   * Configure the minFilter value of the Sampler.
+   */
+  setMinFilter(filter: MinFilter): void;
+
+  /**
+   * Configure the magFilter value of the Sampler.
+   */
+  setMagFilter(filter: MagFilter): void;
+
+  /**
+   * Configure the S (U) wrap mode of the Sampler.
+   */
+  setWrapS(mode: WrapMode): void;
+
+  /**
+   * Configure the T (V) wrap mode of the Sampler.
+   */
+  setWrapT(mode: WrapMode): void;
+
+  /**
+   * Sets the texture rotation, or resets it to zero if argument is null.
+   * Rotation is in radians, positive for counter-clockwise.
+   */
+  setRotation(rotation: number|null): void;
+
+  /**
+   * Sets the texture scale, or resets it to (1, 1) if argument is null.
+   * As the scale value increases, the repetition of the texture will increase.
+   */
+  setScale(scale: Vector2DInterface|null): void;
+
+  /**
+   * Sets the texture offset, or resets it to (0, 0) if argument is null.
+   */
+  setOffset(offset: Vector2DInterface|null): void;
+}
+
+
+/**
+ * An Image represents an embedded or external image used to provide texture
+ * color data.
+ *
+ * @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-image
+ */
+interface Image {
+  /**
+   * The name of the image, if any.
+   */
+  readonly name: string;
+
+  /**
+   * The type is 'external' if the image has a configured URI. Otherwise, it is
+   * considered to be 'embedded'. Note: this distinction is only implied by the
+   * glTF spec, and is made explicit here for convenience.
+   */
+  readonly type: 'embedded'|'external';
+
+  /**
+   * The URI of the image, if it is external.
+   */
+  readonly uri?: string;
+
+  /**
+   * The bufferView of the image, if it is embedded.
+   */
+  readonly bufferView?: number;
+
+  /**
+   * The backing HTML element, if this is a video or canvas texture.
+   */
+  readonly element?: HTMLVideoElement|HTMLCanvasElement;
+
+  /**
+   * The Lottie animation object, if this is a Lottie texture. You may wish to
+   * do image.animation as import('lottie-web').AnimationItem; to get its type
+   * info.
+   */
+  readonly animation?: any;
+
+  /**
+   * A method to create an object URL of this image at the desired
+   * resolution. Especially useful for KTX2 textures which are GPU compressed,
+   * and so are unreadable on the CPU without a method like this.
+   */
+  createThumbnail(width: number, height: number): Promise<string>;
+
+  /**
+   * Only applies to canvas textures. Call when the content of the canvas has
+   * been updated and should be reflected in the model.
+   */
+  update(): void;
+}
+</script>
+</template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="exporter" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+
+          <a class="lockup" href="../../index.html"><div class="icon-button icon-modelviewer-black"></div><h1>examples</h1></a>
+          <div class="heading">
+            <h2 class="demo-title">Exporter</h2>
+          </div>
+          <example-snippet stamp-to="exporter" highlight-as="html">
+            <template>
+<model-viewer id="static-model" src="../../shared-assets/models/Astronaut.glb" shadow-intensity="1" camera-controls touch-action="pan-y" alt="A 3D model of an astronaut">
+  <div class="controls">
+    <button onclick="exportGLB()">Export GLB</button>
+  </div>
+</model-viewer>
+<script>
+  async function exportGLB(){
+    const modelViewer = document.getElementById("static-model");
+    const glTF = await modelViewer.exportScene();
+    const file = new File([glTF], "export.glb");
+    const link = document.createElement("a");
+    link.download =file.name;
+    link.href = URL.createObjectURL(file);
+    link.click();
+  }
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <ul>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/MaterialsVariantsShoe">Shoe</a> ©Copyright 2020 <a href="https://www.shopify.com/">Shopify Inc.</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/Lantern">Lantern</a>,
+          licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/WaterBottle">Water Bottle</a>,
+          licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons Zero</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://github.com/dataarts/3-dreams-of-black/tree/master/deploy/files/models/soup">Horse</a> by <a href="https://github.com/dataarts">Google Data Arts Team</a>,
+          licensed under <a href="https://github.com/dataarts/3-dreams-of-black/blob/master/deploy/files/models/soup/LICENSE.txt">Creative Commons Attribution-NonCommercial-ShareAlike</a>.
+        </li>
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/Duck">Duck</a> by Sony Computer Entertainment Inc.,
+          licensed under <a href="https://web.archive.org/web/20160320123355/http://research.scea.com/scea_shared_source_license.html">the SCEA Shared Source License, Version 1.0</a>.
+        </li>
+      </ul>
+      <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+      <div id='footer-links'></div>
+    </div>
+  </div>
+</div>
+
+  <script type="module" src="../../examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { init('examples-scenegraph'); })();
+    (() => { initFooterLinks();})();
+  </script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="../built/dependencies.js">
+  </script>
+
+  <!-- Loads <model-viewer> on modern browsers: -->
+  <script type="module-shim"
+      src="../../node_modules/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+</body>
+</html>

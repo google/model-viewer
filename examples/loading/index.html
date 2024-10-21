@@ -1,0 +1,636 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>&lt;model-viewer&gt; Lazy Loading</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; lazy loading examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png" />
+
+
+
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+</head>
+
+<body>
+
+<div class="examples-page">
+  <div class="sidebar" id="sidenav"></div>
+  <div id="toggle"></div>
+
+  <div class="examples-container">
+    <div class="sample">
+      <div id="displayPoster" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Lazy Loading. </span>Improve UX with these cost-saving &lt;model-viewer&gt; configurations. This page tests usages of the &lt;model-viewer&gt; element using the poster attribute.</h4>
+
+          <div class="heading">
+            <h2 class="demo-title">Display a poster until loaded</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="displayPoster" highlight-as="html">
+
+            <template>
+<model-viewer id="reveal" loading="eager" camera-controls touch-action="pan-y" auto-rotate poster="../../assets/poster-shishkebab.webp" tone-mapping="aces" src="../../shared-assets/models/shishkebab.glb" shadow-intensity="1" alt="A 3D model of a shishkebab"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="customizeLoad" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Customize loading experience with your own HTML</h2>
+            <!-- <h2 class="demo-title">Lazy load with poster until interaction</h2> -->
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="customizeLoad" highlight-as="html">
+            <template>
+<style>
+  #lazy-load-poster {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: url("../../assets/poster-damagedhelmet.webp");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  #button-load {
+    background-image: url("../../assets/ic_get_app_white_24dp.svg");
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
+    background-position: 6% 50%;
+    background-color: #000;
+    color: white;
+    cursor: pointer;
+    border-radius: 6px;
+    display: inline-block;
+    padding: 10px 18px 9px 40px;
+    font-weight: 500;
+    box-shadow: 0 0 8px rgba(0,0,0,.2), 0 0 4px rgba(0,0,0,.25);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    z-index: 100;
+  }
+</style>
+<!-- use unique asset to ensure lazy loading -->
+<model-viewer id="lazy-load" camera-controls touch-action="pan-y" reveal="manual" src="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/DamagedHelmet.gltf" alt="A 3D model of a damaged helmet">
+  <div id="lazy-load-poster" slot="poster"></div>
+  <div id="button-load" slot="poster">Load 3D Model</div>
+</model-viewer>
+
+<script>
+  document.querySelector('#button-load').addEventListener('click',
+    () => document.querySelector('#lazy-load').dismissPoster());
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="sample">
+      <div id="invalidModel" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Poster with invalid model</h2>
+            <h4>
+              This will output a console error while showing the poster image.
+            </h4>
+          </div>
+          <example-snippet stamp-to="invalidModel" highlight-as="html">
+            <template>
+<model-viewer poster="../../assets/poster-astronaut.png" src="i-do-not-exist.glb" alt="An invalid model"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="cyclingPosters" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Cycling between posters</h2>
+            <h4>The model is shown when the element is clicked. Note that
+            camera-controls is not enabled here, so the model rotates on its
+            own, but is not interactive.</h4>
+          </div>
+          <example-snippet stamp-to="cyclingPosters" highlight-as="html">
+            <template>
+<model-viewer id="toggle-poster" reveal="manual" auto-rotate poster="../../assets/poster-astronaut2.png" src="../../shared-assets/models/Astronaut.glb" alt="A 3D model of an astronaut"></model-viewer>
+<script>
+  const posters = ['poster-astronaut2.png', 'poster-astronaut3.png', 'poster-astronaut4.png'];
+  const togglePoster = document.querySelector('#toggle-poster');
+  let i = 0;
+  setInterval(() =>
+    togglePoster.setAttribute('poster', `../../assets/${posters[++i % 3]}`), 2000);
+  const modelViewer = document.querySelector('#toggle-poster');
+  modelViewer.addEventListener('click', () => modelViewer.dismissPoster());
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="gltfModel" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Model Formats. </span>Learn how model formats work on different platforms. This page tests configurations of the model source.</h4>
+          <div class="heading">
+            <h2 class="demo-title">With a glTF model</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="gltfModel" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of a sphere" src="../../shared-assets/models/reflective-sphere.gltf">
+</model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="glbModel" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">With a GLB model</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="glbModel" highlight-as="html">
+            <template>
+<model-viewer camera-controls
+    alt="A 3D model of an astronaut" src="../../shared-assets/models/Astronaut.glb">
+</model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="dracoSupport" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">DRACO support</h2>
+            <h4>
+              &lt;model-viewer&gt; supports loading glTF models that
+              use <a href="https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md" target="_blank" rel="noopener">the DRACO mesh compression extension</a>.
+            </h4>
+            <h4>
+              In order to load such models, an auxilliary decoder is
+              required and will be loaded on-demand from a Google CDN when
+              a DRACO-compressed model is detected. See below to learn
+              how to customize this behavior.
+            </h4>
+          </div>
+          <example-snippet stamp-to="dracoSupport" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of a boom box" src="../../shared-assets/models/glTF-Sample-Assets/Models/BoomBox/glTF-Draco/BoomBox.gltf">
+</model-viewer>
+            </template>
+          </example-snippet>
+          <div>
+            <p>
+              By default, the DRACO decoder will be loaded from a Google CDN
+              on-demand. The decoder is open source and distributed for free
+              under the Apache License 2.0.
+            </p>
+            <p>
+              It is possible to customize where the decoder is loaded from by
+              defining a global configuration option like so:
+            </p>
+            <example-snippet inert-script highlight-as="html">
+              <template>
+<script>
+self.ModelViewerElement = self.ModelViewerElement || {};
+self.ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/decoder/files/';
+</script>
+            </template>
+          </example-snippet>
+          <p>
+            When customizing the decoder location, you must make sure that
+            the configuration is set <strong>before</strong> the first &lt;model-viewer&gt;
+            element is created on the page. &lt;model-viewer&gt; will attempt to
+            load the decoder as soon as it loads a glTF that uses the DRACO
+            extension, so be careful to set the configuration early!
+          </p>
+          <p>
+            Another way to set the decoder location is to look up
+            the constructor for &lt;model-viewer&gt; and configure it directly:
+          </p>
+          <example-snippet inert-script highlight-as="html">
+            <template>
+<script>
+const ModelViewerElement = customElements.get('model-viewer');
+ModelViewerElement.dracoDecoderLocation = 'http://example.com/location/of/draco/decoder/files/';
+</script>
+              </template>
+            </example-snippet>
+            <p>
+              Note that the direct configuration approach will only work
+              <strong>after</strong> &lt;model-viewer&gt; is defined in the
+              browser (in typical cases, after model-viewer.min.js has been loaded).
+            </p>
+            <p>
+              Keep in mind that the DRACO decoder is pretty large (more than 100KB),
+              so it is best only to use DRACO compressed models when the file size
+              savings are larger than the size of the decoder.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="ktx2Support" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">KTX2 support</h2>
+            <h4>
+              &lt;model-viewer&gt; supports loading glTF models that
+              use <a href="https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_texture_basisu/README.md" target="_blank" rel="noopener">the Basis Universal extension</a> for including KTX v2 textures.
+            </h4>
+            <h4>
+              In order to load such models, an auxilliary decoder is required
+              and will be loaded on-demand from a Google CDN when a basisu model
+              is detected. See the DRACO example above to see how to customize
+              this behavior, using <code>ktx2TranscoderLocation</code> instead
+              of <code>dracoDecoderLocation</code>.
+            </h4>
+          </div>
+          <example-snippet stamp-to="ktx2Support" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of a fish" src="../../shared-assets/models/BarramundiFish.mixed.glb">
+</model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="meshoptSupport" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Meshopt support</h2>
+            <h4>
+              &lt;model-viewer&gt; supports loading glTF models that
+
+              use <a href="https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Vendor/EXT_meshopt_compression/README.md" target="_blank" rel="noopener">the Meshopt compression extension</a>.
+            </h4>
+            <h4>
+              In order to load such models, an auxiliary decoder is
+              required, and is not enabled by default.
+            </h4>
+          </div>
+          <example-snippet stamp-to="meshoptSupport" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of a mechanical coffee mug contraption" src="../../shared-assets/models/coffeemat.glb">
+</model-viewer>
+            </template>
+          </example-snippet>
+          <p>
+            Enable support for Meshopt compression by providing
+            <code>meshoptDecoderLocation</code>:
+          </p>
+          <example-snippet inert-script highlight-as="html">
+            <template>
+<script>
+self.ModelViewerElement = self.ModelViewerElement || {};
+self.ModelViewerElement.meshoptDecoderLocation = 'https://cdn.jsdelivr.net/npm/meshoptimizer/meshopt_decoder.js';
+</script>
+            </template>
+          </example-snippet>
+          <p>
+            When customizing the decoder location, you must make sure that
+            the configuration is set <strong>before</strong> the first &lt;model-viewer&gt;
+            element is created on the page.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="usdzModel" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">With only a USDZ model</h2>
+            <h4>Note that this won't display a model (as that requires a glTF or GLB), but could be used with poster to show a static image and the icon to enter augmented reality mode</h4>
+          </div>
+          <example-snippet stamp-to="usdzModel" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" alt="A 3D model of an astronaut" ar ios-src="../../shared-assets/models/Astronaut.usdz">
+</model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="renderScale" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Dynamic scaling</h2>
+            <h4>Our renderer automatically scales resolution to maintain frame rate. This behavior can be monitored and controlled.</h4>
+            <h4>To see throttling happen, you'll have to tax your GPU. This model is intentionally complex (including transparency and clear coat)
+              so that it will throttle on a fairly broad range of devices. Note that expanding your window and zooming in will tend to tax the GPU
+              more since more pixels are being shaded. Also note that the render returns to full scale any time the scene stops moving. If you use
+              very complex 3D models, you may want to disable auto-rotate for this reason.
+            </h4>
+            <h4>Our renderer tries to keep the frame rate between 38 and 60 frames per second. It's a pretty safe bet that if you are at the reportedDpr,
+              you are smoothly running at 60 fps, and if you are at the minimumDpr you are likely well below 38 fps. This event only fires in 3D mode;
+              The AR modes also do dynamic render scaling, but do not report their status.
+            </h4>
+          </div>
+          <example-snippet stamp-to="renderScale" highlight-as="html">
+            <template>
+<model-viewer id="scale" alt="A 3D model of a toy car" camera-controls touch-action="pan-y" auto-rotate src="../../shared-assets/models/glTF-Sample-Assets/Models/ToyCar/glTF-Binary/ToyCar.glb" ar>
+  Reported DPR: <span id="reportedDpr"></span><br/>
+  Rendered DPR: <span id="renderedDpr"></span><br/>
+  Minimum DPR: <span id="minimumDpr"></span><br/>
+  Rendered width (pixels): <span id="pixelWidth"></span><br/>
+  Rendered height (pixels): <span id="pixelHeight"></span><br/>
+  Reason for scaling: <span id="reason"></span><br/>
+  Minimum scale: <span id="min-scale-value">0.5</span><br/>
+  <input id="min-scale" type="range" min="0.25" max="1" step="0.01" value="0.5" />
+</model-viewer>
+
+<script>
+  const reportedDpr = document.querySelector('#reportedDpr');
+  const renderedDpr = document.querySelector('#renderedDpr');
+  const minimumDpr = document.querySelector('#minimumDpr');
+  const pixelWidth = document.querySelector('#pixelWidth');
+  const pixelHeight = document.querySelector('#pixelHeight');
+  const reason = document.querySelector('#reason');
+
+  // This must be registered before the element loads to catch the initial event.
+  document.querySelector('#scale').addEventListener('render-scale', (event) => {
+    reportedDpr.textContent = event.detail.reportedDpr;
+    renderedDpr.textContent = event.detail.renderedDpr;
+    minimumDpr.textContent = event.detail.minimumDpr;
+    pixelWidth.textContent = event.detail.pixelWidth;
+    pixelHeight.textContent = event.detail.pixelHeight;
+    reason.textContent = event.detail.reason;
+  });
+
+  const setup = () => {
+    const minScale = document.querySelector('#min-scale-value');
+    // The static API must be queried after the element loads. Note that static properties affect all the <model-vieweer> elements on the page.
+    const ModelViewerStatic = customElements.get('model-viewer');
+
+    document.querySelector('#min-scale').addEventListener('input', (event) => {
+      ModelViewerStatic.minimumRenderScale = event.target.value;
+      minScale.textContent = event.target.value;
+    });
+  };
+
+  customElements.whenDefined('model-viewer').then(setup);
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="cyclingModels" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Cycling between different models</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="cyclingModels" highlight-as="html">
+            <template>
+<model-viewer id="toggle-model" src="../../shared-assets/models/shishkebab.glb" alt="A 3D model of a shishkebab" shadow-intensity="1" camera-controls touch-action="pan-y" auto-rotate></model-viewer>
+<script>
+    const models = ['shishkebab.glb', 'Astronaut.glb'];
+    const toggleModel = document.querySelector('#toggle-model');
+    let j = 0;
+    setInterval(() => toggleModel.setAttribute('src', `../../shared-assets/models/${models[j++ % 2]}`), 2000);
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="useA11y" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro">
+            <span class="font-medium">Use a11y.</span>
+            Improve accessibility, by adding a11y attribute to the
+            model-viewer element. To have more descriptive translations to
+            improve screen reader capability.
+          </h4>
+          <div class="heading">
+            <h2 class="demo-title">A11Y defined translations</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="useA11y" highlight-as="html">
+            <template>
+              <model-viewer
+                id="a11y-viewer"
+                loading="eager"
+                camera-controls
+                touch-action="pan-y"
+                src="../../shared-assets/models/Astronaut.glb"
+                shadow-intensity="1"
+                alt="A 3D model of a astronaut"
+                a11y='{"front": "The front of a 3D modelled astronaut with ports for different equipment and some controls for the suit", "back": "The back of a 3D modelled astronaut showing its backpack with environmental system", "left": "The left side of a 3D modelled astronaut showing mission patch", "right": "The right side of a 3D modelled astronaut usually has the flag of the country of the astronaut","upper-front": "The upper front of a 3D modelled astronaut", "upper-back": "The upper back of a 3D modelled astronaut", "upper-left": "The upper left of a 3D modelled astronaut", "upper-right": "The upper right of a 3D modelled astronaut", "lower-front": "The lower front of a 3D modelled astronaut", "lower-back": "The lower back of a 3D modelled astronaut", "lower-left": "The lower left of a 3D modelled astronaut", "lower-right": "The lower right of a 3D modelled astronaut", "interaction-prompt": "Use mouse, touch or arrow keys to move"}'
+              >
+                <div class="a11y-container">
+                  <button class="a11y-btn selected" onclick="switchA11y(this, {
+                    front: 'The front of a 3D modelled astronaut with ports for different equipment and some controls for the suit', 
+                    back: 'The back of a 3D modelled astronaut showing its backpack with environmental system', 
+                    left: 'The left side of a 3D modelled astronaut showing mission patch', 
+                    right: 'The right side of a 3D modelled astronaut usually has the flag of the country of the astronaut',
+                    'upper-front': 'The upper front of a 3D modelled astronaut',
+                    'upper-back': 'The upper back of a 3D modelled astronaut',
+                    'upper-left': 'The upper left of a 3D modelled astronaut',
+                    'upper-right': 'The upper right of a 3D modelled astronaut',
+                    'lower-front': 'The lower front of a 3D modelled astronaut',
+                    'lower-back': 'The lower back of a 3D modelled astronaut',
+                    'lower-left': 'The lower left of a 3D modelled astronaut',
+                    'lower-right': 'The lower right of a 3D modelled astronaut',
+                    'interaction-prompt': 'Use mouse, touch or arrow keys to move'
+                  }, 'A 3D model of a astronaut')">English <span class="a11y-icon">🇺🇸</span></button>
+                  <button class="a11y-btn" onclick="switchA11y(this, {
+                    front: 'Framsidan av den 3D-modellerade astronauten, med portar för olika utrustning och några kontroller för dräkten', 
+                    back: 'Baksidan av den 3D-modellerade astronauten som visar sin ryggsäck med miljösystemet', 
+                    left: 'Den vänstra sidan av den 3D-modellerade astronauten, som visar uppdragslappen', 
+                    right: 'Den högra sidan av den 3D-modellerade astronauten, har vanligtvis flaggan för astronautens land',
+                    'upper-front': 'Den övre framsidan av en 3D-modellerad astronaut',
+                    'upper-back': 'Den övre baksidan av en 3D-modellerad astronaut',
+                    'upper-left': 'Den övre vänstra sidan av en 3D-modellerad astronaut',
+                    'upper-right': 'Den övre högra sidan av en 3D-modellerad astronaut',
+                    'lower-front': 'Den nedre framsidan av en 3D-modellerad astronaut',
+                    'lower-back': 'Den nedre baksidan av en 3D-modellerad astronaut',
+                    'lower-left': 'Den nedre vänstra sidan av en 3D-modellerad astronaut',
+                    'lower-right': 'Den nedre högra sidan av en 3D-modellerad astronaut',
+                    'interaction-prompt': 'Använd mus, touch eller piltangenter för att röra'
+                  }, 'En 3D model av en astronaut')">Svenska <span class="a11y-icon">🇸🇪</span></button>
+                </div>
+              </model-viewer>
+
+              <script type="module">
+                const a11yViewer = document.querySelector("#a11y-viewer");
+                window.switchA11y = (element, translation, alt) => {
+                  a11yViewer.a11y = translation;
+                  a11yViewer.alt = alt;
+
+                  const slides = document.querySelectorAll(".a11y-btn");
+                  slides.forEach((element) => {element.classList.remove("selected");});
+                  element.classList.add("selected");
+                };
+              </script>
+              <style>
+                .a11y-container {
+                  display: flex;
+                  justify-content: space-evenly;
+                  gap: 1rem;
+                  position: absolute;
+                  bottom: 1rem;
+                  left: 1rem;
+                }
+                .a11y-btn {
+                  background-color: #f6f6f6;
+                  border: 1px solid #f6f6f604;
+                  color: rgba(0, 0, 0, .87);
+                  padding: 0 0.5rem;
+                  font-size: 16px;
+                  cursor: pointer;
+                  display: inline-flex;
+                  justify-content: center;
+                  align-items: center;
+                  gap: 0.5rem
+                }
+                .a11y-btn.selected {
+                  border: 1px solid #4285f4;
+                }
+                .a11y-btn:hover {
+                  border: 1px solid #4285f4;
+                }
+                .a11y-icon {
+                  text-decoration: none;
+                  color: #ccc;
+                  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji",
+                  Times, Symbola, Aegyptus, Code2000, Code2001, Code2002, Musica, serif,
+                  LastResort;
+                  font-size: 36px;
+                  text-align: center;
+                }
+              </style>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <ul>
+        <li class="attribution">
+          <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://poly.google.com/view/6uTsH2jqgVn">Shish kebab</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://sketchfab.com/3d-models/coffeemat-7fb196a40a6e4697aad9ca2f75c8b33d">Coffeemat</a> by <a href="https://sketchfab.com/OFFcours1">Roman Red</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution</a>.
+        </li>
+      </ul>
+
+      <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+      <div id='footer-links'></div>
+  </div>
+
+</div>
+
+</div>
+
+  <script type="module" src="../../examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { init('examples-loading'); })();
+    (() => { initFooterLinks();})();
+  </script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module" src="../built/dependencies.js">
+  </script>
+
+  <!-- Enables Meshopt decoder. -->
+  <script>
+    self.ModelViewerElement = self.ModelViewerElement || {};
+    self.ModelViewerElement.meshoptDecoderLocation = 'https://cdn.jsdelivr.net/npm/meshoptimizer/meshopt_decoder.js';
+  </script>
+
+  <!-- Loads <model-viewer> on modern browsers: -->
+  <script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+
+</body>
+
+</html>

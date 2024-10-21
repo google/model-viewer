@@ -1,0 +1,9 @@
+commit d86c111e9a73c392195c4db853533c7e4da4b71d
+Author: Emmett Lalish <elalish@google.com>
+Date:   Mon Oct 21 10:25:51 2024 -0700
+
+    update three.js to r169 (#4907)
+    
+    * updated three.js to r169
+    
+    * revert changes

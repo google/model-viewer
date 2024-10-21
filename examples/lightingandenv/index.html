@@ -1,0 +1,386 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Lighting &amp; Environment</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; lighting &amp; environment examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
+  
+
+
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <script>
+window.oscillate = function(min, max, period, time) {
+  const mag = max - min;
+  return Math.cos(Math.PI + 2 * Math.PI * time / period) * (min + mag / 2.0) +
+      mag / 2.0;
+};
+  </script>
+
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+</head>
+<body>
+
+<div class="examples-page">  
+  <div class="sidebar" id="sidenav"></div>
+  <div id="toggle"></div>
+
+  <div class="examples-container">
+    <div class="sample">
+      <div id="hdrSkyboxImage" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <h4 id="intro"><span class="font-medium">Lighting &amp; Environment. </span>Control the lighting and the environment surrounding &lt;model-viewer&gt;. This page showcases the skybox-image attribute, which links to an equirectangular projection image which is used as the skybox, and applied as an environment map to the model.</h4>
+          <div class="heading">
+            <h2 class="demo-title">An equirectangular HDR <span class="attribute">skybox-image</span></h2>
+            <p>Since the environment map represents scene lighting, it requires extremely high dynamic range to realistically represent either natural or artificial scenes. Traditionally the .hdr image format was used for this purpose (and is supported here), but it has poor compression. Recently, the <a href=https://developer.android.com/guide/topics/media/platform/hdr-image-format>UltraHDR</a> image format was introduced which is backwards-compatible with JPEG, still called .jpg but efficiently compresses HDR image data. The examples on this page use UltraHDR to showcase its 10x - 30x savings over .hdr. You can use this free <a href=https://gainmap-creator.monogrid.com>converter</a> to compress your .hdr and .exr environment images - choose save as JPEG.</p>
+          </div>
+          <example-snippet stamp-to="hdrSkyboxImage" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.jpg" alt="A 3D model of a damaged helmet" src="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/DamagedHelmet.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="groundedSkybox" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Ground-projected Skybox</h2>
+            <p>This is an example of an equirectangular <span class="attribute">skybox-image</span> projected onto the ground using a 1.5 meter <span class="attribute">skybox-height</span>, denoting the height of the camera that took the image. If the camera's height is unknown, a larger value will cause the image below the model to expand. Generally it is best to have a height similar to the size of your model.</p>
+            <p>Note that ground-projected skyboxes work best with images where the ground is fairly flat and devoid of objects, and the horizon is distant. Indoor images will generally give poor results.</p>
+          </div>
+          <example-snippet stamp-to="groundedSkybox" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" disable-pan skybox-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" skybox-height="1.5m" shadow-intensity="2" max-camera-orbit="auto 90deg auto" alt="A 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut.glb"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="unlitModel" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Unlit Model</h2>
+            <p>An equirectangular ground-projected <span class="attribute">skybox-image</span> with an unlit model</p>
+          </div>
+          <example-snippet stamp-to="unlitModel" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" skybox-height="1.5m" shadow-intensity="2" alt="An unlit 3D astronaut model depicted within a forest" src="../../shared-assets/models/Astronaut-Unlit.glb"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="environmentLighting" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Use environment-image to set environmental lighting without changing the background</h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="environmentLighting" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" environment-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" alt="A 3D model of a sphere reflecting a forest" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="neutralLighting" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Showing the difference between our two baked-in lighting environments</h2>
+            <p>If no environment or skybox is specified, we have a baked-in
+            default scene that is faster to load. It is designed as a neutral
+            lighting environment that is evenly lit on all sides, but there is
+            also a baked-in legacy lighting primarily for frontward viewing, and
+            can be activated by setting 
+            <span class="attribute">environment-image="legacy"</span>. Our
+            default neutral lighting has been roughly calibrated to render
+            colors at nearly their baseColorMap RGB values.</p>
+          </div>
+          <example-snippet stamp-to="neutralLighting" highlight-as="html">
+            <template>
+<model-viewer id="neutral-demo" camera-controls touch-action="pan-y" auto-rotate alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/GeoPlanter.glb">
+  <label for="neutral">Neutral Lighting: </label>
+  <input id="neutral" type="checkbox" checked="true">
+</model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#neutral-demo');
+  const checkbox = document.querySelector('#neutral');
+  
+  checkbox.addEventListener('change',() => {
+    modelViewer.environmentImage = checkbox.checked ? '' : 'legacy';
+  });
+})();
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="toneMapping" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Comparing tone mapping</h2>
+            <p>Tone mapping is the critical last stage of the rendering pipeline that controls the final look of your model. It is necessary because the reflections are often much brighter than a screen can reproduce, so they must be smoothly mapped into the sRGB range, ideally while avoiding clipping artifacts or hue shifts. The image sensor and processing on a digital camera performs a similar step. </p>
+            <p>Khronos PBR Neutral is our new tone mapper, designed specifically for the color accuracy needs of e-commerce. It is guaranteed to avoid all hue shifts, has a relatively sharp rolloff in intensity, and a slower progression to white. This is designed to pass the widest range of base color values through unchanged to the screen, while preserving enough headroom for highlights to show well. Neutral is now our default as of v4.0.</p>
+            <p>ACES is a film industry standard that is widely used in graphics and was our default tone mapper prior to v4.0. However, it produces serious hue shifts and extreme desaturation, making bright yellow and cyan unattainable under any lighting. See for yourself in this example.</p>
+            <p>AgX is a relatively new tone mapper that is getting a lot of adoption in graphics. It has less hue shifting than ACES and may be a good option for matching existing artist workflows, but has the same drawback of significant desaturation. However, in more artistic scenes this can be beneficial since it allows for a slower intensity rolloff.</p>
+            <p>For an apples-to-apples comparison of ACES to Neutral with custom lighting, set the Neutral exposure to 1 and the ACES exposure to 0.77 to account for ACES being artificially bright. This compensation is automatic for our built-in lighting.</p>
+          </div>
+          <example-snippet stamp-to="toneMapping" highlight-as="html">
+            <template>
+<model-viewer id="tone-demo" camera-controls touch-action="pan-y" auto-rotate alt="A 3D model of a kitchen mixer" src="../../assets/ShopifyModels/Mixer.glb">
+  <p>Tone Mapping:</p>
+  <select id="tone">
+    <option value="neutral">Neutral</option>
+    <option value="aces">ACES</option>
+    <option value="agx">AgX</option>
+  </select>
+  <p>Model:</p>
+  <select id="model">
+    <option value="Mixer">Mixer</option>
+    <option value="GeoPlanter">GeoPlanter</option>
+    <option value="Chair">Chair</option>
+    <option value="ToyTrain">ToyTrain</option>
+    <option value="Canoe">Canoe</option>
+  </select>
+</model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#tone-demo');
+  const tone = document.querySelector('#tone');
+  const model = document.querySelector('#model');
+  
+  tone.addEventListener('input',() => {
+    modelViewer.toneMapping = tone.value;
+  });
+
+  model.addEventListener('input',() => {
+    modelViewer.src = "../../assets/ShopifyModels/" + model.value + ".glb";
+  });
+})();
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="renderExposure" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+          <h2 class="demo-title">Control render exposure with <span class="attribute">exposure</span></h2>
+          <h4></h4>
+        </div>
+        <example-snippet stamp-to="renderExposure" highlight-as="html">
+          <template>
+<model-viewer camera-controls touch-action="pan-y" id="exposure-demo" exposure="1" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.jpg" alt="A 3D model of a sphere reflecting a sunrise at varying exposure" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#exposure-demo');
+  const time = performance.now();
+
+  const animate = (now) => {
+    modelViewer.exposure = oscillate(0, 2, 4000, now - time);
+    requestAnimationFrame(animate);
+  };
+
+  animate();
+})();
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="shadows" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Control shadow with <span class="attribute">shadow-intensity</span> and <span class="attribute">shadow-softness</span></h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="shadows" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" id="shadow-intensity-demo" shadow-intensity="0" shadow-softness="0" environment-image="../../shared-assets/environments/whipple_creek_regional_park_1k_HDR.jpg" alt="A 3D model of a sphere reflecting a forest with varying shadow intensity" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+<script>
+(() => {
+  const modelViewer = document.querySelector('#shadow-intensity-demo');
+  const time = performance.now();
+
+  const animate = (now) => {
+    modelViewer.shadowIntensity = oscillate(0, 2, 4000, now - time);
+    requestAnimationFrame(animate);
+  };
+
+  animate();
+})();
+</script>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+    <div class="sample">
+      <div id="anotherHDRExample" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">An equirectangular HDR <span class="attribute">skybox-image</span></h2>
+            <h4></h4>
+          </div>
+          <example-snippet stamp-to="anotherHDRExample" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.jpg" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Assets/Models/MetalRoughSpheresNoTextures/glTF/MetalRoughSpheresNoTextures.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+  
+    <div class="sample">
+      <div id="ldrEnvironmentImage" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">An equirectangular LDR <span class="attribute">skybox-image</span></h2>
+            <p>Note that if you have multiple &lt;model-viewer&gt; elements
+            visible on a page with skyboxes, it is important to be consistent in
+            using either HDR, LDR, or separate environment and skybox for all
+            visible elements. When combining them (as in these examples), there is
+            a serious performance problem, which you will probably notice
+            depending on which examples are currently in your viewport. As this
+            edge case is unlikely anywhere outside of these example pages, it may
+            be some time before it is fixed in three.js.</p>
+          </div>
+          <example-snippet stamp-to="ldrEnvironmentImage" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../shared-assets/environments/spruit_sunrise_1k_LDR.jpg" alt="A 3D model of metal spheres at varying degrees of roughness" src="../../shared-assets/models/glTF-Sample-Assets/Models/MetalRoughSpheresNoTextures/glTF/MetalRoughSpheresNoTextures.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+  
+    <div class="sample">
+      <div id="skyboxAndEnvironment" class="demo"></div>
+      <div class="content">
+        <div class="wrapper">
+          <div class="heading">
+            <h2 class="demo-title">Supports different resolutions of <span class="attribute">skybox-image</span> and <span class="attribute">environment-image</span> images</h2>
+            <p>Environment images should be no more than 1k (1024x512) as they
+            are clamped to this resolution internally. If one needs a higher
+            resolution skybox, then two images must be supplied: a high-res JPEG for the
+            <span class="attribute">skybox-image</span> and a matching 1k (or
+            less) HDR for the <span class="attribute">environment-image</span>.
+            Due to compression efficiency, the 4k JPEG and 1k HDR images below are
+            each about 1.5Mb, despite the JPEG having 16 times as many pixels.
+            However, HDR is still recommended for lighting as it yields much more
+            realistic results. 
+            </p>
+          </div>
+          <example-snippet stamp-to="skyboxAndEnvironment" highlight-as="html">
+            <template>
+<model-viewer camera-controls touch-action="pan-y" skybox-image="../../assets/spruit_sunrise_4k_LDR.jpg" environment-image="../../shared-assets/environments/spruit_sunrise_1k_HDR.jpg" alt="A 3D model of a sphere reflecting a sunrise" src="../../shared-assets/models/reflective-sphere.gltf"></model-viewer>
+            </template>
+          </example-snippet>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="footer">
+      <ul>
+        <li class="attribution">
+          <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a> by <a href="https://sketchfab.com/theblueturtle_">theblueturtle_</a>,
+          licensed under <a href="https://creativecommons.org/licenses/by-nc/3.0/us/">Creative Commons Attribution-NonCommercial</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://hdrihaven.com/hdri/?h=small_hangar_01">small_hangar_01_1k.jpg</a> by <a href="https://hdrihaven.com">HDRI Haven</a>,
+          licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>.
+        </li>
+
+        <li class="attribution">
+          <a href="https://hdrihaven.com/hdri/?h=whipple_creek_regional_park_04">whipple_creek_regional_park_04_1k.hdr</a> by <a href="https://hdrihaven.com">HDRI Haven</a>,
+          licensed under <a href="https://hdrihaven.com/p/license.php">CC0</a>.
+        </li>
+      </ul>
+      <div style="margin-top:24px;" class="copyright">©Copyright 2018-2020 Google Inc. Licensed under the Apache License 2.0.</div>
+      <div id='footer-links'></div>
+    </div>
+  </div>
+</div>
+
+  <script type="module" src="../../examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { init('examples-lightingandenv'); })();
+    (() => { initFooterLinks();})();
+  </script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module"
+      src="../built/dependencies.js">
+  </script>
+
+  <!-- Loads <model-viewer> on modern browsers: -->
+  <script type="module"
+      src="../../node_modules/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+</body>
+</html>

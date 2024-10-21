@@ -1,0 +1,314 @@
+[
+  {
+    "name": "Loading",
+    "htmlName": "loading",
+    "examples": [
+      {
+        "htmlId": "displayPoster",
+        "name": "Display Poster"
+      },
+      {
+        "htmlId": "customizeLoad",
+        "name": "Customize Load"
+      },
+      {
+        "htmlId": "invalidModel",
+        "name": "Invalid Model"
+      },
+      {
+        "htmlId": "cyclingPosters",
+        "name": "Cycling Posters"
+      },
+      {
+        "htmlId": "gltfModel",
+        "name": "glTF Model"
+      },
+      {
+        "htmlId": "glbModel",
+        "name": "GLB Model"
+      },
+      {
+        "htmlId": "dracoSupport",
+        "name": "DRACO Support"
+      },
+      {
+        "htmlId": "ktx2Support",
+        "name": "KTX2 Support"
+      },
+      {
+        "htmlId": "meshoptSupport",
+        "name": "Meshopt Support"
+      },
+      {
+        "htmlId": "usdzModel",
+        "name": "USDZ Model"
+      },
+      {
+        "htmlId": "renderScale",
+        "name": "Dynamic Scaling"
+      },
+      {
+        "htmlId": "cyclingModels",
+        "name": "Cycling Models"
+      },
+      {
+        "htmlId": "useA11y",
+        "name": "Use a11y"
+      }
+    ]
+  },
+  {
+    "name": "Augmented Reality",
+    "htmlName": "augmentedreality",
+    "examples": [
+      {
+        "htmlId": "webXR",
+        "name": "WebXR"
+      },
+      {
+        "htmlId": "ar",
+        "name": "AR"
+      },
+      {
+        "htmlId": "sceneViewer",
+        "name": "Scene Viewer"
+      },
+      {
+        "htmlId": "wall",
+        "name": "Place on a Wall"
+      },
+      {
+        "htmlId": "customButton",
+        "name": "Custom Button"
+      },
+      {
+        "htmlId": "transparentBackground",
+        "name": "Transparent Background"
+      }
+    ]
+  },
+  {
+    "name": "Staging & Cameras",
+    "htmlName": "stagingandcameras",
+    "examples": [
+      {
+        "htmlId": "enableInteraction",
+        "name": "Enable Interaction"
+      },
+      {
+        "htmlId": "cameraOrbit",
+        "name": "Camera Orbit"
+      },
+      {
+        "htmlId": "orbitAndScroll",
+        "name": "Orbit and Scroll"
+      },
+      {
+        "htmlId": "disableZoom",
+        "name": "Disable Zoom"
+      },
+      {
+        "htmlId": "interpolation",
+        "name": "Interpolation"
+      },
+      {
+        "htmlId": "defaultTarget",
+        "name": "Default Target"
+      },
+      {
+        "htmlId": "cameraTarget",
+        "name": "Camera Target"
+      },
+      {
+        "htmlId": "panning",
+        "name": "Disable Tap"
+      },
+      {
+        "htmlId": "turnSkybox",
+        "name": "Turn Skybox"
+      },
+      {
+        "htmlId": "customPrompt",
+        "name": "Custom Prompt"
+      }
+    ]
+  },
+  {
+    "name": "Annotations",
+    "htmlName": "annotations",
+    "examples": [
+      {
+        "htmlId": "addHotspots",
+        "name": "Add Hotspots"
+      },
+      {
+        "htmlId": "animatedHotspots",
+        "name": "Animated Hotspots"
+      },
+      {
+        "htmlId": "dimensions",
+        "name": "Dimensions"
+      },
+      {
+        "htmlId": "cameraViews",
+        "name": "Camera Views"
+      }
+    ]
+  },
+  {
+    "name": "Lighting & Skybox",
+    "htmlName": "lightingandenv",
+    "examples": [
+      {
+        "htmlId": "hdrSkyboxImage",
+        "name": "HDR skybox-image"
+      },
+      {
+        "htmlId": "groundedSkybox",
+        "name": "Grounded Skybox"
+      },
+      {
+        "htmlId": "unlitModel",
+        "name": "Unlit Model"
+      },
+      {
+        "htmlId": "environmentLighting",
+        "name": "Environment Lighting"
+      },
+      {
+        "htmlId": "neutralLighting",
+        "name": "Neutral Lighting"
+      },
+      {
+        "htmlId": "toneMapping",
+        "name": "Tone Mapping"
+      },
+      {
+        "htmlId": "renderExposure",
+        "name": "Render Exposure"
+      },
+      {
+        "htmlId": "shadows",
+        "name": "Shadows"
+      },
+      {
+        "htmlId": "anotherHDRExample",
+        "name": "Another HDR Example"
+      },
+      {
+        "htmlId": "ldrEnvironmentImage",
+        "name": "LDR environment-image"
+      },
+      {
+        "htmlId": "skyboxAndEnvironment",
+        "name": "Skybox and Environment"
+      }
+    ]
+  },
+  {
+    "name": "Animation",
+    "htmlName": "animation",
+    "examples": [
+      {
+        "htmlId": "autoplay",
+        "name": "Autoplay"
+      },
+      {
+        "htmlId": "selectingAnimations",
+        "name": "Selecting Animations"
+      },
+      {
+        "htmlId": "controlSpeed",
+        "name": "Control Speed"
+      },
+      {
+        "htmlId": "crossFade",
+        "name": "Crossfade"
+      },
+      {
+        "htmlId": "paused",
+        "name": "Paused"
+      }
+    ]
+  },
+  {
+    "name": "Materials & Scene",
+    "htmlName": "scenegraph",
+    "examples": [
+      {
+        "htmlId": "variants",
+        "name": "Variants"
+      },
+      {
+        "htmlId": "transforms",
+        "name": "Transforms"
+      },
+      {
+        "htmlId": "changeColor",
+        "name": "Change Color"
+      },
+      {
+        "htmlId": "changeMaterial",
+        "name": "Change Material"
+      },
+      {
+        "htmlId": "createTexturesExample",
+        "name": "Create Textures"
+      },
+      {
+        "htmlId": "swapTexturesExample",
+        "name": "Swap Textures"
+      },
+      {
+        "htmlId": "transformTexturesExample",
+        "name": "Transform Textures"
+      },
+      {
+        "htmlId": "hideShowMeshVariantsExample",
+        "name": "Hide/Show Mesh Variants"
+      },
+      {
+        "htmlId": "animatedTexturesExample",
+        "name": "Animated Textures"
+      },
+      {
+        "htmlId": "pickMaterialExample",
+        "name": "Materials API"
+      },
+      {
+        "htmlId": "exporter",
+        "name": "Exporter"
+      }
+    ]
+  },
+  {
+    "name": "Post Process Effects",
+    "htmlName": "postprocessing",
+    "examples": [
+      {
+        "htmlId": "setup",
+        "name": "Setup Post Processing"
+      },
+      {
+        "htmlId": "effects",
+        "name": "The Effects API"
+      },
+      {
+        "htmlId": "colorgrade",
+        "name": "Color Grading"
+      },
+      {
+        "htmlId": "selective-effects",
+        "name": "Selective Effects"
+      },
+      {
+        "htmlId": "combining-effects",
+        "name": "Combining Effects"
+      },
+      {
+        "htmlId": "custom-effects",
+        "name": "Custom Effects"
+      }
+    ]
+  }
+]

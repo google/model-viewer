@@ -1,0 +1,172 @@
+<!--
+ @license
+ Copyright 2020 Google LLC. All Rights Reserved.
+ Licensed under the Apache License, Version 2.0 (the 'License');
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an 'AS IS' BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; editor">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:title" content='﹤model-viewer﹥ Editor - Edit your asset files for 3D & AR' />
+  <meta property="og:description" content="A tool to edit glTF and glb files ✏️, and configure them to use the ﹤model-viewer﹥ 3D & AR web component 🌐" />
+  <title>Model Editor</title>
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+  <link rel="shortcut icon" type="image/png" href="../../shared-assets/icons/favicon.png"/>
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <!-- Web animations for paper-dropdown -->
+  <script src="../node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
+  <script src="../node_modules/js-beautify/js/lib/beautify-html.js"></script>
+  <script src="../node_modules/js-beautify/js/lib/beautify-css.js"></script>
+  <script>
+  // Necessary hack for Redux. See: https://github.com/reduxjs/redux/pull/2910
+  window.process = {
+    env: {
+      NODE_ENV :'production'
+    }
+  };
+  </script>
+  <script type="module" src="../dist/space-opera.js"></script>
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+</head>
+<style>
+  :root {
+    --expandable-section-background: #2b2d30;
+    --expandable-section-text: #EEEEEE;
+    --text-on-expandable-background: #F5F5F5;
+    --number-input-background: #212121;
+  }
+
+  body {
+    margin: 0
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .header {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    height: 48px;
+    justify-content: space-between;
+    padding: 0 12px;
+  }
+
+  /* Container for renderer (left) and tabs (right). */
+  .editor-body-root {
+    display: flex;
+    flex: auto; /* Grows to fill space under header */
+    height: 0;
+  }
+
+  .mvContainer {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    width: 100%;
+  }
+
+  model-viewer-preview {
+    height: 100%;
+  }
+
+  me-tabs {
+    background-color: #202124;  /* GOOGLE_GREY_900 */
+    padding: 0;
+    width: 360px;
+    min-width: 360px;
+    max-width: 360px;
+  }
+
+  me-tabs a {
+    color: #dadcff; /* GOOGLE_GREY_300, but.. bluer */
+  }
+
+  me-tabbed-panel {
+    max-height: calc(100vh - 105px);
+    overflow-y: auto;
+    display: block;
+  }
+  .privacy {
+    color:#BDBDBD;
+    padding: 5px 16px;
+    position: absolute;
+    bottom: 0;
+    font-size: small;
+    z-index: 0;
+    background-color: rgba(32, 33, 36, .75);
+  }
+  @media only screen and (max-height: 600px) {
+    .privacy {
+      z-index: -1;
+    }
+  }
+  .privacy-link {
+    color: #BDBDBD;
+  }
+</style>
+<body>
+<model-editor>
+  <div class="app">
+    <div class="editor-body-root">
+      <div class="mvContainer">
+        <model-viewer-preview id="editing_adapter">
+        </model-viewer-preview>
+      </div>
+      <me-tabs>
+        <me-tabbed-panel icon="import_export">
+          <me-export-panel></me-export-panel>
+          <div style="margin-bottom: 70px;"></div>
+          <div class="privacy">
+            This &lt;model-viewer&gt; editor does not send any imported content to servers except to deploy to your mobile device:
+            <a href="https://policies.google.com/privacy" class="privacy-link" target="_blank">
+              Privacy
+            </a>
+          </div>
+        </me-tabbed-panel>
+        <me-tabbed-panel icon="create">
+          <me-export-panel header></me-export-panel>
+          <me-ibl-selector></me-ibl-selector>
+          <me-animation-controls></me-animation-controls>
+          <me-hotspot-panel></me-hotspot-panel>
+        </me-tabbed-panel>
+        <me-tabbed-panel icon="photo_camera">
+          <me-export-panel header></me-export-panel>
+          <me-camera-settings></me-camera-settings>
+        </me-tabbed-panel>
+        <me-tabbed-panel icon="color_lens">
+          <me-materials-panel></me-materials-panel>
+        </me-tabbed-panel>
+        <me-tabbed-panel icon="search">
+          <me-inspector-panel></me-inspector-panel>
+        </me-tabbed-panel>
+      </me-tabs>
+    </div>
+  </div>
+</model-editor>
+</body>
