@@ -17,7 +17,7 @@ import {promises as fs} from 'fs';
 import {mkdirp} from 'mkdirp';
 import {join, resolve} from 'path';
 import pngjs from 'pngjs';
-import puppeteer, {Browser, Page} from 'puppeteer';
+import puppeteer, {Browser} from 'puppeteer';
 
 import {DEVICE_PIXEL_RATIO, Dimensions, FIDELITY_TEST_THRESHOLD, FidelityRegressionResults, GoldenConfig, ImageComparator, ImageComparisonAnalysis, ImageComparisonConfig, ScenarioConfig, toDecibel} from './common.js';
 import {ConfigReader} from './config-reader.js';
@@ -34,7 +34,6 @@ export interface ScenarioRecord extends ScenarioConfig {
 export class ArtifactCreator {
   private[$configReader]: ConfigReader = new ConfigReader(this.config);
   private browser: Browser|undefined = undefined;
-  private pagePromise: Promise<any>|undefined = undefined;
 
   constructor(
       protected config: ImageComparisonConfig, protected rootDirectory: string,
@@ -43,12 +42,6 @@ export class ArtifactCreator {
   }
 
   async close() {
-    if (this.pagePromise !== undefined) {
-      const page = await this.pagePromise;
-      await page.close();
-      this.pagePromise = undefined;
-    }
-
     if (this.browser !== undefined) {
       await this.browser.close();
       this.browser = undefined;
@@ -301,15 +294,12 @@ export class ArtifactCreator {
       return;
     }
 
-
     if (this.browser == undefined) {
       console.log(`🚀 Launching browser`);
       this.browser = await puppeteer.launch({headless: quiet});
-      this.pagePromise = this.browser.newPage();
     }
 
-    const page = await this.pagePromise as Page;
-    this.pagePromise = undefined;
+    const page = await this.browser.newPage();
 
     const url = `${this.baseUrl}?hide-ui&config=../../config.json&scenario=${
         encodeURIComponent(scenarioName)}`;
@@ -390,7 +380,6 @@ export class ArtifactCreator {
         await page.screenshot({path: outputPath, omitBackground: true});
 
     page.close();
-    this.pagePromise = this.browser.newPage();
 
     return screenshot;
   }
