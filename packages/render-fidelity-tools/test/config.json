@@ -174,7 +174,10 @@
       "dimensions": {
         "height": 800,
         "width": 550
-      }
+      },
+      "exclude": [
+        "model-viewer"
+      ]
     },
     {
       "name": "khronos-MosquitoInAmber",
