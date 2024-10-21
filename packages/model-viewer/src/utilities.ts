@@ -168,8 +168,8 @@ export const waitForEvent = <T extends AnyEvent = Event>(
       function handler(event: AnyEvent) {
         if (!predicate || predicate(event as T)) {
           resolve(event as T);
-          (target as any).removeEventListener(eventName, handler as any);
+          target.removeEventListener(eventName, handler as any);
         }
       }
-      (target as any).addEventListener(eventName, handler as any);
+      target.addEventListener(eventName, handler as any);
     });
