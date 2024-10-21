@@ -8,13 +8,11 @@ jobs:
     timeout-minutes: 90
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16.x'
+    - uses: actions/setup-node@v4
 
     - name: NPM install
       run: npm ci
@@ -27,6 +25,6 @@ jobs:
        npm run build --workspace=@google/model-viewer --workspace=@google/model-viewer-render-fidelity-tools
 
     - name: Fidelity tests
-      uses: GabrielBB/xvfb-action@v1.0
+      uses: coactions/setup-xvfb@v1
       with:
         run: npm run test --workspace=@google/model-viewer-render-fidelity-tools -- --quiet
