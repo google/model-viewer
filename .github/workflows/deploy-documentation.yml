@@ -11,13 +11,11 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16.x'
+    - uses: actions/setup-node@v4
 
     - name: NPM install
       run: npm ci
@@ -32,7 +30,7 @@ jobs:
       run: ./packages/modelviewer.dev/scripts/ci-before-deploy.sh
 
     - name: Deploy to Github Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages

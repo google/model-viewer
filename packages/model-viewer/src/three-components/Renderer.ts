@@ -18,7 +18,7 @@ import {ACESFilmicToneMapping, Event, EventDispatcher, NeutralToneMapping, Vecto
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
 import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
-import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
+import {clamp, isDebugMode} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
@@ -65,9 +65,9 @@ export class Renderer extends
   static get singleton() {
     if (!this._singleton) {
       this._singleton = new Renderer({
-        powerPreference:
-            (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
-                .powerPreference ||
+        powerPreference: (((self as any).ModelViewerElement || {}) as
+                          ModelViewerGlobalConfig)
+                             .powerPreference ||
             DEFAULT_POWER_PREFERENCE,
         debug: isDebugMode()
       });
@@ -134,7 +134,7 @@ export class Renderer extends
   constructor(options: RendererOptions) {
     super();
 
-    this.dpr = resolveDpr();
+    this.dpr = window.devicePixelRatio;
 
     this.canvas3D = document.createElement('canvas');
     this.canvas3D.id = 'webgl-canvas';
@@ -248,7 +248,7 @@ export class Renderer extends
    * device pixel ratio.
    */
   private updateRendererSize() {
-    const dpr = resolveDpr();
+    const dpr = window.devicePixelRatio;
     if (dpr !== this.dpr) {
       // If the device pixel ratio has changed due to page zoom, elements
       // specified by % width do not fire a resize event even though their CSS

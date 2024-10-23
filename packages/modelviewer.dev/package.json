@@ -5,6 +5,7 @@
   "description": "<model-viewer> web site and live documentation",
   "scripts": {
     "test": "echo \"No tests specified\" && exit 0",
+    "test:ci": "npm test",
     "clean": "rm -rf ./examples/built ./lib ./dist",
     "build": "tsc && rollup -c",
     "prepare": "if [ ! -L './shared-assets' ]; then ln -s ../shared-assets ./shared-assets; fi"
