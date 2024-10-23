@@ -1,6 +1,6 @@
 {
   "name": "@google/model-viewer-effects",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Easily add and combine post-processing effects with <model-viewer>!",
   "repository": "https://github.com/google/model-viewer/tree/master/packages/model-viewer-effects",
   "bugs": {
@@ -75,10 +75,10 @@
     "postprocessing": "^6.35.3"
   },
   "peerDependencies": {
-    "@google/model-viewer": "^3.5.0"
+    "@google/model-viewer": "^4.0.0"
   },
   "devDependencies": {
-    "@google/model-viewer": "^3.5.0",
+    "@google/model-viewer": "^4.0.0",
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
