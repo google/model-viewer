@@ -618,7 +618,7 @@
         "htmlName": "maxCameraOrbit",
         "description": "Set the maximum orbital values of the camera. Takes values in the same form as camera-orbit, but does not support <span class='attribute'>env()</span>. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\". The radius value for \"auto\" is the same as the <span class='attribute'>camera-orbit</span> radius \"auto\" value.",
         "default": {
-          "default": "Infinity 157.5deg auto",
+          "default": "Infinity 180deg auto",
           "options": "$theta $phi $radius"
         }
       },
@@ -627,7 +627,7 @@
         "htmlName": "minCameraOrbit",
         "description": "Set the minimum orbital values of the camera. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\". The radius value for \"auto\" is a conservative value to ensure the camera never enters the model, so be careful when setting this to another value.",
         "default": {
-          "default": "-Infinity 22.5deg auto",
+          "default": "-Infinity 0deg auto",
           "options": "$theta $phi $radius"
         }
       },
