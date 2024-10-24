@@ -15,7 +15,7 @@
 
 import {WebGLRenderTarget} from 'three';
 
-import {Renderer} from '../three-components/Renderer';
+import {Renderer} from '../three-components/Renderer.js';
 
 /**
  * Debug method to save an offscreen render target to an image; filename should

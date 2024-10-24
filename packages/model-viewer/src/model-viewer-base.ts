@@ -404,11 +404,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
       this[$userInputElement].setAttribute('aria-label', this[$ariaLabel]);
     }
 
-    if (changedProperties.has('withCredentials')) {
-      CachingGLTFLoader.withCredentials = this.withCredentials;
-      this[$renderer].textureUtils!.withCredentials = this.withCredentials;
-    }
-
     if (changedProperties.has('generateSchema')) {
       if (this.generateSchema) {
         this[$scene].updateSchema(this.src);
@@ -613,7 +608,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     // throw exceptions and/or behave in unexpected ways:
     scene.stopAnimation();
 
-    const updateSourceProgress = this[$progressTracker].beginActivity();
+    const updateSourceProgress =
+        this[$progressTracker].beginActivity('model-load');
     const source = this.src;
     try {
       const srcUpdated = scene.setSource(

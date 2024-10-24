@@ -15,9 +15,9 @@
 
 import {ReactiveElement} from 'lit';
 
-import {EvaluatedStyle, Intrinsics, StyleEvaluator} from './styles/evaluators';
-import {parseExpressions, Unit} from './styles/parsers';
-import {StyleEffector} from './styles/style-effector';
+import {EvaluatedStyle, Intrinsics, StyleEvaluator} from './styles/evaluators.js';
+import {parseExpressions, Unit} from './styles/parsers.js';
+import {StyleEffector} from './styles/style-effector.js';
 
 // An IntrinsicsFactory generates up-to-date intrinsics for a given ModelViewer
 // element instance when it is invoked.

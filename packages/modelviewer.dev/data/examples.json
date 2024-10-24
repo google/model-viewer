@@ -50,6 +50,10 @@
       {
         "htmlId": "cyclingModels",
         "name": "Cycling Models"
+      },
+      {
+        "htmlId": "useA11y",
+        "name": "Use a11y"
       }
     ]
   },
@@ -160,8 +164,8 @@
         "name": "HDR skybox-image"
       },
       {
-        "htmlId": "litModel",
-        "name": "Lit Model"
+        "htmlId": "groundedSkybox",
+        "name": "Grounded Skybox"
       },
       {
         "htmlId": "unlitModel",
@@ -174,6 +178,10 @@
       {
         "htmlId": "neutralLighting",
         "name": "Neutral Lighting"
+      },
+      {
+        "htmlId": "toneMapping",
+        "name": "Tone Mapping"
       },
       {
         "htmlId": "renderExposure",

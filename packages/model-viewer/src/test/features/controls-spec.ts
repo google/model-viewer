@@ -433,32 +433,23 @@ suite('Controls', () => {
         expect(event.detail.source).to.be.equal(ChangeSource.USER_INTERACTION);
       });
 
-      test.skip(
-          'does not send "user-interaction" after JS change', async () => {
-            const expectedSources = [
-              ChangeSource.USER_INTERACTION,
-              ChangeSource.USER_INTERACTION,
-              ChangeSource.NONE,
-              ChangeSource.NONE,
-            ];
-            let changeSource: Array<string> = [];
+      test('does not send "user-interaction" after JS change', async () => {
+        const user = waitForEvent(
+            element,
+            'camera-change',
+            (event) =>
+                (event as any).detail.source === ChangeSource.USER_INTERACTION);
+        dispatchSyntheticEvent(
+            element[$userInputElement], 'keydown', {key: 'ArrowUp'});
+        await user;
 
-            element.addEventListener('camera-change', (event) => {
-              changeSource.push(
-                  (event as CustomEvent<CameraChangeDetails>).detail.source);
-            });
-
-            dispatchSyntheticEvent(
-                element[$userInputElement], 'keydown', {key: 'ArrowUp'});
-            await rafPasses();
-            await rafPasses();
-
-            element.cameraOrbit = '0deg 0deg auto';
-            await rafPasses();
-            await rafPasses();
-
-            expect(changeSource).to.eql(expectedSources);
-          });
+        const js = waitForEvent(
+            element,
+            'camera-change',
+            (event) => (event as any).detail.source === ChangeSource.NONE);
+        element.cameraOrbit = '0deg 0deg auto';
+        await js;
+      });
     });
 
     suite('interaction-prompt', () => {
@@ -535,6 +526,11 @@ suite('Controls', () => {
     });
 
     suite('synthetic interaction', () => {
+      setup(async () => {
+        element.interactionPrompt = 'none';
+        await element.updateComplete;
+      });
+
       const finger = {
         x: {
           initialValue: 0.6,
@@ -572,10 +568,9 @@ suite('Controls', () => {
       test.skip('one finger rotates', async () => {
         const orbit = element.getCameraOrbit();
 
-        element.interact(50, finger);
-        await rafPasses();
-        await rafPasses();
-        await rafPasses();
+        element.interact(1000, finger);
+        await waitForEvent(element, 'camera-change');
+        await waitForEvent(element, 'camera-change');
 
         const newOrbit = element.getCameraOrbit();
         expect(newOrbit.theta).to.be.lessThan(orbit.theta, 'theta');
@@ -593,7 +588,8 @@ suite('Controls', () => {
             element.interact(50, finger);
             await timePasses(50);
             await rafPasses();
-            await rafPasses();
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             const newOrbit = element.getCameraOrbit();
             expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
@@ -607,9 +603,9 @@ suite('Controls', () => {
         await element.updateComplete;
         const target = element.getCameraTarget();
 
-        element.interact(50, finger, finger);
-        await rafPasses();
-        await rafPasses();
+        element.interact(500, finger, finger);
+        await waitForEvent(element, 'camera-change');
+        await waitForEvent(element, 'camera-change');
 
         const newTarget = element.getCameraTarget();
         expect(newTarget.x).to.be.lessThan(target.x, 'X');
@@ -625,8 +621,9 @@ suite('Controls', () => {
         await element.updateComplete;
         const target = element.getCameraTarget();
 
-        element.interact(50, finger, finger);
+        element.interact(500, finger, finger);
         await rafPasses();
+        await timePasses(50);
         await rafPasses();
 
         const newTarget = element.getCameraTarget();
@@ -642,8 +639,11 @@ suite('Controls', () => {
 
             // Long enough duration to not be considered a re-centering tap.
             element.interact(500, finger, finger);
+            await rafPasses();
             await timePasses(500);
             await rafPasses();
+            element.jumpCameraToGoal();
+            await element.updateComplete;
 
             const newTarget = element.getCameraTarget();
             expect(newTarget.x).to.be.closeTo(target.x, 0.001, 'X');
@@ -674,11 +674,11 @@ suite('Controls', () => {
         const target = element.getCameraTarget();
 
         // tap on the model
-        element.interact(5, tap(0.5));
-        await rafPasses();
+        element.interact(50, tap(0.5));
+        await waitForEvent(element, 'camera-change');
+        await waitForEvent(element, 'camera-change');
         element.jumpCameraToGoal();
         await element.updateComplete;
-        await rafPasses();
 
         const newTarget = element.getCameraTarget();
         expect(newTarget.x).to.be.closeTo(target.x, 0.001, 'X');
@@ -686,11 +686,11 @@ suite('Controls', () => {
         expect(newTarget.z).to.be.greaterThan(target.z, 'Z');
 
         // tap off the model
-        element.interact(5, tap(0));
-        await rafPasses();
+        element.interact(50, tap(0));
+        await waitForEvent(element, 'camera-change');
+        await waitForEvent(element, 'camera-change');
         element.jumpCameraToGoal();
         await element.updateComplete;
-        await rafPasses();
 
         const oldTarget = element.getCameraTarget();
         expect(oldTarget.x).to.be.closeTo(target.x, 0.001, 'X recenter');
@@ -706,8 +706,9 @@ suite('Controls', () => {
         await element.updateComplete;
         const target = element.getCameraTarget();
 
-        element.interact(5, tap(0.5));
+        element.interact(50, tap(0.5));
         await rafPasses();
+        await timePasses(50);
         await rafPasses();
 
         const newTarget = element.getCameraTarget();
@@ -717,30 +718,26 @@ suite('Controls', () => {
       });
 
       test.skip('camera-orbit cancels synthetic interaction', async () => {
-        element.interact(50, finger);
-        await rafPasses();
-        await rafPasses();
-
         const canceled = waitForEvent(
             element,
             'interact-stopped',
             (event) => (event as any).detail.source === ChangeSource.NONE);
 
+        element.interact(500, finger);
+        await rafPasses();
         element.cameraOrbit = 'auto auto 70%';
         await canceled;
       });
 
       test.skip('user interaction cancels synthetic interaction', async () => {
-        element.interact(50, finger);
-        await rafPasses();
-        await rafPasses();
-
         const canceled = waitForEvent(
             element,
             'interact-stopped',
             (event) =>
                 (event as any).detail.source === ChangeSource.USER_INTERACTION);
 
+        element.interact(500, finger);
+        await rafPasses();
         dispatchSyntheticEvent(
             element[$userInputElement], 'keydown', {key: 'PageDown'});
         await canceled;
@@ -750,10 +747,12 @@ suite('Controls', () => {
         const target = element.getCameraTarget();
         const orbit = element.getCameraOrbit();
 
-        element.interact(50, finger, finger);
-        element.interact(50, finger);
+        element.interact(500, finger, finger);
+        element.interact(500, finger);
+        await timePasses(50);
         await rafPasses();
-        await rafPasses();
+        element.jumpCameraToGoal();
+        await element.updateComplete;
 
         const newTarget = element.getCameraTarget();
         expect(newTarget.x).to.be.lessThan(target.x, 'X');
@@ -870,6 +869,160 @@ suite('Controls', () => {
 
             element.jumpCameraToGoal();
             await element.updateComplete;
+
+            controls.setOrbit(0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('View from stage upper-front');
+
+            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('View from stage front');
+
+            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('View from stage lower-front');
+          });
+
+      test(
+          'announces camera orientation when orbiting horizontally with a11y',
+          async () => {
+            await rafPasses();
+            input.focus();
+
+            element.a11y = {
+              'front': 'A11y test stage front',
+              'back': 'A11y test stage back',
+              'left': 'A11y test stage left',
+              'right': 'A11y test stage right',
+              'upper-front': 'A11y test stage upper-front',
+              'upper-back': 'A11y test stage upper-back',
+              'upper-left': 'A11y test stage upper-left',
+              'upper-right': 'A11y test stage upper-right',
+              'lower-front': 'A11y test stage lower-front',
+              'lower-back': 'A11y test stage lower-back',
+              'lower-left': 'A11y test stage lower-left',
+              'lower-right': 'A11y test stage lower-right',
+              'interaction-prompt': 'A11y test interaction prompt'
+            };
+
+            controls.setOrbit(-Math.PI / 2.0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('A11y test stage left');
+
+            controls.setOrbit(Math.PI / 2.0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('A11y test stage right');
+
+            controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('A11y test stage back');
+
+            controls.adjustOrbit(Math.PI, 0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('A11y test stage front');
+
+            element.a11y = null;
+
+            controls.setOrbit(-Math.PI / 2.0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('View from stage left');
+
+            controls.setOrbit(Math.PI / 2.0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('View from stage right');
+
+            controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('View from stage back');
+
+            controls.adjustOrbit(Math.PI, 0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('View from stage front');
+          });
+
+      test(
+          'announces camera orientation when orbiting vertically with a11y',
+          async () => {
+            await rafPasses();
+            input.focus();
+
+            element.a11y = {
+              'front': 'A11y test stage front',
+              'back': 'A11y test stage back',
+              'left': 'A11y test stage left',
+              'right': 'A11y test stage right',
+              'upper-front': 'A11y test stage upper-front',
+              'upper-back': 'A11y test stage upper-back',
+              'upper-left': 'A11y test stage upper-left',
+              'upper-right': 'A11y test stage upper-right',
+              'lower-front': 'A11y test stage lower-front',
+              'lower-back': 'A11y test stage lower-back',
+              'lower-left': 'A11y test stage lower-left',
+              'lower-right': 'A11y test stage lower-right',
+              'interaction-prompt': 'A11y test interaction prompt'
+            };
+
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            controls.setOrbit(0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('A11y test stage upper-front');
+
+            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('A11y test stage front');
+
+            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            expect(statusElement.textContent)
+                .to.be.equal('A11y test stage lower-front');
+
+            element.jumpCameraToGoal();
+            await element.updateComplete;
+
+            element.a11y = '';
 
             controls.setOrbit(0, 0);
             element.jumpCameraToGoal();

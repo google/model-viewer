@@ -107,7 +107,7 @@
     display: none;
   }
 </style>
-<model-viewer id="hotspot-demo" ar ar-modes="webxr" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" poster="../../assets/poster-astronaut.webp" shadow-intensity="1" alt="A 3D model of an astronaut.">
+<model-viewer id="hotspot-demo" ar ar-modes="webxr" camera-controls touch-action="pan-y" src="../../shared-assets/models/Astronaut.glb" poster="../../assets/poster-astronaut.webp" tone-mapping="aces" shadow-intensity="1" alt="A 3D model of an astronaut.">
   <button class="hotspot" slot="hotspot-visor" data-position="0 1.75 0.35" data-normal="0 0 1"></button>
   <button class="hotspot" slot="hotspot-hand" data-position="-0.54 0.93 0.1" data-normal="-0.73 0.05 0.69">
     <div class="annotation">This hotspot disappears completely</div>
@@ -348,7 +348,7 @@
   });
 
   modelViewer.addEventListener('ar-status', (event) => {
-    setVisibility(event.detail.status !== 'session-started');
+    setVisibility(checkbox.checked && event.detail.status !== 'session-started');
   });
 
   // update svg
@@ -553,6 +553,7 @@
       min-camera-orbit="auto auto 5%"
       touch-action="none"
       poster="../../assets/SketchfabModels/ThorAndTheMidgardSerpent.webp"
+      tone-mapping="aces" 
       ar
      
     >

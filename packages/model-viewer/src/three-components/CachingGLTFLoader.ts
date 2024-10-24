@@ -21,7 +21,7 @@ import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
 
-import GLTFMaterialsVariantsExtension from './gltf-instance/VariantMaterialLoaderPlugin';
+import GLTFMaterialsVariantsExtension from './gltf-instance/VariantMaterialLoaderPlugin.js';
 import {GLTFInstance, GLTFInstanceConstructor} from './GLTFInstance.js';
 
 export type ProgressCallback = (progress: number) => void;
@@ -86,8 +86,6 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
                                              GLTFInstanceConstructor> extends
     EventDispatcher<
         {'preload': {element: ModelViewerElementBase, src: String}}> {
-  static withCredentials: boolean;
-
   static setDRACODecoderLocation(url: string) {
     dracoDecoderLocation = url;
     dracoLoader.setDecoderPath(url);
@@ -188,7 +186,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
   async preload(
       url: string, element: ModelViewerElementBase,
       progressCallback: ProgressCallback = () => {}) {
-    this[$loader].setWithCredentials(CachingGLTFLoader.withCredentials);
+    this[$loader].setWithCredentials(element.withCredentials);
     this.dispatchEvent({type: 'preload', element: element, src: url});
     if (!cache.has(url)) {
       if (meshoptDecoder != null) {

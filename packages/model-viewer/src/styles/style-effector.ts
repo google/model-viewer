@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ASTWalker, ExpressionNode, FunctionNode} from './parsers';
+import {ASTWalker, ExpressionNode, FunctionNode} from './parsers.js';
 
 interface AnyObserver {
   observe(): void;

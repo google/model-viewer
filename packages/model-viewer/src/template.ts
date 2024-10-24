@@ -315,6 +315,8 @@ canvas {
     <slot name="ar-button">
       <a id="default-ar-button" part="default-ar-button" class="fab"
           tabindex="2"
+          role="button"
+          href="javascript:void(0);"
           aria-label="View in your space">
         ${ARGlyph}
       </a>

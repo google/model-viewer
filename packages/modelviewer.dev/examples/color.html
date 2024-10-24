@@ -23,7 +23,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
   <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
-  <script type='module' src='https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js'></script>
+  <script type='module' src='../../../node_modules/@google/model-viewer/dist/model-viewer.js'></script>
   <script defer src="https://web3dsurvey.com/collector.js"></script>
   <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
@@ -134,7 +134,6 @@
       <a href="#accuracy">What is color accuracy?</a><br/>
       <a href="#matching">What's wrong with the rendered color matching the baseColor?</a><br/>
       <a href="#photography">How does rendering compare to photography?</a><br/>
-      <a href="#tone-mapping">How does tone mapping work?</a><br/>
       <a href="#validate-render">How do we validate a glTF 3D render?</a><br/>
       <a href="#perception">What role does perception play?</a><br/>
       <a href="#validate-gltf">How do we validate a glTF model?</a><br/>
@@ -183,9 +182,10 @@
     a consistent photo, you need to not just have the same object, but also the
     same lighting and camera settings. There is no standard for the default
     settings of these viewers, so it is important to intentionally set them to
-    consistent values. This is precisely what we've done to show the state of <a
-    href="../fidelity">glTF rendering convergence</a> across a variety of
-    popular renderers.</p>
+    consistent values. This is precisely what we and Khronos have done to show
+    the state of <a
+    href="https://github.khronos.org/glTF-Render-Fidelity/comparison/">glTF
+    rendering convergence</a> across a variety of popular renderers.</p>
 
     <h3 id="accuracy">What is color accuracy?</h3>
 
@@ -296,7 +296,7 @@
     which ours passes. It can be shown with physics that under perfectly uniform
     lighting, these white spheres should each uniformly reflect exactly the same
     light as is incident from the environment, and hence be indistinguishable
-    from it.</p>
+    from the background.</p>
 
     <p>Note this result with the yellow spheres is actually pretty close to the
     unlit result - there's almost no discernable difference between shiny and
@@ -389,117 +389,51 @@
     rest of the scene. In order to maintain perception while compressing down to
     SDR, a nonlinear tone mapping curve is used.</p>
 
-    <h3 id="tone-mapping">How does tone mapping work?</h3>
+    <p>Tone mapping comes at the difficult intersection between art and science.
+    We have found through painful experience that the existing tone mapping
+    functions do not meet the needs of e-commerce for color-accuracy, and so we
+    have developed the Khronos PBR Neutral tone mapper for exactly this purpose. If you have
+    precise sRGB color swatches that you have used to create your glTF materials
+    and want them to come through as unaltered as possible, we strongly
+    recommend using our "neutral" tone-mapping function and our default
+    lighting or another suitable grayscale lighting environment.</p>
 
-    <p>Tone mapping is a general term, which can refer to basically any color
-    conversion function. Even separate operations that a photographer might
-    apply in post processing, such as gamma correction, saturation, contrast,
-    and even things like sepia can all be combined into a single resulting
-    function that here we're calling tone mapping. However, we are only
-    interested in hue-neutral functions and those are the only type of
-    tone mapping functions we'll be discussing here. Therefore the focus will be
-    primarily on luma, or brightness.</p>
-
-    <p>The tone mapping function used by <code>&lt;model-viewer&gt;</code> is
-    ACES, which is a standard developed by the film industry and is widely used
-    for 3D rendering. Like most tone mapping curves, it is fairly linear in the
-    central focus of its contrast range, then asymptotes out to smoothly
-    compress the long tails of brights and darks into the required zero to one
-    output range, the idea being that humans perceive less difference between
-    over-bright and over-dark zones as compared to the bulk of the scene.
-    However, since some output range is reserved for these extra-bright
-    highlights, the range left over to represent the input range of matte
-    baseColors is also reduced somewhat. This is why the paper-white sphere does
-    not produce white pixels.</p>
-
-    <p>Sometimes when working with matte objects and trying to compare output
-    color to baseColor, this tone mapping compression will be noticed and
-    identified as the source of the apparent tone discrepancy. The immediate
-    thought is usually, let's fix this by not applying tone mapping! The problem
-    is there is actually no such thing as "no tone mapping", since somehow the
-    unbounded input range must be converted to the zero-to-one range that the
-    encoder expects. If this step is not done, the encoder simply clamps the
-    values, which amounts to a piecewise-linear tone mapping function with sharp
-    corners that introduce perceptual errors for shiny objects, as shown in the
-    example below.</p>
-
-     <figure>
-      <model-viewer
-        id="toneMapping"
-        src="../../shared-assets/models/silver-gold.gltf"
-        skybox-image="../../shared-assets/environments/neutral.hdr"
-        camera-controls
-        alt="3D model of six example material spheres"
-      >
-      <label for="toneMapped">Tone Mapped: </label>
-      <input id="toneMapped" type="checkbox">
-      </model-viewer>
-      <figcaption>Toggle ACES tone mapping to see the difference it makes.</figcaption>
-    </figure>
-
-    <p>Note that once again the shiny and matte white plastic spheres are
-    indistinguishable, even without cranking up the exposure. Since half of the
-    matte white sphere is now rendering pure white, there is no headroom for
-    shiny highlights. Likewise, the top half of the sphere loses its 3D
-    appearance since the shading was removed by clamping the values. Tick the
-    checkbox to go back to ACES tone mapping for a quick comparison. Remember to
-    look away and back again after switching; another trick of human perception
-    is how dependent it is on anchoring. The yellow will look washed-out
-    immediately after switching from saturated yellow, but this perception fades
-    after looking around.</p>
-
-    <p>This example also highlights a second key element of good tone mapping
-    functions: desaturating overexposed colors. Look at the golden sphere
-    (lower-left) and compare to the previous version with ACES tone mapping
-    applied. The baseColor of a metal multiplies the incoming light, so a white
-    light on a golden sphere produces a yellow reflection (fully saturated
-    yellow, in this case of a fully saturated baseColor). With clamped tone
-    mapping, the highlight is indeed saturated yellow, but this does not look
-    perceptually right, even though you could make the argument it is physically
-    correct.</p>
-
-    <p>Good tone mapping curves like ACES not only compress the luma, but also
-    push colors toward white the brighter they are. This is why the highlights
-    on the golden sphere become white instead of yellow. This follows both the
-    behavior of camera sensors and our eyes when responding to overexposed
-    colored light. You can see this effect simply by looking at a candle's flame
-    or a spark, the brightest parts of which tend to look white despite their
-    color. Nvidia has helpfully provided more <a
-    href="https://developer.nvidia.com/preparing-real-hdr">details</a> on tone
-    mapping and HDR for the interested reader.</p>
-
-    <p>One final way to avoid tone mapping that is sometimes suggested is to
-    choose an exposure such that all pixels are inside the [0, 1] range, such
-    that value clamping is avoided. For matte objects with low-dynamic-range
-    lighting, this can give semi-decent results, but it breaks down completely
-    for shiny objects, as shown in the following screenshot.</p>
+    <p>Below is an example where you can see first-hand how much difference tone
+    mapping makes. ACES has been a defacto standard in the PBR industry for some
+    time, but it should be easy to see its serious flaws, including both hue
+    skews (blue to purple, red to orange) and saturation loss. AgX is a newer
+    and better tone mapper that holds hue better, but still has significant
+    contrast and saturation loss, which is desirable for its intended use cases
+    in games and film. For detail, please see our technical document on the
+    tradeoffs in <a href="tone-mapping.html">tone mapping</a> and how our
+    Commerce tone mapper was designed.</p>
 
     <figure>
-      <img src="../assets/ExposureFit.png"/>
-      <figcaption>Image of the above spheres with no tone mapping and exposure
-      set to avoid clamping.</figcaption>
+      <model-viewer
+        id="tone-mapping"
+        src="../assets/ShopifyModels/Mixer.glb"
+       
+        camera-controls
+        alt="Tone mapping comparisons for different 3D models"
+      >
+        <p>Tone Mapping:
+          <select id="tone">
+            <option value="neutral">PBR Neutral</option>
+            <option value="aces">ACES</option>
+            <option value="agx">AgX</option>
+          </select><br/>
+          Model:
+          <select id="model">
+            <option value="Mixer">Mixer</option>
+            <option value="GeoPlanter">GeoPlanter</option>
+            <option value="Chair">Chair</option>
+            <option value="ToyTrain">ToyTrain</option>
+            <option value="Canoe">Canoe</option>
+          </select>
+        </p>
+      </model-viewer>
+      <figcaption>Comparison of tone mapping functions for different models.</figcaption>
     </figure>
-
-    <p>The trouble is that the specular highlights are orders of magnitude
-    brighter than the majority of the scene, so to fit them into the output
-    range requires the exposure to be lowered by more than a factor of 50. This
-    kills the brightness and contrast of the majority of the scene, because of
-    just a few small highlights. And this neutral environment does not have very
-    high dynamic range; if you were to use an outdoor environment that includes
-    the sun, the exposure would have to be so low that nearly the entire render
-    would be black.</p>
-
-    <p>Everything shown here is rendered to an 8-bit sRGB output, but HDR
-    displays and formats are getting more common. Might we be able to avoid tone
-    mapping by keeping the HDR of our raw image in an HDR output format? The
-    short answer is no, because HDR displays may be high dynamic range compared
-    to traditional SDR, but they are still orders of magnitude short of what our
-    eyes experience in the real world, so all the same reasons for tone mapping
-    still apply. However, it is important to note that the choice of tone
-    mapping function should be dependent on the output format. Ideally it would
-    even depend on the display's contrast ratio, its brightness settings, and
-    the level of ambient lighting around it, but this data is unlikely to be
-    available.</p>
 
     <h3 id="validate-render">How do we validate a glTF 3D render?</h3>
 
@@ -537,7 +471,7 @@
     post-processing step. Some things don't apply to rendering, like masking out
     shadows to make them semi-transparent - a 3D renderer can do this
     automatically. In addition to color-neutral tone mapping, sometimes the
-    colors are intentionally "corrected". Why? After all, if the measured light
+    colors are intentionally "corrected". Why? After all, if the captured light
     from the actual scene is not correct, what is?</p>
 
     <p>It may be that some of the post-processing color correction is simply a
@@ -545,7 +479,7 @@
     lighting and scene had to be adjusted, which involves manual labor. Digital
     post-processing can allow the lighting to be less precise. However in 3D
     rendering, the lighting is equally digital, so it is generally a better
-    practice to keep the post-processing step simple (e.g. just ACES tone
+    practice to keep the post-processing step simple (e.g. just tone
     mapping) and adjust the environment image if necessary. Since 3D rendering is
     happening completely automatically in real time, there is no way to make
     manual bespoke color adjustments for each frame.</p>
@@ -643,11 +577,32 @@
     material baseColor, which is what allows the demo below to be compellingly
     realistic.</p>
 
-     <figure>
+    <p>Still, for most e-commerce vendors that are likely managing separate
+    contracts for 3D model creation and interactive website design, simplicity
+    is key to cost-effectiveness. My recommendation is to use our PBR Neutral tone
+    mapping and if you already have approved marketing colors for your products,
+    then tell your artists to use those for the baseColor. Use a grayscale
+    lighting environment (like our default), adjusting if necessary to place
+    highlights and change exposure.</p>
+    
+    <p>If the color is not known, but being matched by eye, then ensure the
+    artist's tools also use the Khronos PBR Neutral tone mapper and a lighting environment
+    that is as close as possible to the production grayscale lighting
+    environment. Since our PBR Neutral tone mapper is relatively new, it may not be
+    available in tools; in this case the next best thing is to turn off tone
+    mapping entirely. Make sure to educate your artists on the differences they
+    can expect - blown out highlights with hue skews, and saturation loss for
+    dark colors. Ensure they also frequently test their output in a
+    near-production environment, hopefully using &lt;model-viewer&gt; with
+    <code>tone-mapping="neutral"</code>. This way they can calibrate and ensure
+    the end user will see realistic colors.</p>
+
+    <figure>
       <model-viewer
         id="environments"
         src="../assets/ShopifyModels/Mixer.glb"
         skybox-image="../../shared-assets/environments/neutral.hdr"
+       
         camera-controls
         alt="3D model of a blender"
       >
@@ -678,6 +633,19 @@
   </script>
 
   <script type="module">
+    const tone2MV = document.querySelector('#tone-mapping');
+    const tone = document.querySelector('#tone');
+    const model = document.querySelector('#model');
+    
+    tone.addEventListener('input',() => {
+      tone2MV.toneMapping = tone.value;
+    });
+
+    model.addEventListener('input',() => {
+      tone2MV.src = "../assets/ShopifyModels/" + model.value + ".glb";
+    });
+
+
     const expMV = document.querySelector("#exposure");
     const exposureDisplay = document.querySelector("#exposure-value");
 
@@ -686,48 +654,6 @@
     document.querySelector('#exposure').addEventListener('input', (event) => {
       expMV.exposure = Number(event.target.value);
       exposureDisplay.textContent = expMV.exposure;
-    });
-
-    const toneMV = document.querySelector("#toneMapping");
-    let threeRenderer;
-    let scene;
-    for (let p = toneMV; p != null; p = Object.getPrototypeOf(p)) {
-      const privateAPI = Object.getOwnPropertySymbols(p);
-      const renderer = privateAPI.find((value) => value.toString() == 'Symbol(renderer)');
-      const sceneSym = privateAPI.find((value) => value.toString() == 'Symbol(scene)');
-      if(renderer != null){
-        threeRenderer = toneMV[renderer].threeRenderer;
-      }
-      if(sceneSym != null){
-        scene = toneMV[sceneSym];
-      }
-      if(threeRenderer != null && scene != null){
-        break;
-      }
-    }
-    // threeRenderer.toneMapping = 1;
-    // toneMV.exposure = 0.02;
-
-    const makeToneMapped = (enabled) => {
-      const {materials} = toneMV.model;
-      const privateAPI = Object.getOwnPropertySymbols(materials[0]);
-      const threeMaterials = privateAPI.find((value) => value.toString() == 'Symbol(correlatedObjects)');
-      
-      for(const material of materials){
-        for(const threeMaterial of material[threeMaterials]){
-          threeMaterial.toneMapped = enabled;
-        }
-      }
-      scene.isDirty = true;
-    };
-
-    const checkbox = document.querySelector('#toneMapped');
-
-    toneMV.addEventListener('load', () => {
-      makeToneMapped(false);
-      checkbox.addEventListener('change', () => {
-        makeToneMapped(checkbox.checked);
-      });
     });
 
     const envMV = document.querySelector("#environments");

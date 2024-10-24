@@ -74,6 +74,18 @@
           "default": "false",
           "options": "true, false"
         }
+      },
+      {
+        "name": "a11y",
+        "htmlName": "a11y",
+        "description": "Add unique translations for the model wcag compliance. Use this attribute, you must provide a JSON object with the following keys: front, back, left, right, upper-front, upper-back, upper-left, upper-right, lower-front, lower-back, lower-left, lower-right, interaction-prompt. The values of these keys should be the translations for the model's orientation. This attribute is useful for screen readers and other assistive technologies.",
+        "links": [
+          "<a href=\"../examples/loading/#useA11y\">Related examples</a>"
+        ],
+        "default": {
+          "default": "null",
+          "options": "{&quot;front&quot;: &quot;Front of 3D model&quot;,&quot;back&quot;: &quot;Back of 3D model&quot;,&quot;left&quot;: &quot;Left of 3D model&quot;,&quot;right&quot;: &quot;Right of 3D model&quot;,&quot;upper-front&quot;: &quot;Upper front of 3D model&quot;,&quot;upper-back&quot;: &quot;Upper back of 3D model&quot;,&quot;upper-left&quot;: &quot;Upper left of 3D model&quot;,&quot;upper-right&quot;: &quot;Upper right of 3D model&quot;,&quot;lower-front&quot;: &quot;Lower front of 3D model&quot;,&quot;lower-back&quot;: &quot;Lower back of 3D model&quot;,&quot;lower-left&quot;: &quot;Lower left of 3D model&quot;,&quot;lower-right&quot;: &quot;Lower right of 3D model&quot;,&quot;interaction-prompt&quot;: &quot;'Use mouse, touch or arrow keys to move&quot;}"
+        }
       }
     ],
     "Properties": [
@@ -248,7 +260,7 @@
       {
         "name": "progress",
         "htmlName": "progress",
-        "description": "This event fires while a model, environment, and/or skybox is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress."
+        "description": "This event fires while a model, environment, skybox, variant, and/or a usdz conversion is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress. It also provides the reason why the event is fired ('model-load', 'environment-update', 'variant-update', 'usdz-conversion'): event.detail.reason."
       },
       {
         "name": "render-scale",
@@ -606,7 +618,7 @@
         "htmlName": "maxCameraOrbit",
         "description": "Set the maximum orbital values of the camera. Takes values in the same form as camera-orbit, but does not support <span class='attribute'>env()</span>. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\". The radius value for \"auto\" is the same as the <span class='attribute'>camera-orbit</span> radius \"auto\" value.",
         "default": {
-          "default": "Infinity 157.5deg auto",
+          "default": "Infinity 180deg auto",
           "options": "$theta $phi $radius"
         }
       },
@@ -615,7 +627,7 @@
         "htmlName": "minCameraOrbit",
         "description": "Set the minimum orbital values of the camera. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\". The radius value for \"auto\" is a conservative value to ensure the camera never enters the model, so be careful when setting this to another value.",
         "default": {
-          "default": "-Infinity 22.5deg auto",
+          "default": "-Infinity 0deg auto",
           "options": "$theta $phi $radius"
         }
       },
@@ -797,9 +809,9 @@
     ],
     "Methods": [
       {
-        "name": "updateHotspot({name, position, normal})",
+        "name": "updateHotspot({name, position?, normal?, surface?})",
         "htmlName": "updateHotspot",
-        "description": "Updates the position and/or normal of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position and normal are given in the same string format as the hotspot attributes <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span>, which are also in the same format as the <span class='attribute'>camera-target</span> attribute."
+        "description": "Updates the position, norma, and/or surface of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position, normal, and surface are given in the same string format as the hotspot attributes <span class='attribute'>data-position</span>,  <span class='attribute'>data-normal</span>, and <span class='attribute'>data-surface</span> from the slot <a href=\"#annotations-slots\">definition</a>."
       },
       {
         "name": "queryHotspot(name)",
@@ -830,7 +842,7 @@
       {
         "name": "hotspot-*",
         "htmlName": "hotspot",
-        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes in model coordinates. Alternately, the <span class='attribute'>data-surface</span> attribute can be used to instead specify the glTF mesh, primitive, three vertex indices and three barycentric coordinates to specify a surface point that will animate along with the mesh. It is recommended to use the <a href=\"./#entrydocs-annotations-methods-surfaceFromPoint\">surfaceFromPoint</a> method to generate this string interactively. See the <a href=\"../examples/annotations/#animatedHotspots\">annotations example</a> for details."
+        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes in model coordinates, in the same format as <span class='attribute'>camera-target</span>. Alternately, the <span class='attribute'>data-surface</span> attribute can be used to instead specify the glTF mesh, primitive, three vertex indices and three barycentric coordinates to specify a surface point that will animate along with the mesh. It is recommended to use the <a href=\"./#entrydocs-annotations-methods-surfaceFromPoint\">surfaceFromPoint</a> method to generate this string interactively. See the <a href=\"../examples/annotations/#animatedHotspots\">annotations example</a> for details."
       }
     ]
   },
@@ -841,10 +853,22 @@
       {
         "name": "skybox-image",
         "htmlName": "skyboxImage",
-        "description": "Sets the background image of the scene. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, jpg and hdr (recommended) images.",
+        "description": "Sets the background image of the scene. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, hdr, and jpg (including UltraHDR) images. HDR images are strongly recommended to adequately represent lighting, and the UltraHDR JPEG format is particularly recommended for its high compression of HDR data - try it yourself using this free online <a href=\"https://gainmap-creator.monogrid.com\">converter</a>.",
         "links": [
           "<a href=\"../examples/lightingandenv/\">Related examples</a>"
         ]
+      },
+      {
+        "name": "skybox-height",
+        "htmlName": "skyboxHeight",
+        "description": "Causes the skybox to be projected onto the ground plane. The height indicates the camera's distance above the ground and acts to scale the image at ground level to the correct size. Accepts units in meters (\"m\"), centimeters (\"cm\"), or millimeters (\"mm\"). The default value of 0m disables ground projection.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#groundedSkybox\">Related examples</a>"
+        ],
+        "default": {
+          "default": "0m",
+          "options": "any positive value"
+        }
       },
       {
         "name": "environment-image",
@@ -868,6 +892,18 @@
         "default": {
           "default": "1",
           "options": "any positive value"
+        }
+      },
+      {
+        "name": "tone-mapping",
+        "htmlName": "toneMapping",
+        "description": "Selects the function that compresses the HDR rendering to an SDR image on your screen. ACES is a film industry standard that is commonly used, though it has serious color-accuracy problems. AgX is a new and improved tone mapper seeing broad adoption in film and games. Khronos PBR Neutral ('neutral') is a standard function designed specifically for accurate color reproduction in e-commerce. Our current default is neutral, but prior to v4.0 this default was ACES. The deprecated name commerce is an alias for neutral.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#toneMapping\"><span class='attribute'>tone-mapping</span> example</a>"
+        ],
+        "default": {
+          "default": "neutral",
+          "options": "neutral, aces, agx"
         }
       },
       {

@@ -17,7 +17,7 @@ import {expect} from '@esm-bundle/chai';
 import {ModelViewerElement} from '@google/model-viewer';
 
 import {ColorGradeEffect, EffectComposer} from '../../model-viewer-effects.js';
-import {ArraysAreEqual, assetPath, AverageHSL, CompareArrays, createModelViewerElement, rafPasses, screenshot, waitForEvent} from '../utilities';
+import {ArraysAreEqual, assetPath, AverageHSL, CompareArrays, createModelViewerElement, rafPasses, screenshot, waitForEvent} from '../utilities.js';
 
 suite('Color Grade Effect', () => {
   let element: ModelViewerElement;

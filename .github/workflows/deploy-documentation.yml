@@ -11,10 +11,11 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
       with:
-        node-version: '16.x'
+        submodules: true
+
+    - uses: actions/setup-node@v4
 
     - name: NPM install
       run: npm ci
@@ -25,17 +26,11 @@ jobs:
     - name: Build packages
       run: npm run build
 
-    - name: Generate fidelity artifacts 
-      continue-on-error: true
-      uses: GabrielBB/xvfb-action@v1.0
-      with:
-        run: npm run test --workspace=@google/model-viewer-render-fidelity-tools
-
     - name: Stage documentation artifacts
       run: ./packages/modelviewer.dev/scripts/ci-before-deploy.sh
 
     - name: Deploy to Github Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages

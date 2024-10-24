@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import {BackSide, BoxGeometry, CubeCamera, CubeTexture, EquirectangularReflectionMapping, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, SRGBColorSpace, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
+import {GainMapDecoderMaterial, HDRJPGLoader, QuadRenderer} from '@monogrid/gainmap-js';
+import {BackSide, BoxGeometry, CubeCamera, CubeTexture, DataTexture, EquirectangularReflectionMapping, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, SRGBColorSpace, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
 
 import EnvironmentScene from './EnvironmentScene.js';
-import EnvironmentSceneAlt from './EnvironmentSceneAlt.js';
 
 export interface EnvironmentMapAndSkybox {
   environmentMap: Texture;
@@ -35,9 +35,9 @@ const HDR_FILE_RE = /\.hdr(\.js)?$/;
 
 export default class TextureUtils {
   public lottieLoaderUrl = '';
-  public withCredentials = false;
 
   private _ldrLoader: TextureLoader|null = null;
+  private _imageLoader: HDRJPGLoader|null = null;
   private _hdrLoader: RGBELoader|null = null;
   private _lottieLoader: Loader|null = null;
 
@@ -52,45 +52,54 @@ export default class TextureUtils {
   constructor(private threeRenderer: WebGLRenderer) {
   }
 
-  get ldrLoader(): TextureLoader {
+  private ldrLoader(withCredentials: boolean): TextureLoader {
     if (this._ldrLoader == null) {
       this._ldrLoader = new TextureLoader();
     }
-    this._ldrLoader.setWithCredentials(this.withCredentials);
+    this._ldrLoader.setWithCredentials(withCredentials);
     return this._ldrLoader;
   }
 
-  get hdrLoader(): RGBELoader {
+  private imageLoader(withCredentials: boolean): HDRJPGLoader {
+    if (this._imageLoader == null) {
+      this._imageLoader = new HDRJPGLoader(this.threeRenderer);
+    }
+    this._imageLoader.setWithCredentials(withCredentials);
+    return this._imageLoader;
+  }
+
+  private hdrLoader(withCredentials: boolean): RGBELoader {
     if (this._hdrLoader == null) {
       this._hdrLoader = new RGBELoader();
       this._hdrLoader.setDataType(HalfFloatType);
     }
-    this._hdrLoader.setWithCredentials(this.withCredentials);
+    this._hdrLoader.setWithCredentials(withCredentials);
     return this._hdrLoader;
   }
 
-  async getLottieLoader(): Promise<any> {
+  async getLottieLoader(withCredentials: boolean): Promise<any> {
     if (this._lottieLoader == null) {
       const {LottieLoader} =
           await import(/* webpackIgnore: true */ this.lottieLoaderUrl);
       this._lottieLoader = new LottieLoader() as Loader;
     }
-    this._lottieLoader.setWithCredentials(this.withCredentials);
+    this._lottieLoader.setWithCredentials(withCredentials);
     return this._lottieLoader;
   }
 
-  async loadImage(url: string): Promise<Texture> {
+  async loadImage(url: string, withCredentials: boolean): Promise<Texture> {
     const texture: Texture = await new Promise<Texture>(
-        (resolve, reject) =>
-            this.ldrLoader.load(url, resolve, () => {}, reject));
+        (resolve, reject) => this.ldrLoader(withCredentials)
+                                 .load(url, resolve, () => {}, reject));
     texture.name = url;
     texture.flipY = false;
 
     return texture;
   }
 
-  async loadLottie(url: string, quality: number): Promise<Texture> {
-    const loader = await this.getLottieLoader();
+  async loadLottie(url: string, quality: number, withCredentials: boolean):
+      Promise<Texture> {
+    const loader = await this.getLottieLoader(withCredentials);
     loader.setQuality(quality);
     const texture: Texture = await new Promise<Texture>(
         (resolve, reject) => loader.load(url, resolve, () => {}, reject));
@@ -100,16 +109,31 @@ export default class TextureUtils {
   }
 
   async loadEquirect(
-      url: string, progressCallback: (progress: number) => void = () => {}):
+      url: string, withCredentials = false,
+      progressCallback: (progress: number) => void = () => {}):
       Promise<Texture> {
     try {
       const isHDR: boolean = HDR_FILE_RE.test(url);
-      const loader = isHDR ? this.hdrLoader : this.ldrLoader;
+      const loader = isHDR ? this.hdrLoader(withCredentials) :
+                             this.imageLoader(withCredentials);
       const texture: Texture = await new Promise<Texture>(
           (resolve, reject) => loader.load(
-              url, resolve, (event: {loaded: number, total: number}) => {
+              url,
+              (result) => {
+                const {renderTarget} =
+                    result as QuadRenderer<1016, GainMapDecoderMaterial>;
+                if (renderTarget != null) {
+                  const {texture} = renderTarget;
+                  result.dispose(false);
+                  resolve(texture);
+                } else {
+                  resolve(result as DataTexture);
+                }
+              },
+              (event: {loaded: number, total: number}) => {
                 progressCallback(event.loaded / event.total * 0.9);
-              }, reject));
+              },
+              reject));
 
       progressCallback(1.0);
 
@@ -136,8 +160,8 @@ export default class TextureUtils {
    */
   async generateEnvironmentMapAndSkybox(
       skyboxUrl: string|null = null, environmentMapUrl: string|null = null,
-      progressCallback: (progress: number) => void = () => {}):
-      Promise<EnvironmentMapAndSkybox> {
+      progressCallback: (progress: number) => void = () => {},
+      withCredentials = false): Promise<EnvironmentMapAndSkybox> {
     const useAltEnvironment = environmentMapUrl !== 'legacy';
     if (environmentMapUrl === 'legacy' || environmentMapUrl === 'neutral') {
       environmentMapUrl = null;
@@ -149,17 +173,18 @@ export default class TextureUtils {
 
     // If we have a skybox URL, attempt to load it as a cubemap
     if (!!skyboxUrl) {
-      skyboxLoads = this.loadEquirectFromUrl(skyboxUrl, progressCallback);
+      skyboxLoads = this.loadEquirectFromUrl(
+          skyboxUrl, withCredentials, progressCallback);
     }
 
     if (!!environmentMapUrl) {
       // We have an available environment map URL
-      environmentMapLoads =
-          this.loadEquirectFromUrl(environmentMapUrl, progressCallback);
+      environmentMapLoads = this.loadEquirectFromUrl(
+          environmentMapUrl, withCredentials, progressCallback);
     } else if (!!skyboxUrl) {
       // Fallback to deriving the environment map from an available skybox
-      environmentMapLoads =
-          this.loadEquirectFromUrl(skyboxUrl, progressCallback);
+      environmentMapLoads = this.loadEquirectFromUrl(
+          skyboxUrl, withCredentials, progressCallback);
     } else {
       // Fallback to generating the environment map
       environmentMapLoads = useAltEnvironment ?
@@ -181,10 +206,11 @@ export default class TextureUtils {
    * Loads an equirect Texture from a given URL, for use as a skybox.
    */
   private async loadEquirectFromUrl(
-      url: string,
+      url: string, withCredentials: boolean,
       progressCallback: (progress: number) => void): Promise<Texture> {
     if (!this.skyboxCache.has(url)) {
-      const skyboxMapLoads = this.loadEquirect(url, progressCallback);
+      const skyboxMapLoads =
+          this.loadEquirect(url, withCredentials, progressCallback);
 
       this.skyboxCache.set(url, skyboxMapLoads);
     }
@@ -228,7 +254,7 @@ export default class TextureUtils {
   private async loadGeneratedEnvironmentMap(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMap == null) {
       this.generatedEnvironmentMap =
-          this.GenerateEnvironmentMap(new EnvironmentScene(), 'legacy');
+          this.GenerateEnvironmentMap(new EnvironmentScene('legacy'), 'legacy');
     }
     return this.generatedEnvironmentMap;
   }
@@ -240,8 +266,8 @@ export default class TextureUtils {
    */
   private async loadGeneratedEnvironmentMapAlt(): Promise<CubeTexture> {
     if (this.generatedEnvironmentMapAlt == null) {
-      this.generatedEnvironmentMapAlt =
-          this.GenerateEnvironmentMap(new EnvironmentSceneAlt(), 'neutral');
+      this.generatedEnvironmentMapAlt = this.GenerateEnvironmentMap(
+          new EnvironmentScene('neutral'), 'neutral');
     }
     return this.generatedEnvironmentMapAlt;
   }

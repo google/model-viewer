@@ -28,7 +28,7 @@ import {assetPath, loadThreeGLTF, rafPasses} from '../../helpers.js';
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
-    assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
+    assetPath('models/glTF-Sample-Assets/Models/Triangle/glTF/Triangle.gltf');
 const CUBES_GLTF_PATH = assetPath('models/cubes.gltf');
 
 suite('scene-graph/model', () => {
@@ -83,12 +83,12 @@ suite('scene-graph/model', () => {
       test('Switch variant and lazy load', async () => {
         const threeGLTF = await loadThreeGLTF(CUBES_GLTF_PATH);
         const model = new Model(CorrelatedSceneGraph.from(threeGLTF));
-        expect(model[$materials][2][$correlatedObjects]).to.be.null;
+        expect(model[$materials][2][$correlatedObjects]).to.be.empty;
         expect(model[$materials][2][$lazyLoadGLTFInfo]).to.be.ok;
 
         await model[$switchVariant]('Yellow Red');
 
-        expect(model[$materials][2][$correlatedObjects]).to.not.be.null;
+        expect(model[$materials][2][$correlatedObjects]).to.not.be.empty;
         expect(model[$materials][2][$lazyLoadGLTFInfo]).to.not.be.ok;
       });
 

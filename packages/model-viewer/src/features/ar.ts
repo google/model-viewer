@@ -222,8 +222,13 @@ configuration or device capabilities');
               arMode = ARMode.WEBXR;
               break;
             }
-            if (value === 'scene-viewer' && IS_SCENEVIEWER_CANDIDATE &&
-                !isSceneViewerBlocked) {
+            if (value === 'scene-viewer' && !isSceneViewerBlocked &&
+                (IS_SCENEVIEWER_CANDIDATE ||
+                 ((navigator as any).userAgentData &&
+                  (navigator as any).userAgentData.getHighEntropyValues &&
+                  (await (navigator as any).userAgentData.getHighEntropyValues([
+                    'formFactor'
+                  ])).formFactor?.includes('XR')))) {
               arMode = ARMode.SCENE_VIEWER;
               break;
             }
@@ -331,11 +336,11 @@ configuration or device capabilities');
         params.set('link', linkUrl.toString());
       }
 
-      const intent = `intent://arvr.google.com/scene-viewer/1.0?${
+      const intent = `intent://arvr.google.com/scene-viewer/1.2?${
           params.toString() + '&file=' +
           encodeURIComponent(
               modelUrl
-                  .toString())}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${
+                  .toString())}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=${
           encodeURIComponent(locationUrl.toString())};end;`;
 
       const undoHashChange = () => {
@@ -415,11 +420,12 @@ configuration or device capabilities');
     }
 
     async prepareUSDZ(): Promise<string> {
-      const updateSourceProgress = this[$progressTracker].beginActivity();
+      const updateSourceProgress =
+          this[$progressTracker].beginActivity('usdz-conversion');
 
       await this[$triggerLoad]();
 
-      const {model, shadow} = this[$scene];
+      const {model, shadow, target} = this[$scene];
       if (model == null) {
         return '';
       }
@@ -435,7 +441,16 @@ configuration or device capabilities');
       updateSourceProgress(0.2);
 
       const exporter = new USDZExporter();
-      const arraybuffer = await exporter.parse(model);
+
+      target.remove(model);
+      model.position.copy(target.position);
+      model.updateWorldMatrix(false, true);
+
+      const arraybuffer = await exporter.parseAsync(model);
+
+      model.position.set(0, 0, 0);
+      target.add(model);
+
       const blob = new Blob([arraybuffer], {
         type: 'model/vnd.usdz+zip',
       });

@@ -46,7 +46,8 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     super(onUpdate, new Set<ThreeTexture>(texture ? [texture] : []));
 
     if (!this[$threeTexture].image.src) {
-      this[$threeTexture].image.src = 'adhoc_image' + adhocNum++;
+      this[$threeTexture].image.src =
+          texture.name ? texture.name : 'adhoc_image' + adhocNum++;
     }
     if (!this[$threeTexture].image.name) {
       this[$threeTexture].image.name =

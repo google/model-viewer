@@ -40,8 +40,10 @@
       {
         "name": "Can I have X feature from three.js?",
         "htmlName": "three",
-        "description": "Probably not. We intentionally keep our API at a higher level than three.js, which is a full game engine. You're welcome to file a feature request if you have an idea that can be explained easily to lay users. You are also welcome to hack/fork us. You can use <code>mvElement[Object.getOwnPropertySymbols(mvElement).find(e => e.description === 'scene')];</code> to get access to our internal three.js scene and do whatever you want. However, this is outside the scope of our public API, so we make no effort to avoid breaking changes or to provide support.",
-        "links": []
+        "description": "Probably not. We intentionally keep our API at a higher level than three.js, which is a full game engine. You're welcome to file a feature request if you have an idea that can be explained easily to lay users. You are also welcome to hack/fork us. You can use <code>mvElement[Object.getOwnPropertySymbols(mvElement).find(e => e.description === 'scene')];</code> to get access to our internal three.js scene and do whatever you want. You can use our unbundled build and hook up Three.js with an import map as demonstrated in the link below to e.g. hook up other file loaders. However, this is all outside the scope of our public API, so we make no effort to avoid breaking changes or to provide support.",
+        "links": [
+          "<a href='../examples/postprocessing/#setup'>Import map example</a>"
+        ]
       },
       {
         "name": "Can I embed a 3D model in Twitter?",
@@ -60,9 +62,19 @@
       {
         "name": "How high is our rendering quality?",
         "htmlName": "quality",
-        "description": "&lt;model-viewer&gt; uses three.js for rendering, which is high-quality and rapidly supports the most recent PBR glTF extensions. The advantage of glTF is that it is widely-supported with consistent rendering (assuming the render parameters are set up the same way). We track convergence of the most popular glTF renderers to demonstrate the state of the industry and to file bugs to drive further improvement; see for yourself at the following link.",
+        "description": "&lt;model-viewer&gt; uses three.js for rendering, which is high-quality and rapidly supports the most recent PBR glTF extensions. The advantage of glTF is that it is widely-supported with consistent rendering (assuming the render parameters are set up the same way). We track convergence of the most popular glTF renderers to demonstrate the state of the industry and to file bugs to drive further improvement; see for yourself at the following Khronos link.",
         "links": [
-          "<a href='../fidelity'>glTF fidelity comparison</a>"
+          "<a href='https://github.khronos.org/glTF-Render-Fidelity/comparison/'>Khronos glTF fidelity comparison</a>"
+        ]
+      },
+      {
+        "name": "How do I ensure accurate colors?",
+        "htmlName": "color",
+        "description": "The short answer is to use neutral (grayscale) lighting and our new 'commerce' tone-mapping function, which is designed specifically to ensure faithful rendering of the glTF's colors. This is a complicated topic, so follow the links for much more in-depth explanations. The single biggest problem with color in 3D e-commerce is the industry-standard ACES tone mapper, so please consider using our commerce alternative.",
+        "links": [
+          "<a href='../examples/lightingandenv/#toneMapping'><span class='attribute'>tone-mapping</span> example</a>",
+          "<a href='../examples/color'>Achieving Color-Accurate Presentation with glTF</a>",
+          "<a href='../examples/tone-mapping'>Tone Mapping Considerations for Physically-Based Rendering</a>"
         ]
       },
       {
@@ -74,7 +86,7 @@
       {
         "name": "How should I access &lt;model-viewer&gt;?",
         "htmlName": "cdn",
-        "description": "If you control your own hosting, the safest option is always to host model-viewer.min.js yourself on the same server as your site. For smaller sites and blogs, it is often more convenient to use one of various free CDNs - Google provides &lt;model-viewer&gt; as one of its hosted libraries, which we recommend as it is a fast and reliable CDN. Simply specify your desired version in the URL: <code>https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js</code>. We used to recommend unpkg, but it has had several serious outages recently. It can automatically pick the most recent version, but this is not a good practice as it slows loading (two requests) and ideally you should test when updating to ensure no bugs have been introduced. Another good option is jsDelivr.",
+        "description": "If you control your own hosting, the safest option is always to host model-viewer.min.js yourself on the same server as your site. For smaller sites and blogs, it is often more convenient to use one of various free CDNs - Google provides &lt;model-viewer&gt; as one of its hosted libraries, which we recommend as it is a fast and reliable CDN. Simply specify your desired version in the URL: <code>https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js</code>. We used to recommend unpkg, but it has had several serious outages recently. It can automatically pick the most recent version, but this is not a good practice as it slows loading (two requests) and ideally you should test when updating to ensure no bugs have been introduced. Another good option is jsDelivr.",
         "links": [
           "<a href='https://developers.google.com/speed/libraries#model-viewer'>Google Hosted Libraries</a>",
           "<a href='https://www.jsdelivr.com/package/npm/@google/model-viewer'>jsDelivr</a>"
@@ -102,6 +114,15 @@
         "description": "Three.js used to be marked as our dependency, which meant it was duplicated if you used it in another part of your code base too. As of v3.0.2, it is marked as our peer dependency, allowing you to share it. Note that we pin its version due to frequent breaking changes, so you will not have much version flexibility. This can be worked around using npm's --legacy-peer-deps mode, but please do not file issues if you do this, as we can only ensure our tested quality on one version of three.js at a time. If you are working directly with our bundle, then you may prefer to use the <code>model-viewer-module.min.js</code> bundle, and bring Three.js manually using an import-map.",
         "links": [
           "<a href='https://docs.npmjs.com/cli/v7/using-npm/config#legacy-peer-deps'>NPM legacy-peer-deps documentation</a>"
+        ]
+      },
+      {
+        "name": "How do I ensure &lt;model-viewer&gt; is self-contained?",
+        "htmlName": "remote",
+        "description": "When packaging an app or extension using &lt;model-viewer&gt;, it is important that everything you need is included in your package, but not more. We have several lazy-loaded modules for decoders that only some users need: DRACO, KTX2, Meshopt, and Lottie. These are loaded by URL and the defaults point to stable, external CDNs to make sure they \"just work\". If you don't use these features, those links will never be accessed, but a static checker can't know that and may flag these external resources. For any feature you need, you should change the Location to a relative URL within your project and copy the files there. If you don't need the feature, do the same thing, but make the file empty - since you'll never access its contents anyway, this will minimize your bundle size.",
+        "links": [
+          "<a href='../docs/#entrydocs-loading-staticproperties-dracoDecoderLocation'>Decoder location static properties</a>",
+          "<a href='../examples/loading/#dracoSupport'>Details on setting static properties</a>"
         ]
       }
     ]

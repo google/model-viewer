@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {clamp} from '../utilities';
+import {clamp} from '../utilities.js';
 
 // Adapted from https://gist.github.com/gre/1650294
 export const easeInOutQuad: TimingFunction = (t: number) =>

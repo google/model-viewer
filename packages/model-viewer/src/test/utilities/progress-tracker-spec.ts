@@ -19,6 +19,8 @@ import {waitForEvent} from '../../utilities.js';
 import {Activity, ProgressDetails, ProgressTracker} from '../../utilities/progress-tracker.js';
 
 suite('ProgressTracker', () => {
+  const progressReason = 'progress-test';
+
   let progressTracker: ProgressTracker;
   setup(() => {
     progressTracker = new ProgressTracker();
@@ -28,11 +30,23 @@ suite('ProgressTracker', () => {
     expect(progressTracker.ongoingActivityCount).to.be.equal(0);
   });
 
+  test('event includes the reason for the progress', async () => {
+    const activity = progressTracker.beginActivity(progressReason);
+
+    const progressEventDispatches =
+        waitForEvent<CustomEvent<ProgressDetails>>(
+            progressTracker, 'progress');
+    activity(0.5);
+    const event = await progressEventDispatches;
+
+    expect(event.detail.reason).to.be.equal(progressReason);
+  });
+
   suite('an activity', () => {
     let firstActivity: Activity;
 
     setup(() => {
-      firstActivity = progressTracker.beginActivity();
+      firstActivity = progressTracker.beginActivity(progressReason);
     });
 
     test('increases the ongoing activities count', () => {
@@ -73,12 +87,12 @@ suite('ProgressTracker', () => {
         });
 
         test('is added to the current stack of activities', () => {
-          progressTracker.beginActivity();
+          progressTracker.beginActivity(progressReason);
           expect(progressTracker.ongoingActivityCount).to.be.equal(2);
         });
 
         test('defers marking all activities completed', () => {
-          progressTracker.beginActivity();
+          progressTracker.beginActivity(progressReason);
           firstActivity(1.0);
           expect(progressTracker.ongoingActivityCount).to.be.equal(2);
         });
@@ -107,7 +121,7 @@ suite('ProgressTracker', () => {
       let secondActivity: Activity;
 
       setup(() => {
-        secondActivity = progressTracker.beginActivity();
+        secondActivity = progressTracker.beginActivity(progressReason);
       });
 
       test('increases the ongoing activity count', () => {

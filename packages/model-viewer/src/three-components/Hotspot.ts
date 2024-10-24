@@ -143,10 +143,7 @@ export class Hotspot extends CSS2DObject {
     }
   }
 
-  updateSurface(forceUpdate: boolean) {
-    if (!forceUpdate && this.initialized) {
-      return;
-    }
+  updateSurface() {
     const {mesh, tri, bary} = this;
     if (mesh == null || tri == null || bary == null) {
       return;
@@ -165,8 +162,8 @@ export class Hotspot extends CSS2DObject {
 
     triangle.set(a, b, c);
     triangle.getNormal(this.normal).transformDirection(mesh.matrixWorld);
-    const scene = target.parent as ModelScene;
-    quat.setFromAxisAngle(a.set(0, 1, 0), -scene.yaw);
+    const pivot = target.parent as ModelScene;
+    quat.setFromAxisAngle(a.set(0, 1, 0), -pivot.rotation.y);
     this.normal.applyQuaternion(quat);
   }
 
@@ -175,12 +172,7 @@ export class Hotspot extends CSS2DObject {
   }
 
   updateVisibility(show: boolean) {
-    // NOTE: IE11 doesn't support a second arg for classList.toggle
-    if (show) {
-      this.element.classList.remove('hide');
-    } else {
-      this.element.classList.add('hide');
-    }
+    this.element.classList.toggle('hide', !show);
 
     // NOTE: ShadyDOM doesn't support slot.assignedElements, otherwise we could
     // use that here.
@@ -196,12 +188,7 @@ export class Hotspot extends CSS2DObject {
       if (visibilityAttribute != null) {
         const attributeName = `data-${visibilityAttribute}`;
 
-        // NOTE: IE11 doesn't support toggleAttribute
-        if (show) {
-          element.setAttribute(attributeName, '');
-        } else {
-          element.removeAttribute(attributeName);
-        }
+        element.toggleAttribute(attributeName, show);
       }
 
       element.dispatchEvent(new CustomEvent('hotspot-visibility', {

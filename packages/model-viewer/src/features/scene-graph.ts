@@ -20,13 +20,13 @@ import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GL
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
-import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin';
+import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin.js';
 import {Constructor} from '../utilities.js';
 
 import {Image, PBRMetallicRoughness, Sampler, TextureInfo} from './scene-graph/api.js';
 import {Material} from './scene-graph/material.js';
 import {$availableVariants, $materialFromPoint, $prepareVariantsForExport, $switchVariant, Model} from './scene-graph/model.js';
-import {Texture as ModelViewerTexture} from './scene-graph/texture';
+import {Texture as ModelViewerTexture} from './scene-graph/texture.js';
 
 
 
@@ -131,7 +131,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     async createTexture(uri: string, type: string = 'image/png'):
         Promise<ModelViewerTexture> {
       const {textureUtils} = this[$renderer];
-      const texture = await textureUtils!.loadImage(uri);
+      const texture = await textureUtils!.loadImage(uri, this.withCredentials);
 
       texture.userData.mimeType = type;
 
@@ -141,13 +141,16 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     async createLottieTexture(uri: string, quality = 1):
         Promise<ModelViewerTexture> {
       const {textureUtils} = this[$renderer];
-      const texture = await textureUtils!.loadLottie(uri, quality);
+      const texture =
+          await textureUtils!.loadLottie(uri, quality, this.withCredentials);
 
       return this[$buildTexture](texture);
     }
 
     createVideoTexture(uri: string): ModelViewerTexture {
       const video = document.createElement('video');
+      video.crossOrigin =
+          this.withCredentials ? 'use-credentials' : 'anonymous';
       video.src = uri;
       video.muted = true;
       video.playsInline = true;
@@ -169,7 +172,8 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.updated(changedProperties);
 
       if (changedProperties.has('variantName')) {
-        const updateVariantProgress = this[$progressTracker].beginActivity();
+        const updateVariantProgress =
+            this[$progressTracker].beginActivity('variant-update');
         updateVariantProgress(0.1);
         const model = this[$model];
         const {variantName} = this;

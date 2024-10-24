@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import {BackSide, Box3, Material, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget, WebGLRenderTargetOptions} from 'three';
+import {BackSide, Box3, Material, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RenderTargetOptions, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
 import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
 import {lerp} from 'three/src/math/MathUtils.js';
 
-import {ModelScene} from './ModelScene';
+import {ModelScene} from './ModelScene.js';
 
 export type Side = 'back'|'bottom';
 
@@ -91,7 +91,7 @@ export class Shadow extends Object3D {
       side: BackSide,
     });
     this.floor = new Mesh(plane, shadowMaterial);
-    this.floor.userData.shadow = true;
+    this.floor.userData.noHit = true;
     camera.add(this.floor);
 
     // the plane onto which to blur the texture
@@ -220,7 +220,7 @@ export class Shadow extends Object3D {
     }
 
     if (this.renderTarget == null) {
-      const params: WebGLRenderTargetOptions = {format: RGBAFormat};
+      const params: RenderTargetOptions = {format: RGBAFormat};
       this.renderTarget = new WebGLRenderTarget(width, height, params);
       this.renderTargetBlur = new WebGLRenderTarget(width, height, params);
 
@@ -264,7 +264,11 @@ export class Shadow extends Object3D {
    * z-fighting with any baked-in shadow plane.
    */
   setOffset(offset: number) {
-    this.floor.position.z = -offset + 0.001 * this.maxDimension;
+    this.floor.position.z = -offset + this.gap();
+  }
+
+  gap() {
+    return 0.001 * this.maxDimension;
   }
 
   render(renderer: WebGLRenderer, scene: Scene) {

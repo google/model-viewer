@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, MeshBasicMaterial, PlaneGeometry, Vector2, Vector3} from 'three';
+import {BoxGeometry, BufferGeometry, DoubleSide, Float32BufferAttribute, Material, Mesh, MeshBasicMaterial, PlaneGeometry, Vector2, Vector3, XRTargetRaySpace} from 'three';
 
 import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
@@ -61,6 +61,7 @@ const addCorner =
  */
 export class PlacementBox extends Mesh {
   private hitPlane: Mesh;
+  private hitBox: Mesh;
   private shadowHeight: number;
   private side: Side;
   private goalOpacity: number;
@@ -105,6 +106,14 @@ export class PlacementBox extends Mesh {
     (this.hitPlane.material as Material).side = DoubleSide;
     this.add(this.hitPlane);
 
+    // The box matches the dimensions of the plane (extra radius all around),
+    // but only the top is expanded by radius, not the bottom.
+    this.hitBox = new Mesh(new BoxGeometry(
+        size.x + 2 * RADIUS, size.y + RADIUS, size.z + 2 * RADIUS));
+    this.hitBox.visible = false;
+    (this.hitBox.material as Material).side = DoubleSide;
+    this.add(this.hitBox);
+
     boundingBox.getCenter(this.position);
 
     switch (side) {
@@ -119,6 +128,8 @@ export class PlacementBox extends Mesh {
     }
 
     scene.target.add(this);
+    this.hitBox.position.y = (size.y + RADIUS) / 2 + boundingBox.min.y;
+    scene.target.add(this.hitBox);
     this.offsetHeight = 0;
   }
 
@@ -140,6 +151,13 @@ export class PlacementBox extends Mesh {
     this.hitPlane.updateMatrixWorld();
     const hitResult = this.getHit(scene, screenX, screenY);
     this.hitPlane.scale.set(1, 1, 1);
+    return hitResult;
+  }
+
+  controllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
+    this.hitBox.visible = true;
+    const hitResult = scene.hitFromController(controller, this.hitBox);
+    this.hitBox.visible = false;
     return hitResult;
   }
 
@@ -188,8 +206,11 @@ export class PlacementBox extends Mesh {
     const {geometry, material} = this.hitPlane;
     geometry.dispose();
     (material as Material).dispose();
+    this.hitBox.geometry.dispose();
+    (this.hitBox.material as Material).dispose();
     this.geometry.dispose();
     (this.material as Material).dispose();
-    this.parent?.remove(this);
+    this.hitBox.removeFromParent();
+    this.removeFromParent();
   }
 }

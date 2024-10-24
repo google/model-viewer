@@ -35,25 +35,23 @@ DEPLOYABLE_STATIC_FILES=( \
   README.md \
   shared-assets/models/*.* \
   shared-assets/models/twitter \
-  shared-assets/models/glTF-Sample-Models/2.0/2CylinderEngine \
-  shared-assets/models/glTF-Sample-Models/2.0/AlphaBlendModeTest \
-  shared-assets/models/glTF-Sample-Models/2.0/AntiqueCamera \
-  shared-assets/models/glTF-Sample-Models/2.0/BoomBox \
-  shared-assets/models/glTF-Sample-Models/2.0/BoxTextured \
-  shared-assets/models/glTF-Sample-Models/2.0/Buggy \
-  shared-assets/models/glTF-Sample-Models/2.0/BrainStem \
-  shared-assets/models/glTF-Sample-Models/2.0/Corset \
-  shared-assets/models/glTF-Sample-Models/2.0/Cube \
-  shared-assets/models/glTF-Sample-Models/2.0/DamagedHelmet \
-  shared-assets/models/glTF-Sample-Models/2.0/Duck \
-  shared-assets/models/glTF-Sample-Models/2.0/FlightHelmet \
-  shared-assets/models/glTF-Sample-Models/2.0/Lantern \
-  shared-assets/models/glTF-Sample-Models/2.0/MaterialsVariantsShoe \
-  shared-assets/models/glTF-Sample-Models/2.0/MetalRoughSpheres \
-  shared-assets/models/glTF-Sample-Models/2.0/Suzanne \
-  shared-assets/models/glTF-Sample-Models/2.0/SpecGlossVsMetalRough \
-  shared-assets/models/glTF-Sample-Models/2.0/ToyCar \
-  shared-assets/models/glTF-Sample-Models/2.0/WaterBottle \
+  shared-assets/models/glTF-Sample-Assets/Models/AlphaBlendModeTest \
+  shared-assets/models/glTF-Sample-Assets/Models/AntiqueCamera \
+  shared-assets/models/glTF-Sample-Assets/Models/BoomBox \
+  shared-assets/models/glTF-Sample-Assets/Models/BoxTextured \
+  shared-assets/models/glTF-Sample-Assets/Models/BrainStem \
+  shared-assets/models/glTF-Sample-Assets/Models/Corset \
+  shared-assets/models/glTF-Sample-Assets/Models/Cube \
+  shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet \
+  shared-assets/models/glTF-Sample-Assets/Models/Duck \
+  shared-assets/models/glTF-Sample-Assets/Models/FlightHelmet \
+  shared-assets/models/glTF-Sample-Assets/Models/Lantern \
+  shared-assets/models/glTF-Sample-Assets/Models/MaterialsVariantsShoe \
+  shared-assets/models/glTF-Sample-Assets/Models/MetalRoughSpheresNoTextures \
+  shared-assets/models/glTF-Sample-Assets/Models/Suzanne \
+  shared-assets/models/glTF-Sample-Assets/Models/SpecGlossVsMetalRough \
+  shared-assets/models/glTF-Sample-Assets/Models/ToyCar \
+  shared-assets/models/glTF-Sample-Assets/Models/WaterBottle \
   shared-assets/environments \
   shared-assets/icons \
 )
@@ -112,9 +110,7 @@ mkdir -p $DEPLOY_ROOT/node_modules/@google/model-viewer-effects/dist
 mkdir -p $DEPLOY_ROOT/node_modules/js-beautify
 mkdir -p $DEPLOY_ROOT/node_modules/web-animations-js
 
-mv ../render-fidelity-tools/test/results $DEPLOY_ROOT/fidelity/results
-cp ../render-fidelity-tools/test/results-viewer.html $DEPLOY_ROOT/fidelity/index.html
-cp ../render-fidelity-tools/dist/* $DEPLOY_ROOT/dist/
+cp examples/fidelity.html $DEPLOY_ROOT/fidelity/index.html
 cp ../space-opera/editor/index.html $DEPLOY_ROOT/editor/
 cp ../space-opera/editor/view/index.html $DEPLOY_ROOT/editor/view/
 cp ../space-opera/dist/space-opera.js $DEPLOY_ROOT/dist/

@@ -89,6 +89,22 @@ export interface Finger {
   y: Path;
 }
 
+export interface A11yTranslationsInterface {
+  left: string;
+  right: string;
+  front: string;
+  back: string;
+  'upper-left': string;
+  'upper-right': string;
+  'upper-front': string;
+  'upper-back': string;
+  'lower-left': string;
+  'lower-right': string;
+  'lower-front': string;
+  'lower-back': string;
+  'interaction-prompt': string;
+}
+
 export type InteractionPromptStrategy = 'auto'|'none';
 export type InteractionPromptStyle = 'basic'|'wiggle';
 export type TouchAction = 'pan-y'|'pan-x'|'none';
@@ -154,7 +170,7 @@ const minCameraOrbitIntrinsics = (element: ModelViewerElementBase&
   return {
     basis: [
       numberNode(-Infinity, 'rad'),
-      numberNode(Math.PI / 8, 'rad'),
+      numberNode(0, 'rad'),
       numberNode(radius, 'm')
     ],
     keywords: {auto: [null, null, null]}
@@ -169,7 +185,7 @@ const maxCameraOrbitIntrinsics = (element: ModelViewerElementBase) => {
   return {
     basis: [
       numberNode(Infinity, 'rad'),
-      numberNode(Math.PI - Math.PI / 8, 'rad'),
+      numberNode(Math.PI, 'rad'),
       numberNode(defaultRadius, 'm')
     ],
     keywords: {auto: [null, null, null]}
@@ -202,6 +218,8 @@ export const $fingerAnimatedContainers = Symbol('fingerAnimatedContainers');
 
 const $deferInteractionPrompt = Symbol('deferInteractionPrompt');
 const $updateAria = Symbol('updateAria');
+const $a11y = Symbol('a11y');
+const $updateA11y = Symbol('updateA11y');
 const $updateCameraForRadius = Symbol('updateCameraForRadius');
 
 const $cancelPrompts = Symbol('cancelPrompts');
@@ -248,6 +266,7 @@ export declare interface ControlsInterface {
   disableZoom: boolean;
   disablePan: boolean;
   disableTap: boolean;
+  a11y: A11yTranslationsInterface|string|null;
   getCameraOrbit(): SphericalPosition;
   getCameraTarget(): Vector3D;
   getFieldOfView(): number;
@@ -359,6 +378,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Number, attribute: 'interpolation-decay'})
     interpolationDecay: number = DECAY_MILLISECONDS;
 
+    @property() a11y: A11yTranslationsInterface|string|null = null;
+
     protected[$promptElement] =
         this.shadowRoot!.querySelector('.interaction-prompt') as HTMLElement;
     protected[$promptAnimatedContainer] =
@@ -384,6 +405,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     protected[$jumpCamera] = false;
     protected[$initialized] = false;
     protected[$maintainThetaPhi] = false;
+    protected[$a11y] = {} as A11yTranslationsInterface;
 
     get inputSensitivity(): number {
       return this[$controls].inputSensitivity;
@@ -408,7 +430,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     getCameraTarget(): Vector3D {
       return toVector3D(
           this[$renderer].isPresenting ? this[$renderer].arRenderer.target :
-                                         this[$scene].getTarget());
+                                         this[$scene].getDynamicTarget());
     }
 
     getFieldOfView(): number {
@@ -542,6 +564,10 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('interpolationDecay')) {
         controls.setDamperDecayTime(this.interpolationDecay);
         scene.setTargetDamperDecayTime(this.interpolationDecay);
+      }
+
+      if (changedProperties.has('a11y')) {
+        this[$updateA11y]();
       }
 
       if (this[$jumpCamera] === true) {
@@ -799,8 +825,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
      * orbiting at the supplied radius.
      */
     [$updateCameraForRadius](radius: number) {
-      const maximumRadius =
-          Math.max(this[$scene].boundingSphere.radius, radius);
+      const maximumRadius = Math.max(this[$scene].farRadius(), radius);
 
       const near = 0;
       const far = Math.abs(2 * maximumRadius);
@@ -819,14 +844,24 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       const azimuthalQuadrantLabel =
           AZIMUTHAL_QUADRANT_LABELS[azimuthalQuadrant];
       const polarTrientLabel = POLAR_TRIENT_LABELS[polarTrient];
+      const position = `${polarTrientLabel}${azimuthalQuadrantLabel}`;
 
-      this[$updateStatus](
-          `View from stage ${polarTrientLabel}${azimuthalQuadrantLabel}`);
+      const key = position as keyof A11yTranslationsInterface;
+      if (key in this[$a11y]) {
+        this[$updateStatus](this[$a11y][key]);
+      } else {
+        this[$updateStatus](`View from stage ${position}`);
+      }
     }
 
     get[$ariaLabel]() {
+      let interactionPrompt = INTERACTION_PROMPT;
+      if ('interaction-prompt' in this[$a11y]) {
+        interactionPrompt = `. ${this[$a11y]['interaction-prompt']}`;
+      }
+
       return super[$ariaLabel].replace(/\.$/, '') +
-          (this.cameraControls ? INTERACTION_PROMPT : '');
+          (this.cameraControls ? interactionPrompt : '');
     }
 
     async[$onResize](event: any) {
@@ -888,12 +923,33 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     [$onPointerChange] = (event: PointerChangeEvent) => {
-      if (event.type === 'pointer-change-start') {
-        this[$container].classList.add('pointer-tumbling');
-      } else {
-        this[$container].classList.remove('pointer-tumbling');
-      }
+      this[$container].classList.toggle(
+          'pointer-tumbling', event.type === 'pointer-change-start');
     };
+
+    [$updateA11y]() {
+      if (typeof this.a11y === 'string') {
+        if (this.a11y.startsWith('{')) {
+          try {
+            this[$a11y] = JSON.parse(this.a11y);
+          } catch (error) {
+            console.warn('Error parsing a11y JSON:', error);
+          }
+        } else if (this.a11y.length > 0) {
+          console.warn(
+              'Error not supported format, should be a JSON string:',
+              this.a11y);
+        } else {
+          this[$a11y] = <A11yTranslationsInterface>{};
+        }
+      } else if (typeof this.a11y === 'object' && this.a11y != null) {
+        this[$a11y] = Object.assign({}, this.a11y);
+      } else {
+        this[$a11y] = <A11yTranslationsInterface>{};
+      }
+
+      this[$userInputElement].setAttribute('aria-label', this[$ariaLabel]);
+    }
   }
 
   return ControlsModelViewerElement;

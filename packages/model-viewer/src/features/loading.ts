@@ -295,14 +295,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           parentNode.appendChild(this[$defaultProgressBarElement]);
         }
 
-        // NOTE(cdata): IE11 does not properly respect the second parameter
-        // of classList.toggle, which this implementation originally used.
-        // @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/11865865/
-        if (progress === 1.0) {
-          this[$defaultProgressBarElement].classList.add('hide');
-        } else {
-          this[$defaultProgressBarElement].classList.remove('hide');
-        }
+        this[$defaultProgressBarElement].classList.toggle('hide', progress === 1.0);
       });
     }, PROGRESS_BAR_UPDATE_THRESHOLD);
 
@@ -367,6 +360,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$onProgress] = (event: Event) => {
       const progress = (event as any).detail.totalProgress;
+      const reason = (event as any).detail.reason;
 
       if (progress === 1.0) {
         this[$updateProgressBar].flush();
@@ -380,7 +374,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$updateProgressBar](progress);
 
       this.dispatchEvent(
-          new CustomEvent('progress', {detail: {totalProgress: progress}}));
+          new CustomEvent('progress', {detail: {totalProgress: progress, reason}}));
     };
 
     [$shouldAttemptPreload](): boolean {

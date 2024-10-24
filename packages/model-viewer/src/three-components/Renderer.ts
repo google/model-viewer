@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, CustomToneMapping, Event, EventDispatcher, ShaderChunk, Vector2, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, NeutralToneMapping, Vector2, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
 import ModelViewerElementBase, {$canvas, $tick, $updateSize} from '../model-viewer-base.js';
-import {clamp, isDebugMode, resolveDpr} from '../utilities.js';
+import {clamp, isDebugMode} from '../utilities.js';
 
 import {ARRenderer} from './ARRenderer.js';
 import {CachingGLTFLoader} from './CachingGLTFLoader.js';
@@ -45,6 +45,7 @@ const SCALE_STEPS = [1, 0.79, 0.62, 0.5, 0.4, 0.31, 0.25];
 const DEFAULT_LAST_STEP = 3;
 
 export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
+const COMMERCE_EXPOSURE = 1.3;
 
 /**
  * Registers canvases with Canvas2DRenderingContexts and renders them
@@ -59,15 +60,18 @@ export const DEFAULT_POWER_PREFERENCE: string = 'high-performance';
  */
 export class Renderer extends
     EventDispatcher<{contextlost: {sourceEvent: WebGLContextEvent}}> {
-  private static _singleton = new Renderer({
-    powerPreference:
-        (((self as any).ModelViewerElement || {}) as ModelViewerGlobalConfig)
-            .powerPreference ||
-        DEFAULT_POWER_PREFERENCE,
-    debug: isDebugMode()
-  });
+  private static _singleton: Renderer;
 
   static get singleton() {
+    if (!this._singleton) {
+      this._singleton = new Renderer({
+        powerPreference: (((self as any).ModelViewerElement || {}) as
+                          ModelViewerGlobalConfig)
+                             .powerPreference ||
+            DEFAULT_POWER_PREFERENCE,
+        debug: isDebugMode()
+      });
+    }
     return this._singleton;
   }
 
@@ -130,35 +134,11 @@ export class Renderer extends
   constructor(options: RendererOptions) {
     super();
 
-    this.dpr = resolveDpr();
+    this.dpr = window.devicePixelRatio;
 
     this.canvas3D = document.createElement('canvas');
     this.canvas3D.id = 'webgl-canvas';
     this.canvas3D.classList.add('show');
-
-    // Emmett's new 3D Commerce tone mapping function
-    ShaderChunk.tonemapping_pars_fragment =
-        ShaderChunk.tonemapping_pars_fragment.replace(
-            'vec3 CustomToneMapping( vec3 color ) { return color; }', `
-      float startCompression = 0.8;
-      float desaturation = 0.5;
-      vec3 CustomToneMapping( vec3 color ) {
-        color *= toneMappingExposure;
-        
-        float d = 1. - startCompression;
-
-        float peak = max(color.r, max(color.g, color.b));
-        if (peak < startCompression) return color;
-
-        float newPeak = 1. - d * d / (peak + d - startCompression);
-        float invPeak = 1. / peak;
-        
-        float extraBrightness = dot(color * (1. - startCompression * invPeak), vec3(1, 1, 1));
-        
-        color *= newPeak * invPeak;
-        float g = 1. - 3. / (desaturation * extraBrightness + 3.);
-        return mix(color, vec3(1, 1, 1), g);
-      }`);
 
     try {
       this.threeRenderer = new WebGLRenderer({
@@ -224,7 +204,9 @@ export class Renderer extends
   }
 
   displayCanvas(scene: ModelScene): HTMLCanvasElement {
-    return this.multipleScenesVisible ? scene.element[$canvas] : this.canvas3D;
+    return scene.element.modelIsVisible && !this.multipleScenesVisible ?
+        this.canvas3D :
+        scene.element[$canvas];
   }
 
   /**
@@ -266,7 +248,7 @@ export class Renderer extends
    * device pixel ratio.
    */
   private updateRendererSize() {
-    const dpr = resolveDpr();
+    const dpr = window.devicePixelRatio;
     if (dpr !== this.dpr) {
       // If the device pixel ratio has changed due to page zoom, elements
       // specified by % width do not fire a resize event even though their CSS
@@ -427,13 +409,19 @@ export class Renderer extends
    * the time that has passed since the last rendered frame.
    */
   preRender(scene: ModelScene, t: number, delta: number) {
-    const {element, exposure} = scene;
+    const {element, exposure, toneMapping} = scene;
 
     element[$tick](t, delta);
 
     const exposureIsNumber =
         typeof exposure === 'number' && !Number.isNaN(exposure);
-    this.threeRenderer.toneMappingExposure = exposureIsNumber ? exposure : 1.0;
+    const env = element.environmentImage;
+    const sky = element.skyboxImage;
+    const compensateExposure = toneMapping === NeutralToneMapping &&
+        (env === 'neutral' || env === 'legacy' || (!env && !sky));
+    this.threeRenderer.toneMappingExposure =
+        (exposureIsNumber ? exposure : 1.0) *
+        (compensateExposure ? COMMERCE_EXPOSURE : 1.0);
   }
 
   render(t: number, frame?: XRFrame) {
@@ -512,9 +500,7 @@ export class Renderer extends
       } else {
         this.threeRenderer.autoClear =
             true;  // this might get reset by the effectRenderer
-        this.threeRenderer.toneMapping = scene.toneMapping === 'commerce' ?
-            CustomToneMapping :
-            ACESFilmicToneMapping;
+        this.threeRenderer.toneMapping = scene.toneMapping;
         this.threeRenderer.render(scene, scene.camera);
       }
       if (this.multipleScenesVisible ||

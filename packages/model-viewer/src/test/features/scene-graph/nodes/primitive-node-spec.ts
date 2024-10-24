@@ -14,7 +14,7 @@
  */
 
 import {expect} from '@esm-bundle/chai';
-import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial';
+import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 
 import {$primitivesList, $variantData, Model} from '../../../../features/scene-graph/model.js';
 import {ModelViewerElement} from '../../../../model-viewer.js';
@@ -23,12 +23,12 @@ import {waitForEvent} from '../../../../utilities.js';
 import {assetPath, loadThreeGLTF} from '../../../helpers.js';
 
 const BRAIN_STEM_GLB_PATH = assetPath(
-    'models/glTF-Sample-Models/2.0/BrainStem/glTF-Binary/BrainStem.glb');
+    'models/glTF-Sample-Assets/Models/BrainStem/glTF-Binary/BrainStem.glb');
 const CUBES_GLTF_PATH = assetPath('models/cubes.gltf');
 const CUBE_GLTF_PATH = assetPath('models/cube.gltf');
 const MESH_PRIMITIVES_GLB_PATH = assetPath('models/MeshPrimitivesVariants.glb');
 const KHRONOS_TRIANGLE_GLB_PATH =
-    assetPath('models/glTF-Sample-Models/2.0/Triangle/glTF/Triangle.gltf');
+    assetPath('models/glTF-Sample-Assets/Models/Triangle/glTF/Triangle.gltf');
 
 const findPrimitivesWithVariant = (model: Model, variantName: string) => {
   const result = new Array<any>();

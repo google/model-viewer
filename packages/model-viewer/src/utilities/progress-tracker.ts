@@ -38,6 +38,7 @@ export type Activity = (progress: number) => number;
  */
 export interface ProgressDetails {
   totalProgress: number;
+  reason: string;
 }
 
 /**
@@ -50,7 +51,7 @@ export interface ProgressDetails {
  *
  * The value of totalProgress is a number that progresses from 0 to 1. The
  * ProgressTracker allows for the lazy accumulation of tracked actions, so the
- * total progress represents a abstract, non-absolute progress towards the
+ * total progress represents an abstract, non-absolute progress towards the
  * completion of all currently tracked events.
  *
  * When all currently tracked activities are finished, the ProgressTracker
@@ -86,7 +87,7 @@ export class ProgressTracker extends EventTarget {
    * progress is reported than the previously reported progress, it will be
    * ignored.
    */
-  beginActivity(): Activity {
+  beginActivity(reason: string): Activity {
     const activity: OngoingActivity = {progress: 0, completed: false};
 
     this.ongoingActivities.add(activity);
@@ -94,7 +95,7 @@ export class ProgressTracker extends EventTarget {
     if (this.ongoingActivityCount === 1) {
       // Announce the first progress event (which should always be 0 / 1
       // total progress):
-      this.announceTotalProgress(activity, 0);
+      this.announceTotalProgress(activity, 0, reason);
     }
 
     return (progress: number): number => {
@@ -103,7 +104,7 @@ export class ProgressTracker extends EventTarget {
       nextProgress = Math.max(clamp(progress, 0, 1), activity.progress);
 
       if (nextProgress !== activity.progress) {
-        this.announceTotalProgress(activity, nextProgress);
+        this.announceTotalProgress(activity, nextProgress, reason);
       }
 
       return activity.progress;
@@ -111,7 +112,7 @@ export class ProgressTracker extends EventTarget {
   }
 
   private announceTotalProgress(
-      updatedActivity: OngoingActivity, nextProgress: number) {
+      updatedActivity: OngoingActivity, nextProgress: number, reason: string) {
     let progressLeft = 0;
     let completedActivities = 0;
 
@@ -122,7 +123,7 @@ export class ProgressTracker extends EventTarget {
       const {progress} = activity;
       progressLeft += 1.0 - progress;
 
-      if (activity.completed === true) {
+      if (activity.completed) {
         completedActivities++;
       }
     }
@@ -140,7 +141,7 @@ export class ProgressTracker extends EventTarget {
         this.totalProgress;
 
     this.dispatchEvent(new CustomEvent<ProgressDetails>(
-        'progress', {detail: {totalProgress}}));
+        'progress', {detail: {totalProgress, reason }}));
 
     if (completedActivities === this.ongoingActivityCount) {
       this.totalProgress = 0.0;
