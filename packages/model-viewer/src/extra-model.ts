@@ -16,6 +16,9 @@
 import {html, ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
 
+import {Model} from './features/scene-graph/model.js';
+// import { toVector3D, Vector3D } from './model-viewer-base.js';
+
 // customElement,
 
 import ModelViewerElementBase from './model-viewer-base.js';
@@ -27,13 +30,26 @@ import ModelViewerElementBase from './model-viewer-base.js';
 // @customElement('extra-model')
 export class ExtraModelElement extends ReactiveElement {
   @property({type: String}) src: string|null = null;
+  @property({type: Boolean}) loaded: boolean|null = null;
+  @property({type: Model}) model: Object|null = null;
+  @property({type: Object}) availableVariants: string[]|null = null;
+
+  /*
+  getDimensions(): Vector3D {
+    return toVector3D(this.orientation);
+  }*/
 
   render() {
+    console.log('extra model render')
     return html`<slot> </slot>`;
   }
-
+  constructor() {
+    super();
+    console.log('extra model constructor')
+  }
   connectedCallback() {
     // Get the parent <model-viewer> element
+    console.log('extra model connected callback')
     const modelViewer = this.closest('model-viewer') as ModelViewerElementBase;
     if (modelViewer) {
       // Add this extra model to the scene
