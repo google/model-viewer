@@ -1,0 +1,5 @@
+commit d7af23135e06af14db98963da8097770652ec440
+Author: Emmett Lalish <elalish@google.com>
+Date:   Thu Oct 24 15:58:21 2024 -0700
+
+    update CDN to v4.0 (#4920)

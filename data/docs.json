@@ -1,0 +1,1162 @@
+[
+  {
+    "Title": "Loading",
+    "htmlName": "loading",
+    "Attributes": [
+      {
+        "name": "src",
+        "htmlName": "src",
+        "description": "The URL to the 3D model. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported.",
+        "links": [
+          "<a href=\"../examples/loading\">Related examples</a>"
+        ],
+        "default": {
+          "default": "empty string",
+          "options": "any legal URL"
+        }
+      },
+      {
+        "name": "alt",
+        "htmlName": "alt",
+        "description": "Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.",
+        "links": [
+          "<a href=\"../examples/loading\">Related examples</a>"
+        ],
+        "default": {
+          "default": "empty string",
+          "options": "any description"
+        }
+      },
+      {
+        "name": "poster",
+        "htmlName": "poster",
+        "description": "Displays an image instead of the model, useful for showing the user something before a model is loaded and ready to render.",
+        "links": [
+          "<a href=\"../examples/loading\">Related examples</a>"
+        ],
+        "default": {
+          "default": "empty string",
+          "options": "any legal URL"
+        }
+      },
+      {
+        "name": "loading",
+        "htmlName": "loading",
+        "description": "An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for <span class='attribute'>reveal=\"auto\"</span>, and when interacted with for <span class='attribute'>reveal=\"interaction\"</span>. Eager loads the model immediately.",
+        "links": [
+          "<a href=\"../examples/loading\">Related examples</a>"
+        ],
+        "default": {
+          "default": "auto",
+          "options": "auto, lazy, eager"
+        }
+      },
+      {
+        "name": "reveal",
+        "htmlName": "reveal",
+        "description": "This attribute controls when the model should be revealed. If <span class='attribute'>reveal</span> is set to \"auto\", the model will be revealed as soon as it is done loading and rendering. If <span class='attribute'>reveal</span> is set to \"manual\", the model will remain hidden until <span class='attribute'>dismissPoster()</span> is called.",
+        "links": [
+          "<a href=\"../examples/loading\">Related examples</a>"
+        ],
+        "default": {
+          "default": "auto",
+          "options": "auto, manual"
+        }
+      },
+      {
+        "name": "with-credentials",
+        "htmlName": "withCredentials",
+        "description": "This attribute makes the browser include credentials (cookies, authorization headers or TLS client certificates) in the request to fetch the 3D model. It's useful if the 3D model file is stored on another server that require authentication. By default the file will be fetch without credentials. Note that this has no effect if you are loading files locally or from the same domain.",
+        "links": [
+          "<a href=\"https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials\">MDN documentation</a>"
+        ],
+        "default": {
+          "default": "false",
+          "options": "true, false"
+        }
+      },
+      {
+        "name": "a11y",
+        "htmlName": "a11y",
+        "description": "Add unique translations for the model wcag compliance. Use this attribute, you must provide a JSON object with the following keys: front, back, left, right, upper-front, upper-back, upper-left, upper-right, lower-front, lower-back, lower-left, lower-right, interaction-prompt. The values of these keys should be the translations for the model's orientation. This attribute is useful for screen readers and other assistive technologies.",
+        "links": [
+          "<a href=\"../examples/loading/#useA11y\">Related examples</a>"
+        ],
+        "default": {
+          "default": "null",
+          "options": "{&quot;front&quot;: &quot;Front of 3D model&quot;,&quot;back&quot;: &quot;Back of 3D model&quot;,&quot;left&quot;: &quot;Left of 3D model&quot;,&quot;right&quot;: &quot;Right of 3D model&quot;,&quot;upper-front&quot;: &quot;Upper front of 3D model&quot;,&quot;upper-back&quot;: &quot;Upper back of 3D model&quot;,&quot;upper-left&quot;: &quot;Upper left of 3D model&quot;,&quot;upper-right&quot;: &quot;Upper right of 3D model&quot;,&quot;lower-front&quot;: &quot;Lower front of 3D model&quot;,&quot;lower-back&quot;: &quot;Lower back of 3D model&quot;,&quot;lower-left&quot;: &quot;Lower left of 3D model&quot;,&quot;lower-right&quot;: &quot;Lower right of 3D model&quot;,&quot;interaction-prompt&quot;: &quot;'Use mouse, touch or arrow keys to move&quot;}"
+        }
+      }
+    ],
+    "Properties": [
+      {
+        "name": "loaded",
+        "htmlName": "loaded",
+        "description": "This property is read-only. It returns true if the  <span class='attribute'>load</span> event below has fired since the last  <span class='attribute'>src</span> change.",
+        "default": {
+          "default": "N/A",
+          "options": "true, false"
+        }
+      },
+      {
+        "name": "modelIsVisible",
+        "htmlName": "modelIsVisible",
+        "description": "This property, pronounced model-is-visible, is read-only. It returns true if the element is visible on the page (assuming there is an IntersectionObserver) and the  <span class='attribute'>poster</span> has been dismissed. This property is related to the  <span class='attribute'>model-visibility</span> event.",
+        "default": {
+          "default": "N/A",
+          "options": "true, false"
+        }
+      }
+    ],
+    "Static Properties": [
+      {
+        "name": "dracoDecoderLocation",
+        "htmlName": "dracoDecoderLocation",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s DRACO decoder location URL. By default, the DRACO decoder will be loaded from a Google CDN.",
+        "links": [
+          "<a href=\"../examples/loading/#dracoSupport\"><span class='attribute'>dracoDecoderLocation</span> example</a>"
+        ]
+      },
+      {
+        "name": "ktx2TranscoderLocation",
+        "htmlName": "ktx2TranscoderLocation",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s KTX2 transcoder location URL. By default, the KTX2 transcoder will be loaded from a Google CDN.",
+        "links": [
+          "<a href=\"../examples/loading/#ktx2Support\"><span class='attribute'>ktx2TranscoderLocation</span> example</a>"
+        ]
+      },
+      {
+        "name": "meshoptDecoderLocation",
+        "htmlName": "meshoptDecoderLocation",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s Meshopt decoder location URL. By default, the Meshopt decoder is not enabled.",
+        "links": [
+          "<a href=\"../examples/loading/#meshoptSupport\"><span class='attribute'>meshoptDecoderLocation</span> example</a>"
+        ]
+      },
+      {
+        "name": "lottieLoaderLocation",
+        "htmlName": "lottieLoaderLocation",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s LottieLoader location URL. The default URL is <code>https://cdn.jsdelivr.net/npm/three@0.146.0/examples/jsm/loaders/LottieLoader.js</code>. It will also require the server to provide the lottie canvas module at <code>../libs/lottie_canvas.module.js</code>."
+      },
+      {
+        "name": "minimumRenderScale",
+        "htmlName": "minimumRenderScale",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s minimum rendering scale factor as it dynamically changes resolution to maintain framerate. Monitor its behavior with the <a href=\"./#entrydocs-loading-events-renderScale\">render-scale</a> event. Turn off this effect by setting to 1.",
+        "links": [
+          "<a href=\"../examples/loading/#renderScale\">Dynamic Scaling Example</a>"
+        ],
+        "default": {
+          "default": "0.5",
+          "options": "number between 0.25 and 1"
+        }
+      },
+      {
+        "name": "modelCacheSize",
+        "htmlName": "modelCacheSize",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s internal glTF model cache size, controlling number of individual models that should be cached. Note that any number of models may be cached at a given time. This number sets the maximum number of models that can be cached even if they are not being used by a <span class='attribute'>&lt;model-viewer&gt;</span> element in the document. Note also that the cache size is measured in number of glTF models, not bytes! This is important to keep in mind, since any two models may have wildly different byte sizes.",
+        "default": {
+          "default": "5",
+          "options": "any integer >= 0"
+        },
+        "links": [
+          "<a href=\"../examples/loading/#dracoSupport\">Static property usage example</a>"
+        ]
+      },
+      {
+        "name": "powerPreference",
+        "htmlName": "powerPreference",
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s power preference value. Model-viewer sets this property to high-performance if no value is provided.",
+        "default": {
+          "default": "high-performance",
+          "options": "high-performance, low-power, default"
+        }
+      }
+    ],
+    "Methods": [
+      {
+        "name": "dismissPoster()",
+        "htmlName": "dismissPoster",
+        "description": "Dismisses the <span class='attribute'>poster</span>, causing the model to load and render if necessary. This is currently effectively the same as interacting with the <span class='attribute'>poster</span> via user input."
+      },
+      {
+        "name": "showPoster()",
+        "htmlName": "showPoster",
+        "description": "Shows the <span class='attribute'>poster</span>, hiding the model. If this is called after the 3D model has been revealed, then it will behave as though <span class='attribute'>reveal='interaction'</span>, being dismissed either by a user click or a call to dismissPoster()."
+      },
+      {
+        "name": "getDimensions()",
+        "htmlName": "getDimensions",
+        "description": "Returns the model's bounding box dimensions in meters, independent of turntable rotation. The returned object has x, y, and z properties along with a toString() method."
+      },
+      {
+        "name": "getBoundingBoxCenter()",
+        "htmlName": "getBoundingBoxCenter",
+        "description": "Returns the center point of the model's bounding box in meters, independent of turntable rotation. The returned object has x, y, and z properties along with a toString() method."
+      },
+      {
+        "name": "toBlob(options: {mimeType, qualityArgument, idealAspect})",
+        "htmlName": "toBlob",
+        "description": "Returns a promise that resolves into a Blob object in the format specified by the <i>mimeType</i> (defaults to image/png). A Blob object represents a file-like object of immutable, raw data. You can also specify a value between 0 and 1 for <i>qualityArgument</i> (Currently only available on Chrome desktop and Firefox) which defaults to 0.92 and 0.8 for image/png and image/webp respectively. By setting <span class='attribute'>idealAspect</span> to true, the blob will be captured at the ideal poster aspect ratio instead of the canvas aspect ratio. This allows for easy poster creation, where a single poster will match the render seamlessly at any canvas aspect ratio."
+      },
+      {
+        "name": "toDataURL(type, encoderOptions)",
+        "htmlName": "toDataURL",
+        "description": "Returns a screenshot of the current model render in the format specified by <i>type</i> (defaults to image/png). The screenshot is encoded as a data URL string. In formats that support a sliding scale of quality (such as image/jpeg and image/webp) you can also specify a value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i> defaults to 0.92 otherwise)."
+      },
+      {
+        "name": "registerEffectComposer(effectComposer)",
+        "htmlName": "registerEffectComposer",
+        "description": "This method allows you to replace the default rendering with an <a href=\"https://github.com/pmndrs/postprocessing\" target=\"_blank\">EffectComposer</a> renderer stack for this element. Unlike <code>externalRenderer</code>, all glTF and rendering-related portions of our API continue to function normally.<br/><br/>The EffectComposer you provide must implement our <code>EffectComposerInterface</code>, which consists of the following functions: <br/><br/>- <code>render(deltaTime?: number): void</code><br/>- <code>setRenderer(renderer: WebGLRenderer): void</code><br/>- <code>setMainScene(scene: Scene): void</code><br/>- <code>setMainCamera(camera: Camera): void</code><br/>- <code>setSize(width: number, height: number): void</code><br/><br/>Registering your EffectComposer using this method calls <code>setRenderer</code>, <code>setMainScene</code>, and <code>setMainCamera</code>. We will call your <code>render</code> method as we would the regular render method, with deltaTime in milliseconds. We will call your <code>setSize</code> method when the element is resized so your effects are always properly sized."
+      },
+      {
+        "name": "unregisterEffectComposer()",
+        "htmlName": "unregisterEffectComposer",
+        "description": "Switches back to default rendering and stops calling the EffectComposer."
+      },
+      {
+        "name": "registerRenderer(externalRenderer)",
+        "htmlName": "registerRenderer",
+        "description": "This method allows you to replace our entire rendering stack with your own for this element. The glTF-related portions of our API cease to function: ar, lighting, staging, animation, scene-graph. However, loading, camera, and annotations continue to function normally. Note that you are now in charge of your own data, so you can load any type of file you choose, or even generate a scene from script.<br/><br/>The externalRenderer you provide must implement our <code>RendererInterface</code>, which consists of three functions: <br/><br/>- <code>load(progressCallback: (progress: number) => void): Promise&lt;FramingInfo&gt;</code><br/>- <code>render(camera: Camera): void</code><br/>- <code>resize(width: number, height: number): void</code> <br/><br/>The element will call your <code>load</code> method when it would normally load a glTF, lazily by default. Make sure to set the <code>src</code> to something (any string will do) to indicate this is not an empty element. Make sure to call our <code>progressCallback</code> occasionally, which will update our progress bar, and ensure you set a progress value of 1.0 when your pixels are ready to be shown. You must return us a <code>FramingInfo</code> object containing two numbers: <code>framedRadius</code> and <code>fieldOfViewAspect</code> to allow our camera to set its defaults. The <code>framedRadius</code> is the size of the bounding sphere and <code>fieldOfViewAspect</code> is the ideal element aspect ratio to frame the model (1.0 is a good default). <br/><br/>We will call your <code>render</code> method when the camera changes and pass you the <code>Camera</code> object containing <code>viewMatrix: Array&lt;number&gt;</code> and <code>projectionMatrix: Array&lt;number&gt;</code> as 4x4 matrices. Use this to update the rendered pixels in your <a href=\"./#entrydocs-loading-slots-canvas\">canvas slot element</a>. We will call your <code>resize</code> method when the element is resized so you can take coordinated action on your slotted canvas element."
+      },
+      {
+        "name": "unregisterRenderer()",
+        "htmlName": "unregisterRenderer",
+        "description": "Switches back to default rendering of a glTF/GLB src and stops calling any external renderer. Note you must manually remove your own slotted canvas element concurrently."
+      }
+    ],
+    "Static Methods": [
+      {
+        "name": "mapURLs(callback)",
+        "htmlName": "mapURLs",
+        "description": "If provided, the <span class='attribute'>callback</span> will be passed each resource URL before a request is sent. The <span class='attribute'>callback</span> may return the original URL, or a new URL to override loading behavior. This behavior can be used to load assets from .ZIP files, drag-and-drop APIs, and Data URIs."
+      }
+    ],
+    "Events": [
+      {
+        "name": "error",
+        "htmlName": "error",
+        "description": "This event can be triggered for two reasons: a model has failed to load or parse, or the WebGL context was lost. If the model failed to load, event.detail.type will be 'loadfailure'. If the WebGL context was lost, event.detail.type will be 'webglcontextlost'. In both cases, recovery countermeasures are left as an exercise for the user. The element will not make automatic attempts to re-load a model that has failed to load. Nor will the element attempt to restore the GL context after it has been lost. Error events also hold a reference to the originating error event (when there is one) as event.detail.sourceEvent."
+      },
+      {
+        "name": "before-render",
+        "htmlName": "before-render",
+        "description": "Fired when a model is loaded, before the first render frame. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the <span class='attribute'>src</span> attribute is changed."
+      },
+      {
+        "name": "load",
+        "htmlName": "load",
+        "description": "Fired when a model is loaded, after the first render frame. Can fire multiple times per <span class=\"attribute\">&lt;model-viewer&gt;</span> if the <span class='attribute'>src</span> attribute is changed."
+      },
+      {
+        "name": "poster-dismissed",
+        "htmlName": "posterDismissed",
+        "description": "Fires when the poster has fully transitioned away. Additional delay from the \"load\" event can be caused by the renderer compiling its shaders."
+      },
+      {
+        "name": "model-visibility",
+        "htmlName": "modelVisibility",
+        "description": "This event is fired when the visibility of the model changes. When the model is loaded, the element is in the viewport (assuming there is an IntersectionObserver), this event will fire and event.detail.visible will be \"true\"."
+      },
+      {
+        "name": "progress",
+        "htmlName": "progress",
+        "description": "This event fires while a model, environment, skybox, variant, and/or a usdz conversion is loading, during both download and processing. The progress of all of these concurrent tasks will be given by a value between 0 and 1: event.detail.totalProgress. It also provides the reason why the event is fired ('model-load', 'environment-update', 'variant-update', 'usdz-conversion'): event.detail.reason."
+      },
+      {
+        "name": "render-scale",
+        "htmlName": "renderScale",
+        "description": "This event fires when the element is attached to the DOM and whenever the rendered DPR (device pixel ratio) changes, which is generally due to our renderer scaling its resolution to maintain frame rate. The event.detail contains the reportedDpr (window.devicePixelRatio), our renderedDpr (<= reportedDpr), minimumDpr (based on <a href=\"./#entrydocs-loading-staticProperties-minimumRenderScale\">minimumRenderScale</a>), reason ('GPU throttling' or 'No meta viewport tag'), and pixelWidth/pixelHeight (rendered resolution of the element). Everything except the size is identical for all elements on the page since the renderer is shared.",
+        "links": [
+          "<a href=\"../examples/loading/#renderScale\">Dynamic Scaling Example</a>"
+        ]
+      }
+    ],
+    "Parts": [
+      {
+        "name": "default-progress-bar",
+        "htmlName": "defaultProgressBar",
+        "description": "Scope your CSS to <code>model-viewer::part(default-progress-bar)</code> to change the styling of our default progress bar without replacing it wholesale with a slot. Most common would be probably changing the background-color, height, width, and margins (avoid the transform property as that is how the progress is updated)."
+      }
+    ],
+    "Slots": [
+      {
+        "name": "poster",
+        "htmlName": "poster",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"poster\"</span>, this element will replace the default poster, which is white. This <span class='attribute'>poster</span> is shown until the model is loaded and revealed.",
+        "links": [
+          "<a href=\"../examples/loading/#customizeLoad\"><span class='attribute'>poster</span> example</a>"
+        ]
+      },
+      {
+        "name": "progress-bar",
+        "htmlName": "progressBar",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"progress-bar\"</span>, this element will replace the default progress bar, which is a thin bar at the top of the element. Use the progress event to update its style."
+      },
+      {
+        "name": "canvas",
+        "htmlName": "canvas",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"canvas\"</span>, this element will replace the default rendering canvas. This slot is intended only for use with an external renderer, provided with <a href=\"./#entrydocs-loading-methods-registerRenderer\">registerRenderer</a>. This can be any kind of element your renderer draws to, like a WebGL canvas, 2D canvas, or even a streaming video."
+      }
+    ]
+  },
+  {
+    "Title": "Augmented Reality",
+    "htmlName": "augmentedreality",
+    "Attributes": [
+      {
+        "name": "ar",
+        "htmlName": "ar",
+        "description": "Enable the ability to launch AR experiences on supported devices.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "ar-modes",
+        "htmlName": "arModes",
+        "description": "A prioritized list of the types of AR experiences to enable. Allowed values are \"webxr\", to launch the AR experience in the browser, \"scene-viewer\", to launch the <a href=\"https://developers.google.com/ar/develop/java/scene-viewer\">Scene Viewer</a> app, \"quick-look\", to launch the iOS Quick Look app. You can specify any number of modes separated by whitespace. Including quick-look here without an ios-src (our default) will generate a USDZ on the fly rather than downloading a separate ios-src file.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/\">Related examples</a>"
+        ],
+        "default": {
+          "default": "webxr scene-viewer quick-look",
+          "options": "prioritized list possible AR modes: webxr, scene-viewer, and quick-look"
+        }
+      },
+      {
+        "name": "ar-scale",
+        "htmlName": "arScale",
+        "description": "Controls the scaling behavior in AR mode. Set to \"fixed\" to disable scaling of the model, which sets it to always be at 100% scale. Defaults to \"auto\" which allows the model to be resized by pinch.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/\">Related examples</a>"
+        ],
+        "default": {
+          "default": "auto",
+          "options": "auto, fixed"
+        }
+      },
+      {
+        "name": "ar-placement",
+        "htmlName": "arPlacement",
+        "description": "Selects whether to place the object on the floor (horizontal surface) or a wall (vertical surface) in AR. The back (negative Z) of the object's bounding box will be placed against the wall and the shadow will be put on this surface as well. Note that the different AR modes handle the placement UX differently.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#wall\"><span class='attribute'>ar-placement</span> example</a>"
+        ],
+        "default": {
+          "default": "floor",
+          "options": "floor, wall"
+        }
+      },
+      {
+        "name": "ios-src",
+        "htmlName": "iosSrc",
+        "description": "The url to a <a href=\"https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html\">USDZ</a> model which will be used on <a href=\"https://www.apple.com/ios/augmented-reality/\">supported iOS 12+ devices</a> via <a href=\"https://developer.apple.com/videos/play/wwdc2018/603/\">AR Quick Look</a> on Safari. The presence of this attribute will automatically enable the quick-look ar-mode, however it is no longer necessary. If instead the quick-look ar-mode is specified and ios-src is not specified (the default), then we will generate a USDZ on the fly when the AR button is pressed. This means modifications via the scene-graph API will now be reflected in Quick Look. However, USDZ generation is not perfect, for instance animations are not yet supported, so in some cases supplying ios-src may give better results.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#ar\"><span class='attribute'>ios-src</span> example</a>"
+        ]
+      },
+      {
+        "name": "xr-environment",
+        "htmlName": "xrEnvironment",
+        "description": "Enables AR lighting estimation in WebXR mode; this has a performance cost and replaces the lighting selected with <code>environment-image</code> during an AR session. Known issues: sometimes too dark, sudden updates, shiny materials look matte.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#ar\"><span class='attribute'>xr-environment</span> example</a>"
+        ]
+      }
+    ],
+    "CSS": [
+      {
+        "name": "ar-status",
+        "htmlName": "arStatus",
+        "description": "This read-only attribute enables DOM content to be styled based on the status of the WebXR AR presentation. For instance, a prompt for the user to move their phone until the object is successfully placed in their space can be shown by scoping a CSS rule to model-viewer[ar-status=\"session-started\"]. Setting this attribute has no effect.",
+        "default": {
+          "default": "N/A",
+          "options": "not-presenting, session-started, object-placed, failed"
+        },
+        "links": [
+          "<a href=\"../examples/augmentedreality/#webXR\"><span class='attribute'>ar-status</span> example</a>"
+        ]
+      },
+      {
+        "name": "ar-tracking",
+        "htmlName": "arTracking",
+        "description": "This read-only attribute enables DOM content to be styled based on the state of the WebXR AR tracking. For instance, a failure message can be shown by scoping a CSS rule to model-viewer[ar-tracking=\"not-tracking\"]. Setting this attribute has no effect. Most AR tracking failures are due to the camera being covered or seeing little discernable texture",
+        "default": {
+          "default": "N/A",
+          "options": "tracking, not-tracking"
+        },
+        "links": [
+          "<a href=\"../examples/augmentedreality/#webXR\"><span class='attribute'>ar-tracking</span> example</a>"
+        ]
+      }
+    ],
+    "Properties": [
+      {
+        "name": "canActivateAR",
+        "htmlName": "canActivateAR",
+        "description": "This property returns true if the current platform supports AR, otherwise false is returned."
+      }
+    ],
+    "Methods": [
+      {
+        "name": "activateAR()",
+        "htmlName": "activateAR",
+        "description": "Activates AR. Note that this method most likely has to be called synchronous from a user interaction handler or it will most likely be ignored."
+      }
+    ],
+    "Events": [
+      {
+        "name": "ar-status",
+        "htmlName": "arStatus",
+        "description": "Fired when the <span class='attribute'>ar-status</span> attribute above changes. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-status</span> attribute, either 'not-presenting', 'session-started', 'object-placed', or 'failed'. This event is only enabled for WebXR AR sessions, with the exception of 'failed', which will be fired any time AR was initiated but failed to start all of the given modes.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#sceneViewer\"><span class='attribute'>ar-status</span> example</a>"
+        ]
+      },
+      {
+        "name": "ar-tracking",
+        "htmlName": "arTracking",
+        "description": "Fired when the <span class='attribute'>ar-tracking</span> attribute above changes. The event.detail.status property will be set to the same value as the <span class='attribute'>ar-tracking</span> attribute, either 'tracking', or 'not-tracking'. This event is only enabled for WebXR AR sessions.",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#sceneViewer\"><span class='attribute'>ar-tracking</span> example</a>"
+        ]
+      },
+      {
+        "name": "quick-look-button-tapped",
+        "htmlName": "quickLookButtonTapped",
+        "description": "If the user has entered a quick-look AR session on iOS, this event is fired when the action button is tapped. An action button can be defined using URL parameters on the ios-src, see <a href='https://developer.apple.com/documentation/arkit/adding_an_apple_pay_button_or_a_custom_action_in_ar_quick_look'>Apple's documentation</a>."
+      }
+    ],
+    "Parts": [
+      {
+        "name": "default-ar-button",
+        "htmlName": "defaultArButton",
+        "description": "Scope your CSS to <code>model-viewer::part(default-ar-button)</code> to change the styling of our default Enter AR button without replacing it wholesale with a slot. Most common would be probably changing the position or size using transform and margins."
+      },
+      {
+        "name": "default-exit-webxr-ar-button",
+        "htmlName": "defaultExitWebxrArButton",
+        "description": "Scope your CSS to <code>model-viewer::part(default-exit-webxr-ar-button)</code> to change the styling of our default Exit AR button for WebXR mode without replacing it wholesale with a slot. Most common would be probably changing the position or size using transform and margins."
+      }
+    ],
+    "Slots": [
+      {
+        "name": "ar-button",
+        "htmlName": "arButton",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"ar-button\"</span>, this element will replace the default \"Enter AR\" button, which is a <span class=\"attribute\">&lt;model-viewer&gt;</span> icon in the lower right. This button will be visible if AR is potentially available (we will have some false positives until the user tries).",
+        "links": [
+          "<a href=\"../examples/augmentedreality/#customButton\"><span class='attribute'>ar-button</span> example</a>"
+        ]
+      },
+      {
+        "name": "exit-webxr-ar-button",
+        "htmlName": "exitWebxrArButton",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"exit-webxr-ar-button\"</span>, this element will replace the default exit button in WebXR mode only, which is an \"X\" icon in the upper left."
+      }
+    ]
+  },
+  {
+    "Title": "Staging & Cameras",
+    "htmlName": "stagingandcameras",
+    "Attributes": [
+      {
+        "name": "camera-controls",
+        "htmlName": "cameraControls",
+        "description": "Enables controls via mouse/touch. This attribute should nearly always be specified, unless all model motion is being controlled by JavaScript functions.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "disable-pan",
+        "htmlName": "disablePan",
+        "description": "Disables panning interactions, which are enabled by default using two-finger touch, or dragging with right-click or modifier keys."
+      },
+      {
+        "name": "disable-tap",
+        "htmlName": "disableTap",
+        "description": "Disables tap-to-recenter behavior (both center-the-tapped-point and reset-view-when-tapping-outside). This attribute has no effect in combination with 'disable-pan', as the tap-to-recenter behavior is part of the panning interactions. It is recommended to create custom re-centering behavior when using 'disable-tap' as after panning and rotating, it is effectively impossible for the user to exactly return to their starting view.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#panning\">Related example</a>"
+        ]
+      },
+      {
+        "name": "touch-action",
+        "htmlName": "touch-action",
+        "description": "Akin to the CSS touch-action property (which does not work due to some iOS bugs), the default 'pan-y' allows touch users to vertically scroll the <span class=\"attribute\">&lt;model-viewer&gt;</span> element, but can interact if their gesture starts horizontal. Legacy behavior can be achieved with 'none', where all scrolling is prevented, while 'pan-x' is the opposite of 'pan-y'. The normal CSS default 'auto' is not allowed here, as this can be achieved by not including the <span class='attribute'>camera-controls</span> attribute.",
+        "default": {
+          "default": "pan-y",
+          "options": "pan-y, pan-x, none"
+        }
+      },
+      {
+        "name": "disable-zoom",
+        "htmlName": "disable-zoom",
+        "description": "Disables user zoom when <span class=\"attribute\">camera-controls</span> is enabled (has no effect otherwise). Has the secondary effect of not swallowing mouse wheel events and pinch gestures, so these will then scroll and zoom the page, respectively.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#disableZoom\"><span class='attribute'>disable-zoom</span> example</a>"
+        ]
+      },
+      {
+        "name": "orbit-sensitivity",
+        "htmlName": "orbitSensitivity",
+        "description": "Adjusts the speed of theta and phi orbit interactions. Can also be set negative to reverse, which is helpful when using zero radius to look around the inside of a cave-like model.",
+        "default": {
+          "default": "1",
+          "options": "any number"
+        }
+      },
+      {
+        "name": "zoom-sensitivity",
+        "htmlName": "zoomSensitivity",
+        "description": "Adjusts the speed of zoom interactions.",
+        "default": {
+          "default": "1",
+          "options": "any number"
+        }
+      },
+      {
+        "name": "pan-sensitivity",
+        "htmlName": "panSensitivity",
+        "description": "Adjusts the speed of pan interactions.",
+        "default": {
+          "default": "1",
+          "options": "any number"
+        }
+      },
+      {
+        "name": "auto-rotate",
+        "htmlName": "autoRotate",
+        "description": "Enables the auto-rotation of the model.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#cameraTarget\"><span class='attribute'>auto-rotate</span> example</a>"
+        ]
+      },
+      {
+        "name": "auto-rotate-delay",
+        "htmlName": "autoRotateDelay",
+        "description": "Sets the delay before auto-rotation begins. The format of the value is a number in milliseconds.",
+        "default": {
+          "default": "3000",
+          "options": "number >= 0"
+        }
+      },
+      {
+        "name": "rotation-per-second",
+        "htmlName": "rotationPerSecond",
+        "description": "Sets the speed of <span class='attribute'>auto-rotate</span>, when enabled. Accepts values with units in degrees or radians (e.g., \"30deg\" or \"0.5rad\"), as well as percent (e.g. \"-100%\") of the default value of pi/32 radians.",
+        "default": {
+          "default": "pi/32 radians",
+          "options": "angle with units"
+        }
+      },
+      {
+        "name": "interaction-prompt",
+        "htmlName": "interactionPrompt",
+        "description": "Allows you to disable the visual and audible interaction prompt. If set to \"auto\", the interaction prompt will be displayed as soon as the <span class='attribute'>interaction-prompt-threshold</span> (see below) time has elapsed (after the model is revealed). The interaction prompt will only display if <span class='attribute'>camera-controls</span> are enabled.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#changeColor\"><span class='attribute'>interaction-prompt=\"none\"</span> example</a>"
+        ],
+        "default": {
+          "default": "auto",
+          "options": "auto, none"
+        }
+      },
+      {
+        "name": "interaction-prompt-style",
+        "htmlName": "interactionPromptStyle",
+        "description": "Configures the presentation style of the <span class='attribute'>interaction-prompt</span> when it is raised. When set to \"wiggle\", the prompt will animate horizontally and the model will rotate as though the prompt is interacting with it. When set to \"basic\", the prompt is not animated, and instead simply appears until it is dismissed by user interaction.",
+        "default": {
+          "default": "wiggle",
+          "options": "wiggle, basic"
+        }
+      },
+      {
+        "name": "interaction-prompt-threshold",
+        "htmlName": "interactionPromptThreshold",
+        "description": "When <span class='attribute'>camera-controls</span> are enabled, <span class='attribute'>&lt;model-viewer&gt;</span> will prompt the user visually (and audibly, for screen readers) to interact if they focus it but don't interact with it for some time. This attribute allows you to set how long <span class='attribute'>&lt;model-viewer&gt;</span> should wait (in milliseconds) before prompting to interact. Defaults to 3000.",
+        "default": {
+          "default": "3000",
+          "options": "number >= 0"
+        }
+      },
+      {
+        "name": "camera-orbit",
+        "htmlName": "cameraOrbit",
+        "description": "Set the starting and/or subsequent orbital position of the camera. You can control the azimuthal, theta, and polar, phi, angles (phi is measured down from the top), and the radius from the center of the model. Accepts values of the form \"$theta $phi $radius\", like \"10deg 75deg 1.5m\". Also supports units in radians (\"rad\") for angles and centimeters (\"cm\") or millimeters (\"mm\") for camera distance. Camera distance can also be set as a percentage ('%'), where 100% gives the model tight framing within any window based on all possible theta and phi values. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value. Any value set to 'auto' will revert to the default. For camera-orbit, camera-target and field-of-view, parts of the property value can be configured with CSS-like functions. The CSS calc() function is supported for these values, as well as a specialized form of the <span class='attribute'>env()</span> function. You can use env(window-scroll-y) anywhere in the expression to get a number from 0-1 that corresponds to the current top-level scroll position of the current frame. For example, a value like \"calc(30deg - env(window-scroll-y) * 60deg) 75deg 1.5m\" cause the camera to orbit horizontally around the model as the user scrolls down the page.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#cameraOrbit\"><span class='attribute'>camera-orbit</span> example</a>"
+        ],
+        "default": {
+          "default": "0deg 75deg 105%",
+          "options": "$theta $phi $radius"
+        }
+      },
+      {
+        "name": "camera-target",
+        "htmlName": "cameraTarget",
+        "description": "Set the starting and/or subsequent point the camera orbits around. Accepts values of the form \"$X $Y $Z\", like \"0m 1.5m -0.5m\". Also supports units in centimeters (\"cm\") or millimeters (\"mm\"). A special value \"auto\" can be used, which sets the target to the center of the model's bounding box in that dimension. Any time this value changes from its initially configured value, the camera will interpolate from its current position to the new value.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#cameraTarget\"><span class='attribute'>camera-target</span> example</a>"
+        ],
+        "default": {
+          "default": "auto auto auto",
+          "options": "$X $Y $Z"
+        }
+      },
+      {
+        "name": "field-of-view",
+        "htmlName": "fieldOfView",
+        "description": "Used to configure the vertical field of view of the camera. Accepts values in both degrees and radians (e.g., \"30deg\" or \"0.5rad\"). Accepts any value between the configured min and max field of view. Any time this value changes from its initially configured value, the camera will interpolate from its current value to the new value. Defaults to \"auto\", which sets either the vertical or horizontal field of view to 45 degrees depending on the dimensions of the model and the aspect ratio of the canvas.",
+        "default": {
+          "default": "auto",
+          "options": "angle between 0 and 180 degrees"
+        }
+      },
+      {
+        "name": "max-camera-orbit",
+        "htmlName": "maxCameraOrbit",
+        "description": "Set the maximum orbital values of the camera. Takes values in the same form as camera-orbit, but does not support <span class='attribute'>env()</span>. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\". The radius value for \"auto\" is the same as the <span class='attribute'>camera-orbit</span> radius \"auto\" value.",
+        "default": {
+          "default": "Infinity 180deg auto",
+          "options": "$theta $phi $radius"
+        }
+      },
+      {
+        "name": "min-camera-orbit",
+        "htmlName": "minCameraOrbit",
+        "description": "Set the minimum orbital values of the camera. Note \"Infinity\" is not an accepted keyword, but the default can still be obtained by passing \"auto\". The radius value for \"auto\" is a conservative value to ensure the camera never enters the model, so be careful when setting this to another value.",
+        "default": {
+          "default": "-Infinity 0deg auto",
+          "options": "$theta $phi $radius"
+        }
+      },
+      {
+        "name": "max-field-of-view",
+        "htmlName": "maxFieldOfView",
+        "description": "Set the maximum field of view of the camera, corresponding to maximum zoom-out. Takes values in the same form as field-of-view, but does not support <span class='attribute'>env()</span>. The default \"auto\" is the same as the default <span class='attribute'>field-of-view</span>.",
+        "default": {
+          "default": "auto",
+          "options": "angle between 0 and 180 degrees"
+        }
+      },
+      {
+        "name": "min-field-of-view",
+        "htmlName": "minFieldOfView",
+        "description": "Set the minimum field of view of the camera, corresponding to maximum zoom-in. Takes values in the same form as field-of-view, but does not support <span class='attribute'>env()</span>. Set this to a small value to get close zoom-in without the camera entering the model.",
+        "default": {
+          "default": "25deg",
+          "options": "angle between 0 and 180 degrees"
+        }
+      },
+      {
+        "name": "interpolation-decay",
+        "htmlName": "interpolationDecay",
+        "description": "Controls the rate of interpolation when the camera or model moves, due to either user interaction or attribute changes. The decay is asymptotic and the value is in milliseconds, where the majority of the movement will occur within this value's time. Doubling this value will cut the speed in half.",
+        "default": {
+          "default": "50",
+          "options": "values greater than 0"
+        },
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#interpolation\"><span class='attribute'>Interpolation</span> example</a>"
+        ]
+      }
+    ],
+    "Properties": [
+      {
+        "name": "turntableRotation",
+        "htmlName": "turntableRotation",
+        "description": "Returns the orientation of the model's turntable (turned by the <span class='attribute'>auto-rotate</span> setting) in radians counter-clockwise when looking down from above."
+      },
+      {
+        "name": "inputSensitivity",
+        "htmlName": "inputSensitivity",
+        "description": "Multiplier for all user inputs: mouse, touch, and keyboard. Allows for selectively fine control or to make custom interaction prompts move the model less compared to the fingers."
+      }
+    ],
+    "Methods": [
+      {
+        "name": "resetTurntableRotation(theta)",
+        "htmlName": "resetTurntableRotation",
+        "description": "Resets the turntable that rotates the model when <span class='attribute'>auto-rotate</span> is enabled. The new value of the turntable rotation will be theta radians after this method is invoked, but the model may not update until the next render frame. If no argument is supplied, theta defaults to zero."
+      },
+      {
+        "name": "resetInteractionPrompt()",
+        "htmlName": "resetInteractionPrompt",
+        "description": "Typically, the interaction prompt will only display once and then stops displaying after the user interacts with the 3D model for the first time. You can invoke this method in order to reset the interaction prompt after it has already been displayed. Doing so will cause it to display once again when the <span class='attribute'>interaction-prompt</span> display conditions have been met."
+      },
+      {
+        "name": "getCameraOrbit()",
+        "htmlName": "getCameraOrbit",
+        "description": "Returns the realtime orbital position of the camera. The returned object has theta, phi, and radius properties along with a toString() method suitable for putting in the camera-orbit attribute. Azimuthal (theta) and polar (phi) angles are represented as radians, and the distance (radius) is represented in meters. This value may differ from the value configured with the <span class='attribute'>camera-orbit</span> attribute on account of user interaction or camera interpolation.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>getCameraOrbit</span> example</a>"
+        ]
+      },
+      {
+        "name": "getCameraTarget()",
+        "htmlName": "getCameraTarget",
+        "description": "Returns the realtime target position of the camera in meters. The returned object has x, y, and z properties along with a toString() method suitable for putting in the camera-target attribute. This value may differ from the value configured with the camera-target attribute on account of user interaction or camera interpolation.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>getCameraTarget</span> example</a>"
+        ]
+      },
+      {
+        "name": "getFieldOfView()",
+        "htmlName": "getFieldOfView",
+        "description": "Returns the realtime camera vertical field of view in degrees. This value may differ from the value configured with the field-of-view attribute on account of user interaction or camera interpolation."
+      },
+      {
+        "name": "jumpCameraToGoal()",
+        "htmlName": "jumpCameraToGoal",
+        "description": "Changes the camera to its last configured goal state immediately on the next update instead of interpolating the motion over time."
+      },
+      {
+        "name": "updateFraming()",
+        "htmlName": "updateFraming",
+        "description": "Recalculates the camera defaults in case the model has been changed, for instance by the orientation or scale attributes.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\"><span class='attribute'>updateFraming</span> example</a>"
+        ]
+      },
+      {
+        "name": "getMinimumFieldOfView()",
+        "htmlName": "getMinimumFieldOfView",
+        "description": "Returns the minimum camera vertical field of view in degrees."
+      },
+      {
+        "name": "getMaximumFieldOfView()",
+        "htmlName": "getMaximumFieldOfView",
+        "description": "Returns the maximum camera vertical field of view in degrees."
+      },
+      {
+        "name": "getIdealAspect()",
+        "htmlName": "getIdealAspect",
+        "description": "Returns the ideal aspect ratio for the poster image for this model as currently framed."
+      },
+      {
+        "name": "zoom(keyPresses)",
+        "htmlName": "zoom",
+        "description": "Applies the default zoom behavior (a combination of radius and field of view change), mimicking keyboard or mouse wheel inputs. If keyPresses = 1.0, it will zoom in as much as a single keystroke; negative values zoom out."
+      },
+      {
+        "name": "interact(duration, finger0, finger1)",
+        "htmlName": "interact",
+        "description": "Creates a synthetic touch interaction, ideal for creating custom interaction prompts. The duration (ms) and finger0 are required, while finger1 is optional and will create zoom/pan interactions instead of rotation if specified. Any other camera change will automatically cancel this motion and interact() cannot be called while a current synthetic interaction is playing. Each finger input is an object with x and y members, each of which has initialValue and keyframes members. The keyframes are an array of objects with frames and value members. The values are between 0 and 1, spanning the width/height of the element. The frames are a relative unit of time, where their sum is normalized to the duration. Each frame eases in and out between values. Visualize the touch points using the <a href=\"./#entrydocs-stagingandcameras-slots-finger\">finger0/finger1</a> slots.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#customPrompt\"><span class='attribute'>customPrompt</span> example</a>"
+        ]
+      }
+    ],
+    "Events": [
+      {
+        "name": "camera-change",
+        "htmlName": "cameraChange",
+        "description": "Fired when the camera position and/or field of view have changed. If the change occurred due to user interaction, the event.detail.source property will be set to \"user-interaction\". For the interaction-prompt or the interact() method, it will be set to \"automatic\". For other API camera changes, it is set to \"none\"."
+      },
+      {
+        "name": "interact-stopped",
+        "htmlName": "interactStopped",
+        "description": "Fired when the <a href=\"./#entrydocs-stagingandcameras-methods-interact\">interact()</a> motion stops. You can tell it completed by checking that event.detail.source is set to \"automatic\", while it was canceled early if the source is \"user-interaction\" or \"none\" (for JS camera changes)."
+      }
+    ],
+    "Slots": [
+      {
+        "name": "interaction-prompt",
+        "htmlName": "interactionPrompt",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"interaction-prompt\"</span>, this element will replace the default hand icon which wiggles back and forth with the model until the user interacts."
+      },
+      {
+        "name": "finger0/finger1",
+        "htmlName": "finger",
+        "description": "Use in combination with <a href=\"./#entrydocs-stagingandcameras-methods-interact\">interact()</a> to specify an HTML element to represent each moving touch point. By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"finger0\"</span>, this element will appear and move along the path specified in the finger0 input of the interact() method, and similarly for finger1. Empty by default.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#customPrompt\"><span class='attribute'>customPrompt</span> example</a>"
+        ]
+      },
+      {
+        "name": "pan-target",
+        "htmlName": "panTarget",
+        "description": "By placing a child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with <span class=\"attribute\">slot=\"pan-target\"</span>, this element will replace the small default circle that appears when the user is panning to indicate the camera's target."
+      }
+    ]
+  },
+  {
+    "Title": "Annotations",
+    "htmlName": "annotations",
+    "CSS": [
+      {
+        "name": "--min-hotspot-opacity",
+        "htmlName": "minHotspotOpacity",
+        "description": "Sets the opacity of hidden hotspots.",
+        "links": [
+          "<a href=\"../examples/annotations/\">Related examples</a>"
+        ],
+        "default": {
+          "default": "0.25",
+          "options": "any value between 0 and 1"
+        }
+      },
+      {
+        "name": "--max-hotspot-opacity",
+        "htmlName": "maxHotspotOpacity",
+        "description": "Sets the opacity of visible hotspots.",
+        "default": {
+          "default": "1",
+          "options": "any value between 0 and 1"
+        }
+      }
+    ],
+    "Methods": [
+      {
+        "name": "updateHotspot({name, position?, normal?, surface?})",
+        "htmlName": "updateHotspot",
+        "description": "Updates the position, norma, and/or surface of the hotspot associated with <span class='attribute'>slot=\"name\"</span>. The position, normal, and surface are given in the same string format as the hotspot attributes <span class='attribute'>data-position</span>,  <span class='attribute'>data-normal</span>, and <span class='attribute'>data-surface</span> from the slot <a href=\"#annotations-slots\">definition</a>."
+      },
+      {
+        "name": "queryHotspot(name)",
+        "htmlName": "queryHotspot",
+        "description": "Returns information about the current state of the hotspot corresponding to the hotspot name as a snapshot: the position, normal, canvasPosition, and facingCamera. The canvas position is represented as a Vector3D with z as the OpenGL depth information. The function returns null if no hotspot is found.",
+        "links": [
+          "<a href=\"../examples/annotations/#dimensions\"><span class='attribute'>dimension lines</span> example</a>"
+        ]
+      },
+      {
+        "name": "positionAndNormalFromPoint(clientX, clientY)",
+        "htmlName": "positionAndNormalFromPoint",
+        "description": "Returns the world position, normal and texture coordinate of the point on the mesh corresponding to the input pixel coordinates given relative to the screen. The position and normal are returned as Vector3D, which has a method toString() that outputs a format suitable for putting in a hotspot's <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes. The texture coordinate is returned as Vector2D, which has also a own toString() method. The function returns null if no object is hit.",
+        "links": [
+          "<a href=\"../examples/stagingandcameras/#panning\"><span class='attribute'>positionAndNormalFromPoint</span> example</a>"
+        ]
+      },
+      {
+        "name": "surfaceFromPoint(clientX, clientY)",
+        "htmlName": "surfaceFromPoint",
+        "description": "This method returns a dynamic hotspot ID string of the point on the mesh corresponding to the input pixel coordinates given relative to the model-viewer element. The ID string can be used in the data-surface attribute of the hotspot to make it follow this point on the surface even as the model animates. If the mesh is not hit, the result is null.",
+        "links": [
+          "<a href=\"../examples/annotations/#animatedHotspots\"><span class='attribute'>animated hotspots</span> example</a>"
+        ]
+      }
+    ],
+    "Slots": [
+      {
+        "name": "hotspot-*",
+        "htmlName": "hotspot",
+        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes in model coordinates, in the same format as <span class='attribute'>camera-target</span>. Alternately, the <span class='attribute'>data-surface</span> attribute can be used to instead specify the glTF mesh, primitive, three vertex indices and three barycentric coordinates to specify a surface point that will animate along with the mesh. It is recommended to use the <a href=\"./#entrydocs-annotations-methods-surfaceFromPoint\">surfaceFromPoint</a> method to generate this string interactively. See the <a href=\"../examples/annotations/#animatedHotspots\">annotations example</a> for details."
+      }
+    ]
+  },
+  {
+    "Title": "Lighting & Skybox",
+    "htmlName": "lightingandenv",
+    "Attributes": [
+      {
+        "name": "skybox-image",
+        "htmlName": "skyboxImage",
+        "description": "Sets the background image of the scene. Takes a URL to an <a href=\"https://en.wikipedia.org/wiki/Equirectangular_projection\">equirectangular projection image</a> that's used for the skybox, as well as applied as an environment map on the model. Supports png, hdr, and jpg (including UltraHDR) images. HDR images are strongly recommended to adequately represent lighting, and the UltraHDR JPEG format is particularly recommended for its high compression of HDR data - try it yourself using this free online <a href=\"https://gainmap-creator.monogrid.com\">converter</a>.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "skybox-height",
+        "htmlName": "skyboxHeight",
+        "description": "Causes the skybox to be projected onto the ground plane. The height indicates the camera's distance above the ground and acts to scale the image at ground level to the correct size. Accepts units in meters (\"m\"), centimeters (\"cm\"), or millimeters (\"mm\"). The default value of 0m disables ground projection.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#groundedSkybox\">Related examples</a>"
+        ],
+        "default": {
+          "default": "0m",
+          "options": "any positive value"
+        }
+      },
+      {
+        "name": "environment-image",
+        "htmlName": "environmentImage",
+        "description": "Controls the environmental reflection of the model. Normally if <span class='attribute'>skybox-image</span> is set, that image will also be used for the <span class='attribute'>environment-image</span>. Use <span class='attribute'>environment-image</span> to only set the reflection without affecting the background. If neither is specified, default neutral lighting will be applied. If 'legacy' is specified without a skybox, then our old default environment is applied instead.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#environmentLighting\">Related examples</a>"
+        ],
+        "default": {
+          "default": "empty string",
+          "options": "'neutral', 'legacy', or a URL to a .hdr or .jpg file"
+        }
+      },
+      {
+        "name": "exposure",
+        "htmlName": "exposure",
+        "description": "Controls the exposure of both the model and skybox, for use primarily with HDR environments.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#renderExposure\"><span class='attribute'>exposure</span> example</a>"
+        ],
+        "default": {
+          "default": "1",
+          "options": "any positive value"
+        }
+      },
+      {
+        "name": "tone-mapping",
+        "htmlName": "toneMapping",
+        "description": "Selects the function that compresses the HDR rendering to an SDR image on your screen. ACES is a film industry standard that is commonly used, though it has serious color-accuracy problems. AgX is a new and improved tone mapper seeing broad adoption in film and games. Khronos PBR Neutral ('neutral') is a standard function designed specifically for accurate color reproduction in e-commerce. Our current default is neutral, but prior to v4.0 this default was ACES. The deprecated name commerce is an alias for neutral.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#toneMapping\"><span class='attribute'>tone-mapping</span> example</a>"
+        ],
+        "default": {
+          "default": "neutral",
+          "options": "neutral, aces, agx"
+        }
+      },
+      {
+        "name": "shadow-intensity",
+        "htmlName": "shadowIntensity",
+        "description": "Controls the opacity of the shadow. Set to 0 to turn off the shadow entirely.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#shadows\"><span class='attribute'>shadow</span> example</a>"
+        ],
+        "default": {
+          "default": "0",
+          "options": "any value between 0 and 1"
+        }
+      },
+      {
+        "name": "shadow-softness",
+        "htmlName": "shadowSoftness",
+        "description": "Controls the blurriness of the shadow. Set to 0 for hard shadows. Softness should not be changed every frame as it incurs a performance cost. Softer shadows render faster.",
+        "links": [
+          "<a href=\"../examples/lightingandenv/#shadows\"><span class='attribute'>shadow-softness</span> example</a>"
+        ],
+        "default": {
+          "default": "1",
+          "options": "any value between 0 and 1"
+        }
+      }
+    ],
+    "Methods": [
+      {
+        "name": "hasBakedShadow()",
+        "htmlName": "hasBakedShadow",
+        "description": "Returns true if a baked-in shadow plane appears to be part of this model. These planes are removed from framing calculations and are only rendered if shadow-intensity is zero, to avoid multiple shadows interacting."
+      }
+    ],
+    "Events": [
+      {
+        "name": "environment-change",
+        "htmlName": "environmentChange",
+        "description": "Fired when the environment has changed. If the environment is derived from <span class='attribute'>skybox-image</span> or <span class='attribute'>environment-image</span>, the image will have loaded by the time this event fires."
+      }
+    ]
+  },
+  {
+    "Title": "Animation",
+    "htmlName": "animation",
+    "Attributes": [
+      {
+        "name": "animation-name",
+        "htmlName": "animationName",
+        "description": "Selects an animation to play by name. This animation will play when the <span class='attribute'>.play()</span> method is invoked, or when the <span class='attribute'>&lt;model-viewer&gt;</span> is configured to autoplay. If no <span class='attribute'>animation-name</span> is specified, <span class='attribute'>&lt;model-viewer&gt;</span> always picks the first animation it finds in the model.",
+        "links": [
+          "<a href=\"../examples/animation/#selectingAnimations\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "animation-crossfade-duration",
+        "htmlName": "animationCrossfadeDuration",
+        "description": "When the current animation is changed, <span class='attribute'>&lt;model-viewer&gt;</span> automatically crossfades between the previous and next animations. This attribute controls how long the crossfade is in milliseconds.",
+        "links": [
+          "<a href=\"../examples/animation/#crossFade\">Default behavior example</a>"
+        ],
+        "default": {
+          "default": "300",
+          "options": "any number >= 0"
+        }
+      },
+      {
+        "name": "autoplay",
+        "htmlName": "autoplay",
+        "description": "If this is true and a model has animations, an animation will automatically begin to play when this attribute is set (or when the property is set to true). If no <span class='attribute'>animation-name</span> is specified, plays the first animation.",
+        "links": [
+          "<a href=\"../examples/animation/#autoplay\"><span class='attribute'>autoplay</span> example</a>"
+        ],
+        "default": {
+          "default": "false",
+          "options": "true, false"
+        }
+      }
+    ],
+    "Properties": [
+      {
+        "name": "availableAnimations",
+        "htmlName": "availableAnimations",
+        "description": "This property reports an array of strings, corresponding to animations in the loaded model that can be selected with <span class='attribute'>animation-name</span>."
+      },
+      {
+        "name": "currentTime",
+        "htmlName": "currentTime",
+        "description": "This property reports the current track time of the currently selected animation in seconds. If no animations are available, the value is always 0. This property can be set in order to seek along the timeline of the currently playing animation. For example, if you set it to 0, it will reset an animation to the beginning."
+      },
+      {
+        "name": "timeScale",
+        "htmlName": "timeScale",
+        "description": "This property reports the scaling factor for the animation time. This can be used to slow down, speed up or play backwards animations. For example, if you set it to 0.5, the animation will play at half speed. The default value is 1."
+      },
+      {
+        "name": "duration",
+        "htmlName": "duration",
+        "description": "This property is read-only. It returns the duration of the currently selected animation in seconds. If no animations are available, the value is always 0."
+      },
+      {
+        "name": "paused",
+        "htmlName": "paused",
+        "description": "This property is read-only. It returns true if animations are paused. It returns false if animations are playing. Animations always start paused, and remain so unless the autoplay attribute is set or the <span class='attribute'>.play()</span> method is invoked.",
+        "links": [
+          "<a href=\"../examples/animation/#paused\"><span class='attribute'>paused</span> example</a>"
+        ]
+      }
+    ],
+    "Methods": [
+      {
+        "name": "play(options: {repetitions, pingpong})",
+        "htmlName": "play",
+        "description": "Causes animations to be played. You can specify the number of repetitions of the animation by setting the number of <i>repetitions</i> to any value greater than 0 (defaults to Infinity). Also if you set <i>pingpong</i> to true, alternately playing forward and backward (defaults to false). Use the autoplay attribute if you want animations to be played automatically. If there are no animations, nothing will happen, so make sure that the model is loaded before invoking this method."
+      },
+      {
+        "name": "pause()",
+        "htmlName": "pause",
+        "description": "Causes animations to be paused. If you want to reset the current animation to the beginning, you should also set the <span class='attribute'>currentTime</span> property to 0."
+      }
+    ],
+    "Events": [
+      {
+        "name": "play",
+        "htmlName": "play",
+        "description": "Dispatched when animations begin to play."
+      },
+      {
+        "name": "pause",
+        "htmlName": "pause",
+        "description": "Dispatched when animations are paused. A model always begins in the paused state, so it is worth mentioning that this event will not be dispatched until the the <span class='attribute'>.pause()</span> method is invoked after animations have begun playing."
+      },
+      {
+        "name": "loop",
+        "htmlName": "loop",
+        "description": "Dispatched when the current animation has looped. You can get the loop count with <span class='attribute'>e.detail.count</span>."
+      },
+      {
+        "name": "finished",
+        "htmlName": "finished",
+        "description": "Dispatched when the current animation has finished playing."
+      }
+    ]
+  },
+  {
+    "Title": "Materials & Scene",
+    "htmlName": "scenegraph",
+    "Attributes": [
+      {
+        "name": "variant-name",
+        "htmlName": "variantName",
+        "description": "Selects a model variant by name.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "orientation",
+        "htmlName": "orientation",
+        "description": "Rotates the model to the orientation specified by roll, pitch, yaw Euler angles, where yaw is first applied about the Y-axis, then pitch about the new local X-axis (positive is front-down), then roll about the new local Z-axis. If specified before the model loads, automatic camera framing will take this change into account; otherwise the updateFraming() method must be called manually.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
+        ],
+        "default": {
+          "default": "0deg 0deg 0deg",
+          "options": "$roll $pitch $yaw"
+        }
+      },
+      {
+        "name": "scale",
+        "htmlName": "scale",
+        "description": "Scales the model as specified in the X, Y, and Z directions. Scale is applied before orientation. If specified before the model loads, automatic camera framing will take this change into account; otherwise the updateFraming() method must be called manually.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#transforms\">Related example</a>"
+        ],
+        "default": {
+          "default": "1 1 1",
+          "options": "$x $y $z"
+        }
+      }
+    ],
+    "Properties": [
+      {
+        "name": "availableVariants",
+        "htmlName": "availableVariants",
+        "description": "This property reports an array of strings, corresponding to variants in the loaded model that can be selected with <span class='attribute'>variant-name</span>.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#variants\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "model",
+        "htmlName": "model",
+        "description": "This object contains all the methods for the materials API. See examples for usage.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#pickMaterialExample\">API definition</a>"
+        ]
+      },
+      {
+        "name": "originalGltfJson",
+        "htmlName": "originalGltfJson",
+        "description": "Returns a readonly copy of the GLTF JSON object as loaded. Changing this object has no affect on the scene and changes made through the materials API are not reflected here. This object is useful for reverting individual changes made through the materials API."
+      }
+    ],
+    "Methods": [
+      {
+        "name": "exportScene(options)",
+        "htmlName": "exportScene",
+        "description": "Exports the model in glTF or GLB formats. Returns a promise that resolves in a Blob of type \"application/octet-stream\" or \"application/json\" depending on the export format. For a list of parameters see <a href='https://threejs.org/docs/index.html#examples/en/exporters/GLTFExporter.parse'> GLTF exporter</a> documentation, with the exception that all animations are automatically exported and truncateDrawRange defaults to true.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#exporter\">Related examples</a>"
+        ]
+      },
+      {
+        "name": "materialFromPoint(clientX, clientY)",
+        "htmlName": "materialFromPoint",
+        "description": "Returns a material whose mesh primitive intersects with a ray created from the input pixel coordinates relative to the screen. Returns the material whose mesh is nearest the camera.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#pickMaterialExample\">Material picking example</a>"
+        ]
+      },
+      {
+        "name": "createTexture(uri, type?)",
+        "htmlName": "createTexture",
+        "description": "Async method that returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The uri is required, but the type defaults to 'image/png', which only designates the export format for saving a GLB. The mimetypes 'image/jpeg' and 'image/webp' are also supported.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#createTexturesExample\">Create texture example</a>"
+        ]
+      },
+      {
+        "name": "createVideoTexture(uri)",
+        "htmlName": "createVideoTexture",
+        "description": "Returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The video element created is available through <code>texture.source.element</code> for controlling playback.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#animatedTexturesExample\">Create animated textures example</a>"
+        ]
+      },
+      {
+        "name": "createCanvasTexture()",
+        "htmlName": "createCanvasTexture",
+        "description": "Returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The 2D canvas element created is available through <code>texture.source.element</code>; simply get the 2d context and draw as desired, then call <code>texture.source.update()</code>.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#animatedTexturesExample\">Create animated textures example</a>"
+        ]
+      },
+      {
+        "name": "createLottieTexture(uri, quality?)",
+        "htmlName": "createLottieTexture",
+        "description": "Async method that returns a Texture object for use with the <code>setTexture</code> method on <code>TextureInfo</code> objects in the Materials API. The uri to the lottie json is required, while the quality defaults to 1 (resolution specified in the file). The Lottie animation created is available through <code>texture.source.animation</code> for controlling playback. The Lottie canvas module is lazy-loaded like the DRACO decoder and if you don't like our default CDN, you can specify your own location using <a href=\"./#entrydocs-loading-staticProperties-lottieLoaderLocation\">lottieLoaderLocation</a>. Note that an import map is required mapping 'three' to your model-viewer library file in order to load a Lottie, follow the link below for an example.",
+        "links": [
+          "<a href=\"../examples/scenegraph/#animatedTexturesExample\">Create animated textures example</a>"
+        ]
+      }
+    ]
+  }
+]
