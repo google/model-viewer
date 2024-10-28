@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {CameraChangeDetails} from '../../features/controls.js';
 import {ModelViewerElement} from '../../model-viewer.js';

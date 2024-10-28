@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {GLTF} from '../../../three-components/gltf-instance/gltf-2.0.js';
 import {GLTFTreeVisitor} from '../../../three-components/gltf-instance/utilities.js';

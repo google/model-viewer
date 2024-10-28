@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {waitForEvent} from '../../utilities.js';
 import {Activity, ProgressDetails, ProgressTracker} from '../../utilities/progress-tracker.js';
@@ -34,8 +34,7 @@ suite('ProgressTracker', () => {
     const activity = progressTracker.beginActivity(progressReason);
 
     const progressEventDispatches =
-        waitForEvent<CustomEvent<ProgressDetails>>(
-            progressTracker, 'progress');
+        waitForEvent<CustomEvent<ProgressDetails>>(progressTracker, 'progress');
     activity(0.5);
     const event = await progressEventDispatches;
 

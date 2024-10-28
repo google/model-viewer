@@ -15,7 +15,7 @@
  *
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {html, nothing, render} from 'lit';
 
 import {spread} from '../components/utils/spread_directive';

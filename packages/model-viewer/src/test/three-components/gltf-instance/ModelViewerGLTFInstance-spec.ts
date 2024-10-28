@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {BufferGeometry, DoubleSide, Mesh, MeshStandardMaterial} from 'three';
 import {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
 

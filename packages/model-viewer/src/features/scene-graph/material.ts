@@ -64,7 +64,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     return (this[$correlatedObjects] as Set<MeshPhysicalMaterial>)
         .values()
         .next()
-        .value;
+        .value!;
   }
 
   constructor(
@@ -98,7 +98,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
         new PBRMetallicRoughness(onUpdate, correlatedMaterials);
 
     const {normalMap, aoMap, emissiveMap} =
-        correlatedMaterials.values().next().value;
+        correlatedMaterials.values().next().value!;
 
     this[$normalTexture] = new TextureInfo(
         onUpdate,

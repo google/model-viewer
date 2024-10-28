@@ -16,7 +16,7 @@
  */
 
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {renderHotspot, renderHotspots} from '../../../components/utils/hotspot/render_hotspots.js';
 

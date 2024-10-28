@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {MeshStandardMaterial} from 'three/src/materials/MeshStandardMaterial.js';
 import {Mesh} from 'three/src/objects/Mesh.js';
 

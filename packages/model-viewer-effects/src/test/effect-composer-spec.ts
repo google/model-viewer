@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
 import {ModelViewerElement} from '@google/model-viewer';
+import {expect} from 'chai';
 import {DotScreenEffect, Effect, EffectPass, GridEffect} from 'postprocessing';
 import {Camera} from 'three';
 
