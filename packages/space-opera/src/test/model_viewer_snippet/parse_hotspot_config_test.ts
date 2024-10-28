@@ -15,7 +15,7 @@
  *
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {parseHotspotsFromSnippet} from '../../components/model_viewer_snippet/parse_hotspot_config.js';
 

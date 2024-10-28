@@ -18,7 +18,7 @@
 import '../../../components/shared/dropdown/dropdown.js';
 import '@polymer/paper-item';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {html, render} from 'lit';
 
 import {Dropdown} from '../../../components/shared/dropdown/dropdown.js';

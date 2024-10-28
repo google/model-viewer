@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {PerspectiveCamera, Vector3} from 'three';
 
 import {$controls} from '../../features/controls.js';

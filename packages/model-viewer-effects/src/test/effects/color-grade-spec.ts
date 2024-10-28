@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
 import {ModelViewerElement} from '@google/model-viewer';
+import {expect} from 'chai';
 
 import {ColorGradeEffect, EffectComposer} from '../../model-viewer-effects.js';
 import {ArraysAreEqual, assetPath, AverageHSL, CompareArrays, createModelViewerElement, rafPasses, screenshot, waitForEvent} from '../utilities.js';

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {Mesh, MeshStandardMaterial} from 'three';
 
 import {$currentGLTF} from '../../features/scene-graph.js';

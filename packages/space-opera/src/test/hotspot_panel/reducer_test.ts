@@ -16,7 +16,7 @@
  */
 
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {dispatchAddHotspot, dispatchClearHotspot, dispatchRemoveHotspot, dispatchSetHotspots, dispatchUpdateHotspot, generateUniqueHotspotName, getHotspots} from '../../components/hotspot_panel/reducer.js';
 import {reduxStore} from '../../space_opera_base.js';

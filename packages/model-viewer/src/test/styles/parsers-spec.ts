@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {ASTWalker, IdentNode, NumberNode, numberNode, parseExpressions} from '../../styles/parsers.js';
 import {expressionNode, functionNode, hexNode, identNode, operatorNode} from '../helpers.js';

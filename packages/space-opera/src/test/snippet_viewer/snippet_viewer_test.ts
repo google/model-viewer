@@ -17,7 +17,7 @@
 import 'js-beautify/js/lib/beautify-html.js';
 import 'js-beautify/js/lib/beautify-css.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {html} from 'lit';
 
 import {SnippetViewer} from '../../components/shared/snippet_viewer/snippet_viewer.js';

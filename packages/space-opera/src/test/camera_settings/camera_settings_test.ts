@@ -17,7 +17,7 @@
 
 import '../../components/camera_settings/camera_settings.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {CameraSettings, CameraTargetInput} from '../../components/camera_settings/camera_settings.js';
 import {dispatchAutoRotate, dispatchCameraTarget, dispatchSaveCameraOrbit, getConfig} from '../../components/config/reducer.js';

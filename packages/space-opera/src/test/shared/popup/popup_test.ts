@@ -18,7 +18,7 @@
 
 import '../../../components/shared/popup/popup.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {html, render} from 'lit';
 
 import {PopUp} from '../../../components/shared/popup/popup.js';

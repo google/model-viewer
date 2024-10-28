@@ -16,7 +16,7 @@
  */
 
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {HotspotEditorElement} from '../../components/hotspot_panel/hotspot_editor.js';
 import {dispatchAddHotspot, dispatchClearHotspot, getHotspots} from '../../components/hotspot_panel/reducer.js';
