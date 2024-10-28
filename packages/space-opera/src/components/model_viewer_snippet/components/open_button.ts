@@ -258,7 +258,7 @@ export class ImportCard extends LitElement {
     }
 
     if (fileMap.size === 1) {
-      const file = fileMap.values().next().value;
+      const file = fileMap.values().next().value!;
       const filename = file.name.toLowerCase();
       let uri = URL.createObjectURL(file);
       if (filename.match(/\.(hdr)$/)) {

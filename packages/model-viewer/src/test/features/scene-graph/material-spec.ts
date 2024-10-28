@@ -14,7 +14,7 @@
  */
 
 import {expect} from 'chai';
-import {MeshStandardMaterial, Texture as ThreeTexture} from 'three';
+import {Material, MeshStandardMaterial, Texture as ThreeTexture} from 'three';
 
 import {$threeTexture} from '../../../features/scene-graph/image.js';
 import {$lazyLoadGLTFInfo} from '../../../features/scene-graph/material.js';
@@ -164,10 +164,11 @@ suite('scene-graph/material', () => {
 
     test('test alpha cutoff expect disabled by default', async () => {
       await loadModel(HELMET_GLB_PATH);
-      expect(element.model!.materials[0]![$correlatedObjects]
-                 ?.values()
-                 .next()
-                 .value.alphaTest)
+      expect((element.model!.materials[0]![$correlatedObjects]
+                  ?.values()
+                  .next()
+                  .value as Material)
+                 .alphaTest)
           .to.be.equal(0);
     });
 

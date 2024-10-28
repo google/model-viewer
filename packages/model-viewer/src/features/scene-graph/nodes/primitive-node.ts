@@ -137,7 +137,7 @@ export class PrimitiveNode extends Node {
       if (baseMaterial != null) {
         this.mesh.material = baseMaterial;
       } else {
-        this.mesh.material = backingMaterials.values().next().value;
+        this.mesh.material = backingMaterials.values().next().value!;
       }
 
       this.parser.assignFinalMaterial(this.mesh);
@@ -247,7 +247,8 @@ export class PrimitiveNode extends Node {
     const map = this.mesh.userData.variantMaterials! as
         Map<number, UserDataVariantMapping>;
     map.set(variantIndex, {
-      material: materialVariant[$correlatedObjects]!.values().next().value,
+      material: materialVariant[$correlatedObjects]!.values().next().value as
+          ThreeMaterial,
       gltfMaterialIndex: materialVariant.index,
     });
   }

@@ -15,11 +15,11 @@
  *
  */
 
-import { customElement } from 'lit/decorators.js';
+import {TabBase} from '@material/mwc-tab/mwc-tab-base';
+import {styles as baseStyles} from '@material/mwc-tab/mwc-tab.css';
+import {customElement} from 'lit/decorators.js';
 
-import { TabBase } from '@material/mwc-tab/mwc-tab-base';
-import { styles as baseStyles } from '@material/mwc-tab/mwc-tab.css';
-import { tabStyles } from './styles.css';
+import {tabStyles} from './styles.css';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -33,5 +33,11 @@ export class Tab extends TabBase {
   // styles ourselves. M2 MWC has sent out its final release  as they are now
   // focusing on M3 making this safe to override according to:
   // https://lit-and-friends.slack.com/archives/CC0Q3PRCL/p1651599492903519
-  static override styles = [baseStyles, tabStyles];
+  static override styles: any = [
+    baseStyles,
+    tabStyles,
+
+    // This cast is needed because MWC uses Lit 2, while we've updated to Lit 3.
+    // The code is mutually compatible though.
+  ] as typeof TabBase.styles;
 }
