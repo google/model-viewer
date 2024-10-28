@@ -30,7 +30,7 @@
     "@types/http-server": "^0.10.0",
     "@types/pngjs": "^3.4.0",
     "http-server": "^14.1.1",
-    "lit": "^2.7.2",
+    "lit": "^3.2.1",
     "mkdirp": "^3.0.1",
     "pngjs": "^7.0.0",
     "puppeteer": "^23.4.0",

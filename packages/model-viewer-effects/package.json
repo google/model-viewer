@@ -72,7 +72,7 @@
     "filter"
   ],
   "dependencies": {
-    "lit": "^2.2.3",
+    "lit": "^3.2.1",
     "postprocessing": "^6.35.3"
   },
   "peerDependencies": {
