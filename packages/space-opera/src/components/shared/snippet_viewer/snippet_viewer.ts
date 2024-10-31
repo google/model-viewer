@@ -15,7 +15,6 @@
  *
  */
 
-import '@material/mwc-button';
 declare function html_beautify(html: string): string;
 declare function css_beautify(css: string): string;
 import {css, html, LitElement} from 'lit';

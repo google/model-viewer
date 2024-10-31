@@ -16,7 +16,6 @@
  */
 
 import '@polymer/paper-slider';
-import '@material/mwc-textfield';
 
 import {PaperSliderElement} from '@polymer/paper-slider';
 import {html, LitElement} from 'lit';

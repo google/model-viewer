@@ -15,10 +15,7 @@
  *
  */
 
-import '@material/mwc-button';
-import '@material/mwc-dialog';
-import '@material/mwc-icon-button';
-import '@material/mwc-textfield';
+import '@material/web/all.js';
 import '@polymer/paper-item';
 import '@polymer/paper-slider';
 import '../shared/checkbox/checkbox.js';
@@ -36,7 +33,8 @@ import {TextureInfo} from '@google/model-viewer/lib/features/scene-graph/texture
 import {RGB, RGBA} from '@google/model-viewer/lib/model-viewer';
 import {AlphaMode} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-2.0';
 import {GLTF, TextureInfo as GLTFTextureInfo} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
-import {TextField} from '@material/mwc-textfield';
+import {PrimaryTab} from '@material/web/tabs/internal/primary-tab.js';
+import {TextField} from '@material/web/textfield/internal/text-field.js';
 import {PaperListboxElement} from '@polymer/paper-listbox';
 import {html} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
@@ -52,7 +50,6 @@ import {ColorPicker} from '../shared/color_picker/color_picker.js';
 import {InputDialog} from '../shared/dialog/input_dialog';
 import {Dropdown} from '../shared/dropdown/dropdown.js';
 import {SliderWithInputElement} from '../shared/slider_with_input/slider_with_input.js';
-import {TabbedPanel} from '../shared/tabs/tabs.js';
 import {FileDetails, TexturePicker} from '../shared/texture_picker/texture_picker.js';
 import {ALPHA_BLEND_MODES} from '../utils/gltf_constants.js';
 import {checkFinite} from '../utils/reducer_utils.js';
@@ -112,7 +109,7 @@ export class MaterialPanel extends ConnectedLitElement {
   @query('input-dialog#edit-material-name')
   editMaterialNameDialog!: InputDialog;
 
-  @query('mwc-textfield#set-variant-name') setVariantName!: TextField;
+  @query('md-textfield#set-variant-name') setVariantName!: TextField;
 
   stateChanged(state: State) {
     const {originalGltf, thumbnailsById} = getModel(state);
@@ -403,50 +400,27 @@ export class MaterialPanel extends ConnectedLitElement {
             (${id}) ${name}</paper-item>
             `)}
         </me-dropdown>
-        <mwc-icon-button icon="create"
+        <md-icon-button icon="create"
         @click="${() => {
       this.editVariantNameDialog.textFieldValue = '';
       this.editVariantNameDialog.placeholder = this.selectedVariant!;
       this.editVariantNameDialog.open = true;
     }}"
         value="${this.selectedVariant}">
-        </mwc-icon-button>
-        <mwc-icon-button icon="delete"
+        </md-icon-button>
+        <md-icon-button icon="delete"
         @click="${this.deleteCurrentVariant}">
-        </mwc-icon-button>
+        </md-icon-button>
         </div>
-        <mwc-button
+        <md-button
           label="Create Variant"
           id="create-variant"
           @click="${() => {
       this.createVariantNameDialog.open = true;
-    }}"></mwc-button>
+    }}"></md-button>
         </div>
     </me-expandable-tab>
     `;
-  }
-
-  validateInput(textField: TextField): boolean {
-    textField.validityTransform =
-        (value: string, nativeValidity: ValidityState) => {
-          // Validates length.
-          if (value.length < 1) {
-            textField.validationMessage = `Invalid input.`;
-            return {valid: false} as ValidityState;
-          }
-
-          // Verifies name is unique.
-          if (getModelViewer().availableVariants.find((existingNames) => {
-                return existingNames === value;
-              })) {
-            textField.validationMessage = `The name ${value} already exists.`;
-            return {valid: false};
-          }
-
-          return nativeValidity;
-        };
-
-    return textField.reportValidity();
   }
 
   isValidInput(_value: string): {valid: boolean, validationMessage: string} {
@@ -522,13 +496,13 @@ export class MaterialPanel extends ConnectedLitElement {
                     material.name ? material.name :
                                     'Unnamed Material'}</paper-item>`)}
       </me-dropdown>
-      <mwc-icon-button icon="create"
+      <md-icon-button icon="create"
         @click="${() => {
       this.editMaterialNameDialog.textFieldValue = '';
       this.editMaterialNameDialog.placeholder = this.selectedMaterial!.name;
       this.editMaterialNameDialog.open = true;
     }}">
-      </mwc-icon-button>
+      </md-icon-button>
       </div>
     </me-expandable-tab>
     `;
@@ -591,7 +565,7 @@ export class MaterialPanel extends ConnectedLitElement {
   }
 
   onClick = (event) => {
-    if (!(this.parentElement as TabbedPanel).selected) {
+    if (!(this.parentElement as PrimaryTab).selected) {
       return;
     }
     const modelviewer = getModelViewer();
@@ -920,9 +894,9 @@ export class MaterialPanel extends ConnectedLitElement {
       <div class="MRSliders">
         <div class="MRSliderLabel">Metallic factor</div>
         <div class="MRSliderContainer">
-          <mwc-icon-button id="revert-metallic-factor" class="RevertButton" icon="undo"
+          <md-icon-button id="revert-metallic-factor" class="RevertButton" icon="undo"
           title="Revert to original metallic factor"
-          @click=${this.revertMetallicFactor}></mwc-icon-button>
+          @click=${this.revertMetallicFactor}></md-icon-button>
           <me-slider-with-input id="metallic-factor" class="MRSlider" min="0.0" max="1.0"
         step="0.01" @change=${this.onMetallicChange}>
           </me-slider-with-input>
@@ -930,9 +904,9 @@ export class MaterialPanel extends ConnectedLitElement {
 
         <div class="MRSliderLabel">Roughness factor</div>
         <div class="MRSliderContainer">
-          <mwc-icon-button id="revert-roughness-factor" class="RevertButton" icon="undo"
+          <md-icon-button id="revert-roughness-factor" class="RevertButton" icon="undo"
           title="Revert to original roughness factor"
-          @click=${this.revertRoughnessFactor}></mwc-icon-button>
+          @click=${this.revertRoughnessFactor}></md-icon-button>
           <me-slider-with-input id="roughness-factor" class="MRSlider" min="0.0" max="1.0"
           step="0.01" @change=${this.onRoughnessChange}>
           </me-slider-with-input>
@@ -940,9 +914,9 @@ export class MaterialPanel extends ConnectedLitElement {
       </div>
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
+          <md-icon-button class="RevertButton" id="revert-metallic-roughness-texture" icon="undo"
           title="Revert to original metallic roughness texture"
-          @click=${this.revertMetallicRoughnessTexture}></mwc-icon-button>
+          @click=${this.revertMetallicRoughnessTexture}></md-icon-button>
           <me-texture-picker id="metallic-roughness-texture-picker" @texture-changed=${
         this.onMetallicRoughnessTextureChange} @texture-uploaded=${
         this.onMetallicRoughnessTextureUpload} .images=${this.thumbnailUrls}>
@@ -959,9 +933,9 @@ export class MaterialPanel extends ConnectedLitElement {
     <div slot="content">
       <me-section-row label="Factor">
         <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-base-color-factor" icon="undo"
+          <md-icon-button class="RevertButton" id="revert-base-color-factor" icon="undo"
             title="Revert to original base color factor"
-            @click=${this.revertBaseColorFactor}></mwc-icon-button>
+            @click=${this.revertBaseColorFactor}></md-icon-button>
           <me-color-picker id="base-color-picker"
           @change=${this.onBaseColorChange}>
           </me-color-picker>
@@ -969,9 +943,9 @@ export class MaterialPanel extends ConnectedLitElement {
       </me-section-row>
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-base-color-texture" icon="undo"
+          <md-icon-button class="RevertButton" id="revert-base-color-texture" icon="undo"
           title="Revert to original base color texture"
-            @click=${this.revertBaseColorTexture}></mwc-icon-button>
+            @click=${this.revertBaseColorTexture}></md-icon-button>
           <me-texture-picker id="base-color-texture-picker" @texture-changed=${
         this.onBaseColorTextureChange} @texture-uploaded=${
         this.onBaseColorTextureUpload} .images=${
@@ -989,9 +963,9 @@ export class MaterialPanel extends ConnectedLitElement {
     <div slot="content">
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-normal-map-texture" icon="undo"
+          <md-icon-button class="RevertButton" id="revert-normal-map-texture" icon="undo"
           title="Revert to original normal map texture"
-            @click=${this.revertNormalTexture}></mwc-icon-button>
+            @click=${this.revertNormalTexture}></md-icon-button>
           <me-texture-picker id="normal-texture-picker" @texture-changed=${
         this.onNormalTextureChange} @texture-uploaded=${
         this.onNormalTextureUpload} .images=${this.thumbnailUrls}>
@@ -1008,18 +982,18 @@ export class MaterialPanel extends ConnectedLitElement {
     <div slot="content">
       <me-section-row label="Factor">
         <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-emissive-factor" icon="undo"
+          <md-icon-button class="RevertButton" id="revert-emissive-factor" icon="undo"
           title="Revert to original emissive factor"
-          @click=${this.revertEmissiveFactor}></mwc-icon-button>
+          @click=${this.revertEmissiveFactor}></md-icon-button>
           <me-color-picker id="emissive-factor-picker" @change=${
         this.onEmissiveFactorChanged}></me-color-picker>
         </div>
       </me-section-row>
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-emissive-texture" icon="undo"
+          <md-icon-button class="RevertButton" id="revert-emissive-texture" icon="undo"
           title="Revert to original emissive texture"
-          @click=${this.revertEmissiveTexture}></mwc-icon-button>
+          @click=${this.revertEmissiveTexture}></md-icon-button>
           <me-texture-picker id="emissive-texture-picker" @texture-changed=${
         this.onEmissiveTextureChange} @texture-uploaded=${
         this.onEmissiveTextureUpload} .images=${this.thumbnailUrls}>
@@ -1036,9 +1010,9 @@ export class MaterialPanel extends ConnectedLitElement {
     <div slot="content">
       <me-section-row label="Texture">
         <div class="TexturePickerContainer">
-          <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
+          <md-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
           title="Revert to original occlusion texture"
-          @click=${this.revertOcclusionTexture}></mwc-icon-button>
+          @click=${this.revertOcclusionTexture}></md-icon-button>
           <me-texture-picker id="occlusion-texture-picker" @texture-changed=${
         this.onOcclusionTextureChange} @texture-uploaded=${
         this.onOcclusionTextureUpload} .images=${this.thumbnailUrls}>
@@ -1053,9 +1027,9 @@ export class MaterialPanel extends ConnectedLitElement {
     return html`
     <div class="SectionLabel">Alpha Blend Mode:</div>
     <div class="DropdownContainer">
-      <mwc-icon-button class="RevertButton" id="revert-alpha-cutoff" icon="undo"
+      <md-icon-button class="RevertButton" id="revert-alpha-cutoff" icon="undo"
         title="Revert to original alpha mode"
-        @click=${this.revertAlphaMode}></mwc-icon-button>
+        @click=${this.revertAlphaMode}></md-icon-button>
       <me-dropdown class="TopMargin" id="alpha-mode-picker"
         @select=${this.onAlphaModeSelect}>
         ${
@@ -1066,9 +1040,9 @@ export class MaterialPanel extends ConnectedLitElement {
     <div id="alpha-factor-container"}>
       <div class="SectionLabel TopMargin" id="alpha-factor-label">Alpha Factor:</div>
       <div class="MRSliderContainer">
-        <mwc-icon-button class="RevertButton" id="revert-alpha-mode" icon="undo"
+        <md-icon-button class="RevertButton" id="revert-alpha-mode" icon="undo"
           title="Revert to original alpha factor"
-          @click=${this.revertAlphaFactor}></mwc-icon-button>
+          @click=${this.revertAlphaFactor}></md-icon-button>
         <me-slider-with-input class="MRSlider" id="alpha-factor" min="0.0" max="1.0"
         step="0.01" @change=${this.onAlphaFactorChange}></me-slider-with-input>
       </div>
@@ -1076,9 +1050,9 @@ export class MaterialPanel extends ConnectedLitElement {
     <div id="alpha-cutoff-container"}>
       <div class="SectionLabel TopMargin" id="alpha-cutoff-label">Alpha Cutoff:</div>
       <div class="MRSliderContainer">
-        <mwc-icon-button class="RevertButton" id="revert-alpha-mode" icon="undo"
+        <md-icon-button class="RevertButton" id="revert-alpha-mode" icon="undo"
           title="Revert to original alpha cutoff"
-          @click=${this.revertAlphaCutoff}></mwc-icon-button>
+          @click=${this.revertAlphaCutoff}></md-icon-button>
         <me-slider-with-input class="MRSlider" id="alpha-cutoff" min="0.0" max="1.0"
         step="0.01" @change=${this.onAlphaCutoffChange}></me-slider-with-input>
       </div>
@@ -1089,9 +1063,9 @@ export class MaterialPanel extends ConnectedLitElement {
   renderDoubleSidedSection() {
     return html`
       <div class="CheckboxContainer">
-        <mwc-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
+        <md-icon-button class="RevertButton" id="revert-occlusion-texture" icon="undo"
         title="Revert to original double sidedness"
-        @click=${this.revertDoubleSided}></mwc-icon-button>
+        @click=${this.revertDoubleSided}></md-icon-button>
         <me-checkbox id="doubleSidedCheckbox"
           label="Double Sided"
           @change=${this.onDoubleSidedChange}></me-checkbox>

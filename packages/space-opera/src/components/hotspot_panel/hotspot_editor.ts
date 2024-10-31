@@ -17,14 +17,13 @@
 
 import '../shared/expandable_content/expandable_tab.js';
 import '../shared/section_row/section_row.js';
-import '@material/mwc-icon-button';
 
 import {html, LitElement, PropertyValues} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
-
 import {hotspotEditorStyles} from '../../styles.css.js';
+
 import {dispatchRemoveHotspot, dispatchUpdateHotspot} from './reducer.js';
 import {HotspotConfig} from './types.js';
 
@@ -50,9 +49,9 @@ export class HotspotEditorElement extends LitElement {
     <me-section-row label="Label:">
       <textarea id="annotation" @input=${this.onAnnotationInput}>${
         this.config.annotation}</textarea>
-      <mwc-icon-button id="remove-hotspot"
+      <md-icon-button id="remove-hotspot"
         icon="delete"
-        @click="${this.onRemoveHotspot}"></mwc-icon-button>
+        @click="${this.onRemoveHotspot}"></md-icon-button>
     </me-section-row>
     `;
   }

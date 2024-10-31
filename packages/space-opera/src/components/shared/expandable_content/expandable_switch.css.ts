@@ -25,7 +25,7 @@ export const styles: CSSResult = css`.LabeledSwitchContainer {
   margin: 0 16px;
 }
 
-mwc-switch {
+md-switch {
   --mdc-theme-secondary: white;
 }
 

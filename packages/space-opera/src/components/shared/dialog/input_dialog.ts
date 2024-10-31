@@ -15,11 +15,11 @@
  *
  */
 
-import '@material/mwc-textfield';
+import '@material/web/all.js';
 
-import {Button} from '@material/mwc-button';
-import {Dialog} from '@material/mwc-dialog';
-import {TextField} from '@material/mwc-textfield';
+import {Button} from '@material/web/button/internal/button';
+import {Dialog} from '@material/web/dialog/internal/dialog';
+import {TextField} from '@material/web/textfield/internal/text-field';
 import {html, LitElement} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 
@@ -30,7 +30,7 @@ import {customElement, property, query} from 'lit/decorators.js';
  */
 @customElement('input-dialog')
 export class InputDialog extends LitElement {
-  /** Proxies to mwc-checkbox's checked field */
+  /** Proxies to md-checkbox's checked field */
   @property({type: Boolean}) openDialog = false;
   @property({type: Boolean}) modal = false;
   @property({type: String}) placeholder = 'Enter Value';
@@ -39,9 +39,9 @@ export class InputDialog extends LitElement {
   onValidate = (_value: string) => {
     return {valid: true, validationMessage: ''};
   };
-  @query('mwc-textfield') textfield!: TextField;
-  @query('mwc-button') button!: Button;
-  @query('mwc-dialog') inputDialog!: Dialog;
+  @query('md-textfield') textfield!: TextField;
+  @query('md-button') button!: Button;
+  @query('md-dialog') inputDialog!: Dialog;
 
   onClick = () => {
     this.OnOK(this.textfield.value);
@@ -52,7 +52,7 @@ export class InputDialog extends LitElement {
   }
 
   set open(value: boolean) {
-    this.textfield.validationMessage = '';
+    this.textfield.setCustomValidity('');
     this.textfield.value = '';
     this.textfield.placeholder = this.placeholder;
     this.inputDialog.open = value;
@@ -68,39 +68,37 @@ export class InputDialog extends LitElement {
 
   render() {
     return html`
-    <mwc-dialog scrimClickAction="${this.modal ? '' : 'close'}">
-      <mwc-textfield placeholder=${
-        this.placeholder} autoValidate="true"></mwc-textfield>
-      <mwc-button
+    <md-dialog scrimClickAction="${this.modal ? '' : 'close'}">
+      <md-textfield placeholder=${
+        this.placeholder} autoValidate="true"></md-textfield>
+      <md-button
         slot="primaryAction"
         dialogAction="ok"
         disabled="true"
         @click=${this.onClick}>
         Ok
-      </mwc-button>
-      <mwc-button
+      </md-button>
+      <md-button
               slot="secondaryAction"
               dialogAction="cancel">
           Cancel
-      </mwc-button>
-    </mwc-dialog>
+      </md-button>
+    </md-dialog>
      `;
   }
 
   firstUpdated() {
-    const self = this;
-    this.textfield.validityTransform =
-        (value: string, nativeValidity: ValidityState) => {
-          const {valid, validationMessage} = self.onValidate(value);
-          if (!valid) {
-            self.button.disabled = true;
-            this.textfield.validationMessage = validationMessage;
-            return {valid: false};
-          }
-
-          self.button.disabled = false;
-          return nativeValidity;
-        };
+    this.textfield.addEventListener('input', (e: Event) => {
+      const button = e.target as Button;
+      const {valid, validationMessage} = this.onValidate(this.textfield.value);
+      if (!valid) {
+        button.disabled = true;
+        this.textfield.errorText = validationMessage;
+        return {valid: false};
+      }
+      button.disabled = false;
+      return {valid: true, validationMessage: ''};
+    });
   }
 }
 

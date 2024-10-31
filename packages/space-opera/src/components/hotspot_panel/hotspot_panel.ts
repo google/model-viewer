@@ -17,7 +17,6 @@
 
 import '../shared/expandable_content/expandable_tab.js';
 import './hotspot_editor.js';
-import '@material/mwc-button';
 
 import {html} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
@@ -55,9 +54,9 @@ export class HotspotPanel extends ConnectedLitElement {
     ${
         this.addHotspotMode ?
             html`<div> Click on the model in the preview to add a hotspot.</div>` :
-            html`<mwc-button unelevated icon="add_circle"
+            html`<md-button unelevated icon="add_circle"
                 id="add-hotspot" @click="${this.onAddHotspot}">Add hotspot
-      </mwc-button>`}
+      </md-button>`}
     </span>
   </me-expandable-tab>
     `;

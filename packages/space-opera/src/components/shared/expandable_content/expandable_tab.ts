@@ -16,7 +16,6 @@
  */
 
 import './expandable_section.js';
-import '@material/mwc-icon';
 
 import {html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
@@ -40,9 +39,9 @@ export class ExpandableTab extends LitElement {
   render() {
     const stickyClass = this.sticky ? 'sticky' : '';
     const copy = this.copyFunction !== undefined ? html`
-        <mwc-button class="upload" id="uploadButton"
+        <md-button class="upload" id="uploadButton"
           icon="file_copy" @click="${this.copyFunction}">
-        </mwc-button>` :
+        </md-button>` :
                                                    html``;
     const StickyWithLineHeightClass =
         this.copyFunction !== undefined ? '' : 'StickyWithLineHeight';
@@ -92,9 +91,9 @@ export class ExpandableTab extends LitElement {
         <slot name="tooltip"></slot>
       </span>
       <div class="IconArea">
-        <mwc-icon>
+        <md-icon>
         ${this.open ? html`keyboard_arrow_up` : html`keyboard_arrow_down`}
-        </mwc-icon>
+        </md-icon>
       </div>
     </div>
   </div>

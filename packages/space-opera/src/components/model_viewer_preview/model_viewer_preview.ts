@@ -20,8 +20,6 @@
  * settings applied to the GLB.
  */
 
-import '@material/mwc-icon-button';
-
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {html} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
@@ -111,10 +109,10 @@ export class ModelViewerPreview extends ConnectedLitElement {
     const hasModel = !!editedConfig.src;
 
     const refreshMobileButton = this.refreshButtonIsReady === true ? html
-    `<mwc-button icon="cached" @click=${this.forcePost}
+    `<md-button icon="cached" @click=${this.forcePost}
       style="--mdc-theme-primary: #DC143C; border: #DC143C" class="RefreshMobileButton">
       Refresh Mobile
-    </mwc-button>`: html``;
+    </md-button>`: html``;
 
     // Renders elements common between mobile and editor.
     const childElements =
@@ -155,7 +153,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
   private async onModelLoaded() {
     reduxStore.dispatch(await dispatchModel());
     if (this.modelViewer.availableAnimations.length > 0) {
-          reduxStore.dispatch(dispatchAutoplayEnabled(true));
+      reduxStore.dispatch(dispatchAutoplayEnabled(true));
     }
     const config = getConfig(reduxStore.getState());
     reduxStore.dispatch(dispatchConfig({...config}));
@@ -168,35 +166,35 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
   private addHotspot(event: MouseEvent) {
     if (getModelViewer().availableAnimations.length > 0) {
-          const surface =
-              this.modelViewer.surfaceFromPoint(event.clientX, event.clientY);
-          if (!surface) {
-            console.log('Click was not on model, no hotspot added.');
-            return;
-          }
-          reduxStore.dispatch(dispatchAddHotspot({
-            name: generateUniqueHotspotName(),
-            surface,
-          }));
+      const surface =
+          this.modelViewer.surfaceFromPoint(event.clientX, event.clientY);
+      if (!surface) {
+        console.log('Click was not on model, no hotspot added.');
+        return;
+      }
+      reduxStore.dispatch(dispatchAddHotspot({
+        name: generateUniqueHotspotName(),
+        surface,
+      }));
     } else {
-          const point = this.modelViewer.positionAndNormalFromPoint(
-              event.clientX, event.clientY);
-          if (!point) {
-            console.log('Click was not on model, no hotspot added.');
-            return;
-          }
-          reduxStore.dispatch(dispatchAddHotspot({
-            name: generateUniqueHotspotName(),
-            position: point.position.toString(),
-            normal: point.normal.toString()
-          }));
+      const point = this.modelViewer.positionAndNormalFromPoint(
+          event.clientX, event.clientY);
+      if (!point) {
+        console.log('Click was not on model, no hotspot added.');
+        return;
+      }
+      reduxStore.dispatch(dispatchAddHotspot({
+        name: generateUniqueHotspotName(),
+        position: point.position.toString(),
+        normal: point.normal.toString()
+      }));
     }
     reduxStore.dispatch(dispatchUpdateHotspotMode(false));
   }
 
   private onDragover(event: DragEvent) {
     if (!event.dataTransfer)
-          return;
+      return;
 
     event.stopPropagation();
     event.preventDefault();
@@ -207,26 +205,25 @@ export class ModelViewerPreview extends ConnectedLitElement {
     event.preventDefault();
 
     if (event.dataTransfer && event.dataTransfer.items[0].kind === 'file') {
-          const file = event.dataTransfer.items[0].getAsFile();
-          if (!file)
-            return;
-          if (file.name.match(/\.(glb|gltf)$/i)) {
-            const arrayBuffer = await file.arrayBuffer();
-            reduxStore.dispatch(dispatchSetModelName(file.name));
-            const url =
-                createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
-            reduxStore.dispatch(dispatchGltfUrl(url));
-            dispatchConfig(extractStagingConfig(this.config));
-            reduxStore.dispatch(dispatchCameraControlsEnabled(true));
-            reduxStore.dispatch(dispatchSetHotspots([]));
-          }
-          if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
-            const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
-            reduxStore.dispatch(
-                dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
-            reduxStore.dispatch(dispatchEnvironmentImage(unsafeUrl));
-            reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
-          }
+      const file = event.dataTransfer.items[0].getAsFile();
+      if (!file)
+        return;
+      if (file.name.match(/\.(glb|gltf)$/i)) {
+        const arrayBuffer = await file.arrayBuffer();
+        reduxStore.dispatch(dispatchSetModelName(file.name));
+        const url = createSafeObjectUrlFromArrayBuffer(arrayBuffer).unsafeUrl;
+        reduxStore.dispatch(dispatchGltfUrl(url));
+        dispatchConfig(extractStagingConfig(this.config));
+        reduxStore.dispatch(dispatchCameraControlsEnabled(true));
+        reduxStore.dispatch(dispatchSetHotspots([]));
+      }
+      if (file.name.match(/\.(hdr|png|jpg|jpeg)$/i)) {
+        const unsafeUrl = await createBlobUrlFromEnvironmentImage(file);
+        reduxStore.dispatch(
+            dispatchAddEnvironmentImage({uri: unsafeUrl, name: file.name}));
+        reduxStore.dispatch(dispatchEnvironmentImage(unsafeUrl));
+        reduxStore.dispatch(dispatchSetEnvironmentName(file.name));
+      }
     }
   }
 }

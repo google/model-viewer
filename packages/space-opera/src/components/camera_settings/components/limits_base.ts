@@ -15,14 +15,13 @@
  *
  */
 
-import '@material/mwc-button';
 import '../../shared/expandable_content/expandable_tab.js';
 import '../../shared/section_row/section_row.js';
 import '../../shared/slider_with_input/slider_with_input.js';
 import '../../shared/checkbox/checkbox.js';
 
 import {html} from 'lit';
-import {state, query} from 'lit/decorators.js';
+import {query, state} from 'lit/decorators.js';
 
 import {Limits} from '../../config/types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';
@@ -136,9 +135,9 @@ export abstract class LimitsBase extends ConnectedLitElement {
     return html`
     <me-section-row label="${this.minimumLabel}">
       <div class="LabelRowContent">
-        <mwc-button id="set-min-button" class="SetButton" unelevated @click="${
+        <md-button id="set-min-button" class="SetButton" unelevated @click="${
         this.onSetMin}">Set to ${
-        this.currentPreviewValue.toFixed(this.decimalPlaces)}</mwc-button>
+        this.currentPreviewValue.toFixed(this.decimalPlaces)}</md-button>
       </div>
     </me-section-row>
 
@@ -153,9 +152,9 @@ export abstract class LimitsBase extends ConnectedLitElement {
 
     <me-section-row class="MaxLabelRow" label="${this.maximumLabel}">
       <div class="LabelRowContent">
-        <mwc-button id="set-max-button" class="SetButton" unelevated @click="${
+        <md-button id="set-max-button" class="SetButton" unelevated @click="${
         this.onSetMax}">Set to ${
-        this.currentPreviewValue.toFixed(this.decimalPlaces)}</mwc-button>
+        this.currentPreviewValue.toFixed(this.decimalPlaces)}</md-button>
       </div>
     </me-section-row>
 

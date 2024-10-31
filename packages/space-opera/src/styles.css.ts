@@ -124,7 +124,7 @@ export const posterControlsStyles: CSSResult = css`
   padding-left: 30px;
 }
 
-mwc-button {
+md-button {
   --mdc-button-disabled-fill-color: #ddd;
   --mdc-button-disabled-ink-color: #fff;
 }

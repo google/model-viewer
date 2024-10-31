@@ -15,9 +15,9 @@
  *
  */
 
-import '@material/mwc-checkbox';
-import {Checkbox} from '@material/mwc-checkbox';
+import '@material/web/all.js';
 
+import {Checkbox} from '@material/web/checkbox/internal/checkbox.js';
 import {html, LitElement} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 
@@ -30,10 +30,10 @@ import {styles} from './checkbox.css.js';
 export class CheckboxElement extends LitElement {
   static styles = styles;
 
-  /** Proxies to mwc-checkbox's checked field */
+  /** Proxies to md-checkbox's checked field */
   @property({type: Boolean}) checked = false;
   @property({type: String}) label = '';
-  @query('mwc-checkbox') checkbox!: Checkbox;
+  @query('md-checkbox') checkbox!: Checkbox;
 
   // Specifically overriding a super class method.
   // tslint:disable-next-line:enforce-name-casing
@@ -45,8 +45,8 @@ export class CheckboxElement extends LitElement {
 
   render() {
     return html`
-  <mwc-checkbox ?checked="${this.checked}" @change="${
-        this.onCheckedChange}"></mwc-checkbox>
+  <md-checkbox ?checked="${this.checked}" @change="${
+        this.onCheckedChange}"></md-checkbox>
   <div class="Label">
     ${this.label}
   </div>

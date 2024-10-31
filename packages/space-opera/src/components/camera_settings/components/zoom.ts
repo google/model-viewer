@@ -67,10 +67,10 @@ export class ZooomLimits extends ConnectedLitElement {
     </me-checkbox>
     ${
         this.enabled ? html`
-      <mwc-button id="set-min-button" class="SetButton" unelevated
-      @click="${this.dispatchMin}">Set Min</mwc-button>
-      <mwc-button id="set-min-button" class="SetButton" unelevated icon="undo"
-      @click="${this.dispatchResetMin}">Reset Min</mwc-button>
+      <md-button id="set-min-button" class="SetButton" unelevated
+      @click="${this.dispatchMin}">Set Min</md-button>
+      <md-button id="set-min-button" class="SetButton" unelevated icon="undo"
+      @click="${this.dispatchResetMin}">Reset Min</md-button>
     ` :
                        html``}
 `;

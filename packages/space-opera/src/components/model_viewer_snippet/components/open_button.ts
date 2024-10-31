@@ -15,8 +15,6 @@
  *
  */
 
-import '@material/mwc-button';
-
 import {ModelViewerElement} from '@google/model-viewer/lib/model-viewer';
 import {html, LitElement} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
@@ -190,10 +188,10 @@ export class OpenModal extends ConnectedLitElement {
       </div>
     </div>
   <div class="FileModalCancel">
-    <mwc-button unelevated icon="save_alt" class="SaveButton"
-      @click=${this.saveAndClose}>Save</mwc-button>
-    <mwc-button unelevated icon="cancel"
-      @click=${this.close}>Cancel</mwc-button>
+    <md-button unelevated icon="save_alt" class="SaveButton"
+      @click=${this.saveAndClose}>Save</md-button>
+    <md-button unelevated icon="cancel"
+      @click=${this.close}>Cancel</md-button>
   </div>
 </paper-dialog>`;
   }
@@ -346,9 +344,9 @@ export class ImportCard extends LitElement {
         <paper-item value='SpecGlossVsMetalRough'>Water Bottles</paper-item>
         <paper-item value='MacbethBalls'>Macbeth</paper-item>
       </me-dropdown>
-      <mwc-button unelevated label="GLB" icon="file_upload" class="UploadButton">
+      <md-button unelevated label="GLB" icon="file_upload" class="UploadButton">
         <label for="file-input" class="FileInputLabel"/>
-      </mwc-button>
+      </md-button>
       <input type="file" id="file-input" multiple/>
 
     </div>

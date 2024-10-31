@@ -19,7 +19,7 @@ import './components/pitch_limits.js';
 import './components/yaw_limits.js';
 import './components/zoom.js';
 import '../shared/checkbox/checkbox.js';
-import '@material/mwc-button';
+import '@material/web/all.js';
 import '../shared/expandable_content/expandable_tab.js';
 import '../shared/section_row/section_row.js';
 import '../shared/draggable_input/draggable_input.js';
@@ -119,9 +119,9 @@ export class CameraTargetInput extends ConnectedLitElement {
         <me-draggable-input id="camera-target-z" value=${
         this.target.z} min=-9999 max=9999 dragStepSize=0.01 @change=${
         this.onInputChange} innerLabel="Z"></me-draggable-input>
-        <mwc-icon-button class="RevertButton" style="align-self: center; margin-top: -10px;" id="revert" icon="undo"
+        <md-icon-button class="RevertButton" style="align-self: center; margin-top: -10px;" id="revert" icon="undo"
         title="Reset target" @click=${this.resetTarget}>
-        </mwc-icon-button>
+        </md-icon-button>
         `;
   }
 }
@@ -217,7 +217,7 @@ export class CameraSettings extends ConnectedLitElement {
             @change=${this.onCameraOrbitEditorChange}>
           </me-camera-orbit-editor>
           <div style="justify-content: space-between; width: 100%; display: flex;">
-            <mwc-button
+            <md-button
               class="SaveCameraButton"
               id="save-camera-angle"
               unelevated
@@ -225,12 +225,12 @@ export class CameraSettings extends ConnectedLitElement {
               style="align-self: center"
               @click=${this.onSaveCameraOrbit}>
               Save current as initial
-            </mwc-button>
-            <mwc-icon-button class="RevertButton" style="align-self: center; margin-top: 10px;" id="revert" icon="undo"
+            </md-button>
+            <md-icon-button class="RevertButton" style="align-self: center; margin-top: 10px;" id="revert" icon="undo"
             title="Reset initial camera" @click=${this.resetInitialCamera}>
-            </mwc-icon-button>
+            </md-icon-button>
           </div>
-          <mwc-button
+          <md-button
             class="SaveCameraButton"
             id="update-framing"
             unelevated
@@ -238,7 +238,7 @@ export class CameraSettings extends ConnectedLitElement {
             style="align-self: center"
             @click=${this.onUpdateFraming}>
             Reset framing
-          </mwc-button>
+          </md-button>
         </div>
         <div style="font-size: 14px; font-weight: 500; margin-top: 20px">Target Point:</div>
         <me-camera-target-input .change=${this.onCameraTargetChange}>

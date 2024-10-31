@@ -95,7 +95,7 @@
     height: 100%;
   }
 
-  me-tabs {
+  md-tabs {
     background-color: #202124;  /* GOOGLE_GREY_900 */
     padding: 0;
     width: 360px;
@@ -103,11 +103,11 @@
     max-width: 360px;
   }
 
-  me-tabs a {
+  md-tabs a {
     color: #dadcff; /* GOOGLE_GREY_300, but.. bluer */
   }
 
-  me-tabbed-panel {
+  md-primary-tab {
     max-height: calc(100vh - 105px);
     overflow-y: auto;
     display: block;
@@ -138,8 +138,8 @@
         <model-viewer-preview id="editing_adapter">
         </model-viewer-preview>
       </div>
-      <me-tabs>
-        <me-tabbed-panel icon="import_export">
+      <md-tabs>
+        <md-primary-tab icon="import_export">
           <me-export-panel></me-export-panel>
           <div style="margin-bottom: 70px;"></div>
           <div class="privacy">
@@ -148,24 +148,24 @@
               Privacy
             </a>
           </div>
-        </me-tabbed-panel>
-        <me-tabbed-panel icon="create">
+        </md-primary-tab>
+        <md-primary-tab icon="create">
           <me-export-panel header></me-export-panel>
           <me-ibl-selector></me-ibl-selector>
           <me-animation-controls></me-animation-controls>
           <me-hotspot-panel></me-hotspot-panel>
-        </me-tabbed-panel>
-        <me-tabbed-panel icon="photo_camera">
+        </md-primary-tab>
+        <md-primary-tab icon="photo_camera">
           <me-export-panel header></me-export-panel>
           <me-camera-settings></me-camera-settings>
-        </me-tabbed-panel>
-        <me-tabbed-panel icon="color_lens">
+        </md-primary-tab>
+        <md-primary-tab icon="color_lens">
           <me-materials-panel></me-materials-panel>
-        </me-tabbed-panel>
-        <me-tabbed-panel icon="search">
+        </md-primary-tab>
+        <md-primary-tab icon="search">
           <me-inspector-panel></me-inspector-panel>
-        </me-tabbed-panel>
-      </me-tabs>
+        </md-primary-tab>
+      </md-tabs>
     </div>
   </div>
 </model-editor>

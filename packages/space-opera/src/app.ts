@@ -19,7 +19,7 @@
  * @fileoverview Model editor for uploading, parsing, modifying GLTF/GLB files.
  */
 
-import '@material/mwc-button';
+import '@material/web/all.js';
 import '@polymer/paper-dialog/paper-dialog';
 // The order of imports is important, as this is the order in which their
 // stateChanged() methods will be called. We put the preview first to apply

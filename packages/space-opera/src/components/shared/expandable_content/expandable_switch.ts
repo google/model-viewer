@@ -15,10 +15,10 @@
  *
  */
 
-import '@material/mwc-switch';
+import '@material/web/all.js';
 import './expandable_section.js';
-import {Switch} from '@material/mwc-switch';
 
+import {Switch} from '@material/web/switch/internal/switch.js';
 import {html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
@@ -40,8 +40,8 @@ export class ExpandableSwitch extends LitElement {
     <div class="SwitchLabel exportSwitchLabel">
       ${this.label}
     </div>
-    <mwc-switch @change="${this.onChange}">
-    </mwc-switch>
+    <md-switch @change="${this.onChange}">
+    </md-switch>
   </div>
 
   <me-expandable-section ?open=${this.open}>

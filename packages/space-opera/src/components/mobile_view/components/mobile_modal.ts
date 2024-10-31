@@ -16,7 +16,7 @@
  */
 
 import {html} from 'lit';
-import {customElement, state, property, query} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
@@ -72,8 +72,8 @@ export class MobileModal extends ConnectedLitElement {
     </div>
   </div>
   <div class="FileModalCancel">
-    <mwc-button unelevated icon="cancel"
-      @click=${this.close}>Close</mwc-button>
+    <md-button unelevated icon="cancel"
+      @click=${this.close}>Close</md-button>
   </div>
 </paper-dialog>`;
   }

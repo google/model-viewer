@@ -18,19 +18,18 @@
 import {WebIO} from '@gltf-transform/core';
 import {KHRONOS_EXTENSIONS} from '@gltf-transform/extensions';
 import {metalRough} from '@gltf-transform/functions';
+import {GLTF} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
 import {html, LitElement} from 'lit';
 import {customElement, property, query, state} from 'lit/decorators.js';
 
+import {reduxStore} from '../../../space_opera_base.js';
 import {validationStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
 import {dispatchGltfUrl, getModel, getModelViewer} from '../../model_viewer_preview/reducer.js';
 
+import type {Message, Report} from './validation_utils';
 import {resolveExternalResource, validateGltf} from './validation_utils.js';
-
-import type {Report, Message} from './validation_utils';
-import {GLTF} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
-import {reduxStore} from '../../../space_opera_base.js';
 
 @customElement('me-validation-modal')
 export class ValidationModal extends LitElement {
@@ -118,9 +117,9 @@ export class ValidationModal extends LitElement {
 <paper-dialog id="file-modal" modal ?opened=${this.isOpen}>
   <div class="container">
     <div class="cancel">
-      <mwc-button unelevated icon="cancel" @click=${this.close}>
+      <md-button unelevated icon="cancel" @click=${this.close}>
         Close
-      </mwc-button>
+      </md-button>
     </div>
     ${this.renderMetaData()}
     ${
@@ -261,10 +260,10 @@ export class Validation extends ConnectedLitElement {
     ${
         this.severityTitle.length > 0 ? html`
 <div style="font-size: 14px; font-weight: 500; margin: 10px 0px;">Validation Report:</div>
-<mwc-button unelevated style="align-self: center; padding-top: 10px;"
+<md-button unelevated style="align-self: center; padding-top: 10px;"
   @click=${this.onOpen} style="--mdc-theme-primary: ${this.severityColor}">
   ${this.severityTitle}
-</mwc-button>` :
+</md-button>` :
                                         html``}
     ${
         this.report ? html`

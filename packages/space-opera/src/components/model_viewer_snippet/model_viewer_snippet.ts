@@ -15,7 +15,6 @@
  *
  */
 
-import '@material/mwc-button';
 import './components/open_button.js';
 import './components/download_button.js';
 import '../mobile_view/open_mobile_view.js';
@@ -23,7 +22,7 @@ import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
 import {html} from 'lit';
-import {customElement, state, property, query} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {ArConfigState, BestPracticesState, ImageType, INITIAL_STATE, ModelViewerConfig, RelativeFilePathsState, State} from '../../types.js';
@@ -127,9 +126,9 @@ export class ExportPanel extends ConnectedLitElement {
   <div slot="content">
     <snippet-viewer id="snippet-header" .renderedSnippet=${snippet}>
     </snippet-viewer>
-    <mwc-button unelevated @click=${this.onSnippetOpen}>
+    <md-button unelevated @click=${this.onSnippetOpen}>
       Edit Snippet
-    </mwc-button>
+    </md-button>
   </div>
 </me-expandable-tab>
 <me-expandable-tab tabName="File Manager" .open=${true}>

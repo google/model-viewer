@@ -24,7 +24,7 @@ export const styles: CSSResult = css`
   --material-color-google-grey-300: #dadce0;
 }
 
-mwc-checkbox {
+md-checkbox {
   --mdc-theme-secondary: var(--material-color-google-blue-500);
   --mdc-checkbox-unchecked-color: var(--text-on-expandable-background);
   margin: auto 0;

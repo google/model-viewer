@@ -21,7 +21,6 @@ import '../shared/section_row/section_row.js';
 import '../shared/slider_with_input/slider_with_input.js';
 import '../shared/checkbox/checkbox.js';
 import '@polymer/paper-item';
-import '@material/mwc-button';
 
 import {html} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
@@ -167,9 +166,9 @@ export class IblSelector extends ConnectedLitElement {
             environmentImage => html`<paper-item value=${
                 environmentImage.uri}>${environmentImage.name}</paper-item>`)}
             </me-dropdown>
-            <mwc-button unelevated label="HDR" icon="file_upload" class="UploadButton UploadHDRButton">
+            <md-button unelevated label="HDR" icon="file_upload" class="UploadButton UploadHDRButton">
               <label for="imageUpload" class="FileInputLabel"/>
-            </mwc-button>
+            </md-button>
             <input type="file" id="imageUpload" accept=${
         ACCEPT_IMAGE_TYPE} @change="${this.onUploadHDR}"/>
           </div>

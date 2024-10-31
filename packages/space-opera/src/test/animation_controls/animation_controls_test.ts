@@ -79,7 +79,7 @@ suite('animation controls test', () => {
     expect(getConfig(reduxStore.getState()).autoplay).to.be.equal(true);
     const autoplayCheckbox =
         animationControls.autoplayCheckbox!.shadowRoot!.querySelector(
-            'mwc-checkbox')!;
+            'md-checkbox')!;
 
     autoplayCheckbox.click();
     await animationControls.updateComplete;

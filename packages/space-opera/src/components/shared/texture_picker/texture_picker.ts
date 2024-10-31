@@ -15,7 +15,6 @@
  *
  */
 
-import '@material/mwc-button';
 import '../popup/popup.js';
 
 import {html, LitElement} from 'lit';
@@ -97,9 +96,9 @@ export class TexturePicker extends LitElement {
 
   renderTextureUploadButton() {
     return html`
-      <mwc-button unelevated label="IMAGE" id="uploadButton" icon="file_upload">
+      <md-button unelevated label="IMAGE" id="uploadButton" icon="file_upload">
         <label for="texture-input" class="FileInputLabel"/>
-      </mwc-button>
+      </md-button>
       <input type="file" accept=${
         ACCEPT_IMAGE_TYPE} id="texture-input" @change="${
         this.onUploadImage}"/>`;

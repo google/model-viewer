@@ -21,7 +21,7 @@ export const styles: CSSResult = css`.LabelRowContent {
   width: 100%;
 }
 
-mwc-button {
+md-button {
   float: right;
 }
 

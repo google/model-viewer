@@ -46,12 +46,12 @@ export class MobileExpanadableSection extends LitElement {
 
   renderDeployButton(): TemplateResult {
     return html`
-    <mwc-button unelevated
+    <md-button unelevated
       icon="file_download"
       ?disabled=${!this.isDeployable}
       @click=${this.onInitialDeploy}>
         Deploy Mobile
-    </mwc-button>`;
+    </md-button>`;
   }
 
   get optionalMessage(): TemplateResult {
@@ -86,16 +86,16 @@ export class MobileExpanadableSection extends LitElement {
     const outOfSyncColor = isOutOfSync ? '#DC143C' : '#4285F4';
     return html`
     <div>
-      <mwc-button unelevated @click=${
+      <md-button unelevated @click=${
         this.openModal} style="margin-bottom: 10px;">
         View QR Code
-      </mwc-button>
-      <mwc-button unelevated icon="cached" @click=${this.postInfo}
+      </md-button>
+      <md-button unelevated icon="cached" @click=${this.postInfo}
         ?disabled=${
     !this.haveReceivedResponse || this.isSendingData}
         style="--mdc-theme-primary: ${outOfSyncColor}">
         Refresh Mobile
-      </mwc-button>
+      </md-button>
       ${this.optionalMessage}
     </div>
     `;
