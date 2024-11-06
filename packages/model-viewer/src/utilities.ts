@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-import {EventDispatcher} from 'three';
-
 import {HAS_WEBXR_DEVICE_API, HAS_WEBXR_HIT_TEST_API, IS_WEBXR_AR_CANDIDATE} from './constants.js';
 
 export type Constructor<T = object, U = object> = {
@@ -143,13 +141,6 @@ export const isDebugMode = (() => {
        self.location.search.match(debugQueryParameter));
 })();
 
-
-/**
- * Three.js EventDispatcher and DOM EventTarget use different event patterns,
- * so AnyEvent covers the shape of both event types.
- */
-export type AnyEvent = Event|CustomEvent<any>|{[index: string]: string};
-
 export type PredicateFunction<T = void> = (value: T) => boolean;
 
 export const timePasses = (ms: number = 0): Promise<void> =>
@@ -160,16 +151,16 @@ export const timePasses = (ms: number = 0): Promise<void> =>
  * @param {string} eventName
  * @param {?Function} predicate
  */
-export const waitForEvent = <T extends AnyEvent = Event>(
-    target: EventTarget|EventDispatcher,
-    eventName: string,
-    predicate: PredicateFunction<T>|null = null): Promise<T> =>
-    new Promise(resolve => {
-      function handler(event: AnyEvent) {
-        if (!predicate || predicate(event as T)) {
-          resolve(event as T);
-          target.removeEventListener(eventName, handler as any);
-        }
-      }
-      target.addEventListener(eventName, handler as any);
-    });
+export const waitForEvent =
+    <T>(target: any,
+        eventName: string,
+        predicate: PredicateFunction<T>|null = null): Promise<T> =>
+        new Promise(resolve => {
+          function handler(event: T) {
+            if (!predicate || predicate(event)) {
+              resolve(event);
+              target.removeEventListener(eventName, handler);
+            }
+          }
+          target.addEventListener(eventName, handler);
+        });

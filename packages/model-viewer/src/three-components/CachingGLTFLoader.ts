@@ -14,6 +14,7 @@
  */
 
 import {EventDispatcher, Texture, WebGLRenderer} from 'three';
+import {MeshoptDecoder} from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
@@ -68,15 +69,6 @@ const ktx2Loader = new KTX2Loader();
 
 let meshoptDecoderLocation: string;
 let meshoptDecoder: Promise<typeof MeshoptDecoder>|undefined;
-
-interface MeshoptDecoder {
-  ready: Promise<void>;
-  supported: boolean;
-}
-
-declare global {
-  const MeshoptDecoder: MeshoptDecoder;
-}
 
 export const $loader = Symbol('loader');
 export const $evictionPolicy = Symbol('evictionPolicy');
