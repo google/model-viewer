@@ -184,18 +184,14 @@
 
   window.addEventListener("resize", onResize);
 
-  function setVisible(visible) {
+  modelViewer1.addEventListener('ar-status', (event) => {
     lines.forEach((element) => {
-      if (visible) {
+      if (event.detail.status !== 'session-started') {
         element.classList.remove('hide');
       } else {
         element.classList.add('hide');
       }
     });
-  }
-
-  modelViewer1.addEventListener('ar-status', (event) => {
-    setVisible(event.detail.status !== 'session-started');
     onResize();
   });
 
