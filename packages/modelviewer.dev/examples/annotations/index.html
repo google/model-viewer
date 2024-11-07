@@ -184,7 +184,20 @@
 
   window.addEventListener("resize", onResize);
 
-  modelViewer1.addEventListener('ar-status', onResize);
+  function setVisible(visible) {
+    lines.forEach((element) => {
+      if (visible) {
+        element.classList.remove('hide');
+      } else {
+        element.classList.add('hide');
+      }
+    });
+  }
+
+  modelViewer1.addEventListener('ar-status', (event) => {
+    setVisible(event.detail.status !== 'session-started');
+    onResize();
+  });
 
   modelViewer1.addEventListener('load', () => {
     onResize();
