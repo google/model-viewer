@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 
-import { html, ReactiveElement } from 'lit';
-import { property } from 'lit/decorators.js';
-import { Model } from './features/scene-graph/model.js';
+import {html, ReactiveElement} from 'lit';
+import {property} from 'lit/decorators.js';
+
+import {Model} from './features/scene-graph/model.js';
 import ModelViewerElementBase from './model-viewer-base.js';
+
 
 /**
  * Definition for a basic <extra-model> element.
  */
 // @customElement('extra-model')
 export class ExtraModelElement extends ReactiveElement {
-  @property({ type: String }) src: string | null = null;
-  @property({ type: Boolean }) loaded: boolean | null = null;
-  @property({ type: Model }) model: Object | null = null;
-  @property({ type: Array }) availableVariants: string[] | null = null;
+  @property({type: String}) src: string|null = null;
+  @property({type: Boolean}) loaded: boolean|null = null;
+  @property({type: Model}) model: Object|null = null;
+  @property({type: Array}) availableVariants: string[]|null = null;
 
   render() {
     console.log('extra model render')
@@ -37,14 +39,14 @@ export class ExtraModelElement extends ReactiveElement {
     console.log('extra model constructor')
   }
 
-  updated(changedProperties: Map<string | number | symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
-    console.log("updated is called");
+    console.log('updated is called');
     if (changedProperties.has('src')) {
-      console.log("src has changed");
+      console.log('src has changed');
     }
     if (changedProperties.has('availableVariants')) {
-      console.log("availableVariants has changed");
+      console.log('availableVariants has changed');
     }
   }
 
