@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
 import {ModelViewerElement} from '@google/model-viewer';
 import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
+import {expect} from 'chai';
 
 import {$effectComposer} from '../effect-composer.js';
 import {EffectComposer} from '../model-viewer-effects.js';

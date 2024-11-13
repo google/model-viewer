@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {Vector3} from 'three';
 
 import {$needsRender, $scene, toVector3D, Vector2D, Vector3D} from '../../model-viewer-base.js';

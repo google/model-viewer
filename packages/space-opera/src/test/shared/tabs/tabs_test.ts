@@ -18,7 +18,7 @@
 
 import '../../../components/shared/tabs/tabs.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {html, render} from 'lit';
 
 import {Tabs} from '../../../components/shared/tabs/tabs.js';

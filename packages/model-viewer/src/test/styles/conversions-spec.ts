@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {degreesToRadians, lengthToBaseMeters, normalizeUnit, radiansToDegrees} from '../../styles/conversions.js';
 import {numberNode} from '../../styles/parsers.js';

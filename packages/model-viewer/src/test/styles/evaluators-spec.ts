@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {CalcEvaluator, EnvEvaluator, OperatorEvaluator, PercentageEvaluator, SphericalIntrinsics, StyleEvaluator} from '../../styles/evaluators.js';
 import {numberNode} from '../../styles/parsers.js';

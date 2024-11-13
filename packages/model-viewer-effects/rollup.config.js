@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-const { nodeResolve: resolve } = require('@rollup/plugin-node-resolve');
-const replace = require('@rollup/plugin-replace');
-const cleanup = require('rollup-plugin-cleanup');
-const { terser } = require('rollup-plugin-terser');
-const commonjs = require('@rollup/plugin-commonjs');
-const polyfill = require('rollup-plugin-polyfill');
+import commonjs from '@rollup/plugin-commonjs';
+import {nodeResolve as resolve} from '@rollup/plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
+import terser from '@rollup/plugin-terser';
+import cleanup from 'rollup-plugin-cleanup';
 import dts from 'rollup-plugin-dts';
+import polyfill from 'rollup-plugin-polyfill';
 
-const { NODE_ENV } = process.env;
+const {NODE_ENV} = process.env;
 
 const onwarn = (warning, warn) => {
   // Suppress non-actionable warning caused by TypeScript boilerplate:
@@ -30,7 +30,7 @@ const onwarn = (warning, warn) => {
   }
 };
 
-let plugins = [resolve(), replace({ 'Reflect.decorate': 'undefined' })];
+let plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
 
 const watchFiles = ['lib/**'];
 

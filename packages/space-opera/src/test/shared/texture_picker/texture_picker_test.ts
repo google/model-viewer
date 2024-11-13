@@ -18,7 +18,7 @@
 
 import '../../../components/shared/texture_picker/texture_picker.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {FileDetails, TexturePicker} from '../../../components/shared/texture_picker/texture_picker.js';
 import {createSafeObjectURL} from '../../../components/utils/create_object_url.js';

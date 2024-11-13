@@ -174,7 +174,9 @@
   let tailRect;
   
   function onResize(){
-    baseRect = modelViewer1.getBoundingClientRect();
+    const arStatus = modelViewer1.getAttribute('ar-status');
+    baseRect = (arStatus == "not-presenting" || arStatus == "failed") ? 
+      modelViewer1.getBoundingClientRect() : new DOMRect();
     noseRect = document.querySelector('#nose').getBoundingClientRect();
     hoofRect = document.querySelector('#hoof').getBoundingClientRect();
     tailRect = document.querySelector('#tail').getBoundingClientRect();
@@ -182,7 +184,16 @@
 
   window.addEventListener("resize", onResize);
 
-  modelViewer1.addEventListener('ar-status', onResize);
+  modelViewer1.addEventListener('ar-status', (event) => {
+    lines.forEach((element) => {
+      if (event.detail.status !== 'session-started') {
+        element.classList.remove('hide');
+      } else {
+        element.classList.add('hide');
+      }
+    });
+    onResize();
+  });
 
   modelViewer1.addEventListener('load', () => {
     onResize();
