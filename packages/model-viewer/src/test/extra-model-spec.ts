@@ -40,9 +40,10 @@ suite('ExtraModelElement', () => {
   });
 
   suite('with src property', () => {
-    test('set loaded to false at first when src is set', async () => {
+    test('set loaded to true at first when src is set', async () => {
       extraElement.src = assetPath('models/Astronaut.glb');
-      expect(extraElement.loaded).to.be.false;
+      await extraElement.updateComplete;
+      expect(extraElement.loaded).to.be.true;
     });
     test.skip('dispatches a load event when src is set', async () => {
       const sourceLoads = waitForEvent(extraElement, 'load');

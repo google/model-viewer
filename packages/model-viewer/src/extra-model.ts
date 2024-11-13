@@ -44,7 +44,7 @@ export class ExtraModelElement extends ReactiveElement {
     super.updated(changedProperties);
     console.log('updated is called');
     if (changedProperties.has('src')) {
-      this.loaded = false;
+      this.loaded = true;
       console.log('src has changed');
     }
     if (changedProperties.has('availableVariants')) {
