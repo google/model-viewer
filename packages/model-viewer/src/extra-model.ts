@@ -16,8 +16,7 @@
 import {html, ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
 
-// customElement,
-
+import {Model} from './features/scene-graph/model.js';
 import ModelViewerElementBase from './model-viewer-base.js';
 
 
@@ -27,13 +26,34 @@ import ModelViewerElementBase from './model-viewer-base.js';
 // @customElement('extra-model')
 export class ExtraModelElement extends ReactiveElement {
   @property({type: String}) src: string|null = null;
+  @property({type: Boolean}) loaded: boolean|null = null;
+  @property({type: Model}) model: Object|null = null;
+  @property({type: Array}) availableVariants: string[]|null = null;
 
   render() {
+    console.log('extra model render')
     return html`<slot> </slot>`;
+  }
+  constructor() {
+    super();
+    console.log('extra model constructor')
+  }
+
+  updated(changedProperties: Map<string|number|symbol, any>) {
+    super.updated(changedProperties);
+    console.log('updated is called');
+    if (changedProperties.has('src')) {
+      console.log('src has changed');
+    }
+    if (changedProperties.has('availableVariants')) {
+      console.log('availableVariants has changed');
+    }
   }
 
   connectedCallback() {
+    super.connectedCallback();
     // Get the parent <model-viewer> element
+    console.log('extra model connected callback')
     const modelViewer = this.closest('model-viewer') as ModelViewerElementBase;
     if (modelViewer) {
       // Add this extra model to the scene
