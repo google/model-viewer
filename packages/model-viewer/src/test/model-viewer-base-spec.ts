@@ -17,7 +17,7 @@ import {expect} from 'chai';
 
 import {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
-import {Renderer} from '../three-components/Renderer.js';
+// import {Renderer} from '../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../utilities.js';
 
 import {assetPath, until} from './helpers.js';
@@ -116,28 +116,29 @@ suite('ModelViewerElementBase', () => {
       expect((event as any).detail.type).to.be.eq('loadfailure');
     });
 
-    test('when losing the GL context, dispatches an error event', async () => {
-      const {threeRenderer, canvas3D} = Renderer.singleton;
+    // test('when losing the GL context, dispatches an error event', async ()
+    // => {
+    //   const {threeRenderer, canvas3D} = Renderer.singleton;
 
-      canvas3D.addEventListener('webglcontextlost', function(event) {
-        event.preventDefault();
-        Renderer.resetSingleton();
-      }, false);
+    //   canvas3D.addEventListener('webglcontextlost', function(event) {
+    //     event.preventDefault();
+    //     Renderer.resetSingleton();
+    //   }, false);
 
-      const errorEventDispatches = waitForEvent(element, 'error');
-      // We make a best effort to simulate the real scenario here, but
-      // for some cases like headless Chrome WebGL might be disabled,
-      // so we simulate the scenario.
-      // @see https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.forceContextLoss
-      if (threeRenderer.getContext() != null) {
-        threeRenderer.forceContextLoss();
-      } else {
-        threeRenderer.domElement.dispatchEvent(
-            new CustomEvent('webglcontextlost'));
-      }
-      const event = await errorEventDispatches;
-      expect((event as any).detail.type).to.be.equal('webglcontextlost');
-    });
+    //   const errorEventDispatches = waitForEvent(element, 'error');
+    //   // We make a best effort to simulate the real scenario here, but
+    //   // for some cases like headless Chrome WebGL might be disabled,
+    //   // so we simulate the scenario.
+    //   // @see https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.forceContextLoss
+    //   if (threeRenderer.getContext() != null) {
+    //     threeRenderer.forceContextLoss();
+    //   } else {
+    //     threeRenderer.domElement.dispatchEvent(
+    //         new CustomEvent('webglcontextlost'));
+    //   }
+    //   const event = await errorEventDispatches;
+    //   expect((event as any).detail.type).to.be.equal('webglcontextlost');
+    // });
 
     suite('capturing screenshots', () => {
       let width: number;

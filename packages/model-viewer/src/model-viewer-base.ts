@@ -15,7 +15,8 @@
 
 import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
-import {Camera as ThreeCamera, Event as ThreeEvent, Vector2, Vector3, WebGLRenderer} from 'three';
+import {Camera as ThreeCamera, Event as ThreeEvent, Vector2, Vector3} from 'three';
+import {WebGPURenderer} from 'three/webgpu';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {$updateEnvironment} from './features/environment.js';
@@ -119,7 +120,7 @@ export interface Camera {
 }
 
 export interface EffectComposerInterface {
-  setRenderer(renderer: WebGLRenderer): void;
+  setRenderer(renderer: WebGPURenderer): void;
   setMainScene(scene: ModelScene): void;
   setMainCamera(camera: ThreeCamera): void;
   setSize(width: number, height: number): void;

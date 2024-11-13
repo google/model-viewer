@@ -117,9 +117,8 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     threeRenderer.render(scene, camera);
     threeRenderer.setRenderTarget(null);
 
-    const buffer = new Uint8Array(width * height * 4);
-    threeRenderer.readRenderTargetPixels(
-        renderTarget, 0, 0, width, height, buffer);
+    const buffer = await threeRenderer.readRenderTargetPixelsAsync(
+        renderTarget, 0, 0, width, height);
 
     blobCanvas.width = width;
     blobCanvas.height = height;

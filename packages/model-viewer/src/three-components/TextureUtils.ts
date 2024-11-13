@@ -16,6 +16,7 @@
 import {GainMapDecoderMaterial, HDRJPGLoader, QuadRenderer} from '@monogrid/gainmap-js';
 import {BackSide, BoxGeometry, CubeCamera, CubeTexture, DataTexture, EquirectangularReflectionMapping, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, SRGBColorSpace, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
+import {WebGPURenderer} from 'three/webgpu';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
 
@@ -49,7 +50,7 @@ export default class TextureUtils {
   private blurMaterial: ShaderMaterial|null = null;
   private blurScene: Scene|null = null;
 
-  constructor(private threeRenderer: WebGLRenderer) {
+  constructor(private threeRenderer: WebGPURenderer) {
   }
 
   private ldrLoader(withCredentials: boolean): TextureLoader {
@@ -62,7 +63,8 @@ export default class TextureUtils {
 
   private imageLoader(withCredentials: boolean): HDRJPGLoader {
     if (this._imageLoader == null) {
-      this._imageLoader = new HDRJPGLoader(this.threeRenderer);
+      this._imageLoader =
+          new HDRJPGLoader(this.threeRenderer as unknown as WebGLRenderer);
     }
     this._imageLoader.setWithCredentials(withCredentials);
     return this._imageLoader;
@@ -238,7 +240,7 @@ export default class TextureUtils {
     renderer.toneMapping = NoToneMapping;
     renderer.outputColorSpace = LinearSRGBColorSpace;
 
-    cubeCamera.update(renderer, scene);
+    cubeCamera.update(renderer as unknown as WebGLRenderer, scene);
 
     this.blurCubemap(cubeTarget, GENERATED_SIGMA);
 
@@ -341,7 +343,8 @@ export default class TextureUtils {
     blurUniforms['dTheta'].value = radiansPerPixel;
 
     const cubeCamera = new CubeCamera(0.1, 100, targetOut);
-    cubeCamera.update(this.threeRenderer, this.blurScene!);
+    cubeCamera.update(
+        this.threeRenderer as unknown as WebGLRenderer, this.blurScene!);
   }
 
   private getBlurShader(maxSamples: number) {

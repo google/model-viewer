@@ -15,6 +15,7 @@
 
 import {BoxGeometry, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, Mesh, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
+import {WebGPURenderer} from 'three/webgpu';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
 import {$currentBackground, $currentEnvironmentMap} from '../features/environment.js';
@@ -73,7 +74,7 @@ export const ARTracking: {[index: string]: ARTracking} = {
   NOT_TRACKING: 'not-tracking'
 };
 
-export interface ARTrackingEvent extends ThreeEvent {
+export interface ARTrackingEvent extends ThreeEvent{
   status: ARTracking,
 }
 
@@ -81,9 +82,7 @@ interface UserData {
   turning: boolean, box: Mesh, line: Line
 }
 
-interface Controller extends XRTargetRaySpace {
-  userData: UserData
-}
+interface Controller extends XRTargetRaySpace{userData: UserData}
 
 interface XRControllerEvent {
   type: XRControllerEventType, data: XRInputSource, target: Controller
@@ -150,7 +149,7 @@ export class ARRenderer extends EventDispatcher<
 
   constructor(private renderer: Renderer) {
     super();
-    this.threeRenderer = renderer.threeRenderer;
+    this.threeRenderer = renderer.threeRenderer as unknown as WebGLRenderer;
     this.threeRenderer.xr.enabled = true;
   }
 
@@ -1029,7 +1028,7 @@ export class ARRenderer extends EventDispatcher<
         this.renderer.preRender(scene, time, delta);
         this.lastTick = time;
 
-        scene.renderShadow(this.threeRenderer);
+        scene.renderShadow(this.threeRenderer as unknown as WebGPURenderer);
       }
 
       this.threeRenderer.render(scene, scene.getCamera());
