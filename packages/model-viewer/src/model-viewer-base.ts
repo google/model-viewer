@@ -15,8 +15,7 @@
 
 import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
-import {Camera as ThreeCamera, Event as ThreeEvent, Vector2, Vector3} from 'three';
-import {WebGPURenderer} from 'three/webgpu';
+import {Camera as ThreeCamera, Event as ThreeEvent, Vector2, Vector3, WebGLRenderer} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
 import {$updateEnvironment} from './features/environment.js';
@@ -120,7 +119,7 @@ export interface Camera {
 }
 
 export interface EffectComposerInterface {
-  setRenderer(renderer: WebGPURenderer): void;
+  setRenderer(renderer: WebGLRenderer): void;
   setMainScene(scene: ModelScene): void;
   setMainCamera(camera: ThreeCamera): void;
   setSize(width: number, height: number): void;
@@ -480,7 +479,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
    * @param effectComposer An EffectComposer from `pmndrs/postprocessing`
    */
   registerEffectComposer(effectComposer: EffectComposerInterface) {
-    effectComposer.setRenderer(this[$renderer].threeRenderer);
+    effectComposer.setRenderer(
+        this[$renderer].threeRenderer as unknown as WebGLRenderer);
     effectComposer.setMainCamera(this[$scene].getCamera());
     effectComposer.setMainScene(this[$scene]);
     this[$scene].effectRenderer = effectComposer;
