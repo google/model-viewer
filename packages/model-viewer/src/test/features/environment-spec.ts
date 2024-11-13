@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {Texture} from 'three';
 
 import {BASE_OPACITY} from '../../features/environment.js';

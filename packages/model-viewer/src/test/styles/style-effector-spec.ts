@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {parseExpressions} from '../../styles/parsers.js';
 import {EnvironmentState, StyleEffector} from '../../styles/style-effector.js';

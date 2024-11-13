@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import ModelViewerElementBase from '../../model-viewer-base.js';
 import {$evictionPolicy, CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';

@@ -15,7 +15,7 @@
 
 import {ModelViewerElement} from '@google/model-viewer';
 import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
-import {EventDispatcher, HSL} from 'three';
+import {HSL} from 'three';
 
 import {getOwnPropertySymbolValue} from '../utilities.js';
 
@@ -168,12 +168,6 @@ export const createModelViewerElement =
       return element;
     };
 
-/**
- * Three.js EventDispatcher and DOM EventTarget use different event patterns,
- * so AnyEvent covers the shape of both event types.
- */
-export type AnyEvent = Event|CustomEvent<any>|{[index: string]: string};
-
 export type PredicateFunction<T = void> = (value: T) => boolean;
 
 /**
@@ -181,19 +175,19 @@ export type PredicateFunction<T = void> = (value: T) => boolean;
  * @param {string} eventName
  * @param {?Function} predicate
  */
-export const waitForEvent = <T extends AnyEvent = Event>(
-    target: EventTarget|EventDispatcher,
-    eventName: string,
-    predicate: PredicateFunction<T>|null = null): Promise<T> =>
-    new Promise((resolve) => {
-      function handler(event: AnyEvent) {
-        if (!predicate || predicate(event as T)) {
-          resolve(event as T);
-          target.removeEventListener(eventName, handler as any);
-        }
-      }
-      target.addEventListener(eventName, handler as any);
-    });
+export const waitForEvent =
+    <T>(target: any,
+        eventName: string,
+        predicate: PredicateFunction<T>|null = null): Promise<T> =>
+        new Promise((resolve) => {
+          function handler(event: T) {
+            if (!predicate || predicate(event)) {
+              resolve(event);
+              target.removeEventListener(eventName, handler);
+            }
+          }
+          target.addEventListener(eventName, handler);
+        });
 
 export interface TypedArray<T = unknown> {
   readonly BYTES_PER_ELEMENT: number;

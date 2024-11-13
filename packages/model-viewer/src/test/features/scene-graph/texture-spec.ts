@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {Texture as ThreeTexture} from 'three';
 
 import {$threeTexture} from '../../../features/scene-graph/image.js';

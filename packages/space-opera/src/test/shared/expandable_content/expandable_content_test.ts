@@ -18,7 +18,7 @@
 import '../../../components/shared/expandable_content/expandable_section.js';
 import '../../../components/shared/expandable_content/expandable_tab.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 import {html, render} from 'lit';
 
 import {ExpandableSection} from '../../../components/shared/expandable_content/expandable_section.js';

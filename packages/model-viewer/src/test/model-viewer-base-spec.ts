@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {$renderer, $scene, $userInputElement} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';

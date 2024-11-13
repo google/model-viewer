@@ -17,7 +17,7 @@
 
 import '../../components/ibl_selector/ibl_selector.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {dispatchExposure, dispatchShadowIntensity, dispatchShadowSoftness, dispatchUseEnvAsSkybox, getConfig} from '../../components/config/reducer.js';
 import {IblSelector} from '../../components/ibl_selector/ibl_selector.js';

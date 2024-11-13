@@ -174,7 +174,10 @@
       "dimensions": {
         "height": 800,
         "width": 550
-      }
+      },
+      "exclude": [
+        "model-viewer"
+      ]
     },
     {
       "name": "khronos-MosquitoInAmber",
@@ -585,6 +588,7 @@
         "radius": 22.00
       },
       "exclude": [
+        "model-viewer",
         "vray"
       ]
     },
@@ -791,7 +795,7 @@
       "model": "../../../shared-assets/models/glTF-Sample-Assets/Models/RecursiveSkeletons/glTF-Binary/RecursiveSkeletons.glb",
       "orbit": {
         "radius": 120.0,
-        "phi": 5
+        "phi": 22.5
       },
       "target": {
         "y": 95

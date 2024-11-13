@@ -46,7 +46,7 @@ export class PBRMetallicRoughness extends ThreeDOMElement implements
       onUpdate: () => void, correlatedMaterials: Set<MeshPhysicalMaterial>) {
     super(onUpdate, correlatedMaterials);
 
-    const {map, metalnessMap} = correlatedMaterials.values().next().value;
+    const {map, metalnessMap} = correlatedMaterials.values().next().value!;
 
     this[$baseColorTexture] =
         new TextureInfo(onUpdate, TextureUsage.Base, map, correlatedMaterials);

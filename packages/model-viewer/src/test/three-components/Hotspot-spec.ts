@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {Hotspot, HotspotVisibilityDetails} from '../../three-components/Hotspot.js';
 import {waitForEvent} from '../../utilities.js';

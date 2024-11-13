@@ -17,7 +17,7 @@
 
 import '../../../components/shared/color_picker/color_picker.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {ColorPicker} from '../../../components/shared/color_picker/color_picker.js';
 

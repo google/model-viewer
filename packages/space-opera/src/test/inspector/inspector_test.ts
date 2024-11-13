@@ -15,7 +15,7 @@
  *
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {InspectorPanel} from '../../components/inspector/inspector.js';
 import {ModelViewerPreview} from '../../components/model_viewer_preview/model_viewer_preview.js';

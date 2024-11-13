@@ -17,7 +17,7 @@
 
 import '../../../components/shared/color_picker/color_map.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {ColorMap} from '../../../components/shared/color_picker/color_map.js';
 

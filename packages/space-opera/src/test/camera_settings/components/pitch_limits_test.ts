@@ -17,7 +17,7 @@
 
 import '../../../components/camera_settings/components/pitch_limits.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {PitchLimits} from '../../../components/camera_settings/components/pitch_limits.js';
 import {getConfig} from '../../../components/config/reducer.js';

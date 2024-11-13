@@ -17,7 +17,7 @@
 
 import '../../components/animation_controls/animation_controls.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {AnimationControls} from '../../components/animation_controls/animation_controls.js';
 import {dispatchAnimationName, dispatchAutoplayEnabled, getConfig} from '../../components/config/reducer.js';

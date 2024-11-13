@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {TextureInfo} from '../../../features/scene-graph/texture-info.js';
 import {ModelViewerElement} from '../../../model-viewer.js';

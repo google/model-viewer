@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {IS_ANDROID, IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer} from '../../features/ar.js';

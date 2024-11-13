@@ -18,7 +18,7 @@
 
 import '../../../components/shared/slider_with_input/slider_with_input.js';
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {SliderWithInputElement} from '../../../components/shared/slider_with_input/slider_with_input.js';
 

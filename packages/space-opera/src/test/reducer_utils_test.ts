@@ -17,7 +17,7 @@
 
 
 
-import {expect} from '@esm-bundle/chai';
+import {expect} from 'chai';
 
 import {immutableArrayUpdate, immutableMapUpdate} from '../components/utils/reducer_utils.js';
 

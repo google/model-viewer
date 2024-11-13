@@ -26,6 +26,7 @@
  */
 
 import {Material, Mesh, Object3D} from 'three';
+import {GLTFExporterPlugin} from 'three/examples/jsm/Addons.js';
 
 import {VariantData} from '../../features/scene-graph/model.js';
 
@@ -61,7 +62,8 @@ const compatibleMaterial = (material: Material|null) => {
   return material && material.isMaterial && !Array.isArray(material);
 };
 
-export default class GLTFExporterMaterialsVariantsExtension {
+export default class GLTFExporterMaterialsVariantsExtension implements
+    GLTFExporterPlugin {
   writer: any;  // @TODO: Replace with GLTFWriter when GLTFExporter plugin TS
                 // declaration is ready
   name: string;
@@ -73,32 +75,38 @@ export default class GLTFExporterMaterialsVariantsExtension {
     this.variantNames = [];
   }
 
-  beforeParse(objects: Object3D[]) {
+  beforeParse(objects: Object3D|Object3D[]) {
     // Find all variant names and store them to the table
     const variantNameSet = new Set<string>();
-    for (const object of objects) {
-      object.traverse(o => {
-        if (!compatibleObject(o)) {
-          return;
+
+    const addVariantNames = (o: Object3D) => {
+      if (!compatibleObject(o)) {
+        return;
+      }
+      const variantMaterials =
+          o.userData.variantMaterials as Map<number, UserDataVariantMapping>;
+      const variantDataMap = o.userData.variantData as Map<string, VariantData>;
+      for (const [variantName, variantData] of variantDataMap) {
+        const variantMaterial = variantMaterials.get(variantData.index);
+        // Ignore unloaded variant materials
+        if (variantMaterial && compatibleMaterial(variantMaterial.material)) {
+          variantNameSet.add(variantName);
         }
-        const variantMaterials =
-            o.userData.variantMaterials as Map<number, UserDataVariantMapping>;
-        const variantDataMap =
-            o.userData.variantData as Map<string, VariantData>;
-        for (const [variantName, variantData] of variantDataMap) {
-          const variantMaterial = variantMaterials.get(variantData.index);
-          // Ignore unloaded variant materials
-          if (variantMaterial && compatibleMaterial(variantMaterial.material)) {
-            variantNameSet.add(variantName);
-          }
-        }
-      });
+      }
+    };
+
+    if (Array.isArray(objects)) {
+      for (const object of objects) {
+        object.traverse(addVariantNames);
+      }
+    } else {
+      objects.traverse(addVariantNames);
     }
     // We may want to sort?
     variantNameSet.forEach(name => this.variantNames.push(name));
   }
 
-  writeMesh(mesh: Mesh, meshDef: any) {
+  async writeMesh(mesh: Mesh, meshDef: any) {
     if (!compatibleObject(mesh)) {
       return;
     }
@@ -126,7 +134,7 @@ export default class GLTFExporterMaterialsVariantsExtension {
       }
 
       const materialIndex =
-          this.writer.processMaterial(variantInstance.material);
+          await this.writer.processMaterialAsync(variantInstance.material);
       if (!mappingTable.has(materialIndex)) {
         mappingTable.set(
             materialIndex, {material: materialIndex, variants: []});
@@ -146,7 +154,7 @@ export default class GLTFExporterMaterialsVariantsExtension {
 
     const originalMaterialIndex =
         compatibleMaterial(userData.originalMaterial) ?
-        this.writer.processMaterial(userData.originalMaterial) :
+        await this.writer.processMaterialAsync(userData.originalMaterial) :
         -1;
 
     for (const primitiveDef of meshDef.primitives) {
