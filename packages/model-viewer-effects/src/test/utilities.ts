@@ -207,7 +207,8 @@ export function screenshot(element: ModelViewerElement): Uint8Array {
   if (!renderer)
     throw new Error('Invalid element provided');
 
-  const screenshotContext = renderer.threeRenderer.getContext();
+  const screenshotContext =
+      renderer.threeRenderer.getContext() as unknown as WebGL2RenderingContext;
   const width = screenshotContext.drawingBufferWidth;
   const height = screenshotContext.drawingBufferHeight;
 

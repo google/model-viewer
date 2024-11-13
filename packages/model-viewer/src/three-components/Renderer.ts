@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, NeutralToneMapping, Vector2, WebGLRenderer} from 'three';
+import {ACESFilmicToneMapping, Event, EventDispatcher, NeutralToneMapping, Vector2} from 'three';
+import {WebGPURenderer} from 'three/webgpu';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -94,7 +95,7 @@ export class Renderer extends
     }
   }
 
-  public threeRenderer!: WebGLRenderer;
+  public threeRenderer!: WebGPURenderer;
   public canvas3D: HTMLCanvasElement;
   public textureUtils: TextureUtils|null;
   public arRenderer: ARRenderer;
@@ -141,19 +142,21 @@ export class Renderer extends
     this.canvas3D.classList.add('show');
 
     try {
-      this.threeRenderer = new WebGLRenderer({
+      this.threeRenderer = new WebGPURenderer({
         canvas: this.canvas3D,
         alpha: true,
         antialias: true,
-        powerPreference: options.powerPreference as WebGLPowerPreference,
-        preserveDrawingBuffer: true,
+        powerPreference: options.powerPreference as GPUPowerPreference,
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
 
       this.threeRenderer.debug = {
         checkShaderErrors: !!options.debug,
-        onShaderError: null
+        onShaderError: null,
+        getShaderAsync: async () => {
+          return {fragmentShader: null, vertexShader: null};
+        },
       };
 
       // ACESFilmicToneMapping appears to be the most "saturated",

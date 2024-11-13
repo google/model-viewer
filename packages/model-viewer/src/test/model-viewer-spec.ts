@@ -125,19 +125,22 @@ suite('ModelViewerElement', () => {
 
     test('Metal roughness sphere with generated lighting', async () => {
       await setupLighting(element);
-      const screenshotContext = element[$renderer].threeRenderer.getContext();
+      const screenshotContext = element[$renderer].threeRenderer.getContext() as
+          unknown as WebGL2RenderingContext;
       testFidelity(screenshotContext);
     });
 
     test('Metal roughness sphere with HDR lighting', async () => {
       await setupLighting(element, SUNRISE_HDR_PATH);
-      const screenshotContext = element[$renderer].threeRenderer.getContext();
+      const screenshotContext = element[$renderer].threeRenderer.getContext() as
+          unknown as WebGL2RenderingContext;
       testFidelity(screenshotContext);
     });
 
     test('Metal roughness sphere with LDR lighting', async () => {
       await setupLighting(element, SUNRISE_LDR_PATH);
-      const screenshotContext = element[$renderer].threeRenderer.getContext();
+      const screenshotContext = element[$renderer].threeRenderer.getContext() as
+          unknown as WebGL2RenderingContext;
       testFidelity(screenshotContext);
     });
   });

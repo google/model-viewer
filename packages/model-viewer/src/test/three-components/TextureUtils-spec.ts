@@ -14,7 +14,8 @@
  */
 
 import {expect} from 'chai';
-import {Cache, CubeReflectionMapping, EquirectangularReflectionMapping, WebGLRenderer} from 'three';
+import {Cache, CubeReflectionMapping, EquirectangularReflectionMapping} from 'three';
+import {WebGPURenderer} from 'three/webgpu';
 
 import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath} from '../helpers.js';
@@ -26,14 +27,14 @@ const EQUI_URL = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 const HDR_EQUI_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
 
 suite('TextureUtils', () => {
-  let threeRenderer: WebGLRenderer;
+  let threeRenderer: WebGPURenderer;
 
   suiteSetup(() => {
     // The threeRenderer can retain state, so these tests have the possibility
     // of getting different results in different orders. However, our use of the
     // threeRenderer *should* always return its state to what it was before to
     // avoid this kind of problem (and many other headaches).
-    threeRenderer = new WebGLRenderer({canvas});
+    threeRenderer = new WebGPURenderer({canvas});
     threeRenderer.debug.checkShaderErrors = true;
   });
 

@@ -479,7 +479,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
    * @param effectComposer An EffectComposer from `pmndrs/postprocessing`
    */
   registerEffectComposer(effectComposer: EffectComposerInterface) {
-    effectComposer.setRenderer(this[$renderer].threeRenderer);
+    effectComposer.setRenderer(
+        this[$renderer].threeRenderer as unknown as WebGLRenderer);
     effectComposer.setMainCamera(this[$scene].getCamera());
     effectComposer.setMainScene(this[$scene]);
     this[$scene].effectRenderer = effectComposer;

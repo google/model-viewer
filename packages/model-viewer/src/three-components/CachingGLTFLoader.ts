@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import {EventDispatcher, Texture, WebGLRenderer} from 'three';
+import {EventDispatcher, Texture} from 'three';
 import {MeshoptDecoder} from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {KTX2Loader} from 'three/examples/jsm/loaders/KTX2Loader.js';
+import {WebGPURenderer} from 'three/webgpu';
 
 import ModelViewerElementBase from '../model-viewer-base.js';
 import {CacheEvictionPolicy} from '../utilities/cache-eviction-policy.js';
@@ -109,7 +110,7 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     return meshoptDecoderLocation;
   }
 
-  static initializeKTX2Loader(renderer: WebGLRenderer) {
+  static initializeKTX2Loader(renderer: WebGPURenderer) {
     ktx2Loader.detectSupport(renderer);
   }
 
