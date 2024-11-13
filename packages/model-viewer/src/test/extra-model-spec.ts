@@ -40,6 +40,10 @@ suite('ExtraModelElement', () => {
   });
 
   suite('with src property', () => {
+    test('set loaded to false at first when src is set', async () => {
+      extraElement.src = assetPath('models/Astronaut.glb');
+      expect(extraElement.loaded).to.be.false;
+    });
     test.skip('dispatches a load event when src is set', async () => {
       const sourceLoads = waitForEvent(extraElement, 'load');
       extraElement.src = assetPath('models/Astronaut.glb');
@@ -56,7 +60,7 @@ suite('ExtraModelElement', () => {
   });
 
   suite('with availableVariants property', () => {
-    test.skip('updates when availableVariants is changed', async () => {
+    test('updates when availableVariants is changed', async () => {
       const variants = ['variant1', 'variant2'];
       extraElement.availableVariants = variants;
       await timePasses();
@@ -65,9 +69,10 @@ suite('ExtraModelElement', () => {
   });
 
   suite('connectedCallback', () => {
-    test.skip('adds itself to the parent model-viewer', () => {
-      // Since it's done in connectedCallback, it should already be added
-      expect(modelViewer).to.include(extraElement);
+    test('adds itself to the parent model-viewer', () => {
+      const modelViewer = document.querySelector('model-viewer') as HTMLElement;
+      const firstExtraModel = modelViewer.querySelector('extra-model'); 
+      expect(firstExtraModel).to.include(extraElement);
     });
   });
 

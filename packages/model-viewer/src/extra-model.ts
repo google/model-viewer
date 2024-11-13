@@ -36,6 +36,7 @@ export class ExtraModelElement extends ReactiveElement {
   }
   constructor() {
     super();
+    this.loaded = false;
     console.log('extra model constructor')
   }
 
@@ -43,6 +44,7 @@ export class ExtraModelElement extends ReactiveElement {
     super.updated(changedProperties);
     console.log('updated is called');
     if (changedProperties.has('src')) {
+      this.loaded = false;
       console.log('src has changed');
     }
     if (changedProperties.has('availableVariants')) {
