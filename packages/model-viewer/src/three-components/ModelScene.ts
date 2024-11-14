@@ -21,6 +21,7 @@ import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.j
 import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
 import ModelViewerElementBase, {$renderer, EffectComposerInterface, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
+import {ModelData} from 'np./ModelData.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 
@@ -65,6 +66,7 @@ const ndc = new Vector2();
  * Provides lights and cameras to be used in a renderer.
  */
 export class ModelScene extends Scene {
+  public modelData: ModelData;
   public element: ModelViewerElement;
   public canvas: HTMLCanvasElement;
   public annotationRenderer = new CSS2DRenderer();
@@ -119,6 +121,8 @@ export class ModelScene extends Scene {
 
   constructor({canvas, element, width, height}: ModelSceneConfig) {
     super();
+
+    this.modelData = new ModelData("url.glb");
 
     this.name = 'ModelScene';
 
