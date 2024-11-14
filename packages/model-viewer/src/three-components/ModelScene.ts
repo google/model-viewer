@@ -21,7 +21,7 @@ import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.j
 import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
 import ModelViewerElementBase, {$renderer, EffectComposerInterface, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
-import {ModelData} from 'np./ModelData.js';
+import {ModelData} from './ModelData.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 
