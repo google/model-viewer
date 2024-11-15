@@ -84,7 +84,7 @@ export class ModelScene extends Scene {
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
   public xrCamera: Camera|null = null;
 
-  public url: string|null = null;
+
   public pivot = new Object3D();
   public target = new Object3D();
   public animationNames: Array<string> = [];
@@ -205,14 +205,17 @@ export class ModelScene extends Scene {
   async setSource(
       url: string|null,
       progressCallback: (progress: number) => void = () => {}) {
-    if (!url || url === this.url) {
+    console.log("SK: ModelScene:SetSource Started");
+    if (!url || url === this.modelData.url) {
+      console.log("SK: ModelScene:SetSource no change");
       progressCallback(1);
       return;
     }
     this.reset();
-    this.url = url;
+    this.modelData.url = url;
 
     if (this.externalRenderer != null) {
+      console.log("SK: ModelScene:SetSource externalRendere.load");
       const framingInfo = await this.externalRenderer.load(progressCallback);
 
       this.boundingSphere.radius = framingInfo.framedRadius;
@@ -223,6 +226,7 @@ export class ModelScene extends Scene {
     // If we have pending work due to a previous source change in progress,
     // cancel it so that we do not incur a race condition:
     if (this.cancelPendingSourceChange != null) {
+      console.log("SK: ModelScene:SetSource cancelPendingSourceChange");
       this.cancelPendingSourceChange!();
       this.cancelPendingSourceChange = null;
     }
@@ -233,6 +237,7 @@ export class ModelScene extends Scene {
       gltf = await new Promise<ModelViewerGLTFInstance>(
           async (resolve, reject) => {
             this.cancelPendingSourceChange = () => reject();
+            console.log("SK: ModelScene:SetSource load gltf");
             try {
               const result = await this.element[$renderer].loader.load(
                   url, this.element, progressCallback);
@@ -246,13 +251,16 @@ export class ModelScene extends Scene {
         // Loading was cancelled, so silently return
         return;
       }
+      console.log("SK: ModelScene:SetSource failed load gltf");
 
       throw error;
     }
 
     this.cancelPendingSourceChange = null;
     this.reset();
-    this.url = url;
+    this.modelData.url = url;
+    console.log("SK: ModelScene:SetSource gltf value", gltf);
+
     this._currentGLTF = gltf;
 
     if (gltf != null) {
@@ -289,7 +297,7 @@ export class ModelScene extends Scene {
   }
 
   reset() {
-    this.url = null;
+    this.modelData.url = null;
     this.renderCount = 0;
     this.queueRender();
     if (this.shadow != null) {
