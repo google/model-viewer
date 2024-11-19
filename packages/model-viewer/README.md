@@ -2,6 +2,7 @@
 
  [![Min Zip](https://badgen.net/bundlephobia/minzip/@google/model-viewer)](https://bundlephobia.com/result?p=@google/model-viewer)
  [![Latest Release](https://img.shields.io/github/v/release/google/model-viewer)](https://github.com/google/model-viewer/releases)
+ [![NPM Package](https://img.shields.io/npm/v/@google/model-viewer)](https://www.npmjs.com/package/@google/model-viewer)
 
  [![follow on Twitter](https://img.shields.io/twitter/follow/modelviewer?style=social&logo=twitter)](https://twitter.com/intent/follow?screen_name=modelviewer)
  [![Github Discussions](https://img.shields.io/github/stars/google/model-viewer.svg?style=social&label=Star&maxAge=2592000)](https://github.com/google/model-viewer/discussions)
@@ -49,7 +50,7 @@ For your production site you may want the extra stability that comes by
 pinning to a specific version, and upgrading on your own schedule (after
 testing).
 
-If you’ve installed via [NPM](https://npmjs.org), you’re all set - you’ll only
+If you’ve installed via [NPM](https://www.npmjs.com/package/@google/model-viewer), you’re all set - you’ll only
 upgrade when you run [`npm update`](https://docs.npmjs.com/cli/update.html).
 Note that three.js is a peer dependency, so that must also be installed, but can
 be shared with other bundled code. Note that `<model-viewer>` requires the
