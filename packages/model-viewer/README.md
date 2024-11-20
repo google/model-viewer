@@ -21,6 +21,8 @@ supported to provide a seamless development experience.
 
 ## Installing
 
+### NPM
+
 The `<model-viewer>` web component can be installed from [NPM](https://npmjs.org):
 
 ```sh
@@ -29,6 +31,14 @@ npm install three
 # install package
 npm install @google/model-viewer
 ```
+
+Finally, include the `<model-viewer>` script in your project.
+
+```js
+import '@google/model-viewer';
+```
+
+### CDN
 
 It can also be used directly from various free CDNs such as [jsDelivr](https://www.jsdelivr.com/package/npm/@google/model-viewer) and Google's own [hosted libraries](https://developers.google.com/speed/libraries#model-viewer):
 
