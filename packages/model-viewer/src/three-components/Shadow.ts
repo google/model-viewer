@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, Box3, Material, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RenderTargetOptions, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {BackSide, DoubleSide, Box3, Material, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RenderTargetOptions, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
 import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
 import {lerp} from 'three/src/math/MathUtils.js';
@@ -107,6 +107,9 @@ export class Shadow extends Object3D {
           'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
           'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) * opacity );');
     };
+    // Render both sides, back sides face the light source and
+    // front sides supply depth information for soft shadows
+    this.depthMaterial.side = DoubleSide;
 
     this.horizontalBlurMaterial.depthTest = false;
     this.verticalBlurMaterial.depthTest = false;
