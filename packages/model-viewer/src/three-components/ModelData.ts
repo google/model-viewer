@@ -12,6 +12,7 @@ public url: string|null = null;
 constructor(url: string) {
     super();
     this.url = url;
+    console.log("Testing new setup");
     console.log("ModelData constructor is called");
 }
 }
