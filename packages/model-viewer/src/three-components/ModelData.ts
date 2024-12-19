@@ -1,4 +1,4 @@
-import {Object3D} from 'three';
+import {AnimationAction, AnimationClip, LoopPingPong, Object3D} from 'three';
 
 import {$renderer} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
@@ -18,10 +18,16 @@ export class ModelData extends Object3D {
 
   private cancelPendingSourceChange: (() => void)|null = null;
 
+
+  // Animations
+  public animationNames: Array<string> = [];
+  public animationsByName: Map<string, AnimationClip> = new Map();
+  public currentAnimationAction: AnimationAction|null = null;
+
+
   constructor() {
     super();
   }
-
 
   async loadModel(
       url: string, element: ModelViewerElement,
@@ -53,5 +59,50 @@ export class ModelData extends Object3D {
     }
 
     return gltf;
+  }
+
+  setUpAnimations() {
+    const {animations} = this.currentGLTF!;
+    console.log('Samaneh:animation', animations);
+    const animationsByName = new Map();
+    const animationNames = [];
+
+    for (const animation of animations) {
+      animationsByName.set(animation.name, animation);
+      animationNames.push(animation.name);
+    }
+
+    this.animations = animations;
+    this.animationsByName = animationsByName;
+    this.animationNames = animationNames;
+  }
+
+
+  get animationTime(): number {
+    if (this.currentAnimationAction != null) {
+      const loopCount =
+          Math.max((this.currentAnimationAction as any)._loopCount, 0);
+      if (this.currentAnimationAction.loop === LoopPingPong &&
+          (loopCount & 1) === 1) {
+        return this.duration - this.currentAnimationAction.time
+      } else {
+        return this.currentAnimationAction.time;
+      }
+    }
+
+    return 0;
+  }
+
+  get duration(): number {
+    if (this.currentAnimationAction != null &&
+        this.currentAnimationAction.getClip()) {
+      return this.currentAnimationAction.getClip().duration;
+    }
+
+    return 0;
+  }
+
+  get hasActiveAnimation(): boolean {
+    return this.currentAnimationAction != null;
   }
 }

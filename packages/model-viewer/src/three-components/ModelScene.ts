@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, AnimationMixerEventMap, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer, XRTargetRaySpace} from 'three';
+import {ACESFilmicToneMapping, AnimationActionLoopStyles, AnimationMixer, AnimationMixerEventMap, Box3, Camera, Euler, Event as ThreeEvent, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer, XRTargetRaySpace} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
 
@@ -87,7 +87,7 @@ export class ModelScene extends Scene {
 
   public pivot = new Object3D();
   public target = new Object3D();
-  public animationNames: Array<string> = [];
+
   public boundingBox = new Box3();
   public boundingSphere = new Sphere();
   public size = new Vector3();
@@ -112,8 +112,6 @@ export class ModelScene extends Scene {
 
   private _model: Object3D|null = null;
   private mixer: AnimationMixer;
-  private animationsByName: Map<string, AnimationClip> = new Map();
-  private currentAnimationAction: AnimationAction|null = null;
 
   private groundedSkybox = new GroundedSkybox();
 
@@ -212,7 +210,7 @@ export class ModelScene extends Scene {
       return;
     }
     this.reset();
-    this.modelData = new ModelData();
+
 
     if (this.externalRenderer != null) {
       console.log('SK: ModelScene:SetSource externalRendere.load');
@@ -247,21 +245,9 @@ export class ModelScene extends Scene {
       this.target.add(gltf.scene);
     }
 
-    const {animations} = gltf!;
-    console.log('gltf:', gltf);
-    console.log('Samaneh:animation', animations);
 
-    const animationsByName = new Map();
-    const animationNames = [];
 
-    for (const animation of animations) {
-      animationsByName.set(animation.name, animation);
-      animationNames.push(animation.name);
-    }
-
-    this.animations = animations;
-    this.animationsByName = animationsByName;
-    this.animationNames = animationNames;
+    this.modelData.setUpAnimations();
 
     await this.setupScene();
   }
@@ -299,9 +285,9 @@ export class ModelScene extends Scene {
       this.modelData.currentGLTF = null;
     }
 
-    if (this.currentAnimationAction != null) {
-      this.currentAnimationAction.stop();
-      this.currentAnimationAction = null;
+    if (this.modelData.currentAnimationAction != null) {
+      this.modelData.currentAnimationAction.stop();
+      this.modelData.currentAnimationAction = null;
     }
 
     this.mixer.stopAllAction();
@@ -663,20 +649,7 @@ export class ModelScene extends Scene {
     this.queueShadowRender();
   }
 
-  get animationTime(): number {
-    if (this.currentAnimationAction != null) {
-      const loopCount =
-          Math.max((this.currentAnimationAction as any)._loopCount, 0);
-      if (this.currentAnimationAction.loop === LoopPingPong &&
-          (loopCount & 1) === 1) {
-        return this.duration - this.currentAnimationAction.time
-      } else {
-        return this.currentAnimationAction.time;
-      }
-    }
 
-    return 0;
-  }
 
   set animationTimeScale(value: number) {
     this.mixer.timeScale = value;
@@ -686,18 +659,7 @@ export class ModelScene extends Scene {
     return this.mixer.timeScale;
   }
 
-  get duration(): number {
-    if (this.currentAnimationAction != null &&
-        this.currentAnimationAction.getClip()) {
-      return this.currentAnimationAction.getClip().duration;
-    }
 
-    return 0;
-  }
-
-  get hasActiveAnimation(): boolean {
-    return this.currentAnimationAction != null;
-  }
 
   /**
    * Plays an animation if there are any associated with the current model.
@@ -712,7 +674,7 @@ export class ModelScene extends Scene {
     if (this.modelData.currentGLTF == null) {
       return;
     }
-    const {animations} = this;
+    const {animations} = this.modelData;
     if (animations == null || animations.length === 0) {
       return;
     }
@@ -720,7 +682,7 @@ export class ModelScene extends Scene {
     let animationClip = null;
 
     if (name != null) {
-      animationClip = this.animationsByName.get(name);
+      animationClip = this.modelData.animationsByName.get(name);
 
       if (animationClip == null) {
         const parsedAnimationIndex = parseInt(name);
@@ -737,10 +699,10 @@ export class ModelScene extends Scene {
     }
 
     try {
-      const {currentAnimationAction: lastAnimationAction} = this;
+      const {currentAnimationAction: lastAnimationAction} = this.modelData;
 
       const action = this.mixer.clipAction(animationClip, this);
-      this.currentAnimationAction = action;
+      this.modelData.currentAnimationAction = action;
 
       if (this.element.paused) {
         this.mixer.stopAllAction();
@@ -750,7 +712,7 @@ export class ModelScene extends Scene {
           action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
         } else if (
             this.animationTimeScale > 0 &&
-            this.animationTime == this.duration) {
+            this.animationTime == this.modelData.duration) {
           // This is a workaround for what I believe is a three.js bug.
           this.animationTime = 0;
         }
@@ -768,7 +730,7 @@ export class ModelScene extends Scene {
   }
 
   stopAnimation() {
-    this.currentAnimationAction = null;
+    this.modelData.currentAnimationAction = null;
     this.mixer.stopAllAction();
   }
 
