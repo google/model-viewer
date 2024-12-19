@@ -124,7 +124,7 @@ export class Shadow extends Object3D {
   setScene(scene: ModelScene, softness: number, side: Side) {
     const {boundingBox, size, rotation, position} = this;
 
-    this.isAnimated = scene.animationNames.length > 0;
+    this.isAnimated = scene.modelData.animationNames.length > 0;
     this.boundingBox.copy(scene.boundingBox);
     this.size.copy(scene.size);
     this.maxDimension = Math.max(size.x, size.y, size.z) *

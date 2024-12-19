@@ -393,7 +393,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
         this[$loaded] = false;
         this[$loadedTime] = 0;
         this[$scene].reset();
-      } else if (this.src !== this[$scene].url) {
+      } else if (this.src !== this[$scene].modelData.url) {
         this[$loaded] = false;
         this[$loadedTime] = 0;
         this[$updateSource]();
@@ -594,7 +594,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   async[$updateSource]() {
     const scene = this[$scene];
     if (this.loaded || !this[$shouldAttemptPreload]() ||
-        this.src === scene.url) {
+        this.src === scene.modelData.url) {
       return;
     }
 

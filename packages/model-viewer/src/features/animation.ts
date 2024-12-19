@@ -75,14 +75,14 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
      */
     get availableAnimations(): Array<string> {
       if (this.loaded) {
-        return this[$scene].animationNames;
+        return this[$scene].modelData.animationNames;
       }
 
       return [];
     }
 
     get duration(): number {
-      return this[$scene].duration;
+      return this[$scene].modelData.duration;
     }
 
     get paused(): boolean {

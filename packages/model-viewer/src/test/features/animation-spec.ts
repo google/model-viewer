@@ -42,8 +42,8 @@ const animationIsPlaying = (element: any, animationName?: string): boolean => {
 
 const animationWithIndexIsPlaying = (element: any, animationIndex = 0):
     boolean => {
-      const {currentAnimationAction} = element[$scene];
-      const {_currentGLTF} = element[$scene];
+      const {currentAnimationAction, modelData} = element[$scene];
+      const {_currentGLTF} = modelData.currentGLTF
 
       if (currentAnimationAction != null && animationIndex >= 0 &&
           animationIndex < _currentGLTF.animations.length &&
