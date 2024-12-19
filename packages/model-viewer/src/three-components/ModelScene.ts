@@ -21,7 +21,6 @@ import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.j
 import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
 import ModelViewerElementBase, {$renderer, EffectComposerInterface, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
-import {ModelData} from './ModelData.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
 
@@ -29,6 +28,7 @@ import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {GroundedSkybox} from './GroundedSkybox.js';
 import {Hotspot} from './Hotspot.js';
+import {ModelData} from './ModelData.js';
 import {Shadow} from './Shadow.js';
 
 export const GROUNDED_SKYBOX_SIZE = 10;
@@ -110,10 +110,8 @@ export class ModelScene extends Scene {
   private targetDamperY = new Damper();
   private targetDamperZ = new Damper();
 
-  private _currentGLTF: ModelViewerGLTFInstance|null = null;
   private _model: Object3D|null = null;
   private mixer: AnimationMixer;
-  private cancelPendingSourceChange: (() => void)|null = null;
   private animationsByName: Map<string, AnimationClip> = new Map();
   private currentAnimationAction: AnimationAction|null = null;
 
@@ -121,8 +119,6 @@ export class ModelScene extends Scene {
 
   constructor({canvas, element, width, height}: ModelSceneConfig) {
     super();
-
-    this.modelData = new ModelData("url.glb");
 
     this.name = 'ModelScene';
 
@@ -152,6 +148,8 @@ export class ModelScene extends Scene {
     style.position = 'absolute';
     style.top = '0';
     this.element.shadowRoot!.querySelector('.default')!.appendChild(domElement);
+
+    this.modelData = new ModelData();
 
     this.schemaElement.setAttribute('type', 'application/ld+json');
   }
@@ -198,6 +196,8 @@ export class ModelScene extends Scene {
     await this.setupScene();
   }
 
+
+
   /**
    * Sets the model via URL.
    */
@@ -205,17 +205,17 @@ export class ModelScene extends Scene {
   async setSource(
       url: string|null,
       progressCallback: (progress: number) => void = () => {}) {
-    console.log("SK: ModelScene:SetSource Started");
+    console.log('SK: ModelScene:SetSource Started');
     if (!url || url === this.modelData.url) {
-      console.log("SK: ModelScene:SetSource no change");
+      console.log('SK: ModelScene:SetSource no change');
       progressCallback(1);
       return;
     }
     this.reset();
-    this.modelData.url = url;
+    this.modelData = new ModelData();
 
     if (this.externalRenderer != null) {
-      console.log("SK: ModelScene:SetSource externalRendere.load");
+      console.log('SK: ModelScene:SetSource externalRendere.load');
       const framingInfo = await this.externalRenderer.load(progressCallback);
 
       this.boundingSphere.radius = framingInfo.framedRadius;
@@ -223,45 +223,24 @@ export class ModelScene extends Scene {
       return;
     }
 
-    // If we have pending work due to a previous source change in progress,
-    // cancel it so that we do not incur a race condition:
-    if (this.cancelPendingSourceChange != null) {
-      console.log("SK: ModelScene:SetSource cancelPendingSourceChange");
-      this.cancelPendingSourceChange!();
-      this.cancelPendingSourceChange = null;
-    }
-
     let gltf: ModelViewerGLTFInstance;
 
     try {
-      gltf = await new Promise<ModelViewerGLTFInstance>(
-          async (resolve, reject) => {
-            this.cancelPendingSourceChange = () => reject();
-            console.log("SK: ModelScene:SetSource load gltf");
-            try {
-              const result = await this.element[$renderer].loader.load(
-                  url, this.element, progressCallback);
-              resolve(result);
-            } catch (error) {
-              reject(error);
-            }
-          });
+      gltf =
+          await this.modelData.loadModel(url, this.element, progressCallback);
     } catch (error) {
       if (error == null) {
         // Loading was cancelled, so silently return
         return;
       }
-      console.log("SK: ModelScene:SetSource failed load gltf");
-
       throw error;
     }
 
-    this.cancelPendingSourceChange = null;
     this.reset();
     this.modelData.url = url;
-    console.log("SK: ModelScene:SetSource gltf value", gltf);
+    console.log('SK: ModelScene:SetSource gltf value', gltf);
 
-    this._currentGLTF = gltf;
+    this.modelData.currentGLTF = gltf;
 
     if (gltf != null) {
       this._model = gltf.scene;
@@ -269,6 +248,9 @@ export class ModelScene extends Scene {
     }
 
     const {animations} = gltf!;
+    console.log('gltf:', gltf);
+    console.log('Samaneh:animation', animations);
+
     const animationsByName = new Map();
     const animationNames = [];
 
@@ -311,10 +293,10 @@ export class ModelScene extends Scene {
       this._model = null;
     }
 
-    const gltf = this._currentGLTF;
+    const gltf = this.modelData.currentGLTF;
     if (gltf != null) {
       gltf.dispose();
-      this._currentGLTF = null;
+      this.modelData.currentGLTF = null;
     }
 
     if (this.currentAnimationAction != null) {
@@ -338,7 +320,7 @@ export class ModelScene extends Scene {
   }
 
   get currentGLTF() {
-    return this._currentGLTF;
+    return this.modelData.currentGLTF;
   }
 
   /**
@@ -727,7 +709,7 @@ export class ModelScene extends Scene {
       name: string|null = null, crossfadeTime: number = 0,
       loopMode: AnimationActionLoopStyles = LoopRepeat,
       repetitionCount: number = Infinity) {
-    if (this._currentGLTF == null) {
+    if (this.modelData.currentGLTF == null) {
       return;
     }
     const {animations} = this;
@@ -832,7 +814,7 @@ export class ModelScene extends Scene {
    */
   setShadowIntensity(shadowIntensity: number) {
     this.shadowIntensity = shadowIntensity;
-    if (this._currentGLTF == null) {
+    if (this.modelData.currentGLTF == null) {
       return;
     }
     this.setBakedShadowVisibility();
