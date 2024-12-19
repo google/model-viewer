@@ -92,7 +92,7 @@ suite('ModelViewerElementBase', () => {
           element.src = assetPath('models/Horse.glb');
           await waitForEvent(element, 'load');
 
-          expect(element[$scene].url)
+          expect(element[$scene].modelData.url)
               .to.be.equal(assetPath('models/Horse.glb'));
         });
 
@@ -102,7 +102,7 @@ suite('ModelViewerElementBase', () => {
           element.src = assetPath('models/Horse.glb');
           await waitForEvent(element, 'load');
 
-          expect(element[$scene].url)
+          expect(element[$scene].modelData.url)
               .to.be.equal(assetPath('models/Horse.glb'));
         });
       });
