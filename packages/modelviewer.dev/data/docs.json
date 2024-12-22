@@ -1011,6 +1011,11 @@
         "links": [
           "<a href=\"../examples/animation/#paused\"><span class='attribute'>paused</span> example</a>"
         ]
+      },
+      {
+        "name": "appendedAnimations",
+        "htmlName": "paused",
+        "description": "This property is read-only. It returns an array of the names of appended animations to the current state and is cleared when the main animation is changed using <span class='attribute'>animation-name</span>."
       }
     ],
     "Methods": [
@@ -1023,6 +1028,16 @@
         "name": "pause()",
         "htmlName": "pause",
         "description": "Causes animations to be paused. If you want to reset the current animation to the beginning, you should also set the <span class='attribute'>currentTime</span> property to 0."
+      },
+      {
+        "name": "appendAnimation(animationName, options: {repetitions, pingpong, weight, timeScale, fade, warp})",
+        "htmlName": "appendAnimation",
+        "description": "Causes an animation to run simultaneously with and blend into the current animation. If you want to get the appended animations, you can use <span class='attribute'>appendedAnimations</span> property. You can specify the number of repetitions of the animation by setting the number of <i>repetitions</i> to any value greater than 0 (defaults to Infinity). Also if you set <i>pingpong</i> to true, alternately playing forward and backward (defaults to false). <i>weight</i> The degree of influence of this animation (in the interval [0, 1]), Values between 0 (no impact) and 1 (full impact) can be used to blend between several actions (defaults to 1). <i>timeScale</i> option can be used to slow down, speed up or play backwards animations. For example, if you set it to 0.5, the animation will play at half speed (defaults to 1). The <i>fade</i> option causes the weight of this animation to gradually increase from 0 to 1, The value of this option can be a boolean or float greater than 0 (in seconds), If the value is true, default duration (1.25 second) is applied (defaults to false). The <i>warp</i> option causes change playback speed, within the passed time interval, by modifying timeScale gradually from 0 to current timeScale value, the value of this option can be a boolean or float greater than 0 (in seconds), If the value is true, default duration (1.25 second) is applied (defaults to false)."
+      },
+      {
+        "name": "detachAnimation(animationName, options: {fade})",
+        "htmlName": "detachAnimation",
+        "description": "Causes the appended animation to be detached. The <i>fade</i> option gradually changes the animation weight to 0, the value of this option can be a boolean or float greater than 0 (in seconds), if the value is true, default duration (1.25 second) is applied (defaults to true)"
       }
     ],
     "Events": [
@@ -1045,6 +1060,16 @@
         "name": "finished",
         "htmlName": "finished",
         "description": "Dispatched when the current animation has finished playing."
+      },
+      {
+        "name": "appendanimation",
+        "htmlName": "appendanimation",
+        "description": "Dispatched when an animation append to current animation."
+      },
+      {
+        "name": "detachanimation",
+        "htmlName": "detachanimation",
+        "description": "Dispatched when appended animation detached."
       }
     ]
   },

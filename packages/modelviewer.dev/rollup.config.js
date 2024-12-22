@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {nodeResolve as resolve} from '@rollup/plugin-node-resolve';
+import { nodeResolve as resolve } from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 
 const onwarn = (warning, warn) => {
@@ -23,10 +23,10 @@ const onwarn = (warning, warn) => {
   }
 };
 
-const plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
+const plugins = [resolve(), replace({ 'Reflect.decorate': 'undefined', preventAssignment: true })];
 
 const watchFiles =
-    ['lib/**', '../model-viewer/lib/**', '../model-viewer-effects/lib/**'];
+  ['lib/**', '../model-viewer/lib/**', '../model-viewer-effects/lib/**'];
 
 const outputOptions = [
   {
