@@ -14,13 +14,6 @@ jobs:
 
     - uses: actions/setup-node@v4
 
-    # - uses: browser-actions/setup-chrome@v1
-    #   with:
-    #     install-chromedriver: true
-
-    # - name: Fix dependencies
-    #   run:  sudo apt -y --fix-broken install
-
     - name: NPM install
       run: npm ci
 
