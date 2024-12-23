@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, AnimationMixerEventMap, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer, XRTargetRaySpace} from 'three';
-import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
+import { ACESFilmicToneMapping, AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, AnimationMixerEventMap, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer, XRTargetRaySpace } from 'three';
+import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { reduceVertices } from 'three/examples/jsm/utils/SceneUtils.js';
 
-import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
-import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
-import ModelViewerElementBase, {$renderer, EffectComposerInterface, RendererInterface} from '../model-viewer-base.js';
-import {ModelViewerElement} from '../model-viewer.js';
-import {normalizeUnit} from '../styles/conversions.js';
-import {NumberNode, parseExpressions} from '../styles/parsers.js';
+import { $currentGLTF, $model, $originalGltfJson } from '../features/scene-graph.js';
+import { $nodeFromIndex, $nodeFromPoint } from '../features/scene-graph/model.js';
+import ModelViewerElementBase, { $renderer, $scene, EffectComposerInterface, RendererInterface } from '../model-viewer-base.js';
+import { ModelViewerElement } from '../model-viewer.js';
+import { normalizeUnit } from '../styles/conversions.js';
+import { NumberNode, parseExpressions } from '../styles/parsers.js';
 
-import {Damper, SETTLING_TIME} from './Damper.js';
-import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
-import {GroundedSkybox} from './GroundedSkybox.js';
-import {Hotspot} from './Hotspot.js';
-import {Shadow} from './Shadow.js';
+import { Damper, SETTLING_TIME } from './Damper.js';
+import { ModelViewerGLTFInstance } from './gltf-instance/ModelViewerGLTFInstance.js';
+import { GroundedSkybox } from './GroundedSkybox.js';
+import { Hotspot } from './Hotspot.js';
+import { Shadow } from './Shadow.js';
 
 export const GROUNDED_SKYBOX_SIZE = 10;
 const MIN_SHADOW_RATIO = 100;
@@ -44,9 +44,9 @@ export interface ModelSceneConfig {
   height: number;
 }
 
-export type IlluminationRole = 'primary'|'secondary';
+export type IlluminationRole = 'primary' | 'secondary';
 
-export const IlluminationRole: {[index: string]: IlluminationRole} = {
+export const IlluminationRole: { [index: string]: IlluminationRole } = {
   Primary: 'primary',
   Secondary: 'secondary'
 };
@@ -68,21 +68,22 @@ export class ModelScene extends Scene {
   public element: ModelViewerElement;
   public canvas: HTMLCanvasElement;
   public annotationRenderer = new CSS2DRenderer();
-  public effectRenderer: EffectComposerInterface|null = null;
+  public effectRenderer: EffectComposerInterface | null = null;
   public schemaElement = document.createElement('script');
   public width = 1;
   public height = 1;
   public aspect = 1;
   public scaleStep = 0;
   public renderCount = 0;
-  public externalRenderer: RendererInterface|null = null;
+  public externalRenderer: RendererInterface | null = null;
+  public appendedAnimations: Array<string> = [];
 
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
   public camera = new PerspectiveCamera(45, 1, 0.1, 100);
-  public xrCamera: Camera|null = null;
+  public xrCamera: Camera | null = null;
 
-  public url: string|null = null;
+  public url: string | null = null;
   public pivot = new Object3D();
   public target = new Object3D();
   public animationNames: Array<string> = [];
@@ -92,7 +93,7 @@ export class ModelScene extends Scene {
   public idealAspect = 0;
   public framedFoVDeg = 0;
 
-  public shadow: Shadow|null = null;
+  public shadow: Shadow | null = null;
   public shadowIntensity = 0;
   public shadowSoftness = 1;
   public bakedShadows = new Set<Mesh>();
@@ -108,16 +109,16 @@ export class ModelScene extends Scene {
   private targetDamperY = new Damper();
   private targetDamperZ = new Damper();
 
-  private _currentGLTF: ModelViewerGLTFInstance|null = null;
-  private _model: Object3D|null = null;
+  private _currentGLTF: ModelViewerGLTFInstance | null = null;
+  private _model: Object3D | null = null;
   private mixer: AnimationMixer;
-  private cancelPendingSourceChange: (() => void)|null = null;
+  private cancelPendingSourceChange: (() => void) | null = null;
   private animationsByName: Map<string, AnimationClip> = new Map();
-  private currentAnimationAction: AnimationAction|null = null;
+  private currentAnimationAction: AnimationAction | null = null;
 
   private groundedSkybox = new GroundedSkybox();
 
-  constructor({canvas, element, width, height}: ModelSceneConfig) {
+  constructor({ canvas, element, width, height }: ModelSceneConfig) {
     super();
 
     this.name = 'ModelScene';
@@ -141,8 +142,8 @@ export class ModelScene extends Scene {
 
     this.mixer = new AnimationMixer(this.target);
 
-    const {domElement} = this.annotationRenderer;
-    const {style} = domElement;
+    const { domElement } = this.annotationRenderer;
+    const { style } = domElement;
     style.display = 'none';
     style.pointerEvents = 'none';
     style.position = 'absolute';
@@ -199,8 +200,8 @@ export class ModelScene extends Scene {
    */
 
   async setSource(
-      url: string|null,
-      progressCallback: (progress: number) => void = () => {}) {
+    url: string | null,
+    progressCallback: (progress: number) => void = () => { }) {
     if (!url || url === this.url) {
       progressCallback(1);
       return;
@@ -227,16 +228,16 @@ export class ModelScene extends Scene {
 
     try {
       gltf = await new Promise<ModelViewerGLTFInstance>(
-          async (resolve, reject) => {
-            this.cancelPendingSourceChange = () => reject();
-            try {
-              const result = await this.element[$renderer].loader.load(
-                  url, this.element, progressCallback);
-              resolve(result);
-            } catch (error) {
-              reject(error);
-            }
-          });
+        async (resolve, reject) => {
+          this.cancelPendingSourceChange = () => reject();
+          try {
+            const result = await this.element[$renderer].loader.load(
+              url, this.element, progressCallback);
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        });
     } catch (error) {
       if (error == null) {
         // Loading was cancelled, so silently return
@@ -256,7 +257,7 @@ export class ModelScene extends Scene {
       this.target.add(gltf.scene);
     }
 
-    const {animations} = gltf!;
+    const { animations } = gltf!;
     const animationsByName = new Map();
     const animationNames = [];
 
@@ -293,7 +294,7 @@ export class ModelScene extends Scene {
     }
     this.bakedShadows.clear();
 
-    const {_model} = this;
+    const { _model } = this;
     if (_model != null) {
       _model.removeFromParent();
       this._model = null;
@@ -386,21 +387,21 @@ export class ModelScene extends Scene {
   }
 
   checkBakedShadows() {
-    const {min, max} = this.boundingBox;
+    const { min, max } = this.boundingBox;
     const shadowBox = new Box3();
     this.boundingBox.getSize(this.size);
 
     for (const mesh of this.bakedShadows) {
       shadowBox.setFromObject(mesh);
       if (shadowBox.min.y < min.y + this.size.y / MIN_SHADOW_RATIO &&
-          shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
-          shadowBox.min.z <= min.z && shadowBox.max.z >= max.z) {
+        shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
+        shadowBox.min.z <= min.z && shadowBox.max.z >= max.z) {
         // floor shadow
         continue;
       }
       if (shadowBox.min.z < min.z + this.size.z / MIN_SHADOW_RATIO &&
-          shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
-          shadowBox.min.y <= min.y && shadowBox.max.y >= max.y) {
+        shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
+        shadowBox.min.y <= min.y && shadowBox.max.y >= max.y) {
         // wall shadow
         continue;
       }
@@ -409,12 +410,12 @@ export class ModelScene extends Scene {
   }
 
   applyTransform() {
-    const {model} = this;
+    const { model } = this;
     if (model == null) {
       return;
     }
     const orientation = parseExpressions(this.element.orientation)[0]
-                            .terms as [NumberNode, NumberNode, NumberNode];
+      .terms as [NumberNode, NumberNode, NumberNode];
 
     const roll = normalizeUnit(orientation[0]).number;
     const pitch = normalizeUnit(orientation[1]).number;
@@ -423,13 +424,13 @@ export class ModelScene extends Scene {
     model.quaternion.setFromEuler(new Euler(pitch, yaw, roll, 'YXZ'));
 
     const scale = parseExpressions(this.element.scale)[0]
-                      .terms as [NumberNode, NumberNode, NumberNode];
+      .terms as [NumberNode, NumberNode, NumberNode];
 
     model.scale.set(scale[0].number, scale[1].number, scale[2].number);
   }
 
   updateBoundingBox() {
-    const {model} = this;
+    const { model } = this;
     if (model == null) {
       return;
     }
@@ -465,13 +466,13 @@ export class ModelScene extends Scene {
    * one side instead of both. Proper choice of center can correct this.
    */
   async updateFraming() {
-    const {model} = this;
+    const { model } = this;
     if (model == null) {
       return;
     }
     this.target.remove(model);
     this.setBakedShadowVisibility(false);
-    const {center} = this.boundingSphere;
+    const { center } = this.boundingSphere;
 
     this.element.requestUpdate('cameraTarget');
     await this.element.updateComplete;
@@ -481,16 +482,16 @@ export class ModelScene extends Scene {
       return Math.max(value, center!.distanceToSquared(vertex));
     };
     this.boundingSphere.radius =
-        Math.sqrt(reduceVertices(model, radiusSquared, 0));
+      Math.sqrt(reduceVertices(model, radiusSquared, 0));
 
     const horizontalTanFov = (value: number, vertex: Vector3): number => {
       vertex.sub(center!);
       const radiusXZ = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z);
       return Math.max(
-          value, radiusXZ / (this.idealCameraDistance() - Math.abs(vertex.y)));
+        value, radiusXZ / (this.idealCameraDistance() - Math.abs(vertex.y)));
     };
     this.idealAspect = reduceVertices(model, horizontalTanFov, 0) /
-        Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
+      Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
 
     this.setBakedShadowVisibility();
     this.target.add(model);
@@ -513,7 +514,7 @@ export class ModelScene extends Scene {
    */
   adjustedFoV(fovDeg: number): number {
     const vertical = Math.tan((fovDeg / 2) * Math.PI / 180) *
-        Math.max(1, this.idealAspect / this.aspect);
+      Math.max(1, this.idealAspect / this.aspect);
     return 2 * Math.atan(vertical) * 180 / Math.PI;
   }
 
@@ -523,7 +524,7 @@ export class ModelScene extends Scene {
     } else {
       const rect = this.element.getBoundingClientRect();
       ndc.set(
-          (clientX - rect.x) / this.width, (clientY - rect.y) / this.height);
+        (clientX - rect.x) / this.width, (clientY - rect.y) / this.height);
     }
 
     ndc.multiplyScalar(2).subScalar(1);
@@ -534,11 +535,11 @@ export class ModelScene extends Scene {
   /**
    * Returns the size of the corresponding canvas element.
    */
-  getSize(): {width: number, height: number} {
-    return {width: this.width, height: this.height};
+  getSize(): { width: number, height: number } {
+    return { width: this.width, height: this.height };
   }
 
-  setEnvironmentAndSkybox(environment: Texture|null, skybox: Texture|null) {
+  setEnvironmentAndSkybox(environment: Texture | null, skybox: Texture | null) {
     if (this.element[$renderer].arRenderer.presentedScene === this) {
       return;
     }
@@ -547,7 +548,7 @@ export class ModelScene extends Scene {
     this.queueRender();
   }
 
-  setBackground(skybox: Texture|null) {
+  setBackground(skybox: Texture | null) {
     this.groundedSkybox.map = skybox;
     if (this.groundedSkybox.isUsable()) {
       this.target.add(this.groundedSkybox);
@@ -560,18 +561,18 @@ export class ModelScene extends Scene {
 
   farRadius() {
     return this.boundingSphere.radius *
-        (this.groundedSkybox.parent != null ? GROUNDED_SKYBOX_SIZE : 1);
+      (this.groundedSkybox.parent != null ? GROUNDED_SKYBOX_SIZE : 1);
   }
 
   setGroundedSkybox() {
     const heightNode =
-        parseExpressions(this.element.skyboxHeight)[0].terms[0] as NumberNode;
+      parseExpressions(this.element.skyboxHeight)[0].terms[0] as NumberNode;
     const height = normalizeUnit(heightNode).number;
     const radius = GROUNDED_SKYBOX_SIZE * this.boundingSphere.radius;
 
     this.groundedSkybox.updateGeometry(height, radius);
     this.groundedSkybox.position.y =
-        height - (this.shadow ? 2 * this.shadow.gap() : 0);
+      height - (this.shadow ? 2 * this.shadow.gap() : 0);
 
     this.setBackground(this.groundedSkybox.map);
   }
@@ -623,7 +624,7 @@ export class ModelScene extends Scene {
     const target = this.target.position;
     if (!goal.equals(target)) {
       const normalization = this.boundingSphere.radius / 10;
-      let {x, y, z} = target;
+      let { x, y, z } = target;
       x = this.targetDamperX.update(x, goal.x, delta, normalization);
       y = this.targetDamperY.update(y, goal.y, delta, normalization);
       z = this.targetDamperZ.update(z, goal.z, delta, normalization);
@@ -642,7 +643,7 @@ export class ModelScene extends Scene {
    * Yaw the +z (front) of the model toward the indicated world coordinates.
    */
   pointTowards(worldX: number, worldZ: number) {
-    const {x, z} = this.position;
+    const { x, z } = this.position;
     this.yaw = Math.atan2(worldX - x, worldZ - z);
   }
 
@@ -672,9 +673,9 @@ export class ModelScene extends Scene {
   get animationTime(): number {
     if (this.currentAnimationAction != null) {
       const loopCount =
-          Math.max((this.currentAnimationAction as any)._loopCount, 0);
+        Math.max((this.currentAnimationAction as any)._loopCount, 0);
       if (this.currentAnimationAction.loop === LoopPingPong &&
-          (loopCount & 1) === 1) {
+        (loopCount & 1) === 1) {
         return this.duration - this.currentAnimationAction.time
       } else {
         return this.currentAnimationAction.time;
@@ -694,7 +695,7 @@ export class ModelScene extends Scene {
 
   get duration(): number {
     if (this.currentAnimationAction != null &&
-        this.currentAnimationAction.getClip()) {
+      this.currentAnimationAction.getClip()) {
       return this.currentAnimationAction.getClip().duration;
     }
 
@@ -712,13 +713,13 @@ export class ModelScene extends Scene {
    * to playing the first animation.
    */
   playAnimation(
-      name: string|null = null, crossfadeTime: number = 0,
-      loopMode: AnimationActionLoopStyles = LoopRepeat,
-      repetitionCount: number = Infinity) {
+    name: string | null = null, crossfadeTime: number = 0,
+    loopMode: AnimationActionLoopStyles = LoopRepeat,
+    repetitionCount: number = Infinity) {
     if (this._currentGLTF == null) {
       return;
     }
-    const {animations} = this;
+    const { animations } = this;
     if (animations == null || animations.length === 0) {
       return;
     }
@@ -732,7 +733,7 @@ export class ModelScene extends Scene {
         const parsedAnimationIndex = parseInt(name);
 
         if (!isNaN(parsedAnimationIndex) && parsedAnimationIndex >= 0 &&
-            parsedAnimationIndex < animations.length) {
+          parsedAnimationIndex < animations.length) {
           animationClip = animations[parsedAnimationIndex];
         }
       }
@@ -743,9 +744,15 @@ export class ModelScene extends Scene {
     }
 
     try {
-      const {currentAnimationAction: lastAnimationAction} = this;
+      const { currentAnimationAction: lastAnimationAction } = this;
 
       const action = this.mixer.clipAction(animationClip, this);
+
+      // Reset animationAction timeScale
+      if (action.timeScale != this.element.timeScale) {
+        action.timeScale = this.element.timeScale;
+      }
+
       this.currentAnimationAction = action;
 
       if (this.element.paused) {
@@ -755,8 +762,8 @@ export class ModelScene extends Scene {
         if (lastAnimationAction != null && action !== lastAnimationAction) {
           action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
         } else if (
-            this.animationTimeScale > 0 &&
-            this.animationTime == this.duration) {
+          this.animationTimeScale > 0 &&
+          this.animationTime == this.duration) {
           // This is a workaround for what I believe is a three.js bug.
           this.animationTime = 0;
         }
@@ -766,8 +773,103 @@ export class ModelScene extends Scene {
 
       action.enabled = true;
       action.clampWhenFinished = true;
-
       action.play();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  appendAnimation(
+    name: string = "",
+    loopMode: AnimationActionLoopStyles = LoopRepeat,
+    repetitionCount: number = Infinity, weight: number = 1, timeScale: number = 1, fade: boolean | number = false, warp: boolean | number = false) {
+    if (this._currentGLTF == null || name === this.element.animationName) {
+      return;
+    }
+    const { animations } = this;
+    if (animations == null || animations.length === 0) {
+      return;
+    }
+
+    let animationClip = null;
+    const defaultFade = 1.25;
+
+    if (name) {
+      animationClip = this.animationsByName.get(name);
+    }
+
+    if (animationClip == null) {
+      return;
+    }
+
+    try {
+      const action = this.mixer.existingAction(animationClip) || this.mixer.clipAction(animationClip, this);
+      if (name != null) {
+        this.element[$scene].appendedAnimations.push(name);
+      }
+      action.stop();
+      action.setLoop(loopMode, repetitionCount);
+
+      if (typeof fade === "boolean" && fade) {
+        action.fadeIn(defaultFade);
+      } else if (typeof fade === "number") {
+        action.fadeIn(fade);
+      } else {
+        if (weight >= 0) {
+          action.weight = weight;
+        }
+      }
+
+      if (typeof warp === "boolean" && warp) {
+        action.warp(0, timeScale, defaultFade);
+      } else if (typeof warp === "number") {
+        action.warp(0, timeScale, warp);
+      } else {
+        action.timeScale = timeScale;
+      }
+
+      action.enabled = true;
+      action.clampWhenFinished = true;
+      action.play();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  detachAnimation(
+    name: string = "", fade: boolean | number = true) {
+    if (this._currentGLTF == null || name === this.element.animationName) {
+      return;
+    }
+    const { animations } = this;
+    if (animations == null || animations.length === 0) {
+      return;
+    }
+
+    let animationClip = null;
+    const defaultFade = 1.5;
+
+    if (name) {
+      animationClip = this.animationsByName.get(name);
+    }
+
+    if (animationClip == null) {
+      return;
+    }
+
+    try {
+      const action = this.mixer.existingAction(animationClip) || this.mixer.clipAction(animationClip, this);
+
+      if (typeof fade === "boolean" && fade) {
+        action.fadeOut(defaultFade);
+      } else if (typeof fade === "number") {
+        action.fadeOut(fade);
+      } else {
+        action.stop();
+      }
+
+      const result = this.element[$scene].appendedAnimations.filter(i => i !== name);
+      this.element[$scene].appendedAnimations = result;
     } catch (error) {
       console.error(error);
     }
@@ -784,7 +886,7 @@ export class ModelScene extends Scene {
   }
 
   subscribeMixerEvent(
-      event: keyof AnimationMixerEventMap, callback: (...args: any[]) => void) {
+    event: keyof AnimationMixerEventMap, callback: (...args: any[]) => void) {
     this.mixer.addEventListener(event, callback);
   }
 
@@ -880,8 +982,7 @@ export class ModelScene extends Scene {
    * coordinates given relative to the model-viewer element. If the mesh
    * is not hit, the result is null.
    */
-  positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
-      {position: Vector3, normal: Vector3, uv: Vector2|null}|null {
+  positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this): { position: Vector3, normal: Vector3, uv: Vector2 | null } | null {
     const hit = this.hitFromPoint(ndcPosition, object);
     if (hit == null) {
       return null;
@@ -889,12 +990,12 @@ export class ModelScene extends Scene {
 
     const position = hit.point;
     const normal = hit.face != null ?
-        hit.face.normal.clone().applyNormalMatrix(
-            new Matrix3().getNormalMatrix(hit.object.matrixWorld)) :
-        raycaster.ray.direction.clone().multiplyScalar(-1);
+      hit.face.normal.clone().applyNormalMatrix(
+        new Matrix3().getNormalMatrix(hit.object.matrixWorld)) :
+      raycaster.ray.direction.clone().multiplyScalar(-1);
     const uv = hit.uv ?? null;
 
-    return {position, normal, uv};
+    return { position, normal, uv };
   }
 
   /**
@@ -904,7 +1005,7 @@ export class ModelScene extends Scene {
    * attribute of the hotspot to make it follow this point on the surface even
    * as the model animates. If the mesh is not hit, the result is null.
    */
-  surfaceFromPoint(ndcPosition: Vector2, object: Object3D = this): string|null {
+  surfaceFromPoint(ndcPosition: Vector2, object: Object3D = this): string | null {
     const model = this.element.model;
     if (model == null) {
       return null;
@@ -916,12 +1017,12 @@ export class ModelScene extends Scene {
     }
 
     const node = model[$nodeFromPoint](hit);
-    const {meshes, primitives} = node.mesh.userData.associations;
+    const { meshes, primitives } = node.mesh.userData.associations;
 
     const va = new Vector3();
     const vb = new Vector3();
     const vc = new Vector3();
-    const {a, b, c} = hit.face;
+    const { a, b, c } = hit.face;
     const mesh = hit.object as any;
     mesh.getVertexPosition(a, va);
     mesh.getVertexPosition(b, vb);
@@ -930,8 +1031,7 @@ export class ModelScene extends Scene {
     const uvw = new Vector3();
     tri.getBarycoord(mesh.worldToLocal(hit.point), uvw);
 
-    return `${meshes} ${primitives} ${a} ${b} ${c} ${uvw.x.toFixed(3)} ${
-        uvw.y.toFixed(3)} ${uvw.z.toFixed(3)}`;
+    return `${meshes} ${primitives} ${a} ${b} ${c} ${uvw.x.toFixed(3)} ${uvw.y.toFixed(3)} ${uvw.z.toFixed(3)}`;
   }
 
   /**
@@ -956,7 +1056,7 @@ export class ModelScene extends Scene {
    * Helper method to apply a function to all hotspots.
    */
   forHotspots(func: (hotspot: Hotspot) => void) {
-    const {children} = this.target;
+    const { children } = this.target;
     for (let i = 0, l = children.length; i < l; i++) {
       const hotspot = children[i];
       if (hotspot instanceof Hotspot) {
@@ -978,11 +1078,11 @@ export class ModelScene extends Scene {
       return;
     }
     const primitiveNode =
-        this.element.model[$nodeFromIndex](nodes[0].number, nodes[1].number);
+      this.element.model[$nodeFromIndex](nodes[0].number, nodes[1].number);
     if (primitiveNode == null) {
       console.warn(
-          hotspot.surface +
-          ' does not match a node/primitive in this glTF! Skipping this hotspot.');
+        hotspot.surface +
+        ' does not match a node/primitive in this glTF! Skipping this hotspot.');
       return;
     }
 
@@ -990,8 +1090,8 @@ export class ModelScene extends Scene {
     const tri = new Vector3(nodes[2].number, nodes[3].number, nodes[4].number);
     if (tri.x >= numVert || tri.y >= numVert || tri.z >= numVert) {
       console.warn(
-          hotspot.surface +
-          ' vertex indices out of range in this glTF! Skipping this hotspot.');
+        hotspot.surface +
+        ' vertex indices out of range in this glTF! Skipping this hotspot.');
       return;
     }
 
@@ -1025,7 +1125,7 @@ export class ModelScene extends Scene {
       target.setFromMatrixPosition(hotspot.matrixWorld);
       view.sub(target);
       normalWorld.copy(hotspot.normal)
-          .transformDirection(this.target.matrixWorld);
+        .transformDirection(this.target.matrixWorld);
       if (view.dot(normalWorld) < 0) {
         hotspot.hide();
       } else {
@@ -1054,16 +1154,16 @@ export class ModelScene extends Scene {
     });
   }
 
-  updateSchema(src: string|null) {
-    const {schemaElement, element} = this;
-    const {alt, poster, iosSrc} = element;
+  updateSchema(src: string | null) {
+    const { schemaElement, element } = this;
+    const { alt, poster, iosSrc } = element;
     if (src != null) {
       const encoding = [{
         '@type': 'MediaObject',
         contentUrl: src,
         encodingFormat: src.split('.').pop()?.toLowerCase() === 'gltf' ?
-            'model/gltf+json' :
-            'model/gltf-binary'
+          'model/gltf+json' :
+          'model/gltf-binary'
       }];
 
       if (iosSrc) {

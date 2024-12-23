@@ -14,9 +14,9 @@
  */
 
 import commonjs from '@rollup/plugin-commonjs';
-import {nodeResolve as resolve} from '@rollup/plugin-node-resolve';
+import { nodeResolve as resolve } from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import {basename} from 'path';
+import { basename } from 'path';
 import externalGlobals from 'rollup-plugin-external-globals';
 
 const onwarn = (warning, warn) => {
@@ -28,9 +28,9 @@ const onwarn = (warning, warn) => {
 
 const plugins = [
   commonjs(),
-  resolve({preferBuiltins: true, browser: true}),
-  replace({'Reflect.decorate': 'undefined'}),
-  externalGlobals({filament: 'Filament'})
+  resolve({ preferBuiltins: true, browser: true }),
+  replace({ 'Reflect.decorate': 'undefined', preventAssignment: true }),
+  externalGlobals({ filament: 'Filament' })
 ];
 
 const buildTarget = (input, outputFormat) => ({
@@ -40,13 +40,13 @@ const buildTarget = (input, outputFormat) => ({
     sourcemap: true,
     format: outputFormat,
     name: outputFormat === 'esm' ?
-        undefined :
-        basename(input)
-            .split('-')
-            .map(
-                string =>
-                    `${string.slice(0, 1).toUpperCase()}${string.slice(1)}`)
-            .join('')
+      undefined :
+      basename(input)
+        .split('-')
+        .map(
+          string =>
+            `${string.slice(0, 1).toUpperCase()}${string.slice(1)}`)
+        .join('')
   },
   watch: {
     include: '{lib/**,lib/third_party/**}',

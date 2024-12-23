@@ -17,6 +17,7 @@
 
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
+import swc from '@rollup/plugin-swc';
 
 const watchFiles = ['lib/**', '../model-viewer/lib/**'];
 
@@ -30,12 +31,17 @@ const plugins = [
     },
   },
   resolve(),
-  commonjs()
+  commonjs(),
+  swc()
 ];
 
 export default [{
   input: './lib/app.js',
-  output: {file: './dist/space-opera.js', format: 'esm', name: 'Space Opera'},
+  output: { file: './dist/space-opera.js', format: 'esm', name: 'Space Opera' },
+  onwarn(warning, warn) {
+    if (warning.code === 'THIS_IS_UNDEFINED') return;
+    warn(warning);
+  },
   plugins,
   watch: {
     include: watchFiles,
