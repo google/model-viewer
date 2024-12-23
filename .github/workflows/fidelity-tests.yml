@@ -14,6 +14,11 @@ jobs:
 
     - uses: actions/setup-node@v4
 
+    - uses: browser-actions/setup-chrome@v1
+      with:
+        install-chromedriver: true
+        install-dependencies: true
+
     - name: NPM install
       run: npm ci
 
