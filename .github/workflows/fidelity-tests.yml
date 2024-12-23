@@ -19,7 +19,7 @@ jobs:
         install-chromedriver: true
 
     - name: Fix dependencies
-      run:  apt -y --fix-broken install
+      run:  sudo apt -y --fix-broken install
 
     - name: NPM install
       run: npm ci
