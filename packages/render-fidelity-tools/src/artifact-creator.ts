@@ -300,7 +300,7 @@ export class ArtifactCreator {
 
     if (this.browser == null) {
       console.log(`🚀 Launching browser`);
-      this.browser = await puppeteer.launch({headless: quiet});
+      this.browser = await puppeteer.launch({headless: quiet, args:['--no-sandbox', '--disable-setuid-sandbox']});
     }
 
     const page = await this.browser.newPage();
