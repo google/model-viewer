@@ -923,6 +923,21 @@ export class ModelScene extends Scene {
       return;
     }
 
+    if (typeof fade === 'string') {
+      // @ts-ignore: Unreachable code error
+      if (fade.toLowerCase().trim() === 'true') {
+        fade = true;
+        // @ts-ignore: Unreachable code error
+      } else if (fade.toLowerCase().trim() === 'false') {
+        fade = false;
+      } else if (!isNaN(fade)) {
+        fade = parseFloat(fade);
+      } else {
+        fade = true;
+        console.warn('Invalid fade value, fade is set to true');
+      }
+    }
+
     try {
       const action = this.mixer.existingAction(animationClip) ||
           this.mixer.clipAction(animationClip, this);
@@ -930,7 +945,7 @@ export class ModelScene extends Scene {
       if (typeof fade === 'boolean' && fade) {
         action.fadeOut(defaultFade);
       } else if (typeof fade === 'number') {
-        action.fadeOut(fade);
+        action.fadeOut(Math.max(fade, 0));
       } else {
         action.stop();
       }
