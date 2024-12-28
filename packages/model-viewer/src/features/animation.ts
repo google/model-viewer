@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import { property } from 'lit/decorators.js';
-import { LoopOnce, LoopPingPong, LoopRepeat } from 'three';
+import {property} from 'lit/decorators.js';
+import {LoopOnce, LoopPingPong, LoopRepeat} from 'three';
 
-import ModelViewerElementBase, { $getModelIsVisible, $needsRender, $onModelLoad, $renderer, $scene, $tick } from '../model-viewer-base.js';
-import { Constructor } from '../utilities.js';
+import ModelViewerElementBase, {$getModelIsVisible, $needsRender, $onModelLoad, $renderer, $scene, $tick} from '../model-viewer-base.js';
+import {Constructor} from '../utilities.js';
 
 const MILLISECONDS_PER_SECOND = 1000.0
 
@@ -31,16 +31,12 @@ interface PlayAnimationOptions {
 }
 
 interface AppendAnimationOptions {
-  pingpong: boolean,
-  repetitions: number,
-  weight: number,
-  timeScale: number,
-  fade: boolean | number,
-  warp: boolean | number
+  pingpong: boolean, repetitions: number, weight: number, timeScale: number,
+      fade: boolean|number, warp: boolean|number
 }
 
 interface DetachAnimationOptions {
-  fade: boolean | number
+  fade: boolean|number
 }
 
 const DEFAULT_PLAY_OPTIONS: PlayAnimationOptions = {
@@ -63,7 +59,7 @@ const DEFAULT_DETACH_OPTIONS: DetachAnimationOptions = {
 
 export declare interface AnimationInterface {
   autoplay: boolean;
-  animationName: string | void;
+  animationName: string|void;
   animationCrossfadeDuration: number;
   readonly availableAnimations: Array<string>;
   readonly paused: boolean;
@@ -72,20 +68,22 @@ export declare interface AnimationInterface {
   timeScale: number;
   pause(): void;
   play(options?: PlayAnimationOptions): void;
-  appendAnimation(animationName: string, options?: AppendAnimationOptions): void;
-  detachAnimation(animationName: string, options?: DetachAnimationOptions): void;
+  appendAnimation(animationName: string, options?: AppendAnimationOptions):
+      void;
+  detachAnimation(animationName: string, options?: DetachAnimationOptions):
+      void;
 }
 
 export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
-  ModelViewerElement: T): Constructor<AnimationInterface> & T => {
+    ModelViewerElement: T): Constructor<AnimationInterface>&T => {
   class AnimationModelViewerElement extends ModelViewerElement {
-    @property({ type: Boolean }) autoplay: boolean = false;
-    @property({ type: String, attribute: 'animation-name' })
-    animationName: string | undefined = undefined;
-    @property({ type: Number, attribute: 'animation-crossfade-duration' })
+    @property({type: Boolean}) autoplay: boolean = false;
+    @property({type: String, attribute: 'animation-name'})
+    animationName: string|undefined = undefined;
+    @property({type: Number, attribute: 'animation-crossfade-duration'})
     animationCrossfadeDuration: number = 300;
 
-    protected [$paused]: boolean = true;
+    protected[$paused]: boolean = true;
 
     constructor(...args: any[]) {
       super(args);
@@ -94,13 +92,15 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         const count = e.action._loopCount;
         const name = e.action._clip.name;
         const uuid = e.action._clip.uuid;
-        this.dispatchEvent(new CustomEvent('loop', { detail: { count, name, uuid } }));
+        this.dispatchEvent(
+            new CustomEvent('loop', {detail: {count, name, uuid}}));
       });
       this[$scene].subscribeMixerEvent('finished', (e) => {
         if (!this[$scene].appendedAnimations.includes(e.action._clip.name)) {
           this[$paused] = true;
         } else {
-          const result = this[$scene].appendedAnimations.filter(i => i !== e.action._clip.name);
+          const result = this[$scene].appendedAnimations.filter(
+              i => i !== e.action._clip.name);
           this[$scene].appendedAnimations = result;
         }
         this.dispatchEvent(new CustomEvent('finished'));
@@ -167,24 +167,22 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     appendAnimation(animationName: string, options?: AppendAnimationOptions) {
-
       if (this.availableAnimations.length > 0) {
         this[$paused] = false;
 
         this[$appendAnimation](animationName, options);
 
-        this.dispatchEvent(new CustomEvent('appendanimation'));
+        this.dispatchEvent(new CustomEvent('append-animation'));
       }
     }
 
     detachAnimation(animationName: string, options?: DetachAnimationOptions) {
-
       if (this.availableAnimations.length > 0) {
         this[$paused] = false;
 
         this[$detachAnimation](animationName, options);
 
-        this.dispatchEvent(new CustomEvent('detachanimation'));
+        this.dispatchEvent(new CustomEvent('detach-animation'));
       }
     }
 
@@ -206,7 +204,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       super[$tick](_time, delta);
 
       if (this[$paused] ||
-        (!this[$getModelIsVisible]() && !this[$renderer].isPresenting)) {
+          (!this[$getModelIsVisible]() && !this[$renderer].isPresenting)) {
         return;
       }
 
@@ -230,13 +228,13 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$changeAnimation](options: PlayAnimationOptions = DEFAULT_PLAY_OPTIONS) {
       const repetitions = options.repetitions ?? Infinity;
       const mode = options.pingpong ?
-        LoopPingPong :
-        (repetitions === 1 ? LoopOnce : LoopRepeat);
+          LoopPingPong :
+          (repetitions === 1 ? LoopOnce : LoopRepeat);
       this[$scene].playAnimation(
-        this.animationName,
-        this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND,
-        mode,
-        repetitions);
+          this.animationName,
+          this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND,
+          mode,
+          repetitions);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation
@@ -246,16 +244,22 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$appendAnimation](animationName: string = "", options: AppendAnimationOptions = DEFAULT_APPEND_OPTIONS) {
+    [$appendAnimation](
+        animationName: string = '',
+        options: AppendAnimationOptions = DEFAULT_APPEND_OPTIONS) {
       const repetitions = options.repetitions ?? Infinity;
       const mode = options.pingpong ?
-        LoopPingPong :
-        (repetitions === 1 ? LoopOnce : LoopRepeat);
+          LoopPingPong :
+          (repetitions === 1 ? LoopOnce : LoopRepeat);
 
       this[$scene].appendAnimation(
-        animationName ? animationName : this.animationName,
-        mode,
-        repetitions, options.weight, options.timeScale, options.fade, options.warp);
+          animationName ? animationName : this.animationName,
+          mode,
+          repetitions,
+          options.weight,
+          options.timeScale,
+          options.fade,
+          options.warp);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation
@@ -265,10 +269,11 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$detachAnimation](animationName: string = "", options: DetachAnimationOptions = DEFAULT_DETACH_OPTIONS) {
+    [$detachAnimation](
+        animationName: string = '',
+        options: DetachAnimationOptions = DEFAULT_DETACH_OPTIONS) {
       this[$scene].detachAnimation(
-        animationName ? animationName : this.animationName,
-        options.fade);
+          animationName ? animationName : this.animationName, options.fade);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation

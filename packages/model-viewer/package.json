@@ -1,6 +1,6 @@
 {
   "name": "@google/model-viewer",
-  "version": "5.0.0",
+  "version": "4.0.0",
   "description": "Easily display interactive 3D models on the web and in AR!",
   "repository": "https://github.com/google/model-viewer",
   "bugs": {
@@ -95,7 +95,7 @@
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-swc": "^0.4.0",
     "@rollup/plugin-terser": "^0.4.4",
-    "@swc/core": "^1.10.1",
+    "@swc/core": "^1.10.3",
     "@types/mocha": "^10.0.10",
     "@types/pngjs": "^6.0.5",
     "@types/three": "^0.171.0",

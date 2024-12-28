@@ -226,6 +226,10 @@
         "name": "Crossfade"
       },
       {
+        "htmlId": "appendAnimation",
+        "name": "Append Animation"
+      },
+      {
         "htmlId": "paused",
         "name": "Paused"
       }

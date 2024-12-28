@@ -37,9 +37,10 @@ const plugins = [
 
 export default [{
   input: './lib/app.js',
-  output: { file: './dist/space-opera.js', format: 'esm', name: 'Space Opera' },
+  output: {file: './dist/space-opera.js', format: 'esm', name: 'Space Opera'},
   onwarn(warning, warn) {
-    if (warning.code === 'THIS_IS_UNDEFINED') return;
+    if (warning.code === 'THIS_IS_UNDEFINED')
+      return;
     warn(warning);
   },
   plugins,
