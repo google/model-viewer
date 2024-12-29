@@ -159,8 +159,8 @@ export class ARRenderer extends EventDispatcher<
 
     const session: XRSession =
         await navigator.xr!.requestSession!('immersive-ar', {
-          requiredFeatures: ['hit-test'],
-          optionalFeatures: ['dom-overlay', 'light-estimation'],
+          requiredFeatures: [],
+          optionalFeatures: ['hit-test', 'dom-overlay', 'light-estimation'],
           domOverlay: this.overlay ? {root: this.overlay} : undefined
         });
 
