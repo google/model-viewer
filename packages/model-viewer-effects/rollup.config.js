@@ -16,10 +16,10 @@
 import commonjs from '@rollup/plugin-commonjs';
 import {nodeResolve as resolve} from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
+import swc from '@rollup/plugin-swc';
 import terser from '@rollup/plugin-terser';
 import cleanup from 'rollup-plugin-cleanup';
 import dts from 'rollup-plugin-dts';
-import polyfill from 'rollup-plugin-polyfill';
 
 const {NODE_ENV} = process.env;
 
@@ -30,7 +30,10 @@ const onwarn = (warning, warn) => {
   }
 };
 
-let plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
+let plugins = [
+  resolve(),
+  replace({'Reflect.decorate': 'undefined', preventAssignment: true})
+];
 
 const watchFiles = ['lib/**'];
 
@@ -59,7 +62,7 @@ if (NODE_ENV !== 'development') {
   const pluginsIE11 = [
     ...plugins,
     commonjs(),
-    polyfill(['object.values/auto']),
+    swc(),
     cleanup({
       // Ideally we'd also clean third_party/three, which saves
       // ~45kb in filesize alone... but takes 2 minutes to build

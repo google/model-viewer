@@ -29,7 +29,7 @@ const onwarn = (warning, warn) => {
 const plugins = [
   commonjs(),
   resolve({preferBuiltins: true, browser: true}),
-  replace({'Reflect.decorate': 'undefined'}),
+  replace({'Reflect.decorate': 'undefined', preventAssignment: true}),
   externalGlobals({filament: 'Filament'})
 ];
 
