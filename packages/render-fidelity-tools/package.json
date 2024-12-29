@@ -22,29 +22,29 @@
     "node": ">=12.0.0"
   },
   "dependencies": {
-    "@actions/core": "^1.2.4",
+    "@actions/core": "^1.11.1",
     "@google/model-viewer": "^4.0.0",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
     "@polymer/paper-slider": "^3.0.1",
-    "@types/http-server": "^0.10.0",
-    "@types/pngjs": "^3.4.0",
+    "@types/http-server": "^0.12.4",
+    "@types/pngjs": "^6.0.5",
     "http-server": "^14.1.1",
     "lit": "^3.2.1",
     "mkdirp": "^3.0.1",
     "pngjs": "^7.0.0",
-    "puppeteer": "^23.4.0",
+    "puppeteer": "^23.11.1",
     "rimraf": "^6.0.1",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.1",
-    "@rollup/plugin-node-resolve": "^15.3.0",
-    "@rollup/plugin-replace": "^6.0.1",
-    "@types/yargs": "^17.0.29",
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-replace": "^6.0.2",
+    "@types/yargs": "^17.0.33",
     "polymer-build": "^3.1.4",
-    "rollup": "^4.24.0",
-    "rollup-plugin-external-globals": "^0.12.0",
-    "typescript": "5.6.3"
+    "rollup": "^4.29.1",
+    "rollup-plugin-external-globals": "^0.13.0",
+    "typescript": "5.7.2"
   }
 }
