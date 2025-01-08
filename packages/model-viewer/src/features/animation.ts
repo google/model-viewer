@@ -31,8 +31,9 @@ interface PlayAnimationOptions {
 }
 
 interface AppendAnimationOptions {
-  pingpong: boolean, repetitions: number, weight: number, timeScale: number,
-      fade: boolean|number, warp: boolean|number
+  pingpong: boolean, repetitions: number|null, weight: number,
+      timeScale: number, fade: boolean|number, warp: boolean|number,
+      relativeWarp: boolean
 }
 
 interface DetachAnimationOptions {
@@ -46,11 +47,12 @@ const DEFAULT_PLAY_OPTIONS: PlayAnimationOptions = {
 
 const DEFAULT_APPEND_OPTIONS: AppendAnimationOptions = {
   pingpong: false,
-  repetitions: Infinity,
+  repetitions: null,
   weight: 1,
   timeScale: 1,
   fade: false,
-  warp: false
+  warp: false,
+  relativeWarp: true
 };
 
 const DEFAULT_DETACH_OPTIONS: DetachAnimationOptions = {
@@ -92,6 +94,19 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         const count = e.action._loopCount;
         const name = e.action._clip.name;
         const uuid = e.action._clip.uuid;
+        const targetAnimation =
+            this[$scene].markedAnimations.find(e => e.name === name);
+
+        if (targetAnimation) {
+          this[$scene].updateAnimationLoop(
+              targetAnimation.name,
+              targetAnimation.loopMode,
+              targetAnimation.repetitionCount);
+          const filtredArr =
+              this[$scene].markedAnimations.filter(e => e.name !== name);
+          this[$scene].markedAnimations = filtredArr;
+        }
+
         this.dispatchEvent(
             new CustomEvent('loop', {detail: {count, name, uuid}}));
       });
@@ -99,9 +114,9 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (!this[$scene].appendedAnimations.includes(e.action._clip.name)) {
           this[$paused] = true;
         } else {
-          const result = this[$scene].appendedAnimations.filter(
+          const filterdList = this[$scene].appendedAnimations.filter(
               i => i !== e.action._clip.name);
-          this[$scene].appendedAnimations = result;
+          this[$scene].appendedAnimations = filterdList;
         }
         this.dispatchEvent(new CustomEvent('finished'));
       });
@@ -252,6 +267,8 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
           LoopPingPong :
           (repetitions === 1 ? LoopOnce : LoopRepeat);
 
+      const needsToStop = !!options.repetitions;
+
       this[$scene].appendAnimation(
           animationName ? animationName : this.animationName,
           mode,
@@ -259,7 +276,9 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
           options.weight,
           options.timeScale,
           options.fade,
-          options.warp);
+          options.warp,
+          options.relativeWarp,
+          needsToStop);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation

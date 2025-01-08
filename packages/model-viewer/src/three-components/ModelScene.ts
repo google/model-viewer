@@ -44,6 +44,10 @@ export interface ModelSceneConfig {
   height: number;
 }
 
+export interface MarkedAnimation {
+  name: string, loopMode: AnimationActionLoopStyles, repetitionCount: number
+}
+
 export type IlluminationRole = 'primary'|'secondary';
 
 export const IlluminationRole: {[index: string]: IlluminationRole} = {
@@ -77,6 +81,7 @@ export class ModelScene extends Scene {
   public renderCount = 0;
   public externalRenderer: RendererInterface|null = null;
   public appendedAnimations: Array<string> = [];
+  public markedAnimations: Array<MarkedAnimation> = [];
 
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
@@ -783,7 +788,8 @@ export class ModelScene extends Scene {
       name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
       repetitionCount: number = Infinity, weight: number = 1,
       timeScale: number = 1, fade: boolean|number = false,
-      warp: boolean|number = false) {
+      warp: boolean|number = false, relativeWarp: boolean = true,
+      needsToStop: boolean = false) {
     if (this._currentGLTF == null || name === this.element.animationName) {
       return;
     }
@@ -812,6 +818,8 @@ export class ModelScene extends Scene {
         console.warn(
             'Invalid repetitionCount value, repetitionCount is set to Infinity');
       }
+    } else if (typeof repetitionCount === 'number' && repetitionCount < 1) {
+      repetitionCount = 1;
     }
 
     if (repetitionCount === 1 && loopMode !== LoopOnce) {
@@ -870,12 +878,13 @@ export class ModelScene extends Scene {
       const action = this.mixer.existingAction(animationClip) ||
           this.mixer.clipAction(animationClip, this);
 
-      if (!this.appendedAnimations.includes(name)) {
-        this.element[$scene].appendedAnimations.push(name);
-      }
+      const currentTimeScale = action.timeScale;
 
-      action.stop();
-      action.setLoop(loopMode, repetitionCount);
+      if (needsToStop && this.appendedAnimations.includes(name)) {
+        if (!this.markedAnimations.map(e => e.name).includes(name)) {
+          this.markedAnimations.push({name, loopMode, repetitionCount});
+        }
+      }
 
       if (typeof fade === 'boolean' && fade) {
         action.fadeIn(defaultFade);
@@ -888,16 +897,26 @@ export class ModelScene extends Scene {
       }
 
       if (typeof warp === 'boolean' && warp) {
-        action.warp(0, timeScale, defaultFade);
+        action.warp(
+            relativeWarp ? currentTimeScale : 0, timeScale, defaultFade);
       } else if (typeof warp === 'number') {
-        action.warp(0, timeScale, Math.max(warp, 0));
+        action.warp(
+            relativeWarp ? currentTimeScale : 0, timeScale, Math.max(warp, 0));
       } else {
-        action.timeScale = Math.min(Math.max(timeScale, 0), 1);
+        action.timeScale = timeScale;
       }
 
-      action.enabled = true;
-      action.clampWhenFinished = true;
-      action.play();
+      if (!action.isRunning()) {
+        action.setLoop(loopMode, repetitionCount);
+        action.paused = false;
+        action.enabled = true;
+        action.clampWhenFinished = true;
+        action.play();
+      }
+
+      if (!this.appendedAnimations.includes(name)) {
+        this.element[$scene].appendedAnimations.push(name);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -953,6 +972,38 @@ export class ModelScene extends Scene {
       const result =
           this.element[$scene].appendedAnimations.filter(i => i !== name);
       this.element[$scene].appendedAnimations = result;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  updateAnimationLoop(
+      name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
+      repetitionCount: number = Infinity) {
+    if (this._currentGLTF == null || name === this.element.animationName) {
+      return;
+    }
+    const {animations} = this;
+    if (animations == null || animations.length === 0) {
+      return;
+    }
+
+    let animationClip = null;
+
+    if (name) {
+      animationClip = this.animationsByName.get(name);
+    }
+
+    if (animationClip == null) {
+      return;
+    }
+
+    try {
+      const action = this.mixer.existingAction(animationClip) ||
+          this.mixer.clipAction(animationClip, this);
+      action.stop();
+      action.setLoop(loopMode, repetitionCount);
+      action.play();
     } catch (error) {
       console.error(error);
     }
