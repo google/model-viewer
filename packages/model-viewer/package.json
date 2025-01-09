@@ -87,7 +87,7 @@
     "@monogrid/gainmap-js": "^3.1.0"
   },
   "peerDependencies": {
-    "three": "^0.172.0"
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.2",
