@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
-import { property } from 'lit/decorators.js';
-import { BlendFunction, BrightnessContrastEffect, HueSaturationEffect, ToneMappingEffect } from 'postprocessing';
-import { clamp, validateLiteralType, wrapClamp } from '../utilities.js';
-import { $updateProperties, MVEffectBase } from './mixins/effect-base.js';
-import { ToneMappingMode as PPToneMappingMode } from 'postprocessing';
-import { $effectComposer, $tonemapping } from '../effect-composer.js';
-import { ACESFilmicToneMapping, NoToneMapping } from 'three';
+import {property} from 'lit/decorators.js';
+import {BlendFunction, BrightnessContrastEffect, HueSaturationEffect, ToneMappingEffect, ToneMappingMode as PPToneMappingMode} from 'postprocessing';
+import {NeutralToneMapping, NoToneMapping} from 'three';
+
+import {$effectComposer, $tonemapping} from '../effect-composer.js';
+import {clamp, validateLiteralType, wrapClamp} from '../utilities.js';
+
+import {$updateProperties, MVEffectBase} from './mixins/effect-base.js';
 
 const TWO_PI = Math.PI * 2;
 
-export type ToneMappingMode = keyof typeof PPToneMappingMode;;
-export const TONEMAPPING_MODES = Object.keys(PPToneMappingMode) as ToneMappingMode[];
+export type ToneMappingMode = keyof typeof PPToneMappingMode;
+;
+export const TONEMAPPING_MODES =
+    Object.keys(PPToneMappingMode) as ToneMappingMode[];
 
 export class MVColorGradeEffect extends MVEffectBase {
   static get is() {
@@ -32,37 +35,37 @@ export class MVColorGradeEffect extends MVEffectBase {
   }
 
   /**
-   * `reinhard | reinhard2 | reinhard_adaptive | optimized_cineon | aces_filmic | linear`
+   * `reinhard | reinhard2 | reinhard_adaptive | optimized_cineon | aces_filmic
+   * | linear`
    * @default 'aces_filmic'
    */
-  @property({ type: String, attribute: 'tonemapping', reflect: true})
+  @property({type: String, attribute: 'tonemapping', reflect: true})
   tonemapping: ToneMappingMode = 'ACES_FILMIC'
 
-  /**
-   * Value in the range of (-1, 1).
-   */
-  @property({ type: Number, attribute: 'brightness', reflect: true })
-  brightness = 0;
+      /**
+       * Value in the range of (-1, 1).
+       */
+      @property({type: Number, attribute: 'brightness', reflect: true})
+      brightness = 0;
 
   /**
    * Value in the range of (-1, 1).
    */
-  @property({ type: Number, attribute: 'contrast', reflect: true })
-  contrast = 0;
+  @property({type: Number, attribute: 'contrast', reflect: true}) contrast = 0;
 
   /**
    * Value in the range of (-1, 1).
    */
-  @property({ type: Number, attribute: 'saturation', reflect: true })
+  @property({type: Number, attribute: 'saturation', reflect: true})
   saturation = 0;
 
   /**
    * Value in the range of (0, 2 * PI).
    *
-   * This property is wrapping, meaning that if you set it above the max it resets to the minimum and vice-versa.
+   * This property is wrapping, meaning that if you set it above the max it
+   * resets to the minimum and vice-versa.
    */
-  @property({ type: Number, attribute: 'hue', reflect: true })
-  hue = 0;
+  @property({type: Number, attribute: 'hue', reflect: true}) hue = 0;
 
   constructor() {
     super();
@@ -88,23 +91,20 @@ export class MVColorGradeEffect extends MVEffectBase {
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string | number | symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
-    if (
-      changedProperties.has('tonemapping') ||
-      changedProperties.has('brightness') ||
-      changedProperties.has('contrast') ||
-      changedProperties.has('hue') ||
-      changedProperties.has('saturation') ||
-      changedProperties.has('blendMode')
-    ) {
+    if (changedProperties.has('tonemapping') ||
+        changedProperties.has('brightness') ||
+        changedProperties.has('contrast') || changedProperties.has('hue') ||
+        changedProperties.has('saturation') ||
+        changedProperties.has('blendMode')) {
       this[$updateProperties]();
     }
   }
 
   [$updateProperties]() {
     if (this.blendMode === 'SKIP') {
-      this.effectComposer[$effectComposer][$tonemapping] = ACESFilmicToneMapping;
+      this.effectComposer[$effectComposer][$tonemapping] = NeutralToneMapping;
     } else {
       this.effectComposer[$effectComposer][$tonemapping] = NoToneMapping;
     }
@@ -119,7 +119,8 @@ export class MVColorGradeEffect extends MVEffectBase {
     try {
       this.tonemapping = this.tonemapping.toUpperCase() as ToneMappingMode;
       validateLiteralType(TONEMAPPING_MODES, this.tonemapping);
-      (this.effects[0] as ToneMappingEffect).mode = PPToneMappingMode[this.tonemapping];
+      (this.effects[0] as ToneMappingEffect).mode =
+          PPToneMappingMode[this.tonemapping];
     } finally {
       this.effectComposer.queueRender();
     }

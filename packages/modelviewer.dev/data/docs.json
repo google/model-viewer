@@ -897,13 +897,13 @@
       {
         "name": "tone-mapping",
         "htmlName": "toneMapping",
-        "description": "Selects the function that compresses the HDR rendering to an SDR image on your screen. ACES is a film industry standard that is commonly used, though it has serious color-accuracy problems. AgX is a new and improved tone mapper seeing broad adoption in film and games. Khronos PBR Neutral ('neutral') is a standard function designed specifically for accurate color reproduction in e-commerce. Our current default is neutral, but prior to v4.0 this default was ACES. The deprecated name commerce is an alias for neutral.",
+        "description": "Selects the function that compresses the HDR rendering to an SDR image on your screen. ACES is a film industry standard that is commonly used, though it has serious color-accuracy problems. AgX is a new and improved tone mapper seeing broad adoption in film and games. Khronos PBR Neutral ('neutral') is a standard function designed specifically for accurate color reproduction in e-commerce. Our current default is neutral, but prior to v4.0 this default was ACES. The deprecated name commerce is an alias for neutral. Other options include NoToneMapping, which disables tone mapping entirely, LinearToneMapping, a simple linear scaling of brightness values, ReinhardToneMapping, a balanced approach for natural-looking HDR images, and CineonToneMapping, which emulates the look of traditional film. Each tone mapper has its use cases, depending on the desired visual outcome and application requirements.",
         "links": [
           "<a href=\"../examples/lightingandenv/#toneMapping\"><span class='attribute'>tone-mapping</span> example</a>"
         ],
         "default": {
           "default": "neutral",
-          "options": "neutral, aces, agx"
+          "options": "neutral, aces, agx, reinhard, cineon, linear, none"
         }
       },
       {

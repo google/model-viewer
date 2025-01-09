@@ -18,7 +18,7 @@ import {ModelScene} from '@google/model-viewer/lib/three-components/ModelScene.j
 import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
 import {EffectComposer as PPEffectComposer, EffectPass, NormalPass, Pass, RenderPass, Selection} from 'postprocessing';
-import {ACESFilmicToneMapping, Camera, HalfFloatType, NeutralToneMapping, ToneMapping, UnsignedByteType, WebGLRenderer} from 'three';
+import {Camera, HalfFloatType, NeutralToneMapping, ToneMapping, UnsignedByteType, WebGLRenderer} from 'three';
 
 import {IMVEffect, IntegrationOptions, MVEffectBase} from './effects/mixins/effect-base.js';
 import {disposeEffectPass, isConvolution, validateLiteralType} from './utilities.js';
@@ -71,7 +71,7 @@ export class EffectComposer extends PPEffectComposer {
 
   private postRender() {
     const renderer = this.getRenderer();
-    renderer.toneMapping = ACESFilmicToneMapping;
+    renderer.toneMapping = NeutralToneMapping;
     renderer.autoClear = true;
   }
 

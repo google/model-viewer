@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, Event, EventDispatcher, NeutralToneMapping, Vector2, WebGLRenderer} from 'three';
+import {Event, EventDispatcher, NeutralToneMapping, Vector2, WebGLRenderer} from 'three';
 
 import {$updateEnvironment} from '../features/environment.js';
 import {ModelViewerGlobalConfig} from '../features/loading.js';
@@ -158,7 +158,7 @@ export class Renderer extends
 
       // ACESFilmicToneMapping appears to be the most "saturated",
       // and similar to Filament's gltf-viewer.
-      this.threeRenderer.toneMapping = ACESFilmicToneMapping;
+      this.threeRenderer.toneMapping = NeutralToneMapping;
     } catch (error) {
       console.warn(error);
     }
