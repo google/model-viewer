@@ -267,7 +267,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
           LoopPingPong :
           (repetitions === 1 ? LoopOnce : LoopRepeat);
 
-      const needsToStop = !!options.repetitions;
+      const needsToStop = !!options.repetitions || "pingpong" in options;
 
       this[$scene].appendAnimation(
           animationName ? animationName : this.animationName,
