@@ -33,7 +33,7 @@ interface PlayAnimationOptions {
 interface AppendAnimationOptions {
   pingpong: boolean, repetitions: number|null, weight: number,
       timeScale: number, fade: boolean|number, warp: boolean|number,
-      relativeWarp: boolean
+      relativeWarp: boolean, time: number|null
 }
 
 interface DetachAnimationOptions {
@@ -52,7 +52,8 @@ const DEFAULT_APPEND_OPTIONS: AppendAnimationOptions = {
   timeScale: 1,
   fade: false,
   warp: false,
-  relativeWarp: true
+  relativeWarp: true,
+  time: null
 };
 
 const DEFAULT_DETACH_OPTIONS: DetachAnimationOptions = {
@@ -267,7 +268,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
           LoopPingPong :
           (repetitions === 1 ? LoopOnce : LoopRepeat);
 
-      const needsToStop = !!options.repetitions || "pingpong" in options;
+      const needsToStop = !!options.repetitions || 'pingpong' in options;
 
       this[$scene].appendAnimation(
           animationName ? animationName : this.animationName,
@@ -278,6 +279,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
           options.fade,
           options.warp,
           options.relativeWarp,
+          options.time,
           needsToStop);
 
       // If we are currently paused, we need to force a render so that

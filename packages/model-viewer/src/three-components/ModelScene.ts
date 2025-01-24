@@ -789,7 +789,7 @@ export class ModelScene extends Scene {
       repetitionCount: number = Infinity, weight: number = 1,
       timeScale: number = 1, fade: boolean|number = false,
       warp: boolean|number = false, relativeWarp: boolean = true,
-      needsToStop: boolean = false) {
+      time: null|number = null, needsToStop: boolean = false) {
     if (this._currentGLTF == null || name === this.element.animationName) {
       return;
     }
@@ -874,6 +874,12 @@ export class ModelScene extends Scene {
       }
     }
 
+    if (typeof time === 'string') {
+      if (!isNaN(time)) {
+        time = parseFloat(time);
+      }
+    }
+
     try {
       const action = this.mixer.existingAction(animationClip) ||
           this.mixer.clipAction(animationClip, this);
@@ -884,6 +890,10 @@ export class ModelScene extends Scene {
         if (!this.markedAnimations.map(e => e.name).includes(name)) {
           this.markedAnimations.push({name, loopMode, repetitionCount});
         }
+      }
+
+      if (typeof time === 'number') {
+        action.time = Math.min(Math.max(time, 0), animationClip.duration);
       }
 
       if (typeof fade === 'boolean' && fade) {
@@ -1028,8 +1038,8 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Call if the object has been changed in such a way that the shadow's shape
-   * has changed (not a rotation about the Y axis).
+   * Call if the object has been changed in such a way that the shadow's
+   * shape has changed (not a rotation about the Y axis).
    */
   updateShadow() {
     const shadow = this.shadow;
@@ -1075,9 +1085,9 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Sets the shadow's softness by mapping a [0, 1] softness parameter to the
-   * shadow's resolution. This involves reallocation, so it should not be
-   * changed frequently. Softer shadows are cheaper to render.
+   * Sets the shadow's softness by mapping a [0, 1] softness parameter to
+   * the shadow's resolution. This involves reallocation, so it should not
+   * be changed frequently. Softer shadows are cheaper to render.
    */
   setShadowSoftness(softness: number) {
     this.shadowSoftness = softness;
@@ -1088,8 +1098,8 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Shift the floor vertically from the bottom of the model's bounding box by
-   * offset (should generally be negative).
+   * Shift the floor vertically from the bottom of the model's bounding box
+   * by offset (should generally be negative).
    */
   setShadowOffset(offset: number) {
     const shadow = this.shadow;
@@ -1137,11 +1147,11 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * This method returns a dynamic hotspot ID string of the point on the mesh
-   * corresponding to the input pixel coordinates given relative to the
+   * This method returns a dynamic hotspot ID string of the point on the
+   * mesh corresponding to the input pixel coordinates given relative to the
    * model-viewer element. The ID string can be used in the data-surface
-   * attribute of the hotspot to make it follow this point on the surface even
-   * as the model animates. If the mesh is not hit, the result is null.
+   * attribute of the hotspot to make it follow this point on the surface
+   * even as the model animates. If the mesh is not hit, the result is null.
    */
   surfaceFromPoint(ndcPosition: Vector2, object: Object3D = this): string|null {
     const model = this.element.model;
@@ -1175,8 +1185,8 @@ export class ModelScene extends Scene {
 
   /**
    * The following methods are for operating on the set of Hotspot objects
-   * attached to the scene. These come from DOM elements, provided to slots by
-   * the Annotation Mixin.
+   * attached to the scene. These come from DOM elements, provided to slots
+   * by the Annotation Mixin.
    */
   addHotspot(hotspot: Hotspot) {
     this.target.add(hotspot);
@@ -1255,8 +1265,8 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Update the CSS visibility of the hotspots based on whether their normals
-   * point toward the camera.
+   * Update the CSS visibility of the hotspots based on whether their
+   * normals point toward the camera.
    */
   updateHotspotsVisibility(viewerPosition: Vector3) {
     this.forHotspots((hotspot) => {
@@ -1274,8 +1284,8 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Rotate all hotspots to an absolute orientation given by the input number of
-   * radians. Zero returns them to upright.
+   * Rotate all hotspots to an absolute orientation given by the input
+   * number of radians. Zero returns them to upright.
    */
   orientHotspots(radians: number) {
     this.forHotspots((hotspot) => {
