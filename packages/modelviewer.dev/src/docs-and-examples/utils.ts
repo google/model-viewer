@@ -115,30 +115,24 @@ export function init(docsOrExample: string) {
   });
 }
 
-export function toggleSidebar() {
-  const root = document.documentElement;
-  const nav = document.getElementById('sidenav')!;
-  if (nav.offsetWidth > 150) {
-    root.style.setProperty('--sidebar-width', '0px');
-    root.style.setProperty('--neg-sidebar-width', '-300px');
-  } else {
-    root.style.setProperty('--sidebar-width', '300px');
-    root.style.setProperty('--neg-sidebar-width', '0px');
-  }
-}
+// export function toggleSidebar() {
+//   document.getElementById('sidenav')?.classList.toggle('active');
+// }
 
-(self as any).toggleSidebar = toggleSidebar;
+// (self as any).toggleSidebar = toggleSidebar;
 (self as any).switchPages = switchPages;
 (self as any).init = init;
 (self as any).initFooterLinks = initFooterLinks;
 
 function handleSideBarClickToggle(event: any) {
-  const nav = document.getElementById('sidenav')!;
-  var mouseClickWidth = event.clientX;
-  // toggle nav when clicking outside of nav on small device
-  if (nav && mouseClickWidth > nav.offsetWidth && nav.offsetWidth > 150 &&
-      window.innerWidth <= 800) {
-    toggleSidebar();
+  if (!(event.target.classList.contains('sidebar') || event.target.closest(".sidebar")) && !event.target.classList.contains("hamburgerInput")) {
+    if (event.target.classList.contains('tab')) {
+      document.getElementById('sidenav')?.classList.toggle('active');
+    } else {
+      if (document.getElementById('sidenav')?.classList.contains('active')) {
+        document.getElementById('sidenav')?.classList.remove('active');
+      }
+    }
   }
 }
 

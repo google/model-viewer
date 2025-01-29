@@ -157,6 +157,7 @@ model-viewer {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: clamp(5rem, 80vw, 20rem);
 }
 
 .HelpText small {

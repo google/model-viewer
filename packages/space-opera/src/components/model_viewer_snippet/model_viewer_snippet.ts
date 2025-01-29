@@ -148,7 +148,7 @@ export class ExportPanel extends ConnectedLitElement {
         <paper-item value='image/jpeg'>JPEG</paper-item>
       </me-dropdown>
     </me-section-row>
-    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+    <div style="display: flex; justify-content: space-between; margin-top: 10px; gap: 0.5rem">
       <me-export-zip-button id="export-zip"></me-export-zip-button>
       <me-export-poster-button></me-export-poster-button>
     </div>

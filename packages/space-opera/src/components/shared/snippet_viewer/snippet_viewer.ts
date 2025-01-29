@@ -31,6 +31,26 @@ export class SnippetViewer extends LitElement {
     return css`
       textarea#snippet {
         width: 100%;
+        resize: none;
+        text-wrap: nowrap;
+        border-radius: 4px;
+        border: none;
+      }
+
+      textarea#snippet::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+        background-color: #fff;
+        border-radius: 0.2rem;
+      }
+
+      textarea#snippet::-webkit-scrollbar-thumb {
+        background-color: #202124b0;
+        border-radius: 0.2rem;
+      }
+
+      textarea#snippet::-webkit-scrollbar-thumb:hover {
+        background-color: #202124b8;
       }
     `;
   }
