@@ -356,6 +356,15 @@
         ]
       },
       {
+        "name": "ar-usdz-max-texture-size",
+        "htmlName": "arUsdzMaxTextureSize",
+        "description": "Set texture max resolution for Quick Look auto generated USDZ model.",
+        "default": {
+          "default": "Infinity (no limits for maximum texture resolution)",
+          "options": "Number greater than or equal to 16"
+        }
+      },
+      {
         "name": "xr-environment",
         "htmlName": "xrEnvironment",
         "description": "Enables AR lighting estimation in WebXR mode; this has a performance cost and replaces the lighting selected with <code>environment-image</code> during an AR session. Known issues: sometimes too dark, sudden updates, shiny materials look matte.",
