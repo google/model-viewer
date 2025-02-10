@@ -22,15 +22,42 @@ import {Constructor} from '../utilities.js';
 const MILLISECONDS_PER_SECOND = 1000.0
 
 const $changeAnimation = Symbol('changeAnimation');
+const $appendAnimation = Symbol('appendAnimation');
+const $detachAnimation = Symbol('detachAnimation');
 const $paused = Symbol('paused');
 
 interface PlayAnimationOptions {
   repetitions: number, pingpong: boolean,
 }
 
+interface AppendAnimationOptions {
+  pingpong: boolean, repetitions: number|null, weight: number,
+      timeScale: number, fade: boolean|number, warp: boolean|number,
+      relativeWarp: boolean, time: number|null
+}
+
+interface DetachAnimationOptions {
+  fade: boolean|number
+}
+
 const DEFAULT_PLAY_OPTIONS: PlayAnimationOptions = {
   repetitions: Infinity,
   pingpong: false
+};
+
+const DEFAULT_APPEND_OPTIONS: AppendAnimationOptions = {
+  pingpong: false,
+  repetitions: null,
+  weight: 1,
+  timeScale: 1,
+  fade: false,
+  warp: false,
+  relativeWarp: true,
+  time: null
+};
+
+const DEFAULT_DETACH_OPTIONS: DetachAnimationOptions = {
+  fade: true
 };
 
 export declare interface AnimationInterface {
@@ -44,6 +71,10 @@ export declare interface AnimationInterface {
   timeScale: number;
   pause(): void;
   play(options?: PlayAnimationOptions): void;
+  appendAnimation(animationName: string, options?: AppendAnimationOptions):
+      void;
+  detachAnimation(animationName: string, options?: DetachAnimationOptions):
+      void;
 }
 
 export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
@@ -62,10 +93,32 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$scene].subscribeMixerEvent('loop', (e) => {
         const count = e.action._loopCount;
-        this.dispatchEvent(new CustomEvent('loop', {detail: {count}}));
+        const name = e.action._clip.name;
+        const uuid = e.action._clip.uuid;
+        const targetAnimation =
+            this[$scene].markedAnimations.find(e => e.name === name);
+
+        if (targetAnimation) {
+          this[$scene].updateAnimationLoop(
+              targetAnimation.name,
+              targetAnimation.loopMode,
+              targetAnimation.repetitionCount);
+          const filtredArr =
+              this[$scene].markedAnimations.filter(e => e.name !== name);
+          this[$scene].markedAnimations = filtredArr;
+        }
+
+        this.dispatchEvent(
+            new CustomEvent('loop', {detail: {count, name, uuid}}));
       });
-      this[$scene].subscribeMixerEvent('finished', () => {
-        this[$paused] = true;
+      this[$scene].subscribeMixerEvent('finished', (e) => {
+        if (!this[$scene].appendedAnimations.includes(e.action._clip.name)) {
+          this[$paused] = true;
+        } else {
+          const filterdList = this[$scene].appendedAnimations.filter(
+              i => i !== e.action._clip.name);
+          this[$scene].appendedAnimations = filterdList;
+        }
         this.dispatchEvent(new CustomEvent('finished'));
       });
     }
@@ -91,6 +144,10 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     get currentTime(): number {
       return this[$scene].animationTime;
+    }
+
+    get appendedAnimations(): string[] {
+      return this[$scene].appendedAnimations;
     }
 
     set currentTime(value: number) {
@@ -122,6 +179,26 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$changeAnimation](options);
 
         this.dispatchEvent(new CustomEvent('play'));
+      }
+    }
+
+    appendAnimation(animationName: string, options?: AppendAnimationOptions) {
+      if (this.availableAnimations.length > 0) {
+        this[$paused] = false;
+
+        this[$appendAnimation](animationName, options);
+
+        this.dispatchEvent(new CustomEvent('append-animation'));
+      }
+    }
+
+    detachAnimation(animationName: string, options?: DetachAnimationOptions) {
+      if (this.availableAnimations.length > 0) {
+        this[$paused] = false;
+
+        this[$detachAnimation](animationName, options);
+
+        this.dispatchEvent(new CustomEvent('detach-animation'));
       }
     }
 
@@ -174,6 +251,50 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
           this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND,
           mode,
           repetitions);
+
+      // If we are currently paused, we need to force a render so that
+      // the scene updates to the first frame of the new animation
+      if (this[$paused]) {
+        this[$scene].updateAnimation(0);
+        this[$needsRender]();
+      }
+    }
+
+    [$appendAnimation](
+        animationName: string = '',
+        options: AppendAnimationOptions = DEFAULT_APPEND_OPTIONS) {
+      const repetitions = options.repetitions ?? Infinity;
+      const mode = options.pingpong ?
+          LoopPingPong :
+          (repetitions === 1 ? LoopOnce : LoopRepeat);
+
+      const needsToStop = !!options.repetitions || 'pingpong' in options;
+
+      this[$scene].appendAnimation(
+          animationName ? animationName : this.animationName,
+          mode,
+          repetitions,
+          options.weight,
+          options.timeScale,
+          options.fade,
+          options.warp,
+          options.relativeWarp,
+          options.time,
+          needsToStop);
+
+      // If we are currently paused, we need to force a render so that
+      // the scene updates to the first frame of the new animation
+      if (this[$paused]) {
+        this[$scene].updateAnimation(0);
+        this[$needsRender]();
+      }
+    }
+
+    [$detachAnimation](
+        animationName: string = '',
+        options: DetachAnimationOptions = DEFAULT_DETACH_OPTIONS) {
+      this[$scene].detachAnimation(
+          animationName ? animationName : this.animationName, options.fade);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation

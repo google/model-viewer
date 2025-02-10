@@ -356,6 +356,15 @@
         ]
       },
       {
+        "name": "ar-usdz-max-texture-size",
+        "htmlName": "arUsdzMaxTextureSize",
+        "description": "Set texture max resolution for Quick Look auto generated USDZ model.",
+        "default": {
+          "default": "Infinity (no limits for maximum texture resolution)",
+          "options": "Number greater than or equal to 16"
+        }
+      },
+      {
         "name": "xr-environment",
         "htmlName": "xrEnvironment",
         "description": "Enables AR lighting estimation in WebXR mode; this has a performance cost and replaces the lighting selected with <code>environment-image</code> during an AR session. Known issues: sometimes too dark, sudden updates, shiny materials look matte.",
@@ -897,13 +906,13 @@
       {
         "name": "tone-mapping",
         "htmlName": "toneMapping",
-        "description": "Selects the function that compresses the HDR rendering to an SDR image on your screen. ACES is a film industry standard that is commonly used, though it has serious color-accuracy problems. AgX is a new and improved tone mapper seeing broad adoption in film and games. Khronos PBR Neutral ('neutral') is a standard function designed specifically for accurate color reproduction in e-commerce. Our current default is neutral, but prior to v4.0 this default was ACES. The deprecated name commerce is an alias for neutral.",
+        "description": "Selects the function that compresses the HDR rendering to an SDR image on your screen. ACES is a film industry standard that is commonly used, though it has serious color-accuracy problems. AgX is a new and improved tone mapper seeing broad adoption in film and games. Khronos PBR Neutral ('neutral') is a standard function designed specifically for accurate color reproduction in e-commerce. Our current default is neutral, but prior to v4.0 this default was ACES. The deprecated name commerce is an alias for neutral. Other options include NoToneMapping, which disables tone mapping entirely, LinearToneMapping, a simple linear scaling of brightness values, ReinhardToneMapping, a balanced approach for natural-looking HDR images, and CineonToneMapping, which emulates the look of traditional film. Each tone mapper has its use cases, depending on the desired visual outcome and application requirements.",
         "links": [
           "<a href=\"../examples/lightingandenv/#toneMapping\"><span class='attribute'>tone-mapping</span> example</a>"
         ],
         "default": {
           "default": "neutral",
-          "options": "neutral, aces, agx"
+          "options": "neutral, aces, agx, reinhard, cineon, linear, none"
         }
       },
       {
@@ -1011,6 +1020,11 @@
         "links": [
           "<a href=\"../examples/animation/#paused\"><span class='attribute'>paused</span> example</a>"
         ]
+      },
+      {
+        "name": "appendedAnimations",
+        "htmlName": "paused",
+        "description": "This property is read-only. It returns an array of the names of appended animations to the current state and is cleared when the main animation is changed using <span class='attribute'>animation-name</span>."
       }
     ],
     "Methods": [
@@ -1023,6 +1037,19 @@
         "name": "pause()",
         "htmlName": "pause",
         "description": "Causes animations to be paused. If you want to reset the current animation to the beginning, you should also set the <span class='attribute'>currentTime</span> property to 0."
+      },
+      {
+        "name": "appendAnimation(animationName, options: {repetitions, pingpong, weight, timeScale, time, fade, warp, relativeWarp})",
+        "htmlName": "appendAnimation",
+        "description": "Causes an animation to run simultaneously with and blend into the current animation. If you want to get the appended animations, you can use <span class='attribute'>appendedAnimations</span> property. You can specify the number of repetitions of the animation by setting the number of <i>repetitions</i> to any value greater than 0 (defaults to Infinity). Also if you set <i>pingpong</i> to true, alternately playing forward and backward (defaults to false). <i>weight</i> The degree of influence of this animation (in the interval [0, 1]), Values between 0 (no impact) and 1 (full impact) can be used to blend between several actions (defaults to 1). <i>timeScale</i> option can be used to slow down, speed up or play backwards animations. For example, if you set it to 0.5, the animation will play at half speed (defaults to 1). The time option causes the animation to start from the specified value. The value of this option can be a float greater than 0 (in seconds) and is clamped between 0 and the animation duration. If not set, the animation starts from the last stopped time (in other words, the previous state continues). The <i>fade</i> option causes the weight of this animation to gradually increase from 0 to 1, The value of this option can be a boolean or float greater than 0 (in seconds), If the value is true, default duration (1.25 second) is applied (defaults to false). The <i>warp</i> option causes change playback speed, within the passed time interval, by modifying timeScale gradually from 0 to current timeScale value, the value of this option can be a boolean or float greater than 0 (in seconds), If the value is true, default duration (1.25 second) is applied (defaults to false), The <i><relativeWarp/i> option changes the warp from the current timeScale to the new value. The value of this option is boolean. If set to false, the timeScale starts from 0 until the entered value (defaults to true).",
+        "links": [
+          "<a href=\"../examples/animation/#appendAnimation\">Append animation example</a>"
+        ]
+      },
+      {
+        "name": "detachAnimation(animationName, options: {fade})",
+        "htmlName": "detachAnimation",
+        "description": "Causes the appended animation to be detached. The <i>fade</i> option gradually changes the animation weight to 0, the value of this option can be a boolean or float greater than 0 (in seconds), if the value is true, default duration (1.25 second) is applied (defaults to true)"
       }
     ],
     "Events": [
@@ -1045,6 +1072,16 @@
         "name": "finished",
         "htmlName": "finished",
         "description": "Dispatched when the current animation has finished playing."
+      },
+      {
+        "name": "append-animation",
+        "htmlName": "append-animation",
+        "description": "Dispatched when an animation append to current animation."
+      },
+      {
+        "name": "detach-animation",
+        "htmlName": "detach-animation",
+        "description": "Dispatched when appended animation detached."
       }
     ]
   },

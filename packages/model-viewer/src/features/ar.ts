@@ -72,6 +72,7 @@ export declare interface ARInterface {
   arPlacement: string;
   iosSrc: string|null;
   xrEnvironment: boolean;
+  arUsdzMaxTextureSize: string;
   readonly canActivateAR: boolean;
   activateAR(): Promise<void>;
 }
@@ -82,6 +83,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     @property({type: Boolean, attribute: 'ar'}) ar: boolean = false;
 
     @property({type: String, attribute: 'ar-scale'}) arScale: string = 'auto';
+
+    @property({type: String, attribute: 'ar-usdz-max-texture-size'})
+    arUsdzMaxTextureSize: string = 'auto';
 
     @property({type: String, attribute: 'ar-placement'})
     arPlacement: string = 'floor';
@@ -182,7 +186,8 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('ar') || changedProperties.has('arModes') ||
-          changedProperties.has('src') || changedProperties.has('iosSrc')) {
+          changedProperties.has('src') || changedProperties.has('iosSrc') ||
+          changedProperties.has('arUsdzMaxTextureSize')) {
         this[$selectARMode]();
       }
     }
@@ -446,7 +451,11 @@ configuration or device capabilities');
       model.position.copy(target.position);
       model.updateWorldMatrix(false, true);
 
-      const arraybuffer = await exporter.parseAsync(model);
+      const arraybuffer = await exporter.parseAsync(model, {
+        maxTextureSize: isNaN(this.arUsdzMaxTextureSize as any) ?
+            Infinity :
+            Math.max(parseInt(this.arUsdzMaxTextureSize), 16),
+      });
 
       model.position.set(0, 0, 0);
       target.add(model);

@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {ACESFilmicToneMapping, AgXToneMapping, NeutralToneMapping, Texture} from 'three';
+import {ACESFilmicToneMapping, AgXToneMapping, CineonToneMapping, LinearToneMapping, NeutralToneMapping, NoToneMapping, ReinhardToneMapping, Texture} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload} from '../model-viewer-base.js';
 import {clamp, Constructor, deserializeUrl} from '../utilities.js';
@@ -24,7 +24,8 @@ const DEFAULT_SHADOW_INTENSITY = 0.0;
 const DEFAULT_SHADOW_SOFTNESS = 1.0;
 const DEFAULT_EXPOSURE = 1.0;
 
-export type ToneMappingValue = 'auto'|'aces'|'agx'|'commerce'|'neutral';
+export type ToneMappingValue = 'auto'|'aces'|'agx'|'commerce'|'neutral'|
+    'reinhard'|'cineon'|'linear'|'none';
 
 export const $currentEnvironmentMap = Symbol('currentEnvironmentMap');
 export const $currentBackground = Symbol('currentBackground');
@@ -90,8 +91,12 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       if (changedProperties.has('toneMapping')) {
         this[$scene].toneMapping = this.toneMapping === 'aces' ?
             ACESFilmicToneMapping :
-            this.toneMapping === 'agx' ? AgXToneMapping :
-                                         NeutralToneMapping;
+            this.toneMapping === 'agx'      ? AgXToneMapping :
+            this.toneMapping === 'reinhard' ? ReinhardToneMapping :
+            this.toneMapping === 'cineon'   ? CineonToneMapping :
+            this.toneMapping === 'linear'   ? LinearToneMapping :
+            this.toneMapping === 'none'     ? NoToneMapping :
+                                              NeutralToneMapping;
         this[$needsRender]();
       }
 

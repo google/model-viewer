@@ -24,6 +24,8 @@ export const styles: CSSResult = css`
   overflow: auto;
   padding: 10px;
   white-space: nowrap;
+  border-radius: 0 0 1rem 1rem;
+  box-shadow: 1px 5px 5px 0px #02020233;
 }
 
 .inner-container {

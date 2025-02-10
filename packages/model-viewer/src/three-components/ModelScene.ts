@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import {ACESFilmicToneMapping, AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, AnimationMixerEventMap, Box3, Camera, Euler, Event as ThreeEvent, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer, XRTargetRaySpace} from 'three';
+import {AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, AnimationMixerEventMap, Box3, Camera, Euler, Event as ThreeEvent, LoopOnce, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, NeutralToneMapping, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer, XRTargetRaySpace} from 'three';
 import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
 
 import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
 import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
-import ModelViewerElementBase, {$renderer, EffectComposerInterface, RendererInterface} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$renderer, $scene, EffectComposerInterface, RendererInterface} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {normalizeUnit} from '../styles/conversions.js';
 import {NumberNode, parseExpressions} from '../styles/parsers.js';
@@ -42,6 +42,10 @@ export interface ModelSceneConfig {
   canvas: HTMLCanvasElement;
   width: number;
   height: number;
+}
+
+export interface MarkedAnimation {
+  name: string, loopMode: AnimationActionLoopStyles, repetitionCount: number
 }
 
 export type IlluminationRole = 'primary'|'secondary';
@@ -76,6 +80,8 @@ export class ModelScene extends Scene {
   public scaleStep = 0;
   public renderCount = 0;
   public externalRenderer: RendererInterface|null = null;
+  public appendedAnimations: Array<string> = [];
+  public markedAnimations: Array<MarkedAnimation> = [];
 
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
@@ -98,7 +104,7 @@ export class ModelScene extends Scene {
   public bakedShadows = new Set<Mesh>();
 
   public exposure = 1;
-  public toneMapping: ToneMapping = ACESFilmicToneMapping;
+  public toneMapping: ToneMapping = NeutralToneMapping;
   public canScale = true;
 
   private isDirty = false;
@@ -746,6 +752,12 @@ export class ModelScene extends Scene {
       const {currentAnimationAction: lastAnimationAction} = this;
 
       const action = this.mixer.clipAction(animationClip, this);
+
+      // Reset animationAction timeScale
+      if (action.timeScale != this.element.timeScale) {
+        action.timeScale = this.element.timeScale;
+      }
+
       this.currentAnimationAction = action;
 
       if (this.element.paused) {
@@ -766,7 +778,244 @@ export class ModelScene extends Scene {
 
       action.enabled = true;
       action.clampWhenFinished = true;
+      action.play();
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
+  appendAnimation(
+      name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
+      repetitionCount: number = Infinity, weight: number = 1,
+      timeScale: number = 1, fade: boolean|number = false,
+      warp: boolean|number = false, relativeWarp: boolean = true,
+      time: null|number = null, needsToStop: boolean = false) {
+    if (this._currentGLTF == null || name === this.element.animationName) {
+      return;
+    }
+    const {animations} = this;
+    if (animations == null || animations.length === 0) {
+      return;
+    }
+
+    let animationClip = null;
+    const defaultFade = 1.25;
+
+    if (name) {
+      animationClip = this.animationsByName.get(name);
+    }
+
+    if (animationClip == null) {
+      return;
+    }
+
+    // validate function parameters
+    if (typeof repetitionCount === 'string') {
+      if (!isNaN(repetitionCount)) {
+        repetitionCount = Math.max(parseInt(repetitionCount), 1);
+      } else {
+        repetitionCount = Infinity;
+        console.warn(
+            'Invalid repetitionCount value, repetitionCount is set to Infinity');
+      }
+    } else if (typeof repetitionCount === 'number' && repetitionCount < 1) {
+      repetitionCount = 1;
+    }
+
+    if (repetitionCount === 1 && loopMode !== LoopOnce) {
+      loopMode = LoopOnce
+    }
+
+    if (typeof weight === 'string') {
+      if (!isNaN(weight)) {
+        weight = parseFloat(weight);
+      } else {
+        weight = 1;
+        console.warn('Invalid weight value, weight is set to 1');
+      }
+    }
+
+    if (typeof timeScale === 'string') {
+      if (!isNaN(timeScale)) {
+        timeScale = parseFloat(timeScale);
+      } else {
+        timeScale = 1;
+        console.warn('Invalid timeScale value, timeScale is set to 1');
+      }
+    }
+
+    if (typeof fade === 'string') {
+      // @ts-ignore: Unreachable code error
+      if (fade.toLowerCase().trim() === 'true') {
+        fade = true;
+        // @ts-ignore: Unreachable code error
+      } else if (fade.toLowerCase().trim() === 'false') {
+        fade = false;
+      } else if (!isNaN(fade)) {
+        fade = parseFloat(fade);
+      } else {
+        fade = false;
+        console.warn('Invalid fade value, fade is set to false');
+      }
+    }
+
+    if (typeof warp === 'string') {
+      // @ts-ignore: Unreachable code error
+      if (warp.toLowerCase().trim() === 'true') {
+        warp = true;
+        // @ts-ignore: Unreachable code error
+      } else if (warp.toLowerCase().trim() === 'false') {
+        warp = false;
+      } else if (!isNaN(warp)) {
+        warp = parseFloat(warp);
+      } else {
+        warp = false;
+        console.warn('Invalid warp value, warp is set to false');
+      }
+    }
+
+    if (typeof time === 'string') {
+      if (!isNaN(time)) {
+        time = parseFloat(time);
+      }
+    }
+
+    try {
+      const action = this.mixer.existingAction(animationClip) ||
+          this.mixer.clipAction(animationClip, this);
+
+      const currentTimeScale = action.timeScale;
+
+      if (needsToStop && this.appendedAnimations.includes(name)) {
+        if (!this.markedAnimations.map(e => e.name).includes(name)) {
+          this.markedAnimations.push({name, loopMode, repetitionCount});
+        }
+      }
+
+      if (typeof time === 'number') {
+        action.time = Math.min(Math.max(time, 0), animationClip.duration);
+      }
+
+      if (typeof fade === 'boolean' && fade) {
+        action.fadeIn(defaultFade);
+      } else if (typeof fade === 'number') {
+        action.fadeIn(Math.max(fade, 0));
+      } else {
+        if (weight >= 0) {
+          action.weight = Math.min(Math.max(weight, 0), 1);
+        }
+      }
+
+      if (typeof warp === 'boolean' && warp) {
+        action.warp(
+            relativeWarp ? currentTimeScale : 0, timeScale, defaultFade);
+      } else if (typeof warp === 'number') {
+        action.warp(
+            relativeWarp ? currentTimeScale : 0, timeScale, Math.max(warp, 0));
+      } else {
+        action.timeScale = timeScale;
+      }
+
+      if (!action.isRunning()) {
+        if (action.time == animationClip.duration) {
+          action.stop();
+        }
+        action.setLoop(loopMode, repetitionCount);
+        action.paused = false;
+        action.enabled = true;
+        action.clampWhenFinished = true;
+        action.play();
+      }
+
+      if (!this.appendedAnimations.includes(name)) {
+        this.element[$scene].appendedAnimations.push(name);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  detachAnimation(name: string = '', fade: boolean|number = true) {
+    if (this._currentGLTF == null || name === this.element.animationName) {
+      return;
+    }
+    const {animations} = this;
+    if (animations == null || animations.length === 0) {
+      return;
+    }
+
+    let animationClip = null;
+    const defaultFade = 1.5;
+
+    if (name) {
+      animationClip = this.animationsByName.get(name);
+    }
+
+    if (animationClip == null) {
+      return;
+    }
+
+    if (typeof fade === 'string') {
+      // @ts-ignore: Unreachable code error
+      if (fade.toLowerCase().trim() === 'true') {
+        fade = true;
+        // @ts-ignore: Unreachable code error
+      } else if (fade.toLowerCase().trim() === 'false') {
+        fade = false;
+      } else if (!isNaN(fade)) {
+        fade = parseFloat(fade);
+      } else {
+        fade = true;
+        console.warn('Invalid fade value, fade is set to true');
+      }
+    }
+
+    try {
+      const action = this.mixer.existingAction(animationClip) ||
+          this.mixer.clipAction(animationClip, this);
+
+      if (typeof fade === 'boolean' && fade) {
+        action.fadeOut(defaultFade);
+      } else if (typeof fade === 'number') {
+        action.fadeOut(Math.max(fade, 0));
+      } else {
+        action.stop();
+      }
+
+      const result =
+          this.element[$scene].appendedAnimations.filter(i => i !== name);
+      this.element[$scene].appendedAnimations = result;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  updateAnimationLoop(
+      name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
+      repetitionCount: number = Infinity) {
+    if (this._currentGLTF == null || name === this.element.animationName) {
+      return;
+    }
+    const {animations} = this;
+    if (animations == null || animations.length === 0) {
+      return;
+    }
+
+    let animationClip = null;
+
+    if (name) {
+      animationClip = this.animationsByName.get(name);
+    }
+
+    if (animationClip == null) {
+      return;
+    }
+
+    try {
+      const action = this.mixer.existingAction(animationClip) ||
+          this.mixer.clipAction(animationClip, this);
+      action.stop();
+      action.setLoop(loopMode, repetitionCount);
       action.play();
     } catch (error) {
       console.error(error);
@@ -789,8 +1038,8 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Call if the object has been changed in such a way that the shadow's shape
-   * has changed (not a rotation about the Y axis).
+   * Call if the object has been changed in such a way that the shadow's
+   * shape has changed (not a rotation about the Y axis).
    */
   updateShadow() {
     const shadow = this.shadow;
@@ -836,9 +1085,9 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Sets the shadow's softness by mapping a [0, 1] softness parameter to the
-   * shadow's resolution. This involves reallocation, so it should not be
-   * changed frequently. Softer shadows are cheaper to render.
+   * Sets the shadow's softness by mapping a [0, 1] softness parameter to
+   * the shadow's resolution. This involves reallocation, so it should not
+   * be changed frequently. Softer shadows are cheaper to render.
    */
   setShadowSoftness(softness: number) {
     this.shadowSoftness = softness;
@@ -849,8 +1098,8 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Shift the floor vertically from the bottom of the model's bounding box by
-   * offset (should generally be negative).
+   * Shift the floor vertically from the bottom of the model's bounding box
+   * by offset (should generally be negative).
    */
   setShadowOffset(offset: number) {
     const shadow = this.shadow;
@@ -898,11 +1147,11 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * This method returns a dynamic hotspot ID string of the point on the mesh
-   * corresponding to the input pixel coordinates given relative to the
+   * This method returns a dynamic hotspot ID string of the point on the
+   * mesh corresponding to the input pixel coordinates given relative to the
    * model-viewer element. The ID string can be used in the data-surface
-   * attribute of the hotspot to make it follow this point on the surface even
-   * as the model animates. If the mesh is not hit, the result is null.
+   * attribute of the hotspot to make it follow this point on the surface
+   * even as the model animates. If the mesh is not hit, the result is null.
    */
   surfaceFromPoint(ndcPosition: Vector2, object: Object3D = this): string|null {
     const model = this.element.model;
@@ -936,8 +1185,8 @@ export class ModelScene extends Scene {
 
   /**
    * The following methods are for operating on the set of Hotspot objects
-   * attached to the scene. These come from DOM elements, provided to slots by
-   * the Annotation Mixin.
+   * attached to the scene. These come from DOM elements, provided to slots
+   * by the Annotation Mixin.
    */
   addHotspot(hotspot: Hotspot) {
     this.target.add(hotspot);
@@ -1016,8 +1265,8 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Update the CSS visibility of the hotspots based on whether their normals
-   * point toward the camera.
+   * Update the CSS visibility of the hotspots based on whether their
+   * normals point toward the camera.
    */
   updateHotspotsVisibility(viewerPosition: Vector3) {
     this.forHotspots((hotspot) => {
@@ -1035,8 +1284,8 @@ export class ModelScene extends Scene {
   }
 
   /**
-   * Rotate all hotspots to an absolute orientation given by the input number of
-   * radians. Zero returns them to upright.
+   * Rotate all hotspots to an absolute orientation given by the input
+   * number of radians. Zero returns them to upright.
    */
   orientHotspots(radians: number) {
     this.forHotspots((hotspot) => {

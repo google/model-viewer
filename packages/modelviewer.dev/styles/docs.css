@@ -183,11 +183,7 @@ hr.solid {
   :root {
     --sidebar-width: 0;
   }
-
-  .sidebar {
-    width: var(--sidebar-width);
-  }
-
+  
   .outer-content {
     margin-left: 0;
     max-width: 100%;

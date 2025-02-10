@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import {nodeResolve as resolve} from '@rollup/plugin-node-resolve';
+import { nodeResolve as resolve } from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
+import swc from '@rollup/plugin-swc';
 
 const onwarn = (warning, warn) => {
   // Suppress non-actionable warning caused by TypeScript boilerplate:
@@ -23,10 +24,10 @@ const onwarn = (warning, warn) => {
   }
 };
 
-const plugins = [resolve(), replace({'Reflect.decorate': 'undefined'})];
+const plugins = [resolve(), replace({ 'Reflect.decorate': 'undefined', preventAssignment: true }), swc()];
 
 const watchFiles =
-    ['lib/**', '../model-viewer/lib/**', '../model-viewer-effects/lib/**'];
+  ['lib/**', '../model-viewer/lib/**', '../model-viewer-effects/lib/**'];
 
 const outputOptions = [
   {
