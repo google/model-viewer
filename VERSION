@@ -1,0 +1,55 @@
+commit c61dd1459b59cd74f539eb31658f943fd13c702e
+Author: MOHAMMAD BAGHAEI <49115397+mohammadbaghaei@users.noreply.github.com>
+Date:   Tue Feb 25 02:18:33 2025 +0330
+
+    fix modelviewer.dev deployment error (#5001)
+    
+    * Added the ability to run and combine multiple animations simultaneously, upgraded to threejs r171, and updated packages to the latest version.
+    
+    * fix build warnings and errors and replace rollup-plugin-polyfill with swc
+    
+    * fix fidelity-tests chrome error
+    
+    * fix chrome install error on fidelity-tests
+    
+    * fix fidelity-tests error on Fix dependencies step
+    
+    * add no-sandbox args to puppeteer.launch
+    
+    * cleanup github workflow
+    
+    * add example for appendAnimation, improve modelviewer.dev styles, improve appendAnimation method,  format codes with clang-format style and fix other requested changes in #4979 pull request
+    
+    * Fix all requested changes in #4979 PR, improve the flexibility of appendAnimation function, improve modelviewer.dev styles and revert dependencies version
+    
+    * improve detachAnimation flexibility
+    
+    * update dependencies to latest version
+    
+    * fix #4960 issue
+    
+    * Fix animation skipping when updating with appendAnimation method and improve general performance
+    
+    * Upgrade to three.js r172 and update dependencies and fix peer dependency error when installing in postprocessing
+    
+    * add Cineon, Reinhard, Linear, none tone mapping options and update documention
+    
+    * revert peetDependencies change
+    
+    * fix package-lock error
+    
+    * fix repetitions and pingpong update bug
+    
+    * add time option to appendAnimation function
+    
+    * fix editor "js-beautify" invalid src
+    
+    * update dependencies
+    
+    * improve editor and modelviewer.dev styles, add mobile responsive to editor, improve modelviewer.dev hamburger menu
+    
+    * update dependencies
+    
+    * add ar-usdz-max-texture-size (related #4984 issue)
+    
+    * try fix deploy error, upgrade to three.js r173 and update all dependencies, fix ar-usdz-docs.json "max-texture-size" attribute defualt value
