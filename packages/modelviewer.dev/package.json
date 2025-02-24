@@ -33,10 +33,10 @@
     "prismjs": "^1.29.0"
   },
   "devDependencies": {
-    "rollup": "^4.32.1",
+    "rollup": "^4.34.8",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-swc": "^0.4.0",
-    "@swc/core": "^1.10.12",
+    "@swc/core": "^1.10.18",
     "@rollup/plugin-replace": "^6.0.2",
     "typescript": "5.7.3"
   }

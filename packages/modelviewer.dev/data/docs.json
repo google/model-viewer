@@ -360,7 +360,7 @@
         "htmlName": "arUsdzMaxTextureSize",
         "description": "Set texture max resolution for Quick Look auto generated USDZ model.",
         "default": {
-          "default": "Infinity (no limits for maximum texture resolution)",
+          "default": "auto (no limits for maximum texture resolution)",
           "options": "Number greater than or equal to 16"
         }
       },
