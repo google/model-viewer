@@ -15,6 +15,7 @@
 
 import { nodeResolve as resolve } from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
+import terser from '@rollup/plugin-terser';
 import swc from '@rollup/plugin-swc';
 
 const onwarn = (warning, warn) => {
@@ -24,7 +25,7 @@ const onwarn = (warning, warn) => {
   }
 };
 
-const plugins = [resolve(), replace({ 'Reflect.decorate': 'undefined', preventAssignment: true }), swc()];
+const plugins = [resolve(), replace({ 'Reflect.decorate': 'undefined', preventAssignment: true }), swc(), terser()];
 
 const watchFiles =
   ['lib/**', '../model-viewer/lib/**', '../model-viewer-effects/lib/**'];
