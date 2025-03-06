@@ -33,7 +33,7 @@
     "lit": "^3.2.1",
     "mkdirp": "^3.0.1",
     "pngjs": "^7.0.0",
-    "puppeteer": "^24.2.1",
+    "puppeteer": "^24.3.1",
     "rimraf": "^6.0.1",
     "yargs": "^17.7.2"
   },
@@ -43,8 +43,8 @@
     "@rollup/plugin-replace": "^6.0.2",
     "@types/yargs": "^17.0.33",
     "polymer-build": "^3.1.4",
-    "rollup": "^4.34.8",
+    "rollup": "^4.34.9",
     "rollup-plugin-external-globals": "^0.13.0",
-    "typescript": "5.7.3"
+    "typescript": "5.8.2"
   }
 }
