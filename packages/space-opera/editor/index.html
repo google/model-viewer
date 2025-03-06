@@ -20,7 +20,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="description" content="&lt;model-viewer&gt; editor">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <meta property="og:title" content='﹤model-viewer﹥ Editor - Edit your asset files for 3D & AR' />
   <meta property="og:description"
     content="A tool to edit glTF and glb files ✏️, and configure them to use the ﹤model-viewer﹥ 3D & AR web component 🌐" />
@@ -30,8 +30,6 @@
   <script defer src="https://web3dsurvey.com/collector.js"></script>
   <!-- Web animations for paper-dropdown -->
   <script src="../../../node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
-  <script src="../node_modules/js-beautify/js/lib/beautify-html.js"></script>
-  <script src="../node_modules/js-beautify/js/lib/beautify-css.js"></script>
   <script>
     // Necessary hack for Redux. See: https://github.com/reduxjs/redux/pull/2910
     window.process = {
@@ -58,6 +56,12 @@
     --expandable-section-text: #EEEEEE;
     --text-on-expandable-background: #F5F5F5;
     --number-input-background: #212121;
+  }
+
+  html, body {
+    width: 100vw;
+    height: 100lvh;
+    overflow: hidden;
   }
 
   .hamburger {

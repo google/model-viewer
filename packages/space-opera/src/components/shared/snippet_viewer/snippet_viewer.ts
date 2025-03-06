@@ -16,11 +16,10 @@
  */
 
 import '@material/mwc-button';
-declare function html_beautify(html: string): string;
-declare function css_beautify(css: string): string;
 import {css, html, LitElement} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 import {TemplateResult} from 'lit';
+import beautify from 'js-beautify';
 
 /**
  * Displays the inner text of an arbitrary TemplateResult.
@@ -66,8 +65,7 @@ export class SnippetViewer extends LitElement {
   }
 
   copyToClipboard() {
-    this.snippet.select();
-    document.execCommand('copy');
+    navigator.clipboard.writeText(this.snippet.value);
   }
 
   protected render() {
@@ -89,7 +87,7 @@ export class SnippetViewer extends LitElement {
 
   get formattedStyle() {
     return this.renderedStyle ? `<style>
-${css_beautify(this.renderedStyle)}
+${beautify.css(this.renderedStyle)}
 </style>
 ` :
                                 ``;
@@ -105,7 +103,7 @@ ${css_beautify(this.renderedStyle)}
     html = html.replace(/ar-status="[\w- ]+" */, '');
     // Remove redundant ="" for boolean attribs
     html = html.replace(/=""/g, '');
-    return html_beautify(html);
+    return beautify.html(html);
   }
 }
 
