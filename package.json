@@ -42,7 +42,7 @@
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "clang-format": "^1.8.0",
-    "eslint": "^9.21.0",
+    "eslint": "^9.22.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-mocha": "^10.5.0",
     "eslint-plugin-wc": "^2.2.1",
@@ -51,6 +51,6 @@
     "typescript": "5.8.2"
   },
   "dependencies": {
-    "puppeteer": "^24.3.1"
+    "puppeteer": "^24.4.0"
   }
 }
