@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-import 'js-beautify/js/lib/beautify-html.js';
-import 'js-beautify/js/lib/beautify-css.js';
+// import 'js-beautify/js/lib/beautify-html.js';
+// import 'js-beautify/js/lib/beautify-css.js';
 
 import {expect} from 'chai';
 import {html} from 'lit';
