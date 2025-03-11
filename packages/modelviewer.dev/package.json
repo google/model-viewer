@@ -30,7 +30,7 @@
     "@types/prismjs": "^1.26.5",
     "focus-visible": "^5.2.1",
     "lit": "^3.2.1",
-    "prismjs": "^1.29.0"
+    "prismjs": "^1.30.0"
   },
   "devDependencies": {
     "rollup": "^4.35.0",

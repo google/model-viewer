@@ -39,8 +39,8 @@
   },
   "homepage": "https://github.com/google/model-viewer#readme",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.26.0",
-    "@typescript-eslint/parser": "^8.26.0",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
     "clang-format": "^1.8.0",
     "eslint": "^9.22.0",
     "eslint-config-google": "^0.14.0",
