@@ -102,7 +102,7 @@ select {
 .tab {
   position: fixed;
   z-index: 999;
-  top: 0.72rem;
+  top: 0.2rem;
   left: 0.72rem;
   border-radius: 4px;
   width: 3rem;
@@ -542,6 +542,7 @@ pre,
 code {
   white-space: pre-wrap !important;
   font-family: var(--font-monospace);
+  word-wrap: break-word;
 }
 
 
