@@ -38,7 +38,7 @@
     "@gltf-transform/core": "^4.1.2",
     "@gltf-transform/extensions": "^4.1.2",
     "@gltf-transform/functions": "^4.1.2",
-    "@google/model-viewer": "^4.0.0",
+    "@google/model-viewer": "^4.1.0",
     "@material/mwc-button": "^0.27.0",
     "@material/mwc-checkbox": "^0.27.0",
     "@material/mwc-dialog": "^0.27.0",
