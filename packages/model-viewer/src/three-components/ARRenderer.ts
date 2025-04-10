@@ -287,7 +287,6 @@ export class ARRenderer extends EventDispatcher<
         });
 
     if (this.xrMode !== 'screen-space') {
-      console.log("present(", scene);
       this.setupControllers();
       this.xDamper.setDecayTime(DECAY);
       this.yDamper.setDecayTime(DECAY);
@@ -412,7 +411,6 @@ export class ARRenderer extends EventDispatcher<
         if (this.controller1?.userData.isSelected && this.controller2?.userData.isSelected) {
           if (scene.canScale) {
             this.isTwoFingering = true;
-            console.log("set isTwoFingering to true when intersects");
             this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
             this.scaleLine.visible = true;
           }
