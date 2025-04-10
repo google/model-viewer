@@ -414,8 +414,7 @@ export class ARRenderer extends EventDispatcher<
             this.scaleLine.visible = true;
           }
         } else {
-          const otherController = controller === this.controller1 ?
-            this.controller2! :
+            const otherController = controller === this.controller1 ? this.controller2! :
             this.controller1!;
             controller.userData.initialX = controller.position.x;
             otherController.userData.turning = false;
