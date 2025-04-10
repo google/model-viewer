@@ -399,7 +399,6 @@ export class ARRenderer extends EventDispatcher<
           controller.attach(scene.pivot);
         }
         this.selectedController = controller;
-  
         scene.setShadowIntensity(0.01);
       } else {
         if (controller == this.controller1) {
@@ -415,13 +414,13 @@ export class ARRenderer extends EventDispatcher<
             this.scaleLine.visible = true;
           }
         } else {
-        const otherController = controller === this.controller1 ?
+          const otherController = controller === this.controller1 ?
             this.controller2! :
             this.controller1!;
-        controller.userData.initialX = controller.position.x;
-        otherController.userData.turning = false;
-        controller.userData.turning = true;
-        controller.userData.line.visible = false;
+            controller.userData.initialX = controller.position.x;
+            otherController.userData.turning = false;
+            controller.userData.turning = true;
+            controller.userData.line.visible = false;
         }
       }
     }
