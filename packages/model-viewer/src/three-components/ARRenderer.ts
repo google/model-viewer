@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BoxGeometry, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, Mesh, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
+import {Box3, BoxGeometry, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, Mesh, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace, Object3D} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
@@ -51,6 +51,10 @@ const DECAY = 150;
 const MAX_LINE_LENGTH = 5;
 // Maximum dimension of rotation indicator box on controller (meters).
 const BOX_SIZE = 0.1;
+// Axis Y in webxr.
+const AXIS_Y = new Vector3(0, 1, 0);
+// Webxr rotation sensitivity
+const ROTATION_SENSIVITY = 0.3;
 
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
@@ -78,7 +82,11 @@ export interface ARTrackingEvent extends ThreeEvent {
 }
 
 interface UserData {
-  turning: boolean, box: Mesh, line: Line
+  turning: boolean
+  box: Mesh
+  line: Line
+  isSelected: boolean
+  initialX: number
 }
 
 interface Controller extends XRTargetRaySpace {
@@ -131,7 +139,7 @@ export class ARRenderer extends EventDispatcher<
   private isRotating = false;
   private isTwoFingering = false;
   private lastDragPosition = new Vector3();
-  private relativeOrientation = new Quaternion();
+  private deltaRotation = new Quaternion();
   private scaleLine = new Line(lineGeometry);
   private firstRatio = 0;
   private lastAngle = 0;
@@ -279,6 +287,7 @@ export class ARRenderer extends EventDispatcher<
         });
 
     if (this.xrMode !== 'screen-space') {
+      console.log("present(", scene);
       this.setupControllers();
       this.xDamper.setDecayTime(DECAY);
       this.yDamper.setDecayTime(DECAY);
@@ -370,33 +379,55 @@ export class ARRenderer extends EventDispatcher<
   private onControllerSelectStart = (event: XRControllerEvent) => {
     const scene = this.presentedScene!;
     const controller = event.target;
+  
+    const intersection = this.placementBox!.controllerIntersection(scene,
+      controller);
+    if (intersection!=null){
+      const bbox = new Box3().setFromObject(scene.pivot);
+      const footprintY = bbox.min.y + 0.2; // Small threshold above base
 
-    if (this.placementBox!.controllerIntersection(scene, controller) != null) {
-      if (this.selectedController != null) {
-        this.selectedController.userData.line.visible = false;
-        if (scene.canScale) {
-          this.isTwoFingering = true;
-          this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
-          this.scaleLine.visible = true;
+      // Check if the ray intersection is near the footprint
+      const isFootprint = intersection.point.y <= footprintY;
+      if (isFootprint) {
+        if (this.selectedController != null) {
+          this.selectedController.userData.line.visible = false;
+          if (scene.canScale) {
+            this.isTwoFingering = true;
+            this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
+            this.scaleLine.visible = true;
+          }
+        } else {
+          controller.attach(scene.pivot);
+        }
+        this.selectedController = controller;
+  
+        scene.setShadowIntensity(0.01);
+      } else {
+        if (controller == this.controller1) {
+          this.controller1.userData.isSelected = true;
+        } else if (controller == this.controller2) {
+          this.controller2.userData.isSelected = true;
+        }
+
+        if (this.controller1?.userData.isSelected && this.controller2?.userData.isSelected) {
+          if (scene.canScale) {
+            this.isTwoFingering = true;
+            console.log("set isTwoFingering to true when intersects");
+            this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
+            this.scaleLine.visible = true;
+          }
+        } else {
+        const otherController = controller === this.controller1 ?
+            this.controller2! :
+            this.controller1!;
+  
+  
+        controller.userData.initialX = controller.position.x;
+        otherController.userData.turning = false;
+        controller.userData.turning = true;
+        controller.userData.line.visible = false;
         }
       }
-
-      controller.attach(scene.pivot);
-      this.selectedController = controller;
-
-      scene.setShadowIntensity(0.01);
-    } else {
-      const otherController = controller === this.controller1 ?
-          this.controller2! :
-          this.controller1!;
-
-      this.relativeOrientation.copy(controller.quaternion)
-          .invert()
-          .multiply(scene.pivot.getWorldQuaternion(quaternion));
-
-      otherController.userData.turning = false;
-      controller.userData.turning = true;
-      controller.userData.line.visible = false;
     }
   };
 
@@ -406,6 +437,13 @@ export class ARRenderer extends EventDispatcher<
     controller.userData.line.visible = true;
     this.isTwoFingering = false;
     this.scaleLine.visible = false;
+
+    if (controller == this.controller1) {
+      this.controller1.userData.isSelected = false;
+    } else if (controller == this.controller2) {
+      this.controller2.userData.isSelected = false;
+    }
+
     if (this.selectedController != null &&
         this.selectedController != controller) {
       return;
@@ -889,41 +927,32 @@ export class ARRenderer extends EventDispatcher<
     }
   }
 
+  private applyControllerRotation(controller: Controller, pivot: Object3D) {
+    if (!controller.userData.turning) {
+      return;
+    }
+    const angle = (controller.position.x - controller.userData.initialX) * ROTATION_SENSIVITY;
+    this.deltaRotation.setFromAxisAngle(AXIS_Y, angle);
+    pivot.quaternion.multiplyQuaternions(this.deltaRotation, pivot.quaternion);
+  }
   private moveScene(delta: number) {
     const scene = this.presentedScene!;
     const {pivot} = scene;
     const box = this.placementBox!;
     box.updateOpacity(delta);
 
-    if (this.controller1) {
-      if (this.controller1.userData.turning) {
-        pivot.quaternion.copy(this.controller1.quaternion)
-            .multiply(this.relativeOrientation);
-        if (this.selectedController &&
-            this.selectedController === this.controller2) {
-          pivot.quaternion.premultiply(
-              quaternion.copy(this.controller2.quaternion).invert());
-        }
-      }
-      this.controller1.userData.box.position.copy(this.controller1.position);
-      pivot.getWorldQuaternion(this.controller1.userData.box.quaternion);
+
+    const bothSelected = this.controller1?.userData.isSelected && this.controller2?.userData.isSelected;
+    if (bothSelected) {
+      this.isTwoFingering = true;
     }
 
-    if (this.controller2) {
-      if (this.controller2.userData.turning) {
-        pivot.quaternion.copy(this.controller2.quaternion)
-            .multiply(this.relativeOrientation);
-        if (this.selectedController &&
-            this.selectedController === this.controller1) {
-          pivot.quaternion.premultiply(
-              quaternion.copy(this.controller1.quaternion).invert());
-        }
-      }
-      this.controller2.userData.box.position.copy(this.controller2.position);
-      pivot.getWorldQuaternion(this.controller2.userData.box.quaternion);
+    if (!bothSelected) {
+      if (this.controller1) this.applyControllerRotation(this.controller1, pivot);
+      if (this.controller2) this.applyControllerRotation(this.controller2, pivot);
     }
 
-    if (this.controller1 && this.controller2 && this.isTwoFingering) {
+    if (this.controller1 && this.controller2 && bothSelected) {
       const dist = this.controllerSeparation();
       this.setScale(dist);
       this.scaleLine.scale.z = -dist;
