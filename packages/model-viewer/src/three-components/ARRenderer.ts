@@ -418,8 +418,6 @@ export class ARRenderer extends EventDispatcher<
         const otherController = controller === this.controller1 ?
             this.controller2! :
             this.controller1!;
-  
-  
         controller.userData.initialX = controller.position.x;
         otherController.userData.turning = false;
         controller.userData.turning = true;
