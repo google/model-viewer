@@ -32,8 +32,8 @@ interface PlayAnimationOptions {
 
 interface AppendAnimationOptions {
   pingpong: boolean, repetitions: number|null, weight: number,
-      timeScale: number, fade: boolean|number, warp: boolean|number,
-      relativeWarp: boolean, time: number|null
+  timeScale: number, fade: boolean|number, warp: boolean|number,
+  relativeWarp: boolean, time: number|null
 }
 
 interface DetachAnimationOptions {
