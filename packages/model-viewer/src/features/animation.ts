@@ -115,9 +115,9 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (!this[$scene].appendedAnimations.includes(e.action._clip.name)) {
           this[$paused] = true;
         } else {
-          const filterdList = this[$scene].appendedAnimations.filter(
+          const filteredList = this[$scene].appendedAnimations.filter(
               i => i !== e.action._clip.name);
-          this[$scene].appendedAnimations = filterdList;
+          this[$scene].appendedAnimations = filteredList;
         }
         this.dispatchEvent(new CustomEvent('finished'));
       });
