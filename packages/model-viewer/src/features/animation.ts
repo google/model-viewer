@@ -32,8 +32,8 @@ interface PlayAnimationOptions {
 
 interface AppendAnimationOptions {
   pingpong: boolean, repetitions: number|null, weight: number,
-      timeScale: number, fade: boolean|number, warp: boolean|number,
-      relativeWarp: boolean, time: number|null
+  timeScale: number, fade: boolean|number, warp: boolean|number,
+  relativeWarp: boolean, time: number|null
 }
 
 interface DetachAnimationOptions {
@@ -115,9 +115,9 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         if (!this[$scene].appendedAnimations.includes(e.action._clip.name)) {
           this[$paused] = true;
         } else {
-          const filterdList = this[$scene].appendedAnimations.filter(
+          const filteredList = this[$scene].appendedAnimations.filter(
               i => i !== e.action._clip.name);
-          this[$scene].appendedAnimations = filterdList;
+          this[$scene].appendedAnimations = filteredList;
         }
         this.dispatchEvent(new CustomEvent('finished'));
       });

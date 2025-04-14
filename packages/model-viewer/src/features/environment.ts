@@ -89,14 +89,16 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       if (changedProperties.has('toneMapping')) {
-        this[$scene].toneMapping = this.toneMapping === 'aces' ?
-            ACESFilmicToneMapping :
-            this.toneMapping === 'agx'      ? AgXToneMapping :
-            this.toneMapping === 'reinhard' ? ReinhardToneMapping :
-            this.toneMapping === 'cineon'   ? CineonToneMapping :
-            this.toneMapping === 'linear'   ? LinearToneMapping :
-            this.toneMapping === 'none'     ? NoToneMapping :
-                                              NeutralToneMapping;
+        const TONE_MAPPING = new Map([
+          ['aces', ACESFilmicToneMapping],
+          ['agx', AgXToneMapping],
+          ['reinhard', ReinhardToneMapping],
+          ['cineon', CineonToneMapping],
+          ['linear', LinearToneMapping],
+          ['none', NoToneMapping]
+        ]);
+        
+        this[$scene].toneMapping = TONE_MAPPING.get(this.toneMapping) ?? NeutralToneMapping;
         this[$needsRender]();
       }
 
