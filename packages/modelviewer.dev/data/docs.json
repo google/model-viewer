@@ -136,7 +136,7 @@
       {
         "name": "lottieLoaderLocation",
         "htmlName": "lottieLoaderLocation",
-        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s LottieLoader location URL. The default URL is <code>https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/loaders/LottieLoader.js</code>. It will also require the server to provide the lottie canvas module at <code>../libs/lottie_canvas.module.js</code>."
+        "description": "This static, writable property sets <span class='attribute'>&lt;model-viewer&gt;</span>'s LottieLoader location URL. The default URL is <code>https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/loaders/LottieLoader.js</code>. It will also require the server to provide the lottie canvas module at <code>../libs/lottie_canvas.module.js</code>."
       },
       {
         "name": "minimumRenderScale",
