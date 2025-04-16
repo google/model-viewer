@@ -753,11 +753,6 @@ export class ModelScene extends Scene {
 
       const action = this.mixer.clipAction(animationClip, this);
 
-      // Reset animationAction timeScale
-      if (action.timeScale != this.element.timeScale) {
-        action.timeScale = this.element.timeScale;
-      }
-
       this.currentAnimationAction = action;
 
       if (this.element.paused) {
@@ -787,9 +782,9 @@ export class ModelScene extends Scene {
   appendAnimation(
       name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
       repetitionCount: number = Infinity, weight: number = 1,
-      timeScale: number = 1, fade: boolean|number = false,
-      warp: boolean|number = false, relativeWarp: boolean = true,
-      time: null|number = null, needsToStop: boolean = false) {
+      timeScale: number = 1, fade: boolean|number|string = false,
+      warp: boolean|number|string = false, relativeWarp: boolean = true,
+      time: null|number|string = null, needsToStop: boolean = false) {
     if (this._currentGLTF == null || name === this.element.animationName) {
       return;
     }
@@ -798,85 +793,56 @@ export class ModelScene extends Scene {
       return;
     }
 
-    let animationClip = null;
-    const defaultFade = 1.25;
-
-    if (name) {
-      animationClip = this.animationsByName.get(name);
-    }
-
+    const animationClip = name ? this.animationsByName.get(name) : null;
     if (animationClip == null) {
       return;
     }
 
-    // validate function parameters
+    // validate and normalize parameters
     if (typeof repetitionCount === 'string') {
-      if (!isNaN(repetitionCount)) {
-        repetitionCount = Math.max(parseInt(repetitionCount), 1);
-      } else {
-        repetitionCount = Infinity;
-        console.warn(
-            'Invalid repetitionCount value, repetitionCount is set to Infinity');
-      }
+      repetitionCount = !isNaN(parseFloat(repetitionCount)) ? 
+          Math.max(parseInt(repetitionCount), 1) : Infinity;
     } else if (typeof repetitionCount === 'number' && repetitionCount < 1) {
       repetitionCount = 1;
     }
 
     if (repetitionCount === 1 && loopMode !== LoopOnce) {
-      loopMode = LoopOnce
+      loopMode = LoopOnce;
     }
 
     if (typeof weight === 'string') {
-      if (!isNaN(weight)) {
-        weight = parseFloat(weight);
-      } else {
-        weight = 1;
-        console.warn('Invalid weight value, weight is set to 1');
-      }
+      weight = !isNaN(parseFloat(weight)) ? parseFloat(weight) : 1;
     }
 
     if (typeof timeScale === 'string') {
-      if (!isNaN(timeScale)) {
-        timeScale = parseFloat(timeScale);
-      } else {
-        timeScale = 1;
-        console.warn('Invalid timeScale value, timeScale is set to 1');
-      }
-    }
-
-    if (typeof fade === 'string') {
-      // @ts-ignore: Unreachable code error
-      if (fade.toLowerCase().trim() === 'true') {
-        fade = true;
-        // @ts-ignore: Unreachable code error
-      } else if (fade.toLowerCase().trim() === 'false') {
-        fade = false;
-      } else if (!isNaN(fade)) {
-        fade = parseFloat(fade);
-      } else {
-        fade = false;
-        console.warn('Invalid fade value, fade is set to false');
-      }
-    }
-
-    if (typeof warp === 'string') {
-      // @ts-ignore: Unreachable code error
-      if (warp.toLowerCase().trim() === 'true') {
-        warp = true;
-        // @ts-ignore: Unreachable code error
-      } else if (warp.toLowerCase().trim() === 'false') {
-        warp = false;
-      } else if (!isNaN(warp)) {
-        warp = parseFloat(warp);
-      } else {
-        warp = false;
-        console.warn('Invalid warp value, warp is set to false');
-      }
+      timeScale = !isNaN(parseFloat(timeScale)) ? parseFloat(timeScale) : 1;
     }
 
     if (typeof time === 'string') {
-      if (!isNaN(time)) {
-        time = parseFloat(time);
+      time = !isNaN(parseFloat(time)) ? parseFloat(time) : null;
+    }
+
+    const { shouldFade, duration: fadeDuration } = this.parseFadeValue(fade, false, 1.25);
+    
+    const defaultWarpDuration = 1.25;
+    let shouldWarp = false;
+    let warpDuration = 0;
+    
+    if (typeof warp === 'boolean') {
+      shouldWarp = warp;
+      warpDuration = warp ? defaultWarpDuration : 0;
+    } else if (typeof warp === 'number') {
+      shouldWarp = warp > 0;
+      warpDuration = Math.max(warp, 0);
+    } else if (typeof warp === 'string') {
+      if (warp.toLowerCase().trim() === 'true') {
+        shouldWarp = true;
+        warpDuration = defaultWarpDuration;
+      } else if (warp.toLowerCase().trim() === 'false') {
+        shouldWarp = false;
+      } else if (!isNaN(parseFloat(warp))) {
+        warpDuration = Math.max(parseFloat(warp), 0);
+        shouldWarp = warpDuration > 0;
       }
     }
 
@@ -896,22 +862,15 @@ export class ModelScene extends Scene {
         action.time = Math.min(Math.max(time, 0), animationClip.duration);
       }
 
-      if (typeof fade === 'boolean' && fade) {
-        action.fadeIn(defaultFade);
-      } else if (typeof fade === 'number') {
-        action.fadeIn(Math.max(fade, 0));
-      } else {
-        if (weight >= 0) {
-          action.weight = Math.min(Math.max(weight, 0), 1);
-        }
+      if (shouldFade) {
+        action.fadeIn(fadeDuration);
+      } else if (weight >= 0) {
+        action.weight = Math.min(Math.max(weight, 0), 1);
       }
 
-      if (typeof warp === 'boolean' && warp) {
+      if (shouldWarp) {
         action.warp(
-            relativeWarp ? currentTimeScale : 0, timeScale, defaultFade);
-      } else if (typeof warp === 'number') {
-        action.warp(
-            relativeWarp ? currentTimeScale : 0, timeScale, Math.max(warp, 0));
+            relativeWarp ? currentTimeScale : 0, timeScale, warpDuration);
       } else {
         action.timeScale = timeScale;
       }
@@ -935,7 +894,29 @@ export class ModelScene extends Scene {
     }
   }
 
-  detachAnimation(name: string = '', fade: boolean|number = true) {
+  /**
+   * Helper function to parse fade parameter values
+   */
+  private parseFadeValue(fade: boolean|number|string, defaultValue: boolean = true, defaultDuration: number = 1.5): { shouldFade: boolean, duration: number } {
+    if (typeof fade === 'boolean') {
+      return { shouldFade: fade, duration: fade ? defaultDuration : 0 };
+    } else if (typeof fade === 'number') {
+      return { shouldFade: fade > 0, duration: Math.max(fade, 0) };
+    } else if (typeof fade === 'string') {
+      if (fade.toLowerCase().trim() === 'true') {
+        return { shouldFade: true, duration: defaultDuration };
+      } else if (fade.toLowerCase().trim() === 'false') {
+        return { shouldFade: false, duration: 0 };
+      } else if (!isNaN(parseFloat(fade))) {
+        const duration = parseFloat(fade);
+        return { shouldFade: duration > 0, duration: Math.max(duration, 0) };
+      }
+    }
+    console.warn(`Invalid fade value, fade is set to ${defaultValue}`);
+    return { shouldFade: defaultValue, duration: defaultValue ? defaultDuration : 0 };
+  }
+
+  detachAnimation(name: string = '', fade: boolean|number|string = true) {
     if (this._currentGLTF == null || name === this.element.animationName) {
       return;
     }
@@ -944,47 +925,25 @@ export class ModelScene extends Scene {
       return;
     }
 
-    let animationClip = null;
-    const defaultFade = 1.5;
-
-    if (name) {
-      animationClip = this.animationsByName.get(name);
-    }
-
+    const animationClip = name ? this.animationsByName.get(name) : null;
     if (animationClip == null) {
       return;
     }
 
-    if (typeof fade === 'string') {
-      // @ts-ignore: Unreachable code error
-      if (fade.toLowerCase().trim() === 'true') {
-        fade = true;
-        // @ts-ignore: Unreachable code error
-      } else if (fade.toLowerCase().trim() === 'false') {
-        fade = false;
-      } else if (!isNaN(fade)) {
-        fade = parseFloat(fade);
-      } else {
-        fade = true;
-        console.warn('Invalid fade value, fade is set to true');
-      }
-    }
+    const { shouldFade, duration } = this.parseFadeValue(fade, true, 1.5);
 
     try {
       const action = this.mixer.existingAction(animationClip) ||
           this.mixer.clipAction(animationClip, this);
 
-      if (typeof fade === 'boolean' && fade) {
-        action.fadeOut(defaultFade);
-      } else if (typeof fade === 'number') {
-        action.fadeOut(Math.max(fade, 0));
+      if (shouldFade) {
+        action.fadeOut(duration);
       } else {
         action.stop();
       }
 
-      const result =
+      this.element[$scene].appendedAnimations = 
           this.element[$scene].appendedAnimations.filter(i => i !== name);
-      this.element[$scene].appendedAnimations = result;
     } catch (error) {
       console.error(error);
     }
