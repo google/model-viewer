@@ -897,23 +897,45 @@ export class ModelScene extends Scene {
   /**
    * Helper function to parse fade parameter values
    */
-  private parseFadeValue(fade: boolean|number|string, defaultValue: boolean = true, defaultDuration: number = 1.5): { shouldFade: boolean, duration: number } {
+  private parseFadeValue(
+    fade: boolean | number | string,
+    defaultValue: boolean = true,
+    defaultDuration: number = 1.5
+  ): { shouldFade: boolean, duration: number } {
+    const normalizeString = (str: string) => str.toLowerCase().trim();
+
     if (typeof fade === 'boolean') {
       return { shouldFade: fade, duration: fade ? defaultDuration : 0 };
-    } else if (typeof fade === 'number') {
-      return { shouldFade: fade > 0, duration: Math.max(fade, 0) };
-    } else if (typeof fade === 'string') {
-      if (fade.toLowerCase().trim() === 'true') {
+    }
+
+    if (typeof fade === 'number') {
+      const duration = Math.max(fade, 0);
+      return { shouldFade: duration > 0, duration };
+    }
+
+    if (typeof fade === 'string') {
+      const normalized = normalizeString(fade);
+
+      if (normalized === 'true') {
         return { shouldFade: true, duration: defaultDuration };
-      } else if (fade.toLowerCase().trim() === 'false') {
+      }
+
+      if (normalized === 'false') {
         return { shouldFade: false, duration: 0 };
-      } else if (!isNaN(parseFloat(fade))) {
-        const duration = parseFloat(fade);
-        return { shouldFade: duration > 0, duration: Math.max(duration, 0) };
+      }
+
+      const parsed = parseFloat(normalized);
+      if (!isNaN(parsed)) {
+        const duration = Math.max(parsed, 0);
+        return { shouldFade: duration > 0, duration };
       }
     }
-    console.warn(`Invalid fade value, fade is set to ${defaultValue}`);
-    return { shouldFade: defaultValue, duration: defaultValue ? defaultDuration : 0 };
+
+    console.warn(`Invalid fade value: ${fade}. Using default: ${defaultValue}`);
+    return {
+      shouldFade: defaultValue,
+      duration: defaultValue ? defaultDuration : 0
+    };
   }
 
   detachAnimation(name: string = '', fade: boolean|number|string = true) {
