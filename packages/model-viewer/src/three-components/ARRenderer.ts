@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Box3, BoxGeometry, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, Mesh, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace, Object3D} from 'three';
+import {Box3, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace, Object3D} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
@@ -49,8 +49,6 @@ const MAX_DISTANCE = 10;
 const DECAY = 150;
 // Longer controller/hand indicator line (meters).
 const MAX_LINE_LENGTH = 5;
-// Maximum dimension of rotation indicator box on controller (meters).
-const BOX_SIZE = 0.1;
 // Axis Y in webxr.
 const AXIS_Y = new Vector3(0, 1, 0);
 // Webxr rotation sensitivity
@@ -83,7 +81,6 @@ export interface ARTrackingEvent extends ThreeEvent {
 
 interface UserData {
   turning: boolean
-  box: Mesh
   line: Line
   isSelected: boolean
   initialX: number
@@ -104,7 +101,6 @@ const hitPosition = new Vector3();
 const camera = new PerspectiveCamera(45, 1, 0.1, 100);
 const lineGeometry = new BufferGeometry().setFromPoints(
     [new Vector3(0, 0, 0), new Vector3(0, 0, -1)]);
-const boxGeometry = new BoxGeometry();
 
 export class ARRenderer extends EventDispatcher<
     {status: {status: ARStatus}, tracking: {status: ARTracking}}> {
@@ -337,19 +333,6 @@ export class ARRenderer extends EventDispatcher<
       this.scaleLine.name = 'scale line';
       this.scaleLine.visible = false;
       this.controller1.add(this.scaleLine);
-
-      const {size} = scene;
-      const scale = BOX_SIZE / Math.max(size.x, size.y, size.z);
-      const box = new Mesh(boxGeometry);
-      box.name = 'box';
-      box.scale.copy(size).multiplyScalar(scale);
-      box.visible = false;
-
-      this.controller1.userData.box = box;
-      scene.add(box);
-      const box2 = box.clone();
-      this.controller2.userData.box = box2;
-      scene.add(box2);
     }
   }
 
@@ -363,9 +346,6 @@ export class ARRenderer extends EventDispatcher<
     const scene = this.presentedScene!;
     const intersection =
         this.placementBox!.controllerIntersection(scene, controller)
-    controller.userData.box.visible =
-        (intersection == null || controller.userData.turning) &&
-        !this.isTwoFingering;
     controller.userData.line.scale.z =
         intersection == null ? MAX_LINE_LENGTH : intersection.distance;
     return intersection != null;
@@ -592,7 +572,6 @@ export class ARRenderer extends EventDispatcher<
     if (this.xrMode !== 'screen-space') {
       if (this.controller1 != null) {
         this.controller1.userData.turning = false;
-        this.controller1.userData.box.visible = false;
         this.controller1.userData.line.visible = true;
         this.controller1.removeEventListener(
             'selectstart', this.onControllerSelectStart);
@@ -603,7 +582,6 @@ export class ARRenderer extends EventDispatcher<
       }
       if (this.controller2 != null) {
         this.controller2.userData.turning = false;
-        this.controller2.userData.box.visible = false;
         this.controller2.userData.line.visible = true;
         this.controller2.removeEventListener(
             'selectstart', this.onControllerSelectStart);
