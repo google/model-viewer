@@ -1,0 +1,5 @@
+commit 4efcf2ea3850c8f5be71cea8ed4edeb98ebdd516
+Author: Samaneh <3915613+samaneh-kazemi@users.noreply.github.com>
+Date:   Tue Apr 29 09:50:27 2025 -0700
+
+    remove indicator box for controllers (#5031)
