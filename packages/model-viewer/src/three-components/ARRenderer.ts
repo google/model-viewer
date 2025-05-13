@@ -26,6 +26,7 @@ import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
 import {ChangeSource} from './SmoothControls.js';
+import { XRMenuPanel } from './XRMenuPanel.js';
 
 // number of initial null pose XRFrames allowed before we post not-tracking
 const INIT_FRAMES = 30;
@@ -109,6 +110,7 @@ export class ARRenderer extends EventDispatcher<
   public placeOnWall = false;
 
   private placementBox: PlacementBox|null = null;
+  private menuPanel: XRMenuPanel|null = null;
   private lastTick: number|null = null;
   private turntableRotation: number|null = null;
   private oldShadowIntensity: number|null = null;
@@ -297,8 +299,45 @@ export class ARRenderer extends EventDispatcher<
         new PlacementBox(scene, this.placeOnWall ? 'back' : 'bottom');
     this.placementComplete = false;
 
+    this.menuPanel = new XRMenuPanel();
+    scene.add(this.menuPanel);
+    this.updateMenuPanelPosition(scene.camera, this.placementBox!); // Position the menu panel
+
+
     this.lastTick = performance.now();
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
+  }
+
+  private updateMenuPanelPosition(camera: PerspectiveCamera, placementBox: PlacementBox) {
+    if (!this.menuPanel || !placementBox) {
+      return;
+    }
+
+    // Get the world position of the placement box
+    const placementBoxWorldPos = new Vector3();
+    placementBox.getWorldPosition(placementBoxWorldPos);
+
+    // Calculate a position slightly in front of the placement box
+    const offsetUp = -0.2;  // Offset upward from the placement box
+    const offsetForward = 0.9;  // Offset forward from the placement box
+
+    // Get direction from placement box to camera (horizontal only)
+    const directionToCamera = new Vector3()
+        .copy(camera.position)
+        .sub(placementBoxWorldPos);
+    directionToCamera.y = 0;  // Zero out vertical component
+    directionToCamera.normalize();
+
+    // Calculate the final position
+    const panelPosition = new Vector3()
+        .copy(placementBoxWorldPos)
+        .add(new Vector3(0, offsetUp, 0))  // Move up
+        .add(directionToCamera.multiplyScalar(offsetForward));  // Move forward
+
+    this.menuPanel.position.copy(panelPosition);
+
+    // Make the menu panel face the camera
+    this.menuPanel.lookAt(camera.position);
   }
 
   private setupControllers() {
@@ -358,7 +397,19 @@ export class ARRenderer extends EventDispatcher<
   private onControllerSelectStart = (event: XRControllerEvent) => {
     const scene = this.presentedScene!;
     const controller = event.target;
+    const menuPanel = this.menuPanel;
   
+    const exitIntersect = this.menuPanel!.exitButtonControllerIntersection(scene, controller);
+    if (exitIntersect != null) {
+      this.menuPanel?.dispose();
+      this.stopPresenting();
+      return;
+    }
+
+    if (menuPanel) {
+      menuPanel!.show = false;
+    }
+
     const intersection = this.placementBox!.controllerIntersection(scene,
       controller);
     if (intersection!=null){
@@ -430,6 +481,9 @@ export class ARRenderer extends EventDispatcher<
         scene.pivot.matrix.elements[8], scene.pivot.matrix.elements[10]);
     this.goalPosition.x = scene.pivot.position.x;
     this.goalPosition.z = scene.pivot.position.z;
+
+    const menuPanel = this.menuPanel;
+    menuPanel!.show = true;
   };
 
   /**
@@ -489,6 +543,14 @@ export class ARRenderer extends EventDispatcher<
       this.placementBox = new PlacementBox(
           this.presentedScene!, this.placeOnWall ? 'back' : 'bottom');
     }
+    if (this.menuPanel) {
+      this.menuPanel.dispose(); // Add a dispose method to XRMenuPanel if needed
+      this.menuPanel = null;
+    }
+    this.menuPanel = new XRMenuPanel();
+    this.presentedScene!.add(this.menuPanel);
+    this.updateMenuPanelPosition(this.presentedScene!.camera, this.placementBox!);
+
   };
 
   private postSessionCleanup() {
@@ -508,6 +570,11 @@ export class ARRenderer extends EventDispatcher<
         scene.remove(this.xrLight);
         (this.xrLight as any).dispose();
         this.xrLight = null;
+      }
+
+      if (this.menuPanel != null) {
+        this.menuPanel.dispose();
+        this.menuPanel = null;
       }
 
       scene.add(scene.pivot);
@@ -913,7 +980,6 @@ export class ARRenderer extends EventDispatcher<
     const box = this.placementBox!;
     box.updateOpacity(delta);
 
-
     const bothSelected = this.controller1?.userData.isSelected && this.controller2?.userData.isSelected;
     if (bothSelected) {
       this.isTwoFingering = true;
@@ -979,6 +1045,13 @@ export class ARRenderer extends EventDispatcher<
     // screen, plus damping time.
     scene.element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
         'camera-change', {detail: {source}}));
+
+    const menuPanel = this.menuPanel;
+    if (menuPanel) {
+      menuPanel.updateOpacity(delta);
+      // Update menu panel position whenever the model moves
+        this.updateMenuPanelPosition(scene.camera, box);
+    }
   }
 
   /**
