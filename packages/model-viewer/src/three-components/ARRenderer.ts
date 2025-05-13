@@ -299,10 +299,11 @@ export class ARRenderer extends EventDispatcher<
         new PlacementBox(scene, this.placeOnWall ? 'back' : 'bottom');
     this.placementComplete = false;
 
-    this.menuPanel = new XRMenuPanel();
-    scene.add(this.menuPanel);
-    this.updateMenuPanelPosition(scene.camera, this.placementBox!); // Position the menu panel
-
+    if (this.xrMode !== 'screen-space') {
+      this.menuPanel = new XRMenuPanel();
+      scene.add(this.menuPanel);
+      this.updateMenuPanelPosition(scene.camera, this.placementBox!); // Position the menu panel
+    }
 
     this.lastTick = performance.now();
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
@@ -543,13 +544,15 @@ export class ARRenderer extends EventDispatcher<
       this.placementBox = new PlacementBox(
           this.presentedScene!, this.placeOnWall ? 'back' : 'bottom');
     }
-    if (this.menuPanel) {
-      this.menuPanel.dispose(); // Add a dispose method to XRMenuPanel if needed
-      this.menuPanel = null;
-    }
-    this.menuPanel = new XRMenuPanel();
-    this.presentedScene!.add(this.menuPanel);
-    this.updateMenuPanelPosition(this.presentedScene!.camera, this.placementBox!);
+    if (this.xrMode !== 'screen-space') {
+        if (this.menuPanel) {
+          this.menuPanel.dispose(); 
+          this.menuPanel = null;
+        }
+        this.menuPanel = new XRMenuPanel();
+        this.presentedScene!.add(this.menuPanel);
+        this.updateMenuPanelPosition(this.presentedScene!.camera, this.placementBox!);
+      }
 
   };
 
