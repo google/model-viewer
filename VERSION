@@ -1,0 +1,5 @@
+commit 4f51296b9d35eeed9674fe3bc6b28912f7553500
+Author: Samaneh <3915613+samaneh-kazemi@users.noreply.github.com>
+Date:   Tue May 13 16:14:47 2025 -0700
+
+    add xrmenupanel only in xr, avoid ar (#5040)

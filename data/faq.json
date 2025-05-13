@@ -1,0 +1,210 @@
+[
+  {
+    "Title": "General",
+    "htmlName": "general",
+    "Questions": [
+      {
+        "name": "Who uses &lt;model-viewer&gt;?",
+        "htmlName": "users",
+        "description": "Being open-source and often embedded as a dependency inside other libraries, this is hard to know exactly, but we have partners using it across e-commerce as well as many museums, blogs, virtual art galleries, online technical papers, and more. &lt;model-viewer&gt; is also powering more and more experiences in Google Search itself: try searching 'eukaryote' on desktop and look down for the 'View in 3D' button. Please share your own sites by starting a 'Show and Tell' discussion on our Github:",
+        "links": [
+          "<a href='https://github.com/google/model-viewer/discussions/categories/show-and-tell'>Show and Tell</a>"
+        ]
+      },
+      {
+        "name": "What 3D formats are supported?",
+        "htmlName": "formats",
+        "description": "&lt;model-viewer&gt; supports and plans to support only glTF/GLB 3D models. It is the Khronos standard known as the JPEG of 3D and the first format to standardize Physically-Based Rendering (PBR), making your models look realistic under any lighting, on any renderer. It is also compact, compressible, and loads rapidly into the GPU.",
+        "links": [
+          "<a href='https://www.khronos.org/gltf/'>Khronos glTF</a>"
+        ]
+      },
+      {
+        "name": "What AR modes are available?",
+        "htmlName": "ar",
+        "description": "&lt;model-viewer&gt; supports three AR modes: WebXR and SceneViewer on Android and QuickLook on iOS. WebXR is our default mode on Android as it is faster (no redownload of model), has consistent rendering, and stays in the browser, retaining all of our advanced features like annotations and material editing.<br/><br/>SceneViewer has most of the same limitations as QuickLook, being independent apps and only customizable through URL parameters. QuickLook only supports Apple's proprietary USDZ format, but &lt;model-viewer&gt; can now auto-generate a USDZ on the fly, much simplifying your deployment and processing. It also allows material edits in 3D mode to propagate into QuickLook, which is not possible in SceneViewer due to redownloading from the original URL. ",
+        "links": []
+      },
+      {
+        "name": "Can I have just the AR button?",
+        "htmlName": "no3d",
+        "description": "This is certainly possible, but not recommended. We have found through UX studies that very few users will accept the necessary camera permissions for AR if they have not yet interacted with the 3D model to see its value. Also, AR does not work reliably in all environments, so it is helpful to think of AR as a progressive enhancement over 3D on the page.",
+        "links": []
+      },
+      {
+        "name": "Why doesn't a documented API exist?",
+        "htmlName": "api",
+        "description": "We don't have the resources to support versioned documentation, so for better or worse our documentation is served from our latest development snapshot, rather than the last release. This means unreleased features are occasionally visible in our public docs. If you run into this problem, you can test with our latest development snapshot here: <code>https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js</code>. Do not use this URL for production! Generally the next release is only a month or so away, which will include the feature.",
+        "links": []
+      },
+      {
+        "name": "Can I have X feature from three.js?",
+        "htmlName": "three",
+        "description": "Probably not. We intentionally keep our API at a higher level than three.js, which is a full game engine. You're welcome to file a feature request if you have an idea that can be explained easily to lay users. You are also welcome to hack/fork us. You can use <code>mvElement[Object.getOwnPropertySymbols(mvElement).find(e => e.description === 'scene')];</code> to get access to our internal three.js scene and do whatever you want. You can use our unbundled build and hook up Three.js with an import map as demonstrated in the link below to e.g. hook up other file loaders. However, this is all outside the scope of our public API, so we make no effort to avoid breaking changes or to provide support.",
+        "links": [
+          "<a href='../examples/postprocessing/#setup'>Import map example</a>"
+        ]
+      },
+      {
+        "name": "Can I embed a 3D model in Twitter?",
+        "htmlName": "twitter",
+        "description": "Yes, &lt;model-viewer&gt; works in a Twitter player card, which will iframe the given URL into the web version of Twitter and will link to it from the mobile app version. We supply a 3D Twitter card generator to make this process easier:",
+        "links": [
+          "<a href='../examples/twitter/generator.html'>3D Twitter card generator</a>"
+        ]
+      }
+    ]
+  },
+  {
+    "Title": "Technical",
+    "htmlName": "technical",
+    "Questions": [
+      {
+        "name": "How high is our rendering quality?",
+        "htmlName": "quality",
+        "description": "&lt;model-viewer&gt; uses three.js for rendering, which is high-quality and rapidly supports the most recent PBR glTF extensions. The advantage of glTF is that it is widely-supported with consistent rendering (assuming the render parameters are set up the same way). We track convergence of the most popular glTF renderers to demonstrate the state of the industry and to file bugs to drive further improvement; see for yourself at the following Khronos link.",
+        "links": [
+          "<a href='https://github.khronos.org/glTF-Render-Fidelity/comparison/'>Khronos glTF fidelity comparison</a>"
+        ]
+      },
+      {
+        "name": "How do I ensure accurate colors?",
+        "htmlName": "color",
+        "description": "The short answer is to use neutral (grayscale) lighting and our new 'commerce' tone-mapping function, which is designed specifically to ensure faithful rendering of the glTF's colors. This is a complicated topic, so follow the links for much more in-depth explanations. The single biggest problem with color in 3D e-commerce is the industry-standard ACES tone mapper, so please consider using our commerce alternative.",
+        "links": [
+          "<a href='../examples/lightingandenv/#toneMapping'><span class='attribute'>tone-mapping</span> example</a>",
+          "<a href='../examples/color'>Achieving Color-Accurate Presentation with glTF</a>",
+          "<a href='../examples/tone-mapping'>Tone Mapping Considerations for Physically-Based Rendering</a>"
+        ]
+      },
+      {
+        "name": "Why am I getting CORS errors?",
+        "htmlName": "cors",
+        "description": "CORS is a browser security policy, Cross-Origin Resource Sharing, which by default limits scripts (like &lt;model-viewer&gt;) from fetching resources (like 3D models) from a different origin than they are served from. In order to allow this, your server that hosts your 3D models must be set up to respond with CORS headers that permit your site origin where &lt;model-viewer&gt; is used.<br/><br/>For instance, if you use an Amazon S3 bucket, you may want to go to the 'CORS' section under 'Permissions' and set: <code>[{'AllowedHeaders': ['*'], 'AllowedMethods': ['GET'], 'AllowedOrigins': ['*'], 'ExposeHeaders': []}]</code>",
+        "links": []
+      },
+      {
+        "name": "How should I access &lt;model-viewer&gt;?",
+        "htmlName": "cdn",
+        "description": "If you control your own hosting, the safest option is always to host model-viewer.min.js yourself on the same server as your site. For smaller sites and blogs, it is often more convenient to use one of various free CDNs - Google provides &lt;model-viewer&gt; as one of its hosted libraries, which we recommend as it is a fast and reliable CDN. Simply specify your desired version in the URL: <code>https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js</code>. We used to recommend unpkg, but it has had several serious outages recently. It can automatically pick the most recent version, but this is not a good practice as it slows loading (two requests) and ideally you should test when updating to ensure no bugs have been introduced. Another good option is jsDelivr.",
+        "links": [
+          "<a href='https://developers.google.com/speed/libraries#model-viewer'>Google Hosted Libraries</a>",
+          "<a href='https://www.jsdelivr.com/package/npm/@google/model-viewer'>jsDelivr</a>"
+        ]
+      },
+      {
+        "name": "How do I optimize page load performance?",
+        "htmlName": "lighthouse",
+        "description": "&lt;model-viewer&gt; is already well-optimized by default, lazy-loading and caching 3D models automatically. Always use a seamless poster so that the loading process becomes one of progressive enhancement. For more details about fine-tuning page-load metrics, see the following link.",
+        "links": [
+          "<a href='../examples/lighthouse.html'>Lighthouse details</a>"
+        ]
+      },
+      {
+        "name": "Does &lt;model-viewer&gt; work in React?",
+        "htmlName": "react",
+        "description": "Yes, as web components do generally, but we are not React experts. For those trying to get a TypeScript React project set up to successfully import our TS declaration, please see the following link, posted by one of our users.",
+        "links": [
+          "<a href='https://dev.to/asross311/a-strongly-typed-google-model-viewer-implementation-in-react-3m5c'>Working with React types</a>"
+        ]
+      },
+      {
+        "name": "How do I avoid duplicating three.js in my bundle?",
+        "htmlName": "duplication",
+        "description": "Three.js used to be marked as our dependency, which meant it was duplicated if you used it in another part of your code base too. As of v3.0.2, it is marked as our peer dependency, allowing you to share it. Note that we pin its version due to frequent breaking changes, so you will not have much version flexibility. This can be worked around using npm's --legacy-peer-deps mode, but please do not file issues if you do this, as we can only ensure our tested quality on one version of three.js at a time. If you are working directly with our bundle, then you may prefer to use the <code>model-viewer-module.min.js</code> bundle, and bring Three.js manually using an import-map.",
+        "links": [
+          "<a href='https://docs.npmjs.com/cli/v7/using-npm/config#legacy-peer-deps'>NPM legacy-peer-deps documentation</a>"
+        ]
+      },
+      {
+        "name": "How do I ensure &lt;model-viewer&gt; is self-contained?",
+        "htmlName": "remote",
+        "description": "When packaging an app or extension using &lt;model-viewer&gt;, it is important that everything you need is included in your package, but not more. We have several lazy-loaded modules for decoders that only some users need: DRACO, KTX2, Meshopt, and Lottie. These are loaded by URL and the defaults point to stable, external CDNs to make sure they \"just work\". If you don't use these features, those links will never be accessed, but a static checker can't know that and may flag these external resources. For any feature you need, you should change the Location to a relative URL within your project and copy the files there. If you don't need the feature, do the same thing, but make the file empty - since you'll never access its contents anyway, this will minimize your bundle size.",
+        "links": [
+          "<a href='../docs/#entrydocs-loading-staticproperties-dracoDecoderLocation'>Decoder location static properties</a>",
+          "<a href='../examples/loading/#dracoSupport'>Details on setting static properties</a>"
+        ]
+      }
+    ]
+  },
+  {
+    "Title": "API",
+    "htmlName": "api",
+    "Questions": [
+      {
+        "name": "How do I find the API I need?",
+        "htmlName": "find",
+        "description": "Both our API reference and these FAQs are designed as scrollable single pages, specifically so that the browser's find method will search everything at once. Try <code>Ctrl+F</code> and search for different keywords.",
+        "links": [
+          "<a href='index.html'>API Reference</a>"
+        ]
+      },
+      {
+        "name": "How do I get help?",
+        "htmlName": "help",
+        "description": "We're here to help! Please search our documentation, examples, and discussion forum. If you still can't find what you need, open a new discussion and you'll see an answer soon, often from maintainers. Please refrain from posting the same question in more than one place, and please only file an issue if you can complete the template.",
+        "links": [
+          "<a href='https://github.com/google/model-viewer/discussions'>Discussion forum</a>"
+        ]
+      },
+      {
+        "name": "Why aren't my camera settings having an effect?",
+        "htmlName": "camera",
+        "description": "Nearly always this is because of setting <code>camera-orbit</code>, but not <code>min-camera-orbit</code> or <code>max-camera-orbit</code>, and likewise for <code>field-of-view</code>. The max and min take precedence, so you need to ensure they include your desired state.",
+        "links": []
+      },
+      {
+        "name": "How do I set an attribute from JS?",
+        "htmlName": "attribute",
+        "description": "We follow standard web conventions, where all attributes are <code>kabob-case</code> and their corresponding JS getters and setters are the equivalent <code>camelCase</code> name.",
+        "links": []
+      },
+      {
+        "name": "Why is my attribute change not working?",
+        "htmlName": "async",
+        "description": "We use Lit Element to build our web component, which batches attribute changes and processes them asynchronously for better performance. If you need an attribute change to be reflected before taking your next action, use <code>await mvElement.updateComplete;</code>. A common example is between changing <code>animationName</code> and calling <code>play()</code>.",
+        "links": [
+          "<a href='https://lit.dev/docs/components/lifecycle/'>Lit Element lifecycle</a>"
+        ]
+      },
+      {
+        "name": "What are slots?",
+        "htmlName": "slots",
+        "description": "A slot is a web standard for web components that allows libraries like &lt;model-viewer&gt; to provide an API where you can insert your own HTML element into a designated part of our internal Shadow DOM. Nearly all of our default UX elements are inside of slots, allowing you to replace them. Keep in mind that if you use a slot, then any API affecting that default element will do nothing. Don't expect the <code>poster</code> attribute to do anything if you are using an element with <code>slot='poster'</code>.",
+        "links": [
+          "<a href='https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_templates_and_slots#adding_flexibility_with_slots'>Background on slots</a>"
+        ]
+      }
+    ]
+  },
+  {
+    "Title": "Tools",
+    "htmlName": "tools",
+    "Questions": [
+      {
+        "name": "What is KTX2?",
+        "htmlName": "ktx2",
+        "description": "KTX2 is a new image format for GPU-friendly compression (BASIS underlies it). It won't give much file size difference compared to JPEG, but it vastly reduces the amount of GPU RAM used and accelerates upload to the GPU. Large high-res models can easily run out of GPU RAM on mobile devices, and this is the fix.",
+        "links": [
+          "<a href='https://doc.babylonjs.com/features/featuresDeepDive/materials/using/ktx2Compression'>KTX2 overview</a>"
+        ]
+      },
+      {
+        "name": "How do I export a great GLB?",
+        "htmlName": "export",
+        "description": "Extensions are added to glTF pretty frequently and the best import/export support is nearly always in Blender, which is a free, open-source 3D animation application. Though its UX may be unfamiliar, it is becoming very popular with 3D artists in many industries. ",
+        "links": [
+          "<a href='https://www.blender.org/'>Blender</a>"
+        ]
+      },
+      {
+        "name": "How do I debug/modify a GLB?",
+        "htmlName": "vscode",
+        "description": "If you need to get into the weeds to debug a glTF or manually modify something, a VSCode extension exists to help. You can even live-preview the render with your changes. This is maintained by the chair of the glTF PBR Next TSG, so it is very up-to-date.",
+        "links": [
+          "<a href='https://github.com/AnalyticalGraphicsInc/gltf-vscode'>glTF VSCode extension</a>"
+        ]
+      }
+    ]
+  }
+]
