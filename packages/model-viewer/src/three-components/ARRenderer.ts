@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BoxGeometry, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, Mesh, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
+import {Box3, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace, Object3D} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
@@ -26,6 +26,7 @@ import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
 import {ChangeSource} from './SmoothControls.js';
+import { XRMenuPanel } from './XRMenuPanel.js';
 
 // number of initial null pose XRFrames allowed before we post not-tracking
 const INIT_FRAMES = 30;
@@ -49,8 +50,10 @@ const MAX_DISTANCE = 10;
 const DECAY = 150;
 // Longer controller/hand indicator line (meters).
 const MAX_LINE_LENGTH = 5;
-// Maximum dimension of rotation indicator box on controller (meters).
-const BOX_SIZE = 0.1;
+// Axis Y in webxr.
+const AXIS_Y = new Vector3(0, 1, 0);
+// Webxr rotation sensitivity
+const ROTATION_SENSIVITY = 0.3;
 
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
@@ -78,7 +81,10 @@ export interface ARTrackingEvent extends ThreeEvent {
 }
 
 interface UserData {
-  turning: boolean, box: Mesh, line: Line
+  turning: boolean
+  line: Line
+  isSelected: boolean
+  initialX: number
 }
 
 interface Controller extends XRTargetRaySpace {
@@ -96,7 +102,6 @@ const hitPosition = new Vector3();
 const camera = new PerspectiveCamera(45, 1, 0.1, 100);
 const lineGeometry = new BufferGeometry().setFromPoints(
     [new Vector3(0, 0, 0), new Vector3(0, 0, -1)]);
-const boxGeometry = new BoxGeometry();
 
 export class ARRenderer extends EventDispatcher<
     {status: {status: ARStatus}, tracking: {status: ARTracking}}> {
@@ -105,6 +110,7 @@ export class ARRenderer extends EventDispatcher<
   public placeOnWall = false;
 
   private placementBox: PlacementBox|null = null;
+  private menuPanel: XRMenuPanel|null = null;
   private lastTick: number|null = null;
   private turntableRotation: number|null = null;
   private oldShadowIntensity: number|null = null;
@@ -131,7 +137,7 @@ export class ARRenderer extends EventDispatcher<
   private isRotating = false;
   private isTwoFingering = false;
   private lastDragPosition = new Vector3();
-  private relativeOrientation = new Quaternion();
+  private deltaRotation = new Quaternion();
   private scaleLine = new Line(lineGeometry);
   private firstRatio = 0;
   private lastAngle = 0;
@@ -293,8 +299,46 @@ export class ARRenderer extends EventDispatcher<
         new PlacementBox(scene, this.placeOnWall ? 'back' : 'bottom');
     this.placementComplete = false;
 
+    if (this.xrMode !== 'screen-space') {
+      this.menuPanel = new XRMenuPanel();
+      scene.add(this.menuPanel);
+      this.updateMenuPanelPosition(scene.camera, this.placementBox!); // Position the menu panel
+    }
+
     this.lastTick = performance.now();
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
+  }
+
+  private updateMenuPanelPosition(camera: PerspectiveCamera, placementBox: PlacementBox) {
+    if (!this.menuPanel || !placementBox) {
+      return;
+    }
+
+    // Get the world position of the placement box
+    const placementBoxWorldPos = new Vector3();
+    placementBox.getWorldPosition(placementBoxWorldPos);
+
+    // Calculate a position slightly in front of the placement box
+    const offsetUp = -0.2;  // Offset upward from the placement box
+    const offsetForward = 0.9;  // Offset forward from the placement box
+
+    // Get direction from placement box to camera (horizontal only)
+    const directionToCamera = new Vector3()
+        .copy(camera.position)
+        .sub(placementBoxWorldPos);
+    directionToCamera.y = 0;  // Zero out vertical component
+    directionToCamera.normalize();
+
+    // Calculate the final position
+    const panelPosition = new Vector3()
+        .copy(placementBoxWorldPos)
+        .add(new Vector3(0, offsetUp, 0))  // Move up
+        .add(directionToCamera.multiplyScalar(offsetForward));  // Move forward
+
+    this.menuPanel.position.copy(panelPosition);
+
+    // Make the menu panel face the camera
+    this.menuPanel.lookAt(camera.position);
   }
 
   private setupControllers() {
@@ -329,19 +373,6 @@ export class ARRenderer extends EventDispatcher<
       this.scaleLine.name = 'scale line';
       this.scaleLine.visible = false;
       this.controller1.add(this.scaleLine);
-
-      const {size} = scene;
-      const scale = BOX_SIZE / Math.max(size.x, size.y, size.z);
-      const box = new Mesh(boxGeometry);
-      box.name = 'box';
-      box.scale.copy(size).multiplyScalar(scale);
-      box.visible = false;
-
-      this.controller1.userData.box = box;
-      scene.add(box);
-      const box2 = box.clone();
-      this.controller2.userData.box = box2;
-      scene.add(box2);
     }
   }
 
@@ -354,10 +385,7 @@ export class ARRenderer extends EventDispatcher<
 
     const scene = this.presentedScene!;
     const intersection =
-        this.placementBox!.controllerIntersection(scene, controller)
-    controller.userData.box.visible =
-        (intersection == null || controller.userData.turning) &&
-        !this.isTwoFingering;
+        this.placementBox!.controllerIntersection(scene, controller);
     controller.userData.line.scale.z =
         intersection == null ? MAX_LINE_LENGTH : intersection.distance;
     return intersection != null;
@@ -370,33 +398,62 @@ export class ARRenderer extends EventDispatcher<
   private onControllerSelectStart = (event: XRControllerEvent) => {
     const scene = this.presentedScene!;
     const controller = event.target;
+    const menuPanel = this.menuPanel;
+  
+    const exitIntersect = this.menuPanel!.exitButtonControllerIntersection(scene, controller);
+    if (exitIntersect != null) {
+      this.menuPanel?.dispose();
+      this.stopPresenting();
+      return;
+    }
 
-    if (this.placementBox!.controllerIntersection(scene, controller) != null) {
-      if (this.selectedController != null) {
-        this.selectedController.userData.line.visible = false;
-        if (scene.canScale) {
-          this.isTwoFingering = true;
-          this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
-          this.scaleLine.visible = true;
+    if (menuPanel) {
+      menuPanel!.show = false;
+    }
+
+    const intersection = this.placementBox!.controllerIntersection(scene,
+      controller);
+    if (intersection!=null){
+      const bbox = new Box3().setFromObject(scene.pivot);
+      const footprintY = bbox.min.y + 0.2; // Small threshold above base
+
+      // Check if the ray intersection is near the footprint
+      const isFootprint = intersection.point.y <= footprintY;
+      if (isFootprint) {
+        if (this.selectedController != null) {
+          this.selectedController.userData.line.visible = false;
+          if (scene.canScale) {
+            this.isTwoFingering = true;
+            this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
+            this.scaleLine.visible = true;
+          }
+        } else {
+          controller.attach(scene.pivot);
+        }
+        this.selectedController = controller;
+        scene.setShadowIntensity(0.01);
+      } else {
+        if (controller == this.controller1) {
+          this.controller1.userData.isSelected = true;
+        } else if (controller == this.controller2) {
+          this.controller2.userData.isSelected = true;
+        }
+
+        if (this.controller1?.userData.isSelected && this.controller2?.userData.isSelected) {
+          if (scene.canScale) {
+            this.isTwoFingering = true;
+            this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
+            this.scaleLine.visible = true;
+          }
+        } else {
+            const otherController = controller === this.controller1 ? this.controller2! :
+            this.controller1!;
+            controller.userData.initialX = controller.position.x;
+            otherController.userData.turning = false;
+            controller.userData.turning = true;
+            controller.userData.line.visible = false;
         }
       }
-
-      controller.attach(scene.pivot);
-      this.selectedController = controller;
-
-      scene.setShadowIntensity(0.01);
-    } else {
-      const otherController = controller === this.controller1 ?
-          this.controller2! :
-          this.controller1!;
-
-      this.relativeOrientation.copy(controller.quaternion)
-          .invert()
-          .multiply(scene.pivot.getWorldQuaternion(quaternion));
-
-      otherController.userData.turning = false;
-      controller.userData.turning = true;
-      controller.userData.line.visible = false;
     }
   };
 
@@ -406,6 +463,13 @@ export class ARRenderer extends EventDispatcher<
     controller.userData.line.visible = true;
     this.isTwoFingering = false;
     this.scaleLine.visible = false;
+
+    if (controller == this.controller1) {
+      this.controller1.userData.isSelected = false;
+    } else if (controller == this.controller2) {
+      this.controller2.userData.isSelected = false;
+    }
+
     if (this.selectedController != null &&
         this.selectedController != controller) {
       return;
@@ -418,6 +482,9 @@ export class ARRenderer extends EventDispatcher<
         scene.pivot.matrix.elements[8], scene.pivot.matrix.elements[10]);
     this.goalPosition.x = scene.pivot.position.x;
     this.goalPosition.z = scene.pivot.position.z;
+
+    const menuPanel = this.menuPanel;
+    menuPanel!.show = true;
   };
 
   /**
@@ -477,6 +544,16 @@ export class ARRenderer extends EventDispatcher<
       this.placementBox = new PlacementBox(
           this.presentedScene!, this.placeOnWall ? 'back' : 'bottom');
     }
+    if (this.xrMode !== 'screen-space') {
+        if (this.menuPanel) {
+          this.menuPanel.dispose(); 
+          this.menuPanel = null;
+        }
+        this.menuPanel = new XRMenuPanel();
+        this.presentedScene!.add(this.menuPanel);
+        this.updateMenuPanelPosition(this.presentedScene!.camera, this.placementBox!);
+      }
+
   };
 
   private postSessionCleanup() {
@@ -496,6 +573,11 @@ export class ARRenderer extends EventDispatcher<
         scene.remove(this.xrLight);
         (this.xrLight as any).dispose();
         this.xrLight = null;
+      }
+
+      if (this.menuPanel != null) {
+        this.menuPanel.dispose();
+        this.menuPanel = null;
       }
 
       scene.add(scene.pivot);
@@ -560,7 +642,6 @@ export class ARRenderer extends EventDispatcher<
     if (this.xrMode !== 'screen-space') {
       if (this.controller1 != null) {
         this.controller1.userData.turning = false;
-        this.controller1.userData.box.visible = false;
         this.controller1.userData.line.visible = true;
         this.controller1.removeEventListener(
             'selectstart', this.onControllerSelectStart);
@@ -571,7 +652,6 @@ export class ARRenderer extends EventDispatcher<
       }
       if (this.controller2 != null) {
         this.controller2.userData.turning = false;
-        this.controller2.userData.box.visible = false;
         this.controller2.userData.line.visible = true;
         this.controller2.removeEventListener(
             'selectstart', this.onControllerSelectStart);
@@ -889,41 +969,31 @@ export class ARRenderer extends EventDispatcher<
     }
   }
 
+  private applyControllerRotation(controller: Controller, pivot: Object3D) {
+    if (!controller.userData.turning) {
+      return;
+    }
+    const angle = (controller.position.x - controller.userData.initialX) * ROTATION_SENSIVITY;
+    this.deltaRotation.setFromAxisAngle(AXIS_Y, angle);
+    pivot.quaternion.multiplyQuaternions(this.deltaRotation, pivot.quaternion);
+  }
   private moveScene(delta: number) {
     const scene = this.presentedScene!;
     const {pivot} = scene;
     const box = this.placementBox!;
     box.updateOpacity(delta);
 
-    if (this.controller1) {
-      if (this.controller1.userData.turning) {
-        pivot.quaternion.copy(this.controller1.quaternion)
-            .multiply(this.relativeOrientation);
-        if (this.selectedController &&
-            this.selectedController === this.controller2) {
-          pivot.quaternion.premultiply(
-              quaternion.copy(this.controller2.quaternion).invert());
-        }
-      }
-      this.controller1.userData.box.position.copy(this.controller1.position);
-      pivot.getWorldQuaternion(this.controller1.userData.box.quaternion);
+    const bothSelected = this.controller1?.userData.isSelected && this.controller2?.userData.isSelected;
+    if (bothSelected) {
+      this.isTwoFingering = true;
     }
 
-    if (this.controller2) {
-      if (this.controller2.userData.turning) {
-        pivot.quaternion.copy(this.controller2.quaternion)
-            .multiply(this.relativeOrientation);
-        if (this.selectedController &&
-            this.selectedController === this.controller1) {
-          pivot.quaternion.premultiply(
-              quaternion.copy(this.controller1.quaternion).invert());
-        }
-      }
-      this.controller2.userData.box.position.copy(this.controller2.position);
-      pivot.getWorldQuaternion(this.controller2.userData.box.quaternion);
+    if (!bothSelected) {
+      if (this.controller1) this.applyControllerRotation(this.controller1, pivot);
+      if (this.controller2) this.applyControllerRotation(this.controller2, pivot);
     }
 
-    if (this.controller1 && this.controller2 && this.isTwoFingering) {
+    if (this.controller1 && this.controller2 && bothSelected) {
       const dist = this.controllerSeparation();
       this.setScale(dist);
       this.scaleLine.scale.z = -dist;
@@ -978,6 +1048,13 @@ export class ARRenderer extends EventDispatcher<
     // screen, plus damping time.
     scene.element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
         'camera-change', {detail: {source}}));
+
+    const menuPanel = this.menuPanel;
+    if (menuPanel) {
+      menuPanel.updateOpacity(delta);
+      // Update menu panel position whenever the model moves
+        this.updateMenuPanelPosition(scene.camera, box);
+    }
   }
 
   /**
