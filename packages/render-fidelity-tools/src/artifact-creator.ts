@@ -382,7 +382,9 @@ export class ArtifactCreator {
     }
 
     const screenshot =
-        await page.screenshot({path: outputPath, omitBackground: true});
+        outputPath && (outputPath.endsWith('.png') || outputPath.endsWith('.jpeg') || outputPath.endsWith('.webp'))
+            ? await page.screenshot({path: outputPath as `${string}.png` | `${string}.jpeg` | `${string}.webp`, omitBackground: true})
+            : await page.screenshot({omitBackground: true});
 
     page.close();
 
