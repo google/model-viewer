@@ -35,9 +35,9 @@
     "Chris George <chrisgeorge@google.com>"
   ],
   "devDependencies": {
-    "@gltf-transform/core": "^4.1.3",
-    "@gltf-transform/extensions": "^4.1.3",
-    "@gltf-transform/functions": "^4.1.3",
+    "@gltf-transform/core": "^4.1.4",
+    "@gltf-transform/extensions": "^4.1.4",
+    "@gltf-transform/functions": "^4.1.4",
     "@google/model-viewer": "^4.1.0",
     "@material/mwc-button": "^0.27.0",
     "@material/mwc-checkbox": "^0.27.0",
