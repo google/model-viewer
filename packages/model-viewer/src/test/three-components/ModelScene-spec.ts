@@ -63,6 +63,38 @@ suite('ModelScene', () => {
         expect(scene.shadow).to.be.ok;
       });
     });
+
+    test('can append and play an animation', () => {
+      // Ensure there is at least one animation
+      expect(scene.animationNames.length).to.be.greaterThan(0);
+      const animationName = scene.animationNames[0];
+      scene.appendAnimation(animationName);
+      // The animation name should be in appendedAnimations
+      expect(scene.appendedAnimations).to.include(animationName);
+      // The animation action should be running
+      const clip = scene['animationsByName'].get(animationName);
+      expect(clip).to.not.be.undefined;
+      const action = scene['mixer'].existingAction(clip!);
+      expect(action).to.be.ok;
+      expect(action!.isRunning()).to.be.true;
+    });
+
+    test('can detach an appended animation', () => {
+      // Ensure there is at least one animation
+      expect(scene.animationNames.length).to.be.greaterThan(0);
+      const animationName = scene.animationNames[0];
+      scene.appendAnimation(animationName);
+      expect(scene.appendedAnimations).to.include(animationName);
+      scene.detachAnimation(animationName, false); // no fade for instant removal
+      // The animation name should be removed from appendedAnimations
+      expect(scene.appendedAnimations).to.not.include(animationName);
+      // The animation action should be stopped
+      const clip = scene['animationsByName'].get(animationName);
+      expect(clip).to.not.be.undefined;
+      const action = scene['mixer'].existingAction(clip!);
+      expect(action).to.be.ok;
+      expect(action!.isRunning()).to.be.false;
+    });
   });
 
   suite('setSize', () => {
