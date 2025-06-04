@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Box3, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace, Object3D} from 'three';
+import {Box3, BufferGeometry, Camera, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace, Object3D} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
@@ -302,14 +302,14 @@ export class ARRenderer extends EventDispatcher<
     if (this.xrMode !== 'screen-space') {
       this.menuPanel = new XRMenuPanel();
       scene.add(this.menuPanel);
-      this.updateMenuPanelPosition(scene.camera, this.placementBox!); // Position the menu panel
+      this.updateMenuPanelPosition(scene.getCamera(), this.placementBox!); // Position the menu panel
     }
 
     this.lastTick = performance.now();
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
   }
 
-  private updateMenuPanelPosition(camera: PerspectiveCamera, placementBox: PlacementBox) {
+  private updateMenuPanelPosition(camera: Camera, placementBox: PlacementBox) {
     if (!this.menuPanel || !placementBox) {
       return;
     }
@@ -551,7 +551,7 @@ export class ARRenderer extends EventDispatcher<
         }
         this.menuPanel = new XRMenuPanel();
         this.presentedScene!.add(this.menuPanel);
-        this.updateMenuPanelPosition(this.presentedScene!.camera, this.placementBox!);
+        this.updateMenuPanelPosition(this.presentedScene!.getCamera(), this.placementBox!);
       }
 
   };
@@ -1053,7 +1053,7 @@ export class ARRenderer extends EventDispatcher<
     if (menuPanel) {
       menuPanel.updateOpacity(delta);
       // Update menu panel position whenever the model moves
-        this.updateMenuPanelPosition(scene.camera, box);
+        this.updateMenuPanelPosition(scene.getCamera(), box);
     }
   }
 
