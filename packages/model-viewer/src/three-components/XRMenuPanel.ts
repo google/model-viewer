@@ -3,7 +3,7 @@ import {CanvasTexture, Mesh,Object3D, Shape,ShapeGeometry, LinearFilter, MeshBas
 import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 
-const MAX_OPACITY = 0.6;
+const MAX_OPACITY = 1;
 const PANEL_WIDTH = 0.1;
 const PANEL_HEIGHT = 0.1;
 const PANEL_CORNER_RADIUS = 0.02;
@@ -66,7 +66,7 @@ export class XRMenuPanel extends Object3D {
         width = 0.05,
         height = 0.05,
         fontSize = 80,
-        textColor = 'white',
+        textColor = '#cccccc',
         backgroundColor = 'transparent',
         fontFamily = 'sans-serif'
       } = options || {};
