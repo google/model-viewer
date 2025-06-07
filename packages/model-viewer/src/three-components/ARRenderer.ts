@@ -326,23 +326,22 @@ export class ARRenderer extends EventDispatcher<
     }
   }
 
+  private setupController(controller: XRController) {
+    this.setupXRControllerLine(controller);
+    controller.addEventListener('selectstart', this.onControllerSelectStart);
+    controller.addEventListener('selectend', this.onControllerSelectEnd);
+  }
   private setupXRControllers() {
     this.xrController1 = this.threeRenderer.xr.getController(0) as XRController;
     this.xrController2 = this.threeRenderer.xr.getController(1) as XRController;
-  
-    this.setupXRControllerLine(this.xrController1);
-    this.setupXRControllerLine(this.xrController2);
-  
-    this.xrController1.addEventListener('selectstart', this.onControllerSelectStart);
-    this.xrController1.addEventListener('selectend', this.onControllerSelectEnd);
-  
-    this.xrController2.addEventListener('selectstart', this.onControllerSelectStart);
-    this.xrController2.addEventListener('selectend', this.onControllerSelectEnd);
-  
+
+    this.setupController(this.xrController1);
+    this.setupController(this.xrController2);
+
     this.scaleLine.name = 'scale line';
     this.scaleLine.visible = false;
     this.xrController1.add(this.scaleLine);
-  
+
     // Add controllers to the scene
     const scene = this.presentedScene!;
     scene.add(this.xrController1);
