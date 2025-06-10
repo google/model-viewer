@@ -858,41 +858,35 @@ export class ARRenderer extends EventDispatcher<
     if (hitSource == null) {
       return;
     }
-    if (!this.isTranslating && !this.isTwoHandInteraction && !this.isRotating) {
-      return;
-    }
     const fingers = frame.getHitTestResultsForTransientInput(hitSource);
     const scene = this.presentedScene!;
     const scale = scene.pivot.scale.x;
 
-    // Rotating, translating and scaling are mutually exclusive operations; only
-    // one can happen at a time, but we can switch during a gesture.
-    if (this.isTwoHandInteraction) {
-      if (fingers.length < 2) {
-        // If we lose the second finger, stop scaling (in fact, stop processing
-        // input altogether until a new gesture starts).
-        this.isTwoHandInteraction = false;
-      } else {
-        const {separation, deltaYaw} = this.fingerPolar(fingers);
-        if (this.placeOnWall === false) {
-          this.goalYaw += deltaYaw;
-        }
-        if (scene.canScale) {
-          this.setScale(separation);
-        }
-      }
-      return;
-    } else if (fingers.length === 2) {
-      // If we were rotating or translating and we get a second finger, switch
-      // to scaling instead.
+    // Check for two-finger interaction first
+    if (fingers.length === 2) {
       this.isTranslating = false;
       this.isRotating = false;
       this.isTwoHandInteraction = true;
       const {separation} = this.fingerPolar(fingers);
-      this.firstRatio = separation / scale;
+      if (this.firstRatio === 0) {
+        this.firstRatio = separation / scale;
+      }
+      if (scene.canScale) {
+        this.setScale(separation);
+      }
+      return;
+    } else if (this.isTwoHandInteraction && fingers.length < 2) {
+      // If we lose the second finger, stop scaling
+      this.isTwoHandInteraction = false;
+      this.firstRatio = 0;
       return;
     }
 
+    if (!this.isTranslating && !this.isTwoHandInteraction && !this.isRotating) {
+      return;
+    }
+
+    // Handle single finger interactions
     if (this.isRotating) {
       const angle = this.inputSource!.gamepad!.axes[0] * ROTATION_RATE;
       this.goalYaw += angle - this.lastAngle;
