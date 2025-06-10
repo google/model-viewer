@@ -27,17 +27,23 @@ const $detachAnimation = Symbol('detachAnimation');
 const $paused = Symbol('paused');
 
 interface PlayAnimationOptions {
-  repetitions: number, pingpong: boolean,
+  repetitions: number;
+  pingpong: boolean;
 }
 
 interface AppendAnimationOptions {
-  pingpong: boolean, repetitions: number|null, weight: number,
-  timeScale: number, fade: boolean|number, warp: boolean|number,
-  relativeWarp: boolean, time: number|null
+  pingpong?: boolean;
+  repetitions?: number|null;
+  weight?: number;
+  timeScale?: number;
+  fade?: boolean|number;
+  warp?: boolean|number;
+  relativeWarp?: boolean;
+  time?: number|null;
 }
 
 interface DetachAnimationOptions {
-  fade: boolean|number
+  fade?: boolean|number;
 }
 
 const DEFAULT_PLAY_OPTIONS: PlayAnimationOptions = {
@@ -260,27 +266,28 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$appendAnimation](
-        animationName: string = '',
-        options: AppendAnimationOptions = DEFAULT_APPEND_OPTIONS) {
-      const repetitions = options.repetitions ?? Infinity;
-      const mode = options.pingpong ?
-          LoopPingPong :
-          (repetitions === 1 ? LoopOnce : LoopRepeat);
+[$appendAnimation](
+    animationName: string = '',
+    options: AppendAnimationOptions = {}) {
+  const opts = {...DEFAULT_APPEND_OPTIONS, ...options};
+  const repetitions = opts.repetitions ?? Infinity;
+  const mode = opts.pingpong ?
+      LoopPingPong :
+      (repetitions === 1 ? LoopOnce : LoopRepeat);
 
-      const needsToStop = !!options.repetitions || 'pingpong' in options;
+  const needsToStop = repetitions !== Infinity || mode !== LoopPingPong;
 
-      this[$scene].appendAnimation(
-          animationName ? animationName : this.animationName,
-          mode,
-          repetitions,
-          options.weight,
-          options.timeScale,
-          options.fade,
-          options.warp,
-          options.relativeWarp,
-          options.time,
-          needsToStop);
+  this[$scene].appendAnimation(
+      animationName ? animationName : this.animationName,
+      mode,
+      repetitions,
+      opts.weight,
+      opts.timeScale,
+      opts.fade,
+      opts.warp,
+      opts.relativeWarp,
+      opts.time,
+      needsToStop);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation
@@ -290,11 +297,12 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$detachAnimation](
-        animationName: string = '',
-        options: DetachAnimationOptions = DEFAULT_DETACH_OPTIONS) {
-      this[$scene].detachAnimation(
-          animationName ? animationName : this.animationName, options.fade);
+[$detachAnimation](
+    animationName: string = '',
+    options: DetachAnimationOptions = {}) {
+  const opts = {...DEFAULT_DETACH_OPTIONS, ...options};
+  this[$scene].detachAnimation(
+      animationName ? animationName : this.animationName, opts.fade);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation
