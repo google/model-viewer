@@ -1,0 +1,7 @@
+commit 054804052f75afb853b72375067876498bbe7e7a
+Author: Samaneh <3915613+samaneh-kazemi@users.noreply.github.com>
+Date:   Tue Jun 10 11:31:32 2025 -0700
+
+    Fix regression caused by the refactor which had disabled scaling in AR mode (#5052)
+    
+    Restore scaling in AR
