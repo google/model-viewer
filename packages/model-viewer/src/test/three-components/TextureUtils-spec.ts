@@ -69,6 +69,36 @@ suite('TextureUtils', () => {
       expect(texture.name).to.be.eq(HDR_EQUI_URL);
       expect(texture.mapping).to.be.eq(EquirectangularReflectionMapping);
     });
+    test('loads a valid HDR texture from blob URL with correct content type', async () => {
+      // Create a blob with HDR content type
+      const blob = new Blob([''], { type: 'image/vnd.radiance' });
+      const blobUrl = URL.createObjectURL(blob);
+      
+      try {
+        let texture = await textureUtils.loadEquirect(blobUrl);
+        texture.dispose();
+        expect(texture.isTexture).to.be.ok;
+        expect(texture.name).to.be.eq(blobUrl);
+        expect(texture.mapping).to.be.eq(EquirectangularReflectionMapping);
+      } finally {
+        URL.revokeObjectURL(blobUrl);
+      }
+    });
+    test('falls back to extension check for blob URL with unknown content type', async () => {
+      // Create a blob with unknown content type
+      const blob = new Blob([''], { type: 'application/octet-stream' });
+      const blobUrl = URL.createObjectURL(blob);
+      
+      try {
+        let texture = await textureUtils.loadEquirect(blobUrl);
+        texture.dispose();
+        expect(texture.isTexture).to.be.ok;
+        expect(texture.name).to.be.eq(blobUrl);
+        expect(texture.mapping).to.be.eq(EquirectangularReflectionMapping);
+      } finally {
+        URL.revokeObjectURL(blobUrl);
+      }
+    });
     test('throws on invalid URL', async () => {
       try {
         await textureUtils.loadEquirect('');
