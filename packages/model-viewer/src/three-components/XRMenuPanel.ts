@@ -1,19 +1,20 @@
-
 import {Camera, CanvasTexture, Mesh,Object3D, Shape,ShapeGeometry, LinearFilter, MeshBasicMaterial, PlaneGeometry, XRTargetRaySpace, Vector3} from 'three';
 import {Damper} from './Damper.js';
 import {ModelScene} from './ModelScene.js';
 import { PlacementBox } from './PlacementBox.js';
 
 const MAX_OPACITY = 1;
-const PANEL_WIDTH = 0.1;
-const PANEL_HEIGHT = 0.1;
+const PANEL_WIDTH = 0.15;
+const PANEL_HEIGHT = 0.08;
 const PANEL_CORNER_RADIUS = 0.02;
 
 export class XRMenuPanel extends Object3D {
   private panelMesh: Mesh;
   private exitButton: Mesh;
+  private toggleButton: Mesh;
   private goalOpacity: number;
   private opacityDamper: Damper;
+  private isActualSize: boolean = false; // Start with normalized size
   
   constructor() {
     super(); 
@@ -41,10 +42,22 @@ export class XRMenuPanel extends Object3D {
     this.panelMesh = new Mesh(geometry, material);
     this.panelMesh.name = 'MenuPanel';
     this.add(this.panelMesh); 
-    this.exitButton = this.createButton('x');
+
+    // Create exit button
+    this.exitButton = this.createButton('X');
     this.exitButton.name = 'ExitButton';
-    this.exitButton.position.set(0, 0, 0.01);
-    this.add(this.exitButton) 
+    this.exitButton.position.set(0.035, 0, 0.01); // Keep X button position
+    this.add(this.exitButton);
+
+    // Create toggle button with adjusted position for larger text
+    this.toggleButton = this.createButton('1:1', {
+      width: 0.06, // Slightly wider for the longer text
+      height: 0.05 // Keep same height as X button
+    });
+    this.toggleButton.name = 'ToggleButton';
+    this.toggleButton.position.set(-0.03, 0, 0.01); // Move slightly more to the left to account for wider button
+    this.add(this.toggleButton);
+ 
     this.opacityDamper = new Damper();
     this.goalOpacity = MAX_OPACITY;
   } 
@@ -97,6 +110,39 @@ export class XRMenuPanel extends Object3D {
   exitButtonControllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
       const hitResult = scene.hitFromController(controller, this.exitButton);
       return hitResult;
+  }
+
+  scaleModeButtonControllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
+      const hitResult = scene.hitFromController(controller, this.toggleButton);
+      return hitResult;
+  }
+
+  toggleScaleMode() {
+    this.isActualSize = !this.isActualSize;
+    const newLabel = this.isActualSize ? '1:1' : '@';
+    this.updateScaleModeButtonLabel(newLabel);
+    return this.isActualSize;
+  }
+
+  private updateScaleModeButtonLabel(label: string) {
+    const canvasSize = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+    const ctx = canvas.getContext('2d')!;
+    
+    ctx.fillStyle = '#cccccc';
+    ctx.font = 'bold 80px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, canvasSize / 2, canvasSize / 2);
+  
+    const texture = new CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    texture.minFilter = LinearFilter;
+  
+    (this.toggleButton.material as MeshBasicMaterial).map = texture;
+    (this.toggleButton.material as MeshBasicMaterial).needsUpdate = true;
   }
    
   updatePosition(camera: Camera, placementBox: PlacementBox)  {

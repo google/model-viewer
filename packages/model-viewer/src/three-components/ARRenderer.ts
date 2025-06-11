@@ -380,6 +380,12 @@ export class ARRenderer extends EventDispatcher<
       return;
     }
 
+    const scaleModeIntersect = this.menuPanel!.scaleModeButtonControllerIntersection(scene, controller);
+    if (scaleModeIntersect != null) {
+      this.menuPanel!.toggleScaleMode();
+      return;
+    }
+
     if (menuPanel) {
       menuPanel!.show = false;
     }
