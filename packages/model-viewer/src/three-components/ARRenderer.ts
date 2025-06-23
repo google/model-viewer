@@ -157,6 +157,7 @@ export class ARRenderer extends EventDispatcher<
   private pitchDamper = new Damper();
   private rollDamper = new Damper();
   private scaleDamper = new Damper();
+  private wasTwoFingering = false;
 
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
@@ -813,8 +814,15 @@ export class ARRenderer extends EventDispatcher<
     } else if (fingers.length === 2) {
       box.show = true;
       this.isTwoHandInteraction = true;
-      const {separation} = this.fingerPolar(fingers);
-      this.firstRatio = separation / scene.pivot.scale.x;
+      const {separation, angle} = this.fingerPolar(fingers);
+      this.lastAngle = angle; // Initialize lastAngle, do not update goalYaw
+      if (this.firstRatio === 0) {
+        this.firstRatio = separation / scene.pivot.scale.x;
+      }
+      if (scene.canScale) {
+        this.setScale(separation);
+      }
+      return;
     }
   };
 
@@ -829,7 +837,7 @@ export class ARRenderer extends EventDispatcher<
   };
 
   private fingerPolar(fingers: XRTransientInputHitTestResult[]):
-      {separation: number, deltaYaw: number} {
+      {separation: number, deltaYaw: number, angle: number} {
     const fingerOne = fingers[0].inputSource.gamepad!.axes;
     const fingerTwo = fingers[1].inputSource.gamepad!.axes;
     const deltaX = fingerTwo[0] - fingerOne[0];
@@ -841,10 +849,10 @@ export class ARRenderer extends EventDispatcher<
     } else if (deltaYaw < -Math.PI) {
       deltaYaw += 2 * Math.PI;
     }
-    this.lastAngle = angle;
     return {
       separation: Math.sqrt(deltaX * deltaX + deltaY * deltaY),
-      deltaYaw: deltaYaw
+      deltaYaw: deltaYaw,
+      angle: angle
     };
   }
 
@@ -862,24 +870,34 @@ export class ARRenderer extends EventDispatcher<
     const scene = this.presentedScene!;
     const scale = scene.pivot.scale.x;
 
-    // Check for two-finger interaction first
+    // Robust two-finger gesture handling
     if (fingers.length === 2) {
-      this.isTranslating = false;
-      this.isRotating = false;
-      this.isTwoHandInteraction = true;
-      const {separation} = this.fingerPolar(fingers);
-      if (this.firstRatio === 0) {
+      if (!this.wasTwoFingering) {
+        // New two-finger gesture starting
+        const {separation, angle} = this.fingerPolar(fingers);
         this.firstRatio = separation / scale;
+        this.lastAngle = angle;
+        this.wasTwoFingering = true;
+        this.isTwoHandInteraction = true;
+        // Do not apply rotation or scale on this frame
+        return;
       }
+      // Ongoing two-finger gesture
+      const {separation, deltaYaw, angle} = this.fingerPolar(fingers);
+      this.goalYaw += deltaYaw;
+      this.lastAngle = angle;
       if (scene.canScale) {
         this.setScale(separation);
       }
+      this.isTwoHandInteraction = true;
       return;
-    } else if (this.isTwoHandInteraction && fingers.length < 2) {
-      // If we lose the second finger, stop scaling
-      this.isTwoHandInteraction = false;
-      this.firstRatio = 0;
-      return;
+    } else {
+      if (this.wasTwoFingering) {
+        // Two-finger gesture ended
+        this.wasTwoFingering = false;
+        this.isTwoHandInteraction = false;
+        this.firstRatio = 0;
+      }
     }
 
     if (!this.isTranslating && !this.isTwoHandInteraction && !this.isRotating) {
@@ -1012,7 +1030,6 @@ export class ARRenderer extends EventDispatcher<
     const box = this.placementBox!;
 
     this.updatePlacementBoxOpacity(box, delta);
-    this.updateTwoHandInteractionState();
     this.applyXRControllerRotations(pivot);
     this.handleScalingInXR(scene, delta);
 
@@ -1028,11 +1045,6 @@ export class ARRenderer extends EventDispatcher<
 
   private updatePlacementBoxOpacity(box: PlacementBox, delta: number) {
     box.updateOpacity(delta);
-  }
-
-  private updateTwoHandInteractionState() {
-    const bothSelected = this.xrController1?.userData.isSelected && this.xrController2?.userData.isSelected;
-    this.isTwoHandInteraction = !!bothSelected;
   }
 
   private applyXRControllerRotations(pivot: Object3D) {
