@@ -1,0 +1,5 @@
+commit 64167d432059ea54b41481a761ff43f4ff077faf
+Author: Samaneh <3915613+samaneh-kazemi@users.noreply.github.com>
+Date:   Mon Jun 23 14:57:21 2025 -0700
+
+    fix rotation which twisting happens with two fingers in ar mode (#5058)
