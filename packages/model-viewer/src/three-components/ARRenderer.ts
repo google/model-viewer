@@ -1030,6 +1030,7 @@ export class ARRenderer extends EventDispatcher<
     const box = this.placementBox!;
 
     this.updatePlacementBoxOpacity(box, delta);
+    this.updateTwoHandInteractionState();
     this.applyXRControllerRotations(pivot);
     this.handleScalingInXR(scene, delta);
 
@@ -1045,6 +1046,11 @@ export class ARRenderer extends EventDispatcher<
 
   private updatePlacementBoxOpacity(box: PlacementBox, delta: number) {
     box.updateOpacity(delta);
+  }
+
+  private updateTwoHandInteractionState() {
+    const bothSelected = this.xrController1?.userData.isSelected && this.xrController2?.userData.isSelected;
+    this.isTwoHandInteraction = !!bothSelected;
   }
 
   private applyXRControllerRotations(pivot: Object3D) {
