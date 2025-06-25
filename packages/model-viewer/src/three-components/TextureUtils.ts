@@ -113,9 +113,27 @@ export default class TextureUtils {
       progressCallback: (progress: number) => void = () => {}):
       Promise<Texture> {
     try {
-      const isHDR: boolean = HDR_FILE_RE.test(url);
+      // Check if it's a blob URL
+      const isBlobUrl = url.startsWith('blob:');
+      
+      // For blob URLs, check the content type
+      let isHDR = false;
+      if (isBlobUrl) {
+        try {
+          const response = await fetch(url);
+          const contentType = response.headers.get('content-type');
+          isHDR = contentType === 'image/vnd.radiance';
+        } catch (error) {
+          console.warn('Failed to check content type for blob URL:', error);
+          // Fallback to file extension check
+          isHDR = HDR_FILE_RE.test(url);
+        }
+      } else {
+        isHDR = HDR_FILE_RE.test(url);
+      }
+
       const loader = isHDR ? this.hdrLoader(withCredentials) :
-                             this.imageLoader(withCredentials);
+                           this.imageLoader(withCredentials);
       const texture: Texture = await new Promise<Texture>(
           (resolve, reject) => loader.load(
               url,
