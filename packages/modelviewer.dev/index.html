@@ -16,27 +16,30 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>&lt;model-viewer&gt;</title>
   <meta charset="utf-8">
   <meta name="description" content="Easily display interactive 3D models on the web and in AR">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <meta name="twitter:card" content="player"/>
-  <meta name="twitter:site" content="modelviewer"/>
-  <meta name="twitter:player:width" content="480"/>
-  <meta name="twitter:player:height" content="480"/>
-  <meta name="twitter:player" content="https://modelviewer.dev/examples/twitter/player.html?src=https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb&poster=https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp&alt=Neil%20Armstrong%27s%20Spacesuit%20from%20the%20Smithsonian%20Digitization%20Programs%20Office%20and%20National%20Air%20and%20Space%20Museum&environmentImage=https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"/>
-  <meta property="og:title" content="3D model-viewer embed"/>
-  <meta property="og:description" content="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum"/>
-  <meta property="og:image" content="https://modelviewer.dev/shared-assets/models/NeilArmstrongTwitter.png"/>
+  <meta name="twitter:card" content="player" />
+  <meta name="twitter:site" content="modelviewer" />
+  <meta name="twitter:player:width" content="480" />
+  <meta name="twitter:player:height" content="480" />
+  <meta name="twitter:player"
+    content="https://modelviewer.dev/examples/twitter/player.html?src=https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb&poster=https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp&alt=Neil%20Armstrong%27s%20Spacesuit%20from%20the%20Smithsonian%20Digitization%20Programs%20Office%20and%20National%20Air%20and%20Space%20Museum&environmentImage=https://modelviewer.dev/shared-assets/environments/moon_1k.hdr" />
+  <meta property="og:title" content="3D model-viewer embed" />
+  <meta property="og:description"
+    content="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" />
+  <meta property="og:image" content="https://modelviewer.dev/shared-assets/models/NeilArmstrongTwitter.png" />
 
   <link type="text/css" href="styles/examples.css" rel="stylesheet" />
-  <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
+  <link rel="shortcut icon" type="image/png" href="assets/favicon.png" />
 
   <script defer src="https://web3dsurvey.com/collector.js"></script>
   <script>
-    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;
     ga('create', 'UA-169901325-1', { 'storage': 'none' });
     ga('set', 'referrer', document.referrer.split('?')[0]);
     ga('set', 'anonymizeIp', true);
@@ -49,6 +52,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="sample">
@@ -56,7 +60,10 @@
     <div class="content">
       <div class="wrapper">
         <div class="heading">
-          <div class="lockup zero-interaction"><div class="icon-button icon-modelviewer-black"></div><h1><span class="attribute">&lt;model-viewer&gt;</span></h1></div>
+          <div class="lockup zero-interaction">
+            <div class="icon-button icon-modelviewer-black"></div>
+            <h1><span class="attribute">&lt;model-viewer&gt;</span></h1>
+          </div>
           <h3 class="slogan" style="font-weight:400;">Easily display interactive 3D models on the web & in AR</h3>
         </div>
 
@@ -66,7 +73,7 @@
               <example-snippet inert-script stamp-to="demo-container" highlight-as="html">
                 <template>
 <!-- Import the component -->
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/{{MODELVIEWER_VERSION}}/model-viewer.min.js"></script>
 
 <!-- Use it like any other HTML element -->
 <model-viewer alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" src="shared-assets/models/NeilArmstrong.glb" ar environment-image="shared-assets/environments/moon_1k.hdr" poster="shared-assets/models/NeilArmstrong.webp" shadow-intensity="1" camera-controls touch-action="pan-y"></model-viewer>
@@ -75,22 +82,24 @@
             </div>
           </div>
 
-          <a href="https://bundlephobia.com/result?p=@google/model-viewer">
-            <img src="https://badgen.net/bundlephobia/minzip/@google/model-viewer" alt="Min Zip" />
-          </a>
-          <a href="https://github.com/google/model-viewer/releases">
-            <img src="https://img.shields.io/github/v/release/google/model-viewer" alt="Latest Release" />
-          </a>
-          <a href="https://www.npmjs.com/package/@google/model-viewer">
-            <img src="https://img.shields.io/npm/v/@google/model-viewer" alt="NPM Package" />
-          </a>
-          <br />
-          <a href="https://twitter.com/intent/follow?screen_name=modelviewer">
-            <img src="https://img.shields.io/twitter/follow/modelviewer?style=social&logo=twitter" alt="follow on Twitter" />
-          </a>
-          <a href="https://github.com/google/model-viewer/discussions">
-            <img src="https://img.shields.io/github/stars/google/model-viewer.svg?style=social&label=Star&maxAge=2592000" alt="Github Discussions" />
-          </a>
+        <a href="https://bundlephobia.com/result?p=@google/model-viewer">
+          <img src="https://badgen.net/bundlephobia/minzip/@google/model-viewer" alt="Min Zip" />
+        </a>
+        <a href="https://github.com/google/model-viewer/releases">
+          <img src="https://img.shields.io/github/v/release/google/model-viewer" alt="Latest Release" />
+        </a>
+        <a href="https://www.npmjs.com/package/@google/model-viewer">
+          <img src="https://img.shields.io/npm/v/@google/model-viewer" alt="NPM Package" />
+        </a>
+        <br />
+        <a href="https://twitter.com/intent/follow?screen_name=modelviewer">
+          <img src="https://img.shields.io/twitter/follow/modelviewer?style=social&logo=twitter"
+            alt="follow on Twitter" />
+        </a>
+        <a href="https://github.com/google/model-viewer/discussions">
+          <img src="https://img.shields.io/github/stars/google/model-viewer.svg?style=social&label=Star&maxAge=2592000"
+            alt="Github Discussions" />
+        </a>
 
         <div id="section-editor">
           <h3 class="grouping-title grouping-title-new border-bottom">Getting Started</h3>
@@ -152,11 +161,12 @@
         <div id="section-browser-support">
           <h3 class="grouping-title grouping-title-new border-bottom">Browser Support</h3>
 
-          <p class="browser-support-desc"><code>&lt;model-viewer&gt;</code> is supported on the last two major versions of all evergreen
+          <p class="browser-support-desc"><code>&lt;model-viewer&gt;</code> is supported on the last two major versions
+            of all evergreen
             desktop and mobile browsers, plus the last two versions of Safari (on MacOS and iOS).</p>
 
           <p class="browser-support-desc">These browser features are
-          only needed if you wish to use webxr in ar-modes:</p>
+            only needed if you wish to use webxr in ar-modes:</p>
           <table class="browser-support">
             <tr>
               <th>Feature</th>
@@ -198,10 +208,18 @@
           </table>
 
           <div id="browser-support-icon-group">
-            <div class="icon-desc"><img class="size-24 icon-check" alt="icon-check"><div>Natively supported</div></div>
-            <div class="icon-desc"><img class="size-24 icon-warning" alt="icon-warning"><div>Available with polyfill</div></div>
-            <div class="icon-desc"><img class="size-24 icon-flag" alt="icon-flag"><div>Behind a flag, unstable</div></div>
-            <div class="icon-desc"><img class="size-24 icon-na" alt="icon-na"><div>Not available</div></div>
+            <div class="icon-desc"><img class="size-24 icon-check" alt="icon-check">
+              <div>Natively supported</div>
+            </div>
+            <div class="icon-desc"><img class="size-24 icon-warning" alt="icon-warning">
+              <div>Available with polyfill</div>
+            </div>
+            <div class="icon-desc"><img class="size-24 icon-flag" alt="icon-flag">
+              <div>Behind a flag, unstable</div>
+            </div>
+            <div class="icon-desc"><img class="size-24 icon-na" alt="icon-na">
+              <div>Not available</div>
+            </div>
           </div>
 
           <div style="clear:both"></div>
@@ -214,29 +232,31 @@
   <div class="footer">
     <ul>
       <li class="attribution">
-        <a href="https://3d.si.edu/object/3d/neil-armstrong-spacesuit:d8c63ba6-4ebc-11ea-b77f-2e728ce88125">Neil Armstrong Space Suit</a> 
-        provided by the Smithsonian Digitization Programs Office and the National Air and Space Museum; <a href=https://www.si.edu/Termsofuse>Usage Conditions Apply</a>.
+        <a href="https://3d.si.edu/object/3d/neil-armstrong-spacesuit:d8c63ba6-4ebc-11ea-b77f-2e728ce88125">Neil
+          Armstrong Space Suit</a>
+        provided by the Smithsonian Digitization Programs Office and the National Air and Space Museum; <a
+          href=https://www.si.edu/Termsofuse>Usage Conditions Apply</a>.
       </li>
     </ul>
-    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2025 Google Inc. Licensed under the Apache License 2.0.</div>
+    <div style="margin-top:24px;" class="copyright">©Copyright 2018-2025 Google Inc. Licensed under the Apache License
+      2.0.</div>
     <div id='footer-links'></div>
   </div>
 
   <script type="module" src="./examples/built/docs-and-examples.js">
   </script>
   <script type="module">
-    (() => { initFooterLinks();})();
+    (() => { initFooterLinks(); })();
   </script>
 
 
   <!-- Documentation-specific dependencies: -->
-  <script type="module"
-      src="examples/built/dependencies.js">
+  <script type="module" src="examples/built/dependencies.js">
   </script>
 
   <!-- Loads <model-viewer> on modern browsers: -->
-  <script type="module"
-      src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
+  <script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
   </script>
 </body>
+
 </html>
