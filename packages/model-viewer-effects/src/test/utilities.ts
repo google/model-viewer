@@ -132,8 +132,8 @@ export const spy =
       let sourcePrototype = object;
 
       while (sourcePrototype != null &&
-             !sourcePrototype.hasOwnProperty(property)) {
-        sourcePrototype = (sourcePrototype as any).__proto__;
+             !Object.prototype.hasOwnProperty.call(sourcePrototype, property)) {
+        sourcePrototype = Object.getPrototypeOf(sourcePrototype);
       }
 
       if (sourcePrototype == null) {
@@ -309,6 +309,7 @@ function rgbToHsl(r: number, g: number, b: number): HSL {
   (r /= 255), (g /= 255), (b /= 255);
 
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  // eslint-disable-next-line prefer-const
   let h, s, l = (max + min) / 2;
 
   if (max == min) {

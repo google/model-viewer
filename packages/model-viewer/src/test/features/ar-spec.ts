@@ -200,6 +200,7 @@ suite('AR', () => {
     });
 
     // This only works on a physical iOS device, not an emulated one.
+    // eslint-disable-next-line mocha/no-pending-tests
     test.skip('with an ios-src on iOS', async () => {
       element.iosSrc = assetPath('models/Astronaut.usdz');
       await rafPasses();

@@ -307,7 +307,7 @@ export class EnvEvaluator extends Evaluator<NumberNode> {
   [$evaluate](): NumberNode {
     if (this[$identNode] != null) {
       switch (this[$identNode]!.value) {
-        case 'window-scroll-y':
+        case 'window-scroll-y': {
           const verticalScrollPosition = window.pageYOffset;
           const verticalScrollMax = Math.max(
               document.body.scrollHeight,
@@ -320,6 +320,7 @@ export class EnvEvaluator extends Evaluator<NumberNode> {
               0;
 
           return {type: 'number', number: scrollY, unit: null};
+        }
       }
     }
 
@@ -328,7 +329,7 @@ export class EnvEvaluator extends Evaluator<NumberNode> {
 }
 
 
-const IS_MULTIPLICATION_RE = /[\*\/]/;
+const IS_MULTIPLICATION_RE = /[*/]/;
 const $evaluator = Symbol('evaluator');
 
 /**

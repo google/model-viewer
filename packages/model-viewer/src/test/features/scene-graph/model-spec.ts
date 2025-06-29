@@ -41,6 +41,7 @@ suite('scene-graph/model', () => {
       expect(model.materials[0].name).to.be.eq('Default');
     });
 
+    // eslint-disable-next-line mocha/no-pending-tests
     test.skip('exposes a list of materials in the scene', async () => {
       // TODO: This test is skipped because [$correlatedObjects] can contain
       // unused materials, because it can contain a base material and the

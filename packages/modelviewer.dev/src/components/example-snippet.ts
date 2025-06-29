@@ -21,7 +21,7 @@ import {property} from 'lit/decorators.js';
 // Silence tsc since prismjs isn't a proper module
 declare let Prism: any;
 
-const EMPTY_ATTRIBUTE_RE = /([\w-]+)=\"\"/g;
+const EMPTY_ATTRIBUTE_RE = /([\w-]+)=""/g;
 
 export type RootNode = Document|ShadowRoot;
 

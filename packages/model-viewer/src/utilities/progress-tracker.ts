@@ -99,9 +99,8 @@ export class ProgressTracker extends EventTarget {
     }
 
     return (progress: number): number => {
-      let nextProgress: number;
-
-      nextProgress = Math.max(clamp(progress, 0, 1), activity.progress);
+      const nextProgress: number =
+          Math.max(clamp(progress, 0, 1), activity.progress);
 
       if (nextProgress !== activity.progress) {
         this.announceTotalProgress(activity, nextProgress, reason);

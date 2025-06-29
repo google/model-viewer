@@ -110,8 +110,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
     const hasModel = !!editedConfig.src;
 
-    const refreshMobileButton = this.refreshButtonIsReady === true ? html
-    `<mwc-button icon="cached" @click=${this.forcePost}
+    const refreshMobileButton = this.refreshButtonIsReady === true ? html`<mwc-button icon="cached" @click=${this.forcePost}
       style="--mdc-theme-primary: #DC143C; border: #DC143C" class="RefreshMobileButton">
       Refresh Mobile
     </mwc-button>`: html``;
@@ -124,8 +123,7 @@ export class ModelViewerPreview extends ConnectedLitElement {
     childElements.push(refreshMobileButton);
     if (!hasModel) {
       childElements.push(
-          html
-          `<div class="HelpText">Drag a glTF or GLB here!<br/>
+          html`<div class="HelpText">Drag a glTF or GLB here!<br/>
           <small>Groups, folders, and Zip archives supported</small><br/>
           <small>Drop an HDR for lighting</small></div>`);
     }

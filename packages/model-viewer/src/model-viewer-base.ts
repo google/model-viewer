@@ -446,7 +446,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     blobCanvas.width = outputWidth;
     blobCanvas.height = outputHeight;
     try {
-      return new Promise<Blob>(async (resolve, reject) => {
+      return new Promise<Blob>((resolve, reject) => {
         blobCanvas.getContext('2d')!.drawImage(
             this[$renderer].displayCanvas(this[$scene]),
             offsetX,
@@ -462,13 +462,12 @@ export default class ModelViewerElementBase extends ReactiveElement {
           if (!blob) {
             return reject(new Error('Unable to retrieve canvas blob'));
           }
-
           resolve(blob);
         }, mimeType, qualityArgument);
       });
     } finally {
       this[$updateSize]({width, height});
-    };
+    }
   }
 
   /**

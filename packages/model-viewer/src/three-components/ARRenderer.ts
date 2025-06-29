@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Box3, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, Object3D, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace} from 'three';
+import {Box3, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace, Object3D} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
@@ -26,7 +26,7 @@ import {ModelScene} from './ModelScene.js';
 import {PlacementBox} from './PlacementBox.js';
 import {Renderer} from './Renderer.js';
 import {ChangeSource} from './SmoothControls.js';
-import {XRMenuPanel} from './XRMenuPanel.js';
+import { XRMenuPanel } from './XRMenuPanel.js';
 
 // number of initial null pose XRFrames allowed before we post not-tracking
 const INIT_FRAMES = 30;
@@ -286,8 +286,7 @@ export class ARRenderer extends EventDispatcher<
             new DOMPoint(0, 0, 0),
             {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
     currentSession
-        .requestHitTestSource!
-        ({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
+        .requestHitTestSource!({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
           this.initialHitSource = hitTestSource;
         });
 
@@ -309,63 +308,15 @@ export class ARRenderer extends EventDispatcher<
     if (this.xrMode !== XRMode.SCREEN_SPACE) {
       this.menuPanel = new XRMenuPanel();
       scene.add(this.menuPanel);
-      this.updateMenuPanelPosition(
-          scene.camera, this.placementBox!);  // Position the menu panel
+      this.menuPanel.updatePosition(scene.getCamera(), this.placementBox!); // Position the menu panel
     }
 
     this.lastTick = performance.now();
     this.dispatchEvent({type: 'status', status: ARStatus.SESSION_STARTED});
   }
 
-  private updateMenuPanelPosition(
-      camera: PerspectiveCamera, placementBox: PlacementBox) {
-    if (!this.menuPanel || !placementBox) {
-      return;
-    }
-
-    // Get the world position of the placement box
-    const placementBoxWorldPos = new Vector3();
-    placementBox.getWorldPosition(placementBoxWorldPos);
-
-    // Calculate a position slightly in front of the placement box
-    const offsetUp = -0.2;      // Offset upward from the placement box
-    const offsetForward = 0.9;  // Offset forward from the placement box
-
-    // Get direction from placement box to camera (horizontal only)
-    const directionToCamera =
-        new Vector3().copy(camera.position).sub(placementBoxWorldPos);
-    directionToCamera.y = 0;  // Zero out vertical component
-    directionToCamera.normalize();
-
-    // Calculate the final position
-    const panelPosition = new Vector3()
-                              .copy(placementBoxWorldPos)
-                              .add(new Vector3(0, offsetUp, 0))  // Move up
-                              .add(directionToCamera.multiplyScalar(
-                                  offsetForward));  // Move forward
-
-    this.menuPanel.position.copy(panelPosition);
-
-    // Make the menu panel face the camera
-    this.menuPanel.lookAt(camera.position);
-  }
-
-  private setupControllers() {
-    this.controller1 = this.threeRenderer.xr.getController(0) as Controller;
-    this.controller1.addEventListener(
-        'selectstart', this.onControllerSelectStart);
-    this.controller1.addEventListener('selectend', this.onControllerSelectEnd);
-
-    this.controller2 = this.threeRenderer.xr.getController(1) as Controller;
-    this.controller2.addEventListener(
-        'selectstart', this.onControllerSelectStart);
-    this.controller2.addEventListener('selectend', this.onControllerSelectEnd);
-
-    const scene = this.presentedScene!;
-    scene.add(this.controller1);
-    scene.add(this.controller2);
-
-    if (!this.controller1.userData.line) {
+  private setupXRControllerLine(xrController: XRController) {
+    if (!xrController.userData.line) {
       const line = new Line(lineGeometry);
       line.name = 'line';
       line.scale.z = MAX_LINE_LENGTH;
@@ -420,9 +371,8 @@ export class ARRenderer extends EventDispatcher<
     const scene = this.presentedScene!;
     const controller = event.target;
     const menuPanel = this.menuPanel;
-
-    const exitIntersect =
-        this.menuPanel!.exitButtonControllerIntersection(scene, controller);
+  
+    const exitIntersect = this.menuPanel!.exitButtonControllerIntersection(scene, controller);
     if (exitIntersect != null) {
       this.menuPanel?.dispose();
       this.stopPresenting();
@@ -433,11 +383,11 @@ export class ARRenderer extends EventDispatcher<
       menuPanel!.show = false;
     }
 
-    const intersection =
-        this.placementBox!.controllerIntersection(scene, controller);
-    if (intersection != null) {
+    const intersection = this.placementBox!.controllerIntersection(scene,
+      controller);
+    if (intersection!=null){
       const bbox = new Box3().setFromObject(scene.pivot);
-      const footprintY = bbox.min.y + 0.2;  // Small threshold above base
+      const footprintY = bbox.min.y + 0.2; // Small threshold above base
 
       // Check if the ray intersection is near the footprint
       const isFootprint = intersection.point.y <= footprintY;
@@ -461,21 +411,19 @@ export class ARRenderer extends EventDispatcher<
           this.xrController2.userData.isSelected = true;
         }
 
-        if (this.controller1?.userData.isSelected &&
-            this.controller2?.userData.isSelected) {
+        if (this.xrController1?.userData.isSelected && this.xrController2?.userData.isSelected) {
           if (scene.canScale) {
             this.isTwoHandInteraction = true;
             this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
             this.scaleLine.visible = true;
           }
         } else {
-          const otherController = controller === this.controller1 ?
-              this.controller2! :
-              this.controller1!;
-          controller.userData.initialX = controller.position.x;
-          otherController.userData.turning = false;
-          controller.userData.turning = true;
-          controller.userData.line.visible = false;
+            const otherController = controller === this.xrController1 ? this.xrController2! :
+            this.xrController1!;
+            controller.userData.initialX = controller.position.x;
+            otherController.userData.turning = false;
+            controller.userData.turning = true;
+            controller.userData.line.visible = false;
         }
       }
     }
@@ -568,16 +516,16 @@ export class ARRenderer extends EventDispatcher<
       this.placementBox = new PlacementBox(
           this.presentedScene!, this.placeOnWall ? 'back' : 'bottom');
     }
-    if (this.xrMode !== 'screen-space') {
-      if (this.menuPanel) {
-        this.menuPanel.dispose();
-        this.menuPanel = null;
+    if (this.xrMode !== XRMode.SCREEN_SPACE) {
+        if (this.menuPanel) {
+          this.menuPanel.dispose(); 
+          this.menuPanel = null;
+        }
+        this.menuPanel = new XRMenuPanel();
+        this.presentedScene!.add(this.menuPanel);
+        this.menuPanel.updatePosition(this.presentedScene!.getCamera(), this.placementBox!);
       }
-      this.menuPanel = new XRMenuPanel();
-      this.presentedScene!.add(this.menuPanel);
-      this.updateMenuPanelPosition(
-          this.presentedScene!.camera, this.placementBox!);
-    }
+
   };
 
   private cleanupXRController(xrController: XRController) {
@@ -766,8 +714,7 @@ export class ARRenderer extends EventDispatcher<
       session.addEventListener('selectstart', this.onSelectStart);
       session.addEventListener('selectend', this.onSelectEnd);
       session
-          .requestHitTestSourceForTransientInput!
-          ({profile: 'generic-touchscreen'})!.then(hitTestSource => {
+          .requestHitTestSourceForTransientInput!({profile: 'generic-touchscreen'})!.then(hitTestSource => {
             this.transientHitTestSource = hitTestSource;
           });
     }
@@ -779,9 +726,8 @@ export class ARRenderer extends EventDispatcher<
         this.presentedScene!, axes[0], axes[1]);
     if (location != null) {
       vector3.copy(location).sub(this.presentedScene!.getCamera().position);
-      if (vector3.length() > MAX_DISTANCE) {
-        return null;
-      }
+      if (vector3.length() > MAX_DISTANCE)
+        {return null;}
     }
     return location;
   }
@@ -1005,33 +951,13 @@ export class ARRenderer extends EventDispatcher<
     if (!controller.userData.turning) {
       return;
     }
-    const angle = (controller.position.x - controller.userData.initialX) *
-        ROTATION_SENSIVITY;
+    const angle = (controller.position.x - controller.userData.initialX) * ROTATION_SENSIVITY;
     this.deltaRotation.setFromAxisAngle(AXIS_Y, angle);
     pivot.quaternion.multiplyQuaternions(this.deltaRotation, pivot.quaternion);
   }
-  private moveScene(delta: number) {
-    const scene = this.presentedScene!;
-    const {pivot} = scene;
-    const box = this.placementBox!;
-    box.updateOpacity(delta);
 
-    const bothSelected = this.controller1?.userData.isSelected &&
-        this.controller2?.userData.isSelected;
-    if (bothSelected) {
-      this.isTwoFingering = true;
-    }
-
-    if (!bothSelected) {
-      if (this.controller1) {
-        this.applyControllerRotation(this.controller1, pivot);
-      }
-      if (this.controller2) {
-        this.applyControllerRotation(this.controller2, pivot);
-      }
-    }
-
-    if (this.controller1 && this.controller2 && bothSelected) {
+  private handleScalingInXR(scene: ModelScene, delta: number) {
+    if (this.xrController1 && this.xrController2 && this.isTwoHandInteraction) {
       const dist = this.controllerSeparation();
       this.setScale(dist);
       this.scaleLine.scale.z = -dist;
@@ -1127,31 +1053,41 @@ export class ARRenderer extends EventDispatcher<
 
   private applyXRControllerRotations(pivot: Object3D) {
     if (!this.isTwoHandInteraction) {
-      if (this.xrController1) this.applyXRControllerRotation(this.xrController1, pivot);
-      if (this.xrController2) this.applyXRControllerRotation(this.xrController2, pivot);
+      if (this.xrController1) {this.applyXRControllerRotation(this.xrController1, pivot);}
+      if (this.xrController2) {this.applyXRControllerRotation(this.xrController2, pivot);}
     }
   }
 
   private dispatchCameraChangeEvent(scene: ModelScene, source: ChangeSource) {
     scene.element.dispatchEvent(new CustomEvent<CameraChangeDetails>(
-        'camera-change', {detail: {source}}));
+      'camera-change', {detail: {source}}
+    ));
+  }
 
-    const menuPanel = this.menuPanel;
-    if (menuPanel) {
-      menuPanel.updateOpacity(delta);
-      // Update menu panel position whenever the model moves
-      this.updateMenuPanelPosition(scene.camera, box);
-    }
+  private updateXRControllerHover() {
+    const over1 = this.hover(this.xrController1!);
+    const over2 = this.hover(this.xrController2!);
+    this.placementBox!.show = (over1 || over2) && !this.isTwoHandInteraction;
+  }
+
+  private handleFirstView(frame: XRFrame, time: number) {
+    this.moveToFloor(frame);
+    this.processInput(frame);
+  
+    const delta = time - this.lastTick!;
+    this.applyXRInputToScene(delta);
+    this.renderer.preRender(this.presentedScene!, time, delta);
+    this.lastTick = time;
+  
+    this.presentedScene!.renderShadow(this.threeRenderer);
   }
 
   /**
    * Only public to make it testable.
    */
   onWebXRFrame(time: number, frame: XRFrame) {
-    if (this.xrMode !== 'screen-space') {
-      const over1 = this.hover(this.controller1!);
-      const over2 = this.hover(this.controller2!);
-      this.placementBox!.show = (over1 || over2) && !this.isTwoFingering;
+    if (this.xrMode !== XRMode.SCREEN_SPACE) {
+      this.updateXRControllerHover();
     }
 
     this.frame = frame;

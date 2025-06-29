@@ -565,6 +565,7 @@ suite('Controls', () => {
         };
       };
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('one finger rotates', async () => {
         const orbit = element.getCameraOrbit();
 
@@ -597,6 +598,7 @@ suite('Controls', () => {
             expect(newOrbit.radius).to.eq(orbit.radius, 'radius');
           });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('two fingers pan', async () => {
         element.cameraOrbit = '0deg 90deg auto';
         element.jumpCameraToGoal();
@@ -667,6 +669,7 @@ suite('Controls', () => {
             expect(stopped).to.be.true;
           });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('tap moves the model and re-centers', async () => {
         element.cameraOrbit = '0deg 90deg auto';
         element.jumpCameraToGoal();
@@ -717,6 +720,7 @@ suite('Controls', () => {
         expect(newTarget.z).to.be.eq(target.z, 'Z');
       });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('camera-orbit cancels synthetic interaction', async () => {
         const canceled = waitForEvent(
             element,
@@ -729,6 +733,7 @@ suite('Controls', () => {
         await canceled;
       });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('user interaction cancels synthetic interaction', async () => {
         const canceled = waitForEvent(
             element,
@@ -743,6 +748,7 @@ suite('Controls', () => {
         await canceled;
       });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('second interaction does not interrupt the first', async () => {
         const target = element.getCameraTarget();
         const orbit = element.getCameraOrbit();

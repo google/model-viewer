@@ -232,17 +232,19 @@ export class ModelScene extends Scene {
     let gltf: ModelViewerGLTFInstance;
 
     try {
-      gltf = await new Promise<ModelViewerGLTFInstance>(
-          async (resolve, reject) => {
-            this.cancelPendingSourceChange = () => reject();
-            try {
-              const result = await this.element[$renderer].loader.load(
-                  url, this.element, progressCallback);
-              resolve(result);
-            } catch (error) {
-              reject(error);
-            }
-          });
+      gltf = await new Promise<ModelViewerGLTFInstance>((resolve, reject) => {
+        this.cancelPendingSourceChange = () => reject();
+
+        (async () => {
+          try {
+            const result = await this.element[$renderer].loader.load(
+                url, this.element, progressCallback);
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        })();
+      });
     } catch (error) {
       if (error == null) {
         // Loading was cancelled, so silently return
@@ -251,6 +253,7 @@ export class ModelScene extends Scene {
 
       throw error;
     }
+
 
     this.cancelPendingSourceChange = null;
     this.reset();

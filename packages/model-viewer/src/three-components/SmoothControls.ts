@@ -690,6 +690,8 @@ export class SmoothControls extends EventDispatcher<{
     try {
       element.setPointerCapture(event.pointerId);
     } catch {
+      // setPointerCapture is not supported in all browsers, so we ignore
+      // errors here.
     }
     this.pointers.push(
         {clientX: event.clientX, clientY: event.clientY, id: event.pointerId});

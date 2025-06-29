@@ -157,7 +157,7 @@ suite('ModelViewerElementBase', () => {
 
       suite('toDataURL', () => {
         test('produces a URL-compatible string', () => {
-          const dataUrlMatcher = /^data\:image\//;
+          const dataUrlMatcher = /^data:image\//;
           expect(dataUrlMatcher.test(element.toDataURL())).to.be.true;
         });
       });
@@ -171,7 +171,7 @@ suite('ModelViewerElementBase', () => {
         test('can convert blob to object URL', async () => {
           const blob = await element.toBlob();
           const objectUrl = URL.createObjectURL(blob);
-          const objectUrlMatcher = /^blob\:/;
+          const objectUrlMatcher = /^blob:/;
           expect(objectUrlMatcher.test(objectUrl)).to.be.true;
         });
 
@@ -180,6 +180,7 @@ suite('ModelViewerElementBase', () => {
           expect(blob.size).to.be.greaterThan(0);
         });
 
+        // eslint-disable-next-line mocha/no-pending-tests
         test.skip('idealAspect gives the proper blob dimensions', async () => {
           const basicBlob = await element.toBlob();
           const idealBlob = await element.toBlob({idealAspect: true});
@@ -224,6 +225,7 @@ suite('ModelViewerElementBase', () => {
       expect(elements[2].modelIsVisible).to.be.true;
     });
 
+    // eslint-disable-next-line mocha/no-pending-tests
     test.skip('only models visible in the viewport', async () => {
       // IntersectionObserver needs to set appropriate
       // visibility on the scene, lots of timing issues when

@@ -20,8 +20,7 @@ import {$effectOptions, $updateProperties, MVEffectBase} from './mixins/effect-b
 import {SelectiveMixin} from './mixins/selective.js';
 import {TEMP_CAMERA} from './utilities.js';
 
-export class MVSelectiveBloomEffect extends SelectiveMixin
-(MVEffectBase) {
+export class MVSelectiveBloomEffect extends SelectiveMixin(MVEffectBase) {
   static get is() {
     return 'selective-bloom-effect';
   }

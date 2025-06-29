@@ -56,6 +56,7 @@ suite('Staging', () => {
         await timePasses();
       });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('causes the model to rotate after a delay', async () => {
         const {turntableRotation} = element;
         await rafPasses();
@@ -90,6 +91,7 @@ suite('Staging', () => {
                 .to.be.greaterThan(turntableRotation);
           });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('pauses rotate after user interaction', async () => {
         const {turntableRotation} = element;
         await timePasses(AUTO_ROTATE_DELAY);

@@ -230,47 +230,50 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     /** @export */
     async exportScene(options?: SceneExportOptions): Promise<Blob> {
       const scene = this[$scene];
-      return new Promise<Blob>(async (resolve, reject) => {
-        // Defaults
-        const opts = {
-          binary: true,
-          onlyVisible: true,
-          maxTextureSize: Infinity,
-          includeCustomExtensions: false,
-          forceIndices: false
-        } as GLTFExporterOptions;
 
-        Object.assign(opts, options);
-        // Not configurable
-        opts.animations = scene.animations;
-        opts.truncateDrawRange = true;
+      // Defaults
+      const opts = {
+        binary: true,
+        onlyVisible: true,
+        maxTextureSize: Infinity,
+        includeCustomExtensions: false,
+        forceIndices: false
+      } as GLTFExporterOptions;
 
-        const shadow = scene.shadow;
-        let visible = false;
-        // Remove shadow from export
-        if (shadow != null) {
-          visible = shadow.visible;
-          shadow.visible = false;
-        }
+      Object.assign(opts, options);
+      // Not configurable
+      opts.animations = scene.animations;
+      opts.truncateDrawRange = true;
 
-        await this[$model]![$prepareVariantsForExport]();
+      const shadow = scene.shadow;
+      let visible = false;
+      // Remove shadow from export
+      if (shadow != null) {
+        visible = shadow.visible;
+        shadow.visible = false;
+      }
 
+      // Perform async operation before the Promise
+      await this[$model]![$prepareVariantsForExport]();
+
+      return new Promise<Blob>((resolve, reject) => {
         const exporter =
             (new GLTFExporter() as any)
                 .register(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
+
         exporter.parse(
             scene.model,
             (gltf: object) => {
-              return resolve(new Blob(
+              resolve(new Blob(
                   [opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
                     type: opts.binary ? 'application/octet-stream' :
                                         'application/json'
                   }));
             },
             () => {
-              return reject('glTF export failed');
+              reject(new Error('glTF export failed'));
             },
             opts);
 

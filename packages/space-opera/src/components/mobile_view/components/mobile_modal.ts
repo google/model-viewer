@@ -42,6 +42,7 @@ export class MobileModal extends ConnectedLitElement {
 
   open() {
     if (this.isNewQRCode) {
+      // eslint-disable-next-line no-new
       new QRious({element: this.canvasQR, value: this.viewableSite, size: 200});
       this.isNewQRCode = false
     }

@@ -395,7 +395,8 @@ export class MVEffectComposer extends ReactiveElement {
     // Place all Geometries in the selection
     this[$selection].clear();
     this[$scene]?.traverse(
-        (obj) => obj.hasOwnProperty('geometry') && this[$selection].add(obj));
+        (obj) => Object.prototype.hasOwnProperty.call(obj, 'geometry') &&
+            this[$selection].add(obj));
     this.dispatchEvent(new CustomEvent('updated-selection'));
   };
 
