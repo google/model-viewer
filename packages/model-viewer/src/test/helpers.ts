@@ -124,8 +124,8 @@ export const spy =
       let sourcePrototype = object;
 
       while (sourcePrototype != null &&
-             !sourcePrototype.hasOwnProperty(property)) {
-        sourcePrototype = (sourcePrototype as any).__proto__;
+             !Object.prototype.hasOwnProperty.call(sourcePrototype, property)) {
+        sourcePrototype = Object.getPrototypeOf(sourcePrototype);
       }
 
       if (sourcePrototype == null) {

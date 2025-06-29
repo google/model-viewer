@@ -211,7 +211,7 @@ suite('Controls', () => {
 
     test('changes FOV basis when aspect ratio changes', async () => {
       const fov = element.getFieldOfView();
-      expect(fov).to.be.closeTo(DEFAULT_FOV_DEG, .001);
+      expect(fov).to.be.closeTo(DEFAULT_FOV_DEG, 0.001);
       element.setAttribute('style', 'width: 200px; height: 300px');
       await rafPasses();
       await rafPasses();
@@ -244,7 +244,7 @@ suite('Controls', () => {
 
     suite('getCameraOrbit', () => {
       setup(async () => {
-        element.cameraOrbit = `1rad 1rad 2.5m`;
+        element.cameraOrbit = '1rad 1rad 2.5m';
         element.jumpCameraToGoal();
         await element.updateComplete;
       });
@@ -257,7 +257,7 @@ suite('Controls', () => {
       });
 
       test('jumpCameraToGoal updates instantly', async () => {
-        const cameraOrbit = `0.5rad 1.5rad 2.2m`;
+        const cameraOrbit = '0.5rad 1.5rad 2.2m';
         element.cameraOrbit = cameraOrbit;
         const fieldOfView = 30;
         element.fieldOfView = `${fieldOfView}deg`;
@@ -266,7 +266,7 @@ suite('Controls', () => {
         await rafPasses();
 
         expect(element.getFieldOfView()).to.be.closeTo(fieldOfView, 0.00001);
-        let orbit = element.getCameraOrbit();
+        const orbit = element.getCameraOrbit();
         // round to nearest 0.0001
         orbit.theta = Math.round(orbit.theta * 10000) / 10000;
         expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
@@ -276,7 +276,7 @@ suite('Controls', () => {
 
     suite('min/max extents', () => {
       setup(async () => {
-        element.cameraOrbit = `0deg 90deg 2.5m`;
+        element.cameraOrbit = '0deg 90deg 2.5m';
         element.jumpCameraToGoal();
         await element.updateComplete;
       });
@@ -289,7 +289,7 @@ suite('Controls', () => {
       });
 
       test('jumps to maxCameraOrbit when outside', async () => {
-        element.maxCameraOrbit = `-2rad 1rad 2m`;
+        element.maxCameraOrbit = '-2rad 1rad 2m';
         await timePasses();
         const orbit = element.getCameraOrbit();
         expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
@@ -297,7 +297,7 @@ suite('Controls', () => {
       });
 
       test('jumps to minCameraOrbit when outside', async () => {
-        element.minCameraOrbit = `2rad 2rad 3m`;
+        element.minCameraOrbit = '2rad 2rad 3m';
         await timePasses();
         const orbit = element.getCameraOrbit();
         expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
@@ -305,14 +305,14 @@ suite('Controls', () => {
       });
 
       test('jumps to maxFieldOfView when outside', async () => {
-        element.maxFieldOfView = `30deg`;
+        element.maxFieldOfView = '30deg';
         await timePasses();
         const fov = Math.round(element.getFieldOfView());
         expect(`${fov}deg`).to.equal(element.maxFieldOfView);
       });
 
       test('jumps to minFieldOfView when outside', async () => {
-        element.minFieldOfView = `60deg`;
+        element.minFieldOfView = '60deg';
         await timePasses();
         const fov = Math.round(element.getFieldOfView());
         expect(`${fov}deg`).to.equal(element.minFieldOfView);
@@ -565,6 +565,7 @@ suite('Controls', () => {
         };
       };
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('one finger rotates', async () => {
         const orbit = element.getCameraOrbit();
 
@@ -597,6 +598,7 @@ suite('Controls', () => {
             expect(newOrbit.radius).to.eq(orbit.radius, 'radius');
           });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('two fingers pan', async () => {
         element.cameraOrbit = '0deg 90deg auto';
         element.jumpCameraToGoal();
@@ -667,6 +669,7 @@ suite('Controls', () => {
             expect(stopped).to.be.true;
           });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('tap moves the model and re-centers', async () => {
         element.cameraOrbit = '0deg 90deg auto';
         element.jumpCameraToGoal();
@@ -717,6 +720,7 @@ suite('Controls', () => {
         expect(newTarget.z).to.be.eq(target.z, 'Z');
       });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('camera-orbit cancels synthetic interaction', async () => {
         const canceled = waitForEvent(
             element,
@@ -729,6 +733,7 @@ suite('Controls', () => {
         await canceled;
       });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('user interaction cancels synthetic interaction', async () => {
         const canceled = waitForEvent(
             element,
@@ -743,6 +748,7 @@ suite('Controls', () => {
         await canceled;
       });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('second interaction does not interrupt the first', async () => {
         const target = element.getCameraTarget();
         const orbit = element.getCameraOrbit();

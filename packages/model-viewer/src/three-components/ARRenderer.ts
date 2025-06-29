@@ -111,9 +111,9 @@ export type XRMode = typeof XRMode[keyof typeof XRMode];
 
 export class ARRenderer extends EventDispatcher<
     {status: {status: ARStatus}, tracking: {status: ARTracking}}> {
-  public threeRenderer: WebGLRenderer;
-  public currentSession: XRSession|null = null;
-  public placeOnWall = false;
+  threeRenderer: WebGLRenderer;
+  currentSession: XRSession|null = null;
+  placeOnWall = false;
 
   private placementBox: PlacementBox|null = null;
   private menuPanel: XRMenuPanel|null = null;
@@ -218,7 +218,7 @@ export class ARRenderer extends EventDispatcher<
       console.warn('Cannot present while a model is already presenting');
     }
 
-    let waitForAnimationFrame = new Promise<void>((resolve, _reject) => {
+    const waitForAnimationFrame = new Promise<void>((resolve, _reject) => {
       requestAnimationFrame(() => resolve());
     });
 
@@ -286,8 +286,7 @@ export class ARRenderer extends EventDispatcher<
             new DOMPoint(0, 0, 0),
             {x: 0, y: -Math.sin(radians), z: -Math.cos(radians)});
     currentSession
-        .requestHitTestSource!
-        ({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
+        .requestHitTestSource!({space: viewerRefSpace, offsetRay: ray})!.then(hitTestSource => {
           this.initialHitSource = hitTestSource;
         });
 
@@ -715,8 +714,7 @@ export class ARRenderer extends EventDispatcher<
       session.addEventListener('selectstart', this.onSelectStart);
       session.addEventListener('selectend', this.onSelectEnd);
       session
-          .requestHitTestSourceForTransientInput!
-          ({profile: 'generic-touchscreen'})!.then(hitTestSource => {
+          .requestHitTestSourceForTransientInput!({profile: 'generic-touchscreen'})!.then(hitTestSource => {
             this.transientHitTestSource = hitTestSource;
           });
     }
@@ -724,12 +722,12 @@ export class ARRenderer extends EventDispatcher<
 
   private getTouchLocation(): Vector3|null {
     const {axes} = this.inputSource!.gamepad!;
-    let location = this.placementBox!.getExpandedHit(
+    const location = this.placementBox!.getExpandedHit(
         this.presentedScene!, axes[0], axes[1]);
     if (location != null) {
       vector3.copy(location).sub(this.presentedScene!.getCamera().position);
       if (vector3.length() > MAX_DISTANCE)
-        return null;
+        {return null;}
     }
     return location;
   }
@@ -754,7 +752,7 @@ export class ARRenderer extends EventDispatcher<
         null;
   }
 
-  public moveToFloor(frame: XRFrame) {
+  moveToFloor(frame: XRFrame) {
     const hitSource = this.initialHitSource;
     if (hitSource == null) {
       return;
@@ -1055,8 +1053,8 @@ export class ARRenderer extends EventDispatcher<
 
   private applyXRControllerRotations(pivot: Object3D) {
     if (!this.isTwoHandInteraction) {
-      if (this.xrController1) this.applyXRControllerRotation(this.xrController1, pivot);
-      if (this.xrController2) this.applyXRControllerRotation(this.xrController2, pivot);
+      if (this.xrController1) {this.applyXRControllerRotation(this.xrController1, pivot);}
+      if (this.xrController2) {this.applyXRControllerRotation(this.xrController2, pivot);}
     }
   }
 
@@ -1087,7 +1085,7 @@ export class ARRenderer extends EventDispatcher<
   /**
    * Only public to make it testable.
    */
-  public onWebXRFrame(time: number, frame: XRFrame) {
+  onWebXRFrame(time: number, frame: XRFrame) {
     if (this.xrMode !== XRMode.SCREEN_SPACE) {
       this.updateXRControllerHover();
     }

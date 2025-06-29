@@ -75,13 +75,11 @@ function copyToDeployRoot {
 
   if [ -d "${path}" ]; then
     cp -r $path/* "$DEPLOY_ROOT/$path"
+  elif [ -f "${path}" ]; then
+    cp $path "$DEPLOY_ROOT/$path"
   else
-    if [ -f "${path}" ]; then
-      cp $path "$DEPLOY_ROOT/$path"
-    else
-      echo "Path not found: $path"
-      exit 1
-    fi
+    echo "Path not found: $path"
+    exit 1
   fi
 }
 
@@ -122,18 +120,20 @@ cp -r ../../node_modules/web-animations-js/* $DEPLOY_ROOT/node_modules/web-anima
 FILES_TO_PATCH_WITH_MINIFIED_BUNDLE=($(find $DEPLOY_ROOT \( -type d -name node_modules -prune \) -o -type f | grep \.html))
 
 for file_to_patch in "${FILES_TO_PATCH_WITH_MINIFIED_BUNDLE[@]}"; do
-  sed -i.bak 's model-viewer.js model-viewer.min.js g' $file_to_patch
-  rm $file_to_patch.bak
-  sed -i.bak 's model-viewer-module.js model-viewer-module.min.js g' $file_to_patch
-  rm $file_to_patch.bak
-  sed -i.bak 's model-viewer-effects.js model-viewer-effects.min.js g' $file_to_patch
-  rm $file_to_patch.bak
-  sed -i.bak 's ../../node_modules/ node_modules/ g' $file_to_patch
-  rm $file_to_patch.bak
+  sed -i.bak 's/model-viewer.js/model-viewer.min.js/g' "$file_to_patch"
+  rm "$file_to_patch.bak"
+  sed -i.bak 's/model-viewer-module.js/model-viewer-module.min.js/g' "$file_to_patch"
+  rm "$file_to_patch.bak"
+  sed -i.bak 's/model-viewer-effects.js/model-viewer-effects.min.js/g' "$file_to_patch"
+  rm "$file_to_patch.bak"
+  sed -i.bak 's|\.\./\.\./node_modules/|node_modules/|g' "$file_to_patch"
+  rm "$file_to_patch.bak"
 done
 
 # Add a "VERSION" file containing the last git commit message
 git log -n 1 > $DEPLOY_ROOT/VERSION
+
+node scripts/update-versions.js
 
 git status --ignored
 

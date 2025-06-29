@@ -34,7 +34,7 @@ const MAX_SAMPLES = 20;
 const HDR_FILE_RE = /\.hdr(\.js)?$/;
 
 export default class TextureUtils {
-  public lottieLoaderUrl = '';
+  lottieLoaderUrl = '';
 
   private _ldrLoader: TextureLoader|null = null;
   private _imageLoader: HDRJPGLoader|null = null;
@@ -172,16 +172,16 @@ export default class TextureUtils {
     let environmentMapLoads: Promise<Texture>;
 
     // If we have a skybox URL, attempt to load it as a cubemap
-    if (!!skyboxUrl) {
+    if (skyboxUrl) {
       skyboxLoads = this.loadEquirectFromUrl(
           skyboxUrl, withCredentials, progressCallback);
     }
 
-    if (!!environmentMapUrl) {
+    if (environmentMapUrl) {
       // We have an available environment map URL
       environmentMapLoads = this.loadEquirectFromUrl(
           environmentMapUrl, withCredentials, progressCallback);
-    } else if (!!skyboxUrl) {
+    } else if (skyboxUrl) {
       // Fallback to deriving the environment map from an available skybox
       environmentMapLoads = this.loadEquirectFromUrl(
           skyboxUrl, withCredentials, progressCallback);

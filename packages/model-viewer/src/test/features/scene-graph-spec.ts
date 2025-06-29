@@ -293,6 +293,7 @@ suite('SceneGraph', () => {
           });
         });
 
+    // eslint-disable-next-line mocha/no-pending-tests
     test.skip(
         'When loading a new JPEG texture from an ObjectURL, the GLB does not export PNG',
         async () => {

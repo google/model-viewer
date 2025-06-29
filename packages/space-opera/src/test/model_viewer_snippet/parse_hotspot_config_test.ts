@@ -50,7 +50,7 @@ suite('parse hotspot config test', () => {
   test(
       'throws an error when given an invalid config without model-viewer tag',
       () => {
-        const snippet = ``;
+        const snippet = '';
         expect(() => {
           parseHotspotsFromSnippet(snippet);
         }).to.throw;

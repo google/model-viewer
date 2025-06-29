@@ -142,7 +142,7 @@ export class XRMenuPanel extends Object3D {
     this.traverse((child) => {
       if (child instanceof Mesh) {
         const mat = child.material as MeshBasicMaterial;
-        if (mat.transparent) mat.opacity = newOpacity;
+        if (mat.transparent) {mat.opacity = newOpacity;}
       }
     });
     this.visible = newOpacity > 0;

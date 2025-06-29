@@ -205,7 +205,7 @@ export function configReducer(
       return {...state, cameraControls: action.payload};
     case SET_AUTO_ROTATE:
       return {...state, autoRotate: action.payload};
-    case SET_CAMERA_TARGET:
+    case SET_CAMERA_TARGET: {
       const target = action.payload;
       const cameraTarget = target == null ?
           undefined :
@@ -213,20 +213,23 @@ export function configReducer(
               roundToDigits(
                   target.y, DIGITS)}m ${roundToDigits(target.z, DIGITS)}m`;
       return {...state, cameraTarget};
-    case SAVE_CAMERA_ORBIT:
+    }
+    case SAVE_CAMERA_ORBIT: {
       const orbit = action.payload;
       const cameraOrbit = orbit == null ? undefined : getOrbitString(orbit);
       return {...state, cameraOrbit};
-    case SAVE_CAMERA_FOV:
+    }
+    case SAVE_CAMERA_FOV: {
       const fieldOfView = action.payload == null ?
           undefined :
           `${roundToDigits(action.payload, DIGITS)}deg`;
       return {...state, fieldOfView};
+    }
     case SET_CAMERA_FOV_LIMITS:
       return {
         ...state,
         minFov: getMinString(action.payload, 'deg'),
-        maxFov: getMaxString(action.payload, 'deg')
+        maxFov: getMaxString(action.payload, 'deg'),
       };
     case SET_CAMERA_PITCH_LIMITS:
       return {...state, ...getUpdatedLimits(state, action.payload, 1)};
@@ -234,13 +237,13 @@ export function configReducer(
       return {...state, ...getUpdatedLimits(state, action.payload, 2)};
     case SET_CAMERA_YAW_LIMITS:
       return {...state, ...getUpdatedLimits(state, action.payload, 0)};
-    case SET_MIN_ZOOM:
+    case SET_MIN_ZOOM: {
       const orbitLimits = getUpdatedLimits(
           state,
           {
             enabled: action.payload.fov != null,
             min: action.payload.radius,
-            max: -1
+            max: -1,
           },
           2);
 
@@ -248,15 +251,16 @@ export function configReducer(
           {
             enabled: action.payload.fov != null,
             min: action.payload.fov,
-            max: -1
+            max: -1,
           },
           'deg');
 
       return {
         ...state,
         minCameraOrbit: orbitLimits.minCameraOrbit,
-        minFov: minFov === 'auto' ? undefined : minFov
+        minFov: minFov === 'auto' ? undefined : minFov,
       };
+    }
     default:
       return state;
   }

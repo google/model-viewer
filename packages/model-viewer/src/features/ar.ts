@@ -315,8 +315,9 @@ configuration or device capabilities');
       const location = self.location.toString();
       const locationUrl = new URL(location);
       const modelUrl = new URL(this.src!, location);
-      if (modelUrl.hash)
+      if (modelUrl.hash) {
         modelUrl.hash = '';
+      }
       const params = new URLSearchParams(modelUrl.search);
 
       locationUrl.hash = noArViewerSigil;
@@ -412,8 +413,9 @@ configuration or device capabilities');
       // attach anchor to shadow DOM to ensure iOS16 ARQL banner click message
       // event propagation
       anchor.style.display = 'none';
-      if (!anchor.isConnected)
+      if (!anchor.isConnected) {
         this.shadowRoot!.appendChild(anchor);
+      }
 
       console.log('Attempting to present in AR with Quick Look...');
       anchor.click();

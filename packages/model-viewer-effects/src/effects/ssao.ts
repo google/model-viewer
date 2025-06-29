@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import { SSAOEffect } from 'postprocessing';
-import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
-import { property } from 'lit/decorators.js';
-import { TEMP_CAMERA } from './utilities.js';
-import { $setDefaultProperties } from './mixins/blend-mode.js';
+import {property} from 'lit/decorators.js';
+import {SSAOEffect} from 'postprocessing';
+
+import {$setDefaultProperties} from './mixins/blend-mode.js';
+import {$effectOptions, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
+import {TEMP_CAMERA} from './utilities.js';
 
 export class MVSSAOEffect extends MVEffectBase {
   static get is() {
@@ -27,12 +28,13 @@ export class MVSSAOEffect extends MVEffectBase {
   /**
    * The strength of the shadow occlusions. Higher value means darker shadows.
    */
-  @property({ type: Number, attribute: 'strength', reflect: true })
+  @property({type: Number, attribute: 'strength', reflect: true})
   strength: number = 2;
 
   constructor() {
     super();
-    this.effects = [new SSAOEffect(TEMP_CAMERA, undefined, this[$effectOptions])];
+    this.effects =
+        [new SSAOEffect(TEMP_CAMERA, undefined, this[$effectOptions])];
     this.effects[0].requireNormals = true;
   }
 
@@ -42,7 +44,7 @@ export class MVSSAOEffect extends MVEffectBase {
     this[$updateProperties]();
   }
 
-  update(changedProperties: Map<string | number | symbol, any>): void {
+  update(changedProperties: Map<string|number|symbol, any>): void {
     super.update && super.update(changedProperties);
     if (changedProperties.has('strength')) {
       this[$updateProperties]();
@@ -56,10 +58,11 @@ export class MVSSAOEffect extends MVEffectBase {
 
   [$setDefaultProperties]() {
     super[$setDefaultProperties]();
-    (this.effects[0] as SSAOEffect).normalBuffer = this.effectComposer.normalBuffer;
+    (this.effects[0] as SSAOEffect).normalBuffer =
+        this.effectComposer.normalBuffer;
   }
 
-  get [$effectOptions]() {
+  get[$effectOptions]() {
     return {
       worldDistanceThreshold: 1000,
       worldDistanceFalloff: 1000,

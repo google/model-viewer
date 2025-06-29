@@ -90,7 +90,7 @@ class ImageComparisonWorker {
         const {analyzer} = this;
 
         if (analyzer == null) {
-          console.warn(`Analyzer not created!`);
+          console.warn('Analyzer not created!');
           return;
         }
 

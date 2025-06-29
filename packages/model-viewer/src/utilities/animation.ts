@@ -17,7 +17,7 @@ import {clamp} from '../utilities.js';
 
 // Adapted from https://gist.github.com/gre/1650294
 export const easeInOutQuad: TimingFunction = (t: number) =>
-    t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
 /**
  * A TimingFunction accepts a value from 0-1 and returns a corresponding
