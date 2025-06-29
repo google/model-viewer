@@ -352,7 +352,7 @@ export class Model implements ModelInterface {
     }
 
     if (materialIndex < 0 || materialIndex >= this.materials.length) {
-      console.error(`setMaterialToVariant(): materialIndex is out of bounds.`);
+      console.error('setMaterialToVariant(): materialIndex is out of bounds.');
       return;
     }
 

@@ -58,8 +58,9 @@ class GenericDownloadButton extends ConnectedLitElement {
   // side-effects anyway, so nothing bad can happen.
   async onDownloadClick() {
     const payload = await this.preparePayload!();
-    if (!payload)
+    if (!payload) {
       return;
+    }
     await safeDownloadCallback(payload.blob, payload.filename)();
   }
 
@@ -85,7 +86,7 @@ async function preparePosterPayload(posterName: string): Promise<Payload> {
 function beautify_snippet(snippetList: string[]): string {
   let snippet = '';
   let i = 0;
-  for (let line of snippetList) {
+  for (const line of snippetList) {
     if (i == 0) {
       snippet = `${line}\n`;
     } else if (i !== 0 && line.includes('model-viewer')) {

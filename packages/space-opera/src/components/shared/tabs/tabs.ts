@@ -16,12 +16,12 @@
  */
 
 import '@material/mwc-tab-bar';
+import './tab';
 
 import {html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
 import {styles} from './styles.css.js';
-import './tab';
 
 /**
  * A tabbed panel.

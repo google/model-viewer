@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-import { LitElement, ReactiveElement } from 'lit';
-import { BlendFunction, BlendMode, Effect } from 'postprocessing';
-import { $effectComposer, MVEffectComposer } from '../../effect-composer.js';
-import { Constructor } from '../../utilities.js';
-import { BlendModeMixin } from './blend-mode.js';
-import { getComponentName } from '../utilities.js';
+import {LitElement, ReactiveElement} from 'lit';
+import {BlendFunction, BlendMode, Effect} from 'postprocessing';
+
+import {$effectComposer, MVEffectComposer} from '../../effect-composer.js';
+import {Constructor} from '../../utilities.js';
+import {getComponentName} from '../utilities.js';
+
+import {BlendModeMixin} from './blend-mode.js';
 
 export const $updateProperties = Symbol('updateProperties');
 export const $effectOptions = Symbol('effectOptions');
@@ -53,7 +55,8 @@ export interface IEffectBaseMixin {
   effectComposer: MVEffectComposer;
 }
 
-export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(EffectClass: T): Constructor<IEffectBaseMixin> & T => {
+export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(
+    EffectClass: T): Constructor<IEffectBaseMixin>&T => {
   class EffectBaseElement extends EffectClass {
     [$effectComposer]?: MVEffectComposer;
     protected effects!: IMVEffect[];
@@ -62,7 +65,11 @@ export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(EffectCl
      * The parent {@link MVEffectComposer} element.
      */
     protected get effectComposer() {
-      if (!this[$effectComposer]) throw new Error(`${getComponentName(this as any)} must be a child of a <model-viewer> component.`);
+      if (!this[$effectComposer]) {
+        throw new Error(`${
+            getComponentName(
+                this as any)} must be a child of a <model-viewer> component.`);
+      }
       return this[$effectComposer];
     }
 
@@ -80,7 +87,7 @@ export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(EffectCl
       this.effectComposer.updateEffects();
     }
   }
-  return EffectBaseElement as Constructor<IEffectBaseMixin> & T;
+  return EffectBaseElement as Constructor<IEffectBaseMixin>& T;
 };
 
 export const MVEffectBase = BlendModeMixin(EffectBaseMixin(LitElement));

@@ -92,7 +92,7 @@ export class SnippetViewer extends LitElement {
 ${css_beautify(this.renderedStyle)}
 </style>
 ` :
-                                ``;
+                                '';
   }
 
   get formattedHtml() {

@@ -85,7 +85,8 @@ suite('ModelScene', () => {
       const animationName = scene.animationNames[0];
       scene.appendAnimation(animationName);
       expect(scene.appendedAnimations).to.include(animationName);
-      scene.detachAnimation(animationName, false); // no fade for instant removal
+      scene.detachAnimation(
+          animationName, false);  // no fade for instant removal
       // The animation name should be removed from appendedAnimations
       expect(scene.appendedAnimations).to.not.include(animationName);
       // The animation action should be stopped

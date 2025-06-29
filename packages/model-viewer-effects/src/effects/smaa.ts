@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-import { property } from 'lit/decorators.js';
-import { SMAAEffect, SMAAPreset } from 'postprocessing';
-import { $updateProperties, MVEffectBase } from './mixins/effect-base.js';
-import { validateLiteralType } from '../utilities.js';
+import {property} from 'lit/decorators.js';
+import {SMAAEffect, SMAAPreset} from 'postprocessing';
+
+import {validateLiteralType} from '../utilities.js';
+
+import {$updateProperties, MVEffectBase} from './mixins/effect-base.js';
 
 export type SMAAQuality = keyof typeof SMAAPreset;
 export const SMAA_QUALITIES = Object.keys(SMAAPreset) as SMAAQuality[];
@@ -30,13 +32,13 @@ export class MVSMAAEffect extends MVEffectBase {
    * `low | medium | high | ultra`
    * @default 'medium'
    */
-  @property({ type: String, attribute: 'quality', reflect: true })
+  @property({type: String, attribute: 'quality', reflect: true})
   quality: SMAAQuality = 'MEDIUM';
 
   constructor() {
     super();
 
-    this.effects = [new SMAAEffect({ preset: SMAAPreset[this.quality] })];
+    this.effects = [new SMAAEffect({preset: SMAAPreset[this.quality]})];
   }
 
   connectedCallback(): void {
@@ -44,7 +46,7 @@ export class MVSMAAEffect extends MVEffectBase {
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string | number | symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
     if (changedProperties.has('quality')) {
       this[$updateProperties]();

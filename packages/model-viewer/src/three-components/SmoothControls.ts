@@ -130,11 +130,11 @@ export class SmoothControls extends EventDispatcher<{
   'pointer-change-start': {},
   'pointer-change-end': {}
 }> {
-  public orbitSensitivity = 1;
-  public zoomSensitivity = 1;
-  public panSensitivity = 1;
-  public inputSensitivity = 1;
-  public changeSource = ChangeSource.NONE;
+  orbitSensitivity = 1;
+  zoomSensitivity = 1;
+  panSensitivity = 1;
+  inputSensitivity = 1;
+  changeSource = ChangeSource.NONE;
 
   private _interactionEnabled: boolean = false;
   private _options: SmoothControlsOptions;
@@ -142,8 +142,8 @@ export class SmoothControls extends EventDispatcher<{
   private isUserPointing = false;
 
   // Pan state
-  public enablePan = true;
-  public enableTap = true;
+  enablePan = true;
+  enableTap = true;
   private panProjection = new Matrix3();
   private panPerPixel = 0;
 

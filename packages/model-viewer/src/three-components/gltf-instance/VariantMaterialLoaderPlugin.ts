@@ -26,8 +26,7 @@
  */
 
 import {Material as ThreeMaterial, Mesh} from 'three';
-import {GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {GLTF, GLTFLoaderPlugin, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTF, GLTFLoaderPlugin, GLTFParser, GLTFReference} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 
 export interface UserDataVariantMapping {

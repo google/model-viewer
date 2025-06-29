@@ -120,7 +120,7 @@ export class ArtifactCreator {
     }
     const scenarioRecord = {analysisResults, scenario};
 
-    console.log(`\n💾 Recording analysis`);
+    console.log('\n💾 Recording analysis');
     await fs.writeFile(
         join(outputDirectory, scenarioName, 'analysis.json'),
         JSON.stringify(scenarioRecord));
@@ -299,9 +299,13 @@ export class ArtifactCreator {
     }
 
     if (this.browser == null) {
-      console.log(`🚀 Launching browser`);
-      // no-sandbox and disable-setuid-sandbox args to resolve puppeteer browser run error in fidelity tests
-      this.browser = await puppeteer.launch({headless: quiet, args:['--no-sandbox', '--disable-setuid-sandbox']});
+      console.log('🚀 Launching browser');
+      // no-sandbox and disable-setuid-sandbox args to resolve puppeteer browser
+      // run error in fidelity tests
+      this.browser = await puppeteer.launch({
+        headless: quiet,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
     }
 
     const page = await this.browser.newPage();
@@ -324,7 +328,7 @@ export class ArtifactCreator {
           await Promise.all(message.args().map((arg: any) => arg.jsonValue()));
 
       if (args.length) {
-        console.log(`➡️`, ...args);
+        console.log('➡️', ...args);
       }
     });
 
@@ -373,7 +377,7 @@ export class ArtifactCreator {
       throw new Error(evaluateError);
     }
 
-    console.log(`🖼  Capturing screenshot`);
+    console.log('🖼  Capturing screenshot');
 
     try {
       await fs.mkdir(this.outputDirectory);
@@ -381,10 +385,15 @@ export class ArtifactCreator {
       // Ignored...
     }
 
-    const screenshot =
-        outputPath && (outputPath.endsWith('.png') || outputPath.endsWith('.jpeg') || outputPath.endsWith('.webp'))
-            ? await page.screenshot({path: outputPath as `${string}.png` | `${string}.jpeg` | `${string}.webp`, omitBackground: true})
-            : await page.screenshot({omitBackground: true});
+    const screenshot = outputPath &&
+            (outputPath.endsWith('.png') || outputPath.endsWith('.jpeg') ||
+             outputPath.endsWith('.webp')) ?
+        await page.screenshot({
+          path: outputPath as `${string}.png` | `${string}.jpeg` |
+              `${string}.webp`,
+          omitBackground: true
+        }) :
+        await page.screenshot({omitBackground: true});
 
     page.close();
 

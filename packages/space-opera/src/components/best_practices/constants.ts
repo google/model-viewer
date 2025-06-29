@@ -32,7 +32,7 @@ export const modelViewerTemplate = `<!doctype html>
   </body>
 </html>`;
 
-export const scriptTemplate = `    <script src="script.js"></script>`;
+export const scriptTemplate = '    <script src="script.js"></script>';
 
 export const progressBar =
     `// Handles loading the events for <model-viewer>'s slotted progress bar

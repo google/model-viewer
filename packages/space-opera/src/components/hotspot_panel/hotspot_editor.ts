@@ -23,8 +23,8 @@ import {html, LitElement, PropertyValues} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
-
 import {hotspotEditorStyles} from '../../styles.css.js';
+
 import {dispatchRemoveHotspot, dispatchUpdateHotspot} from './reducer.js';
 import {HotspotConfig} from './types.js';
 
@@ -43,8 +43,9 @@ export class HotspotEditorElement extends LitElement {
   }
 
   render() {
-    if (!this.config)
+    if (!this.config) {
       return html``;
+    }
 
     return html`
     <me-section-row label="Label:">
@@ -58,8 +59,9 @@ export class HotspotEditorElement extends LitElement {
   }
 
   onAnnotationInput() {
-    if (!this.annotationInput)
+    if (!this.annotationInput) {
       return;
+    }
     const newConfig = {
       ...this.config,
       annotation: this.annotationInput.value

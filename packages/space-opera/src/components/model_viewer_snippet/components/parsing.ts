@@ -50,7 +50,7 @@ export function parseExtraAttributes(snippet: string): string {
   // Parse snippet and extract attributes from model-viewer
   const parsedInput = new DOMParser().parseFromString(snippet, 'text/html');
   const modelViewer = parsedInput.body.getElementsByTagName('model-viewer')[0];
-  let extraAttributes: any = {};
+  const extraAttributes: any = {};
   const attributes = modelViewer.attributes;
 
   // Loop through every attribute, only add the attributes to extraAttributes

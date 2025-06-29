@@ -12,14 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  directive,
-  Directive,
-  DirectiveParameters,
-  ElementPart,
-  PartInfo,
-  PartType,
-} from 'lit/directive.js';
+import {directive, Directive, DirectiveParameters, ElementPart, PartInfo, PartType,} from 'lit/directive.js';
 
 const Binding = {
   ATTRIBUTE: 'ATTRIBUTE' as 'ATTRIBUTE',
@@ -31,13 +24,13 @@ const Binding = {
 type Binding = keyof typeof Binding;
 
 class Spread extends Directive {
-  oldBinds: { [bind: string]: unknown } = {};
+  oldBinds: {[bind: string]: unknown} = {};
 
   constructor(info: PartInfo) {
     super(info);
 
     if (info.type !== PartType.ELEMENT) {
-      throw new Error(`spread directive can only be used on element parts.`);
+      throw new Error('spread directive can only be used on element parts.');
     }
   }
 
@@ -67,12 +60,8 @@ class Spread extends Directive {
   }
 
   handleExistingBind(
-    part: ElementPart,
-    bind: string,
-    bindName: string,
-    value: unknown,
-    bindKind: Binding
-  ) {
+      part: ElementPart, bind: string, bindName: string, value: unknown,
+      bindKind: Binding) {
     const hasBindChanged = this.oldBinds[bind] !== value;
 
     if (!hasBindChanged) {
@@ -81,9 +70,7 @@ class Spread extends Directive {
 
     if (bindKind === Binding.EVENT) {
       part.element.removeEventListener(
-        bindName,
-        this.oldBinds[bind] as EventListener
-      );
+          bindName, this.oldBinds[bind] as EventListener);
     }
 
     this.handleNewBind(part, bindName, value, bindKind);
@@ -92,11 +79,7 @@ class Spread extends Directive {
   }
 
   handleNewBind(
-    part: ElementPart,
-    bindName: string,
-    value: unknown,
-    bindKind: Binding
-  ) {
+      part: ElementPart, bindName: string, value: unknown, bindKind: Binding) {
     switch (bindKind) {
       case Binding.ATTRIBUTE:
         part.element.setAttribute(bindName, value as string);
@@ -114,11 +97,7 @@ class Spread extends Directive {
   }
 
   handleRemovedBind(
-    part: ElementPart,
-    bindName: string,
-    value: unknown,
-    bindKind: Binding
-  ) {
+      part: ElementPart, bindName: string, value: unknown, bindKind: Binding) {
     switch (bindKind) {
       case Binding.ATTRIBUTE:
       case Binding.BOOLEAN_ATTRIBUTE:
@@ -146,10 +125,10 @@ class Spread extends Directive {
     }
   }
 
-  render(binds: { [bind: string]: unknown }) {
+  render(binds: {[bind: string]: unknown}) {
     this.oldBinds = {...binds};
   }
 }
 
 export const spread = directive(Spread);
-export type { Spread };
+export type{Spread};

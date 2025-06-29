@@ -23,7 +23,7 @@ import '../shared/snippet_viewer/snippet_viewer.js';
 import '../shared/expandable_content/expandable_tab.js';
 
 import {html} from 'lit';
-import {customElement, state, property, query} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {ArConfigState, BestPracticesState, ImageType, INITIAL_STATE, ModelViewerConfig, RelativeFilePathsState, State} from '../../types.js';

@@ -69,43 +69,43 @@ const ndc = new Vector2();
  * Provides lights and cameras to be used in a renderer.
  */
 export class ModelScene extends Scene {
-  public element: ModelViewerElement;
-  public canvas: HTMLCanvasElement;
-  public annotationRenderer = new CSS2DRenderer();
-  public effectRenderer: EffectComposerInterface|null = null;
-  public schemaElement = document.createElement('script');
-  public width = 1;
-  public height = 1;
-  public aspect = 1;
-  public scaleStep = 0;
-  public renderCount = 0;
-  public externalRenderer: RendererInterface|null = null;
-  public appendedAnimations: Array<string> = [];
-  public markedAnimations: Array<MarkedAnimation> = [];
+  element: ModelViewerElement;
+  canvas: HTMLCanvasElement;
+  annotationRenderer = new CSS2DRenderer();
+  effectRenderer: EffectComposerInterface|null = null;
+  schemaElement = document.createElement('script');
+  width = 1;
+  height = 1;
+  aspect = 1;
+  scaleStep = 0;
+  renderCount = 0;
+  externalRenderer: RendererInterface|null = null;
+  appendedAnimations: Array<string> = [];
+  markedAnimations: Array<MarkedAnimation> = [];
 
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
-  public camera = new PerspectiveCamera(45, 1, 0.1, 100);
-  public xrCamera: Camera|null = null;
+  camera = new PerspectiveCamera(45, 1, 0.1, 100);
+  xrCamera: Camera|null = null;
 
-  public url: string|null = null;
-  public pivot = new Object3D();
-  public target = new Object3D();
-  public animationNames: Array<string> = [];
-  public boundingBox = new Box3();
-  public boundingSphere = new Sphere();
-  public size = new Vector3();
-  public idealAspect = 0;
-  public framedFoVDeg = 0;
+  url: string|null = null;
+  pivot = new Object3D();
+  target = new Object3D();
+  animationNames: Array<string> = [];
+  boundingBox = new Box3();
+  boundingSphere = new Sphere();
+  size = new Vector3();
+  idealAspect = 0;
+  framedFoVDeg = 0;
 
-  public shadow: Shadow|null = null;
-  public shadowIntensity = 0;
-  public shadowSoftness = 1;
-  public bakedShadows = new Set<Mesh>();
+  shadow: Shadow|null = null;
+  shadowIntensity = 0;
+  shadowSoftness = 1;
+  bakedShadows = new Set<Mesh>();
 
-  public exposure = 1;
-  public toneMapping: ToneMapping = NeutralToneMapping;
-  public canScale = true;
+  exposure = 1;
+  toneMapping: ToneMapping = NeutralToneMapping;
+  canScale = true;
 
   private isDirty = false;
 
@@ -800,8 +800,9 @@ export class ModelScene extends Scene {
 
     // validate and normalize parameters
     if (typeof repetitionCount === 'string') {
-      repetitionCount = !isNaN(parseFloat(repetitionCount)) ? 
-          Math.max(parseInt(repetitionCount), 1) : Infinity;
+      repetitionCount = !isNaN(parseFloat(repetitionCount)) ?
+          Math.max(parseInt(repetitionCount), 1) :
+          Infinity;
     } else if (typeof repetitionCount === 'number' && repetitionCount < 1) {
       repetitionCount = 1;
     }
@@ -822,12 +823,13 @@ export class ModelScene extends Scene {
       time = !isNaN(parseFloat(time)) ? parseFloat(time) : null;
     }
 
-    const { shouldFade, duration: fadeDuration } = this.parseFadeValue(fade, false, 1.25);
-    
+    const {shouldFade, duration: fadeDuration} =
+        this.parseFadeValue(fade, false, 1.25);
+
     const defaultWarpDuration = 1.25;
     let shouldWarp = false;
     let warpDuration = 0;
-    
+
     if (typeof warp === 'boolean') {
       shouldWarp = warp;
       warpDuration = warp ? defaultWarpDuration : 0;
@@ -898,36 +900,34 @@ export class ModelScene extends Scene {
    * Helper function to parse fade parameter values
    */
   private parseFadeValue(
-    fade: boolean | number | string,
-    defaultValue: boolean = true,
-    defaultDuration: number = 1.5
-  ): { shouldFade: boolean, duration: number } {
+      fade: boolean|number|string, defaultValue: boolean = true,
+      defaultDuration: number = 1.5): {shouldFade: boolean, duration: number} {
     const normalizeString = (str: string) => str.toLowerCase().trim();
 
     if (typeof fade === 'boolean') {
-      return { shouldFade: fade, duration: fade ? defaultDuration : 0 };
+      return {shouldFade: fade, duration: fade ? defaultDuration : 0};
     }
 
     if (typeof fade === 'number') {
       const duration = Math.max(fade, 0);
-      return { shouldFade: duration > 0, duration };
+      return {shouldFade: duration > 0, duration};
     }
 
     if (typeof fade === 'string') {
       const normalized = normalizeString(fade);
 
       if (normalized === 'true') {
-        return { shouldFade: true, duration: defaultDuration };
+        return {shouldFade: true, duration: defaultDuration};
       }
 
       if (normalized === 'false') {
-        return { shouldFade: false, duration: 0 };
+        return {shouldFade: false, duration: 0};
       }
 
       const parsed = parseFloat(normalized);
       if (!isNaN(parsed)) {
         const duration = Math.max(parsed, 0);
-        return { shouldFade: duration > 0, duration };
+        return {shouldFade: duration > 0, duration};
       }
     }
 
@@ -952,7 +952,7 @@ export class ModelScene extends Scene {
       return;
     }
 
-    const { shouldFade, duration } = this.parseFadeValue(fade, true, 1.5);
+    const {shouldFade, duration} = this.parseFadeValue(fade, true, 1.5);
 
     try {
       const action = this.mixer.existingAction(animationClip) ||
@@ -964,7 +964,7 @@ export class ModelScene extends Scene {
         action.stop();
       }
 
-      this.element[$scene].appendedAnimations = 
+      this.element[$scene].appendedAnimations =
           this.element[$scene].appendedAnimations.filter(i => i !== name);
     } catch (error) {
       console.error(error);

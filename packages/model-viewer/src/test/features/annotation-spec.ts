@@ -100,7 +100,7 @@ suite('Annotation', () => {
       // position is half the default width and height (300 x 150) with a depth
       // value of ~1.
       const defaultDimensions = {width: 300, height: 150};
-      element.updateHotspot({name: 'hotspot-1', position: `0m 0m 0m`});
+      element.updateHotspot({name: 'hotspot-1', position: '0m 0m 0m'});
 
       const hotspotData = element.queryHotspot('hotspot-1');
 
@@ -211,7 +211,7 @@ suite('Annotation', () => {
     let rect: DOMRect;
 
     setup(async () => {
-      element.setAttribute('style', `width: 200px; height: 300px`);
+      element.setAttribute('style', 'width: 200px; height: 300px');
       rect = element.getBoundingClientRect();
       element.cameraOrbit = '0deg 90deg 2m';
       element.jumpCameraToGoal();

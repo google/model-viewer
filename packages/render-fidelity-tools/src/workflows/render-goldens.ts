@@ -105,7 +105,7 @@ async function main() {
 
   const warn = (message: string) => console.warn(`🚨 ${message}`);
   const exit = (code = 0) => {
-    console.log(`📋 Screenshot updates concluded`);
+    console.log('📋 Screenshot updates concluded');
     process.exit(code);
   };
 
@@ -183,7 +183,7 @@ async function main() {
   const updateScreenshots = async (config: ImageComparisonConfig) => {
     const {scenarios} = config;
 
-    console.log(`🆙 Updating screenshots`);
+    console.log('🆙 Updating screenshots');
 
     try {
       await fs.mkdir(goldensDirectory);
@@ -266,7 +266,7 @@ async function main() {
 
         if (args.dryRun) {
           process.stdout.write(
-              rendererName + `: Rendering ` + scenarioName +
+              rendererName + ': Rendering ' + scenarioName +
               '... -- skipping, dry-run');
           continue;
         }

@@ -15,11 +15,11 @@
 
 import 'prismjs';
 
-import {property} from 'lit/decorators.js';
 import {ReactiveElement} from 'lit';
+import {property} from 'lit/decorators.js';
 
 // Silence tsc since prismjs isn't a proper module
-declare var Prism: any;
+declare let Prism: any;
 
 const EMPTY_ATTRIBUTE_RE = /([\w-]+)=\"\"/g;
 
@@ -73,7 +73,7 @@ export class ExampleSnippet extends ReactiveElement {
 
   readonly stamped: boolean = false;
 
-  public stamp() {
+  stamp() {
     if (this.template == null) {
       return;
     }

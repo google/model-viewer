@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import { MVBloomEffect } from './effects/bloom.js';
-import { MVColorGradeEffect } from './effects/color-grade.js';
-import { MVGlitchEffect } from './effects/glitch.js';
-import { MVOutlineEffect } from './effects/outline.js';
-import { MVPixelateEffect } from './effects/pixelate.js';
-import { MVSMAAEffect } from './effects/smaa.js';
-import { MVSSAOEffect } from './effects/ssao.js';
-import { MVEffectComposer } from './effect-composer.js';
-import { MVEffectBase } from './effects/mixins/effect-base.js';
-import { SelectiveMixin } from './effects/mixins/selective.js';
-import { MVSelectiveBloomEffect } from './effects/selective-bloom.js';
+import {MVEffectComposer} from './effect-composer.js';
+import {MVBloomEffect} from './effects/bloom.js';
+import {MVColorGradeEffect} from './effects/color-grade.js';
+import {MVGlitchEffect} from './effects/glitch.js';
+import {MVEffectBase} from './effects/mixins/effect-base.js';
+import {SelectiveMixin} from './effects/mixins/selective.js';
+import {MVOutlineEffect} from './effects/outline.js';
+import {MVPixelateEffect} from './effects/pixelate.js';
+import {MVSelectiveBloomEffect} from './effects/selective-bloom.js';
+import {MVSMAAEffect} from './effects/smaa.js';
+import {MVSSAOEffect} from './effects/ssao.js';
 
 customElements.define('effect-composer', MVEffectComposer);
 customElements.define('pixelate-effect', MVPixelateEffect);
@@ -60,5 +60,5 @@ export {
   MVSMAAEffect as SMAAEffect,
   MVGlitchEffect as GlitchEffect,
   MVEffectBase as EffectBase,
-  SelectiveMixin,  
+  SelectiveMixin,
 };

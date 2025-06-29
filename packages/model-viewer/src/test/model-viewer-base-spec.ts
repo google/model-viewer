@@ -195,14 +195,14 @@ suite('ModelViewerElementBase', () => {
   });
 
   suite('orchestrates rendering', () => {
-    let elements: Array<ModelViewerElement> = [];
+    const elements: Array<ModelViewerElement> = [];
 
     setup(async () => {
       elements.push(new ModelViewerElement());
       elements.push(new ModelViewerElement());
       elements.push(new ModelViewerElement());
 
-      for (let element of elements) {
+      for (const element of elements) {
         element.style.position = 'relative';
         element.style.marginBottom = '100vh';
         element.src = assetPath('models/cube.gltf');

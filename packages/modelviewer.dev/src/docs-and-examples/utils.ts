@@ -125,7 +125,9 @@ export function init(docsOrExample: string) {
 (self as any).initFooterLinks = initFooterLinks;
 
 function handleSideBarClickToggle(event: any) {
-  if (!(event.target.classList.contains('sidebar') || event.target.closest(".sidebar")) && !event.target.classList.contains("hamburgerInput")) {
+  if (!(event.target.classList.contains('sidebar') ||
+        event.target.closest('.sidebar')) &&
+      !event.target.classList.contains('hamburgerInput')) {
     if (event.target.classList.contains('tab')) {
       document.getElementById('sidenav')?.classList.toggle('active');
     } else {

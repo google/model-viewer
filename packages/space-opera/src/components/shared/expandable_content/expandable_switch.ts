@@ -17,8 +17,8 @@
 
 import '@material/mwc-switch';
 import './expandable_section.js';
-import {Switch} from '@material/mwc-switch';
 
+import {Switch} from '@material/mwc-switch';
 import {html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 

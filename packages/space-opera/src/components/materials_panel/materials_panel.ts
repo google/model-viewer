@@ -431,7 +431,7 @@ export class MaterialPanel extends ConnectedLitElement {
         (value: string, nativeValidity: ValidityState) => {
           // Validates length.
           if (value.length < 1) {
-            textField.validationMessage = `Invalid input.`;
+            textField.validationMessage = 'Invalid input.';
             return {valid: false} as ValidityState;
           }
 
@@ -452,7 +452,7 @@ export class MaterialPanel extends ConnectedLitElement {
   isValidInput(_value: string): {valid: boolean, validationMessage: string} {
     // Validates length.
     if (_value.length < 1) {
-      return {valid: false, validationMessage: `Invalid input.`};
+      return {valid: false, validationMessage: 'Invalid input.'};
     }
 
     // Verifies name is unique.

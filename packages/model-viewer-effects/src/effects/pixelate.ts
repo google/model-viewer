@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-import { property } from 'lit/decorators.js';
-import { PixelationEffect } from 'postprocessing';
-import { $updateProperties, MVEffectBase } from './mixins/effect-base.js';
+import {property} from 'lit/decorators.js';
+import {PixelationEffect} from 'postprocessing';
+
+import {$updateProperties, MVEffectBase} from './mixins/effect-base.js';
 
 export class MVPixelateEffect extends MVEffectBase {
   static get is() {
@@ -26,7 +27,7 @@ export class MVPixelateEffect extends MVEffectBase {
    * The pixel granularity. Higher value = lower resolution.
    * @default 10
    */
-  @property({ type: Number, attribute: 'granularity', reflect: true })
+  @property({type: Number, attribute: 'granularity', reflect: true})
   granularity = 10.0;
 
   constructor() {
@@ -40,7 +41,7 @@ export class MVPixelateEffect extends MVEffectBase {
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string | number | symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
     if (changedProperties.has('granularity')) {
       this[$updateProperties]();

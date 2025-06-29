@@ -86,7 +86,8 @@ export class MagnifyingGlass extends LitElement {
 
     return this.direction === 'horizontal' ?
         x < (width / 2) ? 'right' : 'left' :
-        y < (height / 2) ? 'bottom' : 'top';
+        y < (height / 2) ? 'bottom' :
+                           'top';
   }
 
   render() {

@@ -70,7 +70,7 @@ suite('MVEffectComposer', () => {
 
   suite('userEffects', () => {
     let pass: EffectPass;
-    let effects: Effect[] = [];
+    const effects: Effect[] = [];
     test('adds grid effect', () => {
       const effect = new GridEffect();
       effects.push(effect);
