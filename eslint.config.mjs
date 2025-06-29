@@ -6,17 +6,15 @@ import mochaPlugin from 'eslint-plugin-mocha';
 import wcPlugin from 'eslint-plugin-wc';
 
 export default [
-  // Unified ignore patterns (from .eslintignore and previous config)
   {
     ignores: [
       '**/node_modules',
       'scripts/**/*.js',
       'packages/*/dist',
       'packages/**/*.d.ts',
-      'packages/*/src/*-css.ts'
+      'packages/*/src/*-css.ts',
     ],
   },
-  // Base recommended configs
   js.configs.recommended,
   {
     files: ['**/*.ts', '**/*.js'],
@@ -35,8 +33,8 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tseslint,
-      'mocha': mochaPlugin,
-      'wc': wcPlugin,
+      mocha: mochaPlugin,
+      wc: wcPlugin,
     },
     settings: {
       wc: {
@@ -44,29 +42,38 @@ export default [
       },
     },
     rules: {
-      // Rules temporarily disabled
+      // قوانین پایه
       '@typescript-eslint/explicit-function-return-type': 'off',
-      // Rules disabled in favor of clang-format
       '@typescript-eslint/indent': 'off',
       'indent': 'off',
       'max-len': 'off',
       'block-spacing': 'off',
       'keyword-spacing': 'off',
       'space-before-function-paren': 'off',
-      // clang-format wants async(foo) => {} without a space
-      '@typescript-eslint/explicit-member-accessibility': ['error', { 'accessibility': 'no-public' }],
+      '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'no-public' }],
+
+      // سبک کدنویسی
       'no-new': 'warn',
-      'quotes': ['error', 'single', { 'avoidEscape': true }],
+      'quotes': ['error', 'single', { avoidEscape: true }],
       'no-var': 'error',
       'curly': 'error',
       'no-floating-decimal': 'error',
-      'no-unused-vars': 'error',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'require-jsdoc': 'off',
-      'valid-jsdoc': 'off',
       'prefer-const': 'error',
       'comma-dangle': 'off',
-      // Mocha rules
+      'require-jsdoc': 'off',
+      'valid-jsdoc': 'off',
+
+      // برای type/const هم‌نام و shadow
+      'no-redeclare': 'off',
+      'no-shadow': 'off',
+      '@typescript-eslint/no-shadow': 'off',
+      'no-undef': 'off',
+
+      // استفاده نشده‌ها
+      'no-unused-vars': 'error',
+      '@typescript-eslint/no-unused-vars': 'off',
+
+      // قوانین mocha
       'mocha/handle-done-callback': 'error',
       'mocha/no-exclusive-tests': 'error',
       'mocha/no-identical-title': 'error',
@@ -74,7 +81,6 @@ export default [
       'mocha/no-pending-tests': 'error',
     },
   },
-  // TypeScript-specific overrides
   {
     files: ['packages/**/*.ts'],
     rules: {
@@ -82,9 +88,9 @@ export default [
       'no-invalid-this': 'off',
       'new-cap': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
+      'no-undef': 'off',
     },
   },
-  // Test file overrides
   {
     files: [
       'packages/**/test/**/*.ts',
@@ -106,7 +112,6 @@ export default [
       },
     },
   },
-  // Node/script overrides
   {
     files: [
       'scripts/**/*.js',
@@ -125,4 +130,4 @@ export default [
       },
     },
   },
-]; 
+];
