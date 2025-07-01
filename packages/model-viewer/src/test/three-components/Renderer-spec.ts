@@ -154,6 +154,7 @@ suite('Renderer with two scenes', () => {
     });
   });
 
+  // eslint-disable-next-line mocha/no-pending-tests
   suite.skip('with two loaded scenes', () => {
     setup(async () => {
       const sceneVisible = waitForEvent(scene.element, 'poster-dismissed');

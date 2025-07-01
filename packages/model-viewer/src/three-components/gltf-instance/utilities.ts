@@ -111,9 +111,9 @@ export class GLTFTreeVisitor {
   visit(gltf: GLTF, options: VisitOptions = {}): void {
     const allScenes = !!options.allScenes;
     const sparse = !!options.sparse;
-    const scenes = allScenes ?
-        gltf.scenes || [] :
-        (gltf.scenes && gltf.scene != null) ? [gltf.scenes[gltf.scene]] : [];
+    const scenes = allScenes                ? gltf.scenes || [] :
+        (gltf.scenes && gltf.scene != null) ? [gltf.scenes[gltf.scene]] :
+                                              [];
 
     const state: VisitorTraversalState =
         {hierarchy: [], visited: new Set(), sparse, gltf};

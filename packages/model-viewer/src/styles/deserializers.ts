@@ -49,6 +49,10 @@ export const enumerationDeserializer = <T extends string>(allowedNames: T[]) =>
 
         return new Set<T>(names);
       } catch (_error) {
+        // If parsing fails, we return an empty set. This is to ensure that
+        // deserializers are robust against malformed input.
+        console.warn(
+            `Failed to parse enumeration from "${valueString}". Returning empty set.`);
       }
       return new Set();
     };

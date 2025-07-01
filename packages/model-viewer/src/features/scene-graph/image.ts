@@ -74,7 +74,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     if (texture && (texture.isCanvasTexture || texture.isVideoTexture)) {
       return texture.image;
     }
-    return;
+    return undefined;
   }
 
   get animation(): any|undefined {
@@ -82,7 +82,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     if (texture && texture.isCanvasTexture && texture.animation) {
       return texture.animation;
     }
-    return;
+    return undefined;
   }
 
   get type(): 'embedded'|'external' {
@@ -128,7 +128,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     imageData.data.set(buffer);
     blobContext.putImageData(imageData, 0, 0);
 
-    return new Promise<string>(async (resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       blobCanvas.toBlob(blob => {
         if (!blob) {
           return reject('Failed to capture thumbnail.');

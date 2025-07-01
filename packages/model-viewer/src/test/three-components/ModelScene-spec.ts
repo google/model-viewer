@@ -44,7 +44,7 @@ suite('ModelScene', () => {
 
   suite('with a model', () => {
     setup(async () => {
-      await scene.setSource(assetPath('models/Astronaut.glb'));
+      await scene.setSource(assetPath('models/soldier.glb'));
     });
 
     suite('setShadowIntensity', () => {
@@ -62,6 +62,23 @@ suite('ModelScene', () => {
         scene.setShadowIntensity(1);
         expect(scene.shadow).to.be.ok;
       });
+    });
+
+    test('can append and play an animation', () => {
+      expect(scene.animationNames.length).to.be.greaterThan(0);
+      const animationName = scene.animationNames[0];
+      scene.appendAnimation(animationName);
+      expect(scene.appendedAnimations).to.include(animationName);
+    });
+
+    test('can detach an appended animation', () => {
+      expect(scene.animationNames.length).to.be.greaterThan(0);
+      const animationName = scene.animationNames[0];
+      scene.appendAnimation(animationName);
+      expect(scene.appendedAnimations).to.include(animationName);
+      scene.detachAnimation(
+          animationName, false);
+      expect(scene.appendedAnimations).to.not.include(animationName);
     });
   });
 

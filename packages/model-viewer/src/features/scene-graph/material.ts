@@ -55,7 +55,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$lazyLoadGLTFInfo]?: LazyLoader;
   private[$gltfIndex]: number;
   private[$isActive]: boolean;
-  public[$variantIndices] = new Set<number>();
+  [$variantIndices] = new Set<number>();
   private[$name]?: string;
   readonly[$modelVariants]: Map<string, VariantData>;
   private[$pbrTextures] = new Map<TextureUsage, TextureInfo>();

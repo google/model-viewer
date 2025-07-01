@@ -41,8 +41,8 @@ import {UserDataVariantMapping} from './VariantMaterialLoaderPlugin.js';
 const compatibleObject = (object: Object3D) => {
   // @TODO: Need properer variantMaterials format validation?
   return (object as Mesh).material !==
-      undefined &&        // easier than (!object.isMesh && !object.isLine &&
-                          // !object.isPoints)
+      undefined &&  // easier than (!object.isMesh && !object.isLine &&
+      // !object.isPoints)
       object.userData &&  // just in case
       object.userData.variantMaterials &&
       // Is this line costly?
@@ -65,7 +65,7 @@ const compatibleMaterial = (material: Material|null) => {
 export default class GLTFExporterMaterialsVariantsExtension implements
     GLTFExporterPlugin {
   writer: any;  // @TODO: Replace with GLTFWriter when GLTFExporter plugin TS
-                // declaration is ready
+  // declaration is ready
   name: string;
   variantNames: string[];
 
@@ -115,7 +115,7 @@ export default class GLTFExporterMaterialsVariantsExtension implements
     const variantMaterials =
         userData.variantMaterials as Map<number, UserDataVariantMapping>;
     const variantDataMap = userData.variantData as Map<string, VariantData>;
-    const mappingTable　=
+    const mappingTable =
         new Map<number, {material: number, variants: number[]}>();
 
     // Removes gaps in the variant indices list (caused by deleting variants).

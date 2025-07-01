@@ -99,9 +99,8 @@ export class ProgressTracker extends EventTarget {
     }
 
     return (progress: number): number => {
-      let nextProgress: number;
-
-      nextProgress = Math.max(clamp(progress, 0, 1), activity.progress);
+      const nextProgress: number =
+          Math.max(clamp(progress, 0, 1), activity.progress);
 
       if (nextProgress !== activity.progress) {
         this.announceTotalProgress(activity, nextProgress, reason);
@@ -116,8 +115,9 @@ export class ProgressTracker extends EventTarget {
     let progressLeft = 0;
     let completedActivities = 0;
 
-    if (nextProgress == 1.0)
+    if (nextProgress == 1.0) {
       updatedActivity.completed = true;
+    }
 
     for (const activity of this.ongoingActivities) {
       const {progress} = activity;
@@ -141,7 +141,7 @@ export class ProgressTracker extends EventTarget {
         this.totalProgress;
 
     this.dispatchEvent(new CustomEvent<ProgressDetails>(
-        'progress', {detail: {totalProgress, reason }}));
+        'progress', {detail: {totalProgress, reason}}));
 
     if (completedActivities === this.ongoingActivityCount) {
       this.totalProgress = 0.0;

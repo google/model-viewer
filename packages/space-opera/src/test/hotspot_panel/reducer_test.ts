@@ -70,7 +70,7 @@ suite('hotspot dispatchers test', () => {
       });
 
   test(
-      'throws an error when dispatchUpdateHotspot is called with configs with \ non - existing hotspot names',
+      'throws an error when dispatchUpdateHotspot is called with configs with \\ non - existing hotspot names',
       () => {
         expect(() => {
           reduxStore.dispatch(dispatchUpdateHotspot(config));
@@ -103,7 +103,7 @@ suite('hotspot dispatchers test', () => {
       });
 
   test(
-      'throws an error when dispatchRemoveHotspot is called with configs with \ non - existing hotspot names',
+      'throws an error when dispatchRemoveHotspot is called with configs with \\ non - existing hotspot names',
       () => {
         reduxStore.dispatch(dispatchAddHotspot(config));
 

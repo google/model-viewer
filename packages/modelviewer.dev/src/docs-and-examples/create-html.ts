@@ -45,7 +45,7 @@ const CategoryConstant: Category = {
 };
 
 function getCurrentDocs() {
-  const click = `onclick="switchPages('docs', 'examples')"`;
+  const click = 'onclick="switchPages(\'docs\', \'examples\')"';
   return `
 <div class="inner-flipper" id="documentation-flipper">
   <div class="bolden">DOCUMENTATION</div>
@@ -85,13 +85,17 @@ export function starterSidebar(docsOrExample: string) {
   const isExample = inputList[0] === 'examples';
   const docsExamples =
       isExample ? getCurrentExample(category) : getCurrentDocs();
-  const isPostprocesssing = docsOrExample === 'mve' || category === 'postprocessing';
+  const isPostprocesssing =
+      docsOrExample === 'mve' || category === 'postprocessing';
   const href = isExample ? '../../' : '../';
   nav.innerHTML = `
 <div class="home lockup">
   <a href=${href} class="sidebar-mv inner-home">
     <div class="icon-button icon-modelviewer-black inner-home"></div>
-    <div class="inner-home darken ${isPostprocesssing && 'inner-home-mve'}"><span class="attribute">&lt;${isPostprocesssing ? 'model-viewer-effects' : 'model-viewer'}&gt;</span></div>
+    <div class="inner-home darken ${
+      isPostprocesssing && 'inner-home-mve'}"><span class="attribute">&lt;${
+      isPostprocesssing ? 'model-viewer-effects' :
+                          'model-viewer'}&gt;</span></div>
   </a>
 </div>
 <hr class="sidebar-hr">
@@ -166,7 +170,8 @@ function createSidebar(category: Category) {
   const container = document.getElementById('sidebar-category-container');
   const lowerCaseTitle = category.htmlName;
   let subcategories = Object.keys(category);
-  subcategories = subcategories.filter(k => k !== 'Title' && k !== 'htmlName' && k !== 'Description');
+  subcategories = subcategories.filter(
+      k => k !== 'Title' && k !== 'htmlName' && k !== 'Description');
 
   // Link category href (Loading) to first subcategory (Loading, Attributes)
   let lowerKey = '';
@@ -249,7 +254,7 @@ function createLinks(
   for (const link of entry.links) {
     linksEntry += `<div>${link}</div>`;
   }
-  linksEntry += `</div>`;
+  linksEntry += '</div>';
   return linksEntry;
 }
 
@@ -295,7 +300,8 @@ function createSubcategory(
   <div class='inner-content'>
     <div id=${subcategoryContainerId}>
       <h3 id=${category.concat('-', pluralLowerCaseSubcategory)}>
-        ${subcategory === 'Questions' || subcategory === 'Mixin' ? '' : subcategory}
+        ${
+      subcategory === 'Questions' || subcategory === 'Mixin' ? '' : subcategory}
       </h3>
     </div>
   </div>

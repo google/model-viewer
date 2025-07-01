@@ -50,11 +50,11 @@ const quat = new Quaternion();
  * it should be removed from the tree so it can be garbage-collected.
  */
 export class Hotspot extends CSS2DObject {
-  public normal: Vector3 = new Vector3(0, 1, 0);
-  public surface?: string;
-  public mesh?: Mesh;
-  public tri?: Vector3;
-  public bary?: Vector3;
+  normal: Vector3 = new Vector3(0, 1, 0);
+  surface?: string;
+  mesh?: Mesh;
+  tri?: Vector3;
+  bary?: Vector3;
   private initialized = false;
   private referenceCount = 1;
   private pivot = document.createElement('div');
@@ -120,8 +120,9 @@ export class Hotspot extends CSS2DObject {
    * as the data-position attribute.
    */
   updatePosition(position?: string) {
-    if (position == null)
+    if (position == null) {
       return;
+    }
     const positionNodes = parseExpressions(position)[0].terms;
     for (let i = 0; i < 3; ++i) {
       this.position.setComponent(
@@ -135,8 +136,9 @@ export class Hotspot extends CSS2DObject {
    * data-normal attribute.
    */
   updateNormal(normal?: string) {
-    if (normal == null)
+    if (normal == null) {
       return;
+    }
     const normalNodes = parseExpressions(normal)[0].terms;
     for (let i = 0; i < 3; ++i) {
       this.normal.setComponent(i, (normalNodes[i] as NumberNode).number);

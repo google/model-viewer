@@ -39,18 +39,20 @@
   },
   "homepage": "https://github.com/google/model-viewer#readme",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.26.1",
-    "@typescript-eslint/parser": "^8.26.1",
+    "@types/ua-parser-js": "^0.7.39",
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
+    "@typescript-eslint/parser": "^8.35.1",
     "clang-format": "^1.8.0",
-    "eslint": "^9.22.0",
+    "eslint": "^9.30.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-mocha": "^10.5.0",
-    "eslint-plugin-wc": "^2.2.1",
+    "eslint-plugin-mocha": "^11.1.0",
+    "eslint-plugin-wc": "^3.0.1",
     "http-server": "^14.1.1",
     "husky": "^9.1.7",
-    "typescript": "5.8.2"
+    "typescript": "5.8.3"
   },
   "dependencies": {
-    "puppeteer": "^24.4.0"
+    "puppeteer": "^24.11.1",
+    "ua-parser-js": "^2.0.4"
   }
 }

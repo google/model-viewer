@@ -105,6 +105,7 @@ suite('Animation', () => {
           expect(animationIsPlaying(element)).to.be.false;
         });
 
+        // eslint-disable-next-line mocha/no-pending-tests
         test.skip('has a current time close to the delay', () => {
           expect(element.currentTime)
               .to.be.closeTo(delaySeconds, TOLERANCE_SEC);
@@ -130,6 +131,7 @@ suite('Animation', () => {
             expect(element.duration).to.be.greaterThan(0);
           });
 
+          // eslint-disable-next-line mocha/no-pending-tests
           test.skip('has a current time close to the delay', () => {
             expect(element.currentTime)
                 .to.be.closeTo(delaySeconds, TOLERANCE_SEC);
@@ -147,6 +149,7 @@ suite('Animation', () => {
         await animationsPlay;
       });
 
+      // eslint-disable-next-line mocha/no-pending-tests
       test.skip('plays forward, backward, and stops', async () => {
         await timePasses(element.duration * 0.8 * 1000);
         expect(animationIsPlaying(element), 'failed to start playing!')

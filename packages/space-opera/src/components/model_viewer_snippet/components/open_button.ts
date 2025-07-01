@@ -65,8 +65,9 @@ export class OpenModal extends ConnectedLitElement {
 
   async handleSubmitSnippet(value?: string) {
     const textArea = this.snippetViewer.snippet;
-    if (!textArea)
+    if (!textArea) {
       return;
+    }
     this.errors = [];
     let inputText: string = '';
     if (value === undefined) {

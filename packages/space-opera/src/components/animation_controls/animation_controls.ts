@@ -21,7 +21,7 @@ import '../shared/checkbox/checkbox.js';
 import '@polymer/paper-item';
 
 import {html} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
 import {State} from '../../types.js';

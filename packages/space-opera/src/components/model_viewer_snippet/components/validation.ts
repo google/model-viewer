@@ -169,7 +169,7 @@ export class Validation extends ConnectedLitElement {
 
     if (originalGltf != null && gltfUrl != null &&
         this.originalGltf !== originalGltf) {
-      if (this.severityTitle = 'Converted') {
+      if (this.severityTitle === 'Converted') {
         URL.revokeObjectURL(this.gltfUrl!);
       }
 
@@ -233,7 +233,7 @@ export class Validation extends ConnectedLitElement {
       this.severityColor = '#8bc34a';
       this.severityTitle = 'Converted';
     }
-    if (!!this.report.info?.extensionsUsed?.find(
+    if (this.report.info?.extensionsUsed?.find(
             (e) => e == 'KHR_materials_pbrSpecularGlossiness')) {
       this.severityColor = '#f9a825';
       this.severityTitle = 'Converting';

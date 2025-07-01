@@ -94,14 +94,14 @@ export class Renderer extends
     }
   }
 
-  public threeRenderer!: WebGLRenderer;
-  public canvas3D: HTMLCanvasElement;
-  public textureUtils: TextureUtils|null;
-  public arRenderer: ARRenderer;
-  public loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
-  public width = 0;
-  public height = 0;
-  public dpr = 1;
+  threeRenderer!: WebGLRenderer;
+  canvas3D: HTMLCanvasElement;
+  textureUtils: TextureUtils|null;
+  arRenderer: ARRenderer;
+  loader = new CachingGLTFLoader(ModelViewerGLTFInstance);
+  width = 0;
+  height = 0;
+  dpr = 1;
 
   private scenes: Set<ModelScene> = new Set();
   private multipleScenesVisible = false;

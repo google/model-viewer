@@ -16,7 +16,7 @@
  */
 
 import {html} from 'lit';
-import {customElement, state, property, query} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
@@ -42,6 +42,7 @@ export class MobileModal extends ConnectedLitElement {
 
   open() {
     if (this.isNewQRCode) {
+      // eslint-disable-next-line no-new
       new QRious({element: this.canvasQR, value: this.viewableSite, size: 200});
       this.isNewQRCode = false
     }

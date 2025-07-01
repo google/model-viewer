@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-import { ReactiveElement } from 'lit';
-import { property } from 'lit/decorators.js';
-import { BlendFunction } from 'postprocessing';
-import { Constructor, clampNormal, validateLiteralType } from '../../utilities.js';
-import { IEffectBaseMixin } from './effect-base.js';
+import {ReactiveElement} from 'lit';
+import {property} from 'lit/decorators.js';
+import {BlendFunction} from 'postprocessing';
+
+import {clampNormal, Constructor, validateLiteralType} from '../../utilities.js';
+
+import {IEffectBaseMixin} from './effect-base.js';
 
 export const $setDefaultProperties = Symbol('setDefaultProperties');
 
@@ -30,56 +32,63 @@ export interface IBlendModeMixin {
   [$setDefaultProperties](): void;
 }
 
-export const BlendModeMixin = <T extends Constructor<IEffectBaseMixin & ReactiveElement>>(
-  EffectClass: T
-): Constructor<IBlendModeMixin> & T => {
-  class BlendEffectElement extends EffectClass {
-    /**
-     * The function to use to blend the effect with the base render.
-     */
-    @property({ type: String, attribute: 'blend-mode', reflect: true })
-    blendMode: 'DEFAULT' | BlendMode = 'DEFAULT';
+export const BlendModeMixin =
+    <T extends Constructor<IEffectBaseMixin&ReactiveElement>>(
+        EffectClass: T): Constructor<IBlendModeMixin>&T => {
+      class BlendEffectElement extends EffectClass {
+        /**
+         * The function to use to blend the effect with the base render.
+         */
+        @property({type: String, attribute: 'blend-mode', reflect: true})
+        blendMode: 'DEFAULT'|BlendMode = 'DEFAULT';
 
-    /**
-     * The opacity of the effect that will be blended with the base render.
-     */
-    @property({ type: Number, attribute: 'opacity', reflect: true })
-    opacity: number = 1;
+        /**
+         * The opacity of the effect that will be blended with the base render.
+         */
+        @property({type: Number, attribute: 'opacity', reflect: true})
+        opacity: number = 1;
 
-    connectedCallback() {
-      super.connectedCallback && super.connectedCallback();
-      this[$setDefaultProperties]();
-    }
-
-    updated(changedProperties: Map<string | number | symbol, any>) {
-      super.updated(changedProperties);
-      if (changedProperties.has('blendMode') || changedProperties.has('opacity')) {
-        this.opacity = clampNormal(this.opacity);
-        this.blendMode = this.blendMode.toUpperCase() as BlendMode;
-        this.effects.forEach((effect) => {
-          if (this.blendMode === 'DEFAULT') {
-            if (effect.blendMode.defaultBlendFunction === undefined) throw new Error(`${effect.name} has no default blend function`);
-            effect.blendMode.blendFunction = effect.blendMode.defaultBlendFunction;
-          } else {
-            validateLiteralType(BLEND_MODES, this.blendMode);
-            effect.blendMode.blendFunction = BlendFunction[this.blendMode];
-          }
-          effect.disabled = this.blendMode === 'SKIP';
-          effect.blendMode.setOpacity(this.opacity);
-        });
-        // Recreate EffectPasses if the new or old value was 'skip'
-        if (this.blendMode === 'SKIP' || changedProperties.get('blendMode') === 'SKIP') {
-          this.effectComposer.updateEffects();
+        connectedCallback() {
+          super.connectedCallback && super.connectedCallback();
+          this[$setDefaultProperties]();
         }
-        this.effectComposer.queueRender();
-      }
-    }
 
-    protected [$setDefaultProperties]() {
-      this.effects.forEach((effect) => {
-        effect.blendMode.defaultBlendFunction = effect.blendMode.blendFunction;
-      });
-    }
-  }
-  return BlendEffectElement as Constructor<IBlendModeMixin> & T;
-};
+        updated(changedProperties: Map<string|number|symbol, any>) {
+          super.updated(changedProperties);
+          if (changedProperties.has('blendMode') ||
+              changedProperties.has('opacity')) {
+            this.opacity = clampNormal(this.opacity);
+            this.blendMode = this.blendMode.toUpperCase() as BlendMode;
+            this.effects.forEach((effect) => {
+              if (this.blendMode === 'DEFAULT') {
+                if (effect.blendMode.defaultBlendFunction === undefined) {
+                  throw new Error(
+                      `${effect.name} has no default blend function`);
+                }
+                effect.blendMode.blendFunction =
+                    effect.blendMode.defaultBlendFunction;
+              } else {
+                validateLiteralType(BLEND_MODES, this.blendMode);
+                effect.blendMode.blendFunction = BlendFunction[this.blendMode];
+              }
+              effect.disabled = this.blendMode === 'SKIP';
+              effect.blendMode.setOpacity(this.opacity);
+            });
+            // Recreate EffectPasses if the new or old value was 'skip'
+            if (this.blendMode === 'SKIP' ||
+                changedProperties.get('blendMode') === 'SKIP') {
+              this.effectComposer.updateEffects();
+            }
+            this.effectComposer.queueRender();
+          }
+        }
+
+        protected[$setDefaultProperties]() {
+          this.effects.forEach((effect) => {
+            effect.blendMode.defaultBlendFunction =
+                effect.blendMode.blendFunction;
+          });
+        }
+      }
+      return BlendEffectElement as Constructor<IBlendModeMixin>& T;
+    };

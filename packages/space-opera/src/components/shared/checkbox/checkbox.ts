@@ -16,8 +16,8 @@
  */
 
 import '@material/mwc-checkbox';
-import {Checkbox} from '@material/mwc-checkbox';
 
+import {Checkbox} from '@material/mwc-checkbox';
 import {html, LitElement} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 

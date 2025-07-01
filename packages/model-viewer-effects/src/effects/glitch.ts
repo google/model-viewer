@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-import { property } from 'lit/decorators.js';
-import { ChromaticAberrationEffect, GlitchEffect, GlitchMode as Mode } from 'postprocessing';
-import { Vector2 } from 'three';
-import { clamp, validateLiteralType } from '../utilities.js';
-import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
+import {property} from 'lit/decorators.js';
+import {ChromaticAberrationEffect, GlitchEffect, GlitchMode as Mode} from 'postprocessing';
+import {Vector2} from 'three';
+
+import {clamp, validateLiteralType} from '../utilities.js';
+
+import {$effectOptions, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
 
 
 export const GLITCH_MODES = ['sporadic', 'constant'] as const;
@@ -31,20 +33,21 @@ export class MVGlitchEffect extends MVEffectBase {
   /**
    * Value in the range of (0, 1).
    */
-  @property({ type: Number, attribute: 'strength', reflect: true })
+  @property({type: Number, attribute: 'strength', reflect: true})
   strength: number = 0.5;
 
   /**
    * `sporadic` | `constant`
    * @default 'sporadic'
    */
-  @property({ type: String, attribute: 'mode', reflect: true })
+  @property({type: String, attribute: 'mode', reflect: true})
   mode: GlitchMode = 'sporadic';
 
   constructor() {
     super();
     const chromaticAberrationEffect = new ChromaticAberrationEffect();
-    const glitchEffect = new GlitchEffect(this[$effectOptions](chromaticAberrationEffect));
+    const glitchEffect =
+        new GlitchEffect(this[$effectOptions](chromaticAberrationEffect));
     this.effects = [glitchEffect, chromaticAberrationEffect];
     this.effects[1].requireDirtyRender = true;
   }
@@ -54,7 +57,7 @@ export class MVGlitchEffect extends MVEffectBase {
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string | number | symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
     if (changedProperties.has('mode') || changedProperties.has('strength')) {
       this[$updateProperties]();
@@ -66,15 +69,17 @@ export class MVGlitchEffect extends MVEffectBase {
     this.mode = this.mode.toLowerCase() as GlitchMode;
     try {
       validateLiteralType(GLITCH_MODES, this.mode);
-    } catch(e) {
-      console.error((e as Error).message +  + "\nmode defaulting to 'sporadic'")
+    } catch (e) {
+      console.error((e as Error).message + +'\nmode defaulting to \'sporadic\'')
     }
     if (this.strength == 0) {
       (this.effects[0] as GlitchEffect).columns = 0;
-      (this.effects[0] as GlitchEffect).mode = this.mode === 'constant' ? Mode.CONSTANT_MILD : Mode.SPORADIC;
+      (this.effects[0] as GlitchEffect).mode =
+          this.mode === 'constant' ? Mode.CONSTANT_MILD : Mode.SPORADIC;
     } else {
       (this.effects[0] as GlitchEffect).columns = 0.06;
-      (this.effects[0] as GlitchEffect).mode = this.mode === 'constant' ? Mode.CONSTANT_WILD : Mode.SPORADIC;
+      (this.effects[0] as GlitchEffect).mode =
+          this.mode === 'constant' ? Mode.CONSTANT_WILD : Mode.SPORADIC;
     }
     (this.effects[0] as GlitchEffect).maxStrength = this.strength;
     (this.effects[0] as GlitchEffect).ratio = 1 - this.strength;

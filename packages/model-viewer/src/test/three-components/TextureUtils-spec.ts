@@ -56,14 +56,14 @@ suite('TextureUtils', () => {
 
   suite('load', () => {
     test('loads a valid texture from URL', async () => {
-      let texture = await textureUtils.loadEquirect(EQUI_URL);
+      const texture = await textureUtils.loadEquirect(EQUI_URL);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(EQUI_URL);
       expect(texture.mapping).to.be.eq(EquirectangularReflectionMapping);
     });
     test('loads a valid HDR texture from URL', async () => {
-      let texture = await textureUtils.loadEquirect(HDR_EQUI_URL);
+      const texture = await textureUtils.loadEquirect(HDR_EQUI_URL);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(HDR_EQUI_URL);

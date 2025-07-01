@@ -21,7 +21,7 @@ const [candidateResultsDirectory, goldenResultsDirectory] =
 
 const warn = (message: string) => console.warn(`🚨 ${message}`);
 const exit = () => {
-  console.log(`📋 Fidelity result comparison concluded`);
+  console.log('📋 Fidelity result comparison concluded');
   process.exit(0);
 };
 
