@@ -91,7 +91,7 @@
     "@web/test-runner-playwright": "^0.11.1",
     "chai": "^5.2.0",
     "@rollup/plugin-swc": "^0.4.0",
-    "@swc/core": "^1.12.7", 
+    "@swc/core": "^1.12.9", 
     "focus-visible": "^5.2.1",
     "http-server": "^14.1.1",
     "mocha": "^11.7.1",

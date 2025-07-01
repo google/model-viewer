@@ -36,7 +36,7 @@
     "rollup": "^4.44.1",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-swc": "^0.4.0",
-    "@swc/core": "^1.12.7",
+    "@swc/core": "^1.12.9",
     "@rollup/plugin-replace": "^6.0.2",
     "typescript": "5.8.3"
   }

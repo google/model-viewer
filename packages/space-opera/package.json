@@ -56,7 +56,7 @@
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-swc": "^0.4.0",
-    "@swc/core": "^1.12.7",
+    "@swc/core": "^1.12.9",
     "@types/js-beautify": "^1.14.3",
     "@types/remote-redux-devtools": "^0.5.8",
     "@web/test-runner": "^0.20.2",

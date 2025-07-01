@@ -96,7 +96,7 @@
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-swc": "^0.4.0",
     "@rollup/plugin-terser": "^0.4.4",
-    "@swc/core": "^1.12.7",
+    "@swc/core": "^1.12.9",
     "@types/mocha": "^10.0.10",
     "@types/pngjs": "^6.0.5",
     "@types/three": "^0.177.0",

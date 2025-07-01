@@ -40,8 +40,8 @@
   "homepage": "https://github.com/google/model-viewer#readme",
   "devDependencies": {
     "@types/ua-parser-js": "^0.7.39",
-    "@typescript-eslint/eslint-plugin": "^8.35.0",
-    "@typescript-eslint/parser": "^8.35.0",
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
+    "@typescript-eslint/parser": "^8.35.1",
     "clang-format": "^1.8.0",
     "eslint": "^9.30.0",
     "eslint-config-google": "^0.14.0",
