@@ -117,11 +117,24 @@ export class XRMenuPanel extends Object3D {
       return hitResult;
   }
 
-  toggleScaleMode() {
+  handleScaleToggle(
+    worldSpaceInitialPlacementDone: boolean,
+    initialModelScale: number,
+    minScale: number,
+    maxScale: number
+  ): number | null {
+    if (!worldSpaceInitialPlacementDone) {
+      return null;
+    }
+    
     this.isActualSize = !this.isActualSize;
     const newLabel = this.isActualSize ? '1:1' : '@';
     this.updateScaleModeButtonLabel(newLabel);
-    return this.isActualSize;
+    
+    const targetScale = this.isActualSize ? 1.0 : initialModelScale;
+    const goalScale = Math.max(minScale, Math.min(maxScale, targetScale));
+    
+    return goalScale;
   }
 
   private updateScaleModeButtonLabel(label: string) {

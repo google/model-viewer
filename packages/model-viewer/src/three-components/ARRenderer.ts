@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Box3, BufferGeometry, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace, Object3D} from 'three';
+import {Box3, BufferGeometry, Camera, Event as ThreeEvent, EventDispatcher, Line, Matrix4, PerspectiveCamera, Quaternion, Vector3, WebGLRenderer, XRControllerEventType, XRTargetRaySpace, Object3D} from 'three';
 import {XREstimatedLight} from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 import {CameraChangeDetails, ControlsInterface} from '../features/controls.js';
@@ -54,6 +54,19 @@ const MAX_LINE_LENGTH = 5;
 const AXIS_Y = new Vector3(0, 1, 0);
 // Webxr rotation sensitivity
 const ROTATION_SENSIVITY = 0.3;
+
+// World-space AR automatic positioning constants (similar to FrameModel approach in SVXR)
+const MIN_WORLD_SPACE_DISTANCE = 1.5; // Minimum distance from camera (meters)
+const VIEW_DROP_DEGREES = 15; // Angle down from camera center for optimal viewing
+const VIEW_RATIO = 0.3; // Ratio of viewport to use for model sizing
+const MIN_MODEL_SIZE = 0.01; // Minimum model size to prevent division by zero
+const PLACEMENT_BOX_EXTRA_PADDING = 0.15; // Extra padding for model-viewer
+
+// SVXR-like constants for scale limits
+const MAX_MODEL_SIZE = 70.0;
+const MODEL_SIZE_EPSILON = 0.001;
+
+const FOOTPRINT__INTERSECT_THREASHHOLD = 0.2;
 
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
@@ -158,6 +171,14 @@ export class ARRenderer extends EventDispatcher<
   private rollDamper = new Damper();
   private scaleDamper = new Damper();
   private wasTwoFingering = false;
+
+  // Track if initial automatic placement has been done for world-space mode
+  private worldSpaceInitialPlacementDone = false;
+
+  // Scale toggle state for world-space mode
+  private initialModelScale = 1.0;
+  private minScale = 1.0;
+  private maxScale = 1.0;
 
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
 
@@ -279,6 +300,7 @@ export class ARRenderer extends EventDispatcher<
 
     scene.element.addEventListener('load', this.onUpdateScene);
 
+    // Create hit test source for all modes (will be used differently based on mode and state)
     const radians = HIT_ANGLE_DEG * Math.PI / 180;
     const ray = this.placeOnWall === true ?
         undefined :
@@ -382,7 +404,15 @@ export class ARRenderer extends EventDispatcher<
 
     const scaleModeIntersect = this.menuPanel!.scaleModeButtonControllerIntersection(scene, controller);
     if (scaleModeIntersect != null) {
-      this.menuPanel!.toggleScaleMode();
+      const goalScale = this.menuPanel!.handleScaleToggle(
+        this.worldSpaceInitialPlacementDone,
+        this.initialModelScale,
+        this.minScale,
+        this.maxScale
+      );
+      if (goalScale !== null) {
+        this.goalScale = goalScale;
+      }
       return;
     }
 
@@ -394,14 +424,14 @@ export class ARRenderer extends EventDispatcher<
       controller);
     if (intersection!=null){
       const bbox = new Box3().setFromObject(scene.pivot);
-      const footprintY = bbox.min.y + 0.2; // Small threshold above base
+      const footprintY = bbox.min.y + FOOTPRINT__INTERSECT_THREASHHOLD; // Small threshold above base
 
       // Check if the ray intersection is near the footprint
       const isFootprint = intersection.point.y <= footprintY;
       if (isFootprint) {
         if (this.selectedXRController != null) {
           this.selectedXRController.userData.line.visible = false;
-          if (scene.canScale) {
+          if (scene.canScale && (this.xrMode !== XRMode.WORLD_SPACE || this.worldSpaceInitialPlacementDone)) {
             this.isTwoHandInteraction = true;
             this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
             this.scaleLine.visible = true;
@@ -419,7 +449,7 @@ export class ARRenderer extends EventDispatcher<
         }
 
         if (this.xrController1?.userData.isSelected && this.xrController2?.userData.isSelected) {
-          if (scene.canScale) {
+          if (scene.canScale && (this.xrMode !== XRMode.WORLD_SPACE || this.worldSpaceInitialPlacementDone)) {
             this.isTwoHandInteraction = true;
             this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
             this.scaleLine.visible = true;
@@ -461,6 +491,12 @@ export class ARRenderer extends EventDispatcher<
         scene.pivot.matrix.elements[8], scene.pivot.matrix.elements[10]);
     this.goalPosition.x = scene.pivot.position.x;
     this.goalPosition.z = scene.pivot.position.z;
+    
+    // For world-space mode after initial placement, preserve Y position
+    if (this.xrMode === XRMode.WORLD_SPACE && this.worldSpaceInitialPlacementDone) {
+      console.log('[onControllerSelectEnd] Preserving goalPosition.y as:', scene.pivot.position.y);
+      this.goalPosition.y = scene.pivot.position.y;
+    }
 
     const menuPanel = this.menuPanel;
     menuPanel!.show = true;
@@ -648,6 +684,7 @@ export class ARRenderer extends EventDispatcher<
     this.frame = null;
     this.inputSource = null;
     this.overlay = null;
+    this.worldSpaceInitialPlacementDone = false;
 
     if (this.resolveCleanup != null) {
       this.resolveCleanup!();
@@ -704,15 +741,42 @@ export class ARRenderer extends EventDispatcher<
     scene.yaw = Math.atan2(-cameraDirection.x, -cameraDirection.z) - theta;
     this.goalYaw = scene.yaw;
 
-    const radius = Math.max(1, 2 * scene.boundingSphere.radius);
-    position.copy(xrCamera.position)
-        .add(cameraDirection.multiplyScalar(radius));
+    // Use different placement logic for world-space vs screen-space
+    if (this.xrMode === XRMode.WORLD_SPACE && !this.worldSpaceInitialPlacementDone) {
+      // Use automatic optimal placement for world-space AR only on first session
+      const {position: optimalPosition, scale: optimalScale} = 
+          this.calculateWorldSpaceOptimalPlacement(scene, xrCamera);
+      
+      this.goalPosition.copy(optimalPosition);
+      this.goalScale = optimalScale;
+      
+      // Store the initial scale for toggle functionality
+      this.initialModelScale = optimalScale;
+      
+      // Set initial position and scale immediately for world-space
+      position.copy(optimalPosition);
+      pivot.scale.set(optimalScale, optimalScale, optimalScale);
+      
+      // Mark that initial placement is done
+      this.worldSpaceInitialPlacementDone = true;
+      
+      // Calculate scale limits for world-space mode (SVXR logic)
+      this.calculateWorldSpaceScaleLimits(scene);
+      
+      // Enable user interaction after initial placement
+      this.enableWorldSpaceUserInteraction();
+    } else if (this.xrMode === XRMode.SCREEN_SPACE) {
+      // Use original placement logic for screen-space AR
+      const radius = Math.max(1, 2 * scene.boundingSphere.radius);
+      position.copy(xrCamera.position)
+          .add(cameraDirection.multiplyScalar(radius));
 
-    this.updateTarget();
-    const target = scene.getTarget();
-    position.add(target).sub(this.oldTarget);
+      this.updateTarget();
+      const target = scene.getTarget();
+      position.add(target).sub(this.oldTarget);
 
-    this.goalPosition.copy(position);
+      this.goalPosition.copy(position);
+    }
 
     scene.setHotspotsVisibility(true);
 
@@ -761,6 +825,13 @@ export class ARRenderer extends EventDispatcher<
   }
 
   public moveToFloor(frame: XRFrame) {
+    // Skip hit testing for world-space mode only during initial placement
+    if (this.xrMode === XRMode.WORLD_SPACE && !this.worldSpaceInitialPlacementDone) {
+      this.placementBox!.show = false;
+      this.dispatchEvent({type: 'status', status: ARStatus.OBJECT_PLACED});
+      return;
+    }
+
     const hitSource = this.initialHitSource;
     if (hitSource == null) {
       return;
@@ -825,7 +896,7 @@ export class ARRenderer extends EventDispatcher<
       if (this.firstRatio === 0) {
         this.firstRatio = separation / scene.pivot.scale.x;
       }
-      if (scene.canScale) {
+      if (scene.canScale && (this.xrMode !== XRMode.WORLD_SPACE || this.worldSpaceInitialPlacementDone)) {
         this.setScale(separation);
       }
       return;
@@ -863,8 +934,13 @@ export class ARRenderer extends EventDispatcher<
   }
 
   private setScale(separation: number) {
-    const scale = separation / this.firstRatio;
-    this.goalScale = (Math.abs(scale - 1) < SCALE_SNAP) ? 1 : scale;
+    let scale = separation / this.firstRatio;
+    scale = (Math.abs(scale - 1) < SCALE_SNAP) ? 1 : scale;
+    // Clamp to min/max for world-space mode after initial placement
+    if (this.xrMode === XRMode.WORLD_SPACE && this.worldSpaceInitialPlacementDone) {
+      scale = Math.max(this.minScale, Math.min(this.maxScale, scale));
+    }
+    this.goalScale = scale;
   }
 
   private processInput(frame: XRFrame) {
@@ -892,7 +968,7 @@ export class ARRenderer extends EventDispatcher<
       const {separation, deltaYaw, angle} = this.fingerPolar(fingers);
       this.goalYaw += deltaYaw;
       this.lastAngle = angle;
-      if (scene.canScale) {
+      if (scene.canScale && (this.xrMode !== XRMode.WORLD_SPACE || this.worldSpaceInitialPlacementDone)) {
         this.setScale(separation);
       }
       this.isTwoHandInteraction = true;
@@ -934,7 +1010,13 @@ export class ARRenderer extends EventDispatcher<
 
         this.goalPosition.sub(this.lastDragPosition);
 
-        if (this.placeOnWall === false) {
+        // For world-space mode after initial placement, allow full Y-axis control
+        if (this.xrMode === XRMode.WORLD_SPACE && this.worldSpaceInitialPlacementDone) {
+          // Use the hit point directly without floor constraints
+          console.log('[processInput] Setting goalPosition.y to hit.y:', hit.y);
+          this.goalPosition.add(hit);
+        } else if (this.placeOnWall === false) {
+          // Original logic for screen-space or initial world-space placement
           const offset = hit.y - this.lastDragPosition.y;
           // When a lower floor is found, keep the model at the same height, but
           // drop the placement box to the floor. The model falls on select end.
@@ -947,9 +1029,11 @@ export class ARRenderer extends EventDispatcher<
             cameraPosition.multiplyScalar(alpha);
             hit.multiplyScalar(1 - alpha).add(cameraPosition);
           }
+          this.goalPosition.add(hit);
+        } else {
+          this.goalPosition.add(hit);
         }
 
-        this.goalPosition.add(hit);
         this.lastDragPosition.copy(hit);
       });
     }
@@ -965,6 +1049,11 @@ export class ARRenderer extends EventDispatcher<
   }
 
   private handleScalingInXR(scene: ModelScene, delta: number) {
+    // Allow manual scaling for world-space mode after initial placement
+    if (this.xrMode === XRMode.WORLD_SPACE && !this.worldSpaceInitialPlacementDone) {
+      return;
+    }
+    
     if (this.xrController1 && this.xrController2 && this.isTwoHandInteraction) {
       const dist = this.controllerSeparation();
       this.setScale(dist);
@@ -1008,7 +1097,20 @@ export class ARRenderer extends EventDispatcher<
       if (this.xrMode !== XRMode.SCREEN_SPACE && goal.equals(position)) {
         scene.setShadowIntensity(AR_SHADOW_INTENSITY);
       }
+      
+      // For world-space mode after initial placement, don't constrain Y position
+      if (this.xrMode === XRMode.WORLD_SPACE && this.worldSpaceInitialPlacementDone) {
+        // Allow full Y-axis movement without floor constraints
+        scene.setShadowIntensity(AR_SHADOW_INTENSITY);
+      }
     }
+    
+    // Handle automatic scaling for world-space mode only during initial placement
+    if (this.xrMode === XRMode.WORLD_SPACE && !this.worldSpaceInitialPlacementDone && this.goalScale !== pivot.scale.x) {
+      const newScale = this.scaleDamper.update(pivot.scale.x, this.goalScale, delta, 1);
+      pivot.scale.set(newScale, newScale, newScale);
+    }
+    
     scene.updateTarget(delta);
   
     // Return the source so the caller can use it for camera-change events
@@ -1078,8 +1180,28 @@ export class ARRenderer extends EventDispatcher<
     this.placementBox!.show = (over1 || over2) && !this.isTwoHandInteraction;
   }
 
+ 
+
+  /**
+   * Enable user interaction for world-space mode after initial automatic placement
+   */
+  private enableWorldSpaceUserInteraction() {
+    // Show placement box to indicate model can be moved
+    if (this.placementBox) {
+      this.placementBox.show = true;
+    }
+    
+    // Enable shadow to show model is placed
+    if (this.presentedScene) {
+      this.presentedScene.setShadowIntensity(AR_SHADOW_INTENSITY);
+    }
+  }
+
   private handleFirstView(frame: XRFrame, time: number) {
-    this.moveToFloor(frame);
+    // Skip moveToFloor for world-space mode after initial placement to prevent overriding
+    if (this.xrMode !== XRMode.WORLD_SPACE || !this.worldSpaceInitialPlacementDone) {
+      this.moveToFloor(frame);
+    }
     this.processInput(frame);
   
     const delta = time - this.lastTick!;
@@ -1143,5 +1265,84 @@ export class ARRenderer extends EventDispatcher<
 
       this.threeRenderer.render(scene, scene.getCamera());
     }
+  }
+
+  /**
+  * Calculate optimal scale and position for world-space AR presentation
+  * Similar to the SVXR:FrameModel approach for consistent model presentation
+  * 
+  * This method implements automatic model framing for world-space AR sessions:
+  * 1. Calculates optimal viewing distance based on model size and minimum distance
+  * 2. Positions model at a drop angle below camera center for natural viewing
+  * 3. Automatically scales model to fit within viewport constraints
+  * 4. Ensures consistent presentation across different model sizes
+  * 
+  * Note: This automatic placement only happens on the first session start.
+  * After initial placement, users have full control over model position, rotation, and scale.
+  */
+  private calculateWorldSpaceOptimalPlacement(scene: ModelScene, camera: Camera): {position: Vector3, scale: number} {
+    // Get model bounding box half extents
+    const boundingBox = scene.boundingBox;
+    const halfExtent = {
+      x: (boundingBox.max.x - boundingBox.min.x) / 2,
+      y: (boundingBox.max.y - boundingBox.min.y) / 2,
+      z: (boundingBox.max.z - boundingBox.min.z) / 2
+    };
+
+    // Compute view distance (with extra padding for model-viewer)
+    const placementBoxPadding = PLACEMENT_BOX_EXTRA_PADDING;
+    const viewDistance = Math.max(
+      MIN_WORLD_SPACE_DISTANCE + placementBoxPadding,
+      2 * Math.max(halfExtent.x, halfExtent.z) + placementBoxPadding
+    );
+
+    // Compute ideal view position (drop angle below camera center)
+    const dropAngleRad = VIEW_DROP_DEGREES * Math.PI / 180;
+    const idealViewPosition = new Vector3(
+      0,
+      -viewDistance * Math.sin(dropAngleRad),
+      -viewDistance * Math.cos(dropAngleRad)
+    );
+
+    // Transform ideal view position to world space
+    const worldFromCamera = camera.matrixWorld;
+    const idealWorldPosition = idealViewPosition.clone().applyMatrix4(worldFromCamera);
+
+    // Compute turntable and vertical radii
+    const turntableRadius = Math.max(halfExtent.x, halfExtent.z)+ placementBoxPadding;
+    const verticalRadius = halfExtent.y;
+    const turntableRadiusLimit = viewDistance * VIEW_RATIO;
+    const verticalRadiusLimit = viewDistance * VIEW_RATIO;
+
+    // Compute optimal scale
+    const verticalScale = verticalRadiusLimit / Math.max(verticalRadius, MIN_MODEL_SIZE);
+    const turntableScale = turntableRadiusLimit / Math.max(turntableRadius, MIN_MODEL_SIZE);
+    const optimalScale = Math.min(verticalScale, turntableScale);
+
+    // Offset so the model's base sits at the ideal world position
+    // (subtract scaled half height in Y)
+
+    const finalPosition = idealWorldPosition.clone().sub(
+      new Vector3(0, optimalScale * halfExtent.y, 0)
+    );
+
+    return {
+      position: finalPosition,
+      scale: optimalScale
+    };
+  }
+
+  /**
+   * Calculate min/max scale for world-space AR, SVXR-style
+   */
+  private calculateWorldSpaceScaleLimits(scene: ModelScene) {
+    const size = scene.size;
+    const largestDimension = Math.max(size.x, size.y, size.z);
+    const smallestDimension = Math.max(Math.min(size.x, size.y, size.z), MODEL_SIZE_EPSILON);
+    const scaleMin = MIN_MODEL_SIZE / Math.max(largestDimension, MODEL_SIZE_EPSILON);
+    const scaleMax = MAX_MODEL_SIZE / Math.max(smallestDimension, MODEL_SIZE_EPSILON);
+    // Clamp to initial scale if needed
+    this.minScale = Math.min(scaleMin, scaleMax, this.goalScale);
+    this.maxScale = Math.max(scaleMin, scaleMax, this.goalScale);
   }
 }
