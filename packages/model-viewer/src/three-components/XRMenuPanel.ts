@@ -128,7 +128,7 @@ export class XRMenuPanel extends Object3D {
     }
     
     this.isActualSize = !this.isActualSize;
-    const newLabel = this.isActualSize ? '1:1' : '@';
+    const newLabel = this.isActualSize ? '@' : '1:1';
     this.updateScaleModeButtonLabel(newLabel);
     
     const targetScale = this.isActualSize ? 1.0 : initialModelScale;

@@ -66,7 +66,7 @@ const PLACEMENT_BOX_EXTRA_PADDING = 0.15; // Extra padding for model-viewer
 const MAX_MODEL_SIZE = 70.0;
 const MODEL_SIZE_EPSILON = 0.001;
 
-const FOOTPRINT__INTERSECT_THREASHHOLD = 0.2;
+const FOOTPRINT__INTERSECT_THRESHOLD = 0.2;
 
 export type ARStatus =
     'not-presenting'|'session-started'|'object-placed'|'failed';
@@ -181,6 +181,13 @@ export class ARRenderer extends EventDispatcher<
   private maxScale = 1.0;
 
   private onExitWebXRButtonContainerClick = () => this.stopPresenting();
+
+  /**
+   * Check if world-space mode is active and initial placement is complete
+   */
+  private isWorldSpaceReady(): boolean {
+    return this.xrMode === XRMode.WORLD_SPACE && this.worldSpaceInitialPlacementDone;
+  }
 
   constructor(private renderer: Renderer) {
     super();
@@ -424,14 +431,14 @@ export class ARRenderer extends EventDispatcher<
       controller);
     if (intersection!=null){
       const bbox = new Box3().setFromObject(scene.pivot);
-      const footprintY = bbox.min.y + FOOTPRINT__INTERSECT_THREASHHOLD; // Small threshold above base
+      const footprintY = bbox.min.y + FOOTPRINT__INTERSECT_THRESHOLD; // Small threshold above base
 
       // Check if the ray intersection is near the footprint
       const isFootprint = intersection.point.y <= footprintY;
       if (isFootprint) {
         if (this.selectedXRController != null) {
           this.selectedXRController.userData.line.visible = false;
-          if (scene.canScale && (this.xrMode !== XRMode.WORLD_SPACE || this.worldSpaceInitialPlacementDone)) {
+          if (scene.canScale && this.isWorldSpaceReady()) {
             this.isTwoHandInteraction = true;
             this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
             this.scaleLine.visible = true;
@@ -449,7 +456,7 @@ export class ARRenderer extends EventDispatcher<
         }
 
         if (this.xrController1?.userData.isSelected && this.xrController2?.userData.isSelected) {
-          if (scene.canScale && (this.xrMode !== XRMode.WORLD_SPACE || this.worldSpaceInitialPlacementDone)) {
+          if (scene.canScale && this.isWorldSpaceReady()) {
             this.isTwoHandInteraction = true;
             this.firstRatio = this.controllerSeparation() / scene.pivot.scale.x;
             this.scaleLine.visible = true;
@@ -493,8 +500,7 @@ export class ARRenderer extends EventDispatcher<
     this.goalPosition.z = scene.pivot.position.z;
     
     // For world-space mode after initial placement, preserve Y position
-    if (this.xrMode === XRMode.WORLD_SPACE && this.worldSpaceInitialPlacementDone) {
-      console.log('[onControllerSelectEnd] Preserving goalPosition.y as:', scene.pivot.position.y);
+    if (this.isWorldSpaceReady()) {
       this.goalPosition.y = scene.pivot.position.y;
     }
 
@@ -896,7 +902,7 @@ export class ARRenderer extends EventDispatcher<
       if (this.firstRatio === 0) {
         this.firstRatio = separation / scene.pivot.scale.x;
       }
-      if (scene.canScale && (this.xrMode !== XRMode.WORLD_SPACE || this.worldSpaceInitialPlacementDone)) {
+      if (scene.canScale) {
         this.setScale(separation);
       }
       return;
@@ -937,7 +943,7 @@ export class ARRenderer extends EventDispatcher<
     let scale = separation / this.firstRatio;
     scale = (Math.abs(scale - 1) < SCALE_SNAP) ? 1 : scale;
     // Clamp to min/max for world-space mode after initial placement
-    if (this.xrMode === XRMode.WORLD_SPACE && this.worldSpaceInitialPlacementDone) {
+    if (this.isWorldSpaceReady()) {
       scale = Math.max(this.minScale, Math.min(this.maxScale, scale));
     }
     this.goalScale = scale;
@@ -968,7 +974,7 @@ export class ARRenderer extends EventDispatcher<
       const {separation, deltaYaw, angle} = this.fingerPolar(fingers);
       this.goalYaw += deltaYaw;
       this.lastAngle = angle;
-      if (scene.canScale && (this.xrMode !== XRMode.WORLD_SPACE || this.worldSpaceInitialPlacementDone)) {
+      if (scene.canScale) {
         this.setScale(separation);
       }
       this.isTwoHandInteraction = true;
@@ -1011,7 +1017,7 @@ export class ARRenderer extends EventDispatcher<
         this.goalPosition.sub(this.lastDragPosition);
 
         // For world-space mode after initial placement, allow full Y-axis control
-        if (this.xrMode === XRMode.WORLD_SPACE && this.worldSpaceInitialPlacementDone) {
+        if (this.isWorldSpaceReady()) {
           // Use the hit point directly without floor constraints
           console.log('[processInput] Setting goalPosition.y to hit.y:', hit.y);
           this.goalPosition.add(hit);
@@ -1099,7 +1105,7 @@ export class ARRenderer extends EventDispatcher<
       }
       
       // For world-space mode after initial placement, don't constrain Y position
-      if (this.xrMode === XRMode.WORLD_SPACE && this.worldSpaceInitialPlacementDone) {
+      if (this.isWorldSpaceReady()) {
         // Allow full Y-axis movement without floor constraints
         scene.setShadowIntensity(AR_SHADOW_INTENSITY);
       }
