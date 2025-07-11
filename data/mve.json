@@ -1,0 +1,400 @@
+[
+  {
+    "Title": "EffectComposer",
+    "htmlName": "effectcomposer",
+    "Description": "The base component for managing Post Processing effects on a &lt;model-viewer&gt; element.",
+    "Attributes": [
+      {
+        "name": "renderMode",
+        "htmlName": "renderMode",
+        "description": "This property sets the EffectComposer frame-buffer type to either UnsignedByteType if set to 'performance', or HalfFloatType if set to 'quality'. By setting this to 'quality', the effects under this EffectComposer will have access to high-precision buffers that are not limited to regular sRGB buffers, which have values clamped to [0.0, 1.0]. This can lead to noticeable improvements in color accuracy when used with the &lt;color-grade-effect&gt;, and reduce banding in dark scenes, especially with the &lt;bloom-effect&gt;.",
+        "links": [
+          "<a href=\"../examples/postprocessing#setup\">Related examples</a>"
+        ],
+        "default": {
+          "default": "performance",
+          "options": "performance, quality"
+        }
+      },
+      {
+        "name": "msaa",
+        "htmlName": "msaa",
+        "description": "This property controls the number of samples used for the default Multi-Sample Anti Aliasing. Set this to any factor of 2 to enable - it is set to 0 by default (disabled). This is best for effect workflows that don't use the WebGLRenderer's depth buffer, such as &lt;color-grade-effect&gt;, &lt;glitch-effect&gt;, etc. <br>This antialiasing solution may not work well with &lt;selective-bloom-effect&gt;, &lt;ssao-effect&gt;, &lt;outline-effect&gt;, where it may introduce visual artifacting. If you use these effects you may prefer to use the &lt;smaa-effect&gt;.",
+        "links": [
+          "<a href=\"../examples/postprocessing#setup\">Related examples</a>"
+        ],
+        "default": {
+          "default": "0",
+          "options": "Any factor of 2"
+        }
+      }
+    ],
+    "Properties": [
+      {
+        "name": "modelViewerElement",
+        "htmlName": "modelViewerElement",
+        "description": "This property is read-only. It return a reference to the parent &lt;model-viewer&gt; element if defined, otherwise it will throw an error."
+      },
+      {
+        "name": "selection",
+        "htmlName": "selection",
+        "description": "This read-only property provides access to a selection Set of all 3D objects in the scene of the &lt;model-viewer&gt; element. Selective effects such as &lt;outline-effect&gt; and &lt;selective-bloom-effect&gt; use this as a default selection.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#selective-effects\"><span class='attribute'>selection</span> example</a>"
+        ]
+      },
+      {
+        "name": "normalBuffer",
+        "htmlName": "normalBuffer",
+        "description": "This read-only property provides access to the built-in normalPass texture provided by the &lt;effect-composer&gt; for you to use with a custom effect that requires a normal texture."
+      },
+      {
+        "name": "userPasses",
+        "htmlName": "userPasses",
+        "description": "This read-only property returns a list of custom Passes added using the <code>addPass()</code> method."
+      }
+    ],
+    "Methods": [
+      {
+        "name": "addPass(pass: Pass , requireNormals?: boolean, requireDirtyRender?: boolean)",
+        "htmlName": "addPass",
+        "description": "Add a custom Pass implemented according to the <a href='https://github.com/pmndrs/postprocessing/wiki/Custom-Passes'>Postprocessing Wiki</a>. This method automatically sets the <code>mainScene</code> and <code>mainCamera</code> of the pass, which will be prepended before all other web-component effects. If your Pass uses the <code>normalBuffer</code> anywhere in its code, you must specify so by enabling <code>requireNormals</code>. Enable <code>requireDirtyRender</code> if the effect requires a render every frame, such as the &lt;glitch-effect&gt; for example. Significant performance impact from enabling this.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#custom-effects\"><span class='attribute'>addPass</span> example</a>"
+        ]
+      },
+      {
+        "name": "removePass(pass: Pass, dispose: boolean = true)",
+        "htmlName": "removePass",
+        "description": "Removes and optionally disposes of a pass added with <code>addPass()</code>. <code>dispose</code> is set to <code>true</code> by default, if you would like to reuse the pass somewhere else disable this."
+      },
+      {
+        "name": "queueRender()",
+        "htmlName": "queueRender",
+        "description": "Request a render-frame manually. The &lt;effect-composer&gt; and &lt;model-viewer&gt; However if you change any properties in your custom Passes and Effects the result might not re-render until the model or camera is moved by the user, so you should call this after updating any custom pass.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#custom-effects\"><span class='attribute'>queueRender</span> example</a>"
+        ]
+      }
+    ],
+    "Events": [
+      {
+        "name": "update-selection",
+        "htmlName": "update-selection",
+        "description": "This event is triggered whenever a new model is loaded by the parent &lt;model-viewer&gt; element, and the <code>selection</code> is updated with the new model components. Use this event make sure your custom selection is updated if a model changes.",
+        "links": [
+          "<a href=\"../examples/postprocessing/#selective-effects\"><span class='attribute'>selection</span> example</a>"
+        ]
+      }
+    ]
+  },
+  {
+    "Title": "BloomEffect",
+    "htmlName": "bloom",
+    "Description": "This effect creates a glowing light-bleed effect around bright objects.",
+    "Attributes": [
+      {
+        "name": "strength",
+        "htmlName": "strength",
+        "description": "The strength of the bloom effect.",
+        "default": {
+          "default": "1",
+          "options": "Any positive number"
+        }
+      },
+      {
+        "name": "threshold",
+        "htmlName": "threshold",
+        "description": "The pixel brightness threshold below which objects will not glow.",
+        "default": {
+          "default": "1.0",
+          "options": "A number in the range [0.0, 1.0]"
+        }
+      },
+      {
+        "name": "radius",
+        "htmlName": "radius",
+        "description": "How far the light bleed extends.",
+        "default": {
+          "default": "0.85",
+          "options": "A number in the range [0.0, 1.0]"
+        }
+      },
+      {
+        "name": "smoothing",
+        "htmlName": "smoothing",
+        "description": "The roll-off of the light-bleed.",
+        "default": {
+          "default": "0.025",
+          "options": "A number in the range [0.0, 1.0]"
+        }
+      }
+    ]
+  },
+  {
+    "Title": "SelectiveBloomEffect",
+    "htmlName": "selectivebloom",
+    "Description": "This selective effect creates a glowing light-bleed effect around selected bright objects.",
+    "Attributes": [
+      {
+        "name": "strength",
+        "htmlName": "strength",
+        "description": "The strength of the bloom effect.",
+        "default": {
+          "default": "1",
+          "options": "Any positive number"
+        }
+      },
+      {
+        "name": "threshold",
+        "htmlName": "threshold",
+        "description": "The pixel brightness threshold below which objects will not glow.",
+        "default": {
+          "default": "1.0",
+          "options": "A number in the range [0.0, 1.0]"
+        }
+      },
+      {
+        "name": "radius",
+        "htmlName": "radius",
+        "description": "How far the light bleed extends.",
+        "default": {
+          "default": "0.85",
+          "options": "A number in the range [0.0, 1.0]"
+        }
+      },
+      {
+        "name": "smoothing",
+        "htmlName": "smoothing",
+        "description": "The roll-off of the light-bleed.",
+        "default": {
+          "default": "0.025",
+          "options": "A number in the range [0.0, 1.0]"
+        }
+      }
+    ]
+  },
+  {
+    "Title": "PixelateEffect",
+    "htmlName": "pixelate",
+    "Description": "This effect pixelates the entire scene.",
+    "Attributes": [
+      {
+        "name": "granularity",
+        "htmlName": "granularity",
+        "description": "The pixel size; draw one pixel for every <code>granularity</code> pixels. Higher value = lower resolution.",
+        "default": {
+          "default": "10",
+          "options": "Any positive number"
+        }
+      }
+    ]
+  },
+  {
+    "Title": "ColorGradeEffect",
+    "htmlName": "colorgrade",
+    "Description": "This effect alters the look of the entire scene.",
+    "Attributes": [
+      {
+        "name": "tonemapping",
+        "htmlName": "tonemapping",
+        "description": "The tonemapping of the scene. Due to the fact that in-built tonemapping cannot not applied to <code>&lt;model-viewer-effects&gt;</code> postprocessing, it is recommended to always add the <code>&lt;color-grade-effect&gt;</code> at the end of your postprocess pipeline, which sets the same default tonemapping to <code>Aces Filmic</code>.<br>",
+        "default": {
+          "default": "aces_filmic",
+          "options": "reinhard, reinhard2, reinhard2_adaptive, optimized_cineon, aces_filmic, none"
+        }
+      },
+      {
+        "name": "brightness",
+        "htmlName": "brightness",
+        "description": "The brightness of the entire canvas. 0.0 is the original brightness, 1.0 is completely white, -1.0 is completely black.",
+        "default": {
+          "default": "0.0",
+          "options": "A number in the range [0.0, 1.0]"
+        }
+      },
+      {
+        "name": "contrast",
+        "htmlName": "contrast",
+        "description": "The contrast of the entire canvas. 0.0 is no change, 1.0 is only black or white pixels, -1.0 is only grey pixels.",
+        "default": {
+          "default": "0.0",
+          "options": "A number in the range [-1.0, 1.0]"
+        }
+      },
+      {
+        "name": "saturation",
+        "htmlName": "saturation",
+        "description": "The saturation of the entire canvas. 0.0 is no change, 1.0 means all pixels are 100% saturation, -1.0 means all pixels are 0% saturation.",
+        "default": {
+          "default": "0.0",
+          "options": "A number in the range [-1.0, 1.0]"
+        }
+      },
+      {
+        "name": "hue",
+        "htmlName": "hue",
+        "description": "The hue color shift in radians of the entire canvas. 0.0 is no change, any higher value is a shift along the color wheel of <code>hue</code> radians. This property is wrapping, meaning that if you set it above the max it resets to the minimum and vice-versa.",
+        "default": {
+          "default": "0.0",
+          "options": "A number in the range [0.0, 2 * PI]"
+        }
+      }
+    ]
+  },
+  {
+    "Title": "OutlineEffect",
+    "htmlName": "outline",
+    "Description": "This selective effect draws outlines around selected objects.",
+    "Attributes": [
+      {
+        "name": "strength",
+        "htmlName": "strength",
+        "description": "The edge thickness.",
+        "default": {
+          "default": "1.0",
+          "options": "Any positive number"
+        }
+      },
+      {
+        "name": "color",
+        "htmlName": "color",
+        "description": "The edge color.",
+        "default": {
+          "default": "white",
+          "options": "Any String or RGB #-hexadecimal Color."
+        }
+      },
+      {
+        "name": "smoothing",
+        "htmlName": "smoothing",
+        "description": "The edge blur and roll-off.",
+        "default": {
+          "default": "1",
+          "options": "A number in the range [0, 6]"
+        }
+      }
+    ]
+  },
+  {
+    "Title": "GlitchEffect",
+    "htmlName": "glitch",
+    "Description": "This effect causes chromatic abberation and screen tearing glitches on the scene.",
+    "Attributes": [
+      {
+        "name": "strength",
+        "htmlName": "strength",
+        "description": "The strength of the glitches. Higher value means more significant glitches.",
+        "default": {
+          "default": "0.5",
+          "options": "A number in the range [0.0, 1.0]"
+        }
+      },
+      {
+        "name": "mode",
+        "htmlName": "mode",
+        "description": "The rate of the glitches. Sporadic glitches occur once every 1.0-3.5 seconds, and last between 0.5-1.0 seconds. Constant glitches have no delay, and is best used with very low <code>strength</code> values",
+        "default": {
+          "default": "sporadic",
+          "options": "sporadic, constant"
+        }
+      }
+    ]
+  },
+  {
+    "Title": "SSAOEffect",
+    "htmlName": "ssao",
+    "Description": "This effect simulates soft shadows in between geometries in the scene.",
+    "Attributes": [
+      {
+        "name": "strength",
+        "htmlName": "strength",
+        "description": "The strength of the shadow occlusions. Higher value means darker shadows.",
+        "default": {
+          "default": "2.0",
+          "options": "Any positive number"
+        }
+      }
+    ]
+  },
+  {
+    "Title": "SMAAEffect",
+    "htmlName": "smaa",
+    "Description": "This effect runs Subpixel Morphological Antialiasing (SMAA) on the scene.",
+    "Attributes": [
+      {
+        "name": "quality",
+        "htmlName": "quality",
+        "description": "The quality of the anti-aliasing. Higher quality is less performant.",
+        "default": {
+          "default": "medium",
+          "options": "low, medium, high, ultra"
+        }
+      }
+    ]
+  },
+  {
+    "Title": "BlendMode",
+    "htmlName": "blendmodemixin",
+    "Description": "This mixin provides blending attributes for all built-in &lt;model-viewer-effect&gt; effects.",
+    "Mixin": [
+      {
+        "name": "Used By",
+        "htmlName": "usedBy",
+        "description": "<a href='#bloom'>Bloom Effect</a>, <a href='#selectivebloom'>Selective Bloom Effect</a>, <a href='#pixelate'>Pixelate Effect</a>, <a href='#colorgrade'>Color Grade Effect</a>, <a href='#outline'>Outline Effect</a>, <a href='#glitch'>Glitch Effect</a>, <a href='#ssao'>SSAO Effect</a>, <a href='#smaa'>SMAA Effect</a>, <a href='#fxaa'>FXAA Effect</a>"
+      }
+    ],
+    "Attributes": [
+      {
+        "name": "blend-mode",
+        "htmlName": "blend-mode",
+        "description": "This attribute controls the function used to blend the effect with the base render. Note that unlike the wiki link below, setting this to <code>skip</code> actually does disable the effect completely.",
+        "links": [
+          "<a href=\"../examples/postprocessing#effects\"><span class='attribute'>blend-mode</span> example</a>"
+        ],
+        "default": {
+          "default": "default",
+          "options": "Any value from the <a href='https://pmndrs.github.io/postprocessing/public/docs/variable/index.html#static-variable-BlendFunction'>Postprocessing Wiki</a>, or default"
+        }
+      },
+      {
+        "name": "opacity",
+        "htmlName": "opacity",
+        "description": "The opacity of the effect that will be blended with the base render.",
+        "links": [
+          "<a href=\"../examples/postprocessing#effects\"><span class='attribute'>opacity</span> example</a>"
+        ],
+        "default": {
+          "default": "1.0",
+          "options": "A number in the range [0.0, 1.0]"
+        }
+      }
+    ]
+  },
+  {
+    "Title": "Selective",
+    "htmlName": "selectivemixin",
+    "Description": "This mixin provides selective capabilities, making effects affect only certain parts of a scene.",
+    "Mixin": [
+      {
+        "name": "Used By",
+        "htmlName": "usedBy",
+        "description": "<a href='#selectivebloom-attributes'>Selective Bloom Effect</a>, <a href='#outline-attributes'>Outline Effect</a>"
+      }
+    ],
+    "Attributes": [
+      {
+        "name": "selection",
+        "htmlName": "selection",
+        "description": "This attribute controls the selected objects to be affected. If no value is provided, the default <a href=\"#entrydocs-effectcomposer-properties-selection\"><span class='attribute'>selection</span></a> is used.",
+        "links": [
+          "<a href=\"../examples/postprocessing#selective-effects\"><span class='attribute'>selection</span> example</a>"
+        ],
+        "default": {
+          "default": "<a href=\"#entrydocs-effectcomposer-properties-selection\"><span class='attribute'>selection</span></a>",
+          "options": "An array of loaded object names or references"
+        }
+      }
+    ]
+  }
+]
