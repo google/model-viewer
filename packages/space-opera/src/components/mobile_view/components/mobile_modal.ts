@@ -68,7 +68,7 @@ export class MobileModal extends ConnectedLitElement {
       This uses a third-party <a href="https://github.com/nwtgck/piping-server" target="_blank" class="piping-link">piping server</a> to deploy to your mobile device. This server does not store data.
     </div>
     <div class="modal-text">
-      We use this server: <a href="https://piping.glitch.me/" target="_blank" class="piping-link">https://piping.glitch.me/</a>
+      We use this server: <a href="https://piping.onrender.com/" target="_blank" class="piping-link">https://piping.onrender.com/</a>
     </div>
   </div>
   <div class="FileModalCancel">
