@@ -18,6 +18,7 @@ import {property} from 'lit/decorators.js';
 import {Camera as ThreeCamera, Event as ThreeEvent, Vector2, Vector3, WebGLRenderer} from 'three';
 
 import {HAS_INTERSECTION_OBSERVER, HAS_RESIZE_OBSERVER} from './constants.js';
+import {ExtraModelElement} from './extra-model.js';
 import {$updateEnvironment} from './features/environment.js';
 import {makeTemplate} from './template.js';
 import {$evictionPolicy, CachingGLTFLoader} from './three-components/CachingGLTFLoader.js';
@@ -213,6 +214,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
   protected[$intersectionObserver]: IntersectionObserver|null = null;
 
   protected[$progressTracker]: ProgressTracker = new ProgressTracker();
+
+  // private extraModels: ExtraModelElement[] = [];
 
   /** @export */
   get loaded() {
@@ -644,5 +647,10 @@ export default class ModelViewerElementBase extends ReactiveElement {
     } finally {
       updateSourceProgress(1.0);
     }
+  }
+
+  async addExtraModel(extraModel: ExtraModelElement) {
+    console.log('Adding a new extra model with src: ', extraModel.src);
+    // this.extraModels.add(extraModel);
   }
 }
