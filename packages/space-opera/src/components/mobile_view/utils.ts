@@ -15,7 +15,7 @@
  *
  */
 
-export const DOMAIN = 'https://piping.onrender.com/';
+export const DOMAIN = 'https://ppng.io/';
 
 export function getRandomInt(max: number): number {
   return Math.floor(Math.random() * Math.floor(max));
