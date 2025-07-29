@@ -28,7 +28,12 @@ const PANEL_CONFIG = {
   height: 0.07,
   cornerRadius: 0.03,
   opacity: 1,
-  color: 0x000000
+  color: 0x000000,
+  // Distance-based scaling configuration
+  minDistance: 0.5,  // Minimum distance for scaling (meters)
+  maxDistance: 10.0, // Maximum distance for scaling (meters)
+  baseScale: 1.0,    // Base scale factor
+  distanceScaleFactor: 0.3 // How much to scale per meter of distance
 } as const;
 
 // Button configuration
@@ -251,6 +256,15 @@ export class XRMenuPanel extends Object3D {
         .add(new Vector3(0, offsetUp, 0))  // Move up
         .add(directionToCamera.multiplyScalar(offsetForward));  // Move forward 
     this.position.copy(panelPosition); 
+    
+    // Calculate distance-based scaling
+    const distanceToCamera = camera.position.distanceTo(panelPosition);
+    const clampedDistance = Math.max(PANEL_CONFIG.minDistance, Math.min(PANEL_CONFIG.maxDistance, distanceToCamera));
+    const scaleFactor = PANEL_CONFIG.baseScale + (clampedDistance - PANEL_CONFIG.minDistance) * PANEL_CONFIG.distanceScaleFactor;
+    
+    // Apply scaling to the entire panel (including buttons)
+    this.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    
     // Make the menu panel face the camera
     this.lookAt(camera.position);
   }
