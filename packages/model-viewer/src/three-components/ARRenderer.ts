@@ -1149,7 +1149,10 @@ export class ARRenderer extends EventDispatcher<
     this.handleScalingInXR(scene, delta);
 
     if (pivot.parent !== scene) {
-      return;  // attached to controller instead
+      // attached to controller instead
+      // when moving the model, the menu panel should disapear
+      this.updateMenuPanel(scene, box, delta);
+      return;
     }
 
     const source = this.updatePivotPosition(scene, delta);
