@@ -38,9 +38,11 @@ const CONFIG = {
     ACTIVE_FILL: new Color(0.6, 0.6, 0.6),      // Brighter fill when active
   },
   
-  // Opacity settings
+  // Opacity settings - now configurable
   MAX_OPACITY: 0.75,
   ACTIVE_OPACITY: 0.9,
+  FILL_OPACITY_MULTIPLIER: 0.5,  // Fill opacity relative to edge opacity
+  INTERACTIVE_OPACITY_MULTIPLIER: 1.2,  // Edge opacity multiplier when interactive
   
   // Distance-based scaling (similar to Footprint)
   MIN_DISTANCE: 0.5,
@@ -48,10 +50,18 @@ const CONFIG = {
   BASE_SCALE: 1.0,
   DISTANCE_SCALE_FACTOR: 0.3,
   
-  // Animation timing
+  // Animation timing - optimized for performance
   FADE_IN_DURATION: 0.12,
   FADE_OUT_DURATION: 0.12,
   SIZE_UPDATE_DURATION: 0.05,
+  COLOR_LERP_FACTOR: 0.15,  // Color transition speed
+  
+  // Screen space scaling - now configurable
+  SCREEN_SPACE_SCALE: 1.2,  // Scale factor for screen space mode
+  
+  // Performance optimization thresholds
+  SIZE_UPDATE_THRESHOLD: 0.001,  // Minimum size change to trigger geometry update
+  GEOMETRY_UPDATE_DEBOUNCE: 100,  // ms to debounce geometry updates
 } as const;
 
 const vector2 = new Vector2();
@@ -99,6 +109,10 @@ export class PlacementBox extends Mesh {
   private isHovered: boolean = false;
   private edgeMaterial!: MeshBasicMaterial;
   private fillMaterial!: MeshBasicMaterial;
+  
+  // Performance optimization
+  private lastGeometryUpdateTime: number = 0;
+  private needsGeometryUpdate: boolean = false;
 
   constructor(scene: ModelScene, side: Side) {
     const geometry = new BufferGeometry();
@@ -253,12 +267,20 @@ export class PlacementBox extends Mesh {
 
   /**
    * Update the placement box when model size changes
+   * Optimized to batch updates and reduce performance impact
    */
   updateFromModelChanges(): void {
     this.updateSizeFromScene();
     this.updatePositionFromScene();
+    
+    // Force immediate geometry update for model changes
+    this.updateGeometry();
     this.updateHitMeshes();
     this.ensureProperOrientation();
+    
+    // Reset performance tracking
+    this.needsGeometryUpdate = false;
+    this.lastGeometryUpdateTime = performance.now();
   }
 
   /**
@@ -286,7 +308,7 @@ export class PlacementBox extends Mesh {
     if (isScreenSpace) {
       // In screen space mode, ensure the placement box is more visible
       // and properly positioned for touch interaction
-      this.scale.set(1.2, 1.2, 1.2); // Slightly larger for touch
+      this.scale.set(CONFIG.SCREEN_SPACE_SCALE, CONFIG.SCREEN_SPACE_SCALE, CONFIG.SCREEN_SPACE_SCALE);
     } else {
       // Reset scale for world space mode
       this.scale.set(1.0, 1.0, 1.0);
@@ -339,10 +361,9 @@ export class PlacementBox extends Mesh {
       targetFillColor = CONFIG.COLORS.FILL_CUTOFF;
     }
     
-    // Smoothly transition colors with faster response
-    this.edgeMaterial.color.lerp(targetColor, 0.15);
-    this.fillMaterial.color.lerp(targetFillColor, 0.15);
-    
+    // Smoothly transition colors with configurable response speed
+    this.edgeMaterial.color.lerp(targetColor, CONFIG.COLOR_LERP_FACTOR);
+    this.fillMaterial.color.lerp(targetFillColor, CONFIG.COLOR_LERP_FACTOR);
   }
 
   /**
@@ -427,13 +448,13 @@ export class PlacementBox extends Mesh {
         1
     );
     
-    // Update both edge and fill materials with enhanced visibility
+    // Update both edge and fill materials with configurable visibility
     this.edgeMaterial.opacity = newOpacity;
-    this.fillMaterial.opacity = newOpacity * 0.5; // Increased fill opacity for better visibility
+    this.fillMaterial.opacity = newOpacity * CONFIG.FILL_OPACITY_MULTIPLIER;
     
     // Add subtle glow effect when active or hovered
     if (this.isActive || this.isHovered) {
-      this.edgeMaterial.opacity = newOpacity * 1.2; // Slightly brighter when interactive
+      this.edgeMaterial.opacity = newOpacity * CONFIG.INTERACTIVE_OPACITY_MULTIPLIER;
     }
     
     this.visible = newOpacity > 0;
@@ -441,20 +462,35 @@ export class PlacementBox extends Mesh {
 
   /**
    * Update method to be called each frame for smooth transitions
+   * Optimized to reduce frequent geometry updates for better performance
    */
   update(delta: number, cameraPosition?: Vector3): void {
     // Update opacity
     this.updateOpacity(delta);
     
-    // Update size transitions
+    // Update size transitions with performance optimization
     if (!this.currentSize.equals(this.goalSize)) {
       const newSize = new Vector3();
       newSize.x = this.sizeDamper.update(this.currentSize.x, this.goalSize.x, delta, 1);
       newSize.y = this.sizeDamper.update(this.currentSize.y, this.goalSize.y, delta, 1);
       newSize.z = this.sizeDamper.update(this.currentSize.z, this.goalSize.z, delta, 1);
       
-      this.currentSize.copy(newSize);
+      // Check if size change is significant enough to warrant geometry update
+      const sizeChange = newSize.distanceTo(this.currentSize);
+      if (sizeChange > CONFIG.SIZE_UPDATE_THRESHOLD) {
+        this.currentSize.copy(newSize);
+        this.needsGeometryUpdate = true;
+      }
+    }
+    
+    // Debounce geometry updates to prevent excessive updates
+    const now = performance.now();
+    if (this.needsGeometryUpdate && 
+        (now - this.lastGeometryUpdateTime) > CONFIG.GEOMETRY_UPDATE_DEBOUNCE) {
       this.updateGeometry();
+      this.updateHitMeshes();
+      this.needsGeometryUpdate = false;
+      this.lastGeometryUpdateTime = now;
     }
     
     // Apply distance scaling if camera position is provided
