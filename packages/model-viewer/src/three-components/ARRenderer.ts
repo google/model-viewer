@@ -328,6 +328,7 @@ export class ARRenderer extends EventDispatcher<
       this.yawDamper.setDecayTime(DECAY);
       this.pitchDamper.setDecayTime(DECAY);
       this.rollDamper.setDecayTime(DECAY);
+      this.scaleDamper.setDecayTime(DECAY);
     }
 
     this.currentSession = currentSession;
