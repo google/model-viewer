@@ -328,11 +328,18 @@ export class ARRenderer extends EventDispatcher<
       this.yawDamper.setDecayTime(DECAY);
       this.pitchDamper.setDecayTime(DECAY);
       this.rollDamper.setDecayTime(DECAY);
+      this.scaleDamper.setDecayTime(DECAY);
     }
 
     this.currentSession = currentSession;
     this.placementBox =
         new PlacementBox(scene, this.placeOnWall ? 'back' : 'bottom');
+    
+    // Set screen space mode for proper positioning
+    if (this.placementBox) {
+      this.placementBox.setScreenSpaceMode(this.xrMode === XRMode.SCREEN_SPACE);
+    }
+    
     this.placementComplete = false;
 
     if (this.xrMode !== XRMode.SCREEN_SPACE) {
@@ -561,9 +568,11 @@ export class ARRenderer extends EventDispatcher<
 
   onUpdateScene = () => {
     if (this.placementBox != null && this.isPresenting) {
-      this.placementBox!.dispose();
-      this.placementBox = new PlacementBox(
-          this.presentedScene!, this.placeOnWall ? 'back' : 'bottom');
+      // Update the existing placement box with new model dimensions instead of recreating
+      this.placementBox!.updateFromModelChanges();
+      
+      // Ensure screen space mode is maintained
+      this.placementBox!.setScreenSpaceMode(this.xrMode === XRMode.SCREEN_SPACE);
     }
     if (this.xrMode !== XRMode.SCREEN_SPACE) {
         if (this.menuPanel) {
@@ -1162,7 +1171,17 @@ export class ARRenderer extends EventDispatcher<
   }
 
   private updatePlacementBoxOpacity(box: PlacementBox, delta: number) {
-    box.updateOpacity(delta);
+    // Use the new enhanced update method that includes distance scaling and visual state
+    const camera = this.presentedScene!.getCamera();
+    box.update(delta, camera.position);
+    
+    // Update interaction state based on hover
+    const over1 = this.hover(this.xrController1!);
+    const over2 = this.hover(this.xrController2!);
+    const isHovered = (over1 || over2) && !this.isTwoHandInteraction;
+    
+    // Set interaction state for visual feedback
+    box.setInteractionState(this.isTranslating || this.isRotating, isHovered);
   }
 
   private updateTwoHandInteractionState() {
@@ -1186,7 +1205,13 @@ export class ARRenderer extends EventDispatcher<
   private updateXRControllerHover() {
     const over1 = this.hover(this.xrController1!);
     const over2 = this.hover(this.xrController2!);
-    this.placementBox!.show = (over1 || over2) && !this.isTwoHandInteraction;
+    const isHovered = (over1 || over2) && !this.isTwoHandInteraction;
+    
+    // Use the new interaction state system
+    if (this.placementBox) {
+      this.placementBox.setInteractionState(this.isTranslating || this.isRotating, isHovered);
+      this.placementBox.show = isHovered;
+    }
   }
 
  
