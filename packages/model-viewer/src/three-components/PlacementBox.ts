@@ -503,6 +503,13 @@ export class PlacementBox extends Mesh {
   }
 
   /**
+   * Get the current size of the placement box
+   */
+  getSize(): Vector3 {
+    return this.goalSize.clone();
+  }
+
+  /**
    * Call this to clean up Three's cache when you remove the box.
    */
   dispose() {

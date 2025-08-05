@@ -241,9 +241,20 @@ export class XRMenuPanel extends Object3D {
     // Get the world position of the placement box
     const placementBoxWorldPos = new Vector3();
     placementBox.getWorldPosition(placementBoxWorldPos); 
-    // Calculate a position slightly in front of the placement box
-    const offsetUp = -0.2;  // Offset upward from the placement box
-    const offsetForward = 0.9;  // Offset forward from the placement box 
+    
+    // Get the placement box size to calculate dynamic offsets
+    const placementBoxSize = placementBox.getSize();
+    const placementBoxMinDimension = Math.min(placementBoxSize.x, placementBoxSize.z);
+    
+    // Calculate dynamic offsets based on placement box size
+    // Base offsets with placement box size scaling
+    const baseOffsetUp = -0.2;
+    const baseOffsetForward = 0.9;
+    const sizeScaleFactor = Math.max(0.5, Math.min(2.0, placementBoxMinDimension / 1.0)); // Scale between 0.5x and 2x
+    
+    const offsetUp = baseOffsetUp * sizeScaleFactor;
+    const offsetForward = baseOffsetForward * sizeScaleFactor;
+    
     // Get direction from placement box to camera (horizontal only)
     const directionToCamera = new Vector3()
         .copy(camera.position)
