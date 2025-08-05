@@ -343,11 +343,6 @@ export class PlacementBox extends Mesh {
     this.edgeMaterial.color.lerp(targetColor, 0.15);
     this.fillMaterial.color.lerp(targetFillColor, 0.15);
     
-    // Add subtle scale animation for active state
-    if (this.isActive) {
-      const scale = 1.0 + Math.sin(Date.now() * 0.01) * 0.02; // Subtle pulsing
-      this.scale.set(scale, scale, scale);
-    }
   }
 
   /**
