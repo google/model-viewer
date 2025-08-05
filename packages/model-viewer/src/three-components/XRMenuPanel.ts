@@ -1,6 +1,6 @@
-import {Camera, CanvasTexture, Mesh,Object3D, Shape,ShapeGeometry, LinearFilter, MeshBasicMaterial, PlaneGeometry, XRTargetRaySpace, Vector3} from 'three';
-import {Damper} from './Damper.js';
-import {ModelScene} from './ModelScene.js';
+import { Camera, CanvasTexture, Mesh, Object3D, Shape, ShapeGeometry, LinearFilter, MeshBasicMaterial, PlaneGeometry, XRTargetRaySpace, Vector3 } from 'three';
+import { Damper } from './Damper.js';
+import { ModelScene } from './ModelScene.js';
 import { PlacementBox } from './PlacementBox.js';
 // SVG strings for the icons are defined here to avoid io and better performance for xr.
 const CLOSE_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#e8eaed">
@@ -24,312 +24,312 @@ const REPLAY_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24px" he
 
 // Panel configuration
 const PANEL_CONFIG = {
- width: 0.16,
- height: 0.07,
- cornerRadius: 0.03,
- opacity: 1,
- color: 0x000000,
- // Distance-based scaling configuration
- minDistance: 0.5,  // Minimum distance for scaling (meters)
- maxDistance: 10.0, // Maximum distance for scaling (meters)
- baseScale: 1.0,    // Base scale factor
- distanceScaleFactor: 0.3 // How much to scale per meter of distance
+  width: 0.16,
+  height: 0.07,
+  cornerRadius: 0.03,
+  opacity: 1,
+  color: 0x000000,
+  // Distance-based scaling configuration
+  minDistance: 0.5,  // Minimum distance for scaling (meters)
+  maxDistance: 10.0, // Maximum distance for scaling (meters)
+  baseScale: 1.0,    // Base scale factor
+  distanceScaleFactor: 0.3 // How much to scale per meter of distance
 } as const;
 
 // Button configuration
 const BUTTON_CONFIG = {
- size: 0.05, // Fixed size for all buttons
- zOffset: 0.01, // Distance from panel surface
- spacing: 0.07 // Space between button centers
+  size: 0.05, // Fixed size for all buttons
+  zOffset: 0.01, // Distance from panel surface
+  spacing: 0.07 // Space between button centers
 } as const;
 
 // Icon configuration
 const ICON_CONFIG = {
- canvasSize: 128,
- filter: LinearFilter
+  canvasSize: 128,
+  filter: LinearFilter
 } as const;
 
 export class XRMenuPanel extends Object3D {
- private panelMesh!: Mesh;
- private exitButton!: Mesh;
- private toggleButton!: Mesh;
- private goalOpacity: number;
- private opacityDamper: Damper;
- private isActualSize: boolean = false; // Start with normalized size
+  private panelMesh!: Mesh;
+  private exitButton!: Mesh;
+  private toggleButton!: Mesh;
+  private goalOpacity: number;
+  private opacityDamper: Damper;
+  private isActualSize: boolean = false; // Start with normalized size
 
   // Cache for pre-rendered textures
- private static readonly iconTextures = new Map<string, CanvasTexture>();
+  private static readonly iconTextures = new Map<string, CanvasTexture>();
 
   constructor() {
-   super();
-  
-   // Pre-render all icons
-   this.preRenderIcons();
-  
-   this.createPanel();
-   this.createButtons();
+    super();
 
-   this.opacityDamper = new Damper();
-   this.goalOpacity = PANEL_CONFIG.opacity;
- }
+    // Pre-render all icons
+    this.preRenderIcons();
 
- private createPanel(): void {
-   const panelShape = this.createPanelShape();
-   const geometry = new ShapeGeometry(panelShape);
-   const material = new MeshBasicMaterial({
-     color: PANEL_CONFIG.color,
-     opacity: PANEL_CONFIG.opacity,
-     transparent: true
-   });
-   this.panelMesh = new Mesh(geometry, material);
-   this.panelMesh.name = 'MenuPanel';
-   this.add(this.panelMesh);
- }
+    this.createPanel();
+    this.createButtons();
 
- private createButtons(): void {
-   // Create exit button
-   this.exitButton = this.createButton('close');
-   this.exitButton.name = 'ExitButton';
-   this.exitButton.position.set(BUTTON_CONFIG.spacing / 2, 0, BUTTON_CONFIG.zOffset);
-   this.add(this.exitButton);
+    this.opacityDamper = new Damper();
+    this.goalOpacity = PANEL_CONFIG.opacity;
+  }
 
-   // Create toggle button
-   this.toggleButton = this.createButton('view-real-size');
-   this.toggleButton.name = 'ToggleButton';
-   this.toggleButton.position.set(-BUTTON_CONFIG.spacing / 2, 0, BUTTON_CONFIG.zOffset);
-   this.add(this.toggleButton);
- }
+  private createPanel(): void {
+    const panelShape = this.createPanelShape();
+    const geometry = new ShapeGeometry(panelShape);
+    const material = new MeshBasicMaterial({
+      color: PANEL_CONFIG.color,
+      opacity: PANEL_CONFIG.opacity,
+      transparent: true
+    });
+    this.panelMesh = new Mesh(geometry, material);
+    this.panelMesh.name = 'MenuPanel';
+    this.add(this.panelMesh);
+  }
 
- private createPanelShape(): Shape {
-   const shape = new Shape();
-   const { width: w, height: h, cornerRadius: r } = PANEL_CONFIG;
-  
-   // Create rounded rectangle path
-   shape.moveTo(-w / 2 + r, -h / 2);
-   shape.lineTo(w / 2 - r, -h / 2);
-   shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
-   shape.lineTo(w / 2, h / 2 - r);
-   shape.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
-   shape.lineTo(-w / 2 + r, h / 2);
-   shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
-   shape.lineTo(-w / 2, -h / 2 + r);
-   shape.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
-  
-   return shape;
- }
+  private createButtons(): void {
+    // Create exit button
+    this.exitButton = this.createButton('close');
+    this.exitButton.name = 'ExitButton';
+    this.exitButton.position.set(BUTTON_CONFIG.spacing / 2, 0, BUTTON_CONFIG.zOffset);
+    this.add(this.exitButton);
 
- private preRenderIcons(): void {
-   const iconSvgs = [
-     { key: 'close', svg: CLOSE_ICON_SVG },
-     { key: 'view-real-size', svg: VIEW_REAL_SIZE_ICON_SVG },
-     { key: 'replay', svg: REPLAY_ICON_SVG }
-   ];
+    // Create toggle button
+    this.toggleButton = this.createButton('view-real-size');
+    this.toggleButton.name = 'ToggleButton';
+    this.toggleButton.position.set(-BUTTON_CONFIG.spacing / 2, 0, BUTTON_CONFIG.zOffset);
+    this.add(this.toggleButton);
+  }
 
-   iconSvgs.forEach(({ key, svg }) => {
-     if (!XRMenuPanel.iconTextures.has(key)) {
-       this.createTextureFromSvg(svg, key);
-     }
-   });
- }
+  private createPanelShape(): Shape {
+    const shape = new Shape();
+    const { width: w, height: h, cornerRadius: r } = PANEL_CONFIG;
 
- private createTextureFromSvg(svgContent: string, key: string): void {
-   const canvas = document.createElement('canvas');
-   canvas.width = ICON_CONFIG.canvasSize;
-   canvas.height = ICON_CONFIG.canvasSize;
-   const ctx = canvas.getContext('2d')!;
-  
-   // Create an image from SVG content
-   const img = new Image();
-   const svgBlob = new Blob([svgContent], {type: 'image/svg+xml'});
-   const url = URL.createObjectURL(svgBlob);
-  
-   img.onload = () => {
-     ctx.drawImage(img, 0, 0, ICON_CONFIG.canvasSize, ICON_CONFIG.canvasSize);
-    
-     const texture = new CanvasTexture(canvas);
-     texture.needsUpdate = true;
-     texture.minFilter = ICON_CONFIG.filter;
-    
-     XRMenuPanel.iconTextures.set(key, texture);
-     URL.revokeObjectURL(url);
-   };
-   img.src = url;
- }
+    // Create rounded rectangle path
+    shape.moveTo(-w / 2 + r, -h / 2);
+    shape.lineTo(w / 2 - r, -h / 2);
+    shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+    shape.lineTo(w / 2, h / 2 - r);
+    shape.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
+    shape.lineTo(-w / 2 + r, h / 2);
+    shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
+    shape.lineTo(-w / 2, -h / 2 + r);
+    shape.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
 
- createButton(iconKey: string): Mesh {   
-   // Create a placeholder mesh
-   const material = new MeshBasicMaterial({ transparent: true });
-   const geometry = new PlaneGeometry(BUTTON_CONFIG.size, BUTTON_CONFIG.size);
-   const mesh = new Mesh(geometry, material);
-  
-   // Try to get cached texture, or create a fallback
-   const cachedTexture = XRMenuPanel.iconTextures.get(iconKey);
-   if (cachedTexture) {
-     (mesh.material as MeshBasicMaterial).map = cachedTexture;
-     (mesh.material as MeshBasicMaterial).needsUpdate = true;
-   } else {
-     // RACE CONDITION FIX: Texture creation is async (img.onload), but button creation is sync
-     // This fallback handles the case where buttons are created before textures finish loading
-     this.createTextureFromSvg(iconKey === 'close' ? CLOSE_ICON_SVG :
-                              iconKey === 'view-real-size' ? VIEW_REAL_SIZE_ICON_SVG :
-                              REPLAY_ICON_SVG, iconKey);
-    
-     // Polling mechanism: Wait for async texture creation to complete
-     // This prevents white squares from appearing on first load
-     const checkTexture = () => {
-       const texture = XRMenuPanel.iconTextures.get(iconKey);
-       if (texture) {
-         // Texture is ready - apply it to the mesh
-         (mesh.material as MeshBasicMaterial).map = texture;
-         (mesh.material as MeshBasicMaterial).needsUpdate = true;
-       } else {
-         // Texture not ready yet - check again in 10ms
-         setTimeout(checkTexture, 10);
-       }
-     };
-     checkTexture();
-   }
-  
-   return mesh;
- }
+    return shape;
+  }
 
- exitButtonControllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
-     const hitResult = scene.hitFromController(controller, this.exitButton);
-     return hitResult;
- }
+  private preRenderIcons(): void {
+    const iconSvgs = [
+      { key: 'close', svg: CLOSE_ICON_SVG },
+      { key: 'view-real-size', svg: VIEW_REAL_SIZE_ICON_SVG },
+      { key: 'replay', svg: REPLAY_ICON_SVG }
+    ];
 
- scaleModeButtonControllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
-     const hitResult = scene.hitFromController(controller, this.toggleButton);
-     return hitResult;
- }
+    iconSvgs.forEach(({ key, svg }) => {
+      if (!XRMenuPanel.iconTextures.has(key)) {
+        this.createTextureFromSvg(svg, key);
+      }
+    });
+  }
 
- handleScaleToggle(
-   worldSpaceInitialPlacementDone: boolean,
-   initialModelScale: number,
-   minScale: number,
-   maxScale: number
- ): number | null {
-   if (!worldSpaceInitialPlacementDone) {
-     return null;
-   }
-  
-   this.isActualSize = !this.isActualSize;
-   // Toggle between view real size icon and replay icon
-   // When isActualSize is true, show replay icon (to reset)
-   // When isActualSize is false, show view real size icon (to go to actual size)
-   const iconKey = this.isActualSize ? 'replay' : 'view-real-size';
-   this.updateScaleModeButtonLabel(iconKey);
-  
-   const targetScale = this.isActualSize ? 1.0 : initialModelScale;
-   const goalScale = Math.max(minScale, Math.min(maxScale, targetScale));
-  
-   return goalScale;
- }
+  private createTextureFromSvg(svgContent: string, key: string): void {
+    const canvas = document.createElement('canvas');
+    canvas.width = ICON_CONFIG.canvasSize;
+    canvas.height = ICON_CONFIG.canvasSize;
+    const ctx = canvas.getContext('2d')!;
 
- private updateScaleModeButtonLabel(iconKey: string) {
-   const cachedTexture = XRMenuPanel.iconTextures.get(iconKey);
-   if (cachedTexture) {
-     (this.toggleButton.material as MeshBasicMaterial).map = cachedTexture;
-     (this.toggleButton.material as MeshBasicMaterial).needsUpdate = true;
-   }
- }
- 
- updatePosition(camera: Camera, placementBox: PlacementBox)  {
-   if (!placementBox) {
-     return;
-   }
-   // Get the world position of the placement box
-   const placementBoxWorldPos = new Vector3();
-   placementBox.getWorldPosition(placementBoxWorldPos);
-  
-   // Get the placement box size to calculate dynamic offsets
-   const placementBoxSize = placementBox.getSize();
-   const placementBoxMinDimension = Math.min(placementBoxSize.x, placementBoxSize.z);
-  
-   // Calculate dynamic offsets based on placement box size
-   // Base offsets with placement box size scaling
-   const baseOffsetUp = -0.2;
-   const baseOffsetForward = 0.9;
-   const sizeScaleFactor = Math.max(0.5, Math.min(2.0, placementBoxMinDimension / 1.0)); // Scale between 0.5x and 2x
-  
-   const offsetUp = baseOffsetUp * sizeScaleFactor;
-   const offsetForward = baseOffsetForward * sizeScaleFactor;
-  
-   // Get direction from placement box to camera (horizontal only)
-   const directionToCamera = new Vector3()
-       .copy(camera.position)
-       .sub(placementBoxWorldPos);
-   directionToCamera.y = 0;  // Zero out vertical component
-   directionToCamera.normalize();
-   // Calculate the final position
-   const panelPosition = new Vector3()
-       .copy(placementBoxWorldPos)
-       .add(new Vector3(0, offsetUp, 0))  // Move up
-       .add(directionToCamera.multiplyScalar(offsetForward));  // Move forward
-   this.position.copy(panelPosition);
-  
-   // Calculate distance-based scaling
-   const distanceToCamera = camera.position.distanceTo(panelPosition);
-   const clampedDistance = Math.max(PANEL_CONFIG.minDistance, Math.min(PANEL_CONFIG.maxDistance, distanceToCamera));
-   const scaleFactor = PANEL_CONFIG.baseScale + (clampedDistance - PANEL_CONFIG.minDistance) * PANEL_CONFIG.distanceScaleFactor;
-  
-   // Apply scaling to the entire panel (including buttons)
-   this.scale.set(scaleFactor, scaleFactor, scaleFactor);
-  
-   // Make the menu panel face the camera
-   this.lookAt(camera.position);
- }
+    // Create an image from SVG content
+    const img = new Image();
+    const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(svgBlob);
 
- /**
-  * Set the box's visibility; it will fade in and out.
-  */
- set show(visible: boolean) {
-   this.goalOpacity = visible ? PANEL_CONFIG.opacity : 0;
- }
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, ICON_CONFIG.canvasSize, ICON_CONFIG.canvasSize);
 
- /**
-  * Call on each frame with the frame delta to fade the box.
-  */
- updateOpacity(delta: number) {
-   const material = this.panelMesh.material as MeshBasicMaterial;
-   const currentOpacity = material.opacity;
-   const newOpacity = this.opacityDamper.update(currentOpacity, this.goalOpacity, delta, 1);
-   this.traverse((child) => {
-     if (child instanceof Mesh) {
-       const mat = child.material as MeshBasicMaterial;
-       if (mat.transparent) mat.opacity = newOpacity;
-     }
-   });
-   this.visible = newOpacity > 0;
- }
+      const texture = new CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      texture.minFilter = ICON_CONFIG.filter;
 
- dispose() {
-   this.children.forEach(child => {
-     if (child instanceof Mesh) {
-       // Dispose geometry first
-       if (child.geometry) {
-         child.geometry.dispose();
-       }
+      XRMenuPanel.iconTextures.set(key, texture);
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
 
-       // Handle material(s)
-       // Material can be a single Material or an array of Materials
-       const materials = Array.isArray(child.material) ? child.material : [child.material];
+  createButton(iconKey: string): Mesh {
+    // Create a placeholder mesh
+    const material = new MeshBasicMaterial({ transparent: true });
+    const geometry = new PlaneGeometry(BUTTON_CONFIG.size, BUTTON_CONFIG.size);
+    const mesh = new Mesh(geometry, material);
 
-       materials.forEach(material => {
-         if (material) { // Ensure material exists before proceeding
-           // Dispose texture if it exists and is a CanvasTexture
-           // We specifically created CanvasTextures for buttons, so check for that type.
-           if ('map' in material && material.map instanceof CanvasTexture) { // Check if 'map' property exists and is a CanvasTexture
-             material.map.dispose();
-           }
-           // Dispose material itself
-           material.dispose();
-         }
-       });
-     }
-   });
+    // Try to get cached texture, or create a fallback
+    const cachedTexture = XRMenuPanel.iconTextures.get(iconKey);
+    if (cachedTexture) {
+      (mesh.material as MeshBasicMaterial).map = cachedTexture;
+      (mesh.material as MeshBasicMaterial).needsUpdate = true;
+    } else {
+      // RACE CONDITION FIX: Texture creation is async (img.onload), but button creation is sync
+      // This fallback handles the case where buttons are created before textures finish loading
+      this.createTextureFromSvg(iconKey === 'close' ? CLOSE_ICON_SVG :
+        iconKey === 'view-real-size' ? VIEW_REAL_SIZE_ICON_SVG :
+          REPLAY_ICON_SVG, iconKey);
+
+      // Polling mechanism: Wait for async texture creation to complete
+      // This prevents white squares from appearing on first load
+      const checkTexture = () => {
+        const texture = XRMenuPanel.iconTextures.get(iconKey);
+        if (texture) {
+          // Texture is ready - apply it to the mesh
+          (mesh.material as MeshBasicMaterial).map = texture;
+          (mesh.material as MeshBasicMaterial).needsUpdate = true;
+        } else {
+          // Texture not ready yet - check again in 10ms
+          setTimeout(checkTexture, 10);
+        }
+      };
+      checkTexture();
+    }
+
+    return mesh;
+  }
+
+  exitButtonControllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
+    const hitResult = scene.hitFromController(controller, this.exitButton);
+    return hitResult;
+  }
+
+  scaleModeButtonControllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
+    const hitResult = scene.hitFromController(controller, this.toggleButton);
+    return hitResult;
+  }
+
+  handleScaleToggle(
+    worldSpaceInitialPlacementDone: boolean,
+    initialModelScale: number,
+    minScale: number,
+    maxScale: number
+  ): number | null {
+    if (!worldSpaceInitialPlacementDone) {
+      return null;
+    }
+
+    this.isActualSize = !this.isActualSize;
+    // Toggle between view real size icon and replay icon
+    // When isActualSize is true, show replay icon (to reset)
+    // When isActualSize is false, show view real size icon (to go to actual size)
+    const iconKey = this.isActualSize ? 'replay' : 'view-real-size';
+    this.updateScaleModeButtonLabel(iconKey);
+
+    const targetScale = this.isActualSize ? 1.0 : initialModelScale;
+    const goalScale = Math.max(minScale, Math.min(maxScale, targetScale));
+
+    return goalScale;
+  }
+
+  private updateScaleModeButtonLabel(iconKey: string) {
+    const cachedTexture = XRMenuPanel.iconTextures.get(iconKey);
+    if (cachedTexture) {
+      (this.toggleButton.material as MeshBasicMaterial).map = cachedTexture;
+      (this.toggleButton.material as MeshBasicMaterial).needsUpdate = true;
+    }
+  }
+
+  updatePosition(camera: Camera, placementBox: PlacementBox) {
+    if (!placementBox) {
+      return;
+    }
+    // Get the world position of the placement box
+    const placementBoxWorldPos = new Vector3();
+    placementBox.getWorldPosition(placementBoxWorldPos);
+
+    // Get the placement box size to calculate dynamic offsets
+    const placementBoxSize = placementBox.getSize();
+    const placementBoxMinDimension = Math.min(placementBoxSize.x, placementBoxSize.z);
+
+    // Calculate dynamic offsets based on placement box size
+    // Base offsets with placement box size scaling
+    const baseOffsetUp = -0.2;
+    const baseOffsetForward = 0.9;
+    const sizeScaleFactor = Math.max(0.5, Math.min(2.0, placementBoxMinDimension / 1.0)); // Scale between 0.5x and 2x
+
+    const offsetUp = baseOffsetUp * sizeScaleFactor;
+    const offsetForward = baseOffsetForward * sizeScaleFactor;
+
+    // Get direction from placement box to camera (horizontal only)
+    const directionToCamera = new Vector3()
+      .copy(camera.position)
+      .sub(placementBoxWorldPos);
+    directionToCamera.y = 0;  // Zero out vertical component
+    directionToCamera.normalize();
+    // Calculate the final position
+    const panelPosition = new Vector3()
+      .copy(placementBoxWorldPos)
+      .add(new Vector3(0, offsetUp, 0))  // Move up
+      .add(directionToCamera.multiplyScalar(offsetForward));  // Move forward
+    this.position.copy(panelPosition);
+
+    // Calculate distance-based scaling
+    const distanceToCamera = camera.position.distanceTo(panelPosition);
+    const clampedDistance = Math.max(PANEL_CONFIG.minDistance, Math.min(PANEL_CONFIG.maxDistance, distanceToCamera));
+    const scaleFactor = PANEL_CONFIG.baseScale + (clampedDistance - PANEL_CONFIG.minDistance) * PANEL_CONFIG.distanceScaleFactor;
+
+    // Apply scaling to the entire panel (including buttons)
+    this.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+    // Make the menu panel face the camera
+    this.lookAt(camera.position);
+  }
+
+  /**
+   * Set the box's visibility; it will fade in and out.
+   */
+  set show(visible: boolean) {
+    this.goalOpacity = visible ? PANEL_CONFIG.opacity : 0;
+  }
+
+  /**
+   * Call on each frame with the frame delta to fade the box.
+   */
+  updateOpacity(delta: number) {
+    const material = this.panelMesh.material as MeshBasicMaterial;
+    const currentOpacity = material.opacity;
+    const newOpacity = this.opacityDamper.update(currentOpacity, this.goalOpacity, delta, 1);
+    this.traverse((child) => {
+      if (child instanceof Mesh) {
+        const mat = child.material as MeshBasicMaterial;
+        if (mat.transparent) mat.opacity = newOpacity;
+      }
+    });
+    this.visible = newOpacity > 0;
+  }
+
+  dispose() {
+    this.children.forEach(child => {
+      if (child instanceof Mesh) {
+        // Dispose geometry first
+        if (child.geometry) {
+          child.geometry.dispose();
+        }
+
+        // Handle material(s)
+        // Material can be a single Material or an array of Materials
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+
+        materials.forEach(material => {
+          if (material) { // Ensure material exists before proceeding
+            // Dispose texture if it exists and is a CanvasTexture
+            // We specifically created CanvasTextures for buttons, so check for that type.
+            if ('map' in material && material.map instanceof CanvasTexture) { // Check if 'map' property exists and is a CanvasTexture
+              material.map.dispose();
+            }
+            // Dispose material itself
+            material.dispose();
+          }
+        });
+      }
+    });
 
     // Remove the panel itself from its parent in the scene graph
-   this.parent?.remove(this);
- }
+    this.parent?.remove(this);
+  }
 }
