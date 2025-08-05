@@ -21,47 +21,47 @@ import {Side} from './Shadow.js';
 
 // Enhanced configuration for dynamic sizing and visual design
 const CONFIG = {
- // Dynamic sizing - slightly bigger
- MIN_TOUCH_AREA: 0.05,  // minimum touch area
- BASE_RADIUS: 0.15,      // base radius
- LINE_WIDTH: 0.02,       // line width
- SEGMENTS: 16,           // segments for smoother curves
- DELTA_PHI: Math.PI / (2 * 16),
-
+  // Dynamic sizing - slightly bigger
+  MIN_TOUCH_AREA: 0.05,  // minimum touch area
+  BASE_RADIUS: 0.15,      // base radius
+  LINE_WIDTH: 0.02,       // line width
+  SEGMENTS: 16,           // segments for smoother curves
+  DELTA_PHI: Math.PI / (2 * 16),
+  
   // Enhanced visual design with more vibrant colors
- COLORS: {
-   EDGE_FALLOFF: new Color(0.98, 0.98, 0.98),  // Brighter light gray
-   EDGE_CUTOFF: new Color(0.8, 0.8, 0.8),      // Brighter medium gray
-   FILL_FALLOFF: new Color(0.4, 0.4, 0.4),     // Brighter dark gray
-   FILL_CUTOFF: new Color(0.4, 0.4, 0.4),      // Brighter dark gray
-   ACTIVE_EDGE: new Color(1.0, 1.0, 1.0),      // Pure white when active
-   ACTIVE_FILL: new Color(0.6, 0.6, 0.6),      // Brighter fill when active
- },
-
+  COLORS: {
+    EDGE_FALLOFF: new Color(0.98, 0.98, 0.98),  // Brighter light gray
+    EDGE_CUTOFF: new Color(0.8, 0.8, 0.8),      // Brighter medium gray
+    FILL_FALLOFF: new Color(0.4, 0.4, 0.4),     // Brighter dark gray
+    FILL_CUTOFF: new Color(0.4, 0.4, 0.4),      // Brighter dark gray
+    ACTIVE_EDGE: new Color(1.0, 1.0, 1.0),      // Pure white when active
+    ACTIVE_FILL: new Color(0.6, 0.6, 0.6),      // Brighter fill when active
+  },
+  
   // Opacity settings - now configurable
- MAX_OPACITY: 0.75,
- ACTIVE_OPACITY: 0.9,
- FILL_OPACITY_MULTIPLIER: 0.5,  // Fill opacity relative to edge opacity
- INTERACTIVE_OPACITY_MULTIPLIER: 1.2,  // Edge opacity multiplier when interactive
-
+  MAX_OPACITY: 0.75,
+  ACTIVE_OPACITY: 0.9,
+  FILL_OPACITY_MULTIPLIER: 0.5,  // Fill opacity relative to edge opacity
+  INTERACTIVE_OPACITY_MULTIPLIER: 1.2,  // Edge opacity multiplier when interactive
+  
   // Distance-based scaling (similar to Footprint)
- MIN_DISTANCE: 0.5,
- MAX_DISTANCE: 10.0,
- BASE_SCALE: 1.0,
- DISTANCE_SCALE_FACTOR: 0.3,
-
+  MIN_DISTANCE: 0.5,
+  MAX_DISTANCE: 10.0,
+  BASE_SCALE: 1.0,
+  DISTANCE_SCALE_FACTOR: 0.3,
+  
   // Animation timing - optimized for performance
- FADE_IN_DURATION: 0.12,
- FADE_OUT_DURATION: 0.12,
- SIZE_UPDATE_DURATION: 0.05,
- COLOR_LERP_FACTOR: 0.15,  // Color transition speed
-
+  FADE_IN_DURATION: 0.12,
+  FADE_OUT_DURATION: 0.12,
+  SIZE_UPDATE_DURATION: 0.05,
+  COLOR_LERP_FACTOR: 0.15,  // Color transition speed
+  
   // Screen space scaling - now configurable
- SCREEN_SPACE_SCALE: 1.2,  // Scale factor for screen space mode
-
+  SCREEN_SPACE_SCALE: 1.2,  // Scale factor for screen space mode
+  
   // Performance optimization thresholds
- SIZE_UPDATE_THRESHOLD: 0.001,  // Minimum size change to trigger geometry update
- GEOMETRY_UPDATE_DEBOUNCE: 100,  // ms to debounce geometry updates
+  SIZE_UPDATE_THRESHOLD: 0.001,  // Minimum size change to trigger geometry update
+  GEOMETRY_UPDATE_DEBOUNCE: 100,  // ms to debounce geometry updates
 } as const;
 
 const vector2 = new Vector2();
