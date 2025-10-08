@@ -64,12 +64,15 @@ export class MobileModal extends ConnectedLitElement {
       Use the QR Code to open your edited model, environment image, and &ltmodel-viewer&gt snippet on a mobile device to test out AR features.
       After every subsequent change, click the "Refresh Mobile" button.
     </div>
-    <canvas id="qr" style="display: block; margin-bottom: 90px;"></canvas>
+    <canvas id="qr" style="display: block; margin-bottom: 10px;"></canvas>
+    <div class="modal-text" style="margin-bottom: 80px;">
+      <a href="${this.viewableSite}" target="_blank" style="color: white">${this.viewableSite}</a>
+    </div>
     <div class="modal-text">
       This uses a third-party <a href="https://github.com/nwtgck/piping-server" target="_blank" class="piping-link">piping server</a> to deploy to your mobile device. This server does not store data.
     </div>
     <div class="modal-text">
-      We use this server: <a href="https://piping.glitch.me/" target="_blank" class="piping-link">https://piping.glitch.me/</a>
+      We use this server: <a href="https://ppng.io/" target="_blank" class="piping-link">https://ppng.io/</a>
     </div>
   </div>
   <div class="FileModalCancel">
