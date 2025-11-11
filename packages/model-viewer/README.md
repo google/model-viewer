@@ -43,7 +43,7 @@ import '@google/model-viewer';
 It can also be used directly from various free CDNs such as [jsDelivr](https://www.jsdelivr.com/package/npm/@google/model-viewer) and Google's own [hosted libraries](https://developers.google.com/speed/libraries#model-viewer):
 
 ```html
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/{{MODELVIEWER_VERSION}}/model-viewer.min.js"></script>
 ```
 
 For more detailed usage documentation and live examples, please visit our docs
