@@ -13,14 +13,21 @@
  * limitations under the License.
  */
 
-import {Mesh, MeshBasicMaterial, OrthographicCamera, PlaneGeometry, Scene, Texture as ThreeTexture, WebGLRenderTarget} from 'three';
+import {
+  Mesh,
+  MeshBasicMaterial,
+  OrthographicCamera,
+  PlaneGeometry,
+  Scene,
+  Texture as ThreeTexture,
+  WebGLRenderTarget
+} from 'three';
 
-import {blobCanvas} from '../../model-viewer-base.js';
-import {Renderer} from '../../three-components/Renderer.js';
+import { blobCanvas } from '../../model-viewer-base.js';
+import { Renderer } from '../../three-components/Renderer.js';
 
-import {Image as ImageInterface} from './api.js';
-import {$correlatedObjects, $onUpdate, ThreeDOMElement} from './three-dom-element.js';
-
+import { Image as ImageInterface } from './api.js';
+import { $correlatedObjects, $onUpdate, ThreeDOMElement } from './three-dom-element.js';
 
 const quadMaterial = new MeshBasicMaterial();
 const quad = new PlaneGeometry(2, 2);
@@ -34,64 +41,77 @@ export const $applyTexture = Symbol('applyTexture');
  * Image facade implementation for Three.js textures
  */
 export class Image extends ThreeDOMElement implements ImageInterface {
-  get[$threeTexture]() {
+  get [$threeTexture]() {
     return this[$correlatedObjects]?.values().next().value as ThreeTexture;
   }
 
-  get[$threeTextures](): Set<ThreeTexture> {
+  get [$threeTextures](): Set<ThreeTexture> {
     return this[$correlatedObjects] as Set<ThreeTexture>;
   }
 
   constructor(onUpdate: () => void, texture: ThreeTexture) {
     super(onUpdate, new Set<ThreeTexture>(texture ? [texture] : []));
 
-    if (!this[$threeTexture].image.src) {
-      this[$threeTexture].image.src =
-          texture.name ? texture.name : 'adhoc_image' + adhocNum++;
+    // Explicitly cast image to known structure
+    const image = this[$threeTexture].image as
+      | (HTMLImageElement & { src?: string; name?: string; bufferView?: number })
+      | HTMLVideoElement
+      | HTMLCanvasElement
+      | { src?: string; name?: string; bufferView?: number }
+      | undefined;
+
+    if (image && !('src' in image) || (image as any).src == null) {
+      (image as any).src = texture.name ? texture.name : 'adhoc_image' + adhocNum++;
     }
-    if (!this[$threeTexture].image.name) {
-      this[$threeTexture].image.name =
-          (texture && texture.image && texture.image.src) ?
-          texture.image.src.split('/').pop() :
-          'adhoc_image';
+
+    if (image && !('name' in image) || (image as any).name == null) {
+      (image as any).name =
+        (image as any).src ? (image as any).src.split('/').pop() : 'adhoc_image';
     }
   }
 
   get name(): string {
-    return this[$threeTexture].image.name || '';
+    const image = this[$threeTexture].image as any;
+    return image?.name || '';
   }
 
-  get uri(): string|undefined {
-    return this[$threeTexture].image.src;
+  get uri(): string | undefined {
+    const image = this[$threeTexture].image as any;
+    return image?.src;
   }
 
-  get bufferView(): number|undefined {
-    return this[$threeTexture].image.bufferView;
+  get bufferView(): number | undefined {
+    const image = this[$threeTexture].image as any;
+    return image?.bufferView;
   }
 
-  get element(): HTMLVideoElement|HTMLCanvasElement|undefined {
+  get element(): HTMLVideoElement | HTMLCanvasElement | undefined {
     const texture = this[$threeTexture] as any;
     if (texture && (texture.isCanvasTexture || texture.isVideoTexture)) {
       return texture.image;
     }
-    return;
+    return undefined;
   }
 
-  get animation(): any|undefined {
+  get animation(): any | undefined {
     const texture = this[$threeTexture] as any;
     if (texture && texture.isCanvasTexture && texture.animation) {
       return texture.animation;
     }
-    return;
+    return undefined;
   }
 
-  get type(): 'embedded'|'external' {
+  get type(): 'embedded' | 'external' {
     return this.uri != null ? 'external' : 'embedded';
   }
 
   set name(name: string) {
     for (const texture of this[$threeTextures]) {
-      texture.image.name = name;
+      const image = texture.image as any;
+      if (image) {
+        image.name = name;
+      }
+
     }
   }
 
@@ -111,15 +131,14 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     scene.add(mesh);
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    const {threeRenderer} = Renderer.singleton;
+    const { threeRenderer } = Renderer.singleton;
     const renderTarget = new WebGLRenderTarget(width, height);
     threeRenderer.setRenderTarget(renderTarget);
     threeRenderer.render(scene, camera);
     threeRenderer.setRenderTarget(null);
 
     const buffer = new Uint8Array(width * height * 4);
-    threeRenderer.readRenderTargetPixels(
-        renderTarget, 0, 0, width, height, buffer);
+    threeRenderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, buffer);
 
     blobCanvas.width = width;
     blobCanvas.height = height;
@@ -128,7 +147,7 @@ export class Image extends ThreeDOMElement implements ImageInterface {
     imageData.data.set(buffer);
     blobContext.putImageData(imageData, 0, 0);
 
-    return new Promise<string>(async (resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       blobCanvas.toBlob(blob => {
         if (!blob) {
           return reject('Failed to capture thumbnail.');

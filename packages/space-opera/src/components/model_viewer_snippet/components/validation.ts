@@ -15,28 +15,28 @@
  *
  */
 
-import {WebIO} from '@gltf-transform/core';
-import {KHRONOS_EXTENSIONS} from '@gltf-transform/extensions';
-import {metalRough} from '@gltf-transform/functions';
-import {html, LitElement} from 'lit';
-import {customElement, property, query, state} from 'lit/decorators.js';
+import { WebIO } from '@gltf-transform/core';
+import { KHRONOS_EXTENSIONS } from '@gltf-transform/extensions';
+import { metalRough } from '@gltf-transform/functions';
+import { html, LitElement } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
-import {validationStyles} from '../../../styles.css.js';
-import {State} from '../../../types.js';
-import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
-import {dispatchGltfUrl, getModel, getModelViewer} from '../../model_viewer_preview/reducer.js';
+import { validationStyles } from '../../../styles.css.js';
+import { State } from '../../../types.js';
+import { ConnectedLitElement } from '../../connected_lit_element/connected_lit_element';
+import { dispatchGltfUrl, getModel, getModelViewer } from '../../model_viewer_preview/reducer.js';
 
-import {resolveExternalResource, validateGltf} from './validation_utils.js';
+import { resolveExternalResource, validateGltf } from './validation_utils.js';
 
-import type {Report, Message} from './validation_utils';
-import {GLTF} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
-import {reduxStore} from '../../../space_opera_base.js';
+import type { Report, Message } from './validation_utils';
+import { GLTF } from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
+import { reduxStore } from '../../../space_opera_base.js';
 
 @customElement('me-validation-modal')
 export class ValidationModal extends LitElement {
   static styles = [validationStyles];
 
-  @property({attribute: false}) report: Report = {};
+  @property({ attribute: false }) report: Report = {};
   @state() isOpen: boolean = false;
 
   open() {
@@ -89,14 +89,12 @@ export class ValidationModal extends LitElement {
         <li>${this.report.info!.width?.toPrecision(3)} m x-width</li>
         <li>${this.report.info!.height?.toPrecision(3)} m y-height</li>
         <li>${this.report.info!.length?.toPrecision(3)} m z-length</li>
-        <li>Extensions used: ${
-        this.report.info!.extensionsUsed?.join(', ')}</li>
-        ${
-        this.report.info!.converted ? html`
+        <li>Extensions used: ${this.report.info!.extensionsUsed?.join(', ')}</li>
+        ${this.report.info!.converted ? html`
         <li><b>KHR_materials_pbrSpecularGlossiness extension was encountered, but is no longer supported. 
         This file has been automatically (and losslessly) converted to Metallic-Roughness.
         Please download the GLB to get the updated version.</b></li>` :
-                                      html``}
+        html``}
       </ul>
     </li>
   </ul>
@@ -123,22 +121,18 @@ export class ValidationModal extends LitElement {
       </mwc-button>
     </div>
     ${this.renderMetaData()}
-    ${
-        this.report.issues!.numErrors ?
-            this.renderTable('#f44336', 'Error', this.report!.errors!) :
-            html``}
-   ${
-        this.report.issues!.numWarnings ?
-            this.renderTable('#f9a825', 'Warning', this.report!.warnings!) :
-            html``}
-   ${
-        this.report.issues!.numHints ?
-            this.renderTable('#8bc34a', 'Hint', this.report!.hints!) :
-            html``}
-    ${
-        this.report.issues!.numInfos ?
-            this.renderTable('#2196f3', 'Info', this.report!.infos!) :
-            html``}
+    ${this.report.issues!.numErrors ?
+        this.renderTable('#f44336', 'Error', this.report!.errors!) :
+        html``}
+   ${this.report.issues!.numWarnings ?
+        this.renderTable('#f9a825', 'Warning', this.report!.warnings!) :
+        html``}
+   ${this.report.issues!.numHints ?
+        this.renderTable('#8bc34a', 'Hint', this.report!.hints!) :
+        html``}
+    ${this.report.issues!.numInfos ?
+        this.renderTable('#2196f3', 'Info', this.report!.infos!) :
+        html``}
   </div>
 </paper-dialog>`;
   }
@@ -162,14 +156,14 @@ export class Validation extends ConnectedLitElement {
   @state() severityColor: string = '';
 
   async stateChanged(state: State) {
-    const {rootPath, originalGltf, gltfUrl, fileMap} = getModel(state);
+    const { rootPath, originalGltf, gltfUrl, fileMap } = getModel(state);
     if (rootPath != null) {
       this.rootPath = rootPath;
     }
 
     if (originalGltf != null && gltfUrl != null &&
-        this.originalGltf !== originalGltf) {
-      if (this.severityTitle = 'Converted') {
+      this.originalGltf !== originalGltf) {
+      if (this.severityTitle === 'Converted') {
         URL.revokeObjectURL(this.gltfUrl!);
       }
 
@@ -185,7 +179,7 @@ export class Validation extends ConnectedLitElement {
         const doc = await io.read(gltfUrl);
         await doc.transform(metalRough());
         const glb = await io.writeBinary(doc);
-        const blob = new Blob([glb], {type: 'application/octet-stream'});
+        const blob = new Blob([glb.buffer as ArrayBuffer], { type: 'application/octet-stream' });
         const fileURL = URL.createObjectURL(blob);
         this.converted = true;
         reduxStore.dispatch(dispatchGltfUrl(fileURL));
@@ -233,8 +227,8 @@ export class Validation extends ConnectedLitElement {
       this.severityColor = '#8bc34a';
       this.severityTitle = 'Converted';
     }
-    if (!!this.report.info?.extensionsUsed?.find(
-            (e) => e == 'KHR_materials_pbrSpecularGlossiness')) {
+    if (this.report.info?.extensionsUsed?.find(
+      (e) => e == 'KHR_materials_pbrSpecularGlossiness')) {
       this.severityColor = '#f9a825';
       this.severityTitle = 'Converting';
     }
@@ -249,7 +243,7 @@ export class Validation extends ConnectedLitElement {
         }
       }
     }
-    this.report.info = {...this.report?.info, totalJointCount: jointSet.size};
+    this.report.info = { ...this.report?.info, totalJointCount: jointSet.size };
   }
 
   onOpen() {
@@ -258,20 +252,18 @@ export class Validation extends ConnectedLitElement {
 
   render() {
     return html`
-    ${
-        this.severityTitle.length > 0 ? html`
+    ${this.severityTitle.length > 0 ? html`
 <div style="font-size: 14px; font-weight: 500; margin: 10px 0px;">Validation Report:</div>
 <mwc-button unelevated style="align-self: center; padding-top: 10px;"
   @click=${this.onOpen} style="--mdc-theme-primary: ${this.severityColor}">
   ${this.severityTitle}
 </mwc-button>` :
-                                        html``}
-    ${
-        this.report ? html`
+        html``}
+    ${this.report ? html`
     <me-validation-modal id="validation-modal" .report=${this.report}>
     </me-validation-modal>
     ` :
-                      html``}
+        html``}
 
     `;
   }
