@@ -13,11 +13,19 @@
  * limitations under the License.
  */
 
-import {ColorSpace, LinearSRGBColorSpace, MeshPhysicalMaterial, SRGBColorSpace, Texture as ThreeTexture, Vector2, VideoTexture} from 'three';
+import {
+  ColorSpace,
+  LinearSRGBColorSpace,
+  MeshPhysicalMaterial,
+  SRGBColorSpace,
+  Texture as ThreeTexture,
+  Vector2,
+  VideoTexture,
+} from 'three';
 
-import {TextureInfo as TextureInfoInterface} from './api.js';
-import {$threeTexture} from './image.js';
-import {Texture} from './texture.js';
+import { TextureInfo as TextureInfoInterface } from './api.js';
+import { $threeTexture } from './image.js';
+import { Texture } from './texture.js';
 
 const $texture = Symbol('texture');
 const $transform = Symbol('transform');
@@ -57,25 +65,27 @@ interface TextureTransform {
  * TextureInfo facade implementation for Three.js materials
  */
 export class TextureInfo implements TextureInfoInterface {
-  private[$texture]: Texture|null = null;
-  private[$transform]: TextureTransform = {
+  private [$texture]: Texture | null = null;
+  private [$transform]: TextureTransform = {
     rotation: 0,
     scale: new Vector2(1, 1),
-    offset: new Vector2(0, 0)
+    offset: new Vector2(0, 0),
   };
 
   // Holds a reference to the Three data that backs the material object.
-  private[$materials]: Set<MeshPhysicalMaterial>|null;
+  private [$materials]: Set<MeshPhysicalMaterial> | null;
 
-  // Texture usage defines the how the texture is used (ie Normal, Emissive...
-  // etc)
-  private[$usage]: TextureUsage;
-  private[$onUpdate]: () => void;
-  private[$activeVideo] = false;
+  // Texture usage defines how the texture is used (ie Normal, Emissive, etc.)
+  private [$usage]: TextureUsage;
+  private [$onUpdate]: () => void;
+  private [$activeVideo] = false;
 
   constructor(
-      onUpdate: () => void, usage: TextureUsage,
-      threeTexture: ThreeTexture|null, material: Set<MeshPhysicalMaterial>) {
+    onUpdate: () => void,
+    usage: TextureUsage,
+    threeTexture: ThreeTexture | null,
+    material: Set<MeshPhysicalMaterial>
+  ) {
     // Creates image, sampler, and texture if valid texture info is provided.
     if (threeTexture) {
       this[$transform].rotation = threeTexture.rotation;
@@ -90,28 +100,39 @@ export class TextureInfo implements TextureInfoInterface {
     this[$usage] = usage;
   }
 
-  get texture(): Texture|null {
+  get texture(): Texture | null {
     return this[$texture];
   }
 
-  setTexture(texture: Texture|null): void {
-    const threeTexture: ThreeTexture|null =
-        texture != null ? texture.source[$threeTexture] : null;
+  setTexture(texture: Texture | null): void {
+    const threeTexture: ThreeTexture | null =
+      texture != null ? texture.source[$threeTexture] : null;
 
-    const oldTexture = this[$texture]?.source[$threeTexture] as VideoTexture;
-    if (oldTexture != null && oldTexture.isVideoTexture) {
+    const oldTexture = this[$texture]?.source[$threeTexture] as
+      | VideoTexture
+      | undefined;
+
+    if (oldTexture?.isVideoTexture) {
       this[$activeVideo] = false;
     } else if (this[$texture]?.source.animation) {
       this[$texture].source.animation.removeEventListener(
-          'enterFrame', this[$onUpdate]);
+        'enterFrame',
+        this[$onUpdate]
+      );
     }
 
     this[$texture] = texture;
 
-    if (threeTexture != null && (threeTexture as VideoTexture).isVideoTexture) {
-      const element = threeTexture.image;
+    // --- 🎥 VideoTexture update handling ---
+    if (threeTexture && (threeTexture as VideoTexture).isVideoTexture) {
+      const element = threeTexture.image as HTMLVideoElement;
       this[$activeVideo] = true;
-      if (element.requestVideoFrameCallback != null) {
+
+      // Use requestVideoFrameCallback if supported
+      if (
+        'requestVideoFrameCallback' in element &&
+        typeof element.requestVideoFrameCallback === 'function'
+      ) {
         const update = () => {
           if (!this[$activeVideo]) {
             return;
@@ -131,12 +152,16 @@ export class TextureInfo implements TextureInfoInterface {
         requestAnimationFrame(update);
       }
     } else if (texture?.source.animation != null) {
-      texture.source.animation.addEventListener('enterFrame', this[$onUpdate]);
+      texture.source.animation.addEventListener(
+        'enterFrame',
+        this[$onUpdate]
+      );
     }
 
+    // --- 🎨 Assign texture to material based on usage ---
     let colorSpace: ColorSpace = SRGBColorSpace;
     if (this[$materials]) {
-      for (const material of this[$materials]!) {
+      for (const material of this[$materials]) {
         switch (this[$usage]) {
           case TextureUsage.Base:
             material.map = threeTexture;
@@ -194,18 +219,20 @@ export class TextureInfo implements TextureInfoInterface {
             (material as any).anisotropyMap = threeTexture;
             break;
           default:
+            break;
         }
         material.needsUpdate = true;
       }
     }
 
+    // --- 🧭 Update texture transforms and color space ---
     if (threeTexture) {
-      // Updates the colorSpace for the texture, affects all references.
       threeTexture.colorSpace = colorSpace;
       threeTexture.rotation = this[$transform].rotation;
       threeTexture.repeat = this[$transform].scale;
       threeTexture.offset = this[$transform].offset;
     }
+
     this[$onUpdate]();
   }
 }

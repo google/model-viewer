@@ -26,18 +26,18 @@
   },
   "dependencies": {
     "@google/model-viewer": "^4.1.0",
-    "@google/model-viewer-effects": "^1.4.0",
+    "@google/model-viewer-effects": "^1.5.0",
     "@types/prismjs": "^1.26.5",
     "focus-visible": "^5.2.1",
-    "lit": "^3.2.1",
+    "lit": "^3.3.1",
     "prismjs": "^1.30.0"
   },
   "devDependencies": {
-    "rollup": "^4.35.0",
-    "@rollup/plugin-node-resolve": "^16.0.0",
+    "rollup": "^4.53.2",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-swc": "^0.4.0",
-    "@swc/core": "^1.11.8",
-    "@rollup/plugin-replace": "^6.0.2",
-    "typescript": "5.8.2"
+    "@swc/core": "^1.15.1",
+    "@rollup/plugin-replace": "^6.0.3",
+    "typescript": "5.9.3"
   }
 }
