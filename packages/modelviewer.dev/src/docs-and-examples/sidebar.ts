@@ -344,8 +344,7 @@ export function sidebarClick() {
   isSideBarClick = true;
   // close sidebar if click in sidebar on mobile
   if (window.innerWidth <= 800) {
-    const root = document.documentElement;
-    root.style.setProperty('--sidebar-width', '0px');
+    document.getElementById('sidenav')?.classList.remove('active');
   }
 }
 
