@@ -1,0 +1,37 @@
+{
+    "version": 2,
+    "legal": [
+        {
+            "license": "CC0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+            "artist": "Maximillan Kamps",
+            "year": "2018",
+            "owner": "UX3D",
+            "what": "Everything",
+            "text": "CC0 1.0 Universal",
+            "spdx": "CC0-1.0",
+            "icon": "https://licensebuttons.net/p/zero/1.0/88x31.png"
+        },
+        {
+            "license": "LicenseRef-LegalMark-UX3D",
+            "licenseUrl": "",
+            "artist": "Non-copyrightable logo",
+            "year": "2017",
+            "owner": "UX3D",
+            "what": "UX3D logo",
+            "text": "",
+            "spdx": "",
+            "icon": ""
+        }
+    ],
+    "tags": [
+        "core",
+        "testing",
+        "issues"
+    ],
+    "screenshot": "screenshot/screenshot.jpg",
+    "name": "Antique Camera",
+    "path": "./Models/AntiqueCamera",
+    "summary": "Static model of old camera on a tripod. [Issues: non-Khronos mark]",
+    "createReadme": true
+}

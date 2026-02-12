@@ -1,0 +1,37 @@
+{
+    "version": 2,
+    "legal": [
+        {
+            "license": "CC0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+            "artist": "Guido Odendahl",
+            "year": "2020",
+            "owner": "Public",
+            "what": "Initial car model",
+            "text": "CC0 1.0 Universal",
+            "spdx": "CC0-1.0",
+            "icon": "https://licensebuttons.net/p/zero/1.0/88x31.png"
+        },
+        {
+            "license": "CC0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+            "artist": "Eric Chadwick",
+            "year": "2020",
+            "owner": "Public",
+            "what": "Extensions and scene composition",
+            "text": "CC0 1.0 Universal",
+            "spdx": "CC0-1.0",
+            "icon": "https://licensebuttons.net/p/zero/1.0/88x31.png"
+        }
+    ],
+    "tags": [
+        "showcase",
+        "video",
+        "extension"
+    ],
+    "screenshot": "screenshot/screenshot.jpg",
+    "name": "Toy Car",
+    "path": "./Models/ToyCar",
+    "summary": "Toy car example using transmission, clearcoat, and sheen.",
+    "createReadme": true
+}
