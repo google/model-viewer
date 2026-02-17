@@ -115,6 +115,19 @@ export class ExampleSnippet extends ReactiveElement {
 
       let snippet = template.innerHTML;
 
+      // Ensure that any un-replaced version placeholders at runtime get stripped
+      // out with predefined injected variables from the Rollup build output.
+      // @ts-ignore
+      if (typeof __THREEJS_VERSION__ !== 'undefined') {
+        // @ts-ignore
+        snippet = snippet.replace(/\{\{THREEJS_VERSION\}\}/g, __THREEJS_VERSION__);
+      }
+      // @ts-ignore
+      if (typeof __POSTPROCESSING_VERSION__ !== 'undefined') {
+        // @ts-ignore
+        snippet = snippet.replace(/\{\{POSTPROCESSING_VERSION\}\}/g, __POSTPROCESSING_VERSION__);
+      }
+
       snippet = snippet.replace(/type="noexecute" /g, '');
       snippet = snippet.replace(/-noexecute/g, '');
 

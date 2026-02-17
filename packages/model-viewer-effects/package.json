@@ -73,7 +73,7 @@
   ],
   "dependencies": {
     "lit": "^3.2.1",
-    "postprocessing": "^6.37.1"
+    "postprocessing": "^6.38.2"
   },
   "peerDependencies": {
     "@google/model-viewer": "^4.1.0"
@@ -85,7 +85,7 @@
     "@rollup/plugin-replace": "^6.0.2",
     "@types/mocha": "^10.0.10",
     "@types/pngjs": "^6.0.5",
-    "@types/three": "^0.174.0",
+    "@types/three": "^0.182.0",
     "@ungap/event-target": "^0.2.4",
     "@web/test-runner": "^0.20.0",
     "@web/test-runner-playwright": "^0.11.0",
@@ -101,7 +101,7 @@
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-polyfill": "^4.2.0",
     "@rollup/plugin-terser": "^0.4.4",
-    "three": "^0.174.0",
+    "three": "^0.182.0",
     "typescript": "5.8.2"
   },
   "publishConfig": {

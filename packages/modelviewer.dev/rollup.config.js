@@ -25,7 +25,36 @@ const onwarn = (warning, warn) => {
   }
 };
 
-const plugins = [resolve(), replace({ 'Reflect.decorate': 'undefined', preventAssignment: true }), swc(), terser()];
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const modelViewerPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../model-viewer/package.json'), 'utf8'));
+const effectsPkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../model-viewer-effects/package.json'), 'utf8'));
+
+const getVersion = (pkg, name) => (pkg.dependencies?.[name] || pkg.devDependencies?.[name] || '').replace(/^[^\d]*/, '');
+
+const versions = {
+  three: getVersion(modelViewerPkg, 'three'),
+  modelViewer: modelViewerPkg.version || '',
+  postprocessing: getVersion(effectsPkg, 'postprocessing'),
+};
+
+const plugins = [
+  resolve(),
+  replace({
+    'Reflect.decorate': 'undefined',
+    '__THREEJS_VERSION__': JSON.stringify(versions.three),
+    '__MODELVIEWER_VERSION__': JSON.stringify(versions.modelViewer),
+    '__POSTPROCESSING_VERSION__': JSON.stringify(versions.postprocessing),
+    preventAssignment: true
+  }),
+  swc(),
+  terser()
+];
 
 const watchFiles =
   ['lib/**', '../model-viewer/lib/**', '../model-viewer-effects/lib/**'];
