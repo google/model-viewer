@@ -47,8 +47,31 @@ const PORT = 8080;
 const ROOT_DIR = path.resolve(__dirname, '..');
 
 const server = http.createServer((req, res) => {
-  // Basic URL parsing
-  let url = req.url.split('?')[0]; // Remove query params
+  // Basic URL parsing preventing Open Redirects and filtering query params
+  let safeUrl;
+  try {
+    safeUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  } catch (err) {
+    res.writeHead(400);
+    res.end('Bad Request');
+    return;
+  }
+  // Ensure the URL is strictly a relative root path to prevent Open Redirects (e.g. //google.com)
+  let url = safeUrl.pathname.replace(/^\/+/, '/');
+
+  try {
+    url = decodeURIComponent(url);
+  } catch (err) {
+    res.writeHead(400);
+    res.end('Bad Request');
+    return;
+  }
+  // Prevent null byte poisoning and directory traversal vulnerabilities
+  if (url.includes('\0') || url.includes('..')) {
+    res.writeHead(403);
+    res.end('403 Forbidden');
+    return;
+  }
 
   // Default to resolving paths to the packages/modelviewer.dev folder for root requests
   if (url === '/') {
@@ -67,12 +90,20 @@ const server = http.createServer((req, res) => {
     filePath = path.join(ROOT_DIR, 'packages', url);
   }
 
+  // Ensure filePath does not escape ROOT_DIR to prevent directory traversal
+  filePath = path.normalize(filePath);
+  if (!filePath.startsWith(ROOT_DIR)) {
+    res.writeHead(403);
+    res.end('403 Forbidden');
+    return;
+  }
+
   // If the compiled path is a directory, append index.html
   try {
     if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
       // Redirect if URL is missing trailing slash so relative HTML paths resolve correctly
       if (!url.endsWith('/')) {
-        res.writeHead(301, { 'Location': url + '/' });
+        res.writeHead(301, { 'Location': encodeURI(url + '/') });
         res.end();
         return;
       }
