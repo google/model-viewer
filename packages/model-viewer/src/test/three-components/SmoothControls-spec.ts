@@ -60,7 +60,9 @@ suite('SmoothControls', () => {
   });
 
   teardown(() => {
-    document.body.removeChild(modelViewer);
+    if (modelViewer && modelViewer.parentNode != null) {
+      modelViewer.parentNode.removeChild(modelViewer);
+    }
   });
 
   suite('when updated', () => {

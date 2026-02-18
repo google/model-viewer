@@ -110,7 +110,9 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
   }
 
   static initializeKTX2Loader(renderer: WebGLRenderer) {
-    ktx2Loader.detectSupport(renderer);
+    if (renderer != null) {
+      ktx2Loader.detectSupport(renderer);
+    }
   }
 
   static[$evictionPolicy]: CacheEvictionPolicy =

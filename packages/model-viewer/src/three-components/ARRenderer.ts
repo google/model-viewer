@@ -192,7 +192,9 @@ export class ARRenderer extends EventDispatcher<
   constructor(private renderer: Renderer) {
     super();
     this.threeRenderer = renderer.threeRenderer;
-    this.threeRenderer.xr.enabled = true;
+    if (this.threeRenderer != null && this.threeRenderer.xr != null) {
+      this.threeRenderer.xr.enabled = true;
+    }
   }
 
   async resolveARSession(): Promise<XRSession> {

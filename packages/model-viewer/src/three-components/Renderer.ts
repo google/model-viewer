@@ -160,6 +160,7 @@ export class Renderer extends
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = NeutralToneMapping;
     } catch (error) {
+      console.error('WEBGL_RENDERER_ERROR:', error);
       console.warn(error);
     }
 
@@ -181,7 +182,9 @@ export class Renderer extends
     scene.forceRescale();
 
     const size = new Vector2();
-    this.threeRenderer.getSize(size);
+    if (this.canRender) {
+      this.threeRenderer.getSize(size);
+    }
     scene.canvas.width = size.x;
     scene.canvas.height = size.y;
 
