@@ -336,6 +336,7 @@ suite('Controls', () => {
         test('respects user-configured min/maxFieldOfView', async () => {
           document.body.insertBefore(
               initiallyUnloadedElement, document.body.firstChild);
+          await rafPasses();
 
           initiallyUnloadedElement.minFieldOfView = '90deg';
           initiallyUnloadedElement.maxFieldOfView = '100deg';

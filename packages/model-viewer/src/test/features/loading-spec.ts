@@ -33,6 +33,7 @@ suite('Loading', () => {
     element = new ModelViewerElement();
     firstChild = document.body.firstChild;
     document.body.insertBefore(element, firstChild);
+    await rafPasses();
 
     // Wait at least a microtask for size calculations
     await timePasses();
@@ -53,6 +54,7 @@ suite('Loading', () => {
       element2 = new ModelViewerElement();
       element2.loading = 'eager';
       document.body.insertBefore(element2, firstChild);
+      await rafPasses();
       element.style.height = '100vh';
       element2.style.height = '100vh';
       const load1 = waitForEvent(element, 'load');

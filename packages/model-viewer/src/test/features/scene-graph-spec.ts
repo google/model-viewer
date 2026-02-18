@@ -45,9 +45,10 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
 suite('SceneGraph', () => {
   let element: ModelViewerElement;
 
-  setup(() => {
+  setup(async () => {
     element = new ModelViewerElement();
     document.body.insertBefore(element, document.body.firstChild);
+    await rafPasses();
   });
 
   teardown(() => {

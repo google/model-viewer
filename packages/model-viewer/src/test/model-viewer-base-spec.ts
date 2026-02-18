@@ -20,7 +20,7 @@ import {ModelViewerElement} from '../model-viewer.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../utilities.js';
 
-import {assetPath, until} from './helpers.js';
+import { assetPath, rafPasses, until } from './helpers.js';
 
 const expectBlobDimensions =
     async (blob: Blob, width: number, height: number) => {
@@ -42,10 +42,11 @@ suite('ModelViewerElementBase', () => {
     let element: ModelViewerElement;
     let input: HTMLDivElement;
 
-    setup(() => {
+    setup(async () => {
       element = new ModelViewerElement();
       input = element[$userInputElement];
       document.body.insertBefore(element, document.body.firstChild);
+      await rafPasses();
     });
 
     teardown(() => {
@@ -207,6 +208,7 @@ suite('ModelViewerElementBase', () => {
         element.style.marginBottom = '100vh';
         element.src = assetPath('models/cube.gltf');
         document.body.insertBefore(element, document.body.firstChild);
+        await rafPasses();
       }
     });
 
