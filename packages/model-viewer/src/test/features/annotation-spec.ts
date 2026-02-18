@@ -61,6 +61,8 @@ suite('Annotation', () => {
     document.body.insertBefore(element, document.body.firstChild);
     scene = element[$scene];
 
+    await rafPasses();
+
     element.src = assetPath('models/cube.gltf');
     await waitForEvent(element, 'poster-dismissed');
   });

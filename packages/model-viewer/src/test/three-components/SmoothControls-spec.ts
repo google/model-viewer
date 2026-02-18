@@ -21,7 +21,7 @@ import {$userInputElement} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {SmoothControls} from '../../three-components/SmoothControls.js';
 import {waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent} from '../helpers.js';
+import { assetPath, dispatchSyntheticEvent, rafPasses } from '../helpers.js';
 
 const ONE_FRAME_DELTA = 1000.0 / 60.0;
 const FIFTY_FRAME_DELTA = 50.0 * ONE_FRAME_DELTA;
@@ -51,6 +51,8 @@ suite('SmoothControls', () => {
     modelViewer.style.height = '100px';
 
     document.body.insertBefore(modelViewer, document.body.firstChild);
+
+    await rafPasses();
 
     modelViewer.cameraControls = true;
     modelViewer.src = assetPath('models/cube.gltf');
