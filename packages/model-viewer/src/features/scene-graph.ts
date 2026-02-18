@@ -129,9 +129,12 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async createTexture(uri: string, type: string = 'image/png'):
-        Promise<ModelViewerTexture> {
+      Promise<ModelViewerTexture | null> {
       const {textureUtils} = this[$renderer];
-      const texture = await textureUtils!.loadImage(uri, this.withCredentials);
+      if (textureUtils == null) {
+        return null;
+      }
+      const texture = await textureUtils.loadImage(uri, this.withCredentials);
 
       texture.userData.mimeType = type;
 
@@ -139,10 +142,13 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async createLottieTexture(uri: string, quality = 1):
-        Promise<ModelViewerTexture> {
+      Promise<ModelViewerTexture | null> {
       const {textureUtils} = this[$renderer];
+      if (textureUtils == null) {
+        return null;
+      }
       const texture =
-          await textureUtils!.loadLottie(uri, quality, this.withCredentials);
+        await textureUtils.loadLottie(uri, quality, this.withCredentials);
 
       return this[$buildTexture](texture);
     }

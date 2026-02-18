@@ -144,9 +144,7 @@ export class Renderer extends
       this.threeRenderer = new WebGLRenderer({
         canvas: this.canvas3D,
         alpha: true,
-        antialias: true,
-        powerPreference: options.powerPreference as WebGLPowerPreference,
-        preserveDrawingBuffer: true,
+        antialias: true
       });
       this.threeRenderer.autoClear = true;
       this.threeRenderer.setPixelRatio(1);  // handle pixel ratio externally
@@ -160,7 +158,6 @@ export class Renderer extends
       // and similar to Filament's gltf-viewer.
       this.threeRenderer.toneMapping = NeutralToneMapping;
     } catch (error) {
-      console.error('WEBGL_RENDERER_ERROR:', error);
       console.warn(error);
     }
 
@@ -176,6 +173,8 @@ export class Renderer extends
     this.updateRendererSize();
   }
 
+  private fallbackAnimationLoopId: number = 0;
+
   registerScene(scene: ModelScene) {
     this.scenes.add(scene);
 
@@ -188,9 +187,21 @@ export class Renderer extends
     scene.canvas.width = size.x;
     scene.canvas.height = size.y;
 
-    if (this.canRender && this.scenes.size > 0) {
-      this.threeRenderer.setAnimationLoop(
+    if (this.scenes.size > 0) {
+      if (this.canRender) {
+        this.threeRenderer.setAnimationLoop(
           (time: number, frame?: any) => this.render(time, frame));
+      } else if (this.fallbackAnimationLoopId === 0) {
+        const fallbackLoop = () => {
+          this.render(performance.now());
+          if (this.scenes.size > 0) {
+            this.fallbackAnimationLoopId = setTimeout(fallbackLoop, 16) as unknown as number;
+          } else {
+            this.fallbackAnimationLoopId = 0;
+          }
+        };
+        this.fallbackAnimationLoopId = setTimeout(fallbackLoop, 16) as unknown as number;
+      }
     }
   }
 
@@ -201,8 +212,13 @@ export class Renderer extends
       scene.canvas.parentElement!.removeChild(this.canvas3D);
     }
 
-    if (this.canRender && this.scenes.size === 0) {
-      this.threeRenderer.setAnimationLoop(null);
+    if (this.scenes.size === 0) {
+      if (this.canRender) {
+        this.threeRenderer.setAnimationLoop(null);
+      } else if (this.fallbackAnimationLoopId !== 0) {
+        clearTimeout(this.fallbackAnimationLoopId);
+        this.fallbackAnimationLoopId = 0;
+      }
     }
   }
 
@@ -416,15 +432,17 @@ export class Renderer extends
 
     element[$tick](t, delta);
 
-    const exposureIsNumber =
+    if (this.canRender) {
+      const exposureIsNumber =
         typeof exposure === 'number' && !Number.isNaN(exposure);
-    const env = element.environmentImage;
-    const sky = element.skyboxImage;
-    const compensateExposure = toneMapping === NeutralToneMapping &&
+      const env = element.environmentImage;
+      const sky = element.skyboxImage;
+      const compensateExposure = toneMapping === NeutralToneMapping &&
         (env === 'neutral' || env === 'legacy' || (!env && !sky));
-    this.threeRenderer.toneMappingExposure =
+      this.threeRenderer.toneMappingExposure =
         (exposureIsNumber ? exposure : 1.0) *
         (compensateExposure ? COMMERCE_EXPOSURE : 1.0);
+    }
   }
 
   render(t: number, frame?: XRFrame) {
@@ -436,7 +454,25 @@ export class Renderer extends
     const delta = t - this.lastTick;
     this.lastTick = t;
 
+    for (const scene of this.orderedScenes()) {
+      const { element } = scene;
+      if (!element.loaded ||
+        (!element.modelIsVisible && scene.renderCount > 0)) {
+        continue;
+      }
+      this.preRender(scene, t, delta);
+    }
+
     if (!this.canRender || this.isPresenting) {
+      for (const scene of this.orderedScenes()) {
+        const { element } = scene;
+        if (!element.loaded ||
+          (!element.modelIsVisible && scene.renderCount > 0)) {
+          continue;
+        }
+        scene.hasRendered();
+        ++scene.renderCount;
+      }
       return;
     }
 
@@ -455,8 +491,6 @@ export class Renderer extends
           (!element.modelIsVisible && scene.renderCount > 0)) {
         continue;
       }
-
-      this.preRender(scene, t, delta);
 
       if (!this.shouldRender(scene)) {
         continue;

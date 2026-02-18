@@ -193,6 +193,7 @@ suite('Annotation', () => {
         });
 
         test('the hotspot is hidden', async () => {
+          await waitForEvent(hotspot2, 'hotspot-visibility');
           expect(wrapper.classList.contains('hide')).to.be.true;
         });
 

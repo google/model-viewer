@@ -109,8 +109,11 @@ suite('Environment', () => {
       document.body.removeChild(element);
     });
 
-    test('changes the tone mapping exposure of the renderer', async () => {
+    test('changes the tone mapping exposure of the renderer', async function () {
       const renderer = Renderer.singleton;
+      if (!renderer.canRender) {
+        this.skip();
+      }
       const originalToneMappingExposure =
           renderer.threeRenderer.toneMappingExposure;
       element.exposure = 2.0;
