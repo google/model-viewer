@@ -116,7 +116,7 @@ suite('Controls', () => {
     });
 
     teardown(() => {
-      if (element.parentNode != null) {
+      if (element && element.parentNode != null) {
         element.parentNode.removeChild(element);
       }
     });
@@ -400,9 +400,11 @@ suite('Controls', () => {
     });
 
     teardown(() => {
-      element.cameraControls = false;
-      if (element.parentNode != null) {
-        element.parentNode.removeChild(element);
+      if (element) {
+        element.cameraControls = false;
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
       }
     });
 

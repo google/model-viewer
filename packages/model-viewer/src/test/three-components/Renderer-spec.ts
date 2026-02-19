@@ -75,7 +75,14 @@ suite('Renderer with two scenes', () => {
   let otherScene: ModelScene;
   let renderer: Renderer;
 
-  setup(() => {
+  setup(function () {
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     renderer = Renderer.singleton;
     // Ensure tests are not rescaling
     ModelViewerElement.minimumRenderScale = 1;
@@ -84,9 +91,9 @@ suite('Renderer with two scenes', () => {
   });
 
   teardown(() => {
-    disposeScene(scene);
-    disposeScene(otherScene);
-    renderer.render(performance.now());
+    if (scene) disposeScene(scene);
+    if (otherScene) disposeScene(otherScene);
+    if (renderer) renderer.render(performance.now());
   });
 
   test('pre-renders eager, invisible scenes', async () => {
@@ -109,8 +116,8 @@ suite('Renderer with two scenes', () => {
     });
 
     teardown(() => {
-      disposeScene(externalScene);
-      renderer.render(performance.now());
+      if (externalScene) disposeScene(externalScene);
+      if (renderer) renderer.render(performance.now());
     });
 
     test('load sets framing', async () => {

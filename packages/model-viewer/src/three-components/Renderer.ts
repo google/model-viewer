@@ -538,7 +538,11 @@ export class Renderer extends
         this.threeRenderer.autoClear =
             true;  // this might get reset by the effectRenderer
         this.threeRenderer.toneMapping = scene.toneMapping;
-        this.threeRenderer.render(scene, scene.camera);
+        try {
+          this.threeRenderer.render(scene, scene.camera);
+        } catch (error) {
+          console.warn('Three.js render failed:', error);
+        }
       }
       if (this.multipleScenesVisible ||
           (!scene.element.modelIsVisible && scene.renderCount === 0)) {

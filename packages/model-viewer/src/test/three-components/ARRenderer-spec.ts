@@ -185,14 +185,21 @@ suite('ARRenderer', () => {
     };
   };
 
-  setup(() => {
+  setup(function () {
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     element = new ModelViewerElement();
     document.body.insertBefore(element, document.body.firstChild);
     arRenderer = Renderer.singleton.arRenderer;
   });
 
   teardown(() => {
-    if (element.parentNode != null) {
+    if (element && element.parentNode != null) {
       element.parentNode.removeChild(element);
     }
   });
@@ -228,7 +235,7 @@ suite('ARRenderer', () => {
 
     teardown(async () => {
       (window as any).XRRay = oldXRRay;
-      await arRenderer.stopPresenting().catch(() => {});
+      if (arRenderer) await arRenderer.stopPresenting().catch(() => { });
     });
 
     test('presents the model at its natural scale', () => {

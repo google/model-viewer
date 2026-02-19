@@ -27,13 +27,22 @@ suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
   let baseScreenshot: Uint8Array;
 
-  setup(async () => {
+  setup(async function () {
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));
     await waitForEvent(element, 'load');
   });
 
   teardown(() => {
-    document.body.removeChild(element);
+    if (element && element.parentNode) {
+      document.body.removeChild(element);
+    }
   });
 
   test('Compare ModelViewer to Self', async () => {

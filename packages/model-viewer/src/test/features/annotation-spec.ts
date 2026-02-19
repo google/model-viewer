@@ -22,7 +22,7 @@ import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, rafPasses} from '../helpers.js';
+import {assetPath, rafPasses, until} from '../helpers.js';
 
 const sceneContainsHotspot =
     (scene: ModelScene, element: HTMLElement): boolean => {
@@ -201,7 +201,7 @@ suite('Annotation', () => {
         });
 
         test('the hotspot is hidden', async () => {
-          await waitForEvent(hotspot2, 'hotspot-visibility');
+          await until(() => wrapper.classList.contains('hide'));
           expect(wrapper.classList.contains('hide')).to.be.true;
         });
 

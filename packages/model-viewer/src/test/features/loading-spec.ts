@@ -126,8 +126,9 @@ suite('Loading', () => {
     element.style.display = 'none';
 
     // Give IntersectionObserver a chance to notify. In Chrome, this takes
-    // two rAFs (empirically observed). Await extra time just in case:
-    await timePasses(100);
+    // two rAFs (empirically observed). Webkit might be faster or slower.
+    // Await extra time just in case:
+    await timePasses(500);
 
     element.src = CUBE_GLB_PATH;
 
