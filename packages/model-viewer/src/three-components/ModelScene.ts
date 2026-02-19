@@ -1,5 +1,5 @@
 /* @license
- * Copyright 2019 Google LLC. All Rights Reserved.
+ * Copyright 2025 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, AnimationMixerEventMap, Box3, Camera, Euler, Event as ThreeEvent, LoopOnce, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, NeutralToneMapping, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer, XRTargetRaySpace} from 'three';
-import {CSS2DRenderer} from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import {reduceVertices} from 'three/examples/jsm/utils/SceneUtils.js';
+import { AnimationAction, AnimationActionLoopStyles, AnimationClip, AnimationMixer, AnimationMixerEventMap, Box3, Camera, Euler, Event as ThreeEvent, LoopOnce, LoopPingPong, LoopRepeat, Material, Matrix3, Mesh, NeutralToneMapping, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Texture, ToneMapping, Triangle, Vector2, Vector3, WebGLRenderer, XRTargetRaySpace } from 'three';
+import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { reduceVertices } from 'three/examples/jsm/utils/SceneUtils.js';
 
-import {$currentGLTF, $model, $originalGltfJson} from '../features/scene-graph.js';
-import {$nodeFromIndex, $nodeFromPoint} from '../features/scene-graph/model.js';
-import ModelViewerElementBase, {$renderer, $scene, EffectComposerInterface, RendererInterface} from '../model-viewer-base.js';
-import {ModelViewerElement} from '../model-viewer.js';
-import {normalizeUnit} from '../styles/conversions.js';
-import {NumberNode, parseExpressions} from '../styles/parsers.js';
+import { $currentGLTF, $model, $originalGltfJson } from '../features/scene-graph.js';
+import { $nodeFromIndex, $nodeFromPoint } from '../features/scene-graph/model.js';
+import ModelViewerElementBase, { $renderer, $scene, EffectComposerInterface, RendererInterface } from '../model-viewer-base.js';
+import { ModelViewerElement } from '../model-viewer.js';
+import { normalizeUnit } from '../styles/conversions.js';
+import { NumberNode, parseExpressions } from '../styles/parsers.js';
 
-import {Damper, SETTLING_TIME} from './Damper.js';
-import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
-import {GroundedSkybox} from './GroundedSkybox.js';
-import {Hotspot} from './Hotspot.js';
-import {Shadow} from './Shadow.js';
+import { Damper, SETTLING_TIME } from './Damper.js';
+import { ModelViewerGLTFInstance } from './gltf-instance/ModelViewerGLTFInstance.js';
+import { GroundedSkybox } from './GroundedSkybox.js';
+import { Hotspot } from './Hotspot.js';
+import { Shadow } from './Shadow.js';
 
 export const GROUNDED_SKYBOX_SIZE = 10;
 const MIN_SHADOW_RATIO = 100;
@@ -48,9 +48,9 @@ export interface MarkedAnimation {
   name: string, loopMode: AnimationActionLoopStyles, repetitionCount: number
 }
 
-export type IlluminationRole = 'primary'|'secondary';
+export type IlluminationRole = 'primary' | 'secondary';
 
-export const IlluminationRole: {[index: string]: IlluminationRole} = {
+export const IlluminationRole: { [index: string]: IlluminationRole } = {
   Primary: 'primary',
   Secondary: 'secondary'
 };
@@ -69,43 +69,43 @@ const ndc = new Vector2();
  * Provides lights and cameras to be used in a renderer.
  */
 export class ModelScene extends Scene {
-  public element: ModelViewerElement;
-  public canvas: HTMLCanvasElement;
-  public annotationRenderer = new CSS2DRenderer();
-  public effectRenderer: EffectComposerInterface|null = null;
-  public schemaElement = document.createElement('script');
-  public width = 1;
-  public height = 1;
-  public aspect = 1;
-  public scaleStep = 0;
-  public renderCount = 0;
-  public externalRenderer: RendererInterface|null = null;
-  public appendedAnimations: Array<string> = [];
-  public markedAnimations: Array<MarkedAnimation> = [];
+  element: ModelViewerElement;
+  canvas: HTMLCanvasElement;
+  annotationRenderer = new CSS2DRenderer();
+  effectRenderer: EffectComposerInterface | null = null;
+  schemaElement = document.createElement('script');
+  width = 1;
+  height = 1;
+  aspect = 1;
+  scaleStep = 0;
+  renderCount = 0;
+  externalRenderer: RendererInterface | null = null;
+  appendedAnimations: Array<string> = [];
+  markedAnimations: Array<MarkedAnimation> = [];
 
   // These default camera values are never used, as they are reset once the
   // model is loaded and framing is computed.
-  public camera = new PerspectiveCamera(45, 1, 0.1, 100);
-  public xrCamera: Camera|null = null;
+  camera = new PerspectiveCamera(45, 1, 0.1, 100);
+  xrCamera: Camera | null = null;
 
-  public url: string|null = null;
-  public pivot = new Object3D();
-  public target = new Object3D();
-  public animationNames: Array<string> = [];
-  public boundingBox = new Box3();
-  public boundingSphere = new Sphere();
-  public size = new Vector3();
-  public idealAspect = 0;
-  public framedFoVDeg = 0;
+  url: string | null = null;
+  pivot = new Object3D();
+  target = new Object3D();
+  animationNames: Array<string> = [];
+  boundingBox = new Box3();
+  boundingSphere = new Sphere();
+  size = new Vector3();
+  idealAspect = 0;
+  framedFoVDeg = 0;
 
-  public shadow: Shadow|null = null;
-  public shadowIntensity = 0;
-  public shadowSoftness = 1;
-  public bakedShadows = new Set<Mesh>();
+  shadow: Shadow | null = null;
+  shadowIntensity = 0;
+  shadowSoftness = 1;
+  bakedShadows = new Set<Mesh>();
 
-  public exposure = 1;
-  public toneMapping: ToneMapping = NeutralToneMapping;
-  public canScale = true;
+  exposure = 1;
+  toneMapping: ToneMapping = NeutralToneMapping;
+  canScale = true;
 
   private isDirty = false;
 
@@ -114,16 +114,16 @@ export class ModelScene extends Scene {
   private targetDamperY = new Damper();
   private targetDamperZ = new Damper();
 
-  private _currentGLTF: ModelViewerGLTFInstance|null = null;
-  private _model: Object3D|null = null;
+  private _currentGLTF: ModelViewerGLTFInstance | null = null;
+  private _model: Object3D | null = null;
   private mixer: AnimationMixer;
-  private cancelPendingSourceChange: (() => void)|null = null;
+  private cancelPendingSourceChange: (() => void) | null = null;
   private animationsByName: Map<string, AnimationClip> = new Map();
-  private currentAnimationAction: AnimationAction|null = null;
+  private currentAnimationAction: AnimationAction | null = null;
 
   private groundedSkybox = new GroundedSkybox();
 
-  constructor({canvas, element, width, height}: ModelSceneConfig) {
+  constructor({ canvas, element, width, height }: ModelSceneConfig) {
     super();
 
     this.name = 'ModelScene';
@@ -147,8 +147,8 @@ export class ModelScene extends Scene {
 
     this.mixer = new AnimationMixer(this.target);
 
-    const {domElement} = this.annotationRenderer;
-    const {style} = domElement;
+    const { domElement } = this.annotationRenderer;
+    const { style } = domElement;
     style.display = 'none';
     style.pointerEvents = 'none';
     style.position = 'absolute';
@@ -205,8 +205,8 @@ export class ModelScene extends Scene {
    */
 
   async setSource(
-      url: string|null,
-      progressCallback: (progress: number) => void = () => {}) {
+    url: string | null,
+    progressCallback: (progress: number) => void = () => { }) {
     if (!url || url === this.url) {
       progressCallback(1);
       return;
@@ -232,17 +232,19 @@ export class ModelScene extends Scene {
     let gltf: ModelViewerGLTFInstance;
 
     try {
-      gltf = await new Promise<ModelViewerGLTFInstance>(
-          async (resolve, reject) => {
-            this.cancelPendingSourceChange = () => reject();
-            try {
-              const result = await this.element[$renderer].loader.load(
-                  url, this.element, progressCallback);
-              resolve(result);
-            } catch (error) {
-              reject(error);
-            }
-          });
+      gltf = await new Promise<ModelViewerGLTFInstance>((resolve, reject) => {
+        this.cancelPendingSourceChange = () => reject();
+
+        (async () => {
+          try {
+            const result = await this.element[$renderer].loader.load(
+              url, this.element, progressCallback);
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        })();
+      });
     } catch (error) {
       if (error == null) {
         // Loading was cancelled, so silently return
@@ -251,6 +253,7 @@ export class ModelScene extends Scene {
 
       throw error;
     }
+
 
     this.cancelPendingSourceChange = null;
     this.reset();
@@ -262,7 +265,7 @@ export class ModelScene extends Scene {
       this.target.add(gltf.scene);
     }
 
-    const {animations} = gltf!;
+    const { animations } = gltf!;
     const animationsByName = new Map();
     const animationNames = [];
 
@@ -299,7 +302,7 @@ export class ModelScene extends Scene {
     }
     this.bakedShadows.clear();
 
-    const {_model} = this;
+    const { _model } = this;
     if (_model != null) {
       _model.removeFromParent();
       this._model = null;
@@ -392,21 +395,21 @@ export class ModelScene extends Scene {
   }
 
   checkBakedShadows() {
-    const {min, max} = this.boundingBox;
+    const { min, max } = this.boundingBox;
     const shadowBox = new Box3();
     this.boundingBox.getSize(this.size);
 
     for (const mesh of this.bakedShadows) {
       shadowBox.setFromObject(mesh);
       if (shadowBox.min.y < min.y + this.size.y / MIN_SHADOW_RATIO &&
-          shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
-          shadowBox.min.z <= min.z && shadowBox.max.z >= max.z) {
+        shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
+        shadowBox.min.z <= min.z && shadowBox.max.z >= max.z) {
         // floor shadow
         continue;
       }
       if (shadowBox.min.z < min.z + this.size.z / MIN_SHADOW_RATIO &&
-          shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
-          shadowBox.min.y <= min.y && shadowBox.max.y >= max.y) {
+        shadowBox.min.x <= min.x && shadowBox.max.x >= max.x &&
+        shadowBox.min.y <= min.y && shadowBox.max.y >= max.y) {
         // wall shadow
         continue;
       }
@@ -415,12 +418,12 @@ export class ModelScene extends Scene {
   }
 
   applyTransform() {
-    const {model} = this;
+    const { model } = this;
     if (model == null) {
       return;
     }
     const orientation = parseExpressions(this.element.orientation)[0]
-                            .terms as [NumberNode, NumberNode, NumberNode];
+      .terms as [NumberNode, NumberNode, NumberNode];
 
     const roll = normalizeUnit(orientation[0]).number;
     const pitch = normalizeUnit(orientation[1]).number;
@@ -429,13 +432,13 @@ export class ModelScene extends Scene {
     model.quaternion.setFromEuler(new Euler(pitch, yaw, roll, 'YXZ'));
 
     const scale = parseExpressions(this.element.scale)[0]
-                      .terms as [NumberNode, NumberNode, NumberNode];
+      .terms as [NumberNode, NumberNode, NumberNode];
 
     model.scale.set(scale[0].number, scale[1].number, scale[2].number);
   }
 
   updateBoundingBox() {
-    const {model} = this;
+    const { model } = this;
     if (model == null) {
       return;
     }
@@ -471,13 +474,13 @@ export class ModelScene extends Scene {
    * one side instead of both. Proper choice of center can correct this.
    */
   async updateFraming() {
-    const {model} = this;
+    const { model } = this;
     if (model == null) {
       return;
     }
     this.target.remove(model);
     this.setBakedShadowVisibility(false);
-    const {center} = this.boundingSphere;
+    const { center } = this.boundingSphere;
 
     this.element.requestUpdate('cameraTarget');
     await this.element.updateComplete;
@@ -487,16 +490,16 @@ export class ModelScene extends Scene {
       return Math.max(value, center!.distanceToSquared(vertex));
     };
     this.boundingSphere.radius =
-        Math.sqrt(reduceVertices(model, radiusSquared, 0));
+      Math.sqrt(reduceVertices(model, radiusSquared, 0));
 
     const horizontalTanFov = (value: number, vertex: Vector3): number => {
       vertex.sub(center!);
       const radiusXZ = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z);
       return Math.max(
-          value, radiusXZ / (this.idealCameraDistance() - Math.abs(vertex.y)));
+        value, radiusXZ / (this.idealCameraDistance() - Math.abs(vertex.y)));
     };
     this.idealAspect = reduceVertices(model, horizontalTanFov, 0) /
-        Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
+      Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
 
     this.setBakedShadowVisibility();
     this.target.add(model);
@@ -519,7 +522,7 @@ export class ModelScene extends Scene {
    */
   adjustedFoV(fovDeg: number): number {
     const vertical = Math.tan((fovDeg / 2) * Math.PI / 180) *
-        Math.max(1, this.idealAspect / this.aspect);
+      Math.max(1, this.idealAspect / this.aspect);
     return 2 * Math.atan(vertical) * 180 / Math.PI;
   }
 
@@ -529,7 +532,7 @@ export class ModelScene extends Scene {
     } else {
       const rect = this.element.getBoundingClientRect();
       ndc.set(
-          (clientX - rect.x) / this.width, (clientY - rect.y) / this.height);
+        (clientX - rect.x) / this.width, (clientY - rect.y) / this.height);
     }
 
     ndc.multiplyScalar(2).subScalar(1);
@@ -540,11 +543,11 @@ export class ModelScene extends Scene {
   /**
    * Returns the size of the corresponding canvas element.
    */
-  getSize(): {width: number, height: number} {
-    return {width: this.width, height: this.height};
+  getSize(): { width: number, height: number } {
+    return { width: this.width, height: this.height };
   }
 
-  setEnvironmentAndSkybox(environment: Texture|null, skybox: Texture|null) {
+  setEnvironmentAndSkybox(environment: Texture | null, skybox: Texture | null) {
     if (this.element[$renderer].arRenderer.presentedScene === this) {
       return;
     }
@@ -553,7 +556,7 @@ export class ModelScene extends Scene {
     this.queueRender();
   }
 
-  setBackground(skybox: Texture|null) {
+  setBackground(skybox: Texture | null) {
     this.groundedSkybox.map = skybox;
     if (this.groundedSkybox.isUsable()) {
       this.target.add(this.groundedSkybox);
@@ -566,18 +569,18 @@ export class ModelScene extends Scene {
 
   farRadius() {
     return this.boundingSphere.radius *
-        (this.groundedSkybox.parent != null ? GROUNDED_SKYBOX_SIZE : 1);
+      (this.groundedSkybox.parent != null ? GROUNDED_SKYBOX_SIZE : 1);
   }
 
   setGroundedSkybox() {
     const heightNode =
-        parseExpressions(this.element.skyboxHeight)[0].terms[0] as NumberNode;
+      parseExpressions(this.element.skyboxHeight)[0].terms[0] as NumberNode;
     const height = normalizeUnit(heightNode).number;
     const radius = GROUNDED_SKYBOX_SIZE * this.boundingSphere.radius;
 
     this.groundedSkybox.updateGeometry(height, radius);
     this.groundedSkybox.position.y =
-        height - (this.shadow ? 2 * this.shadow.gap() : 0);
+      height - (this.shadow ? 2 * this.shadow.gap() : 0);
 
     this.setBackground(this.groundedSkybox.map);
   }
@@ -629,7 +632,7 @@ export class ModelScene extends Scene {
     const target = this.target.position;
     if (!goal.equals(target)) {
       const normalization = this.boundingSphere.radius / 10;
-      let {x, y, z} = target;
+      let { x, y, z } = target;
       x = this.targetDamperX.update(x, goal.x, delta, normalization);
       y = this.targetDamperY.update(y, goal.y, delta, normalization);
       z = this.targetDamperZ.update(z, goal.z, delta, normalization);
@@ -648,7 +651,7 @@ export class ModelScene extends Scene {
    * Yaw the +z (front) of the model toward the indicated world coordinates.
    */
   pointTowards(worldX: number, worldZ: number) {
-    const {x, z} = this.position;
+    const { x, z } = this.position;
     this.yaw = Math.atan2(worldX - x, worldZ - z);
   }
 
@@ -678,9 +681,9 @@ export class ModelScene extends Scene {
   get animationTime(): number {
     if (this.currentAnimationAction != null) {
       const loopCount =
-          Math.max((this.currentAnimationAction as any)._loopCount, 0);
+        Math.max((this.currentAnimationAction as any)._loopCount, 0);
       if (this.currentAnimationAction.loop === LoopPingPong &&
-          (loopCount & 1) === 1) {
+        (loopCount & 1) === 1) {
         return this.duration - this.currentAnimationAction.time
       } else {
         return this.currentAnimationAction.time;
@@ -700,7 +703,7 @@ export class ModelScene extends Scene {
 
   get duration(): number {
     if (this.currentAnimationAction != null &&
-        this.currentAnimationAction.getClip()) {
+      this.currentAnimationAction.getClip()) {
       return this.currentAnimationAction.getClip().duration;
     }
 
@@ -718,13 +721,13 @@ export class ModelScene extends Scene {
    * to playing the first animation.
    */
   playAnimation(
-      name: string|null = null, crossfadeTime: number = 0,
-      loopMode: AnimationActionLoopStyles = LoopRepeat,
-      repetitionCount: number = Infinity) {
+    name: string | null = null, crossfadeTime: number = 0,
+    loopMode: AnimationActionLoopStyles = LoopRepeat,
+    repetitionCount: number = Infinity) {
     if (this._currentGLTF == null) {
       return;
     }
-    const {animations} = this;
+    const { animations } = this;
     if (animations == null || animations.length === 0) {
       return;
     }
@@ -738,7 +741,7 @@ export class ModelScene extends Scene {
         const parsedAnimationIndex = parseInt(name);
 
         if (!isNaN(parsedAnimationIndex) && parsedAnimationIndex >= 0 &&
-            parsedAnimationIndex < animations.length) {
+          parsedAnimationIndex < animations.length) {
           animationClip = animations[parsedAnimationIndex];
         }
       }
@@ -749,14 +752,9 @@ export class ModelScene extends Scene {
     }
 
     try {
-      const {currentAnimationAction: lastAnimationAction} = this;
+      const { currentAnimationAction: lastAnimationAction } = this;
 
       const action = this.mixer.clipAction(animationClip, this);
-
-      // Reset animationAction timeScale
-      if (action.timeScale != this.element.timeScale) {
-        action.timeScale = this.element.timeScale;
-      }
 
       this.currentAnimationAction = action;
 
@@ -767,8 +765,8 @@ export class ModelScene extends Scene {
         if (lastAnimationAction != null && action !== lastAnimationAction) {
           action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
         } else if (
-            this.animationTimeScale > 0 &&
-            this.animationTime == this.duration) {
+          this.animationTimeScale > 0 &&
+          this.animationTime == this.duration) {
           // This is a workaround for what I believe is a three.js bug.
           this.animationTime = 0;
         }
@@ -785,110 +783,119 @@ export class ModelScene extends Scene {
   }
 
   appendAnimation(
-      name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
-      repetitionCount: number = Infinity, weight: number = 1,
-      timeScale: number = 1, fade: boolean|number = false,
-      warp: boolean|number = false, relativeWarp: boolean = true,
-      time: null|number = null, needsToStop: boolean = false) {
+    name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
+    repetitionCount: number = Infinity, weight: number = 1,
+    timeScale: number = 1, fade: boolean | number | string = false,
+    warp: boolean | number | string = false, relativeWarp: boolean = true,
+    time: null | number | string = null, needsToStop: boolean = false) {
     if (this._currentGLTF == null || name === this.element.animationName) {
       return;
     }
-    const {animations} = this;
+    const { animations } = this;
     if (animations == null || animations.length === 0) {
       return;
     }
 
-    let animationClip = null;
-    const defaultFade = 1.25;
-
-    if (name) {
-      animationClip = this.animationsByName.get(name);
-    }
-
+    const animationClip = name ? this.animationsByName.get(name) : null;
     if (animationClip == null) {
       return;
     }
 
-    // validate function parameters
+    // validate and normalize parameters
     if (typeof repetitionCount === 'string') {
-      if (!isNaN(repetitionCount)) {
-        repetitionCount = Math.max(parseInt(repetitionCount), 1);
-      } else {
+      if (isNaN(parseFloat(repetitionCount))) {
         repetitionCount = Infinity;
-        console.warn(
-            'Invalid repetitionCount value, repetitionCount is set to Infinity');
+        console.warn(`Invalid repetitionCount value: ${repetitionCount}. Using default: Infinity`);
+      } else {
+        if (parseInt(repetitionCount) < 1) {
+          console.warn(`Invalid repetitionCount value: ${repetitionCount}. Using 1 as minimum.`);
+        }
+        repetitionCount = Math.max(parseInt(repetitionCount), 1);
       }
     } else if (typeof repetitionCount === 'number' && repetitionCount < 1) {
       repetitionCount = 1;
+      console.warn(`Invalid repetitionCount value: ${repetitionCount}. Using  1 value as minimum.`);
+    } else {
+      console.warn(`Invalid repetitionCount value: ${repetitionCount}. Using default: Infinity`);
     }
 
     if (repetitionCount === 1 && loopMode !== LoopOnce) {
-      loopMode = LoopOnce
+      loopMode = LoopOnce;
     }
 
     if (typeof weight === 'string') {
-      if (!isNaN(weight)) {
-        weight = parseFloat(weight);
-      } else {
+      const parsedWeight = parseFloat(weight);
+      if (isNaN(parsedWeight) || parsedWeight < 0 || parsedWeight > 1) {
         weight = 1;
-        console.warn('Invalid weight value, weight is set to 1');
+        console.warn(`Invalid weight value: ${weight}. Using default: 1`);
+      } else {
+        weight = parsedWeight;
       }
     }
 
     if (typeof timeScale === 'string') {
-      if (!isNaN(timeScale)) {
-        timeScale = parseFloat(timeScale);
-      } else {
+      const parsedTimeScale = parseFloat(timeScale);
+      if (isNaN(parsedTimeScale) || parsedTimeScale < 0) {
         timeScale = 1;
-        console.warn('Invalid timeScale value, timeScale is set to 1');
-      }
-    }
-
-    if (typeof fade === 'string') {
-      // @ts-ignore: Unreachable code error
-      if (fade.toLowerCase().trim() === 'true') {
-        fade = true;
-        // @ts-ignore: Unreachable code error
-      } else if (fade.toLowerCase().trim() === 'false') {
-        fade = false;
-      } else if (!isNaN(fade)) {
-        fade = parseFloat(fade);
+        console.warn(`Invalid timeScale value: ${timeScale}. Using default: 1`);
       } else {
-        fade = false;
-        console.warn('Invalid fade value, fade is set to false');
-      }
-    }
-
-    if (typeof warp === 'string') {
-      // @ts-ignore: Unreachable code error
-      if (warp.toLowerCase().trim() === 'true') {
-        warp = true;
-        // @ts-ignore: Unreachable code error
-      } else if (warp.toLowerCase().trim() === 'false') {
-        warp = false;
-      } else if (!isNaN(warp)) {
-        warp = parseFloat(warp);
-      } else {
-        warp = false;
-        console.warn('Invalid warp value, warp is set to false');
+        timeScale = parsedTimeScale;
       }
     }
 
     if (typeof time === 'string') {
-      if (!isNaN(time)) {
-        time = parseFloat(time);
+      // time = !isNaN(parseFloat(time)) ? parseFloat(time) : null;
+      const parsedTime = parseFloat(time);
+      if (isNaN(parsedTime)) {
+        time = null;
+        console.warn(`Invalid time value: ${time}. Using default: 0 or previous time`);
+      } else {
+        time = parsedTime;
+      }
+    }
+
+    const { shouldFade, duration: fadeDuration } =
+      this.parseFadeValue(fade, false, 1.25);
+
+    const defaultWarpDuration = 1.25;
+    let shouldWarp = false;
+    let warpDuration = 0;
+
+    if (typeof warp === 'boolean') {
+      shouldWarp = warp;
+      warpDuration = warp ? defaultWarpDuration : 0;
+    } else if (typeof warp === 'number') {
+      shouldWarp = warp > 0;
+      warpDuration = Math.max(warp, 0);
+      if (warp < 0) {
+        console.warn(`Invalid warp value: ${warp}. Using default: false`);
+      }
+    } else if (typeof warp === 'string') {
+      if (warp.toLowerCase().trim() === 'true') {
+        shouldWarp = true;
+        warpDuration = defaultWarpDuration;
+      } else if (warp.toLowerCase().trim() === 'false') {
+        shouldWarp = false;
+      } else if (!isNaN(parseFloat(warp))) {
+        warpDuration = Math.max(parseFloat(warp), 0);
+        shouldWarp = warpDuration > 0;
+        if (warpDuration <= 0) {
+          console.warn(`Invalid warp value: ${warp}. Using default: false`);
+        }
+      } else {
+        console.warn(`Invalid warp value: ${warp}. Using default: false`);
       }
     }
 
     try {
       const action = this.mixer.existingAction(animationClip) ||
-          this.mixer.clipAction(animationClip, this);
+        this.mixer.clipAction(animationClip, this);
 
       const currentTimeScale = action.timeScale;
 
       if (needsToStop && this.appendedAnimations.includes(name)) {
         if (!this.markedAnimations.map(e => e.name).includes(name)) {
-          this.markedAnimations.push({name, loopMode, repetitionCount});
+          this.markedAnimations.push({ name, loopMode, repetitionCount });
         }
       }
 
@@ -896,22 +903,15 @@ export class ModelScene extends Scene {
         action.time = Math.min(Math.max(time, 0), animationClip.duration);
       }
 
-      if (typeof fade === 'boolean' && fade) {
-        action.fadeIn(defaultFade);
-      } else if (typeof fade === 'number') {
-        action.fadeIn(Math.max(fade, 0));
-      } else {
-        if (weight >= 0) {
-          action.weight = Math.min(Math.max(weight, 0), 1);
-        }
+      if (shouldFade) {
+        action.fadeIn(fadeDuration);
+      } else if (weight >= 0) {
+        action.weight = Math.min(Math.max(weight, 0), 1);
       }
 
-      if (typeof warp === 'boolean' && warp) {
+      if (shouldWarp) {
         action.warp(
-            relativeWarp ? currentTimeScale : 0, timeScale, defaultFade);
-      } else if (typeof warp === 'number') {
-        action.warp(
-            relativeWarp ? currentTimeScale : 0, timeScale, Math.max(warp, 0));
+          relativeWarp ? currentTimeScale : 0, timeScale, warpDuration);
       } else {
         action.timeScale = timeScale;
       }
@@ -935,68 +935,88 @@ export class ModelScene extends Scene {
     }
   }
 
-  detachAnimation(name: string = '', fade: boolean|number = true) {
+  /**
+   * Helper function to parse fade parameter values
+   */
+  private parseFadeValue(
+    fade: boolean | number | string, defaultValue: boolean = true,
+    defaultDuration: number = 1.5): { shouldFade: boolean, duration: number } {
+    const normalizeString = (str: string) => str.toLowerCase().trim();
+
+    if (typeof fade === 'boolean') {
+      return { shouldFade: fade, duration: fade ? defaultDuration : 0 };
+    }
+
+    if (typeof fade === 'number') {
+      const duration = Math.max(fade, 0);
+      return { shouldFade: duration > 0, duration };
+    }
+
+    if (typeof fade === 'string') {
+      const normalized = normalizeString(fade);
+
+      if (normalized === 'true') {
+        return { shouldFade: true, duration: defaultDuration };
+      }
+
+      if (normalized === 'false') {
+        return { shouldFade: false, duration: 0 };
+      }
+
+      const parsed = parseFloat(normalized);
+      if (!isNaN(parsed)) {
+        const duration = Math.max(parsed, 0);
+        return { shouldFade: duration > 0, duration };
+      }
+    }
+
+    console.warn(`Invalid fade value: ${fade}. Using default: ${defaultValue}`);
+    return {
+      shouldFade: defaultValue,
+      duration: defaultValue ? defaultDuration : 0
+    };
+  }
+
+  detachAnimation(name: string = '', fade: boolean | number | string = true) {
     if (this._currentGLTF == null || name === this.element.animationName) {
       return;
     }
-    const {animations} = this;
+    const { animations } = this;
     if (animations == null || animations.length === 0) {
       return;
     }
 
-    let animationClip = null;
-    const defaultFade = 1.5;
-
-    if (name) {
-      animationClip = this.animationsByName.get(name);
-    }
-
+    const animationClip = name ? this.animationsByName.get(name) : null;
     if (animationClip == null) {
       return;
     }
 
-    if (typeof fade === 'string') {
-      // @ts-ignore: Unreachable code error
-      if (fade.toLowerCase().trim() === 'true') {
-        fade = true;
-        // @ts-ignore: Unreachable code error
-      } else if (fade.toLowerCase().trim() === 'false') {
-        fade = false;
-      } else if (!isNaN(fade)) {
-        fade = parseFloat(fade);
-      } else {
-        fade = true;
-        console.warn('Invalid fade value, fade is set to true');
-      }
-    }
+    const { shouldFade, duration } = this.parseFadeValue(fade, true, 1.5);
 
     try {
       const action = this.mixer.existingAction(animationClip) ||
-          this.mixer.clipAction(animationClip, this);
+        this.mixer.clipAction(animationClip, this);
 
-      if (typeof fade === 'boolean' && fade) {
-        action.fadeOut(defaultFade);
-      } else if (typeof fade === 'number') {
-        action.fadeOut(Math.max(fade, 0));
+      if (shouldFade) {
+        action.fadeOut(duration);
       } else {
         action.stop();
       }
 
-      const result =
-          this.element[$scene].appendedAnimations.filter(i => i !== name);
-      this.element[$scene].appendedAnimations = result;
+      this.element[$scene].appendedAnimations =
+        this.element[$scene].appendedAnimations.filter(i => i !== name);
     } catch (error) {
       console.error(error);
     }
   }
 
   updateAnimationLoop(
-      name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
-      repetitionCount: number = Infinity) {
+    name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
+    repetitionCount: number = Infinity) {
     if (this._currentGLTF == null || name === this.element.animationName) {
       return;
     }
-    const {animations} = this;
+    const { animations } = this;
     if (animations == null || animations.length === 0) {
       return;
     }
@@ -1013,7 +1033,7 @@ export class ModelScene extends Scene {
 
     try {
       const action = this.mixer.existingAction(animationClip) ||
-          this.mixer.clipAction(animationClip, this);
+        this.mixer.clipAction(animationClip, this);
       action.stop();
       action.setLoop(loopMode, repetitionCount);
       action.play();
@@ -1033,7 +1053,7 @@ export class ModelScene extends Scene {
   }
 
   subscribeMixerEvent(
-      event: keyof AnimationMixerEventMap, callback: (...args: any[]) => void) {
+    event: keyof AnimationMixerEventMap, callback: (...args: any[]) => void) {
     this.mixer.addEventListener(event, callback);
   }
 
@@ -1129,8 +1149,7 @@ export class ModelScene extends Scene {
    * coordinates given relative to the model-viewer element. If the mesh
    * is not hit, the result is null.
    */
-  positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
-      {position: Vector3, normal: Vector3, uv: Vector2|null}|null {
+  positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this): { position: Vector3, normal: Vector3, uv: Vector2 | null } | null {
     const hit = this.hitFromPoint(ndcPosition, object);
     if (hit == null) {
       return null;
@@ -1138,12 +1157,12 @@ export class ModelScene extends Scene {
 
     const position = hit.point;
     const normal = hit.face != null ?
-        hit.face.normal.clone().applyNormalMatrix(
-            new Matrix3().getNormalMatrix(hit.object.matrixWorld)) :
-        raycaster.ray.direction.clone().multiplyScalar(-1);
+      hit.face.normal.clone().applyNormalMatrix(
+        new Matrix3().getNormalMatrix(hit.object.matrixWorld)) :
+      raycaster.ray.direction.clone().multiplyScalar(-1);
     const uv = hit.uv ?? null;
 
-    return {position, normal, uv};
+    return { position, normal, uv };
   }
 
   /**
@@ -1153,7 +1172,7 @@ export class ModelScene extends Scene {
    * attribute of the hotspot to make it follow this point on the surface
    * even as the model animates. If the mesh is not hit, the result is null.
    */
-  surfaceFromPoint(ndcPosition: Vector2, object: Object3D = this): string|null {
+  surfaceFromPoint(ndcPosition: Vector2, object: Object3D = this): string | null {
     const model = this.element.model;
     if (model == null) {
       return null;
@@ -1165,12 +1184,12 @@ export class ModelScene extends Scene {
     }
 
     const node = model[$nodeFromPoint](hit);
-    const {meshes, primitives} = node.mesh.userData.associations;
+    const { meshes, primitives } = node.mesh.userData.associations;
 
     const va = new Vector3();
     const vb = new Vector3();
     const vc = new Vector3();
-    const {a, b, c} = hit.face;
+    const { a, b, c } = hit.face;
     const mesh = hit.object as any;
     mesh.getVertexPosition(a, va);
     mesh.getVertexPosition(b, vb);
@@ -1179,8 +1198,7 @@ export class ModelScene extends Scene {
     const uvw = new Vector3();
     tri.getBarycoord(mesh.worldToLocal(hit.point), uvw);
 
-    return `${meshes} ${primitives} ${a} ${b} ${c} ${uvw.x.toFixed(3)} ${
-        uvw.y.toFixed(3)} ${uvw.z.toFixed(3)}`;
+    return `${meshes} ${primitives} ${a} ${b} ${c} ${uvw.x.toFixed(3)} ${uvw.y.toFixed(3)} ${uvw.z.toFixed(3)}`;
   }
 
   /**
@@ -1205,7 +1223,7 @@ export class ModelScene extends Scene {
    * Helper method to apply a function to all hotspots.
    */
   forHotspots(func: (hotspot: Hotspot) => void) {
-    const {children} = this.target;
+    const { children } = this.target;
     for (let i = 0, l = children.length; i < l; i++) {
       const hotspot = children[i];
       if (hotspot instanceof Hotspot) {
@@ -1227,11 +1245,11 @@ export class ModelScene extends Scene {
       return;
     }
     const primitiveNode =
-        this.element.model[$nodeFromIndex](nodes[0].number, nodes[1].number);
+      this.element.model[$nodeFromIndex](nodes[0].number, nodes[1].number);
     if (primitiveNode == null) {
       console.warn(
-          hotspot.surface +
-          ' does not match a node/primitive in this glTF! Skipping this hotspot.');
+        hotspot.surface +
+        ' does not match a node/primitive in this glTF! Skipping this hotspot.');
       return;
     }
 
@@ -1239,8 +1257,8 @@ export class ModelScene extends Scene {
     const tri = new Vector3(nodes[2].number, nodes[3].number, nodes[4].number);
     if (tri.x >= numVert || tri.y >= numVert || tri.z >= numVert) {
       console.warn(
-          hotspot.surface +
-          ' vertex indices out of range in this glTF! Skipping this hotspot.');
+        hotspot.surface +
+        ' vertex indices out of range in this glTF! Skipping this hotspot.');
       return;
     }
 
@@ -1274,7 +1292,7 @@ export class ModelScene extends Scene {
       target.setFromMatrixPosition(hotspot.matrixWorld);
       view.sub(target);
       normalWorld.copy(hotspot.normal)
-          .transformDirection(this.target.matrixWorld);
+        .transformDirection(this.target.matrixWorld);
       if (view.dot(normalWorld) < 0) {
         hotspot.hide();
       } else {
@@ -1303,16 +1321,16 @@ export class ModelScene extends Scene {
     });
   }
 
-  updateSchema(src: string|null) {
-    const {schemaElement, element} = this;
-    const {alt, poster, iosSrc} = element;
+  updateSchema(src: string | null) {
+    const { schemaElement, element } = this;
+    const { alt, poster, iosSrc } = element;
     if (src != null) {
       const encoding = [{
         '@type': 'MediaObject',
         contentUrl: src,
         encodingFormat: src.split('.').pop()?.toLowerCase() === 'gltf' ?
-            'model/gltf+json' :
-            'model/gltf-binary'
+          'model/gltf+json' :
+          'model/gltf-binary'
       }];
 
       if (iosSrc) {
