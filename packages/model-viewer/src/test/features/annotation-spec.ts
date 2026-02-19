@@ -20,6 +20,7 @@ import {$needsRender, $scene, toVector3D, Vector2D, Vector3D} from '../../model-
 import {ModelViewerElement} from '../../model-viewer.js';
 import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
 
@@ -56,8 +57,15 @@ suite('Annotation', () => {
   let element: ModelViewerElement;
   let scene: ModelScene;
 
-  setup(async () => {
+  setup(async function () {
     element = new ModelViewerElement();
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     document.body.insertBefore(element, document.body.firstChild);
     scene = element[$scene];
 

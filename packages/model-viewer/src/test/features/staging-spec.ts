@@ -18,6 +18,7 @@ import {expect} from 'chai';
 import {CameraChangeDetails} from '../../features/controls.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ChangeSource} from '../../three-components/SmoothControls.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
 
@@ -28,8 +29,15 @@ suite('Staging', () => {
   suite('with a visible loaded model', () => {
     let element: ModelViewerElement;
 
-    setup(async () => {
+    setup(async function () {
       element = new ModelViewerElement();
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       document.body.insertBefore(element, document.body.firstChild);
       await rafPasses();
       element.src = ODD_SHAPE_GLB_PATH;
@@ -39,7 +47,9 @@ suite('Staging', () => {
     });
 
     teardown(() => {
-      document.body.removeChild(element);
+      if (element.parentNode != null) {
+        document.body.removeChild(element);
+      }
     });
 
     test('can manually rotate turntable', () => {

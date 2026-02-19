@@ -20,6 +20,7 @@ import {$scene, $userInputElement} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {assetPath, pickShadowDescendant, rafPasses, until} from '../helpers.js';
 
 const CUBE_GLB_PATH = assetPath('models/cube.gltf');
@@ -29,8 +30,16 @@ suite('Loading', () => {
   let element: ModelViewerElement;
   let firstChild: ChildNode|null;
 
-  setup(async () => {
+  setup(async function () {
     element = new ModelViewerElement();
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      // If Renderer singleton throws (e.g. missing WebGL), we skip.
+      this.skip();
+    }
     firstChild = document.body.firstChild;
     document.body.insertBefore(element, firstChild);
     await rafPasses();

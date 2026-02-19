@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-import { expect } from 'chai';
-import { Camera, Vector3 } from 'three';
+import {expect} from 'chai';
+import {Camera, Vector3} from 'three';
 
-import { $controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition } from '../../features/controls.js';
-import ModelViewerElementBase, { $scene, $statusElement, $userInputElement, Vector3D } from '../../model-viewer-base.js';
-import { ModelViewerElement } from '../../model-viewer.js';
-import { StyleEvaluator } from '../../styles/evaluators.js';
-import { ChangeSource, SmoothControls } from '../../three-components/SmoothControls.js';
-import { Renderer } from '../../three-components/Renderer.js';
-import { step, timePasses, waitForEvent } from '../../utilities.js';
-import { assetPath, dispatchSyntheticEvent, rafPasses, until } from '../helpers.js';
+
+import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
+import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
+import {ModelViewerElement} from '../../model-viewer.js';
+import {StyleEvaluator} from '../../styles/evaluators.js';
+import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
+import {Renderer} from '../../three-components/Renderer.js';
+import {step, timePasses, waitForEvent} from '../../utilities.js';
+import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
@@ -79,6 +80,16 @@ const cameraIsLookingAt = (camera: Camera, position: Vector3D) => {
 
 
 suite('Controls', () => {
+  setup(function () {
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
+  });
+
   suite('camera-orbit', () => {
     let element: ModelViewerElement;
     let defaultRadius: number;

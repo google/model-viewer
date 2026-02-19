@@ -23,6 +23,7 @@ import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelViewerGLTFInstance} from '../../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses} from '../helpers.js';
 
@@ -45,14 +46,23 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
 suite('SceneGraph', () => {
   let element: ModelViewerElement;
 
-  setup(async () => {
+  setup(async function () {
     element = new ModelViewerElement();
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     document.body.insertBefore(element, document.body.firstChild);
     await rafPasses();
   });
 
   teardown(() => {
-    document.body.removeChild(element);
+    if (element.parentNode != null) {
+      document.body.removeChild(element);
+    }
   });
 
   suite('scene export', () => {
