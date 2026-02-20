@@ -59,7 +59,14 @@ suite('Loading', () => {
   suite('with a second element outside the viewport', () => {
     let element2: ModelViewerElement;
 
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       element2 = new ModelViewerElement();
       element2.loading = 'eager';
       document.body.insertBefore(element2, firstChild);

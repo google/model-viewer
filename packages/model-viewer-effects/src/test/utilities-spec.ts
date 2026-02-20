@@ -21,7 +21,7 @@ import {$effectComposer} from '../effect-composer.js';
 import {EffectComposer} from '../model-viewer-effects.js';
 import {getOwnPropertySymbolValue} from '../utilities.js';
 
-import {ArraysAreEqual, assetPath, createModelViewerElement, screenshot, timePasses, waitForEvent} from './utilities.js';
+import { ArraysAreEqual, assetPath, createModelViewerElement, rafPasses, screenshot, waitForEvent } from './utilities.js';
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
@@ -50,9 +50,9 @@ suite('Screenshot Baseline Test', () => {
         getOwnPropertySymbolValue<Renderer>(element, 'renderer') as Renderer;
     expect(renderer).to.not.be.undefined;
     expect(renderer.threeRenderer).to.not.be.undefined;
-    await timePasses(5);
+    await rafPasses();
     baseScreenshot = screenshot(element);
-    await timePasses(5);
+    await rafPasses();
     const screenshot2 = screenshot(element);
 
     expect(ArraysAreEqual(baseScreenshot, screenshot2)).to.be.true;
@@ -67,15 +67,15 @@ suite('Screenshot Baseline Test', () => {
       composer.renderMode = 'quality';
       composer.msaa = 8;
       element.insertBefore(composer, element.firstChild);
-      await timePasses(5);
+      await rafPasses();
     });
 
     test('Compare Self', async () => {
       const renderer = composer[$effectComposer].getRenderer();
       expect(renderer).to.not.be.undefined;
-      await timePasses(10);
+      await rafPasses();
       composerScreenshot = screenshot(element);
-      await timePasses(10);
+      await rafPasses();
       const screenshot2 = screenshot(element);
 
       expect(ArraysAreEqual(composerScreenshot, screenshot2)).to.be.true;

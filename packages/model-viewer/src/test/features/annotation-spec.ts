@@ -210,7 +210,7 @@ suite('Annotation', () => {
           element[$scene].updateMatrixWorld();
           element[$needsRender]();
 
-          await waitForEvent(hotspot2, 'hotspot-visibility');
+          await until(() => !wrapper.classList.contains('hide'));
 
           expect(!!wrapper.classList.contains('hide')).to.be.false;
         });

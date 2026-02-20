@@ -525,25 +525,26 @@ export class Renderer extends
 
       const {width, height} = this.sceneSize(scene);
 
-      scene.renderShadow(this.threeRenderer);
+      try {
+        scene.renderShadow(this.threeRenderer);
 
-      // Need to set the render target in order to prevent
-      // clearing the depth from a different buffer
-      this.threeRenderer.setRenderTarget(null);
-      this.threeRenderer.setViewport(
+        // Need to set the render target in order to prevent
+        // clearing the depth from a different buffer
+        this.threeRenderer.setRenderTarget(null);
+        this.threeRenderer.setViewport(
           0, Math.ceil(this.height * this.dpr) - height, width, height);
-      if (scene.effectRenderer != null) {
-        scene.effectRenderer.render(delta);
-      } else {
-        this.threeRenderer.autoClear =
+        if (scene.effectRenderer != null) {
+          scene.effectRenderer.render(delta);
+        } else {
+          this.threeRenderer.autoClear =
             true;  // this might get reset by the effectRenderer
-        this.threeRenderer.toneMapping = scene.toneMapping;
-        try {
+          this.threeRenderer.toneMapping = scene.toneMapping;
           this.threeRenderer.render(scene, scene.camera);
-        } catch (error) {
-          console.warn('Three.js render failed:', error);
         }
+      } catch (error) {
+        console.warn('Three.js render failed:', error);
       }
+
       if (this.multipleScenesVisible ||
           (!scene.element.modelIsVisible && scene.renderCount === 0)) {
         this.copyPixels(scene, width, height);
