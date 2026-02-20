@@ -18,8 +18,9 @@ import {expect} from 'chai';
 import {CameraChangeDetails} from '../../features/controls.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ChangeSource} from '../../three-components/SmoothControls.js';
-import {timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, rafPasses} from '../helpers.js';
+import {Renderer} from '../../three-components/Renderer.js';
+import { timePasses } from '../../utilities.js';
+import { assetPath, rafPasses, waitForModelToLoad } from '../helpers.js';
 
 const ODD_SHAPE_GLB_PATH = assetPath('models/odd-shape.glb');
 const AUTO_ROTATE_DELAY = 50;
@@ -28,17 +29,27 @@ suite('Staging', () => {
   suite('with a visible loaded model', () => {
     let element: ModelViewerElement;
 
-    setup(async () => {
+    setup(async function () {
       element = new ModelViewerElement();
-      element.src = ODD_SHAPE_GLB_PATH;
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       document.body.insertBefore(element, document.body.firstChild);
+      await rafPasses();
+      element.src = ODD_SHAPE_GLB_PATH;
 
-      await waitForEvent(element, 'poster-dismissed');
+      await waitForModelToLoad(element);
       await rafPasses();
     });
 
     teardown(() => {
-      document.body.removeChild(element);
+      if (element.parentNode != null) {
+        document.body.removeChild(element);
+      }
     });
 
     test('can manually rotate turntable', () => {
@@ -50,7 +61,14 @@ suite('Staging', () => {
     });
 
     suite('auto-rotate', () => {
-      setup(async () => {
+      setup(async function () {
+        try {
+          if (!Renderer.singleton.canRender) {
+            this.skip();
+          }
+        } catch (e) {
+          this.skip();
+        }
         element.autoRotate = true;
         element.autoRotateDelay = AUTO_ROTATE_DELAY;
         await timePasses();

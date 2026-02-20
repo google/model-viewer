@@ -59,7 +59,7 @@
     "test:ci": "web-test-runner --static-logging --config web-test-ci.config.mjs",
     "check-fidelity": "node ./test/fidelity/index.js ./test/fidelity/config.json",
     "compare-fidelity": "./scripts/compare-fidelity-to-ref.sh",
-    "serve": "node_modules/.bin/http-server -c-1",
+    "serve": "node ../../scripts/dev-server.js",
     "dev": "npm run build:dev && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:test' 'serve -- -s'",
     "watch:tsc": "tsc -w --incremental",
     "watch:rollup": "rollup -c -w --environment NODE_ENV:production",
@@ -83,23 +83,24 @@
     "3d"
   ],
   "dependencies": {
-    "lit": "^3.2.1",
-    "@monogrid/gainmap-js": "^3.1.0"
+    "@monogrid/gainmap-js": "^3.1.0",
+    "lit": "^3.2.1"
   },
   "peerDependencies": {
-    "three": "^0.174.0"
+    "three": "^0.182.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-replace": "^6.0.2",
+    "@rollup/plugin-swc": "^0.4.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@swc/core": "^1.11.8",
     "@types/mocha": "^10.0.10",
     "@types/pngjs": "^6.0.5",
-    "@types/three": "^0.174.0",
+    "@types/three": "^0.182.0",
     "@ungap/event-target": "^0.2.4",
     "@web/test-runner": "^0.20.0",
-    "@rollup/plugin-swc": "^0.4.0",
-    "@swc/core": "^1.11.8",
     "@web/test-runner-playwright": "^0.11.0",
     "chai": "^5.2.0",
     "http-server": "^14.1.1",
@@ -109,9 +110,8 @@
     "rollup-plugin-cleanup": "^3.2.1",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-polyfill": "^4.2.0",
-    "@rollup/plugin-terser": "^0.4.4",
-    "typescript": "5.8.2",
-    "three": "^0.174.0"
+    "three": "^0.182.0",
+    "typescript": "5.8.2"
   },
   "publishConfig": {
     "access": "public"

@@ -20,32 +20,40 @@ import {ModelViewerElement} from '../model-viewer.js';
 import {Renderer} from '../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../utilities.js';
 
-import {assetPath, until} from './helpers.js';
+import { assetPath, rafPasses, until } from './helpers.js';
 
 const expectBlobDimensions =
-    async (blob: Blob, width: number, height: number) => {
-  const img = await new Promise<HTMLImageElement>((resolve) => {
-    const url = URL.createObjectURL(blob);
-    const img = new Image();
-    img.onload = () => {
-      resolve(img);
-    };
-    img.src = url;
-  });
+  async (blob: Blob, width: number, height: number) => {
+    const img = await new Promise<HTMLImageElement>((resolve) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        resolve(img);
+      };
+      img.src = url;
+    });
 
-  expect(img.width).to.be.equal(Math.round(width));
-  expect(img.height).to.be.equal(Math.round(height));
-};
+    expect(img.width).to.be.equal(Math.round(width));
+    expect(img.height).to.be.equal(Math.round(height));
+  };
 
 suite('ModelViewerElementBase', () => {
   suite('with an element', () => {
     let element: ModelViewerElement;
     let input: HTMLDivElement;
 
-    setup(() => {
+    setup(async function () {
       element = new ModelViewerElement();
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       input = element[$userInputElement];
       document.body.insertBefore(element, document.body.firstChild);
+      await rafPasses();
     });
 
     teardown(() => {
@@ -73,7 +81,7 @@ suite('ModelViewerElementBase', () => {
           await timePasses();
 
           expect(input.getAttribute('aria-label'))
-              .to.be.equal(defaultAriaLabel);
+            .to.be.equal(defaultAriaLabel);
         });
       });
     });
@@ -93,7 +101,7 @@ suite('ModelViewerElementBase', () => {
           await waitForEvent(element, 'load');
 
           expect(element[$scene].url)
-              .to.be.equal(assetPath('models/Horse.glb'));
+            .to.be.equal(assetPath('models/Horse.glb'));
         });
 
         test('it loads the second value on task timing', async () => {
@@ -103,7 +111,7 @@ suite('ModelViewerElementBase', () => {
           await waitForEvent(element, 'load');
 
           expect(element[$scene].url)
-              .to.be.equal(assetPath('models/Horse.glb'));
+            .to.be.equal(assetPath('models/Horse.glb'));
         });
       });
     });
@@ -116,8 +124,15 @@ suite('ModelViewerElementBase', () => {
       expect((event as any).detail.type).to.be.eq('loadfailure');
     });
 
-    test('when losing the GL context, dispatches an error event', async () => {
-      const {threeRenderer, canvas3D} = Renderer.singleton;
+    test('when losing the GL context, dispatches an error event', async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
+      const { threeRenderer, canvas3D } = Renderer.singleton;
 
       canvas3D.addEventListener('webglcontextlost', function(event) {
         event.preventDefault();
@@ -133,7 +148,7 @@ suite('ModelViewerElementBase', () => {
         threeRenderer.forceContextLoss();
       } else {
         threeRenderer.domElement.dispatchEvent(
-            new CustomEvent('webglcontextlost'));
+          new CustomEvent('webglcontextlost'));
       }
       const event = await errorEventDispatches;
       expect((event as any).detail.type).to.be.equal('webglcontextlost');
@@ -197,7 +212,14 @@ suite('ModelViewerElementBase', () => {
   suite('orchestrates rendering', () => {
     let elements: Array<ModelViewerElement> = [];
 
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       elements.push(new ModelViewerElement());
       elements.push(new ModelViewerElement());
       elements.push(new ModelViewerElement());
@@ -207,13 +229,14 @@ suite('ModelViewerElementBase', () => {
         element.style.marginBottom = '100vh';
         element.src = assetPath('models/cube.gltf');
         document.body.insertBefore(element, document.body.firstChild);
+        await rafPasses();
       }
     });
 
     teardown(() => {
       elements.forEach(
-          element => element.parentNode != null &&
-              element.parentNode.removeChild(element));
+        element => element.parentNode != null &&
+          element.parentNode.removeChild(element));
     });
 
     test('sets a model within viewport to be visible', async () => {
@@ -230,10 +253,10 @@ suite('ModelViewerElementBase', () => {
       // running -- wait for the visibility flags to be flipped
       await until(() => {
         return elements
-            .map((element, index) => {
-              return (index === 0) === element.modelIsVisible;
-            })
-            .reduce(((l, r) => l && r), true);
+          .map((element, index) => {
+            return (index === 0) === element.modelIsVisible;
+          })
+          .reduce(((l, r) => l && r), true);
       });
 
       expect(elements[0].modelIsVisible).to.be.ok;

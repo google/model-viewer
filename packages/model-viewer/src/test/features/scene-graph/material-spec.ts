@@ -23,6 +23,7 @@ import {Texture} from '../../../features/scene-graph/texture.js';
 import {$correlatedObjects} from '../../../features/scene-graph/three-dom-element.js';
 import {ModelViewerElement} from '../../../model-viewer.js';
 import {waitForEvent} from '../../../utilities.js';
+import { Renderer } from '../../../three-components/Renderer.js';
 import {assetPath} from '../../helpers.js';
 
 const CUBES_GLTF_PATH = assetPath('models/cubes.gltf');
@@ -38,7 +39,14 @@ suite('scene-graph/material', () => {
     let texture: Texture|null;
     let threeMaterials: Set<MeshStandardMaterial>;
 
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       element = new ModelViewerElement();
       element.src = HELMET_GLB_PATH;
       document.body.insertBefore(element, document.body.firstChild);
@@ -50,7 +58,9 @@ suite('scene-graph/material', () => {
     });
 
     teardown(() => {
-      document.body.removeChild(element);
+      if (element && element.parentNode != null) {
+        document.body.removeChild(element);
+      }
       texture = null;
     });
 
@@ -148,12 +158,21 @@ suite('scene-graph/material', () => {
   suite('Material properties', () => {
     let element: ModelViewerElement;
 
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       element = new ModelViewerElement();
     });
 
     teardown(() => {
-      document.body.removeChild(element);
+      if (element && element.parentNode != null) {
+        document.body.removeChild(element);
+      }
     });
 
     const loadModel = async (path: string) => {
@@ -238,7 +257,14 @@ suite('scene-graph/material', () => {
     let element: ModelViewerElement;
     let model: Model;
 
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       element = new ModelViewerElement();
       element.src = CUBES_GLTF_PATH;
       document.body.insertBefore(element, document.body.firstChild);
@@ -247,7 +273,9 @@ suite('scene-graph/material', () => {
     });
 
     teardown(() => {
-      document.body.removeChild(element);
+      if (element && element.parentNode != null) {
+        document.body.removeChild(element);
+      }
     });
 
     test('Accessing the name getter does not cause throw error.', async () => {

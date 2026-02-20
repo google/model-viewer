@@ -20,8 +20,9 @@ import {$needsRender, $scene, toVector3D, Vector2D, Vector3D} from '../../model-
 import {ModelViewerElement} from '../../model-viewer.js';
 import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, rafPasses} from '../helpers.js';
+import { assetPath, rafPasses, until, waitForModelToLoad } from '../helpers.js';
 
 const sceneContainsHotspot =
     (scene: ModelScene, element: HTMLElement): boolean => {
@@ -56,13 +57,22 @@ suite('Annotation', () => {
   let element: ModelViewerElement;
   let scene: ModelScene;
 
-  setup(async () => {
+  setup(async function () {
     element = new ModelViewerElement();
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     document.body.insertBefore(element, document.body.firstChild);
     scene = element[$scene];
 
+    await rafPasses();
+
     element.src = assetPath('models/cube.gltf');
-    await waitForEvent(element, 'poster-dismissed');
+    await waitForModelToLoad(element);
   });
 
   teardown(() => {
@@ -179,7 +189,14 @@ suite('Annotation', () => {
       suite('with a camera', () => {
         let wrapper: HTMLElement;
 
-        setup(async () => {
+        setup(async function () {
+          try {
+            if (!Renderer.singleton.canRender) {
+              this.skip();
+            }
+          } catch (e) {
+            this.skip();
+          }
           // This is to wait for the hotspots to be added to their slots, as
           // this triggers their visibility to "show". Otherwise, sometimes the
           // following hide() call will happen first, then when the camera
@@ -191,6 +208,7 @@ suite('Annotation', () => {
         });
 
         test('the hotspot is hidden', async () => {
+          await until(() => wrapper.classList.contains('hide'));
           expect(wrapper.classList.contains('hide')).to.be.true;
         });
 
@@ -199,7 +217,7 @@ suite('Annotation', () => {
           element[$scene].updateMatrixWorld();
           element[$needsRender]();
 
-          await waitForEvent(hotspot2, 'hotspot-visibility');
+          await until(() => !wrapper.classList.contains('hide'));
 
           expect(!!wrapper.classList.contains('hide')).to.be.false;
         });
@@ -210,7 +228,14 @@ suite('Annotation', () => {
   suite('a model-viewer element with a loaded cube', () => {
     let rect: DOMRect;
 
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       element.setAttribute('style', `width: 200px; height: 300px`);
       rect = element.getBoundingClientRect();
       element.cameraOrbit = '0deg 90deg 2m';

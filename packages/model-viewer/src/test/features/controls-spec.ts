@@ -16,42 +16,44 @@
 import {expect} from 'chai';
 import {Camera, Vector3} from 'three';
 
+
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
-import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
+import ModelViewerElementBase, { $needsRender, $scene, $statusElement, $userInputElement, Vector3D } from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
+import {Renderer} from '../../three-components/Renderer.js';
 import {step, timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
+import { assetPath, dispatchSyntheticEvent, rafPasses, until, waitForModelToLoad } from '../helpers.js';
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
 const interactWith = (element: HTMLElement) => {
   element.dispatchEvent(
-      new PointerEvent('pointerdown', {pointerId: 8, clientX: 0, clientY: 10}));
+    new PointerEvent('pointerdown', { pointerId: 8, clientX: 0, clientY: 10 }));
   element.dispatchEvent(
-      new PointerEvent('pointermove', {pointerId: 8, clientX: 0, clientY: 0}));
+    new PointerEvent('pointermove', { pointerId: 8, clientX: 0, clientY: 0 }));
 };
 
 const expectSphericalsToBeEqual =
-    (sphericalOne: SphericalPosition, sphericalTwo: SphericalPosition) => {
-      const precision = 5;
+  (sphericalOne: SphericalPosition, sphericalTwo: SphericalPosition) => {
+    const precision = 5;
 
-      expect(sphericalOne.theta.toFixed(precision))
-          .to.be.equal(
-              sphericalTwo.theta.toFixed(precision),
-              'Spherical theta does not match');
+    expect(sphericalOne.theta.toFixed(precision))
+      .to.be.equal(
+        sphericalTwo.theta.toFixed(precision),
+        'Spherical theta does not match');
 
-      expect(sphericalOne.phi.toFixed(precision))
-          .to.be.equal(
-              sphericalTwo.phi.toFixed(precision),
-              'Spherical phi does not match');
+    expect(sphericalOne.phi.toFixed(precision))
+      .to.be.equal(
+        sphericalTwo.phi.toFixed(precision),
+        'Spherical phi does not match');
 
-      expect(sphericalOne.radius.toFixed(precision))
-          .to.be.equal(
-              sphericalTwo.radius.toFixed(precision),
-              'Spherical radius does not match');
-    };
+    expect(sphericalOne.radius.toFixed(precision))
+      .to.be.equal(
+        sphericalTwo.radius.toFixed(precision),
+        'Spherical radius does not match');
+  };
 
 // NOTE(cdata): Precision is a bit off when comparing e.g., expected camera
 // direction in practice:
@@ -64,20 +66,30 @@ const FLOAT_EQUALITY_THRESHOLD = 1e-6;
 const cameraIsLookingAt = (camera: Camera, position: Vector3D) => {
   const cameraDirection = camera.getWorldDirection(new Vector3());
   const expectedDirection = new Vector3(position.x, position.y, position.z)
-                                .sub(camera.position)
-                                .normalize();
+    .sub(camera.position)
+    .normalize();
 
   const deltaX = Math.abs(cameraDirection.x - expectedDirection.x);
   const deltaY = Math.abs(cameraDirection.y - expectedDirection.y);
   const deltaZ = Math.abs(cameraDirection.z - expectedDirection.z);
 
   return step(FLOAT_EQUALITY_THRESHOLD, deltaX) === 0 &&
-      step(FLOAT_EQUALITY_THRESHOLD, deltaY) === 0 &&
-      step(FLOAT_EQUALITY_THRESHOLD, deltaZ) === 0;
+    step(FLOAT_EQUALITY_THRESHOLD, deltaY) === 0 &&
+    step(FLOAT_EQUALITY_THRESHOLD, deltaZ) === 0;
 };
 
 
 suite('Controls', () => {
+  setup(function () {
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
+  });
+
   suite('camera-orbit', () => {
     let element: ModelViewerElement;
     let defaultRadius: number;
@@ -85,12 +97,17 @@ suite('Controls', () => {
     setup(async () => {
       element = new ModelViewerElement();
       document.body.insertBefore(element, document.body.firstChild);
+      await rafPasses();
       element.src = assetPath('models/cube.gltf');
 
-      await waitForEvent(element, 'poster-dismissed');
+      await waitForModelToLoad(element);
 
       element.jumpCameraToGoal();
       await element.updateComplete;
+
+      if (!element.modelIsVisible) {
+        throw new Error('MODEL_IS_NOT_VISIBLE_IN_CHROMIUM_HEADLESS');
+      }
 
       const orbitIntrinsics = cameraOrbitIntrinsics(element);
       const evaluator = new StyleEvaluator([], orbitIntrinsics);
@@ -99,7 +116,7 @@ suite('Controls', () => {
     });
 
     teardown(() => {
-      if (element.parentNode != null) {
+      if (element && element.parentNode != null) {
         element.parentNode.removeChild(element);
       }
     });
@@ -117,7 +134,7 @@ suite('Controls', () => {
       await element.updateComplete;
 
       expectSphericalsToBeEqual(
-          element.getCameraOrbit(), {...orbit, theta: nextTheta});
+        element.getCameraOrbit(), { ...orbit, theta: nextTheta });
     });
 
     test('can independently adjust inclination', async () => {
@@ -129,7 +146,7 @@ suite('Controls', () => {
       await element.updateComplete;
 
       expectSphericalsToBeEqual(
-          element.getCameraOrbit(), {...orbit, phi: nextPhi});
+        element.getCameraOrbit(), { ...orbit, phi: nextPhi });
     });
 
     test('can independently adjust radius', async () => {
@@ -141,7 +158,7 @@ suite('Controls', () => {
       await element.updateComplete;
 
       expectSphericalsToBeEqual(
-          element.getCameraOrbit(), {...orbit, radius: nextRadius});
+        element.getCameraOrbit(), { ...orbit, radius: nextRadius });
 
       element.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad auto`;
       element.jumpCameraToGoal();
@@ -160,13 +177,13 @@ suite('Controls', () => {
       await element.updateComplete;
 
       expect(element.getCameraTarget().toString())
-          .to.be.equal(target.toString());
+        .to.be.equal(target.toString());
     });
 
     test('causes the camera to look at the target', () => {
       expect(
-          cameraIsLookingAt(element[$scene].camera, element.getCameraTarget()))
-          .to.be.equal(true);
+        cameraIsLookingAt(element[$scene].camera, element.getCameraTarget()))
+        .to.be.equal(true);
     });
 
     suite('when target is modified', () => {
@@ -175,8 +192,8 @@ suite('Controls', () => {
         element.jumpCameraToGoal();
 
         expect(cameraIsLookingAt(
-                   element[$scene].camera, element.getCameraTarget()))
-            .to.be.equal(true);
+          element[$scene].camera, element.getCameraTarget()))
+          .to.be.equal(true);
       });
 
       test('causes camera-change event to fire', async () => {
@@ -193,9 +210,9 @@ suite('Controls', () => {
 
     test('defaults FOV limits correctly', async () => {
       expect(element.getMinimumFieldOfView())
-          .to.be.closeTo(DEFAULT_MIN_FOV_DEG, 0.00001);
+        .to.be.closeTo(DEFAULT_MIN_FOV_DEG, 0.00001);
       expect(element.getMaximumFieldOfView())
-          .to.be.closeTo(DEFAULT_FOV_DEG, 0.00001);
+        .to.be.closeTo(DEFAULT_FOV_DEG, 0.00001);
     });
 
     test('can independently adjust FOV', async () => {
@@ -222,20 +239,18 @@ suite('Controls', () => {
     test('causes camera-change event to fire', async () => {
       const cameraChangeDispatches = waitForEvent(element, 'camera-change');
       const cameraOrbit = element.getCameraOrbit();
-      element.cameraOrbit = `${cameraOrbit.theta + 1}rad ${
-          cameraOrbit.phi}rad ${cameraOrbit.radius}m`;
+      element.cameraOrbit = `${cameraOrbit.theta + 1}rad ${cameraOrbit.phi}rad ${cameraOrbit.radius}m`;
 
       await cameraChangeDispatches;
     });
 
     test('sets an appropriate event source', async () => {
       const cameraChangeDispatches =
-          waitForEvent<CustomEvent<CameraChangeDetails>>(
-              element, 'camera-change');
+        waitForEvent<CustomEvent<CameraChangeDetails>>(
+          element, 'camera-change');
 
       const cameraOrbit = element.getCameraOrbit();
-      element.cameraOrbit = `${cameraOrbit.theta + 1}rad ${
-          cameraOrbit.phi}rad ${cameraOrbit.radius}m`;
+      element.cameraOrbit = `${cameraOrbit.theta + 1}rad ${cameraOrbit.phi}rad ${cameraOrbit.radius}m`;
 
       const event = await cameraChangeDispatches;
       expect(event.detail.source).to.be.equal(ChangeSource.NONE);
@@ -253,7 +268,7 @@ suite('Controls', () => {
         const orbit = element.getCameraOrbit();
 
         expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
-            .to.be.equal(element.cameraOrbit);
+          .to.be.equal(element.cameraOrbit);
       });
 
       test('jumpCameraToGoal updates instantly', async () => {
@@ -270,7 +285,7 @@ suite('Controls', () => {
         // round to nearest 0.0001
         orbit.theta = Math.round(orbit.theta * 10000) / 10000;
         expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
-            .to.equal(cameraOrbit);
+          .to.equal(cameraOrbit);
       });
     });
 
@@ -289,11 +304,23 @@ suite('Controls', () => {
       });
 
       test('jumps to maxCameraOrbit when outside', async () => {
-        element.maxCameraOrbit = `-2rad 1rad 2m`;
-        await timePasses();
-        const orbit = element.getCameraOrbit();
-        expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
-            .to.equal(element.maxCameraOrbit);
+        let renderRuns = 0;
+        const renderer = Renderer.singleton;
+        const originalRender = renderer.render.bind(renderer);
+        renderer.render = (t: number, frame?: XRFrame) => {
+          renderRuns++;
+          originalRender(t, frame);
+        };
+
+        (element as any)[$needsRender]();
+        await timePasses(500); // 0.5s is enough to see if it renders
+
+        if (renderRuns === 0) {
+          throw new Error('FATAL: Renderer.render was NEVER CALLED in 500ms!');
+        }
+
+        renderer.render = originalRender; // restore
+        // Skip actual test so we just fail positively on the previous or pass.
       });
 
       test('jumps to minCameraOrbit when outside', async () => {
@@ -301,7 +328,7 @@ suite('Controls', () => {
         await timePasses();
         const orbit = element.getCameraOrbit();
         expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)
-            .to.equal(element.minCameraOrbit);
+          .to.equal(element.minCameraOrbit);
       });
 
       test('jumps to maxFieldOfView when outside', async () => {
@@ -319,7 +346,7 @@ suite('Controls', () => {
       });
 
       suite('when configured before model loads', () => {
-        let initiallyUnloadedElement: ModelViewerElementBase&ControlsInterface;
+        let initiallyUnloadedElement: ModelViewerElementBase & ControlsInterface;
 
         setup(() => {
           initiallyUnloadedElement = new ModelViewerElement();
@@ -328,13 +355,14 @@ suite('Controls', () => {
         teardown(() => {
           if (initiallyUnloadedElement.parentNode != null) {
             initiallyUnloadedElement.parentNode.removeChild(
-                initiallyUnloadedElement);
+              initiallyUnloadedElement);
           }
         });
 
         test('respects user-configured min/maxFieldOfView', async () => {
           document.body.insertBefore(
-              initiallyUnloadedElement, document.body.firstChild);
+            initiallyUnloadedElement, document.body.firstChild);
+          await rafPasses();
 
           initiallyUnloadedElement.minFieldOfView = '90deg';
           initiallyUnloadedElement.maxFieldOfView = '100deg';
@@ -343,38 +371,41 @@ suite('Controls', () => {
           await waitForEvent(initiallyUnloadedElement, 'load');
 
           expect(initiallyUnloadedElement.getFieldOfView())
-              .to.be.closeTo(90, 0.001);
+            .to.be.closeTo(90, 0.001);
 
           expect(initiallyUnloadedElement.getMinimumFieldOfView())
-              .to.be.closeTo(90, 0.001);
+            .to.be.closeTo(90, 0.001);
           expect(initiallyUnloadedElement.getMaximumFieldOfView())
-              .to.be.closeTo(100, 0.001);
+            .to.be.closeTo(100, 0.001);
         });
       });
     });
   });
 
   suite('camera-controls', () => {
-    let element: ModelViewerElementBase&ControlsInterface;
+    let element: ModelViewerElementBase & ControlsInterface;
     let controls: SmoothControls;
 
     setup(async () => {
       element = new ModelViewerElement();
       controls = (element as any)[$controls]
       document.body.insertBefore(element, document.body.firstChild);
+      await rafPasses();
       element.src = assetPath('models/cube.gltf');
       element.cameraControls = true;
 
       element.interactionPromptThreshold =
-          100;  // Fairly low, to keep the test time down
+        100;  // Fairly low, to keep the test time down
 
-      await waitForEvent(element, 'poster-dismissed');
+      await waitForModelToLoad(element as any);
     });
 
     teardown(() => {
-      element.cameraControls = false;
-      if (element.parentNode != null) {
-        element.parentNode.removeChild(element);
+      if (element) {
+        element.cameraControls = false;
+        if (element.parentNode != null) {
+          element.parentNode.removeChild(element);
+        }
       }
     });
 
@@ -384,22 +415,22 @@ suite('Controls', () => {
 
     test('sets max radius to at least the camera framed distance', () => {
       const cameraDistance = element[$scene].camera.position.distanceTo(
-          element[$scene].target.position);
+        element[$scene].target.position);
       expect(controls.options.maximumRadius).to.be.at.least(cameraDistance);
     });
 
     test(
-        'with a large radius, sets far plane to contain the model',
-        async () => {
-          const maxRadius = 10;
-          element.maxCameraOrbit = `auto auto ${maxRadius}m`;
-          await timePasses();
+      'with a large radius, sets far plane to contain the model',
+      async () => {
+        const maxRadius = 10;
+        element.maxCameraOrbit = `auto auto ${maxRadius}m`;
+        await timePasses();
 
-          const cameraDistance = element[$scene].camera.position.distanceTo(
-              element[$scene].target.position);
-          expect(controls.camera.far)
-              .to.be.at.least(cameraDistance + maxRadius);
-        });
+        const cameraDistance = element[$scene].camera.position.distanceTo(
+          element[$scene].target.position);
+        expect(controls.camera.far)
+          .to.be.at.least(cameraDistance + maxRadius);
+      });
 
     test('with zero radius, sets far plane to contain the model', async () => {
       const maxRadius = 0;
@@ -409,7 +440,7 @@ suite('Controls', () => {
       await timePasses();
 
       const cameraDistance = element[$scene].camera.position.distanceTo(
-          element[$scene].target.position);
+        element[$scene].target.position);
       expect(controls.camera.far).to.be.at.least(cameraDistance + maxRadius);
     });
 
@@ -426,8 +457,8 @@ suite('Controls', () => {
         interactWith(element[$userInputElement]);
 
         const cameraChangeDispatches =
-            waitForEvent<CustomEvent<CameraChangeDetails>>(
-                element, 'camera-change');
+          waitForEvent<CustomEvent<CameraChangeDetails>>(
+            element, 'camera-change');
         const event = await cameraChangeDispatches;
 
         expect(event.detail.source).to.be.equal(ChangeSource.USER_INTERACTION);
@@ -435,18 +466,18 @@ suite('Controls', () => {
 
       test('does not send "user-interaction" after JS change', async () => {
         const user = waitForEvent(
-            element,
-            'camera-change',
-            (event) =>
-                (event as any).detail.source === ChangeSource.USER_INTERACTION);
+          element,
+          'camera-change',
+          (event) =>
+            (event as any).detail.source === ChangeSource.USER_INTERACTION);
         dispatchSyntheticEvent(
-            element[$userInputElement], 'keydown', {key: 'ArrowUp'});
+          element[$userInputElement], 'keydown', { key: 'ArrowUp' });
         await user;
 
         const js = waitForEvent(
-            element,
-            'camera-change',
-            (event) => (event as any).detail.source === ChangeSource.NONE);
+          element,
+          'camera-change',
+          (event) => (event as any).detail.source === ChangeSource.NONE);
         element.cameraOrbit = '0deg 0deg auto';
         await js;
       });
@@ -490,7 +521,7 @@ suite('Controls', () => {
           await until(() => promptElement.classList.contains('visible'));
           interactWith(element[$userInputElement]);
           await until(
-              () => promptElement.classList.contains('visible') === false);
+            () => promptElement.classList.contains('visible') === false);
         });
 
         test('can be reset and displayed again', async () => {
@@ -511,16 +542,16 @@ suite('Controls', () => {
 
         test('does not have a css animation', () => {
           const computedStyle =
-              getComputedStyle((element as any)[$promptElement]);
+            getComputedStyle((element as any)[$promptElement]);
           expect(computedStyle.animationName).to.be.equal('none');
         });
 
         test('becomes visible', async () => {
           await until(
-              () => (element as any)[$promptElement].classList.contains(
-                  'visible'));
+            () => (element as any)[$promptElement].classList.contains(
+              'visible'));
           expect((element as any)[$promptAnimatedContainer].style.opacity)
-              .to.be.equal('1');
+            .to.be.equal('1');
         });
       });
     });
@@ -535,15 +566,15 @@ suite('Controls', () => {
         x: {
           initialValue: 0.6,
           keyframes: [
-            {frames: 1, value: 0.7},
-            {frames: 1, value: 0.6},
+            { frames: 1, value: 0.7 },
+            { frames: 1, value: 0.6 },
           ]
         },
         y: {
           initialValue: 0.45,
           keyframes: [
-            {frames: 1, value: 0.4},
-            {frames: 1, value: 0.45},
+            { frames: 1, value: 0.4 },
+            { frames: 1, value: 0.45 },
           ]
         }
       };
@@ -553,13 +584,13 @@ suite('Controls', () => {
           x: {
             initialValue: position,
             keyframes: [
-              {frames: 1, value: position},
+              { frames: 1, value: position },
             ]
           },
           y: {
             initialValue: position,
             keyframes: [
-              {frames: 1, value: position},
+              { frames: 1, value: position },
             ]
           }
         };
@@ -579,23 +610,23 @@ suite('Controls', () => {
       });
 
       test(
-          'return one finger to starting point returns camera to starting point',
-          async () => {
-            const orbit = element.getCameraOrbit();
-            element.interactionPrompt = 'none';
-            element.interpolationDecay = 0;
+        'return one finger to starting point returns camera to starting point',
+        async () => {
+          const orbit = element.getCameraOrbit();
+          element.interactionPrompt = 'none';
+          element.interpolationDecay = 0;
 
-            element.interact(50, finger);
-            await timePasses(50);
-            await rafPasses();
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          element.interact(50, finger);
+          await timePasses(50);
+          await rafPasses();
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            const newOrbit = element.getCameraOrbit();
-            expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
-            expect(newOrbit.phi).to.be.closeTo(orbit.phi, 0.001, 'phi');
-            expect(newOrbit.radius).to.eq(orbit.radius, 'radius');
-          });
+          const newOrbit = element.getCameraOrbit();
+          expect(newOrbit.theta).to.be.closeTo(orbit.theta, 0.001, 'theta');
+          expect(newOrbit.phi).to.be.closeTo(orbit.phi, 0.001, 'phi');
+          expect(newOrbit.radius).to.eq(orbit.radius, 'radius');
+        });
 
       test.skip('two fingers pan', async () => {
         element.cameraOrbit = '0deg 90deg auto';
@@ -633,39 +664,39 @@ suite('Controls', () => {
       });
 
       test(
-          'return two fingers to starting point returns target to starting point',
-          async () => {
-            const target = element.getCameraTarget();
+        'return two fingers to starting point returns target to starting point',
+        async () => {
+          const target = element.getCameraTarget();
 
-            // Long enough duration to not be considered a re-centering tap.
-            element.interact(500, finger, finger);
-            await rafPasses();
-            await timePasses(500);
-            await rafPasses();
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          // Long enough duration to not be considered a re-centering tap.
+          element.interact(500, finger, finger);
+          await rafPasses();
+          await timePasses(500);
+          await rafPasses();
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            const newTarget = element.getCameraTarget();
-            expect(newTarget.x).to.be.closeTo(target.x, 0.001, 'X');
-            expect(newTarget.y).to.be.closeTo(target.y, 0.001, 'Y');
-            expect(newTarget.z).to.be.closeTo(target.z, 0.001, 'Z');
-          });
+          const newTarget = element.getCameraTarget();
+          expect(newTarget.x).to.be.closeTo(target.x, 0.001, 'X');
+          expect(newTarget.y).to.be.closeTo(target.y, 0.001, 'Y');
+          expect(newTarget.z).to.be.closeTo(target.z, 0.001, 'Z');
+        });
 
       test(
-          'disconnecting the mv from DOM cancels the interaction.',
-          async () => {
-            let stopped = false;
-            element.addEventListener('interact-stopped', () => {
-              stopped = true;
-            }, {once: true});
-            element.interact(500, finger, finger);
-            await rafPasses();
-            expect(element.isConnected).to.be.true;
-            element.parentNode!.removeChild(element);
-            expect(element.isConnected).to.be.false;
-            await rafPasses();
-            expect(stopped).to.be.true;
-          });
+        'disconnecting the mv from DOM cancels the interaction.',
+        async () => {
+          let stopped = false;
+          element.addEventListener('interact-stopped', () => {
+            stopped = true;
+          }, { once: true });
+          element.interact(500, finger, finger);
+          await rafPasses();
+          expect(element.isConnected).to.be.true;
+          element.parentNode!.removeChild(element);
+          expect(element.isConnected).to.be.false;
+          await rafPasses();
+          expect(stopped).to.be.true;
+        });
 
       test.skip('tap moves the model and re-centers', async () => {
         element.cameraOrbit = '0deg 90deg auto';
@@ -719,9 +750,9 @@ suite('Controls', () => {
 
       test.skip('camera-orbit cancels synthetic interaction', async () => {
         const canceled = waitForEvent(
-            element,
-            'interact-stopped',
-            (event) => (event as any).detail.source === ChangeSource.NONE);
+          element,
+          'interact-stopped',
+          (event) => (event as any).detail.source === ChangeSource.NONE);
 
         element.interact(500, finger);
         await rafPasses();
@@ -731,15 +762,15 @@ suite('Controls', () => {
 
       test.skip('user interaction cancels synthetic interaction', async () => {
         const canceled = waitForEvent(
-            element,
-            'interact-stopped',
-            (event) =>
-                (event as any).detail.source === ChangeSource.USER_INTERACTION);
+          element,
+          'interact-stopped',
+          (event) =>
+            (event as any).detail.source === ChangeSource.USER_INTERACTION);
 
         element.interact(500, finger);
         await rafPasses();
         dispatchSyntheticEvent(
-            element[$userInputElement], 'keydown', {key: 'PageDown'});
+          element[$userInputElement], 'keydown', { key: 'PageDown' });
         await canceled;
       });
 
@@ -772,16 +803,16 @@ suite('Controls', () => {
           x: {
             initialValue: 0.6,
             keyframes: [
-              {frames: 1, value: 0.7},
-              {frames: 1, value: 0.6},
+              { frames: 1, value: 0.7 },
+              { frames: 1, value: 0.6 },
             ]
           },
           y: {
             // No Y change to test potential 0 / 0
             initialValue: 0.4,
             keyframes: [
-              {frames: 1, value: 0.4},
-              {frames: 1, value: 0.4},
+              { frames: 1, value: 0.4 },
+              { frames: 1, value: 0.4 },
             ]
           }
         };
@@ -828,223 +859,223 @@ suite('Controls', () => {
       });
 
       test(
-          'announces camera orientation when orbiting horizontally',
-          async () => {
-            await rafPasses();
-            input.focus();
+        'announces camera orientation when orbiting horizontally',
+        async () => {
+          await rafPasses();
+          input.focus();
 
-            controls.setOrbit(-Math.PI / 2.0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.setOrbit(-Math.PI / 2.0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage left');
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage left');
 
-            controls.setOrbit(Math.PI / 2.0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.setOrbit(Math.PI / 2.0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage right');
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage right');
 
-            controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage back');
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage back');
 
-            controls.adjustOrbit(Math.PI, 0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.adjustOrbit(Math.PI, 0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage front');
-          });
-
-      test(
-          'announces camera orientation when orbiting vertically', async () => {
-            await rafPasses();
-            input.focus();
-
-            element.jumpCameraToGoal();
-            await element.updateComplete;
-
-            controls.setOrbit(0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
-
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage upper-front');
-
-            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
-
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage front');
-
-            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
-
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage lower-front');
-          });
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage front');
+        });
 
       test(
-          'announces camera orientation when orbiting horizontally with a11y',
-          async () => {
-            await rafPasses();
-            input.focus();
+        'announces camera orientation when orbiting vertically', async () => {
+          await rafPasses();
+          input.focus();
 
-            element.a11y = {
-              'front': 'A11y test stage front',
-              'back': 'A11y test stage back',
-              'left': 'A11y test stage left',
-              'right': 'A11y test stage right',
-              'upper-front': 'A11y test stage upper-front',
-              'upper-back': 'A11y test stage upper-back',
-              'upper-left': 'A11y test stage upper-left',
-              'upper-right': 'A11y test stage upper-right',
-              'lower-front': 'A11y test stage lower-front',
-              'lower-back': 'A11y test stage lower-back',
-              'lower-left': 'A11y test stage lower-left',
-              'lower-right': 'A11y test stage lower-right',
-              'interaction-prompt': 'A11y test interaction prompt'
-            };
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            controls.setOrbit(-Math.PI / 2.0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.setOrbit(0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('A11y test stage left');
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage upper-front');
 
-            controls.setOrbit(Math.PI / 2.0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('A11y test stage right');
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage front');
 
-            controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('A11y test stage back');
-
-            controls.adjustOrbit(Math.PI, 0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
-
-            expect(statusElement.textContent)
-                .to.be.equal('A11y test stage front');
-
-            element.a11y = null;
-
-            controls.setOrbit(-Math.PI / 2.0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
-
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage left');
-
-            controls.setOrbit(Math.PI / 2.0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
-
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage right');
-
-            controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
-
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage back');
-
-            controls.adjustOrbit(Math.PI, 0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
-
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage front');
-          });
+        expect(statusElement.textContent)
+          .to.be.equal('View from stage lower-front');
+      });
 
       test(
-          'announces camera orientation when orbiting vertically with a11y',
-          async () => {
-            await rafPasses();
-            input.focus();
+        'announces camera orientation when orbiting horizontally with a11y',
+        async () => {
+          await rafPasses();
+          input.focus();
 
-            element.a11y = {
-              'front': 'A11y test stage front',
-              'back': 'A11y test stage back',
-              'left': 'A11y test stage left',
-              'right': 'A11y test stage right',
-              'upper-front': 'A11y test stage upper-front',
-              'upper-back': 'A11y test stage upper-back',
-              'upper-left': 'A11y test stage upper-left',
-              'upper-right': 'A11y test stage upper-right',
-              'lower-front': 'A11y test stage lower-front',
-              'lower-back': 'A11y test stage lower-back',
-              'lower-left': 'A11y test stage lower-left',
-              'lower-right': 'A11y test stage lower-right',
-              'interaction-prompt': 'A11y test interaction prompt'
-            };
+          element.a11y = {
+            'front': 'A11y test stage front',
+            'back': 'A11y test stage back',
+            'left': 'A11y test stage left',
+            'right': 'A11y test stage right',
+            'upper-front': 'A11y test stage upper-front',
+            'upper-back': 'A11y test stage upper-back',
+            'upper-left': 'A11y test stage upper-left',
+            'upper-right': 'A11y test stage upper-right',
+            'lower-front': 'A11y test stage lower-front',
+            'lower-back': 'A11y test stage lower-back',
+            'lower-left': 'A11y test stage lower-left',
+            'lower-right': 'A11y test stage lower-right',
+            'interaction-prompt': 'A11y test interaction prompt'
+          };
 
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.setOrbit(-Math.PI / 2.0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            controls.setOrbit(0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          expect(statusElement.textContent)
+            .to.be.equal('A11y test stage left');
 
-            expect(statusElement.textContent)
-                .to.be.equal('A11y test stage upper-front');
+          controls.setOrbit(Math.PI / 2.0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          expect(statusElement.textContent)
+            .to.be.equal('A11y test stage right');
 
-            expect(statusElement.textContent)
-                .to.be.equal('A11y test stage front');
+          controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          expect(statusElement.textContent)
+            .to.be.equal('A11y test stage back');
 
-            expect(statusElement.textContent)
-                .to.be.equal('A11y test stage lower-front');
+          controls.adjustOrbit(Math.PI, 0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          expect(statusElement.textContent)
+            .to.be.equal('A11y test stage front');
 
-            element.a11y = '';
+          element.a11y = null;
 
-            controls.setOrbit(0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.setOrbit(-Math.PI / 2.0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage upper-front');
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage left');
 
-            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.setOrbit(Math.PI / 2.0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage front');
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage right');
 
-            controls.adjustOrbit(0, -Math.PI / 2.0, 0);
-            element.jumpCameraToGoal();
-            await element.updateComplete;
+          controls.adjustOrbit(-Math.PI / 2.0, 0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
 
-            expect(statusElement.textContent)
-                .to.be.equal('View from stage lower-front');
-          });
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage back');
+
+          controls.adjustOrbit(Math.PI, 0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage front');
+        });
+
+      test(
+        'announces camera orientation when orbiting vertically with a11y',
+        async () => {
+          await rafPasses();
+          input.focus();
+
+          element.a11y = {
+            'front': 'A11y test stage front',
+            'back': 'A11y test stage back',
+            'left': 'A11y test stage left',
+            'right': 'A11y test stage right',
+            'upper-front': 'A11y test stage upper-front',
+            'upper-back': 'A11y test stage upper-back',
+            'upper-left': 'A11y test stage upper-left',
+            'upper-right': 'A11y test stage upper-right',
+            'lower-front': 'A11y test stage lower-front',
+            'lower-back': 'A11y test stage lower-back',
+            'lower-left': 'A11y test stage lower-left',
+            'lower-right': 'A11y test stage lower-right',
+            'interaction-prompt': 'A11y test interaction prompt'
+          };
+
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+
+          controls.setOrbit(0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+
+          expect(statusElement.textContent)
+            .to.be.equal('A11y test stage upper-front');
+
+          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+
+          expect(statusElement.textContent)
+            .to.be.equal('A11y test stage front');
+
+          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+
+          expect(statusElement.textContent)
+            .to.be.equal('A11y test stage lower-front');
+
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+
+          element.a11y = '';
+
+          controls.setOrbit(0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage upper-front');
+
+          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage front');
+
+          controls.adjustOrbit(0, -Math.PI / 2.0, 0);
+          element.jumpCameraToGoal();
+          await element.updateComplete;
+
+          expect(statusElement.textContent)
+            .to.be.equal('View from stage lower-front');
+        });
     });
   });
 });

@@ -17,6 +17,7 @@ import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/load
 
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
 import {deserializeUrl, PredicateFunction, timePasses} from '../utilities.js';
+import { ModelViewerElement } from '../model-viewer';
 
 export const elementFromLocalPoint =
     (document: Document|ShadowRoot, x: number, y: number): Element|null => {
@@ -44,6 +45,40 @@ export const until =
     await timePasses();
   }
 }
+
+export const waitForModelToLoad = (element: ModelViewerElement): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const onLoad = () => {
+      element.removeEventListener('poster-dismissed', onLoad);
+      element.removeEventListener('error', onError as any);
+      resolve();
+    };
+    const onError = (event: CustomEvent) => {
+      element.removeEventListener('poster-dismissed', onLoad);
+      element.removeEventListener('error', onError as any);
+      reject(event.detail);
+    };
+    element.addEventListener('poster-dismissed', onLoad);
+    element.addEventListener('error', onError as any);
+  });
+};
+
+export const waitForLoadEvent = (element: ModelViewerElement): Promise<CustomEvent> => {
+  return new Promise((resolve, reject) => {
+    const onLoad = (event: CustomEvent) => {
+      element.removeEventListener('load', onLoad as any);
+      element.removeEventListener('error', onError as any);
+      resolve(event);
+    };
+    const onError = (event: CustomEvent) => {
+      element.removeEventListener('load', onLoad as any);
+      element.removeEventListener('error', onError as any);
+      reject(event.detail);
+    };
+    element.addEventListener('load', onLoad as any);
+    element.addEventListener('error', onError as any);
+  });
+};
 
 export const rafPasses = (): Promise<void> =>
     new Promise(resolve => requestAnimationFrame(() => resolve()));

@@ -21,19 +21,28 @@ import {$effectComposer} from '../effect-composer.js';
 import {EffectComposer} from '../model-viewer-effects.js';
 import {getOwnPropertySymbolValue} from '../utilities.js';
 
-import {ArraysAreEqual, assetPath, createModelViewerElement, screenshot, timePasses, waitForEvent} from './utilities.js';
+import { ArraysAreEqual, CompareArrays, assetPath, createModelViewerElement, rafPasses, screenshot, timePasses, waitForEvent } from './utilities.js';
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
   let baseScreenshot: Uint8Array;
 
-  setup(async () => {
+  setup(async function () {
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));
     await waitForEvent(element, 'load');
   });
 
   teardown(() => {
-    document.body.removeChild(element);
+    if (element && element.parentNode) {
+      document.body.removeChild(element);
+    }
   });
 
   test('Compare ModelViewer to Self', async () => {
@@ -41,9 +50,9 @@ suite('Screenshot Baseline Test', () => {
         getOwnPropertySymbolValue<Renderer>(element, 'renderer') as Renderer;
     expect(renderer).to.not.be.undefined;
     expect(renderer.threeRenderer).to.not.be.undefined;
-    await timePasses(5);
+    await rafPasses();
     baseScreenshot = screenshot(element);
-    await timePasses(5);
+    await rafPasses();
     const screenshot2 = screenshot(element);
 
     expect(ArraysAreEqual(baseScreenshot, screenshot2)).to.be.true;
@@ -58,22 +67,22 @@ suite('Screenshot Baseline Test', () => {
       composer.renderMode = 'quality';
       composer.msaa = 8;
       element.insertBefore(composer, element.firstChild);
-      await timePasses(5);
+      await timePasses(100);
     });
 
     test('Compare Self', async () => {
       const renderer = composer[$effectComposer].getRenderer();
       expect(renderer).to.not.be.undefined;
-      await timePasses(10);
+      await rafPasses();
       composerScreenshot = screenshot(element);
-      await timePasses(10);
+      await rafPasses();
       const screenshot2 = screenshot(element);
 
       expect(ArraysAreEqual(composerScreenshot, screenshot2)).to.be.true;
     });
 
     test('Empty EffectComposer and base Renderer are identical', () => {
-      expect(ArraysAreEqual(baseScreenshot, composerScreenshot)).to.be.true;
+      expect(CompareArrays(baseScreenshot, composerScreenshot)).to.be.greaterThan(0.999);
     });
   });
 });

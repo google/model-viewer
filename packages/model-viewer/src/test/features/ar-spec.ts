@@ -18,6 +18,7 @@ import {expect} from 'chai';
 import {IS_ANDROID, IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer} from '../../features/ar.js';
 import {ModelViewerElement} from '../../model-viewer.js';
+import { Renderer } from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
 import {assetPath, rafPasses, spy} from '../helpers.js';
 
@@ -26,8 +27,15 @@ suite('AR', () => {
   let intentUrls: Array<string>;
   let restoreAnchorClick: () => void;
 
-  setup(() => {
+  setup(function () {
     element = new ModelViewerElement();
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     document.body.insertBefore(element, document.body.firstChild);
     intentUrls = [];
     restoreAnchorClick = spy(HTMLAnchorElement.prototype, 'click', {
@@ -41,7 +49,9 @@ suite('AR', () => {
     if (element.parentNode != null) {
       element.parentNode.removeChild(element);
     }
-    restoreAnchorClick();
+    if (restoreAnchorClick) {
+      restoreAnchorClick();
+    }
   });
 
   suite('openSceneViewer', () => {
@@ -188,7 +198,14 @@ suite('AR', () => {
   });
 
   suite('shows the AR button', () => {
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       element.ar = true;
       element.src = assetPath('models/Astronaut.glb');
 

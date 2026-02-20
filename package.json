@@ -1,6 +1,7 @@
 {
   "name": "model-viewer-packages",
   "private": true,
+  "type": "module",
   "description": "The repository for all <model-viewer> packages",
   "scripts": {
     "test": "npm run test --workspaces",
@@ -10,7 +11,7 @@
     "lint:fix": "npm run lint -- --fix",
     "clean": "npm run clean --workspaces",
     "build": "npm run build --workspaces",
-    "serve": "./node_modules/.bin/http-server -c-1",
+    "serve": "node scripts/dev-server.js",
     "update:package-lock": "npm exec -y --workspaces -- npx rimraf package-lock.json node_modules && npx rimraf package-lock.json node_modules && npm install --save && npm run clean --workspaces && node ./scripts/postinstall.js"
   },
   "husky": {

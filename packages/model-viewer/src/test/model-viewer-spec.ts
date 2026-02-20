@@ -2,9 +2,10 @@ import {expect} from 'chai';
 
 import {$renderer} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
-import {Constructor, waitForEvent} from '../utilities.js';
+import { Constructor } from '../utilities.js';
+import {Renderer} from '../three-components/Renderer.js';
 
-import {assetPath, rafPasses} from './helpers.js';
+import { assetPath, rafPasses, waitForModelToLoad } from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const SUNRISE_HDR_PATH = 'environments/spruit_sunrise_1k_HDR.hdr';
@@ -13,24 +14,25 @@ const SUNRISE_LDR_PATH = 'environments/spruit_sunrise_1k_LDR.jpg';
 const COMPONENTS_PER_PIXEL = 4;
 
 const setupLighting =
-    async (modelViewer: ModelViewerElement, lighting?: string) => {
-  const posterDismissed = waitForEvent(modelViewer, 'poster-dismissed');
+  async (modelViewer: ModelViewerElement, lighting?: string) => {
+    if (!Renderer.singleton.canRender) return;
+    const load = waitForModelToLoad(modelViewer);
 
-  if (lighting) {
-    const lightingPath = assetPath(lighting);
-    modelViewer.environmentImage = lightingPath;
+    if (lighting) {
+      const lightingPath = assetPath(lighting);
+      modelViewer.environmentImage = lightingPath;
+    }
+    modelViewer.src = assetPath('models/reflective-sphere.gltf');
+
+    await load;
+    await rafPasses();
   }
-  modelViewer.src = assetPath('models/reflective-sphere.gltf');
-
-  await posterDismissed;
-  await rafPasses();
-}
 
 // TODO(sun765): this only test whether the screenshot
 // is colorless or not. Replace this with more robust
 // test in later pr.
-function testFidelity(screenshotContext: WebGLRenderingContext|
-                      WebGL2RenderingContext) {
+function testFidelity(screenshotContext: WebGLRenderingContext |
+  WebGL2RenderingContext) {
   const width = screenshotContext.drawingBufferWidth;
   const height = screenshotContext.drawingBufferHeight;
 
@@ -38,13 +40,13 @@ function testFidelity(screenshotContext: WebGLRenderingContext|
   // this function reads in the bottom-up direction from the coordinate
   // specified ((0,0) is the bottom-left corner).
   screenshotContext.readPixels(
-      0,
-      0,
-      width,
-      height,
-      screenshotContext.RGBA,
-      screenshotContext.UNSIGNED_BYTE,
-      pixels);
+    0,
+    0,
+    width,
+    height,
+    screenshotContext.RGBA,
+    screenshotContext.UNSIGNED_BYTE,
+    pixels);
 
   let transparentPixels = 0;
   let whitePixels = 0;
@@ -83,11 +85,9 @@ function testFidelity(screenshotContext: WebGLRenderingContext|
 
   const imagePixelCount = width * height;
   expect(whitePixels + blackPixels + transparentPixels)
-      .to.be.below(
-          imagePixelCount,
-          `Image had ${whitePixels} white pixels and ${
-              blackPixels} black pixels and ${
-              transparentPixels} background pixels.`);
+    .to.be.below(
+      imagePixelCount,
+      `Image had ${whitePixels} white pixels and ${blackPixels} black pixels and ${transparentPixels} background pixels.`);
 };
 
 suite('ModelViewerElement', () => {
@@ -110,8 +110,16 @@ suite('ModelViewerElement', () => {
   suite('Render Functionality Test', () => {
     let element: ModelViewerElement;
 
-    setup(async () => {
+    setup(async function () {
       element = new ModelViewerElement();
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
+
       element.style.width = '100px';
       element.style.height = '100px';
       document.body.insertBefore(element, document.body.firstChild);

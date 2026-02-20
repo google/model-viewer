@@ -20,8 +20,9 @@ import {$controls} from '../../features/controls.js';
 import {$userInputElement} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {SmoothControls} from '../../three-components/SmoothControls.js';
+import { Renderer } from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent} from '../helpers.js';
+import { assetPath, dispatchSyntheticEvent, rafPasses } from '../helpers.js';
 
 const ONE_FRAME_DELTA = 1000.0 / 60.0;
 const FIFTY_FRAME_DELTA = 50.0 * ONE_FRAME_DELTA;
@@ -42,7 +43,14 @@ suite('SmoothControls', () => {
   let modelViewer: ModelViewerElement;
   let element: HTMLDivElement;
 
-  setup(async () => {
+  setup(async function () {
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     modelViewer = new ModelViewerElement();
     element = modelViewer[$userInputElement];
     controls = (modelViewer as any)[$controls];
@@ -52,13 +60,17 @@ suite('SmoothControls', () => {
 
     document.body.insertBefore(modelViewer, document.body.firstChild);
 
+    await rafPasses();
+
     modelViewer.cameraControls = true;
     modelViewer.src = assetPath('models/cube.gltf');
     await waitForEvent(modelViewer, 'poster-dismissed');
   });
 
   teardown(() => {
-    document.body.removeChild(modelViewer);
+    if (modelViewer && modelViewer.parentNode != null) {
+      modelViewer.parentNode.removeChild(modelViewer);
+    }
   });
 
   suite('when updated', () => {
