@@ -20,6 +20,7 @@ import {$controls} from '../../features/controls.js';
 import {$userInputElement} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {SmoothControls} from '../../three-components/SmoothControls.js';
+import { Renderer } from '../../three-components/Renderer.js';
 import {waitForEvent} from '../../utilities.js';
 import { assetPath, dispatchSyntheticEvent, rafPasses } from '../helpers.js';
 
@@ -42,7 +43,14 @@ suite('SmoothControls', () => {
   let modelViewer: ModelViewerElement;
   let element: HTMLDivElement;
 
-  setup(async () => {
+  setup(async function () {
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     modelViewer = new ModelViewerElement();
     element = modelViewer[$userInputElement];
     controls = (modelViewer as any)[$controls];

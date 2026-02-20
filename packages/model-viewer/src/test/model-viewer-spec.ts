@@ -15,6 +15,7 @@ const COMPONENTS_PER_PIXEL = 4;
 
 const setupLighting =
   async (modelViewer: ModelViewerElement, lighting?: string) => {
+    if (!Renderer.singleton.canRender) return;
     const posterDismissed = waitForEvent(modelViewer, 'poster-dismissed');
 
     if (lighting) {

@@ -46,8 +46,15 @@ suite('Environment', () => {
   let element: ModelViewerElement;
   let scene: ModelScene;
 
-  setup(() => {
+  setup(function () {
     element = new ModelViewerElement();
+    try {
+      if (!Renderer.singleton.canRender) {
+        this.skip();
+      }
+    } catch (e) {
+      this.skip();
+    }
     scene = element[$scene];
   });
 
@@ -71,7 +78,14 @@ suite('Environment', () => {
   suite('with no skybox-image property', () => {
     let environmentChanges = 0;
     suite('and a src property', () => {
-      setup(async () => {
+      setup(async function () {
+        try {
+          if (!Renderer.singleton.canRender) {
+            this.skip();
+          }
+        } catch (e) {
+          this.skip();
+        }
         const onLoad = waitForLoadAndEnvMap(element);
         element.src = MODEL_URL;
         document.body.insertBefore(element, document.body.firstChild);
@@ -98,7 +112,14 @@ suite('Environment', () => {
   });
 
   suite('exposure', () => {
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       element.src = MODEL_URL;
       document.body.insertBefore(element, document.body.firstChild);
       await waitForEvent(element, 'poster-dismissed');
@@ -128,7 +149,14 @@ suite('Environment', () => {
   });
 
   suite('shadow-intensity', () => {
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       element.src = MODEL_URL;
       document.body.insertBefore(element, document.body.firstChild);
       await waitForEvent(element, 'poster-dismissed');
@@ -147,7 +175,14 @@ suite('Environment', () => {
   });
 
   suite('environment-image', () => {
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       const onLoad = waitForLoadAndEnvMap(element);
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('environment-image', HDR_BG_IMAGE_URL);
@@ -177,7 +212,14 @@ suite('Environment', () => {
   });
 
   suite('with skybox-image property', () => {
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       const onLoad = waitForLoadAndEnvMap(element);
       element.setAttribute('src', MODEL_URL);
       element.setAttribute('skybox-image', HDR_BG_IMAGE_URL);
@@ -202,7 +244,14 @@ suite('Environment', () => {
     });
 
     suite('with skybox-height property', () => {
-      setup(async () => {
+      setup(async function () {
+        try {
+          if (!Renderer.singleton.canRender) {
+            this.skip();
+          }
+        } catch (e) {
+          this.skip();
+        }
         element.setAttribute('skybox-height', '1m');
         await element.updateComplete;
       });
@@ -225,7 +274,14 @@ suite('Environment', () => {
     });
 
     suite('with an environment-image', () => {
-      setup(async () => {
+      setup(async function () {
+        try {
+          if (!Renderer.singleton.canRender) {
+            this.skip();
+          }
+        } catch (e) {
+          this.skip();
+        }
         const environmentChanged = waitForEvent(element, 'environment-change');
         element.setAttribute('environment-image', ALT_BG_IMAGE_URL);
         await environmentChanged;

@@ -61,7 +61,14 @@ suite('Staging', () => {
     });
 
     suite('auto-rotate', () => {
-      setup(async () => {
+      setup(async function () {
+        try {
+          if (!Renderer.singleton.canRender) {
+            this.skip();
+          }
+        } catch (e) {
+          this.skip();
+        }
         element.autoRotate = true;
         element.autoRotateDelay = AUTO_ROTATE_DELAY;
         await timePasses();

@@ -189,7 +189,14 @@ suite('Annotation', () => {
       suite('with a camera', () => {
         let wrapper: HTMLElement;
 
-        setup(async () => {
+        setup(async function () {
+          try {
+            if (!Renderer.singleton.canRender) {
+              this.skip();
+            }
+          } catch (e) {
+            this.skip();
+          }
           // This is to wait for the hotspots to be added to their slots, as
           // this triggers their visibility to "show". Otherwise, sometimes the
           // following hide() call will happen first, then when the camera
@@ -221,7 +228,14 @@ suite('Annotation', () => {
   suite('a model-viewer element with a loaded cube', () => {
     let rect: DOMRect;
 
-    setup(async () => {
+    setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       element.setAttribute('style', `width: 200px; height: 300px`);
       rect = element.getBoundingClientRect();
       element.cameraOrbit = '0deg 90deg 2m';

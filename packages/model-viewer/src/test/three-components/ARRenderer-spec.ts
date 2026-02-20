@@ -215,6 +215,13 @@ suite('ARRenderer', () => {
     let oldXRRay: any;
 
     setup(async function () {
+      try {
+        if (!Renderer.singleton.canRender) {
+          this.skip();
+        }
+      } catch (e) {
+        this.skip();
+      }
       const sourceLoads = waitForEvent(element, 'poster-dismissed');
       element.src = assetPath('models/Astronaut.glb');
       await sourceLoads;

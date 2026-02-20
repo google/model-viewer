@@ -21,7 +21,7 @@ import {$effectComposer} from '../effect-composer.js';
 import {EffectComposer} from '../model-viewer-effects.js';
 import {getOwnPropertySymbolValue} from '../utilities.js';
 
-import { ArraysAreEqual, assetPath, createModelViewerElement, rafPasses, screenshot, waitForEvent } from './utilities.js';
+import { ArraysAreEqual, assetPath, createModelViewerElement, rafPasses, screenshot, timePasses, waitForEvent } from './utilities.js';
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
@@ -67,7 +67,7 @@ suite('Screenshot Baseline Test', () => {
       composer.renderMode = 'quality';
       composer.msaa = 8;
       element.insertBefore(composer, element.firstChild);
-      await rafPasses();
+      await timePasses(100);
     });
 
     test('Compare Self', async () => {

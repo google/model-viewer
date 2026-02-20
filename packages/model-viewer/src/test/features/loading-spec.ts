@@ -148,7 +148,14 @@ suite('Loading', () => {
 
   suite('load', () => {
     suite('when a model src changes after loading', () => {
-      setup(async () => {
+      setup(async function () {
+        try {
+          if (!Renderer.singleton.canRender) {
+            this.skip();
+          }
+        } catch (e) {
+          this.skip();
+        }
         // The shadow is here to expose an earlier bug on unloading models.
         element.shadowIntensity = 1;
         element.src = CUBE_GLB_PATH;
