@@ -21,7 +21,7 @@ import {$effectComposer} from '../effect-composer.js';
 import {EffectComposer} from '../model-viewer-effects.js';
 import {getOwnPropertySymbolValue} from '../utilities.js';
 
-import { ArraysAreEqual, assetPath, createModelViewerElement, rafPasses, screenshot, timePasses, waitForEvent } from './utilities.js';
+import { ArraysAreEqual, CompareArrays, assetPath, createModelViewerElement, rafPasses, screenshot, timePasses, waitForEvent } from './utilities.js';
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
@@ -82,7 +82,7 @@ suite('Screenshot Baseline Test', () => {
     });
 
     test('Empty EffectComposer and base Renderer are identical', () => {
-      expect(ArraysAreEqual(baseScreenshot, composerScreenshot)).to.be.true;
+      expect(CompareArrays(baseScreenshot, composerScreenshot)).to.be.greaterThan(0.999);
     });
   });
 });

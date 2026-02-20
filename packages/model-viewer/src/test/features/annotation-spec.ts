@@ -22,7 +22,7 @@ import {Hotspot} from '../../three-components/Hotspot.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, rafPasses, until} from '../helpers.js';
+import { assetPath, rafPasses, until, waitForModelToLoad } from '../helpers.js';
 
 const sceneContainsHotspot =
     (scene: ModelScene, element: HTMLElement): boolean => {
@@ -72,7 +72,7 @@ suite('Annotation', () => {
     await rafPasses();
 
     element.src = assetPath('models/cube.gltf');
-    await waitForEvent(element, 'poster-dismissed');
+    await waitForModelToLoad(element);
   });
 
   teardown(() => {

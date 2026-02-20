@@ -19,8 +19,8 @@ import {CameraChangeDetails} from '../../features/controls.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {ChangeSource} from '../../three-components/SmoothControls.js';
 import {Renderer} from '../../three-components/Renderer.js';
-import {timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, rafPasses} from '../helpers.js';
+import { timePasses } from '../../utilities.js';
+import { assetPath, rafPasses, waitForModelToLoad } from '../helpers.js';
 
 const ODD_SHAPE_GLB_PATH = assetPath('models/odd-shape.glb');
 const AUTO_ROTATE_DELAY = 50;
@@ -42,7 +42,7 @@ suite('Staging', () => {
       await rafPasses();
       element.src = ODD_SHAPE_GLB_PATH;
 
-      await waitForEvent(element, 'poster-dismissed');
+      await waitForModelToLoad(element);
       await rafPasses();
     });
 

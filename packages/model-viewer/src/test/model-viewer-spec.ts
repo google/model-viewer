@@ -2,10 +2,10 @@ import {expect} from 'chai';
 
 import {$renderer} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
-import {Constructor, waitForEvent} from '../utilities.js';
+import { Constructor } from '../utilities.js';
 import {Renderer} from '../three-components/Renderer.js';
 
-import {assetPath, rafPasses} from './helpers.js';
+import { assetPath, rafPasses, waitForModelToLoad } from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const SUNRISE_HDR_PATH = 'environments/spruit_sunrise_1k_HDR.hdr';
@@ -16,7 +16,7 @@ const COMPONENTS_PER_PIXEL = 4;
 const setupLighting =
   async (modelViewer: ModelViewerElement, lighting?: string) => {
     if (!Renderer.singleton.canRender) return;
-    const posterDismissed = waitForEvent(modelViewer, 'poster-dismissed');
+    const load = waitForModelToLoad(modelViewer);
 
     if (lighting) {
       const lightingPath = assetPath(lighting);
@@ -24,7 +24,7 @@ const setupLighting =
     }
     modelViewer.src = assetPath('models/reflective-sphere.gltf');
 
-    await posterDismissed;
+    await load;
     await rafPasses();
   }
 

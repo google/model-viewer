@@ -21,7 +21,7 @@ import {ModelViewerElement} from '../../model-viewer.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
 import {Renderer} from '../../three-components/Renderer.js';
-import {assetPath, pickShadowDescendant, rafPasses, until} from '../helpers.js';
+import { assetPath, pickShadowDescendant, rafPasses, until, waitForLoadEvent } from '../helpers.js';
 
 const CUBE_GLB_PATH = assetPath('models/cube.gltf');
 const HORSE_GLB_PATH = assetPath('models/Horse.glb');
@@ -73,8 +73,8 @@ suite('Loading', () => {
       await rafPasses();
       element.style.height = '100vh';
       element2.style.height = '100vh';
-      const load1 = waitForEvent(element, 'load');
-      const load2 = waitForEvent(element2, 'load');
+      const load1 = waitForLoadEvent(element);
+      const load2 = waitForLoadEvent(element2);
       element.src = CUBE_GLB_PATH;
       element2.src = CUBE_GLB_PATH;
       await Promise.all([load1, load2]);
@@ -173,11 +173,11 @@ suite('Loading', () => {
         try {
           element.src = HORSE_GLB_PATH;
 
-          await waitForEvent(element, 'load');
+          await waitForLoadEvent(element);
 
           element.src = CUBE_GLB_PATH;
 
-          await waitForEvent(element, 'load');
+          await waitForLoadEvent(element);
 
           // Give any late-dispatching events a chance to dispatch
           await timePasses(300);
@@ -197,7 +197,7 @@ suite('Loading', () => {
 
       test('models are unloaded after src updates', async () => {
         element.src = HORSE_GLB_PATH;
-        await waitForEvent(element, 'load');
+        await waitForLoadEvent(element);
 
         const {shadow, model, target} = element[$scene];
         const {children} = target;
@@ -206,7 +206,7 @@ suite('Loading', () => {
         expect(children).to.contain(model, 'horse model');
 
         element.src = CUBE_GLB_PATH;
-        await waitForEvent(element, 'load');
+        await waitForLoadEvent(element);
         const {children: children2} = target;
         expect(children2.length).to.be.eq(2, 'cube');
         expect(children2).to.contain(shadow, 'cube shadow');
@@ -239,14 +239,14 @@ suite('Loading', () => {
         element.src = CUBE_GLB_PATH;
 
         const loadCubeEvent =
-            waitForEvent(element, 'load') as Promise<CustomEvent>;
+          waitForLoadEvent(element);
 
         await timePasses();
 
         element.src = HORSE_GLB_PATH;
 
         const loadCube = await loadCubeEvent;
-        const loadHorse = await waitForEvent(element, 'load') as CustomEvent;
+        const loadHorse = await waitForLoadEvent(element);
 
         expect(loadCube.detail.url).to.be.eq(CUBE_GLB_PATH);
         expect(loadHorse.detail.url).to.be.eq(HORSE_GLB_PATH);
@@ -291,7 +291,7 @@ suite('Loading', () => {
           const posterElement = (element as any)[$defaultPosterElement];
           const input = element[$userInputElement];
 
-          await waitForEvent(element, 'load');
+          await waitForLoadEvent(element);
 
           posterElement.focus();
 

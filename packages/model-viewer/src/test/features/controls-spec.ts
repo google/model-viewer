@@ -18,13 +18,13 @@ import {Camera, Vector3} from 'three';
 
 
 import {$controls, $promptAnimatedContainer, $promptElement, CameraChangeDetails, cameraOrbitIntrinsics, ControlsInterface, DEFAULT_FOV_DEG, DEFAULT_MIN_FOV_DEG, INTERACTION_PROMPT, SphericalPosition} from '../../features/controls.js';
-import ModelViewerElementBase, {$scene, $statusElement, $userInputElement, Vector3D} from '../../model-viewer-base.js';
+import ModelViewerElementBase, { $needsRender, $scene, $statusElement, $userInputElement, Vector3D } from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {StyleEvaluator} from '../../styles/evaluators.js';
 import {ChangeSource, SmoothControls} from '../../three-components/SmoothControls.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {step, timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, dispatchSyntheticEvent, rafPasses, until} from '../helpers.js';
+import { assetPath, dispatchSyntheticEvent, rafPasses, until, waitForModelToLoad } from '../helpers.js';
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
 
@@ -100,7 +100,7 @@ suite('Controls', () => {
       await rafPasses();
       element.src = assetPath('models/cube.gltf');
 
-      await waitForEvent(element, 'poster-dismissed');
+      await waitForModelToLoad(element);
 
       element.jumpCameraToGoal();
       await element.updateComplete;
@@ -312,6 +312,7 @@ suite('Controls', () => {
           originalRender(t, frame);
         };
 
+        (element as any)[$needsRender]();
         await timePasses(500); // 0.5s is enough to see if it renders
 
         if (renderRuns === 0) {
@@ -396,7 +397,7 @@ suite('Controls', () => {
       element.interactionPromptThreshold =
         100;  // Fairly low, to keep the test time down
 
-      await waitForEvent(element, 'poster-dismissed');
+      await waitForModelToLoad(element as any);
     });
 
     teardown(() => {
