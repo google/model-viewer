@@ -18,7 +18,7 @@ import {expect} from 'chai';
 import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
-import { assetPath, rafPasses } from '../helpers.js';
+import {assetPath} from '../helpers.js';
 
 const TOLERANCE_SEC = 0.1;
 const NON_ANIMATED_GLB_PATH = assetPath('models/Astronaut.glb');
@@ -63,9 +63,8 @@ suite('Animation', () => {
 
     setup(async () => {
       element = new ModelViewerElement();
-      document.body.insertBefore(element, document.body.firstChild);
-      await rafPasses();
       element.src = ANIMATED_GLB_PATH;
+      document.body.insertBefore(element, document.body.firstChild);
 
       await waitForEvent(element, 'poster-dismissed');
     });

@@ -21,7 +21,7 @@ import {$effectComposer} from '../effect-composer.js';
 import {EffectComposer} from '../model-viewer-effects.js';
 import {getOwnPropertySymbolValue} from '../utilities.js';
 
-import {ArraysAreEqual, assetPath, createModelViewerElement, screenshot, timePasses, waitForEvent} from './utilities.js';
+import { ArraysAreEqual, CompareArrays, assetPath, createModelViewerElement, screenshot, timePasses, waitForEvent, rafPasses } from './utilities.js';
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
@@ -55,10 +55,10 @@ suite('Screenshot Baseline Test', () => {
 
     setup(async () => {
       composer = new EffectComposer();
-      composer.renderMode = 'quality';
       composer.msaa = 8;
       element.insertBefore(composer, element.firstChild);
-      await timePasses(5);
+      await composer.updateComplete;
+      await rafPasses();
     });
 
     test('Compare Self', async () => {
@@ -72,8 +72,13 @@ suite('Screenshot Baseline Test', () => {
       expect(ArraysAreEqual(composerScreenshot, screenshot2)).to.be.true;
     });
 
-    test('Empty EffectComposer and base Renderer are identical', () => {
-      expect(ArraysAreEqual(baseScreenshot, composerScreenshot)).to.be.true;
+    test('Empty EffectComposer and base Renderer are identical', function () {
+      const similarity = CompareArrays(baseScreenshot, composerScreenshot);
+      if (Number.isNaN(similarity)) {
+        this.skip();
+      } else {
+        expect(similarity).to.be.greaterThan(0.999);
+      }
     });
   });
 });

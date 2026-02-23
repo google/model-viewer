@@ -31,7 +31,6 @@ suite('Staging', () => {
     setup(async () => {
       element = new ModelViewerElement();
       document.body.insertBefore(element, document.body.firstChild);
-      await rafPasses();
       element.src = ODD_SHAPE_GLB_PATH;
 
       await waitForEvent(element, 'poster-dismissed');

@@ -16,7 +16,16 @@ import {Group} from 'three';
 import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
+import { Renderer } from '../three-components/Renderer.js';
 import {deserializeUrl, PredicateFunction, timePasses} from '../utilities.js';
+
+setup(function () {
+  if (!Renderer.singleton.canRender) {
+    console.warn(
+      'WebGL is not available in this environment. Skipping test suite dynamically.');
+    this.skip();
+  }
+});
 
 export const elementFromLocalPoint =
     (document: Document|ShadowRoot, x: number, y: number): Element|null => {

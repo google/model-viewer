@@ -42,7 +42,7 @@
     "build:rollup:dev": "rollup -c --environment NODE_ENV:development",
     "prepublishOnly": "npm run build",
     "test": "web-test-runner --playwright --browsers chromium firefox webkit",
-    "test:ci": "web-test-runner --static-logging --playwright --browsers chromium webkit",
+    "test:ci": "web-test-runner --static-logging --config ../model-viewer/web-test-ci.config.mjs",
     "serve": "node_modules/.bin/http-server -c-1",
     "dev": "npm run build:dev && npm-run-all --parallel 'watch:tsc -- --preserveWatchOutput' 'watch:test' 'serve -- -s'",
     "watch:tsc": "tsc -w --incremental",

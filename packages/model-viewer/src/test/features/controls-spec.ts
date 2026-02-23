@@ -85,7 +85,6 @@ suite('Controls', () => {
     setup(async () => {
       element = new ModelViewerElement();
       document.body.insertBefore(element, document.body.firstChild);
-      await rafPasses();
       element.src = assetPath('models/cube.gltf');
 
       await waitForEvent(element, 'poster-dismissed');
@@ -363,7 +362,6 @@ suite('Controls', () => {
       element = new ModelViewerElement();
       controls = (element as any)[$controls]
       document.body.insertBefore(element, document.body.firstChild);
-      await rafPasses();
       element.src = assetPath('models/cube.gltf');
       element.cameraControls = true;
 

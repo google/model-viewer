@@ -52,6 +52,14 @@ export default {
       product: 'chromium',
       launchOptions: {
         retries: 3,
+        args: [
+          '--use-gl=angle',
+          '--use-angle=swiftshader',
+          '--disable-gpu',
+          '--no-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu-process-crash-limit'
+        ],
       },
       createBrowserContext({browser}) {
         return browser.newContext({...devices['Galaxy S9+']});
@@ -61,6 +69,14 @@ export default {
       product: 'chromium',
       launchOptions: {
         retries: 3,
+        args: [
+          '--use-gl=angle',
+          '--use-angle=swiftshader',
+          '--disable-gpu',
+          '--no-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu-process-crash-limit'
+        ],
       },
       createBrowserContext({browser}) {
         return browser.newContext({...devices['Desktop Chrome']});
