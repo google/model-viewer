@@ -321,7 +321,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const lottieLoaderLocation = ModelViewerElement.lottieLoaderLocation ||
           DEFAULT_LOTTIE_LOADER_LOCATION;
-      Renderer.singleton.textureUtils!.lottieLoaderUrl = lottieLoaderLocation;
+      if (Renderer.singleton.textureUtils != null) {
+        Renderer.singleton.textureUtils.lottieLoaderUrl = lottieLoaderLocation;
+      }
     }
 
     connectedCallback() {

@@ -185,8 +185,8 @@ suite('Annotation', () => {
           // following hide() call will happen first, then when the camera
           // moves, we never get a hotspot-visibility event because they were
           // already visible.
-          await rafPasses();
 
+          await rafPasses();
           wrapper = (scene.target.children[numSlots - 1] as Hotspot).element;
         });
 

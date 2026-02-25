@@ -15,7 +15,7 @@
 import {Group} from 'three';
 import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
+import { ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode } from '../styles/parsers.js';
 import { Renderer } from '../three-components/Renderer.js';
 import {deserializeUrl, PredicateFunction, timePasses} from '../utilities.js';
 
@@ -55,7 +55,16 @@ export const until =
 }
 
 export const rafPasses = (): Promise<void> =>
-    new Promise(resolve => requestAnimationFrame(() => resolve()));
+  new Promise(resolve => {
+    const timeout = setTimeout(() => {
+      console.warn('rafPasses timed out');
+      resolve();
+    }, 500);
+    requestAnimationFrame(() => {
+      clearTimeout(timeout);
+      resolve();
+    });
+  });
 
 export interface SyntheticEventProperties {
   clientX?: number;

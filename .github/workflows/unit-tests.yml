@@ -28,6 +28,4 @@ jobs:
       run: npm run build
 
     - name: Unit tests
-      uses: coactions/setup-xvfb@v1
-      with:
-        run: npm run test:ci
+      run: npm run test:ci
