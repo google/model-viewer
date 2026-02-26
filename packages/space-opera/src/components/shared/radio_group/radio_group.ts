@@ -20,7 +20,6 @@ import '@polymer/paper-radio-group';
 
 import {html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
-
 import {styles} from './radio_group.css.js';
 
 /**

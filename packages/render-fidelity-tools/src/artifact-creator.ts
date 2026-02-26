@@ -300,12 +300,8 @@ export class ArtifactCreator {
 
     if (this.browser == null) {
       console.log(`🚀 Launching browser`);
-      // no-sandbox and disable-setuid-sandbox args to resolve puppeteer browser
-      // run error in fidelity tests
-      this.browser = await puppeteer.launch({
-        headless: quiet,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
+      // no-sandbox and disable-setuid-sandbox args to resolve puppeteer browser run error in fidelity tests
+      this.browser = await puppeteer.launch({headless: quiet, args:['--no-sandbox', '--disable-setuid-sandbox']});
     }
 
     const page = await this.browser.newPage();
@@ -385,8 +381,8 @@ export class ArtifactCreator {
       // Ignored...
     }
 
-    const screenshot = await page.screenshot(
-        {path: outputPath as `${string}.png`, omitBackground: true});
+    const screenshot =
+        await page.screenshot({path: outputPath as `${string}.png`, omitBackground: true});
 
     page.close();
 
