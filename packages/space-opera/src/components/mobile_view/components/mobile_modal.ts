@@ -16,7 +16,7 @@
  */
 
 import {html} from 'lit';
-import {customElement, state, property, query} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 // @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
@@ -65,7 +65,8 @@ export class MobileModal extends ConnectedLitElement {
     </div>
     <canvas id="qr" style="display: block; margin-bottom: 10px;"></canvas>
     <div class="modal-text" style="margin-bottom: 80px;">
-      <a href="${this.viewableSite}" target="_blank" style="color: white">${this.viewableSite}</a>
+      <a href="${this.viewableSite}" target="_blank" style="color: white">${
+        this.viewableSite}</a>
     </div>
     <div class="modal-text">
       This uses a third-party <a href="https://github.com/nwtgck/piping-server" target="_blank" class="piping-link">piping server</a> to deploy to your mobile device. This server does not store data.

@@ -21,13 +21,13 @@ import {$effectComposer} from '../effect-composer.js';
 import {EffectComposer} from '../model-viewer-effects.js';
 import {getOwnPropertySymbolValue} from '../utilities.js';
 
-import { ArraysAreEqual, assetPath, createModelViewerElement, rafPasses, screenshot, timePasses, waitForEvent } from './utilities.js';
+import {ArraysAreEqual, assetPath, createModelViewerElement, rafPasses, screenshot, timePasses, waitForEvent} from './utilities.js';
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
   let baseScreenshot: Uint8Array;
 
-  suiteSetup(function () {
+  suiteSetup(function() {
     if (!Renderer.singleton.canRender) {
       this.skip();
     }

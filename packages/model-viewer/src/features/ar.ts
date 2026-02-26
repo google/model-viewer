@@ -150,11 +150,12 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       super.connectedCallback();
 
       if (this[$renderer].arRenderer != null) {
-        this[$renderer].arRenderer.addEventListener('status', this[$onARStatus]);
+        this[$renderer].arRenderer.addEventListener(
+            'status', this[$onARStatus]);
         this.setAttribute('ar-status', ARStatus.NOT_PRESENTING);
 
         this[$renderer].arRenderer.addEventListener(
-          'tracking', this[$onARTracking]);
+            'tracking', this[$onARTracking]);
       }
 
       this[$arAnchor].addEventListener('message', this[$onARTap]);
@@ -165,9 +166,9 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (this[$renderer].arRenderer != null) {
         this[$renderer].arRenderer.removeEventListener(
-          'status', this[$onARStatus]);
+            'status', this[$onARStatus]);
         this[$renderer].arRenderer.removeEventListener(
-          'tracking', this[$onARTracking]);
+            'tracking', this[$onARTracking]);
       }
 
       this[$arAnchor].removeEventListener('message', this[$onARTap]);

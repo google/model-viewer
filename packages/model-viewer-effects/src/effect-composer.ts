@@ -18,17 +18,17 @@ import {ModelScene} from '@google/model-viewer/lib/three-components/ModelScene.j
 import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
 import {EffectComposer as PPEffectComposer, EffectPass, NormalPass, Pass, RenderPass, Selection} from 'postprocessing';
-import { Camera, HalfFloatType, NeutralToneMapping, ToneMapping, UnsignedByteType, Vector2, WebGLRenderer } from 'three';
+import {Camera, HalfFloatType, NeutralToneMapping, ToneMapping, UnsignedByteType, Vector2, WebGLRenderer} from 'three';
 
 const DUMMY_RENDERER = {
   getDrawingBufferSize: (v: Vector2) => v.set(1, 1),
   getSize: (v: Vector2) => v.set(1, 1),
-  getContext: () => ({ getContextAttributes: () => ({ alpha: true }) }),
+  getContext: () => ({getContextAttributes: () => ({alpha: true})}),
 } as unknown as WebGLRenderer;
 
 import {IMVEffect, IntegrationOptions, MVEffectBase} from './effects/mixins/effect-base.js';
-import { disposeEffectPass, getOwnPropertySymbolValue, isConvolution, validateLiteralType } from './utilities.js';
-import { Renderer } from '@google/model-viewer/lib/three-components/Renderer.js';
+import {disposeEffectPass, getOwnPropertySymbolValue, isConvolution, validateLiteralType} from './utilities.js';
+import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
 
 export const $scene = Symbol('scene');
 export const $composer = Symbol('composer');
@@ -232,10 +232,10 @@ export class MVEffectComposer extends ReactiveElement {
           (e as Error).message + '\nrenderMode defaulting to: performance');
     }
     const rendererInfo = getOwnPropertySymbolValue<Renderer>(
-      this.modelViewerElement, 'renderer');
+        this.modelViewerElement, 'renderer');
     const threeRenderer = rendererInfo && rendererInfo.threeRenderer ?
-      rendererInfo.threeRenderer :
-      DUMMY_RENDERER;
+        rendererInfo.threeRenderer :
+        DUMMY_RENDERER;
 
     this[$composer] = new EffectComposer(threeRenderer, {
       stencilBuffer: true,

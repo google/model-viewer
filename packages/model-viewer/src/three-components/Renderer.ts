@@ -190,7 +190,7 @@ export class Renderer extends
 
       if (this.scenes.size > 0) {
         this.threeRenderer.setAnimationLoop(
-          (time: number, frame?: any) => this.render(time, frame));
+            (time: number, frame?: any) => this.render(time, frame));
       }
     }
   }
@@ -556,7 +556,7 @@ export class Renderer extends
   onWebGLContextRestored = () => {
     this.textureUtils?.dispose();
     this.textureUtils =
-      this.canRender ? new TextureUtils(this.threeRenderer) : null;
+        this.canRender ? new TextureUtils(this.threeRenderer) : null;
     for (const scene of this.scenes) {
       (scene.element as any)[$updateEnvironment]();
     }

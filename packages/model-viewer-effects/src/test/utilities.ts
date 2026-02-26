@@ -56,17 +56,16 @@ export const pickShadowDescendant =
           null;
     };
 
-export const rafPasses = (): Promise<void> =>
-  new Promise((resolve) => {
-    const timeout = setTimeout(() => {
-      console.warn('rafPasses timed out');
-      resolve();
-    }, 500);
-    requestAnimationFrame(() => {
-      clearTimeout(timeout);
-      resolve();
-    });
+export const rafPasses = (): Promise<void> => new Promise((resolve) => {
+  const timeout = setTimeout(() => {
+    console.warn('rafPasses timed out');
+    resolve();
+  }, 500);
+  requestAnimationFrame(() => {
+    clearTimeout(timeout);
+    resolve();
   });
+});
 
 export interface SyntheticEventProperties {
   clientX?: number;

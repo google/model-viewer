@@ -141,7 +141,7 @@ export class ProgressTracker extends EventTarget {
         this.totalProgress;
 
     this.dispatchEvent(new CustomEvent<ProgressDetails>(
-        'progress', {detail: {totalProgress, reason }}));
+        'progress', {detail: {totalProgress, reason}}));
 
     if (completedActivities === this.ongoingActivityCount) {
       this.totalProgress = 0.0;

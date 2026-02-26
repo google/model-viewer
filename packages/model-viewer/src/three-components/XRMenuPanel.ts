@@ -1,17 +1,23 @@
-import { Camera, CanvasTexture, Mesh, Object3D, Shape, ShapeGeometry, LinearFilter, MeshBasicMaterial, PlaneGeometry, XRTargetRaySpace, Vector3 } from 'three';
-import { Damper } from './Damper.js';
-import { ModelScene } from './ModelScene.js';
-import { PlacementBox } from './PlacementBox.js';
-// SVG strings for the icons are defined here to avoid io and better performance for xr.
-const CLOSE_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#e8eaed">
+import {Camera, CanvasTexture, LinearFilter, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Shape, ShapeGeometry, Vector3, XRTargetRaySpace} from 'three';
+
+import {Damper} from './Damper.js';
+import {ModelScene} from './ModelScene.js';
+import {PlacementBox} from './PlacementBox.js';
+
+// SVG strings for the icons are defined here to avoid io and better performance
+// for xr.
+const CLOSE_ICON_SVG =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#e8eaed">
    <path d="M6.4,19L5,17.6L10.6,12L5,6.4L6.4,5L12,10.6L17.6,5L19,6.4L13.4,12L19,17.6L17.6,19L12,13.4L6.4,19Z"/>
 </svg>`;
 
-const VIEW_REAL_SIZE_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#e8eaed">
+const VIEW_REAL_SIZE_ICON_SVG =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#e8eaed">
    <path d="M7,17V9H5V7H9V17H7ZM11,17V15H13V17H11ZM16,17V9H14V7H18V17H16ZM11,13V11H13V13H11Z"/>
 </svg>`;
 
-const REPLAY_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#E1E2E8">
+const REPLAY_ICON_SVG =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#E1E2E8">
    <defs>
        <clipPath id="clip0">
            <path d="M0,0h24v24h-24z"/>
@@ -30,17 +36,17 @@ const PANEL_CONFIG = {
   opacity: 1,
   color: 0x000000,
   // Distance-based scaling configuration
-  minDistance: 0.5,  // Minimum distance for scaling (meters)
-  maxDistance: 10.0, // Maximum distance for scaling (meters)
-  baseScale: 1.0,    // Base scale factor
-  distanceScaleFactor: 0.3 // How much to scale per meter of distance
+  minDistance: 0.5,         // Minimum distance for scaling (meters)
+  maxDistance: 10.0,        // Maximum distance for scaling (meters)
+  baseScale: 1.0,           // Base scale factor
+  distanceScaleFactor: 0.3  // How much to scale per meter of distance
 } as const;
 
 // Button configuration
 const BUTTON_CONFIG = {
-  size: 0.05, // Fixed size for all buttons
-  zOffset: 0.01, // Distance from panel surface
-  spacing: 0.07 // Space between button centers
+  size: 0.05,     // Fixed size for all buttons
+  zOffset: 0.01,  // Distance from panel surface
+  spacing: 0.07   // Space between button centers
 } as const;
 
 // Icon configuration
@@ -55,7 +61,7 @@ export class XRMenuPanel extends Object3D {
   private toggleButton!: Mesh;
   private goalOpacity: number;
   private opacityDamper: Damper;
-  private isActualSize: boolean = false; // Start with normalized size
+  private isActualSize: boolean = false;  // Start with normalized size
 
   // Cache for pre-rendered textures
   private static readonly iconTextures = new Map<string, CanvasTexture>();
@@ -90,19 +96,21 @@ export class XRMenuPanel extends Object3D {
     // Create exit button
     this.exitButton = this.createButton('close');
     this.exitButton.name = 'ExitButton';
-    this.exitButton.position.set(BUTTON_CONFIG.spacing / 2, 0, BUTTON_CONFIG.zOffset);
+    this.exitButton.position.set(
+        BUTTON_CONFIG.spacing / 2, 0, BUTTON_CONFIG.zOffset);
     this.add(this.exitButton);
 
     // Create toggle button
     this.toggleButton = this.createButton('view-real-size');
     this.toggleButton.name = 'ToggleButton';
-    this.toggleButton.position.set(-BUTTON_CONFIG.spacing / 2, 0, BUTTON_CONFIG.zOffset);
+    this.toggleButton.position.set(
+        -BUTTON_CONFIG.spacing / 2, 0, BUTTON_CONFIG.zOffset);
     this.add(this.toggleButton);
   }
 
   private createPanelShape(): Shape {
     const shape = new Shape();
-    const { width: w, height: h, cornerRadius: r } = PANEL_CONFIG;
+    const {width: w, height: h, cornerRadius: r} = PANEL_CONFIG;
 
     // Create rounded rectangle path
     shape.moveTo(-w / 2 + r, -h / 2);
@@ -120,12 +128,12 @@ export class XRMenuPanel extends Object3D {
 
   private preRenderIcons(): void {
     const iconSvgs = [
-      { key: 'close', svg: CLOSE_ICON_SVG },
-      { key: 'view-real-size', svg: VIEW_REAL_SIZE_ICON_SVG },
-      { key: 'replay', svg: REPLAY_ICON_SVG }
+      {key: 'close', svg: CLOSE_ICON_SVG},
+      {key: 'view-real-size', svg: VIEW_REAL_SIZE_ICON_SVG},
+      {key: 'replay', svg: REPLAY_ICON_SVG}
     ];
 
-    iconSvgs.forEach(({ key, svg }) => {
+    iconSvgs.forEach(({key, svg}) => {
       if (!XRMenuPanel.iconTextures.has(key)) {
         this.createTextureFromSvg(svg, key);
       }
@@ -140,7 +148,7 @@ export class XRMenuPanel extends Object3D {
 
     // Create an image from SVG content
     const img = new Image();
-    const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+    const svgBlob = new Blob([svgContent], {type: 'image/svg+xml'});
     const url = URL.createObjectURL(svgBlob);
 
     img.onload = () => {
@@ -158,7 +166,7 @@ export class XRMenuPanel extends Object3D {
 
   createButton(iconKey: string): Mesh {
     // Create a placeholder mesh
-    const material = new MeshBasicMaterial({ transparent: true });
+    const material = new MeshBasicMaterial({transparent: true});
     const geometry = new PlaneGeometry(BUTTON_CONFIG.size, BUTTON_CONFIG.size);
     const mesh = new Mesh(geometry, material);
 
@@ -168,11 +176,14 @@ export class XRMenuPanel extends Object3D {
       (mesh.material as MeshBasicMaterial).map = cachedTexture;
       (mesh.material as MeshBasicMaterial).needsUpdate = true;
     } else {
-      // RACE CONDITION FIX: Texture creation is async (img.onload), but button creation is sync
-      // This fallback handles the case where buttons are created before textures finish loading
-      this.createTextureFromSvg(iconKey === 'close' ? CLOSE_ICON_SVG :
-        iconKey === 'view-real-size' ? VIEW_REAL_SIZE_ICON_SVG :
-          REPLAY_ICON_SVG, iconKey);
+      // RACE CONDITION FIX: Texture creation is async (img.onload), but button
+      // creation is sync This fallback handles the case where buttons are
+      // created before textures finish loading
+      this.createTextureFromSvg(
+          iconKey === 'close'              ? CLOSE_ICON_SVG :
+              iconKey === 'view-real-size' ? VIEW_REAL_SIZE_ICON_SVG :
+                                             REPLAY_ICON_SVG,
+          iconKey);
 
       // Polling mechanism: Wait for async texture creation to complete
       // This prevents white squares from appearing on first load
@@ -193,22 +204,21 @@ export class XRMenuPanel extends Object3D {
     return mesh;
   }
 
-  exitButtonControllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
+  exitButtonControllerIntersection(
+      scene: ModelScene, controller: XRTargetRaySpace) {
     const hitResult = scene.hitFromController(controller, this.exitButton);
     return hitResult;
   }
 
-  scaleModeButtonControllerIntersection(scene: ModelScene, controller: XRTargetRaySpace) {
+  scaleModeButtonControllerIntersection(
+      scene: ModelScene, controller: XRTargetRaySpace) {
     const hitResult = scene.hitFromController(controller, this.toggleButton);
     return hitResult;
   }
 
   handleScaleToggle(
-    worldSpaceInitialPlacementDone: boolean,
-    initialModelScale: number,
-    minScale: number,
-    maxScale: number
-  ): number | null {
+      worldSpaceInitialPlacementDone: boolean, initialModelScale: number,
+      minScale: number, maxScale: number): number|null {
     if (!worldSpaceInitialPlacementDone) {
       return null;
     }
@@ -216,7 +226,8 @@ export class XRMenuPanel extends Object3D {
     this.isActualSize = !this.isActualSize;
     // Toggle between view real size icon and replay icon
     // When isActualSize is true, show replay icon (to reset)
-    // When isActualSize is false, show view real size icon (to go to actual size)
+    // When isActualSize is false, show view real size icon (to go to actual
+    // size)
     const iconKey = this.isActualSize ? 'replay' : 'view-real-size';
     this.updateScaleModeButtonLabel(iconKey);
 
@@ -244,34 +255,42 @@ export class XRMenuPanel extends Object3D {
 
     // Get the placement box size to calculate dynamic offsets
     const placementBoxSize = placementBox.getSize();
-    const placementBoxMinDimension = Math.min(placementBoxSize.x, placementBoxSize.z);
+    const placementBoxMinDimension =
+        Math.min(placementBoxSize.x, placementBoxSize.z);
 
     // Calculate dynamic offsets based on placement box size
     // Base offsets with placement box size scaling
     const baseOffsetUp = -0.2;
     const baseOffsetForward = 0.9;
-    const sizeScaleFactor = Math.max(0.5, Math.min(2.0, placementBoxMinDimension / 1.0)); // Scale between 0.5x and 2x
+    const sizeScaleFactor = Math.max(
+        0.5,
+        Math.min(
+            2.0, placementBoxMinDimension / 1.0));  // Scale between 0.5x and 2x
 
     const offsetUp = baseOffsetUp * sizeScaleFactor;
     const offsetForward = baseOffsetForward * sizeScaleFactor;
 
     // Get direction from placement box to camera (horizontal only)
-    const directionToCamera = new Vector3()
-      .copy(camera.position)
-      .sub(placementBoxWorldPos);
+    const directionToCamera =
+        new Vector3().copy(camera.position).sub(placementBoxWorldPos);
     directionToCamera.y = 0;  // Zero out vertical component
     directionToCamera.normalize();
     // Calculate the final position
     const panelPosition = new Vector3()
-      .copy(placementBoxWorldPos)
-      .add(new Vector3(0, offsetUp, 0))  // Move up
-      .add(directionToCamera.multiplyScalar(offsetForward));  // Move forward
+                              .copy(placementBoxWorldPos)
+                              .add(new Vector3(0, offsetUp, 0))  // Move up
+                              .add(directionToCamera.multiplyScalar(
+                                  offsetForward));  // Move forward
     this.position.copy(panelPosition);
 
     // Calculate distance-based scaling
     const distanceToCamera = camera.position.distanceTo(panelPosition);
-    const clampedDistance = Math.max(PANEL_CONFIG.minDistance, Math.min(PANEL_CONFIG.maxDistance, distanceToCamera));
-    const scaleFactor = PANEL_CONFIG.baseScale + (clampedDistance - PANEL_CONFIG.minDistance) * PANEL_CONFIG.distanceScaleFactor;
+    const clampedDistance = Math.max(
+        PANEL_CONFIG.minDistance,
+        Math.min(PANEL_CONFIG.maxDistance, distanceToCamera));
+    const scaleFactor = PANEL_CONFIG.baseScale +
+        (clampedDistance - PANEL_CONFIG.minDistance) *
+            PANEL_CONFIG.distanceScaleFactor;
 
     // Apply scaling to the entire panel (including buttons)
     this.scale.set(scaleFactor, scaleFactor, scaleFactor);
@@ -293,11 +312,13 @@ export class XRMenuPanel extends Object3D {
   updateOpacity(delta: number) {
     const material = this.panelMesh.material as MeshBasicMaterial;
     const currentOpacity = material.opacity;
-    const newOpacity = this.opacityDamper.update(currentOpacity, this.goalOpacity, delta, 1);
+    const newOpacity =
+        this.opacityDamper.update(currentOpacity, this.goalOpacity, delta, 1);
     this.traverse((child) => {
       if (child instanceof Mesh) {
         const mat = child.material as MeshBasicMaterial;
-        if (mat.transparent) mat.opacity = newOpacity;
+        if (mat.transparent)
+          mat.opacity = newOpacity;
       }
     });
     this.visible = newOpacity > 0;
@@ -313,13 +334,18 @@ export class XRMenuPanel extends Object3D {
 
         // Handle material(s)
         // Material can be a single Material or an array of Materials
-        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        const materials =
+            Array.isArray(child.material) ? child.material : [child.material];
 
         materials.forEach(material => {
-          if (material) { // Ensure material exists before proceeding
+          if (material) {  // Ensure material exists before proceeding
             // Dispose texture if it exists and is a CanvasTexture
-            // We specifically created CanvasTextures for buttons, so check for that type.
-            if ('map' in material && material.map instanceof CanvasTexture) { // Check if 'map' property exists and is a CanvasTexture
+            // We specifically created CanvasTextures for buttons, so check for
+            // that type.
+            if ('map' in material &&
+                material.map instanceof
+                    CanvasTexture) {  // Check if 'map' property exists and is a
+                                      // CanvasTexture
               material.map.dispose();
             }
             // Dispose material itself

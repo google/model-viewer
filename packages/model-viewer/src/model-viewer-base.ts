@@ -641,7 +641,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
           });
         });
       });
-      this.dispatchEvent(new CustomEvent('load', { detail: { url: source } }));
+      this.dispatchEvent(new CustomEvent('load', {detail: {url: source}}));
     } catch (error) {
       this.dispatchEvent(new CustomEvent(
           'error', {detail: {type: 'loadfailure', sourceError: error}}));

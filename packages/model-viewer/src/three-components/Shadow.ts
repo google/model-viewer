@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {BackSide, DoubleSide, Box3, Material, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RenderTargetOptions, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {BackSide, Box3, DoubleSide, Material, Mesh, MeshBasicMaterial, MeshDepthMaterial, Object3D, OrthographicCamera, PlaneGeometry, RenderTargetOptions, RGBAFormat, Scene, ShaderMaterial, Vector3, WebGLRenderer, WebGLRenderTarget} from 'three';
 import {HorizontalBlurShader} from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
 import {VerticalBlurShader} from 'three/examples/jsm/shaders/VerticalBlurShader.js';
 import {lerp} from 'three/src/math/MathUtils.js';

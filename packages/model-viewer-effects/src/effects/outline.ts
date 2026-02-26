@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-import { property } from 'lit/decorators.js';
-import { BlendFunction, OutlineEffect } from 'postprocessing';
-import { Color, ColorRepresentation } from 'three';
-import { $updateProperties, $effectOptions, MVEffectBase } from './mixins/effect-base.js';
-import { SelectiveMixin } from './mixins/selective.js';
-import { getKernelSize, TEMP_CAMERA } from './utilities.js';
+import {property} from 'lit/decorators.js';
+import {BlendFunction, OutlineEffect} from 'postprocessing';
+import {Color, ColorRepresentation} from 'three';
 
-export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
+import {$effectOptions, $updateProperties, MVEffectBase} from './mixins/effect-base.js';
+import {SelectiveMixin} from './mixins/selective.js';
+import {getKernelSize, TEMP_CAMERA} from './utilities.js';
+
+export class MVOutlineEffect extends SelectiveMixin
+(MVEffectBase) {
   static get is() {
     return 'outline-effect';
   }
@@ -29,26 +31,26 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
    * String or RGB #-hexadecimal Color.
    * @default 'white'
    */
-  @property({ type: String || Number, attribute: 'color', reflect: true })
+  @property({type: String || Number, attribute: 'color', reflect: true})
   color: ColorRepresentation = 'white';
 
   /**
    * A larger value denotes a thicker edge.
    * @default 1
    */
-  @property({ type: Number, attribute: 'strength', reflect: true })
-  strength = 1;
+  @property({type: Number, attribute: 'strength', reflect: true}) strength = 1;
 
   /**
    * Value in the range of (0, 6). Controls the edge blur strength.
    * @default 1
    */
-  @property({ type: Number, attribute: 'smoothing', reflect: true })
+  @property({type: Number, attribute: 'smoothing', reflect: true})
   smoothing = 1;
 
   constructor() {
     super();
-    this.effects = [new OutlineEffect(undefined, TEMP_CAMERA, this[$effectOptions])];
+    this.effects =
+        [new OutlineEffect(undefined, TEMP_CAMERA, this[$effectOptions])];
   }
 
   connectedCallback(): void {
@@ -56,9 +58,10 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string | number | symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, any>) {
     super.updated(changedProperties);
-    if (changedProperties.has('color') || changedProperties.has('smoothing') || changedProperties.has('strength')) {
+    if (changedProperties.has('color') || changedProperties.has('smoothing') ||
+        changedProperties.has('strength')) {
       this[$updateProperties]();
     }
   }
@@ -67,12 +70,14 @@ export class MVOutlineEffect extends SelectiveMixin(MVEffectBase) {
     (this.effects[0] as OutlineEffect).edgeStrength = this.strength;
     (this.effects[0] as OutlineEffect).visibleEdgeColor = new Color(this.color);
     (this.effects[0] as OutlineEffect).hiddenEdgeColor = new Color(this.color);
-    (this.effects[0] as OutlineEffect).blurPass.enabled = Math.round(this.smoothing) > 0;
-    (this.effects[0] as OutlineEffect).blurPass.kernelSize = getKernelSize(this.smoothing);
+    (this.effects[0] as OutlineEffect).blurPass.enabled =
+        Math.round(this.smoothing) > 0;
+    (this.effects[0] as OutlineEffect).blurPass.kernelSize =
+        getKernelSize(this.smoothing);
     this.effectComposer.queueRender();
   }
 
-  get [$effectOptions]() {
+  get[$effectOptions]() {
     return {
       blendFunction: BlendFunction.SCREEN,
       edgeStrength: this.strength,

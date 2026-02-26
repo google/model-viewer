@@ -1,10 +1,12 @@
+import './renderer-gate.js';
+
 import {expect} from 'chai';
 
 import {$renderer} from '../model-viewer-base.js';
 import {ModelViewerElement} from '../model-viewer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
 
-import { assetPath, rafPasses } from './helpers.js';
+import {assetPath, rafPasses} from './helpers.js';
 import {BasicSpecTemplate} from './templates.js';
 
 const SUNRISE_HDR_PATH = 'environments/spruit_sunrise_1k_HDR.hdr';
@@ -22,8 +24,8 @@ const setupLighting =
   }
   modelViewer.src = assetPath('models/reflective-sphere.gltf');
 
-      await posterDismissed;
-      await rafPasses();
+  await posterDismissed;
+  await rafPasses();
 }
 
 // TODO(sun765): this only test whether the screenshot

@@ -47,12 +47,10 @@ export class Image extends ThreeDOMElement implements ImageInterface {
 
     const image = this[$threeTexture].image as any;
     if (!image.src) {
-      image.src =
-          texture.name ? texture.name : 'adhoc_image' + adhocNum++;
+      image.src = texture.name ? texture.name : 'adhoc_image' + adhocNum++;
     }
     if (!image.name) {
-      image.name =
-        (texture && image && image.src) ?
+      image.name = (texture && image && image.src) ?
           image.src.split('/').pop() :
           'adhoc_image';
     }
