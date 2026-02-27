@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import '../renderer-gate.js';
+
 import {expect} from 'chai';
 import {Matrix4, Mesh, SphereGeometry, Vector3} from 'three';
 
@@ -76,8 +78,7 @@ suite('ModelScene', () => {
       const animationName = scene.animationNames[0];
       scene.appendAnimation(animationName);
       expect(scene.appendedAnimations).to.include(animationName);
-      scene.detachAnimation(
-          animationName, false);
+      scene.detachAnimation(animationName, false);
       expect(scene.appendedAnimations).to.not.include(animationName);
     });
   });

@@ -56,8 +56,16 @@ export const pickShadowDescendant =
           null;
     };
 
-export const rafPasses = (): Promise<void> =>
-    new Promise((resolve) => requestAnimationFrame(() => resolve()));
+export const rafPasses = (): Promise<void> => new Promise((resolve) => {
+  const timeout = setTimeout(() => {
+    console.warn('rafPasses timed out');
+    resolve();
+  }, 500);
+  requestAnimationFrame(() => {
+    clearTimeout(timeout);
+    resolve();
+  });
+});
 
 export interface SyntheticEventProperties {
   clientX?: number;
@@ -188,6 +196,12 @@ export const waitForEvent =
           }
           target.addEventListener(eventName, handler);
         });
+
+export const until = async (predicate: PredicateFunction) => {
+  while (!predicate()) {
+    await timePasses();
+  }
+};
 
 export interface TypedArray<T = unknown> {
   readonly BYTES_PER_ELEMENT: number;

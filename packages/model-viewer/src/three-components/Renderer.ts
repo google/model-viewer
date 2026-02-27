@@ -163,10 +163,12 @@ export class Renderer extends
       console.warn(error);
     }
 
-    this.arRenderer = new ARRenderer(this);
+    this.arRenderer = this.canRender ? new ARRenderer(this) : null as any;
     this.textureUtils =
         this.canRender ? new TextureUtils(this.threeRenderer) : null;
-    CachingGLTFLoader.initializeKTX2Loader(this.threeRenderer);
+    if (this.canRender) {
+      CachingGLTFLoader.initializeKTX2Loader(this.threeRenderer);
+    }
 
     this.canvas3D.addEventListener('webglcontextlost', this.onWebGLContextLost);
     this.canvas3D.addEventListener(
@@ -180,14 +182,16 @@ export class Renderer extends
 
     scene.forceRescale();
 
-    const size = new Vector2();
-    this.threeRenderer.getSize(size);
-    scene.canvas.width = size.x;
-    scene.canvas.height = size.y;
+    if (this.canRender) {
+      const size = new Vector2();
+      this.threeRenderer.getSize(size);
+      scene.canvas.width = size.x;
+      scene.canvas.height = size.y;
 
-    if (this.canRender && this.scenes.size > 0) {
-      this.threeRenderer.setAnimationLoop(
-          (time: number, frame?: any) => this.render(time, frame));
+      if (this.scenes.size > 0) {
+        this.threeRenderer.setAnimationLoop(
+            (time: number, frame?: any) => this.render(time, frame));
+      }
     }
   }
 
@@ -401,7 +405,7 @@ export class Renderer extends
   }
 
   get isPresenting(): boolean {
-    return this.arRenderer.isPresenting;
+    return (this as any).arRenderer?.isPresenting === true;
   }
 
   /**
@@ -426,7 +430,9 @@ export class Renderer extends
 
   render(t: number, frame?: XRFrame) {
     if (frame != null) {
-      this.arRenderer.onWebXRFrame(t, frame);
+      if (this.arRenderer != null) {
+        this.arRenderer.onWebXRFrame(t, frame);
+      }
       return;
     }
 
@@ -549,7 +555,8 @@ export class Renderer extends
 
   onWebGLContextRestored = () => {
     this.textureUtils?.dispose();
-    this.textureUtils = new TextureUtils(this.threeRenderer);
+    this.textureUtils =
+        this.canRender ? new TextureUtils(this.threeRenderer) : null;
     for (const scene of this.scenes) {
       (scene.element as any)[$updateEnvironment]();
     }

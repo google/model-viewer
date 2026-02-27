@@ -295,7 +295,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
           parentNode.appendChild(this[$defaultProgressBarElement]);
         }
 
-        this[$defaultProgressBarElement].classList.toggle('hide', progress === 1.0);
+        this[$defaultProgressBarElement].classList.toggle(
+            'hide', progress === 1.0);
       });
     }, PROGRESS_BAR_UPDATE_THRESHOLD);
 
@@ -321,7 +322,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const lottieLoaderLocation = ModelViewerElement.lottieLoaderLocation ||
           DEFAULT_LOTTIE_LOADER_LOCATION;
-      Renderer.singleton.textureUtils!.lottieLoaderUrl = lottieLoaderLocation;
+      if (Renderer.singleton.textureUtils != null) {
+        Renderer.singleton.textureUtils.lottieLoaderUrl = lottieLoaderLocation;
+      }
     }
 
     connectedCallback() {
@@ -373,8 +376,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       this[$updateProgressBar](progress);
 
-      this.dispatchEvent(
-          new CustomEvent('progress', {detail: {totalProgress: progress, reason}}));
+      this.dispatchEvent(new CustomEvent(
+          'progress', {detail: {totalProgress: progress, reason}}));
     };
 
     [$shouldAttemptPreload](): boolean {

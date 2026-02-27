@@ -18,6 +18,7 @@ import {GLTF as ThreeGLTF, GLTFLoader, GLTFParser} from 'three/examples/jsm/load
 import {ExpressionNode, ExpressionTerm, FunctionNode, HexNode, IdentNode, Operator, OperatorNode} from '../styles/parsers.js';
 import {deserializeUrl, PredicateFunction, timePasses} from '../utilities.js';
 
+
 export const elementFromLocalPoint =
     (document: Document|ShadowRoot, x: number, y: number): Element|null => {
       const host: HTMLElement = (document === window.document) ?
@@ -45,8 +46,16 @@ export const until =
   }
 }
 
-export const rafPasses = (): Promise<void> =>
-    new Promise(resolve => requestAnimationFrame(() => resolve()));
+export const rafPasses = (): Promise<void> => new Promise(resolve => {
+  const timeout = setTimeout(() => {
+    console.warn('rafPasses timed out');
+    resolve();
+  }, 500);
+  requestAnimationFrame(() => {
+    clearTimeout(timeout);
+    resolve();
+  });
+});
 
 export interface SyntheticEventProperties {
   clientX?: number;

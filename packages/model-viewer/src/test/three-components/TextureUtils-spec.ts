@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
+import '../renderer-gate.js';
+
 import {expect} from 'chai';
 import {Cache, CubeReflectionMapping, EquirectangularReflectionMapping, WebGLRenderer} from 'three';
 
+import {Renderer} from '../../three-components/Renderer.js';
 import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath} from '../helpers.js';
 
@@ -28,7 +31,10 @@ const HDR_EQUI_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
 suite('TextureUtils', () => {
   let threeRenderer: WebGLRenderer;
 
-  suiteSetup(() => {
+  suiteSetup(function() {
+    if (!Renderer.singleton.canRender) {
+      this.skip();
+    }
     // The threeRenderer can retain state, so these tests have the possibility
     // of getting different results in different orders. However, our use of the
     // threeRenderer *should* always return its state to what it was before to

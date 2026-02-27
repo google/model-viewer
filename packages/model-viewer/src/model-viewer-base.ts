@@ -630,14 +630,18 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
       // Wait for shaders to compile and pixels to be drawn.
       await new Promise<void>(resolve => {
+        const timeout = setTimeout(() => {
+          console.warn('rAF timed out in updateSource');
+          resolve();
+        }, 500);
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            this.dispatchEvent(
-                new CustomEvent('load', {detail: {url: source}}));
+            clearTimeout(timeout);
             resolve();
           });
         });
       });
+      this.dispatchEvent(new CustomEvent('load', {detail: {url: source}}));
     } catch (error) {
       this.dispatchEvent(new CustomEvent(
           'error', {detail: {type: 'loadfailure', sourceError: error}}));

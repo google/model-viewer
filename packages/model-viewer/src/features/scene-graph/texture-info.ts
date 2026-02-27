@@ -109,7 +109,7 @@ export class TextureInfo implements TextureInfoInterface {
     this[$texture] = texture;
 
     if (threeTexture != null && (threeTexture as VideoTexture).isVideoTexture) {
-      const element = threeTexture.image;
+      const element = threeTexture.image as HTMLVideoElement;
       this[$activeVideo] = true;
       if (element.requestVideoFrameCallback != null) {
         const update = () => {

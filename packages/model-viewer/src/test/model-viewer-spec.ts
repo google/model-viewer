@@ -1,3 +1,5 @@
+import './renderer-gate.js';
+
 import {expect} from 'chai';
 
 import {$renderer} from '../model-viewer-base.js';
