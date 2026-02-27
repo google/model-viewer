@@ -63,7 +63,15 @@ function removeDeactiveCategory(sidebarIds: SidebarIds) {
       ?.classList.remove('de-active');
 }
 
-const identicalCategories = ['loading', 'augmentedreality', 'stagingandcameras', 'annotations', 'lightingandenv', 'animation', 'scenegraph'];
+const identicalCategories = [
+  'loading',
+  'augmentedreality',
+  'stagingandcameras',
+  'annotations',
+  'lightingandenv',
+  'animation',
+  'scenegraph'
+];
 
 export function getSidebarCategoryForNewPage(): string {
   const category = previouslyActive.split('-')[0];

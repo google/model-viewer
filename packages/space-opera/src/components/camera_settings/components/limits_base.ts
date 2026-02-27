@@ -22,7 +22,7 @@ import '../../shared/slider_with_input/slider_with_input.js';
 import '../../shared/checkbox/checkbox.js';
 
 import {html} from 'lit';
-import {state, query} from 'lit/decorators.js';
+import {query, state} from 'lit/decorators.js';
 
 import {Limits} from '../../config/types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element.js';

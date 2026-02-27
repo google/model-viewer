@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-import { ModelViewerElement } from '@google/model-viewer';
-import { Renderer } from '@google/model-viewer/lib/three-components/Renderer.js';
-import { expect } from 'chai';
+import {ModelViewerElement} from '@google/model-viewer';
+import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
+import {expect} from 'chai';
 
-import { $effectComposer } from '../effect-composer.js';
-import { EffectComposer } from '../model-viewer-effects.js';
-import { getOwnPropertySymbolValue } from '../utilities.js';
+import {$effectComposer} from '../effect-composer.js';
+import {EffectComposer} from '../model-viewer-effects.js';
+import {getOwnPropertySymbolValue} from '../utilities.js';
 
-import { CompareArrays, assetPath, createModelViewerElement, rafPasses, screenshot, waitForEvent } from './utilities.js';
+import {assetPath, CompareArrays, createModelViewerElement, rafPasses, screenshot, waitForEvent} from './utilities.js';
 
 suite('Screenshot Baseline Test', () => {
   let element: ModelViewerElement;
   let baseScreenshot: Uint8Array;
 
-  suiteSetup(function () {
+  suiteSetup(function() {
     if (!Renderer.singleton.canRender) {
       this.skip();
     }
@@ -44,7 +44,7 @@ suite('Screenshot Baseline Test', () => {
 
   test('Compare ModelViewer to Self', async () => {
     const renderer =
-      getOwnPropertySymbolValue<Renderer>(element, 'renderer') as Renderer;
+        getOwnPropertySymbolValue<Renderer>(element, 'renderer') as Renderer;
     expect(renderer).to.not.be.undefined;
     expect(renderer.threeRenderer).to.not.be.undefined;
     await element.updateComplete;
