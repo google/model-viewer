@@ -46,13 +46,13 @@ npm install three @google/model-viewer @google/model-viewer-effects
 
 ```html
 <!-- ES-Shims for older browser compatibility -->
-<script async src="https://ga.jspm.io/npm:es-module-shims@1.7.1/dist/es-module-shims.js"></script>
+<script async src="https://ga.jspm.io/npm:es-module-shims@2.6.2/dist/es-module-shims.js"></script>
 
 <!-- Import Three.js using an import-map -->
 <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@^0.172.0/build/three.module.min.js"
+      "three": "https://cdn.jsdelivr.net/npm/three@^{{THREEJS_VERSION}}/build/three.module.min.js"
     }
   }
 </script>

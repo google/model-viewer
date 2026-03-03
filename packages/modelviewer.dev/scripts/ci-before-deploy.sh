@@ -135,6 +135,8 @@ done
 # Add a "VERSION" file containing the last git commit message
 git log -n 1 > $DEPLOY_ROOT/VERSION
 
+node scripts/update-versions.js
+
 git status --ignored
 
 popd

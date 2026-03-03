@@ -23,8 +23,8 @@ import {html, LitElement, PropertyValues} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 
 import {reduxStore} from '../../space_opera_base.js';
-
 import {hotspotEditorStyles} from '../../styles.css.js';
+
 import {dispatchRemoveHotspot, dispatchUpdateHotspot} from './reducer.js';
 import {HotspotConfig} from './types.js';
 

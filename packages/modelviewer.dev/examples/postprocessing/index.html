@@ -33,7 +33,7 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@^0.172.0/build/three.module.min.js"
+        "three": "https://cdn.jsdelivr.net/npm/three@^{{THREEJS_VERSION}}/build/three.module.min.js"
       }
     }
   </script>
@@ -114,7 +114,7 @@
                   <script type="importmap-noexecute">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@^0.172.0/build/three.module.min.js"
+    "three": "https://cdn.jsdelivr.net/npm/three@^{{THREEJS_VERSION}}/build/three.module.min.js"
   }
 }
 </script>
@@ -459,7 +459,7 @@
                   </div>
                 </model-viewer>
                 <script type="module">
-                  import * as PostProcessing from 'https://cdn.jsdelivr.net/npm/postprocessing@6.35.3/build/index.js';
+                  import * as PostProcessing from 'https://cdn.jsdelivr.net/npm/postprocessing@{{POSTPROCESSING_VERSION}}/build/index.js';
                   const customComposer = document.querySelector("effect-composer#customComposer");
 
                   const grid = new PostProcessing.GridEffect();

@@ -18,10 +18,17 @@ import {ModelScene} from '@google/model-viewer/lib/three-components/ModelScene.j
 import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
 import {EffectComposer as PPEffectComposer, EffectPass, NormalPass, Pass, RenderPass, Selection} from 'postprocessing';
-import {Camera, HalfFloatType, NeutralToneMapping, ToneMapping, UnsignedByteType, WebGLRenderer} from 'three';
+import {Camera, HalfFloatType, NeutralToneMapping, ToneMapping, UnsignedByteType, Vector2, WebGLRenderer} from 'three';
+
+const DUMMY_RENDERER = {
+  getDrawingBufferSize: (v: Vector2) => v.set(1, 1),
+  getSize: (v: Vector2) => v.set(1, 1),
+  getContext: () => ({getContextAttributes: () => ({alpha: true})}),
+} as unknown as WebGLRenderer;
 
 import {IMVEffect, IntegrationOptions, MVEffectBase} from './effects/mixins/effect-base.js';
-import {disposeEffectPass, isConvolution, validateLiteralType} from './utilities.js';
+import {disposeEffectPass, getOwnPropertySymbolValue, isConvolution, validateLiteralType} from './utilities.js';
+import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
 
 export const $scene = Symbol('scene');
 export const $composer = Symbol('composer');
@@ -57,7 +64,8 @@ export class EffectComposer extends PPEffectComposer {
     multisampling?: number;
     frameBufferType?: number;
   }) {
-    super(renderer, options);
+    // @ts-ignore
+    super(renderer ? renderer : DUMMY_RENDERER, options);
   }
 
   private preRender() {
@@ -223,7 +231,13 @@ export class MVEffectComposer extends ReactiveElement {
       console.error(
           (e as Error).message + '\nrenderMode defaulting to: performance');
     }
-    this[$composer] = new EffectComposer(undefined, {
+    const rendererInfo = getOwnPropertySymbolValue<Renderer>(
+        this.modelViewerElement, 'renderer');
+    const threeRenderer = rendererInfo && rendererInfo.threeRenderer ?
+        rendererInfo.threeRenderer :
+        DUMMY_RENDERER;
+
+    this[$composer] = new EffectComposer(threeRenderer, {
       stencilBuffer: true,
       multisampling: this.msaa,
       frameBufferType: this.renderMode === 'quality' ? HalfFloatType :

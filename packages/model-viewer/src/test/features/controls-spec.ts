@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import '../renderer-gate.js';
+
 import {expect} from 'chai';
 import {Camera, Vector3} from 'three';
 

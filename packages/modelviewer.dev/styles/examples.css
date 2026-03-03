@@ -64,6 +64,7 @@ select {
 }
 
 .sidebar {
+  width: var(--sidebar-width);
   margin: 0;
   padding: 0;
   background-color: #f6f6f6;
@@ -1045,5 +1046,7 @@ paper-button {
 
   .sidebar.active {
     transform: translateX(0);
+    width: var(--og-sidebar-width);
+    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
   }
 }

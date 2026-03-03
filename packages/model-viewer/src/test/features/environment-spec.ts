@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import '../renderer-gate.js';
+
 import {expect} from 'chai';
 import {Texture} from 'three';
 
@@ -22,7 +24,7 @@ import {ModelViewerElement} from '../../model-viewer.js';
 import {ModelScene} from '../../three-components/ModelScene.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
-import {assetPath, rafPasses} from '../helpers.js';
+import {assetPath, rafPasses, until} from '../helpers.js';
 
 const ALT_BG_IMAGE_URL = assetPath('environments/white_furnace.hdr');
 const HDR_BG_IMAGE_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
@@ -249,7 +251,7 @@ suite('Environment', () => {
         setup(async () => {
           element.removeAttribute('skybox-image');
           await element.updateComplete;
-          await rafPasses();
+          await until(() => scene.background == null);
         });
 
         test('continues using environment-image as environment map', () => {

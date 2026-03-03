@@ -97,8 +97,9 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
           ['linear', LinearToneMapping],
           ['none', NoToneMapping]
         ]);
-        
-        this[$scene].toneMapping = TONE_MAPPING.get(this.toneMapping) ?? NeutralToneMapping;
+
+        this[$scene].toneMapping =
+            TONE_MAPPING.get(this.toneMapping) ?? NeutralToneMapping;
         this[$needsRender]();
       }
 

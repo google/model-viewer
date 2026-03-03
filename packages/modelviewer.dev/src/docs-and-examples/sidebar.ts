@@ -63,7 +63,15 @@ function removeDeactiveCategory(sidebarIds: SidebarIds) {
       ?.classList.remove('de-active');
 }
 
-const identicalCategories = ['loading', 'augmentedreality', 'stagingandcameras', 'annotations', 'lightingandenv', 'animation', 'scenegraph'];
+const identicalCategories = [
+  'loading',
+  'augmentedreality',
+  'stagingandcameras',
+  'annotations',
+  'lightingandenv',
+  'animation',
+  'scenegraph'
+];
 
 export function getSidebarCategoryForNewPage(): string {
   const category = previouslyActive.split('-')[0];
@@ -344,8 +352,7 @@ export function sidebarClick() {
   isSideBarClick = true;
   // close sidebar if click in sidebar on mobile
   if (window.innerWidth <= 800) {
-    const root = document.documentElement;
-    root.style.setProperty('--sidebar-width', '0px');
+    document.getElementById('sidenav')?.classList.remove('active');
   }
 }
 

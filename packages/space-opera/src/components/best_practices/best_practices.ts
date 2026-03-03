@@ -16,11 +16,13 @@
  */
 
 import {html} from 'lit';
-import {customElement, state, query} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
+
 import {reduxStore} from '../../space_opera_base';
 import {BestPracticesState, State} from '../../types';
 import {ConnectedLitElement} from '../connected_lit_element/connected_lit_element';
 import {CheckboxElement} from '../shared/checkbox/checkbox';
+
 import {dispatchSetARButton, dispatchSetARPrompt, dispatchSetProgressBar, getBestPractices} from './reducer';
 
 /**

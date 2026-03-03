@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import '../renderer-gate.js';
+
 import {expect} from 'chai';
 
 import {$defaultPosterElement, $posterContainerElement} from '../../features/loading.js';
@@ -113,10 +115,8 @@ suite('Loading', () => {
     element.addEventListener('load', loadHandler);
 
     element.style.display = 'none';
-
-    // Give IntersectionObserver a chance to notify. In Chrome, this takes
-    // two rAFs (empirically observed). Await extra time just in case:
-    await timePasses(100);
+    // Give IntersectionObserver a chance to notify.
+    await until(() => element.modelIsVisible === false);
 
     element.src = CUBE_GLB_PATH;
 
