@@ -266,28 +266,28 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-[$appendAnimation](
-    animationName: string = '',
-    options: AppendAnimationOptions = {}) {
-  const opts = {...DEFAULT_APPEND_OPTIONS, ...options};
-  const repetitions = opts.repetitions ?? Infinity;
-  const mode = opts.pingpong ?
-      LoopPingPong :
-      (repetitions === 1 ? LoopOnce : LoopRepeat);
+    [$appendAnimation](
+        animationName: string = '',
+        options: AppendAnimationOptions = {}) {
+      const opts = {...DEFAULT_APPEND_OPTIONS, ...options};
+      const repetitions = opts.repetitions ?? Infinity;
+      const mode = opts.pingpong ?
+          LoopPingPong :
+          (repetitions === 1 ? LoopOnce : LoopRepeat);
 
-  const needsToStop = repetitions !== Infinity || mode !== LoopPingPong;
+      const needsToStop = !!options.repetitions || 'pingpong' in options;
 
-  this[$scene].appendAnimation(
-      animationName ? animationName : this.animationName,
-      mode,
-      repetitions,
-      opts.weight,
-      opts.timeScale,
-      opts.fade,
-      opts.warp,
-      opts.relativeWarp,
-      opts.time,
-      needsToStop);
+      this[$scene].appendAnimation(
+          animationName ? animationName : this.animationName,
+          mode,
+          repetitions,
+          opts.weight,
+          opts.timeScale,
+          opts.fade,
+          opts.warp,
+          opts.relativeWarp,
+          opts.time,
+          needsToStop);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation
@@ -297,12 +297,12 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-[$detachAnimation](
-    animationName: string = '',
-    options: DetachAnimationOptions = {}) {
-  const opts = {...DEFAULT_DETACH_OPTIONS, ...options};
-  this[$scene].detachAnimation(
-      animationName ? animationName : this.animationName, opts.fade);
+    [$detachAnimation](
+        animationName: string = '',
+        options: DetachAnimationOptions = {}) {
+      const opts = {...DEFAULT_DETACH_OPTIONS, ...options};
+      this[$scene].detachAnimation(
+          animationName ? animationName : this.animationName, opts.fade);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation
