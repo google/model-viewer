@@ -9,11 +9,11 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         submodules: true
 
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
 
     - name: NPM install
       run: npm ci

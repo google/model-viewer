@@ -2,6 +2,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import os from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -144,7 +145,7 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n======================================================`);
   console.log(`✅ [modelviewer.dev] Local Dev Server is Running!`);
   console.log(`======================================================\n`);
@@ -153,5 +154,15 @@ server.listen(PORT, () => {
   console.log(`- model-viewer: ${versions.modelViewer}`);
   console.log(`- postprocessing: ${versions.postprocessing}\n`);
   console.log(`The server is currently listening for connections.`);
-  console.log(`👉 PLEASE OPEN YOUR BROWSER TO: http://localhost:${PORT}/ \n`);
+  console.log(`👉 Local:   http://localhost:${PORT}/`);
+  
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        console.log(`👉 Network: http://${iface.address}:${PORT}/`);
+      }
+    }
+  }
+  console.log(`\n`);
 });

@@ -24,6 +24,8 @@ const DUMMY_RENDERER = {
   getDrawingBufferSize: (v: Vector2) => v.set(1, 1),
   getSize: (v: Vector2) => v.set(1, 1),
   getContext: () => ({getContextAttributes: () => ({alpha: true})}),
+  outputColorSpace: 'srgb',
+  autoClear: false,
 } as unknown as WebGLRenderer;
 
 import {IMVEffect, IntegrationOptions, MVEffectBase} from './effects/mixins/effect-base.js';
