@@ -236,6 +236,7 @@ suite('Annotation', () => {
 
     test('gets expected hit result when turned', async () => {
       element.resetTurntableRotation(-Math.PI / 2);
+      element[$scene].updateMatrixWorld();
       await rafPasses();
       const hitResult = element.positionAndNormalFromPoint(
           rect.width / 2 + rect.x, rect.height / 2 + rect.y);
