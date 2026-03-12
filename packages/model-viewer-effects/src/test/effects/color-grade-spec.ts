@@ -16,6 +16,8 @@
 import {ModelViewerElement} from '@google/model-viewer';
 import {expect} from 'chai';
 
+import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
+
 import {ColorGradeEffect, EffectComposer} from '../../model-viewer-effects.js';
 import {ArraysAreEqual, assetPath, AverageHSL, CompareArrays, createModelViewerElement, rafPasses, screenshot, waitForEvent} from '../utilities.js';
 
@@ -24,6 +26,12 @@ suite('Color Grade Effect', () => {
   let composer: EffectComposer;
   let baseScreenshot: Uint8Array;
   let colorGrade: ColorGradeEffect;
+
+  suiteSetup(function() {
+    if (!Renderer.singleton.canRender) {
+      this.skip();
+    }
+  });
 
   setup(async () => {
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));

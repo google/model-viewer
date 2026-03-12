@@ -67,7 +67,6 @@ suite('Screenshot Baseline Test', () => {
     setup(async () => {
       composer = new EffectComposer();
       composer.renderMode = 'quality';
-      composer.msaa = 8;
       element.insertBefore(composer, element.firstChild);
       await element.updateComplete;
       await composer.updateComplete;

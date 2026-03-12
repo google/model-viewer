@@ -18,6 +18,8 @@ import {expect} from 'chai';
 import {DotScreenEffect, Effect, EffectPass, GridEffect} from 'postprocessing';
 import {Camera} from 'three';
 
+import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
+
 import {$effectComposer, $normalPass, $renderPass, $scene} from '../effect-composer.js';
 import {EffectComposer} from '../model-viewer-effects.js';
 
@@ -26,6 +28,12 @@ import {assetPath, createModelViewerElement, waitForEvent} from './utilities.js'
 suite('MVEffectComposer', () => {
   let element: ModelViewerElement;
   let composer: EffectComposer;
+
+  suiteSetup(function() {
+    if (!Renderer.singleton.canRender) {
+      this.skip();
+    }
+  });
 
   setup(async () => {
     element = createModelViewerElement(assetPath('models/Astronaut.glb'));
