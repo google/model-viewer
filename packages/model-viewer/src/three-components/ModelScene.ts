@@ -461,31 +461,45 @@ export class ModelScene extends Scene {
   }
 
   updateBoundingBox() {
-    const {model} = this;
-    if (model == null) {
+    const {models} = this;
+    if (models.length === 0) {
       return;
     }
-    this.target.remove(model);
-
-    this.findBakedShadows(model);
+    
+    for (const mod of models) {
+      this.target.remove(mod);
+      this.findBakedShadows(mod);
+    }
 
     const bound = (box: Box3, vertex: Vector3): Box3 => {
       return box.expandByPoint(vertex);
     };
     this.setBakedShadowVisibility(false);
-    this.boundingBox = reduceVertices(model, bound, new Box3());
+    
+    let combinedBox = new Box3();
+    for (const mod of models) {
+      combinedBox = reduceVertices(mod, bound, combinedBox);
+    }
+    this.boundingBox = combinedBox;
+    
     // If there's nothing but the baked shadow, then it's not a baked shadow.
     if (this.boundingBox.isEmpty()) {
       this.setBakedShadowVisibility(true);
       this.bakedShadows.forEach((mesh) => this.unmarkBakedShadow(mesh));
-      this.boundingBox = reduceVertices(model, bound, new Box3());
+      combinedBox = new Box3();
+      for (const mod of models) {
+        combinedBox = reduceVertices(mod, bound, combinedBox);
+      }
+      this.boundingBox = combinedBox;
     }
     this.checkBakedShadows();
     this.setBakedShadowVisibility();
 
     this.boundingBox.getSize(this.size);
 
-    this.target.add(model);
+    for (const mod of models) {
+      this.target.add(mod);
+    }
   }
 
   /**
@@ -497,11 +511,14 @@ export class ModelScene extends Scene {
    * one side instead of both. Proper choice of center can correct this.
    */
   async updateFraming() {
-    const {model} = this;
-    if (model == null) {
+    const {models} = this;
+    if (models.length === 0) {
       return;
     }
-    this.target.remove(model);
+    
+    for (const mod of models) {
+      this.target.remove(mod);
+    }
     this.setBakedShadowVisibility(false);
     const {center} = this.boundingSphere;
 
@@ -512,8 +529,12 @@ export class ModelScene extends Scene {
     const radiusSquared = (value: number, vertex: Vector3): number => {
       return Math.max(value, center!.distanceToSquared(vertex));
     };
-    this.boundingSphere.radius =
-        Math.sqrt(reduceVertices(model, radiusSquared, 0));
+    
+    let maxRadiusSq = 0;
+    for (const mod of models) {
+      maxRadiusSq = Math.max(maxRadiusSq, reduceVertices(mod, radiusSquared, 0));
+    }
+    this.boundingSphere.radius = Math.sqrt(maxRadiusSq);
 
     const horizontalTanFov = (value: number, vertex: Vector3): number => {
       vertex.sub(center!);
@@ -521,11 +542,17 @@ export class ModelScene extends Scene {
       return Math.max(
           value, radiusXZ / (this.idealCameraDistance() - Math.abs(vertex.y)));
     };
-    this.idealAspect = reduceVertices(model, horizontalTanFov, 0) /
-        Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
+    
+    let maxAspect = 0;
+    for (const mod of models) {
+      maxAspect = Math.max(maxAspect, reduceVertices(mod, horizontalTanFov, 0));
+    }
+    this.idealAspect = maxAspect / Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
 
     this.setBakedShadowVisibility();
-    this.target.add(model);
+    for (const mod of models) {
+      this.target.add(mod);
+    }
   }
 
   setBakedShadowVisibility(visible: boolean = this.shadowIntensity <= 0) {
