@@ -173,6 +173,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   @property({type: String}) src: string|null = null;
 
+  @property({type: String, attribute: 'extra-srcs'}) extraSrcs: string|null = null;
+
   @property({type: Boolean, attribute: 'with-credentials'})
   withCredentials: boolean = false;
 
@@ -388,12 +390,13 @@ export default class ModelViewerElementBase extends ReactiveElement {
     // of a microtask, LitElement/UpdatingElement will notify of a change even
     // though the value has effectively not changed, so we need to check to make
     // sure that the value has actually changed before changing the loaded flag.
-    if (changedProperties.has('src')) {
-      if (this.src == null) {
+    if (changedProperties.has('src') || changedProperties.has('extraSrcs')) {
+      const extraUrlsMatch = (this.extraSrcs || '') === (this[$scene].extraUrls || []).join(',');
+      if (this.src == null && this.extraSrcs == null) {
         this[$loaded] = false;
         this[$loadedTime] = 0;
         this[$scene].reset();
-      } else if (this.src !== this[$scene].url) {
+      } else if (this.src !== this[$scene].url || !extraUrlsMatch) {
         this[$loaded] = false;
         this[$loadedTime] = 0;
         this[$updateSource]();
@@ -593,8 +596,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
    */
   async[$updateSource]() {
     const scene = this[$scene];
+    const extraUrlsMatch = (this.extraSrcs || '') === (scene.extraUrls || []).join(',');
     if (this.loaded || !this[$shouldAttemptPreload]() ||
-        this.src === scene.url) {
+        (this.src === scene.url && extraUrlsMatch)) {
       return;
     }
 
@@ -611,9 +615,11 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const updateSourceProgress =
         this[$progressTracker].beginActivity('model-load');
     const source = this.src;
+    const extraUrlsList = this.extraSrcs ? this.extraSrcs.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
     try {
       const srcUpdated = scene.setSource(
           source,
+          extraUrlsList,
           (progress: number) =>
               updateSourceProgress(clamp(progress, 0, 1) * 0.95));
 

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Phase 1: Multi-Model Test</title>
+  <script type="module" src="./dist/model-viewer.js"></script>
+  <style>
+    body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; }
+    model-viewer { width: 800px; height: 600px; background-color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <model-viewer 
+    src="../shared-assets/models/Astronaut.glb" 
+    extra-srcs="../shared-assets/models/Horse.glb, ../shared-assets/models/RobotExpressive.glb" 
+    camera-controls auto-rotate>
+  </model-viewer>
+</body>
+</html>

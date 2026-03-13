@@ -89,6 +89,7 @@ export class ModelScene extends Scene {
   xrCamera: Camera|null = null;
 
   url: string|null = null;
+  extraUrls: string[] = [];
   pivot = new Object3D();
   target = new Object3D();
   animationNames: Array<string> = [];
@@ -114,8 +115,8 @@ export class ModelScene extends Scene {
   private targetDamperY = new Damper();
   private targetDamperZ = new Damper();
 
-  private _currentGLTF: ModelViewerGLTFInstance|null = null;
-  private _model: Object3D|null = null;
+  private _currentGLTFs: ModelViewerGLTFInstance[] = [];
+  private _models: Object3D[] = [];
   private mixer: AnimationMixer;
   private cancelPendingSourceChange: (() => void)|null = null;
   private animationsByName: Map<string, AnimationClip> = new Map();
@@ -195,7 +196,7 @@ export class ModelScene extends Scene {
    */
   async setObject(model: Object3D) {
     this.reset();
-    this._model = model;
+    this._models = [model];
     this.target.add(model);
     await this.setupScene();
   }
@@ -206,13 +207,15 @@ export class ModelScene extends Scene {
 
   async setSource(
       url: string|null,
+      extraUrls: string[] = [],
       progressCallback: (progress: number) => void = () => {}) {
-    if (!url || url === this.url) {
+    if ((!url || url === this.url) && extraUrls.join(',') === this.extraUrls.join(',')) {
       progressCallback(1);
       return;
     }
     this.reset();
     this.url = url;
+    this.extraUrls = extraUrls;
 
     if (this.externalRenderer != null) {
       const framingInfo = await this.externalRenderer.load(progressCallback);
@@ -229,22 +232,31 @@ export class ModelScene extends Scene {
       this.cancelPendingSourceChange = null;
     }
 
-    let gltf: ModelViewerGLTFInstance;
+    let gltfs: ModelViewerGLTFInstance[] = [];
 
     try {
-      gltf = await new Promise<ModelViewerGLTFInstance>((resolve, reject) => {
-        this.cancelPendingSourceChange = () => reject();
+      const urlsToLoad: string[] = [];
+      if (url) urlsToLoad.push(url);
+      urlsToLoad.push(...extraUrls);
+      
+      if (urlsToLoad.length > 0) {
+        gltfs = await new Promise<ModelViewerGLTFInstance[]>((resolve, reject) => {
+          this.cancelPendingSourceChange = () => reject();
 
-        (async () => {
-          try {
-            const result = await this.element[$renderer].loader.load(
-                url, this.element, progressCallback);
-            resolve(result);
-          } catch (error) {
-            reject(error);
-          }
-        })();
-      });
+          (async () => {
+            try {
+              const results = await Promise.all(
+                urlsToLoad.map(curUrl => 
+                  this.element[$renderer].loader.load(curUrl, this.element, progressCallback)
+                )
+              );
+              resolve(results as ModelViewerGLTFInstance[]);
+            } catch (error) {
+              reject(error);
+            }
+          })();
+        });
+      }
     } catch (error) {
       if (error == null) {
         // Loading was cancelled, so silently return
@@ -258,23 +270,29 @@ export class ModelScene extends Scene {
     this.cancelPendingSourceChange = null;
     this.reset();
     this.url = url;
-    this._currentGLTF = gltf;
+    this.extraUrls = extraUrls;
+    this._currentGLTFs = gltfs;
 
-    if (gltf != null) {
-      this._model = gltf.scene;
-      this.target.add(gltf.scene);
+    for (const gltf of gltfs) {
+      if (gltf != null) {
+        this._models.push(gltf.scene);
+        this.target.add(gltf.scene);
+      }
     }
 
-    const {animations} = gltf!;
     const animationsByName = new Map();
     const animationNames = [];
+    const allAnimations = [];
 
-    for (const animation of animations) {
-      animationsByName.set(animation.name, animation);
-      animationNames.push(animation.name);
+    for (const gltf of gltfs) {
+      for (const animation of gltf.animations || []) {
+        animationsByName.set(animation.name, animation);
+        animationNames.push(animation.name);
+        allAnimations.push(animation);
+      }
     }
 
-    this.animations = animations;
+    this.animations = allAnimations;
     this.animationsByName = animationsByName;
     this.animationNames = animationNames;
 
@@ -302,17 +320,17 @@ export class ModelScene extends Scene {
     }
     this.bakedShadows.clear();
 
-    const {_model} = this;
-    if (_model != null) {
-      _model.removeFromParent();
-      this._model = null;
+    const {_models} = this;
+    for (const mod of _models) {
+      if (mod != null) mod.removeFromParent();
     }
+    this._models = [];
 
-    const gltf = this._currentGLTF;
-    if (gltf != null) {
-      gltf.dispose();
-      this._currentGLTF = null;
+    const gltfs = this._currentGLTFs;
+    for (const gltf of gltfs) {
+      if (gltf != null) gltf.dispose();
     }
+    this._currentGLTFs = [];
 
     if (this.currentAnimationAction != null) {
       this.currentAnimationAction.stop();
@@ -335,7 +353,11 @@ export class ModelScene extends Scene {
   }
 
   get currentGLTF() {
-    return this._currentGLTF;
+    return this._currentGLTFs[0] || null;
+  }
+
+  get currentGLTFs() {
+    return this._currentGLTFs;
   }
 
   /**
@@ -418,8 +440,8 @@ export class ModelScene extends Scene {
   }
 
   applyTransform() {
-    const {model} = this;
-    if (model == null) {
+    const {models} = this;
+    if (models.length === 0) {
       return;
     }
     const orientation = parseExpressions(this.element.orientation)[0]
@@ -429,12 +451,13 @@ export class ModelScene extends Scene {
     const pitch = normalizeUnit(orientation[1]).number;
     const yaw = normalizeUnit(orientation[2]).number;
 
-    model.quaternion.setFromEuler(new Euler(pitch, yaw, roll, 'YXZ'));
-
     const scale = parseExpressions(this.element.scale)[0]
                       .terms as [NumberNode, NumberNode, NumberNode];
 
-    model.scale.set(scale[0].number, scale[1].number, scale[2].number);
+    for (const mod of models) {
+      mod.quaternion.setFromEuler(new Euler(pitch, yaw, roll, 'YXZ'));
+      mod.scale.set(scale[0].number, scale[1].number, scale[2].number);
+    }
   }
 
   updateBoundingBox() {
@@ -656,7 +679,11 @@ export class ModelScene extends Scene {
   }
 
   get model() {
-    return this._model;
+    return this._models[0] || null;
+  }
+
+  get models() {
+    return this._models;
   }
 
   /**
@@ -724,7 +751,7 @@ export class ModelScene extends Scene {
       name: string|null = null, crossfadeTime: number = 0,
       loopMode: AnimationActionLoopStyles = LoopRepeat,
       repetitionCount: number = Infinity) {
-    if (this._currentGLTF == null) {
+    if (this.currentGLTF == null) {
       return;
     }
     const {animations} = this;
@@ -788,7 +815,7 @@ export class ModelScene extends Scene {
       timeScale: number = 1, fade: boolean|number|string = false,
       warp: boolean|number|string = false, relativeWarp: boolean = true,
       time: null|number|string = null, needsToStop: boolean = false) {
-    if (this._currentGLTF == null || name === this.element.animationName) {
+    if (this.currentGLTF == null || name === this.element.animationName) {
       return;
     }
     const {animations} = this;
@@ -983,7 +1010,7 @@ export class ModelScene extends Scene {
   }
 
   detachAnimation(name: string = '', fade: boolean|number|string = true) {
-    if (this._currentGLTF == null || name === this.element.animationName) {
+    if (this.currentGLTF == null || name === this.element.animationName) {
       return;
     }
     const {animations} = this;
@@ -1018,7 +1045,7 @@ export class ModelScene extends Scene {
   updateAnimationLoop(
       name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
       repetitionCount: number = Infinity) {
-    if (this._currentGLTF == null || name === this.element.animationName) {
+    if (this.currentGLTF == null || name === this.element.animationName) {
       return;
     }
     const {animations} = this;
@@ -1094,7 +1121,7 @@ export class ModelScene extends Scene {
    */
   setShadowIntensity(shadowIntensity: number) {
     this.shadowIntensity = shadowIntensity;
-    if (this._currentGLTF == null) {
+    if (this.currentGLTF == null) {
       return;
     }
     this.setBakedShadowVisibility();
