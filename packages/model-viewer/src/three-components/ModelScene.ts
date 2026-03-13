@@ -816,7 +816,14 @@ export class ModelScene extends Scene {
 
         if (name != null) {
           // Look for an animation with this precise name inside this model
-          animationClip = animations.find(anim => anim.name === name);
+          // We search backwards to mimic previous Map.set overriding behavior
+          // so the last animation with the same name takes precedence.
+          for (let k = animations.length - 1; k >= 0; k--) {
+            if (animations[k].name === name) {
+              animationClip = animations[k];
+              break;
+            }
+          }
 
           if (animationClip == null) {
             const parsedAnimationIndex = parseInt(name);

@@ -277,16 +277,25 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                 .register(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
-        const exportGroup = new Object3D();
-        for (const m of scene.models) {
-          exportGroup.add(m);
+        let exportTarget: Object3D;
+        if (scene.models.length > 1) {
+          exportTarget = new Object3D();
+          for (const m of scene.models) {
+            exportTarget.add(m);
+          }
+        } else {
+          exportTarget = scene.models[0];
         }
 
         exporter.parse(
-            exportGroup,
+            exportTarget,
             (gltf: object) => {
-              for (const m of scene.models) {
-                scene.target.add(m);
+              if (scene.models.length > 1) {
+                for (const m of scene.models) {
+                  scene.target.add(m);
+                }
+              } else {
+                scene.target.add(scene.models[0]);
               }
               return resolve(new Blob(
                   [opts.binary ? gltf as Blob : JSON.stringify(gltf)], {

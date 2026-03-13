@@ -29,7 +29,7 @@ const ANIMATED_GLB_DUPLICATE_ANIMATION_NAMES_PATH =
     assetPath('models/DuplicateAnimationNames.glb');
 
 const animationIsPlaying = (element: any, animationName?: string): boolean => {
-  const {currentAnimationAction} = element[$scene];
+  const currentAnimationAction = (element[$scene] as any).currentAnimationActions[0];
 
   if (currentAnimationAction != null &&
       (animationName == null ||
@@ -44,8 +44,8 @@ const animationIsPlaying = (element: any, animationName?: string): boolean => {
 
 const animationWithIndexIsPlaying = (element: any, animationIndex = 0):
     boolean => {
-      const {currentAnimationAction} = element[$scene];
-      const {_currentGLTF} = element[$scene];
+      const currentAnimationAction = (element[$scene] as any).currentAnimationActions[0];
+      const _currentGLTF = (element[$scene] as any)._currentGLTFs[0];
 
       if (currentAnimationAction != null && animationIndex >= 0 &&
           animationIndex < _currentGLTF.animations.length &&

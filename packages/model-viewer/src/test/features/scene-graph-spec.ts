@@ -41,7 +41,20 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
   // TODO: export is putting in an extra node layer, because the loader
   // gives us a Group, but if the exporter doesn't get a Scene, then it
   // wraps everything in an "AuxScene" node. Feels like a three.js bug.
-  return hasBeenExportedOnce ? scene.model!.children[0] : scene.model!;
+  // With multi-model we added an extra grouping level globally.
+  if (!hasBeenExportedOnce) return scene.model!;
+  
+  // If exported, check for the extra node wrapper (AuxScene or otherwise).
+  if (scene.model!.children.length === 1 && scene.model!.children[0].name.includes('AuxScene')) {
+    return scene.model!.children[0];
+  } else if (scene.model!.children.length > 0 && !scene.model!.userData.variants) {
+    // Attempt unroll if it isn't an AuxScene but wraps
+    if (scene.model!.children[0].children && scene.model!.children[0].children.length > 0) {
+        return scene.model!.children[0];
+    }
+  }
+  
+  return scene.model!;
 }
 
 suite('SceneGraph', () => {
@@ -142,9 +155,10 @@ suite('SceneGraph', () => {
       });
 
       test('has variants', () => {
+        const gltfRoot = getGLTFRoot(element[$scene]);
+
         expect(element[$scene].currentGLTF!.userData.variants.length)
             .to.be.eq(3);
-        const gltfRoot = getGLTFRoot(element[$scene]);
         expect(gltfRoot.children[0].userData.variantMaterials.size).to.be.eq(3);
         expect(gltfRoot.children[1].userData.variantMaterials.size).to.be.eq(3);
       });
@@ -227,9 +241,10 @@ suite('SceneGraph', () => {
           });
 
           test('has variants', () => {
+            const gltfRoot = getGLTFRoot(element[$scene]);
+
             expect(element[$scene].currentGLTF!.userData.variants.length)
                 .to.be.eq(2);
-            const gltfRoot = getGLTFRoot(element[$scene]);
             expect(
                 gltfRoot.children[0].children[0].userData.variantMaterials.size)
                 .to.be.eq(2);
