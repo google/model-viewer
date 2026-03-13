@@ -36,6 +36,7 @@ export interface HotspotConfiguration {
   position?: string;
   normal?: string;
   surface?: string;
+  modelIndex?: number | null;
 }
 
 const a = new Vector3();
@@ -52,6 +53,7 @@ const quat = new Quaternion();
 export class Hotspot extends CSS2DObject {
   public normal: Vector3 = new Vector3(0, 1, 0);
   public surface?: string;
+  public modelIndex?: number;
   public mesh?: Mesh;
   public tri?: Vector3;
   public bary?: Vector3;
@@ -73,6 +75,10 @@ export class Hotspot extends CSS2DObject {
     this.updatePosition(config.position);
     this.updateNormal(config.normal);
     this.surface = config.surface;
+    
+    if (config.modelIndex != null) {
+      this.modelIndex = config.modelIndex;
+    }
   }
 
   get facingCamera(): boolean {

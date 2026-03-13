@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Matrix4, Vector3} from 'three';
+import {Vector3} from 'three';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $scene, $tick, toVector2D, toVector3D, Vector2D, Vector3D} from '../model-viewer-base.js';
 import {Hotspot, HotspotConfiguration} from '../three-components/Hotspot.js';
@@ -26,7 +26,7 @@ const $observer = Symbol('observer');
 const $addHotspot = Symbol('addHotspot');
 const $removeHotspot = Symbol('removeHotspot');
 
-const worldToModel = new Matrix4();
+
 
 export declare type HotspotData = {
   position: Vector3D,
@@ -39,7 +39,7 @@ export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
   queryHotspot(name: string): HotspotData|null;
   positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D, uv: Vector2D|null}|null;
+      {position: Vector3D, normal: Vector3D, uv: Vector2D|null, modelIndex?: number}|null;
   surfaceFromPoint(pixelX: number, pixelY: number): string|null;
 }
 
@@ -140,6 +140,9 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
       hotspot.updatePosition(config.position);
       hotspot.updateNormal(config.normal);
       hotspot.surface = config.surface;
+      if (config.modelIndex !== undefined && config.modelIndex !== null) {
+        hotspot.modelIndex = config.modelIndex;
+      }
       this[$scene].updateSurfaceHotspot(hotspot);
       this[$needsRender]();
     }
@@ -191,7 +194,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * not hit, the result is null.
      */
     positionAndNormalFromPoint(pixelX: number, pixelY: number):
-        {position: Vector3D, normal: Vector3D, uv: Vector2D|null}|null {
+        {position: Vector3D, normal: Vector3D, uv: Vector2D|null, modelIndex?: number}|null {
       const scene = this[$scene];
       const ndcPosition = scene.getNDC(pixelX, pixelY);
 
@@ -200,7 +203,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         return null;
       }
 
-      worldToModel.copy(scene.target.matrixWorld).invert();
+      const worldToModel = hit.worldToModel;
       const position = toVector3D(hit.position.applyMatrix4(worldToModel));
       const normal = toVector3D(hit.normal.transformDirection(worldToModel));
 
@@ -209,7 +212,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         uv = toVector2D(hit.uv);
       }
 
-      return {position: position, normal: normal, uv: uv};
+      return {position: position, normal: normal, uv: uv, modelIndex: hit.modelIndex};
     }
 
     /**
@@ -242,6 +245,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           position: node.dataset.position,
           normal: node.dataset.normal,
           surface: node.dataset.surface,
+          modelIndex: node.dataset.modelIndex != null ? parseInt(node.dataset.modelIndex) : null,
         });
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].addHotspot(hotspot);
