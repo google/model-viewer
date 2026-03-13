@@ -14,7 +14,7 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {CanvasTexture, RepeatWrapping, SRGBColorSpace, Texture, VideoTexture} from 'three';
+import {CanvasTexture, Object3D, RepeatWrapping, SRGBColorSpace, Texture, VideoTexture} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
@@ -277,9 +277,17 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                 .register(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
+        const exportGroup = new Object3D();
+        for (const m of scene.models) {
+          exportGroup.add(m);
+        }
+
         exporter.parse(
-            scene.model,
+            exportGroup,
             (gltf: object) => {
+              for (const m of scene.models) {
+                scene.target.add(m);
+              }
               return resolve(new Blob(
                   [opts.binary ? gltf as Blob : JSON.stringify(gltf)], {
                     type: opts.binary ? 'application/octet-stream' :
