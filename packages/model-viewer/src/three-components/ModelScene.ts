@@ -1244,6 +1244,7 @@ export class ModelScene extends Scene {
     }
 
     const node = model[$nodeFromPoint](hit);
+    if (node == null) return null;
     const {meshes, primitives} = node.mesh.userData.associations;
 
     const va = new Vector3();

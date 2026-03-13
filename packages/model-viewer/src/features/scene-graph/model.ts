@@ -211,8 +211,8 @@ export class Model implements ModelInterface {
     return found == null ? null : found as PrimitiveNode;
   }
 
-  [$nodeFromPoint](hit: Intersection<Object3D>): PrimitiveNode {
-    return this[$hierarchy].find((node: Node) => {
+  [$nodeFromPoint](hit: Intersection<Object3D>): PrimitiveNode|null {
+    const found = this[$hierarchy].find((node: Node) => {
       if (node instanceof PrimitiveNode) {
         const primitive = node as PrimitiveNode;
         if (primitive.mesh === hit.object) {
@@ -220,15 +220,13 @@ export class Model implements ModelInterface {
         }
       }
       return false;
-    }) as PrimitiveNode;
+    });
+    return found ? found as PrimitiveNode : null;
   }
 
-  /**
-   * Intersects a ray with the Model and returns the first material whose
-   * object was intersected.
-   */
-  [$materialFromPoint](hit: Intersection<Object3D>): Material {
-    return this[$nodeFromPoint](hit).getActiveMaterial();
+  [$materialFromPoint](hit: Intersection<Object3D>): Material|null {
+    const node = this[$nodeFromPoint](hit);
+    return node ? node.getActiveMaterial() : null;
   }
 
   /**

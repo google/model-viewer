@@ -15,5 +15,18 @@
     extra-srcs="../shared-assets/models/Horse.glb, ../shared-assets/models/RobotExpressive.glb" 
     camera-controls auto-rotate>
   </model-viewer>
+  <script>
+    const viewer = document.querySelector('model-viewer');
+    viewer.addEventListener('load', () => {
+      // Phase 2 Verification: Change color of the first extra model (Horse)
+      if (viewer.extraModels && viewer.extraModels.length > 0) {
+        const horseMaterial = viewer.extraModels[0].materials[0];
+        if (horseMaterial) {
+          horseMaterial.pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]); // Red horse
+          console.log("Turned the horse red!");
+        }
+      }
+    });
+  </script>
 </body>
 </html>
