@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {ExtraModelElement} from './extra-model.js';
 import {AnimationMixin} from './features/animation.js';
 import {AnnotationMixin} from './features/annotation.js';
 import {ARMixin} from './features/ar.js';
@@ -36,9 +37,11 @@ export type ModelViewerElement = InstanceType<typeof ModelViewerElement>;
 export type{RGB, RGBA} from './three-components/gltf-instance/gltf-2.0';
 
 customElements.define('model-viewer', ModelViewerElement);
+customElements.define('extra-model', ExtraModelElement);
 
 declare global {
   interface HTMLElementTagNameMap {
     'model-viewer': ModelViewerElement;
+    'extra-model': ExtraModelElement;
   }
 }
