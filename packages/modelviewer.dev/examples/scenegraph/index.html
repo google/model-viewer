@@ -1289,6 +1289,87 @@
         </div>
       </div>
 
+      <div class="sample">
+        <div id="multiModel" class="demo"></div>
+        <div class="content">
+          <div class="wrapper">
+            <div class="heading">
+              <h2 class="demo-title">Multiple Models in One Scene</h2>
+              <p>You can load additional models into the same scene using the <code>extra-srcs</code> attribute.
+                This allows you to compose scenes dynamically while getting the benefits of automatic framing and lighting
+                from a single <code>&lt;model-viewer&gt;</code> element. The AR modes (WebXR, iOS Quick Look, and Scene Viewer) 
+                will correctly handle and export all models loaded this way.</p>
+              <p>You can access the secondary models using the <code>extraModels</code> property and manipulate their materials independently.
+                 Animations can be played or paused per model by passing <code>{ modelIndex: number }</code>, and hotspots can be anchored to them using <code>data-model-index</code>.</p>
+            </div>
+            <example-snippet stamp-to="multiModel" highlight-as="html">
+              <template>
+                <model-viewer id="multimodel-demo" src="../../shared-assets/models/Astronaut.glb"
+                  extra-srcs="../../shared-assets/models/glTF-Sample-Assets/Models/Duck/glTF-Binary/Duck.glb,../../shared-assets/models/glTF-Sample-Assets/Models/BoxAnimated/glTF-Binary/BoxAnimated.glb"
+                  shadow-intensity="1" camera-controls touch-action="pan-y" ar alt="A multi-model scene">
+                  <div class="controls glass">
+                    <button id="toggle-animations">Play/Pause Box Animation</button>
+                    <button id="color-duck">Randomize Duck Color</button>
+                  </div>
+                </model-viewer>
+                <script>
+                  const multiModelViewer = document.getElementById("multimodel-demo");
+                  let boxPlaying = false;
+                  
+                  const spaceModels = () => {
+                    const symbols = Object.getOwnPropertySymbols(multiModelViewer);
+                    const sceneSymbol = symbols.find(s => s.description === 'scene');
+                    const scene = multiModelViewer[sceneSymbol];
+                    
+                    if (scene && scene._models && scene._models.length >= 3) {
+                      // Astronaut is in the center.
+                      // Move Duck to the left.
+                      scene._models[1].position.set(-2, 0, 0);
+                      scene._models[1].updateMatrixWorld();
+                      // Move Box to the right.
+                      scene._models[2].position.set(2, 0, 0);
+                      scene._models[2].updateMatrixWorld();
+                      
+                      scene.updateBoundingBox();
+                      scene.updateShadow();
+                      multiModelViewer.updateFraming();
+                      scene.queueRender();
+                    }
+                  };
+
+                  if (multiModelViewer.loaded) {
+                    spaceModels();
+                  } else {
+                    multiModelViewer.addEventListener("load", spaceModels);
+                  }
+
+                  document.getElementById("toggle-animations").addEventListener("click", () => {
+                    // modelIndex 0 is Astronaut (no animation), 1 is Duck (no animation), 2 is BoxAnimated.
+                    boxPlaying = !boxPlaying;
+                    if (boxPlaying) {
+                      multiModelViewer.play({ modelIndex: 2 });
+                    } else {
+                      multiModelViewer.pause({ modelIndex: 2 });
+                    }
+                  });
+
+                  document.getElementById("color-duck").addEventListener("click", () => {
+                    const extraModels = multiModelViewer.extraModels;
+                    if (extraModels && extraModels.length > 0) {
+                      // extraModels[0] is the Duck (from the first extra-src)
+                      const material = extraModels[0].materials[0];
+                      if (material) {
+                        material.pbrMetallicRoughness.setBaseColorFactor([Math.random(), Math.random(), Math.random()]);
+                      }
+                    }
+                  });
+                </script>
+              </template>
+            </example-snippet>
+          </div>
+        </div>
+      </div>
+
       <div class="footer">
         <ul>
           <li class="attribution">
