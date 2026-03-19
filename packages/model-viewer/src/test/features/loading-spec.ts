@@ -228,6 +228,60 @@ suite('Loading', () => {
     });
 
 
+    suite('extra-model changes', () => {
+      test('loads models when only extra-model is provided', async () => {
+        element.loading = 'eager';
+        const extraModel1 = document.createElement('extra-model') as any;
+        extraModel1.src = CUBE_GLB_PATH;
+        const extraModel2 = document.createElement('extra-model') as any;
+        extraModel2.src = HORSE_GLB_PATH;
+        
+        element.appendChild(extraModel1);
+        element.appendChild(extraModel2);
+
+        const loadEvent = await waitForEvent(element, 'load') as CustomEvent;
+        expect(loadEvent.detail.url).to.be.eq(CUBE_GLB_PATH);
+        
+        const models = element[$scene].models;
+        expect(models.length).to.be.eq(2);
+      });
+
+      test('loads models when both src and extra-model are provided', async () => {
+        element.loading = 'eager';
+        element.src = CUBE_GLB_PATH;
+        const extraModel = document.createElement('extra-model') as any;
+        extraModel.src = HORSE_GLB_PATH;
+        element.appendChild(extraModel);
+
+        const loadEvent = await waitForEvent(element, 'load') as CustomEvent;
+        expect(loadEvent.detail.url).to.be.eq(CUBE_GLB_PATH);
+        
+        const models = element[$scene].models;
+        expect(models.length).to.be.eq(2);
+      });
+      
+      test('generates 3DModel schema with extra-model', async () => {
+        element.generateSchema = true;
+        const extraModel1 = document.createElement('extra-model') as any;
+        extraModel1.src = HORSE_GLB_PATH;
+        const extraModel2 = document.createElement('extra-model') as any;
+        extraModel2.src = CUBE_GLB_PATH;
+        element.appendChild(extraModel1);
+        element.appendChild(extraModel2);
+
+        await waitForEvent(element, 'load');
+        await element.updateComplete;
+        
+        const {schemaElement} = element[$scene];
+        expect(schemaElement.type).to.be.eq('application/ld+json');
+        
+        const json = JSON.parse(schemaElement.textContent!);
+        const encoding = json.encoding[0];
+
+        expect(encoding.contentUrl).to.be.eq(HORSE_GLB_PATH);
+      });
+    });
+
     suite('reveal', () => {
       suite('auto', () => {
         test('hides poster when element loads', async () => {

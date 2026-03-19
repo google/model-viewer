@@ -381,7 +381,8 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     [$shouldAttemptPreload](): boolean {
-      return !!this.src &&
+      const extraModels = Array.from(this.querySelectorAll('extra-model'));
+      return !!(this.src || extraModels.length > 0) &&
           (this[$shouldDismissPoster] ||
            this.loading === LoadingStrategy.EAGER ||
            (this.reveal === RevealStrategy.AUTO && this[$isElementInViewport]));

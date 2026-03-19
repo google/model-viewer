@@ -239,7 +239,7 @@ export class ModelScene extends Scene {
     try {
       const urlsToLoad: string[] = [];
       if (url) urlsToLoad.push(url);
-      urlsToLoad.push(...extraUrls);
+      if (extraUrls) urlsToLoad.push(...extraUrls);
       
       if (urlsToLoad.length > 0) {
         gltfs = await new Promise<ModelViewerGLTFInstance[]>((resolve, reject) => {
@@ -318,6 +318,33 @@ export class ModelScene extends Scene {
     this.setShadowIntensity(this.shadowIntensity);
 
     this.setGroundedSkybox();
+  }
+
+  updateModelTransforms(index: number, offset?: string|null, orientation?: string|null, scale?: string|null) {
+    const model = this._models[index];
+    console.log(`[ModelScene] updateModelTransforms index: ${index} modelFound: ${!!model} offset: ${offset} orientation: ${orientation}`);
+    if (!model) return;
+
+    if (offset) {
+      const parts = offset.split(' ').map(s => s.trim()).filter(s => s.length > 0).map(Number);
+      if (parts.length === 3 && !parts.some(isNaN)) {
+        model.position.set(parts[0], parts[1], parts[2]);
+      }
+    }
+
+    if (scale) {
+      const parts = scale.split(' ').map(s => s.trim()).filter(s => s.length > 0).map(Number);
+      if (parts.length === 1 && !isNaN(parts[0])) {
+        model.scale.setScalar(parts[0]);
+      } else if (parts.length === 3 && !parts.some(isNaN)) {
+        model.scale.set(parts[0], parts[1], parts[2]);
+      }
+    }
+
+    model.updateMatrixWorld(true);
+    this.updateBoundingBox();
+    this.updateShadow();
+    this.queueRender();
   }
 
   reset() {

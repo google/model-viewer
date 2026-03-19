@@ -22,6 +22,7 @@ import {LoadingMixin} from './features/loading.js';
 import {SceneGraphMixin} from './features/scene-graph.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
+import './features/extra-model.js';
 
 // Export these to allow lazy-loaded LottieLoader.js to find what it needs.
 // Requires an import map - "three": "path/to/model-viewer.min.js".
@@ -40,5 +41,6 @@ customElements.define('model-viewer', ModelViewerElement);
 declare global {
   interface HTMLElementTagNameMap {
     'model-viewer': ModelViewerElement;
+    'extra-model': import('./features/extra-model.js').ExtraModelElement;
   }
 }

@@ -168,6 +168,22 @@ suite('Animation', () => {
       });
     });
 
+    suite('when appendAnimation is invoked', () => {
+      setup(async () => {
+        const appendEvent = waitForEvent(element, 'append-animation');
+        element.appendAnimation('Punch', { weight: 1.0 });
+        await appendEvent;
+      });
+
+      test('unpauses the model', () => {
+        expect(element.paused).to.be.false;
+      });
+
+      test('adds the animation to appendedAnimations', () => {
+        expect(element.appendedAnimations).to.include('Punch');
+      });
+    });
+
     suite('when configured to autoplay', () => {
       setup(async () => {
         element.autoplay = true;

@@ -74,6 +74,7 @@ export declare interface AnimationInterface {
   animationName: string|void;
   animationCrossfadeDuration: number;
   readonly availableAnimations: Array<string>;
+  readonly appendedAnimations: Array<string>;
   readonly paused: boolean;
   readonly duration: number;
   currentTime: number;
@@ -197,6 +198,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     appendAnimation(animationName: string, options?: AppendAnimationOptions) {
       if (this.availableAnimations.length > 0) {
         this[$paused] = false;
+        this[$scene].unpauseAnimation(options?.modelIndex ?? null);
 
         this[$appendAnimation](animationName, options);
 
@@ -207,6 +209,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     detachAnimation(animationName: string, options?: DetachAnimationOptions) {
       if (this.availableAnimations.length > 0) {
         this[$paused] = false;
+        this[$scene].unpauseAnimation(options?.modelIndex ?? null);
 
         this[$detachAnimation](animationName, options);
 

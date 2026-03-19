@@ -320,7 +320,14 @@ configuration or device capabilities');
     async [$openSceneViewer]() {
       const location = self.location.toString();
       const locationUrl = new URL(location);
-      let modelUrl = new URL(this.src!, location);
+      const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./extra-model.js').ExtraModelElement>;
+      const extraUrlsList = extraModels.map(m => m.src).filter(src => src != null) as Array<string>;
+      const firstSrc = this.src || extraUrlsList[0] || null;
+      if (!firstSrc) {
+        console.warn('No src or extra-model provided for Scene Viewer fallback.');
+        return;
+      }
+      let modelUrl = new URL(firstSrc, location);
 
       if (this[$scene].models.length > 1 && typeof (this as any).exportScene === 'function') {
         const glbBlob = await (this as any).exportScene({binary: true});
@@ -400,9 +407,14 @@ configuration or device capabilities');
       if (generateUsdz) {
         const location = self.location.toString();
         const locationUrl = new URL(location);
-        const srcUrl = new URL(this.src!, locationUrl);
-        if (srcUrl.hash) {
-          modelUrl.hash = srcUrl.hash;
+        const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./extra-model.js').ExtraModelElement>;
+        const extraUrlsList = extraModels.map(m => m.src).filter(src => src != null) as Array<string>;
+        const firstSrc = this.src || extraUrlsList[0] || null;
+        if (firstSrc) {
+          const srcUrl = new URL(firstSrc, locationUrl);
+          if (srcUrl.hash) {
+            modelUrl.hash = srcUrl.hash;
+          }
         }
       }
 

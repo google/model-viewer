@@ -234,14 +234,22 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$extraModels] = [];
+      const extraNodes = Array.from(this.querySelectorAll('extra-model')) as Array<import('./extra-model.js').ExtraModelElement>;
+      
       for (let i = 1; i < currentGLTFs.length; i++) {
         const gltf = currentGLTFs[i];
         if (gltf != null && gltf.correlatedSceneGraph != null) {
-          this[$extraModels].push(new Model(gltf.correlatedSceneGraph, this[$getOnUpdateMethod]()));
+          const modelWrapper = new Model(gltf.correlatedSceneGraph, this[$getOnUpdateMethod]());
+          this[$extraModels].push(modelWrapper);
+          
+          // Link back to light-dom DOM node!
+          if (extraNodes[i - 1]) {
+            extraNodes[i - 1].model = modelWrapper;
+          }
         }
       }
-
-      this[$currentGLTF] = currentGLTF;
+ 
+       this[$currentGLTF] = currentGLTF;
     }
 
     /** @export */
