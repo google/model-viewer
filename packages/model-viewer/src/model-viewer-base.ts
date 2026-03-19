@@ -199,7 +199,16 @@ export default class ModelViewerElementBase extends ReactiveElement {
   protected[$clearModelTimeout]: number|null = null;
 
   [$onSlotChange] = () => {
-    this[$updateSource]();
+    if (!this[$scene]) return;
+    
+    const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./features/extra-model.js').ExtraModelElement>;
+    const newExtraUrls = extraModels.map(m => m.src).filter(src => src != null) as string[];
+    const currentExtraUrls = this[$scene].extraUrls || [];
+    
+    // Only reload if the declarative list of <extra-model> components has modified its source set
+    if (newExtraUrls.join(',') !== currentExtraUrls.join(',') || extraModels.length !== currentExtraUrls.length) {
+      this[$updateSource]();
+    }
   };
 
   [$onExtraModelChanged] = (event: Event) => {
