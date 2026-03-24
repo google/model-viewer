@@ -79,6 +79,7 @@ suite('Screenshot Baseline Test', () => {
       expect(renderer).to.not.be.undefined;
       element.jumpCameraToGoal();
       await rafPasses();
+      await new Promise(resolve => setTimeout(resolve, 100)); // Allow shader recompilation frames to catch up on Chromium
       composerScreenshot = screenshot(element);
       await rafPasses();
       const screenshot2 = screenshot(element);
@@ -89,7 +90,8 @@ suite('Screenshot Baseline Test', () => {
       }
     });
 
-    test('Empty EffectComposer and base Renderer are identical', () => {
+    test('Empty EffectComposer and base Renderer are identical', async () => {
+      await new Promise(resolve => setTimeout(resolve, 100)); // Wait for potential rendering stabilization
       const similarity = CompareArrays(baseScreenshot, composerScreenshot);
       if (!Number.isNaN(similarity)) {
         expect(similarity).to.be.greaterThan(0.999);

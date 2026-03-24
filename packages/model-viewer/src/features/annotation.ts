@@ -106,6 +106,7 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const scene = this[$scene];
       scene.forHotspots((hotspot) => {
+        scene.updateHotspotAttachment(hotspot);
         scene.updateSurfaceHotspot(hotspot);
       });
     }

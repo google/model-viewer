@@ -117,6 +117,7 @@ export class ModelScene extends Scene {
 
   private _currentGLTFs: ModelViewerGLTFInstance[] = [];
   private _models: Object3D[] = [];
+  private boundsAndShadowDirty = false;
   private mixers: AnimationMixer[] = [];
   private mixerPausedStates: boolean[] = [];
   private cancelPendingSourceChange: (() => void)|null = null;
@@ -320,9 +321,8 @@ export class ModelScene extends Scene {
     this.setGroundedSkybox();
   }
 
-  updateModelTransforms(index: number, offset?: string|null, orientation?: string|null, scale?: string|null) {
+  updateModelTransforms(index: number, offset?: string|null, _orientation?: string|null, scale?: string|null) {
     const model = this._models[index];
-    console.log(`[ModelScene] updateModelTransforms index: ${index} modelFound: ${!!model} offset: ${offset} orientation: ${orientation}`);
     if (!model) return;
 
     if (offset) {
@@ -342,9 +342,25 @@ export class ModelScene extends Scene {
     }
 
     model.updateMatrixWorld(true);
-    this.updateBoundingBox();
-    this.updateShadow();
+    // Defer bounding box and shadow recalculations.
+    // If developers animate `<extra-model>` offset or scale properties via requestAnimationFrame,
+    // recalculating bounding boxes synchronously every single frame here blocks the main thread and tanks frame rates.
+    // Instead, we mark the bounds as dirty and wait for the render loop or a public dimensions getter to flush the changes.
+    this.boundsAndShadowDirty = true;
     this.queueRender();
+  }
+
+  /**
+   * Evaluates bounding box recalculations asynchronously.
+   * Flushed right before a frame is rendered or when dimension properties are formally queried
+   * to ensure that high-frequency layout changes don't stall execution natively.
+   */
+  updateBoundingBoxAndShadowIfDirty() {
+    if (this.boundsAndShadowDirty) {
+      this.boundsAndShadowDirty = false;
+      this.updateBoundingBox();
+      this.updateShadow();
+    }
   }
 
   reset() {
@@ -1241,6 +1257,7 @@ export class ModelScene extends Scene {
   }
 
   renderShadow(renderer: WebGLRenderer) {
+    this.updateBoundingBoxAndShadowIfDirty();
     const shadow = this.shadow;
     if (shadow != null && shadow.needsUpdate == true) {
       shadow.render(renderer, this);
@@ -1397,9 +1414,25 @@ export class ModelScene extends Scene {
    * The following methods are for operating on the set of Hotspot objects
    * attached to the scene. These come from DOM elements, provided to slots
    * by the Annotation Mixin.
+  /**
+   * Evaluates the intended `modelIndex` of the hotspot and safely reparents it
+   * to the corresponding `Object3D` node mapped inside this scene's `_models` array.
+   * This guarantees that declarative offset and layout transforms affect positional anchors.
    */
+  updateHotspotAttachment(hotspot: Hotspot) {
+    const targetNode = (hotspot.modelIndex != null && hotspot.modelIndex > 0 && this._models[hotspot.modelIndex])
+        ? this._models[hotspot.modelIndex]
+        : this.target;
+
+    if (hotspot.parent !== targetNode) {
+      targetNode.add(hotspot);
+      hotspot.updatePosition(hotspot.position.toArray().join(' ') + 'm'); // Force bounds sync to fresh parent
+      hotspot.updateMatrixWorld(true);
+    }
+  }
+
   addHotspot(hotspot: Hotspot) {
-    this.target.add(hotspot);
+    this.updateHotspotAttachment(hotspot);
     // This happens automatically in render(), but we do it early so that
     // the slots appear in the shadow DOM and the elements get attached,
     // allowing us to dispatch events on them.
@@ -1408,18 +1441,33 @@ export class ModelScene extends Scene {
   }
 
   removeHotspot(hotspot: Hotspot) {
-    this.target.remove(hotspot);
+    if (hotspot.parent) {
+      hotspot.parent.remove(hotspot);
+    }
   }
 
   /**
    * Helper method to apply a function to all hotspots.
    */
   forHotspots(func: (hotspot: Hotspot) => void) {
-    const {children} = this.target;
+    const children = [...this.target.children];
     for (let i = 0, l = children.length; i < l; i++) {
       const hotspot = children[i];
       if (hotspot instanceof Hotspot) {
         func(hotspot);
+      }
+    }
+    
+    // Also traverse extra models to find any hotspots already reparented to them
+    for (const model of this._models) {
+      if (model && model !== this.target) {
+        const extraChildren = [...model.children];
+        for (let i = 0, l = extraChildren.length; i < l; i++) {
+          const hotspot = extraChildren[i];
+          if (hotspot instanceof Hotspot) {
+            func(hotspot);
+          }
+        }
       }
     }
   }
@@ -1439,17 +1487,21 @@ export class ModelScene extends Scene {
     
     // Determine format: 8 numbers = legacy (index 0), 9 numbers = indexed
     const isLegacy = nodes.length === 8;
-    const modelIndex = isLegacy ? 0 : nodes[0].number;
+    const parsedModelIndex = isLegacy ? 0 : nodes[0].number;
     const offset = isLegacy ? 0 : 1;
 
-    const model = modelIndex === 0 ? this.element.model : this.element.extraModels?.[modelIndex - 1];
+    // DOM attribute (`data-model-index`) takes precedence over the parsed surface index.
+    const finalModelIndex = hotspot.modelIndex ?? parsedModelIndex;
+    
+    // Assign resolved modelIndex to the hotspot
+    hotspot.modelIndex = finalModelIndex;
+
+    // Ensure physical attachment matches the logical model index
+    this.updateHotspotAttachment(hotspot);
+
+    const model = finalModelIndex === 0 ? this.element.model : this.element.extraModels?.[finalModelIndex - 1];
     if (model == null) {
       return;
-    }
-    
-    // Assign parsed modelIndex to the hotspot if not already set manually
-    if (hotspot.modelIndex == null) {
-      hotspot.modelIndex = modelIndex;
     }
 
     const primitiveNode =

@@ -252,10 +252,12 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      * turntable rotation.
      */
     getDimensions(): Vector3D {
+      this[$scene].updateBoundingBoxAndShadowIfDirty();
       return toVector3D(this[$scene].size);
     }
 
     getBoundingBoxCenter(): Vector3D {
+      this[$scene].updateBoundingBoxAndShadowIfDirty();
       return toVector3D(this[$scene].boundingBox.getCenter(new Vector3()));
     }
 
