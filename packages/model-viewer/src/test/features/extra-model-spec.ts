@@ -107,6 +107,24 @@ suite('ExtraModel', () => {
     });
   });
 
+  suite('animation duration syncing', () => {
+    test('duration reflects the longest animation across all models', async () => {
+        element.loading = 'eager';
+        element.src = CUBE_GLB_PATH; // Base model has no animation
+        
+        const extra = document.createElement('extra-model');
+        extra.setAttribute('src', assetPath('models/Horse.glb'));
+        extra.setAttribute('animation-name', 'horse_A_');
+        element.appendChild(extra);
+
+        await waitForEvent(element, 'load');
+        element.play();
+        await timePasses(); // Allow play state to initialize AnimationActions
+
+        expect(element.duration).to.be.greaterThan(0); // Should be ~1 second (Horse animation)
+    });
+  });
+
   suite('hotspot attachment', () => {
     test('data-model-index forces hotspot attachment to extra model', async () => {
         element.loading = 'eager';

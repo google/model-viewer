@@ -793,19 +793,25 @@ export class ModelScene extends Scene {
   }
 
   get animationTime(): number {
-    const action = this.currentAnimationActions[0];
-    if (action != null) {
-      const loopCount =
-          Math.max((action as any)._loopCount, 0);
-      if (action.loop === LoopPingPong &&
-          (loopCount & 1) === 1) {
-        return this.duration - action.time
-      } else {
-        return action.time;
+    let maxTime = 0;
+    
+    for (const action of this.currentAnimationActions) {
+      if (action != null) {
+        let currentTime = action.time;
+        const loopCount = Math.max((action as any)._loopCount, 0);
+        
+        if (action.loop === LoopPingPong && (loopCount & 1) === 1) {
+          const clipDuration = action.getClip() ? action.getClip().duration : 0;
+          currentTime = clipDuration - action.time;
+        }
+        
+        if (currentTime > maxTime) {
+          maxTime = currentTime;
+        }
       }
     }
 
-    return 0;
+    return maxTime;
   }
 
   set animationTimeScale(value: number) {
@@ -819,12 +825,18 @@ export class ModelScene extends Scene {
   }
 
   get duration(): number {
-    const action = this.currentAnimationActions[0];
-    if (action != null && action.getClip()) {
-      return action.getClip().duration;
+    let maxDuration = 0;
+    
+    for (const action of this.currentAnimationActions) {
+      if (action != null && action.getClip()) {
+        const clipDuration = action.getClip().duration;
+        if (clipDuration > maxDuration) {
+          maxDuration = clipDuration;
+        }
+      }
     }
 
-    return 0;
+    return maxDuration;
   }
 
   get hasActiveAnimation(): boolean {
