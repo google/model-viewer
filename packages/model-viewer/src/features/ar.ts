@@ -329,11 +329,11 @@ configuration or device capabilities');
       }
       let modelUrl = new URL(firstSrc, location);
 
-      if (this[$scene].models.length > 1 && typeof (this as any).exportScene === 'function') {
-        const glbBlob = await (this as any).exportScene({binary: true});
-        const blobUrl = URL.createObjectURL(glbBlob);
-        modelUrl = new URL(blobUrl, location);
-      }
+      // Note: While it would be ideal to export and pass a composited GLB for multi-model scenes,
+      // Android's Scene Viewer app cannot securely read browser-generated `blob:` URIs 
+      // due to cross-process security restrictions. Attempting to pass one will cause Scene Viewer 
+      // to crash or fail silently. To prevent this, we intentionally skip exporting the scene
+      // and gracefully degrade to serving only the base model's remote URI.
 
       if (modelUrl.hash)
         modelUrl.hash = '';
