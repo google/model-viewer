@@ -18,7 +18,7 @@ import '../renderer-gate.js';
 import {expect} from 'chai';
 
 import {$defaultPosterElement, $posterContainerElement} from '../../features/loading.js';
-import {$scene, $userInputElement} from '../../model-viewer-base.js';
+import {$isElementInViewport, $scene, $userInputElement} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
 import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {timePasses, waitForEvent} from '../../utilities.js';
@@ -116,7 +116,7 @@ suite('Loading', () => {
 
     element.style.display = 'none';
     // Give IntersectionObserver a chance to notify.
-    await until(() => element.modelIsVisible === false);
+    await until(() => (element as any)[$isElementInViewport] === false);
 
     element.src = CUBE_GLB_PATH;
 
