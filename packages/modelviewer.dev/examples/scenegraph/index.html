@@ -1297,8 +1297,8 @@
               <h2 class="demo-title">Multiple Models in One Scene</h2>
               <p>You can load additional models into the same scene using the <code>&lt;extra-model&gt;</code> element.
                 This allows you to compose scenes dynamically while getting the benefits of automatic framing and lighting
-                from a single <code>&lt;model-viewer&gt;</code> element. The AR modes (WebXR, iOS Quick Look, and Scene Viewer) 
-                will correctly handle and export all models loaded this way.</p>
+                from a single <code>&lt;model-viewer&gt;</code> element. The AR modes (WebXR and iOS Quick Look) 
+                will correctly handle and export all models loaded this way (Scene Viewer will gracefully degrade to displaying the base model).</p>
               <p>You can access the secondary models and manipulate their materials independently via standard internal traversal structures.
                  Animations can be played or paused per model by passing <code>{ modelIndex: number }</code>, and hotspots can be anchored to them using <code>data-model-index</code>.</p>
             </div>
