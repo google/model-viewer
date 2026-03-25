@@ -38,8 +38,12 @@ export declare type HotspotData = {
 export declare interface AnnotationInterface {
   updateHotspot(config: HotspotConfiguration): void;
   queryHotspot(name: string): HotspotData|null;
-  positionAndNormalFromPoint(pixelX: number, pixelY: number):
-      {position: Vector3D, normal: Vector3D, uv: Vector2D|null, modelIndex?: number}|null;
+  positionAndNormalFromPoint(pixelX: number, pixelY: number): {
+    position: Vector3D,
+    normal: Vector3D,
+    uv: Vector2D|null,
+    modelIndex?: number
+  }|null;
   surfaceFromPoint(pixelX: number, pixelY: number): string|null;
 }
 
@@ -194,8 +198,12 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
      * hotspot's data-position and data-normal attributes. If the mesh is
      * not hit, the result is null.
      */
-    positionAndNormalFromPoint(pixelX: number, pixelY: number):
-        {position: Vector3D, normal: Vector3D, uv: Vector2D|null, modelIndex?: number}|null {
+    positionAndNormalFromPoint(pixelX: number, pixelY: number): {
+      position: Vector3D,
+      normal: Vector3D,
+      uv: Vector2D|null,
+      modelIndex?: number
+    }|null {
       const scene = this[$scene];
       const ndcPosition = scene.getNDC(pixelX, pixelY);
 
@@ -213,7 +221,12 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         uv = toVector2D(hit.uv);
       }
 
-      return {position: position, normal: normal, uv: uv, modelIndex: hit.modelIndex};
+      return {
+        position: position,
+        normal: normal,
+        uv: uv,
+        modelIndex: hit.modelIndex
+      };
     }
 
     /**
@@ -246,7 +259,9 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
           position: node.dataset.position,
           normal: node.dataset.normal,
           surface: node.dataset.surface,
-          modelIndex: node.dataset.modelIndex != null ? parseInt(node.dataset.modelIndex) : null,
+          modelIndex: node.dataset.modelIndex != null ?
+              parseInt(node.dataset.modelIndex) :
+              null,
         });
         this[$hotspotMap].set(node.slot, hotspot);
         this[$scene].addHotspot(hotspot);

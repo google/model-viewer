@@ -36,7 +36,7 @@ export interface HotspotConfiguration {
   position?: string;
   normal?: string;
   surface?: string;
-  modelIndex?: number | null;
+  modelIndex?: number|null;
 }
 
 const a = new Vector3();
@@ -75,7 +75,7 @@ export class Hotspot extends CSS2DObject {
     this.updatePosition(config.position);
     this.updateNormal(config.normal);
     this.surface = config.surface;
-    
+
     if (config.modelIndex != null) {
       this.modelIndex = config.modelIndex;
     }

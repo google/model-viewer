@@ -317,23 +317,29 @@ configuration or device capabilities');
      * Takes a URL and a title string, and attempts to launch Scene Viewer on
      * the current device.
      */
-    async [$openSceneViewer]() {
+    async[$openSceneViewer]() {
       const location = self.location.toString();
       const locationUrl = new URL(location);
-      const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./extra-model.js').ExtraModelElement>;
-      const extraUrlsList = extraModels.map(m => m.src).filter(src => src != null) as Array<string>;
+      const extraModels = Array.from(this.querySelectorAll('extra-model')) as
+          Array<import('./extra-model.js').ExtraModelElement>;
+      const extraUrlsList =
+          extraModels.map(m => m.src).filter(src => src != null) as
+          Array<string>;
       const firstSrc = this.src || extraUrlsList[0] || null;
       if (!firstSrc) {
-        console.warn('No src or extra-model provided for Scene Viewer fallback.');
+        console.warn(
+            'No src or extra-model provided for Scene Viewer fallback.');
         return;
       }
       let modelUrl = new URL(firstSrc, location);
 
-      // Note: While it would be ideal to export and pass a composited GLB for multi-model scenes,
-      // Android's Scene Viewer app cannot securely read browser-generated `blob:` URIs 
-      // due to cross-process security restrictions. Attempting to pass one will cause Scene Viewer 
-      // to crash or fail silently. To prevent this, we intentionally skip exporting the scene
-      // and gracefully degrade to serving only the base model's remote URI.
+      // Note: While it would be ideal to export and pass a composited GLB for
+      // multi-model scenes, Android's Scene Viewer app cannot securely read
+      // browser-generated `blob:` URIs due to cross-process security
+      // restrictions. Attempting to pass one will cause Scene Viewer to crash
+      // or fail silently. To prevent this, we intentionally skip exporting the
+      // scene and gracefully degrade to serving only the base model's remote
+      // URI.
 
       if (modelUrl.hash)
         modelUrl.hash = '';
@@ -407,8 +413,11 @@ configuration or device capabilities');
       if (generateUsdz) {
         const location = self.location.toString();
         const locationUrl = new URL(location);
-        const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./extra-model.js').ExtraModelElement>;
-        const extraUrlsList = extraModels.map(m => m.src).filter(src => src != null) as Array<string>;
+        const extraModels = Array.from(this.querySelectorAll('extra-model')) as
+            Array<import('./extra-model.js').ExtraModelElement>;
+        const extraUrlsList =
+            extraModels.map(m => m.src).filter(src => src != null) as
+            Array<string>;
         const firstSrc = this.src || extraUrlsList[0] || null;
         if (firstSrc) {
           const srcUrl = new URL(firstSrc, locationUrl);

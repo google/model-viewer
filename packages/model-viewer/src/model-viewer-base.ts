@@ -199,14 +199,19 @@ export default class ModelViewerElementBase extends ReactiveElement {
   protected[$clearModelTimeout]: number|null = null;
 
   [$onSlotChange] = () => {
-    if (!this[$scene]) return;
-    
-    const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./features/extra-model.js').ExtraModelElement>;
-    const newExtraUrls = extraModels.map(m => m.src).filter(src => src != null) as string[];
+    if (!this[$scene])
+      return;
+
+    const extraModels = Array.from(this.querySelectorAll('extra-model')) as
+        Array<import('./features/extra-model.js').ExtraModelElement>;
+    const newExtraUrls =
+        extraModels.map(m => m.src).filter(src => src != null) as string[];
     const currentExtraUrls = this[$scene].extraUrls || [];
-    
-    // Only reload if the declarative list of <extra-model> components has modified its source set
-    if (newExtraUrls.join(',') !== currentExtraUrls.join(',') || extraModels.length !== currentExtraUrls.length) {
+
+    // Only reload if the declarative list of <extra-model> components has
+    // modified its source set
+    if (newExtraUrls.join(',') !== currentExtraUrls.join(',') ||
+        extraModels.length !== currentExtraUrls.length) {
       this[$updateSource]();
     }
   };
@@ -214,13 +219,15 @@ export default class ModelViewerElementBase extends ReactiveElement {
   [$onExtraModelChanged] = (event: Event) => {
     const customEv = event as CustomEvent;
     const targetNode = customEv.target as HTMLElement;
-    
+
     const extraModels = Array.from(this.querySelectorAll('extra-model'));
     const childIndex = (extraModels as HTMLElement[]).indexOf(targetNode);
 
-    console.log(`[onExtraModelChanged] childIndex: ${childIndex} srcChanged: ${customEv.detail.srcChanged} offset: ${customEv.detail.offset}`);
+    console.log(`[onExtraModelChanged] childIndex: ${childIndex} srcChanged: ${
+        customEv.detail.srcChanged} offset: ${customEv.detail.offset}`);
 
-    if (childIndex === -1) return;
+    if (childIndex === -1)
+      return;
 
     const modelIndex = this.src ? childIndex + 1 : childIndex;
 
@@ -231,11 +238,10 @@ export default class ModelViewerElementBase extends ReactiveElement {
       // Apply Transforms
       if (this[$scene]) {
         this[$scene].updateModelTransforms(
-          modelIndex, 
-          customEv.detail.offset, 
-          customEv.detail.orientation, 
-          customEv.detail.scale
-        );
+            modelIndex,
+            customEv.detail.offset,
+            customEv.detail.orientation,
+            customEv.detail.scale);
       }
     }
   };
@@ -343,7 +349,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
             const oldVisibility = this.modelIsVisible;
             this[$isElementInViewport] = entry.isIntersecting;
             this[$announceModelVisibility](oldVisibility);
-            console.log(`IntersectionObserver fired! isIntersecting: ${entry.isIntersecting}`);
+            console.log(`IntersectionObserver fired! isIntersecting: ${
+                entry.isIntersecting}`);
             if (this[$isElementInViewport] && !this.loaded) {
               this[$updateSource]();
             }
@@ -385,7 +392,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     this.addEventListener('blur', this[$onBlur]);
     this.addEventListener('extra-model-changed', this[$onExtraModelChanged]);
 
-    const defaultSlot = this.shadowRoot!.querySelector('.slot.default slot') as HTMLSlotElement;
+    const defaultSlot =
+        this.shadowRoot!.querySelector('.slot.default slot') as HTMLSlotElement;
     if (defaultSlot) {
       defaultSlot.addEventListener('slotchange', this[$onSlotChange]);
     }
@@ -421,7 +429,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     this.removeEventListener('blur', this[$onBlur]);
     this.removeEventListener('extra-model-changed', this[$onExtraModelChanged]);
 
-    const defaultSlot = this.shadowRoot!.querySelector('.slot.default slot') as HTMLSlotElement;
+    const defaultSlot =
+        this.shadowRoot!.querySelector('.slot.default slot') as HTMLSlotElement;
     if (defaultSlot) {
       defaultSlot.removeEventListener('slotchange', this[$onSlotChange]);
     }
@@ -446,9 +455,13 @@ export default class ModelViewerElementBase extends ReactiveElement {
     // though the value has effectively not changed, so we need to check to make
     // sure that the value has actually changed before changing the loaded flag.
     if (changedProperties.has('src')) {
-      const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./features/extra-model.js').ExtraModelElement>;
-      const extraUrlsList = extraModels.map(m => m.src).filter(src => src != null) as Array<string>;
-      const extraUrlsMatch = extraUrlsList.join(',') === (this[$scene].extraUrls || []).join(',');
+      const extraModels = Array.from(this.querySelectorAll('extra-model')) as
+          Array<import('./features/extra-model.js').ExtraModelElement>;
+      const extraUrlsList =
+          extraModels.map(m => m.src).filter(src => src != null) as
+          Array<string>;
+      const extraUrlsMatch =
+          extraUrlsList.join(',') === (this[$scene].extraUrls || []).join(',');
 
       if (this.src == null && extraModels.length === 0) {
         this[$loaded] = false;
@@ -467,8 +480,11 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     if (changedProperties.has('generateSchema')) {
       if (this.generateSchema) {
-        const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./features/extra-model.js').ExtraModelElement>;
-        const extraUrlsList = extraModels.map(m => m.src).filter(src => src != null) as Array<string>;
+        const extraModels = Array.from(this.querySelectorAll('extra-model')) as
+            Array<import('./features/extra-model.js').ExtraModelElement>;
+        const extraUrlsList =
+            extraModels.map(m => m.src).filter(src => src != null) as
+            Array<string>;
         const heroSrc = this.src || extraUrlsList[0] || null;
         this[$scene].updateSchema(heroSrc);
       } else {
@@ -658,11 +674,15 @@ export default class ModelViewerElementBase extends ReactiveElement {
    */
   async[$updateSource]() {
     const scene = this[$scene];
-    const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./features/extra-model.js').ExtraModelElement>;
-    const extraUrlsList = extraModels.map(m => m.src).filter(src => src != null) as Array<string>;
-    const extraUrlsMatch = extraUrlsList.join(',') === (scene.extraUrls || []).join(',');
-    
-    console.log(`[$updateSource] called! \nsrc: ${this.src}\nextraUrls: ${extraUrlsList.join(',')}\nloaded: ${this.loaded}`);
+    const extraModels = Array.from(this.querySelectorAll('extra-model')) as
+        Array<import('./features/extra-model.js').ExtraModelElement>;
+    const extraUrlsList =
+        extraModels.map(m => m.src).filter(src => src != null) as Array<string>;
+    const extraUrlsMatch =
+        extraUrlsList.join(',') === (scene.extraUrls || []).join(',');
+
+    console.log(`[$updateSource] called! \nsrc: ${this.src}\nextraUrls: ${
+        extraUrlsList.join(',')}\nloaded: ${this.loaded}`);
 
     if (this.loaded || !this[$shouldAttemptPreload]() ||
         (this.src === scene.url && extraUrlsMatch)) {
@@ -692,10 +712,12 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
       await Promise.all([srcUpdated, envUpdated]);
 
-      const extraModels = Array.from(this.querySelectorAll('extra-model')) as Array<import('./features/extra-model.js').ExtraModelElement>;
+      const extraModels = Array.from(this.querySelectorAll('extra-model')) as
+          Array<import('./features/extra-model.js').ExtraModelElement>;
       extraModels.forEach((m, i) => {
         const modelIndex = this.src ? i + 1 : i;
-        this[$scene].updateModelTransforms(modelIndex, m.offset, m.orientation, m.scale);
+        this[$scene].updateModelTransforms(
+            modelIndex, m.offset, m.orientation, m.scale);
       });
 
       this[$markLoaded]();

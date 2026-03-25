@@ -209,10 +209,10 @@ export class ModelScene extends Scene {
    */
 
   async setSource(
-      url: string|null,
-      extraUrls: string[] = [],
+      url: string|null, extraUrls: string[] = [],
       progressCallback: (progress: number) => void = () => {}) {
-    if ((!url || url === this.url) && extraUrls.join(',') === this.extraUrls.join(',')) {
+    if ((!url || url === this.url) &&
+        extraUrls.join(',') === this.extraUrls.join(',')) {
       progressCallback(1);
       return;
     }
@@ -239,26 +239,27 @@ export class ModelScene extends Scene {
 
     try {
       const urlsToLoad: string[] = [];
-      if (url) urlsToLoad.push(url);
-      if (extraUrls) urlsToLoad.push(...extraUrls);
-      
-      if (urlsToLoad.length > 0) {
-        gltfs = await new Promise<ModelViewerGLTFInstance[]>((resolve, reject) => {
-          this.cancelPendingSourceChange = () => reject();
+      if (url)
+        urlsToLoad.push(url);
+      if (extraUrls)
+        urlsToLoad.push(...extraUrls);
 
-          (async () => {
-            try {
-              const results = await Promise.all(
-                urlsToLoad.map(curUrl => 
-                  this.element[$renderer].loader.load(curUrl, this.element, progressCallback)
-                )
-              );
-              resolve(results as ModelViewerGLTFInstance[]);
-            } catch (error) {
-              reject(error);
-            }
-          })();
-        });
+      if (urlsToLoad.length > 0) {
+        gltfs =
+            await new Promise<ModelViewerGLTFInstance[]>((resolve, reject) => {
+              this.cancelPendingSourceChange = () => reject();
+
+              (async () => {
+                try {
+                  const results = await Promise.all(urlsToLoad.map(
+                      curUrl => this.element[$renderer].loader.load(
+                          curUrl, this.element, progressCallback)));
+                  resolve(results as ModelViewerGLTFInstance[]);
+                } catch (error) {
+                  reject(error);
+                }
+              })();
+            });
       }
     } catch (error) {
       if (error == null) {
@@ -284,7 +285,7 @@ export class ModelScene extends Scene {
         this.mixerPausedStates.push(false);
         this.currentAnimationActions.push(null);
       } else {
-        this.mixers.push(new AnimationMixer(this.target)); 
+        this.mixers.push(new AnimationMixer(this.target));
         this.mixerPausedStates.push(false);
         this.currentAnimationActions.push(null);
       }
@@ -321,19 +322,28 @@ export class ModelScene extends Scene {
     this.setGroundedSkybox();
   }
 
-  updateModelTransforms(index: number, offset?: string|null, _orientation?: string|null, scale?: string|null) {
+  updateModelTransforms(
+      index: number, offset?: string|null, _orientation?: string|null,
+      scale?: string|null) {
     const model = this._models[index];
-    if (!model) return;
+    if (!model)
+      return;
 
     if (offset) {
-      const parts = offset.split(' ').map(s => s.trim()).filter(s => s.length > 0).map(Number);
+      const parts = offset.split(' ')
+                        .map(s => s.trim())
+                        .filter(s => s.length > 0)
+                        .map(Number);
       if (parts.length === 3 && !parts.some(isNaN)) {
         model.position.set(parts[0], parts[1], parts[2]);
       }
     }
 
     if (scale) {
-      const parts = scale.split(' ').map(s => s.trim()).filter(s => s.length > 0).map(Number);
+      const parts = scale.split(' ')
+                        .map(s => s.trim())
+                        .filter(s => s.length > 0)
+                        .map(Number);
       if (parts.length === 1 && !isNaN(parts[0])) {
         model.scale.setScalar(parts[0]);
       } else if (parts.length === 3 && !parts.some(isNaN)) {
@@ -343,17 +353,20 @@ export class ModelScene extends Scene {
 
     model.updateMatrixWorld(true);
     // Defer bounding box and shadow recalculations.
-    // If developers animate `<extra-model>` offset or scale properties via requestAnimationFrame,
-    // recalculating bounding boxes synchronously every single frame here blocks the main thread and tanks frame rates.
-    // Instead, we mark the bounds as dirty and wait for the render loop or a public dimensions getter to flush the changes.
+    // If developers animate `<extra-model>` offset or scale properties via
+    // requestAnimationFrame, recalculating bounding boxes synchronously every
+    // single frame here blocks the main thread and tanks frame rates. Instead,
+    // we mark the bounds as dirty and wait for the render loop or a public
+    // dimensions getter to flush the changes.
     this.boundsAndShadowDirty = true;
     this.queueRender();
   }
 
   /**
    * Evaluates bounding box recalculations asynchronously.
-   * Flushed right before a frame is rendered or when dimension properties are formally queried
-   * to ensure that high-frequency layout changes don't stall execution natively.
+   * Flushed right before a frame is rendered or when dimension properties are
+   * formally queried to ensure that high-frequency layout changes don't stall
+   * execution natively.
    */
   updateBoundingBoxAndShadowIfDirty() {
     if (this.boundsAndShadowDirty) {
@@ -374,13 +387,15 @@ export class ModelScene extends Scene {
 
     const {_models} = this;
     for (const mod of _models) {
-      if (mod != null) mod.removeFromParent();
+      if (mod != null)
+        mod.removeFromParent();
     }
     this._models = [];
 
     const gltfs = this._currentGLTFs;
     for (const gltf of gltfs) {
-      if (gltf != null) gltf.dispose();
+      if (gltf != null)
+        gltf.dispose();
     }
     this._currentGLTFs = [];
 
@@ -523,7 +538,7 @@ export class ModelScene extends Scene {
     if (models.length === 0) {
       return;
     }
-    
+
     for (const mod of models) {
       this.target.remove(mod);
       this.findBakedShadows(mod);
@@ -533,13 +548,13 @@ export class ModelScene extends Scene {
       return box.expandByPoint(vertex);
     };
     this.setBakedShadowVisibility(false);
-    
+
     let combinedBox = new Box3();
     for (const mod of models) {
       combinedBox = reduceVertices(mod, bound, combinedBox);
     }
     this.boundingBox = combinedBox;
-    
+
     // If there's nothing but the baked shadow, then it's not a baked shadow.
     if (this.boundingBox.isEmpty()) {
       this.setBakedShadowVisibility(true);
@@ -573,7 +588,7 @@ export class ModelScene extends Scene {
     if (models.length === 0) {
       return;
     }
-    
+
     for (const mod of models) {
       this.target.remove(mod);
     }
@@ -587,10 +602,11 @@ export class ModelScene extends Scene {
     const radiusSquared = (value: number, vertex: Vector3): number => {
       return Math.max(value, center!.distanceToSquared(vertex));
     };
-    
+
     let maxRadiusSq = 0;
     for (const mod of models) {
-      maxRadiusSq = Math.max(maxRadiusSq, reduceVertices(mod, radiusSquared, 0));
+      maxRadiusSq =
+          Math.max(maxRadiusSq, reduceVertices(mod, radiusSquared, 0));
     }
     this.boundingSphere.radius = Math.sqrt(maxRadiusSq);
 
@@ -600,12 +616,13 @@ export class ModelScene extends Scene {
       return Math.max(
           value, radiusXZ / (this.idealCameraDistance() - Math.abs(vertex.y)));
     };
-    
+
     let maxAspect = 0;
     for (const mod of models) {
       maxAspect = Math.max(maxAspect, reduceVertices(mod, horizontalTanFov, 0));
     }
-    this.idealAspect = maxAspect / Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
+    this.idealAspect =
+        maxAspect / Math.tan((this.framedFoVDeg / 2) * Math.PI / 180);
 
     this.setBakedShadowVisibility();
     for (const mod of models) {
@@ -794,17 +811,17 @@ export class ModelScene extends Scene {
 
   get animationTime(): number {
     let maxTime = 0;
-    
+
     for (const action of this.currentAnimationActions) {
       if (action != null) {
         let currentTime = action.time;
         const loopCount = Math.max((action as any)._loopCount, 0);
-        
+
         if (action.loop === LoopPingPong && (loopCount & 1) === 1) {
           const clipDuration = action.getClip() ? action.getClip().duration : 0;
           currentTime = clipDuration - action.time;
         }
-        
+
         if (currentTime > maxTime) {
           maxTime = currentTime;
         }
@@ -826,7 +843,7 @@ export class ModelScene extends Scene {
 
   get duration(): number {
     let maxDuration = 0;
-    
+
     for (const action of this.currentAnimationActions) {
       if (action != null && action.getClip()) {
         const clipDuration = action.getClip().duration;
@@ -853,77 +870,79 @@ export class ModelScene extends Scene {
   playAnimation(
       name: string|null = null, crossfadeTime: number = 0,
       loopMode: AnimationActionLoopStyles = LoopRepeat,
-      repetitionCount: number = Infinity, modelIndex: number | null = null) {
-    
+      repetitionCount: number = Infinity, modelIndex: number|null = null) {
     // Determine which models we're animating
     const startIndex = modelIndex != null ? modelIndex : 0;
     const endIndex = modelIndex != null ? modelIndex + 1 : this._models.length;
 
     for (let i = startIndex; i < endIndex; i++) {
-        const gltf = this._currentGLTFs[i];
-        if (gltf == null) continue;
+      const gltf = this._currentGLTFs[i];
+      if (gltf == null)
+        continue;
 
-        // Collect animations specific to this model
-        const animations = gltf.animations || [];
-        if (animations.length === 0) continue;
+      // Collect animations specific to this model
+      const animations = gltf.animations || [];
+      if (animations.length === 0)
+        continue;
 
-        let animationClip = null;
+      let animationClip = null;
 
-        if (name != null) {
-          // Look for an animation with this precise name inside this model
-          // We search backwards to mimic previous Map.set overriding behavior
-          // so the last animation with the same name takes precedence.
-          for (let k = animations.length - 1; k >= 0; k--) {
-            if (animations[k].name === name) {
-              animationClip = animations[k];
-              break;
-            }
-          }
-
-          if (animationClip == null) {
-            const parsedAnimationIndex = parseInt(name);
-            if (!isNaN(parsedAnimationIndex) && parsedAnimationIndex >= 0 &&
-                parsedAnimationIndex < animations.length) {
-              animationClip = animations[parsedAnimationIndex];
-            }
+      if (name != null) {
+        // Look for an animation with this precise name inside this model
+        // We search backwards to mimic previous Map.set overriding behavior
+        // so the last animation with the same name takes precedence.
+        for (let k = animations.length - 1; k >= 0; k--) {
+          if (animations[k].name === name) {
+            animationClip = animations[k];
+            break;
           }
         }
 
         if (animationClip == null) {
-          animationClip = animations[0];
-        }
-
-        try {
-          const lastAnimationAction = this.currentAnimationActions[i];
-          const mixer = this.mixers[i];
-          const action = mixer.clipAction(animationClip, this._models[i]);
-
-          this.currentAnimationActions[i] = action;
-
-          if (this.element.paused) {
-            mixer.stopAllAction();
-            this.mixerPausedStates[i] = true;
-          } else {
-            action.paused = false;
-            this.mixerPausedStates[i] = false;
-            // Crossfade behavior doesn't work perfectly when the actions don't map to the same skeleton.
-            // Since we're making a new mixer/action for each model, if we didn't have one before it's fine.
-            if (lastAnimationAction != null && action !== lastAnimationAction) {
-              action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
-            } else if (
-                this.animationTimeScale > 0 &&
-                this.animationTime == this.duration) {
-              this.animationTime = 0;
-            }
+          const parsedAnimationIndex = parseInt(name);
+          if (!isNaN(parsedAnimationIndex) && parsedAnimationIndex >= 0 &&
+              parsedAnimationIndex < animations.length) {
+            animationClip = animations[parsedAnimationIndex];
           }
-
-          action.setLoop(loopMode, repetitionCount);
-          action.enabled = true;
-          action.clampWhenFinished = true;
-          action.play();
-        } catch (error) {
-          console.error(error);
         }
+      }
+
+      if (animationClip == null) {
+        animationClip = animations[0];
+      }
+
+      try {
+        const lastAnimationAction = this.currentAnimationActions[i];
+        const mixer = this.mixers[i];
+        const action = mixer.clipAction(animationClip, this._models[i]);
+
+        this.currentAnimationActions[i] = action;
+
+        if (this.element.paused) {
+          mixer.stopAllAction();
+          this.mixerPausedStates[i] = true;
+        } else {
+          action.paused = false;
+          this.mixerPausedStates[i] = false;
+          // Crossfade behavior doesn't work perfectly when the actions don't
+          // map to the same skeleton. Since we're making a new mixer/action for
+          // each model, if we didn't have one before it's fine.
+          if (lastAnimationAction != null && action !== lastAnimationAction) {
+            action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
+          } else if (
+              this.animationTimeScale > 0 &&
+              this.animationTime == this.duration) {
+            this.animationTime = 0;
+          }
+        }
+
+        action.setLoop(loopMode, repetitionCount);
+        action.enabled = true;
+        action.clampWhenFinished = true;
+        action.play();
+      } catch (error) {
+        console.error(error);
+      }
     }
   }
 
@@ -933,7 +952,7 @@ export class ModelScene extends Scene {
       timeScale: number = 1, fade: boolean|number|string = false,
       warp: boolean|number|string = false, relativeWarp: boolean = true,
       time: null|number|string = null, needsToStop: boolean = false,
-      modelIndex: number | null = null) {
+      modelIndex: number|null = null) {
     if (this.currentGLTF == null || name === this.element.animationName) {
       return;
     }
@@ -1134,7 +1153,9 @@ export class ModelScene extends Scene {
     };
   }
 
-  detachAnimation(name: string = '', fade: boolean|number|string = true, modelIndex: number | null = null) {
+  detachAnimation(
+      name: string = '', fade: boolean|number|string = true,
+      modelIndex: number|null = null) {
     if (this.currentGLTF == null || name === this.element.animationName) {
       return;
     }
@@ -1175,7 +1196,7 @@ export class ModelScene extends Scene {
 
   updateAnimationLoop(
       name: string = '', loopMode: AnimationActionLoopStyles = LoopRepeat,
-      repetitionCount: number = Infinity, modelIndex: number | null = null) {
+      repetitionCount: number = Infinity, modelIndex: number|null = null) {
     if (this.currentGLTF == null || name === this.element.animationName) {
       return;
     }
@@ -1223,19 +1244,19 @@ export class ModelScene extends Scene {
     return this.mixerPausedStates.every(paused => paused);
   }
 
-  pauseAnimation(modelIndex: number | null = null) {
+  pauseAnimation(modelIndex: number|null = null) {
     const startIndex = modelIndex != null ? modelIndex : 0;
     const endIndex = modelIndex != null ? modelIndex + 1 : this.mixers.length;
     for (let i = startIndex; i < endIndex; i++) {
-        this.mixerPausedStates[i] = true;
+      this.mixerPausedStates[i] = true;
     }
   }
 
-  unpauseAnimation(modelIndex: number | null = null) {
+  unpauseAnimation(modelIndex: number|null = null) {
     const startIndex = modelIndex != null ? modelIndex : 0;
     const endIndex = modelIndex != null ? modelIndex + 1 : this.mixers.length;
     for (let i = startIndex; i < endIndex; i++) {
-        this.mixerPausedStates[i] = false;
+      this.mixerPausedStates[i] = false;
     }
   }
 
@@ -1343,13 +1364,14 @@ export class ModelScene extends Scene {
   }
 
   getModelIndexFromHit(hit: Intersection): number {
-    let current: Object3D | null = hit.object;
+    let current: Object3D|null = hit.object;
     while (current != null) {
       const idx = this.models.indexOf(current);
-      if (idx !== -1) return idx;
+      if (idx !== -1)
+        return idx;
       current = current.parent;
     }
-    return 0; // Default to primary model if not found
+    return 0;  // Default to primary model if not found
   }
 
   /**
@@ -1358,8 +1380,12 @@ export class ModelScene extends Scene {
    * coordinates given relative to the model-viewer element. If the mesh
    * is not hit, the result is null.
    */
-  positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this):
-      {position: Vector3, normal: Vector3, uv: Vector2|null, modelIndex?: number, worldToModel: Matrix4}|null {
+  positionAndNormalFromPoint(ndcPosition: Vector2, object: Object3D = this): {
+    position: Vector3,
+    normal: Vector3,
+    uv: Vector2|null,
+    modelIndex?: number, worldToModel: Matrix4
+  }|null {
     const hit = this.hitFromPoint(ndcPosition, object);
     if (hit == null) {
       return null;
@@ -1392,14 +1418,16 @@ export class ModelScene extends Scene {
     }
 
     const modelIndex = this.getModelIndexFromHit(hit);
-    const model = modelIndex === 0 ? this.element.model : this.element.extraModels?.[modelIndex - 1];
-    
+    const model = modelIndex === 0 ? this.element.model :
+                                     this.element.extraModels?.[modelIndex - 1];
+
     if (model == null) {
       return null;
     }
 
     const node = model[$nodeFromPoint](hit);
-    if (node == null) return null;
+    if (node == null)
+      return null;
     const {meshes, primitives} = node.mesh.userData.associations;
 
     const va = new Vector3();
@@ -1416,8 +1444,8 @@ export class ModelScene extends Scene {
 
     tri.getBarycoord(mesh.worldToLocal(hit.point), uvw);
 
-    const baseSurface = `${meshes} ${primitives} ${a} ${b} ${c} ${uvw.x.toFixed(3)} ${
-        uvw.y.toFixed(3)} ${uvw.z.toFixed(3)}`;
+    const baseSurface = `${meshes} ${primitives} ${a} ${b} ${c} ${
+        uvw.x.toFixed(3)} ${uvw.y.toFixed(3)} ${uvw.z.toFixed(3)}`;
 
     return modelIndex === 0 ? baseSurface : `${modelIndex} ${baseSurface}`;
   }
@@ -1428,17 +1456,22 @@ export class ModelScene extends Scene {
    * by the Annotation Mixin.
   /**
    * Evaluates the intended `modelIndex` of the hotspot and safely reparents it
-   * to the corresponding `Object3D` node mapped inside this scene's `_models` array.
-   * This guarantees that declarative offset and layout transforms affect positional anchors.
+   * to the corresponding `Object3D` node mapped inside this scene's `_models`
+  array.
+   * This guarantees that declarative offset and layout transforms affect
+  positional anchors.
    */
   updateHotspotAttachment(hotspot: Hotspot) {
-    const targetNode = (hotspot.modelIndex != null && hotspot.modelIndex > 0 && this._models[hotspot.modelIndex])
-        ? this._models[hotspot.modelIndex]
-        : this.target;
+    const targetNode = (hotspot.modelIndex != null && hotspot.modelIndex > 0 &&
+                        this._models[hotspot.modelIndex]) ?
+        this._models[hotspot.modelIndex] :
+        this.target;
 
     if (hotspot.parent !== targetNode) {
       targetNode.add(hotspot);
-      hotspot.updatePosition(hotspot.position.toArray().join(' ') + 'm'); // Force bounds sync to fresh parent
+      hotspot.updatePosition(
+          hotspot.position.toArray().join(' ') +
+          'm');  // Force bounds sync to fresh parent
       hotspot.updateMatrixWorld(true);
     }
   }
@@ -1469,8 +1502,9 @@ export class ModelScene extends Scene {
         func(hotspot);
       }
     }
-    
-    // Also traverse extra models to find any hotspots already reparented to them
+
+    // Also traverse extra models to find any hotspots already reparented to
+    // them
     for (const model of this._models) {
       if (model && model !== this.target) {
         const extraChildren = [...model.children];
@@ -1493,31 +1527,36 @@ export class ModelScene extends Scene {
     }
     const nodes = parseExpressions(hotspot.surface)[0].terms as NumberNode[];
     if (nodes.length !== 8 && nodes.length !== 9) {
-      console.warn(hotspot.surface + ' does not have exactly 8 or 9 numbers. Did you use an outdated string?');
+      console.warn(
+          hotspot.surface +
+          ' does not have exactly 8 or 9 numbers. Did you use an outdated string?');
       return;
     }
-    
+
     // Determine format: 8 numbers = legacy (index 0), 9 numbers = indexed
     const isLegacy = nodes.length === 8;
     const parsedModelIndex = isLegacy ? 0 : nodes[0].number;
     const offset = isLegacy ? 0 : 1;
 
-    // DOM attribute (`data-model-index`) takes precedence over the parsed surface index.
+    // DOM attribute (`data-model-index`) takes precedence over the parsed
+    // surface index.
     const finalModelIndex = hotspot.modelIndex ?? parsedModelIndex;
-    
+
     // Assign resolved modelIndex to the hotspot
     hotspot.modelIndex = finalModelIndex;
 
     // Ensure physical attachment matches the logical model index
     this.updateHotspotAttachment(hotspot);
 
-    const model = finalModelIndex === 0 ? this.element.model : this.element.extraModels?.[finalModelIndex - 1];
+    const model = finalModelIndex === 0 ?
+        this.element.model :
+        this.element.extraModels?.[finalModelIndex - 1];
     if (model == null) {
       return;
     }
 
-    const primitiveNode =
-        model[$nodeFromIndex](nodes[0 + offset].number, nodes[1 + offset].number);
+    const primitiveNode = model[$nodeFromIndex](
+        nodes[0 + offset].number, nodes[1 + offset].number);
     if (primitiveNode == null) {
       console.warn(
           hotspot.surface +
@@ -1526,7 +1565,10 @@ export class ModelScene extends Scene {
     }
 
     const numVert = primitiveNode.mesh.geometry.attributes.position.count;
-    const tri = new Vector3(nodes[2 + offset].number, nodes[3 + offset].number, nodes[4 + offset].number);
+    const tri = new Vector3(
+        nodes[2 + offset].number,
+        nodes[3 + offset].number,
+        nodes[4 + offset].number);
     if (tri.x >= numVert || tri.y >= numVert || tri.z >= numVert) {
       console.warn(
           hotspot.surface +
@@ -1534,7 +1576,10 @@ export class ModelScene extends Scene {
       return;
     }
 
-    const bary = new Vector3(nodes[5 + offset].number, nodes[6 + offset].number, nodes[7 + offset].number);
+    const bary = new Vector3(
+        nodes[5 + offset].number,
+        nodes[6 + offset].number,
+        nodes[7 + offset].number);
     hotspot.mesh = primitiveNode.mesh;
     hotspot.tri = tri;
     hotspot.bary = bary;

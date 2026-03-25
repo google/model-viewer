@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import './features/extra-model.js';
+
 import {AnimationMixin} from './features/animation.js';
 import {AnnotationMixin} from './features/annotation.js';
 import {ARMixin} from './features/ar.js';
@@ -22,7 +24,6 @@ import {LoadingMixin} from './features/loading.js';
 import {SceneGraphMixin} from './features/scene-graph.js';
 import {StagingMixin} from './features/staging.js';
 import ModelViewerElementBase from './model-viewer-base.js';
-import './features/extra-model.js';
 
 // Export these to allow lazy-loaded LottieLoader.js to find what it needs.
 // Requires an import map - "three": "path/to/model-viewer.min.js".

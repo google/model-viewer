@@ -25,7 +25,7 @@ export class ExtraModelElement extends ReactiveElement {
   }
 
   @property({type: String}) src: string|null = null;
-  
+
   /**
    * Reference to the underlying scene graph Model wrapper.
    */
@@ -54,18 +54,16 @@ export class ExtraModelElement extends ReactiveElement {
    */
   @property({type: Boolean}) background: boolean = false;
 
-  updated(changedProperties: Map<string | number | symbol, unknown>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
-    // Whenever attributes change, dispatch a customized event up to <model-viewer>
-    if (changedProperties.has('src') || 
-        changedProperties.has('offset') || 
-        changedProperties.has('orientation') || 
-        changedProperties.has('scale') || 
-        changedProperties.has('background')) {
-      
+    // Whenever attributes change, dispatch a customized event up to
+    // <model-viewer>
+    if (changedProperties.has('src') || changedProperties.has('offset') ||
+        changedProperties.has('orientation') ||
+        changedProperties.has('scale') || changedProperties.has('background')) {
       const srcChanged = changedProperties.has('src');
-      
+
       this.dispatchEvent(new CustomEvent('extra-model-changed', {
         bubbles: true,
         composed: true,

@@ -173,7 +173,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$scene].animationTimeScale = value;
     }
 
-    pause(options?: { modelIndex?: number }) {
+    pause(options?: {modelIndex?: number}) {
       if (options?.modelIndex == null && this.paused) {
         return;
       }
@@ -234,7 +234,8 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     [$tick](_time: number, delta: number) {
       super[$tick](_time, delta);
 
-      if (this.paused || (!this[$getModelIsVisible]() && !this[$renderer].isPresenting)) {
+      if (this.paused ||
+          (!this[$getModelIsVisible]() && !this[$renderer].isPresenting)) {
         return;
       }
 
@@ -276,13 +277,11 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$appendAnimation](
-        animationName: string = '',
-        options: AppendAnimationOptions = {}) {
+        animationName: string = '', options: AppendAnimationOptions = {}) {
       const opts = {...DEFAULT_APPEND_OPTIONS, ...options};
       const repetitions = opts.repetitions ?? Infinity;
-      const mode = opts.pingpong ?
-          LoopPingPong :
-          (repetitions === 1 ? LoopOnce : LoopRepeat);
+      const mode = opts.pingpong ? LoopPingPong :
+                                   (repetitions === 1 ? LoopOnce : LoopRepeat);
 
       const needsToStop = !!options.repetitions || 'pingpong' in options;
 
@@ -308,11 +307,12 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     [$detachAnimation](
-        animationName: string = '',
-        options: DetachAnimationOptions = {}) {
+        animationName: string = '', options: DetachAnimationOptions = {}) {
       const opts = {...DEFAULT_DETACH_OPTIONS, ...options};
       this[$scene].detachAnimation(
-          animationName ? animationName : this.animationName, opts.fade, opts.modelIndex);
+          animationName ? animationName : this.animationName,
+          opts.fade,
+          opts.modelIndex);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation

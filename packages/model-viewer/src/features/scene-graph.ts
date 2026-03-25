@@ -234,22 +234,24 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
 
       this[$extraModels] = [];
-      const extraNodes = Array.from(this.querySelectorAll('extra-model')) as Array<import('./extra-model.js').ExtraModelElement>;
-      
+      const extraNodes = Array.from(this.querySelectorAll('extra-model')) as
+          Array<import('./extra-model.js').ExtraModelElement>;
+
       for (let i = 1; i < currentGLTFs.length; i++) {
         const gltf = currentGLTFs[i];
         if (gltf != null && gltf.correlatedSceneGraph != null) {
-          const modelWrapper = new Model(gltf.correlatedSceneGraph, this[$getOnUpdateMethod]());
+          const modelWrapper =
+              new Model(gltf.correlatedSceneGraph, this[$getOnUpdateMethod]());
           this[$extraModels].push(modelWrapper);
-          
+
           // Link back to light-dom DOM node!
           if (extraNodes[i - 1]) {
             extraNodes[i - 1].model = modelWrapper;
           }
         }
       }
- 
-       this[$currentGLTF] = currentGLTF;
+
+      this[$currentGLTF] = currentGLTF;
     }
 
     /** @export */
@@ -333,12 +335,14 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       const model = this[$model];
       if (model != null) {
         const material = model[$materialFromPoint](hit);
-        if (material != null) return material;
+        if (material != null)
+          return material;
       }
 
       for (const extraModel of this[$extraModels]) {
         const extraMaterial = extraModel[$materialFromPoint](hit);
-        if (extraMaterial != null) return extraMaterial;
+        if (extraMaterial != null)
+          return extraMaterial;
       }
 
       return null;

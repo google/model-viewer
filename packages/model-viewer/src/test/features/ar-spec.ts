@@ -120,24 +120,26 @@ suite('AR', () => {
       expect(search.get('link')).to.equal('http://linkme.com/');
     });
 
-    test('gracefully degrades to base model URI for multi-model scenes instead of crashing via blob:', async () => {
-      element.src = assetPath('models/cube.gltf');
-      const extra = document.createElement('extra-model');
-      extra.setAttribute('src', assetPath('models/Horse.glb'));
-      element.appendChild(extra);
+    test(
+        'gracefully degrades to base model URI for multi-model scenes instead of crashing via blob:',
+        async () => {
+          element.src = assetPath('models/cube.gltf');
+          const extra = document.createElement('extra-model');
+          extra.setAttribute('src', assetPath('models/Horse.glb'));
+          element.appendChild(extra);
 
-      await waitForEvent(element, 'load');
-      (element as any)[$openSceneViewer]();
+          await waitForEvent(element, 'load');
+          (element as any)[$openSceneViewer]();
 
-      expect(intentUrls.length).to.be.equal(1);
-      
-      const search = new URLSearchParams(new URL(intentUrls[0]).search);
-      const file = new URL(search.get('file') as any);
+          expect(intentUrls.length).to.be.equal(1);
 
-      // It must strictly equal the base model URL and NOT a blob URL
-      expect(file.protocol).to.not.equal('blob:');
-      expect(file.pathname).to.include('cube.gltf');
-    });
+          const search = new URLSearchParams(new URL(intentUrls[0]).search);
+          const file = new URL(search.get('file') as any);
+
+          // It must strictly equal the base model URL and NOT a blob URL
+          expect(file.protocol).to.not.equal('blob:');
+          expect(file.pathname).to.include('cube.gltf');
+        });
   });
 
   suite('openQuickLook', () => {

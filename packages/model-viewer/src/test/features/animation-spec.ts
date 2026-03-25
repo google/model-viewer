@@ -29,7 +29,8 @@ const ANIMATED_GLB_DUPLICATE_ANIMATION_NAMES_PATH =
     assetPath('models/DuplicateAnimationNames.glb');
 
 const animationIsPlaying = (element: any, animationName?: string): boolean => {
-  const currentAnimationAction = (element[$scene] as any).currentAnimationActions[0];
+  const currentAnimationAction =
+      (element[$scene] as any).currentAnimationActions[0];
 
   if (currentAnimationAction != null &&
       (animationName == null ||
@@ -44,7 +45,8 @@ const animationIsPlaying = (element: any, animationName?: string): boolean => {
 
 const animationWithIndexIsPlaying = (element: any, animationIndex = 0):
     boolean => {
-      const currentAnimationAction = (element[$scene] as any).currentAnimationActions[0];
+      const currentAnimationAction =
+          (element[$scene] as any).currentAnimationActions[0];
       const _currentGLTF = (element[$scene] as any)._currentGLTFs[0];
 
       if (currentAnimationAction != null && animationIndex >= 0 &&
@@ -171,7 +173,7 @@ suite('Animation', () => {
     suite('when appendAnimation is invoked', () => {
       setup(async () => {
         const appendEvent = waitForEvent(element, 'append-animation');
-        element.appendAnimation('Punch', { weight: 1.0 });
+        element.appendAnimation('Punch', {weight: 1.0});
         await appendEvent;
       });
 
