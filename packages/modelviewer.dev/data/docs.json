@@ -18,7 +18,7 @@
       {
         "name": "&lt;extra-model&gt;",
         "htmlName": "extra-model",
-        "description": "A child element that loads additional models into the same scene alongside the primary `src` model. This allows you to compose scenes dynamically while getting the benefits of automatic framing and lighting from a single `<model-viewer>` element. You can add multiple `<extra-model>` elements. Attributes: `src`, `offset`, `scale`, `orientation`, `background`.",
+        "description": "A child element that loads additional models into the same scene alongside the primary `src` model. This allows you to compose scenes dynamically while getting the benefits of automatic framing and lighting from a single `<model-viewer>` element. You can add multiple `<extra-model>` elements. Attributes: `src`, `offset`, `scale`, `orientation`, `background`. Note: This feature will be available in model-viewer v4.3.0 (which is not yet released).",
         "links": [
           "<a href=\"../examples/scenegraph/#multiModel\">Related examples</a>"
         ],
