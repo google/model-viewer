@@ -16,18 +16,6 @@
         }
       },
       {
-        "name": "&lt;extra-model&gt;",
-        "htmlName": "extra-model",
-        "description": "A child element that loads additional models into the same scene alongside the primary `src` model. This allows you to compose scenes dynamically while getting the benefits of automatic framing and lighting from a single `<model-viewer>` element. You can add multiple `<extra-model>` elements. Attributes: `src`, `offset`, `scale`, `orientation`, `background`.",
-        "links": [
-          "<a href=\"../examples/scenegraph/#multiModel\">Related examples</a>"
-        ],
-        "default": {
-          "default": "N/A",
-          "options": "N/A"
-        }
-      },
-      {
         "name": "alt",
         "htmlName": "alt",
         "description": "Configures the model with custom text that will be used to describe the model to viewers who use a screen reader or otherwise depend on additional semantic context to understand what they are viewing.",
@@ -108,15 +96,6 @@
         "default": {
           "default": "N/A",
           "options": "true, false"
-        }
-      },
-      {
-        "name": "extraModels",
-        "htmlName": "extraModels",
-        "description": "This property is read-only. It returns an array of Model instances corresponding to each of the additional models loaded via `<extra-model>` elements. The elements are ordered the same as the `<extra-model>` elements in the DOM.",
-        "default": {
-          "default": "[]",
-          "options": "Array<Model>"
         }
       },
       {
@@ -872,7 +851,7 @@
       {
         "name": "hotspot-*",
         "htmlName": "hotspot",
-        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes in model coordinates, in the same format as <span class='attribute'>camera-target</span>. Alternately, the <span class='attribute'>data-surface</span> attribute can be used to specify a surface point that will animate along with the mesh. You can anchor the hotspot to a specific model loaded via some `<extra-model>` using the <span class='attribute'>data-model-index</span> attribute (0 for primary, 1 for the first extra model, etc.). It is recommended to use the <a href=\"./#entrydocs-annotations-methods-surfaceFromPoint\">surfaceFromPoint</a> method to generate this string interactively. See the <a href=\"../examples/scenegraph/#multiModel\">multi-model example</a> for details."
+        "description": "Any child element under <span class=\"attribute\">&lt;model-viewer&gt;</span> with a slot name starting with \"hotspot\" will be aligned with the 3D model using its <span class='attribute'>data-position</span> and <span class='attribute'>data-normal</span> attributes in model coordinates, in the same format as <span class='attribute'>camera-target</span>. Alternately, the <span class='attribute'>data-surface</span> attribute can be used to specify a surface point that will animate along with the mesh. It is recommended to use the <a href=\"./#entrydocs-annotations-methods-surfaceFromPoint\">surfaceFromPoint</a> method to generate this string interactively."
       }
     ]
   },
@@ -1050,14 +1029,14 @@
     ],
     "Methods": [
       {
-        "name": "play(options: {repetitions, pingpong, modelIndex})",
+        "name": "play(options: {repetitions, pingpong})",
         "htmlName": "play",
-        "description": "Causes animations to be played. You can specify the number of repetitions of the animation by setting the number of <i>repetitions</i> to any value greater than 0 (defaults to Infinity). Also if you set <i>pingpong</i> to true, alternately playing forward and backward (defaults to false). You can optionally pass `modelIndex: number` to target animation playback for a specific model (0 for the primary model, 1 for the first `<extra-model>` element, etc.). Use the autoplay attribute if you want animations to be played automatically."
+        "description": "Causes animations to be played. You can specify the number of repetitions of the animation by setting the number of <i>repetitions</i> to any value greater than 0 (defaults to Infinity). Also if you set <i>pingpong</i> to true, alternately playing forward and backward (defaults to false). Use the autoplay attribute if you want animations to be played automatically."
       },
       {
-        "name": "pause(options: {modelIndex})",
+        "name": "pause()",
         "htmlName": "pause",
-        "description": "Causes animations to be paused. If you want to reset the current animation to the beginning, you should also set the <span class='attribute'>currentTime</span> property to 0. You can optionally pass `modelIndex: number` to selectively pause animation playback for a specific model (0 for the primary model, 1 for the first `<extra-model>` element, etc.)."
+        "description": "Causes animations to be paused. If you want to reset the current animation to the beginning, you should also set the <span class='attribute'>currentTime</span> property to 0."
       },
       {
         "name": "appendAnimation(animationName, options: {repetitions, pingpong, weight, timeScale, time, fade, warp, relativeWarp})",
