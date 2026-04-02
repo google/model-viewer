@@ -139,9 +139,11 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     async createTexture(uri: string, type: string = 'image/png'):
         Promise<ModelViewerTexture> {
       const {textureUtils} = this[$renderer];
-      const texture = await textureUtils!.loadImage(uri, this.withCredentials);
-
-      texture.userData.mimeType = type;
+      const texture =
+          await textureUtils!.loadImage(uri, this.withCredentials, type);
+      // GLTFExporter cannot encode KTX2; use PNG as export format
+      const exportType = (type === 'image/ktx2') ? 'image/png' : type;
+      texture.userData.mimeType = exportType;
 
       return this[$buildTexture](texture);
     }

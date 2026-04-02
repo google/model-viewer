@@ -26,6 +26,7 @@ import {waitForEvent} from '../../../utilities.js';
 import {assetPath} from '../../helpers.js';
 
 const ASTRONAUT_GLB_PATH = assetPath('models/Astronaut.glb');
+const KTX2_TEXTURE_PATH = assetPath('models/CesiumLogoFlat.ktx2');
 suite('scene-graph/texture', () => {
   suite('Texture', () => {
     let element: ModelViewerElement;
@@ -65,6 +66,13 @@ suite('scene-graph/texture', () => {
               ?.source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
+    });
+
+    test('Create a KTX2 texture', async () => {
+      const ktx2Texture = await element.createTexture(KTX2_TEXTURE_PATH);
+      expect(ktx2Texture).to.not.be.null;
+      expect(ktx2Texture!.source[$threeTexture].userData.mimeType)
+          .to.be.equal('image/png');
     });
 
     test('Verify legacy correlatedObjects are updated.', async () => {

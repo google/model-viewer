@@ -18,6 +18,7 @@ import '../renderer-gate.js';
 import {expect} from 'chai';
 import {Cache, CubeReflectionMapping, EquirectangularReflectionMapping, WebGLRenderer} from 'three';
 
+import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath} from '../helpers.js';
@@ -27,6 +28,7 @@ import {assetPath} from '../helpers.js';
 const canvas = document.createElement('canvas');
 const EQUI_URL = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 const HDR_EQUI_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
+const KTX2_URL = assetPath('models/CesiumLogoFlat.ktx2');
 
 suite('TextureUtils', () => {
   let threeRenderer: WebGLRenderer;
@@ -41,6 +43,9 @@ suite('TextureUtils', () => {
     // avoid this kind of problem (and many other headaches).
     threeRenderer = new WebGLRenderer({canvas});
     threeRenderer.debug.checkShaderErrors = true;
+    CachingGLTFLoader.setKTX2TranscoderLocation(
+        'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/');
+    CachingGLTFLoader.initializeKTX2Loader(threeRenderer);
   });
 
   suiteTeardown(() => {
@@ -67,6 +72,12 @@ suite('TextureUtils', () => {
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(EQUI_URL);
       expect(texture.mapping).to.be.eq(EquirectangularReflectionMapping);
+    });
+    test('loads a valid KTX2 texture from URL', async () => {
+      let texture = await textureUtils.loadImage(KTX2_URL, false);
+      texture.dispose();
+      expect(texture.isTexture).to.be.ok;
+      expect(texture.name).to.be.eq(KTX2_URL);
     });
     test('loads a valid HDR texture from URL', async () => {
       let texture = await textureUtils.loadEquirect(HDR_EQUI_URL);
