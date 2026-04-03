@@ -59,7 +59,7 @@ export class Hotspot extends CSS2DObject {
   public bary?: Vector3;
   private initialized = false;
   private referenceCount = 1;
-  private pivot = document.createElement('div');
+  private pivotEl = document.createElement('div');
   private slot: HTMLSlotElement = document.createElement('slot');
 
   constructor(config: HotspotConfiguration) {
@@ -69,8 +69,8 @@ export class Hotspot extends CSS2DObject {
 
     this.slot.name = config.name;
 
-    this.element.appendChild(this.pivot);
-    this.pivot.appendChild(this.slot);
+    this.element.appendChild(this.pivotEl);
+    this.pivotEl.appendChild(this.slot);
 
     this.updatePosition(config.position);
     this.updateNormal(config.normal);
@@ -168,13 +168,13 @@ export class Hotspot extends CSS2DObject {
 
     triangle.set(a, b, c);
     triangle.getNormal(this.normal).transformDirection(mesh.matrixWorld);
-    const pivot = target.parent as ModelScene;
-    quat.setFromAxisAngle(a.set(0, 1, 0), -pivot.rotation.y);
+    const pivotEl = target.parent as ModelScene;
+    quat.setFromAxisAngle(a.set(0, 1, 0), -pivotEl.rotation.y);
     this.normal.applyQuaternion(quat);
   }
 
   orient(radians: number) {
-    this.pivot.style.transform = `rotate(${radians}rad)`;
+    this.pivotEl.style.transform = `rotate(${radians}rad)`;
   }
 
   updateVisibility(show: boolean) {
