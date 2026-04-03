@@ -16,6 +16,7 @@
 import {property} from 'lit/decorators.js';
 import {CanvasTexture, Object3D, RepeatWrapping, SRGBColorSpace, Texture, VideoTexture} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
+import {decompress} from 'three/examples/jsm/utils/WebGLTextureUtils.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
@@ -289,6 +290,17 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                 .register(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
+
+        const threeRenderer = this[$renderer].threeRenderer;
+        exporter.setTextureUtils({
+          decompress: (texture: Texture, maxTextureSize?: number) => {
+            const result =
+                decompress(texture, maxTextureSize ?? Infinity, threeRenderer);
+            result.flipY = texture.flipY;
+            return result;
+          }
+        });
+
         let exportTarget: Object3D;
         if (scene.models.length > 1) {
           exportTarget = new Object3D();

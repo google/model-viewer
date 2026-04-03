@@ -75,6 +75,26 @@ suite('scene-graph/texture', () => {
           .to.be.equal('image/png');
     });
 
+    test('exports and re-imports a model with KTX2 compressed texture',
+         async () => {
+           const ktx2Texture =
+               await element.createTexture(KTX2_TEXTURE_PATH);
+           element.model!.materials[0]
+               .pbrMetallicRoughness.baseColorTexture!.setTexture(
+                   ktx2Texture);
+
+           const exported = await element.exportScene({binary: true});
+           expect(exported).to.be.not.undefined;
+           expect(exported.size).to.be.greaterThan(500);
+
+           const url = URL.createObjectURL(exported);
+           element.src = url;
+           await waitForEvent(element, 'load');
+
+           expect(element.model).to.not.be.null;
+           expect(element.model!.materials.length).to.be.greaterThan(0);
+         });
+
     test('Verify legacy correlatedObjects are updated.', async () => {
       const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
 
