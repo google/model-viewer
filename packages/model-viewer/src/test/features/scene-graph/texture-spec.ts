@@ -75,25 +75,36 @@ suite('scene-graph/texture', () => {
           .to.be.equal('image/png');
     });
 
-    test('exports and re-imports a model with KTX2 compressed texture',
-         async () => {
-           const ktx2Texture =
-               await element.createTexture(KTX2_TEXTURE_PATH);
-           element.model!.materials[0]
-               .pbrMetallicRoughness.baseColorTexture!.setTexture(
-                   ktx2Texture);
+    test(
+        'exports and re-imports a model with KTX2 compressed texture',
+        async () => {
+          const ktx2Texture = await element.createTexture(KTX2_TEXTURE_PATH);
+          element.model!.materials[0]
+              .pbrMetallicRoughness.baseColorTexture!.setTexture(ktx2Texture);
 
-           const exported = await element.exportScene({binary: true});
-           expect(exported).to.be.not.undefined;
-           expect(exported.size).to.be.greaterThan(500);
+          const materialCount = element.model!.materials.length;
+          const dim = element.getDimensions();
 
-           const url = URL.createObjectURL(exported);
-           element.src = url;
-           await waitForEvent(element, 'load');
+          const exported = await element.exportScene({binary: true});
+          expect(exported).to.be.not.undefined;
+          expect(exported.size).to.be.greaterThan(500);
 
-           expect(element.model).to.not.be.null;
-           expect(element.model!.materials.length).to.be.greaterThan(0);
-         });
+          // Verify scene is still intact after export (no renderer
+          // corruption).
+          expect(element.model).to.not.be.null;
+          expect(element.model!.materials.length).to.equal(materialCount);
+          const dimAfter = element.getDimensions();
+          expect(dimAfter.x).to.be.closeTo(dim.x, 0.001);
+          expect(dimAfter.y).to.be.closeTo(dim.y, 0.001);
+          expect(dimAfter.z).to.be.closeTo(dim.z, 0.001);
+
+          const url = URL.createObjectURL(exported);
+          element.src = url;
+          await waitForEvent(element, 'load');
+
+          expect(element.model).to.not.be.null;
+          expect(element.model!.materials.length).to.be.greaterThan(0);
+        });
 
     test('Verify legacy correlatedObjects are updated.', async () => {
       const newUUID: string|undefined = texture?.source[$threeTexture]?.uuid;
