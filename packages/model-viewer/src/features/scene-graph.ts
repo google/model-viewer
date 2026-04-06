@@ -14,8 +14,9 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {CanvasTexture, Mesh, NoToneMapping, Object3D, PerspectiveCamera, PlaneGeometry, RepeatWrapping, Scene, ShaderMaterial, SRGBColorSpace, Texture, VideoTexture, WebGLRenderer, WebGLRenderTarget} from 'three';
+import {CanvasTexture, Object3D, RepeatWrapping, SRGBColorSpace, Texture, VideoTexture} from 'three';
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
+import {decompress} from 'three/examples/jsm/utils/WebGLTextureUtils.js';
 
 import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
@@ -65,89 +66,6 @@ export interface SceneGraphInterface {
    * @returns a material, if no intersection is made then null is returned.
    */
   materialFromPoint(pixelX: number, pixelY: number): Material|null;
-}
-
-/**
- * Decompresses a CompressedTexture into a CanvasTexture using a
- * WebGLRenderTarget to avoid corrupting the renderer's main canvas.
- */
-function decompressTexture(
-    texture: Texture, maxTextureSize: number, renderer: WebGLRenderer):
-    CanvasTexture {
-  const image = texture.image as {width: number, height: number};
-  const width = Math.min(image.width, maxTextureSize);
-  const height = Math.min(image.height, maxTextureSize);
-
-  const isSRGB = texture.colorSpace === SRGBColorSpace;
-  const material = new ShaderMaterial({
-    uniforms: {blitTexture: {value: texture}},
-    vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = vec4(position.xy, 0.0, 1.0);
-      }`,
-    fragmentShader: `
-      uniform sampler2D blitTexture;
-      varying vec2 vUv;
-
-      vec3 linearToSRGB(vec3 linear) {
-        vec3 cutoff = step(linear, vec3(0.0031308));
-        vec3 higher = 1.055 * pow(linear, vec3(1.0 / 2.4)) - 0.055;
-        vec3 lower = linear * 12.92;
-        return mix(higher, lower, cutoff);
-      }
-
-      void main() {
-        vec4 texel = texture2D(blitTexture, vUv);
-        ${
-        isSRGB ? 'gl_FragColor = vec4(linearToSRGB(texel.rgb), texel.a);' :
-                 'gl_FragColor = texel;'}
-      }`
-  });
-
-  const mesh = new Mesh(new PlaneGeometry(2, 2), material);
-  mesh.frustumCulled = false;
-  const scene = new Scene();
-  scene.add(mesh);
-  const camera = new PerspectiveCamera();
-
-  const renderTarget = new WebGLRenderTarget(width, height);
-  const prevRenderTarget = renderer.getRenderTarget();
-  const prevToneMapping = renderer.toneMapping;
-
-  renderer.toneMapping = NoToneMapping;
-  renderer.setRenderTarget(renderTarget);
-  renderer.clear();
-  renderer.render(scene, camera);
-
-  const pixels = new Uint8Array(width * height * 4);
-  renderer.readRenderTargetPixels(renderTarget, 0, 0, width, height, pixels);
-
-  renderer.setRenderTarget(prevRenderTarget);
-  renderer.toneMapping = prevToneMapping;
-  renderTarget.dispose();
-  mesh.geometry.dispose();
-  material.dispose();
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d')!;
-  const imageData = ctx.createImageData(width, height);
-  imageData.data.set(pixels);
-  ctx.putImageData(imageData, 0, 0);
-
-  const result = new CanvasTexture(canvas);
-  result.minFilter = texture.minFilter;
-  result.magFilter = texture.magFilter;
-  result.wrapS = texture.wrapS;
-  result.wrapT = texture.wrapT;
-  result.colorSpace = texture.colorSpace;
-  result.name = texture.name;
-  result.flipY = texture.flipY;
-
-  return result;
 }
 
 /**
@@ -373,11 +291,9 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
                     (writer: any) =>
                         new GLTFExporterMaterialsVariantsExtension(writer));
 
-        const threeRenderer = this[$renderer].threeRenderer;
         exporter.setTextureUtils({
           decompress: (texture: Texture, maxTextureSize?: number) => {
-            return decompressTexture(
-                texture, maxTextureSize ?? Infinity, threeRenderer);
+            return decompress(texture, maxTextureSize ?? Infinity, undefined);
           }
         });
 
