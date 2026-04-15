@@ -15,7 +15,7 @@
 
 import {GainMapDecoderMaterial, HDRJPGLoader, QuadRenderer} from '@monogrid/gainmap-js';
 import {BackSide, BoxGeometry, CubeCamera, CubeTexture, DataTexture, EquirectangularReflectionMapping, HalfFloatType, LinearSRGBColorSpace, Loader, Mesh, NoBlending, NoToneMapping, RGBAFormat, Scene, ShaderMaterial, SRGBColorSpace, Texture, TextureLoader, Vector3, WebGLCubeRenderTarget, WebGLRenderer} from 'three';
-import {HDRLoader} from 'three/examples/jsm/loaders/HDRLoader.js';
+import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import {deserializeUrl, timePasses} from '../utilities.js';
 
@@ -40,7 +40,7 @@ export default class TextureUtils {
 
   private _ldrLoader: TextureLoader|null = null;
   private _imageLoader: HDRJPGLoader|null = null;
-  private _hdrLoader: HDRLoader|null = null;
+  private _hdrLoader: RGBELoader|null = null;
   private _lottieLoader: Loader|null = null;
 
   private generatedEnvironmentMap: Promise<CubeTexture>|null = null;
@@ -70,9 +70,9 @@ export default class TextureUtils {
     return this._imageLoader;
   }
 
-  private hdrLoader(withCredentials: boolean): HDRLoader {
+  private hdrLoader(withCredentials: boolean): RGBELoader {
     if (this._hdrLoader == null) {
-      this._hdrLoader = new HDRLoader();
+      this._hdrLoader = new RGBELoader();
       this._hdrLoader.setDataType(HalfFloatType);
     }
     this._hdrLoader.setWithCredentials(withCredentials);
@@ -136,7 +136,7 @@ export default class TextureUtils {
       const texture: Texture = await new Promise<Texture>(
           (resolve, reject) => loader.load(
               url,
-              (result) => {
+              (result: any) => {
                 const {renderTarget} =
                     result as QuadRenderer<1016, GainMapDecoderMaterial>;
                 if (renderTarget != null) {

@@ -114,15 +114,6 @@
                     transform: translate3d(-50%, -50%, 0);
                     z-index: 100;
                   }
-
-                  .controls {
-                    position: absolute;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: left;
-                    bottom: 8px;
-                    left: 8px;
-                  }
                 </style>
                 <!-- use unique asset to ensure lazy loading -->
                 <model-viewer id="lazy-load" camera-controls touch-action="pan-y" reveal="manual"
@@ -433,6 +424,26 @@
             </div>
             <example-snippet stamp-to="renderScale" highlight-as="html">
               <template>
+                <style>
+                  model-viewer#scale {
+                    container-type: size;
+                  }
+                  .controls {
+                    position: absolute;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    top: 16px;
+                    left: 16px;
+                    transform: translateY(calc(100cqh - 100% - 32px));
+                    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                  }
+                  @container (max-width: 550px) {
+                    .controls {
+                      transform: translateY(0px);
+                    }
+                  }
+                </style>
                 <model-viewer id="scale" alt="A 3D model of a toy car" camera-controls touch-action="pan-y" auto-rotate
                   src="../../shared-assets/models/glTF-Sample-Assets/Models/ToyCar/glTF-Binary/ToyCar.glb" ar>
                   <div class="controls glass">
