@@ -425,9 +425,6 @@
             <example-snippet stamp-to="renderScale" highlight-as="html">
               <template>
                 <style>
-                  model-viewer#scale {
-                    container-type: size;
-                  }
                   .controls {
                     position: absolute;
                     display: flex;
@@ -435,13 +432,6 @@
                     align-items: flex-start;
                     top: 16px;
                     left: 16px;
-                    transform: translateY(calc(100cqh - 100% - 32px));
-                    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-                  }
-                  @container (max-width: 550px) {
-                    .controls {
-                      transform: translateY(0px);
-                    }
                   }
                 </style>
                 <model-viewer id="scale" alt="A 3D model of a toy car" camera-controls touch-action="pan-y" auto-rotate
