@@ -140,8 +140,15 @@ export default class TextureUtils {
                 const {renderTarget} =
                     result as QuadRenderer<1016, GainMapDecoderMaterial>;
                 if (renderTarget != null) {
-                  const {texture} = renderTarget;
-                  result.dispose(false);
+                  let texture: Texture;
+                  try {
+                    texture = result.toDataTexture();
+                    result.dispose(true);
+                  } catch (e) {
+                    console.warn('Failed to convert gainmap to DataTexture, falling back to render target texture:', e);
+                    texture = renderTarget.texture;
+                    result.dispose(false);
+                  }
                   resolve(texture);
                 } else {
                   resolve(result as DataTexture);
