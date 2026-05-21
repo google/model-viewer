@@ -140,8 +140,32 @@ export default class TextureUtils {
                 const {renderTarget} =
                     result as QuadRenderer<1016, GainMapDecoderMaterial>;
                 if (renderTarget != null) {
-                  const {texture} = renderTarget;
-                  result.dispose(false);
+                  let texture: Texture;
+                  try {
+                    const dataTexture = result.toDataTexture();
+                    dataTexture.needsUpdate = true;
+                    const data = dataTexture.image.data as ArrayLike<number>;
+                    let hasContent = false;
+                    const len = data.length;
+                    for (let i = 0; i < len; i++) {
+                      if (data[i] !== 0) {
+                        hasContent = true;
+                        break;
+                      }
+                    }
+                    if (hasContent) {
+                      texture = dataTexture;
+                      result.dispose(true);
+                    } else {
+                      console.warn('Decoded DataTexture is completely black, falling back to render target texture.');
+                      texture = renderTarget.texture;
+                      result.dispose(false);
+                    }
+                  } catch (e) {
+                    console.warn('Failed to convert gainmap to DataTexture, falling back to render target texture:', e);
+                    texture = renderTarget.texture;
+                    result.dispose(false);
+                  }
                   resolve(texture);
                 } else {
                   resolve(result as DataTexture);
@@ -157,7 +181,7 @@ export default class TextureUtils {
       texture.name = url;
       texture.mapping = EquirectangularReflectionMapping;
 
-      if (!isHDR) {
+      if (!isHDR && texture.type !== HalfFloatType) {
         texture.colorSpace = SRGBColorSpace;
       }
 
