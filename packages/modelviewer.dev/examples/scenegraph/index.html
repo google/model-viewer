@@ -156,6 +156,7 @@
                 <code>ios-src</code> is not specified, since in this case a USDZ
                 will be generated on the fly from the current state.
               </p>
+              <p><b>Tip:</b> When building custom interactive overlay controls with text or numeric input fields on mobile, ensure your inputs are styled with a CSS rule setting <code>font-size: 16px;</code> (or larger). If a focused text field's computed font size is below 16px, mobile WebKit browsers (like iOS Safari and Chrome) will automatically zoom in the entire viewport, which does not automatically reset when the input is blurred and can break the page layout.</p>
             </div>
             <example-snippet stamp-to="transforms" highlight-as="html">
               <template>
