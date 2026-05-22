@@ -1050,3 +1050,9 @@ paper-button {
     box-shadow: 2px 0 4px rgba(0,0,0,0.1);
   }
 }
+
+/* Prevent iOS mobile auto-viewport zoom on user interactions with input/select controls */
+.controls input,
+.controls select {
+  font-size: 16px;
+}
