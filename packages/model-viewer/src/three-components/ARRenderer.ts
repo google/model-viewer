@@ -261,6 +261,9 @@ export class ARRenderer extends EventDispatcher<
     // This sets isPresenting to true
     this._presentedScene = scene;
     this.overlay = scene.element.shadowRoot!.querySelector('div.default');
+    if (this.overlay != null) {
+      this.overlay.addEventListener('beforexrselect', this.onBeforeXRSelect);
+    }
 
     if (environmentEstimation === true) {
       this.xrLight = new XREstimatedLight(this.threeRenderer);
@@ -712,7 +715,10 @@ export class ARRenderer extends EventDispatcher<
     this.oldShadowIntensity = null;
     this.frame = null;
     this.inputSource = null;
-    this.overlay = null;
+    if (this.overlay != null) {
+      this.overlay.removeEventListener('beforexrselect', this.onBeforeXRSelect);
+      this.overlay = null;
+    }
     this.worldSpaceInitialPlacementDone = false;
 
     if (this.resolveCleanup != null) {
@@ -943,6 +949,22 @@ export class ARRenderer extends EventDispatcher<
     this.goalPosition.y +=
         this.placementBox!.offsetHeight * this.presentedScene!.scale.x;
     this.placementBox!.show = false
+  };
+
+  private onBeforeXRSelect = (event: Event) => {
+    const path = event.composedPath();
+    for (const element of path) {
+      if (element instanceof HTMLElement) {
+        const tagName = element.tagName.toLowerCase();
+        if (tagName === 'input' || tagName === 'button' ||
+            tagName === 'select' || tagName === 'textarea' ||
+            tagName === 'a' || element.hasAttribute('data-pointer-coalesce') ||
+            element.classList.contains('interactive')) {
+          event.preventDefault();
+          break;
+        }
+      }
+    }
   };
 
   private fingerPolar(fingers: XRTransientInputHitTestResult[]):

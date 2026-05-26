@@ -124,6 +124,14 @@
           "<a href='../docs/#entrydocs-loading-staticproperties-dracoDecoderLocation'>Decoder location static properties</a>",
           "<a href='../examples/loading/#dracoSupport'>Details on setting static properties</a>"
         ]
+      },
+      {
+        "name": "How do I make custom inputs or overlays work reliably in AR DOM Overlay mode?",
+        "htmlName": "ar-dom-overlay-inputs",
+        "description": "Inside a WebXR full-screen immersive AR session, mobile browsers do not shrink the layout viewport when a soft keyboard is shown, which can cover your custom input overlays. Additionally, tap events on your overlays can propagate as WebXR screen taps and trigger unexpected 3D gestures (like model movements). To prevent these issues, follow two best practices:<br/><br/>1. <b>Event Suppression:</b> The core &lt;model-viewer&gt; now automatically intercepts the <code>beforexrselect</code> event on your interactive DOM elements and calls <code>event.preventDefault()</code> to stop WebXR from turning DOM taps into 3D session interactions.<br/>2. <b>Viewport Resizing:</b> Use the <code>visualViewport</code> API to listen for keyboard height overlays (when <code>ar-status='session-started'</code>) and translate your elements upward (e.g., via <code>transform: translateY(-offset px);</code>) to keep them visible above the keyboard, as demonstrated in our scenegraph example.",
+        "links": [
+          "<a href='../examples/scenegraph/#transforms'>Model Transformations example</a>"
+        ]
       }
     ]
   },

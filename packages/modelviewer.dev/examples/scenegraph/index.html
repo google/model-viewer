@@ -157,6 +157,7 @@
                 will be generated on the fly from the current state.
               </p>
               <p><b>Tip:</b> When building custom interactive overlay controls with text or numeric input fields on mobile, ensure your inputs are styled with a CSS rule setting <code>font-size: 16px;</code> (or larger). If a focused text field's computed font size is below 16px, mobile WebKit browsers (like iOS Safari and Chrome) will automatically zoom in the entire viewport, which does not automatically reset when the input is blurred and can break the page layout.</p>
+              <p><b>AR Keyboard Overlays:</b> Inside a WebXR full-screen immersive AR session, mobile browsers do not shrink the layout viewport when a software virtual keyboard is open. To prevent inputs from being covered by the keyboard, you can register a <code>visualViewport</code> resize listener (only active when <code>ar-status="session-started"</code>) to calculate the soft keyboard's overlay height and dynamically translate your overlay container upward (e.g., via <code>transform: translateY(-offset px);</code>), as demonstrated in the script below.</p>
             </div>
             <example-snippet stamp-to="transforms" highlight-as="html">
               <template>
@@ -215,6 +216,28 @@
                   z.addEventListener('input', () => {
                     updateScale();
                   });
+
+                  const controls = modelViewerTransform.querySelector(".controls");
+                  if (window.visualViewport) {
+                    const updateControls = () => {
+                      if (modelViewerTransform.getAttribute('ar-status') !== 'session-started') {
+                        controls.style.transform = 'none';
+                        return;
+                      }
+                      const layoutHeight = window.innerHeight;
+                      const visualHeight = window.visualViewport.height;
+                      const offsetTop = window.visualViewport.offsetTop;
+                      const offset = layoutHeight - (visualHeight + offsetTop);
+                      if (offset > 0) {
+                        controls.style.transform = `translateY(-${offset}px)`;
+                      } else {
+                        controls.style.transform = 'none';
+                      }
+                    };
+                    window.visualViewport.addEventListener('resize', updateControls);
+                    window.visualViewport.addEventListener('scroll', updateControls);
+                    modelViewerTransform.addEventListener('ar-status', updateControls);
+                  }
                 </script>
               </template>
             </example-snippet>
