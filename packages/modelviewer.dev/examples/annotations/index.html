@@ -111,6 +111,16 @@
                     padding: 10px;
                   }
 
+                  model-viewer > .annotation {
+                    transform: translate(10px, 10px);
+                  }
+
+                  @media only screen and (max-width: 800px) {
+                    model-viewer > .annotation {
+                      transform: translate(4.5rem, 10px);
+                    }
+                  }
+
                   /* This keeps child nodes hidden while the element loads */
                   :not(:defined)>* {
                     display: none;
