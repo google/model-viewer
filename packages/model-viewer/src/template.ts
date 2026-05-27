@@ -272,11 +272,17 @@ canvas {
   pointer-events: none;
 }
 
+.slot.exit-webxr-ar-button > slot,
+.slot.exit-webxr-ar-button ::slotted(*) {
+  pointer-events: auto;
+}
+
 .slot.exit-webxr-ar-button:not(.enabled) {
   display: none;
 }
 
 #default-exit-webxr-ar-button {
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: center;
