@@ -58,7 +58,7 @@
       border-radius: 0.5rem;
       padding: 0.5rem 1rem;
       /* max-height: 14rem; */
-      overflow: auto;
+      overflow: visible;
     }
 
     #texture-name,
@@ -71,6 +71,7 @@
       margin: 0 0.25em;
     }
   </style>
+  <script type="module" src="./custom-select.js"></script>
 </head>
 
 <body>
@@ -102,7 +103,7 @@
                   src="../../shared-assets/models/glTF-Sample-Assets/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb"
                   ar alt="A 3D model of a Shoe">
                   <div class="controls glass">
-                    <div>Variant: <select id="variant"></select></div>
+                    <div>Variant: <custom-select id="variant"></custom-select></div>
                   </div>
                 </model-viewer>
                 <script>
@@ -391,7 +392,7 @@
                   alt="A 3D model of a duck">
                   <div class="controls glass">
                     <p>Normals</p>
-                    <select id="normals2">
+                    <custom-select id="normals2">
                       <option>None</option>
                       <option
                         value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_normal.jpg">
@@ -402,7 +403,7 @@
                       <option
                         value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_normal.png">
                         Water Bottle</option>
-                    </select>
+                    </custom-select>
                     <p>Custom texture name</p>
                     <p id="texture-name">None</p>
                     <p>Image name from file name</p>
@@ -467,9 +468,9 @@
                   src="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"
                   ar alt="A 3D model of a helmet">
                   <div class="controls glass">
-                    <div>
+                     <div>
                       <p>Diffuse</p>
-                      <select id="diffuse">
+                      <custom-select id="diffuse">
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_albedo.jpg">
                           Damaged helmet</option>
@@ -479,11 +480,11 @@
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_baseColor.png">
                           Water Bottle</option>
-                      </select>
+                      </custom-select>
                     </div>
                     <div>
                       <p>Metallic-roughness</p>
-                      <select id="metallicRoughness">
+                      <custom-select id="metallicRoughness">
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_metalRoughness.jpg">
                           Damaged helmet</option>
@@ -493,11 +494,11 @@
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">
                           Water Bottle</option>
-                      </select>
+                      </custom-select>
                     </div>
                     <div>
                       <p>Normals</p>
-                      <select id="normals">
+                      <custom-select id="normals">
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_normal.jpg">
                           Damaged helmet</option>
@@ -507,22 +508,22 @@
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_normal.png">
                           Water Bottle</option>
-                      </select>
+                      </custom-select>
                     </div>
                     <div>
                       <p>Occlusion</p>
-                      <select id="occlusion">
+                      <custom-select id="occlusion">
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_AO.jpg">
                           Damaged helmet</option>
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_occlusionRoughnessMetallic.png">
                           Water Bottle</option>
-                      </select>
+                      </custom-select>
                     </div>
                     <div>
                       <p>Emission</p>
-                      <select id="emission">
+                      <custom-select id="emission">
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/DamagedHelmet/glTF/Default_emissive.jpg">
                           Damaged helmet</option>
@@ -532,7 +533,7 @@
                         <option
                           value="../../shared-assets/models/glTF-Sample-Assets/Models/WaterBottle/glTF/WaterBottle_emissive.png">
                           Water Bottle</option>
-                      </select>
+                      </custom-select>
                     </div>
                   </div>
                 </model-viewer>
@@ -604,11 +605,11 @@
                     <p>Offset</p>
                     <input type="range" min="0" max="1" value="0" step="0.01" id="offsetSlider">
                     <p>WrapMode</p>
-                    <select id="wrapMode">
+                    <custom-select id="wrapMode">
                       <option value="10497">Repeat</option>
                       <option value="33071">ClampToEdge</option>
                       <option value="33648">MirroredRepeat</option>
-                    </select>
+                    </custom-select>
                   </div>
                 </model-viewer>
                 <script type="module">
@@ -678,10 +679,10 @@
                   src="../../shared-assets/models/manifold.glb" ar alt="A 3D model of a stick and ball">
                   <div class="controls glass">
                     <div>Mesh Variants:
-                      <select id="textures">
+                      <custom-select id="textures">
                         <option value="ball">ball</option>
                         <option value="stick">stick</option>
-                      </select>
+                      </custom-select>
                     </div>
                 </model-viewer>
                 <script type="module">
@@ -777,11 +778,11 @@
                   src="../../shared-assets/models/sphere.glb" ar alt="A 3D model of a duck">
                   <div class="controls glass">
                     <p>Texture Type</p>
-                    <select id="type">
+                    <custom-select id="type">
                       <option value="lottie">Lottie</option>
                       <option value="video">Video</option>
                       <option value="canvas">Canvas</option>
-                    </select>
+                    </custom-select>
                   </div>
                 </model-viewer>
                 <script type="module">
