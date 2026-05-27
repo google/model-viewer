@@ -131,7 +131,7 @@ function createExampleSidebarCategory(category: any) {
   container!.innerHTML += `
 <div class="category">
   <h3 id=${id}>
-    <a class="darken" href="../${htmlName}" onclick="sidebarClick()">${
+    <a class="darken" href="../${htmlName}/" onclick="sidebarClick()">${
       category['name']}</a>
   </h3>
   <div class="subCategory">

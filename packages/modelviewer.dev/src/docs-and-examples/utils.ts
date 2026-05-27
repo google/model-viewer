@@ -24,7 +24,7 @@ export function switchPages(oldLocation: string, newLocation: string) {
     let URI = '';
     if (oldLocation === 'docs') {
       const category = getSidebarCategoryForNewPage();
-      URI = '../examples/'.concat(category);
+      URI = '../examples/'.concat(category).concat('/');
     } else {
       URI = newLocation;
     }
