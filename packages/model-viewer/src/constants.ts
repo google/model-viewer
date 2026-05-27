@@ -88,15 +88,15 @@ export const IS_WKWEBVIEW =
 // (DuckDuckGo). All other iOS browsers / apps will fail by default.
 export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
   if (IS_IOS) {
-    if (!IS_WKWEBVIEW) {
-      const tempAnchor = document.createElement('a');
-      return Boolean(
-          tempAnchor.relList && tempAnchor.relList.supports &&
-          tempAnchor.relList.supports('ar'));
-    } else {
-      return Boolean(/CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(
-          navigator.userAgent));
+    const isSupportedThirdParty =
+        /CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(navigator.userAgent);
+    if (isSupportedThirdParty) {
+      return true;
     }
+    const tempAnchor = document.createElement('a');
+    return Boolean(
+        tempAnchor.relList && tempAnchor.relList.supports &&
+        tempAnchor.relList.supports('ar'));
   } else {
     return false;
   }

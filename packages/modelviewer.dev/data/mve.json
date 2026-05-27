@@ -9,7 +9,7 @@
         "htmlName": "renderMode",
         "description": "This property sets the EffectComposer frame-buffer type to either UnsignedByteType if set to 'performance', or HalfFloatType if set to 'quality'. By setting this to 'quality', the effects under this EffectComposer will have access to high-precision buffers that are not limited to regular sRGB buffers, which have values clamped to [0.0, 1.0]. This can lead to noticeable improvements in color accuracy when used with the &lt;color-grade-effect&gt;, and reduce banding in dark scenes, especially with the &lt;bloom-effect&gt;.",
         "links": [
-          "<a href=\"../examples/postprocessing#setup\">Related examples</a>"
+          "<a href=\"../examples/postprocessing/#setup\">Related examples</a>"
         ],
         "default": {
           "default": "performance",
@@ -21,7 +21,7 @@
         "htmlName": "msaa",
         "description": "This property controls the number of samples used for the default Multi-Sample Anti Aliasing. Set this to any factor of 2 to enable - it is set to 0 by default (disabled). This is best for effect workflows that don't use the WebGLRenderer's depth buffer, such as &lt;color-grade-effect&gt;, &lt;glitch-effect&gt;, etc. <br>This antialiasing solution may not work well with &lt;selective-bloom-effect&gt;, &lt;ssao-effect&gt;, &lt;outline-effect&gt;, where it may introduce visual artifacting. If you use these effects you may prefer to use the &lt;smaa-effect&gt;.",
         "links": [
-          "<a href=\"../examples/postprocessing#setup\">Related examples</a>"
+          "<a href=\"../examples/postprocessing/#setup\">Related examples</a>"
         ],
         "default": {
           "default": "0",
@@ -350,7 +350,7 @@
         "htmlName": "blend-mode",
         "description": "This attribute controls the function used to blend the effect with the base render. Note that unlike the wiki link below, setting this to <code>skip</code> actually does disable the effect completely.",
         "links": [
-          "<a href=\"../examples/postprocessing#effects\"><span class='attribute'>blend-mode</span> example</a>"
+          "<a href=\"../examples/postprocessing/#effects\"><span class='attribute'>blend-mode</span> example</a>"
         ],
         "default": {
           "default": "default",
@@ -362,7 +362,7 @@
         "htmlName": "opacity",
         "description": "The opacity of the effect that will be blended with the base render.",
         "links": [
-          "<a href=\"../examples/postprocessing#effects\"><span class='attribute'>opacity</span> example</a>"
+          "<a href=\"../examples/postprocessing/#effects\"><span class='attribute'>opacity</span> example</a>"
         ],
         "default": {
           "default": "1.0",
@@ -388,7 +388,7 @@
         "htmlName": "selection",
         "description": "This attribute controls the selected objects to be affected. If no value is provided, the default <a href=\"#entrydocs-effectcomposer-properties-selection\"><span class='attribute'>selection</span></a> is used.",
         "links": [
-          "<a href=\"../examples/postprocessing#selective-effects\"><span class='attribute'>selection</span> example</a>"
+          "<a href=\"../examples/postprocessing/#selective-effects\"><span class='attribute'>selection</span> example</a>"
         ],
         "default": {
           "default": "<a href=\"#entrydocs-effectcomposer-properties-selection\"><span class='attribute'>selection</span></a>",
