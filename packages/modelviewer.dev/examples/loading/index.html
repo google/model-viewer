@@ -433,19 +433,36 @@
                     display: flex;
                     flex-direction: column;
                     align-items: flex-start;
-                    top: 16px;
+                    bottom: 16px;
                     left: 16px;
-                    transform: translateY(calc(100cqh - 100% - 32px));
-                    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                    z-index: 10;
                   }
-                  @container (max-width: 550px) {
-                    .controls {
+                  .custom-ar-button {
+                    position: absolute;
+                    top: 16px;
+                    right: 16px;
+                    background-color: white;
+                    border: 1px solid #dadce0;
+                    border-radius: 4px;
+                    padding: 8px 12px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    color: #1a73e8;
+                    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+                    cursor: pointer;
+                    z-index: 10;
+                    transform: translateY(calc(100cqh - 100% - 32px));
+                    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                  }
+                  @container (max-width: 700px) {
+                    .custom-ar-button {
                       transform: translateY(0px);
                     }
                   }
                 </style>
                 <model-viewer id="scale" alt="A 3D model of a toy car" camera-controls touch-action="pan-y" auto-rotate
                   src="../../shared-assets/models/glTF-Sample-Assets/Models/ToyCar/glTF-Binary/ToyCar.glb" ar>
+                  <button slot="ar-button" class="custom-ar-button">View in AR</button>
                   <div class="controls glass">
                     <div>
                       Reported DPR: <span id="reportedDpr"></span>

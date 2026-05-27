@@ -161,9 +161,37 @@
             </div>
             <example-snippet stamp-to="transforms" highlight-as="html">
               <template>
+                <style>
+                  model-viewer#transform {
+                    container-type: size;
+                  }
+                  .custom-ar-button {
+                    position: absolute;
+                    top: 16px;
+                    right: 16px;
+                    background-color: white;
+                    border: 1px solid #dadce0;
+                    border-radius: 4px;
+                    padding: 8px 12px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    color: #1a73e8;
+                    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+                    cursor: pointer;
+                    z-index: 10;
+                    transform: translateY(calc(100cqh - 100% - 32px));
+                    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                  }
+                  @container (max-width: 700px) {
+                    .custom-ar-button {
+                      transform: translateY(0px);
+                    }
+                  }
+                </style>
                 <model-viewer id="transform" orientation="20deg 0 0" shadow-intensity="1" camera-controls
                   touch-action="pan-y" ar src="../../shared-assets/models/Astronaut.glb"
                   alt="A 3D model of an astronaut">
+                  <button slot="ar-button" class="custom-ar-button">View in AR</button>
                   <div class="controls glass">
                     <div>Roll: <input id="roll" value="20" size="3" class="number"> degrees</div>
                     <div>Pitch: <input id="pitch" value="0" size="3" class="number"> degrees</div>
