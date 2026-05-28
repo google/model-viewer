@@ -253,6 +253,16 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (hotspot != null) {
         hotspot.increment();
+        const visibilityAttribute = node.dataset.visibilityAttribute;
+        if (visibilityAttribute != null) {
+          const attributeName = `data-${visibilityAttribute}`;
+          node.toggleAttribute(attributeName, hotspot.facingCamera);
+        }
+        node.dispatchEvent(new CustomEvent('hotspot-visibility', {
+          detail: {
+            visible: hotspot.facingCamera,
+          },
+        }));
       } else {
         hotspot = new Hotspot({
           name: node.slot,
