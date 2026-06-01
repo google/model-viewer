@@ -25,10 +25,27 @@ const versions = {
   postprocessing: extractPackageVersion(effectsPkg, 'postprocessing'),
 };
 
+let localIp = 'localhost';
+try {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        localIp = iface.address;
+        break;
+      }
+    }
+    if (localIp !== 'localhost') break;
+  }
+} catch (e) {
+  // Fallback to localhost if network discovery fails
+}
+
 const replacements = {
   '{{THREEJS_VERSION}}': versions.three,
   '{{MODELVIEWER_VERSION}}': versions.modelViewer,
   '{{POSTPROCESSING_VERSION}}': versions.postprocessing,
+  '{{LOCAL_IP}}': localIp,
 };
 
 const mimeTypes = {
@@ -41,7 +58,8 @@ const mimeTypes = {
   '.svg': 'image/svg+xml',
   '.hdr': 'application/octet-stream',
   '.glb': 'model/gltf-binary',
-  '.webp': 'image/webp'
+  '.webp': 'image/webp',
+  '.usdz': 'model/vnd.usdz+zip'
 };
 
 const PORT = 8080;

@@ -17,7 +17,7 @@ import {property} from 'lit/decorators.js';
 import {Object3D} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
 
-import {IS_AR_QUICKLOOK_CANDIDATE, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
+import {IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_GSA, IS_IOS_THIRDPARTY, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus, ARTracking} from '../three-components/ARRenderer.js';
@@ -243,7 +243,8 @@ configuration or device capabilities');
               arMode = ARMode.SCENE_VIEWER;
               break;
             }
-            if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE) {
+            if (value === 'quick-look' && IS_AR_QUICKLOOK_CANDIDATE &&
+                !IS_IOS_GSA && (!IS_IOS_THIRDPARTY || this.iosSrc != null)) {
               arMode = ARMode.QUICK_LOOK;
               break;
             }
@@ -253,7 +254,7 @@ configuration or device capabilities');
         // The presence of ios-src overrides the absence of quick-look
         // ar-mode.
         if (arMode === ARMode.NONE && this.iosSrc != null &&
-            IS_AR_QUICKLOOK_CANDIDATE) {
+            IS_AR_QUICKLOOK_CANDIDATE && !IS_IOS_GSA) {
           arMode = ARMode.QUICK_LOOK;
         }
       }
