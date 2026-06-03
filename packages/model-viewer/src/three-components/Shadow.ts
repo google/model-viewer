@@ -104,7 +104,7 @@ export class Shadow extends Object3D {
     // like MeshDepthMaterial, but goes from black to transparent
     this.depthMaterial.onBeforeCompile = function(shader) {
       shader.fragmentShader = shader.fragmentShader.replace(
-          'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
+          /gl_FragColor\s*=\s*vec4\(\s*vec3\(\s*1\.0\s*-\s*fragCoordZ\s*\),\s*opacity\s*\);/,
           'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) * opacity );');
     };
     // Render both sides, back sides face the light source and
@@ -232,10 +232,18 @@ export class Shadow extends Object3D {
     }
 
     // These pads account for the softening radius around the shadow.
-    this.camera.scale.set(
-        size.x * (1 + TAP_WIDTH / baseWidth),
-        size.z * (1 + TAP_WIDTH / baseHeight),
-        1);
+    const frustumWidth = size.x * (1 + TAP_WIDTH / baseWidth);
+    const frustumHeight = size.z * (1 + TAP_WIDTH / baseHeight);
+
+    this.camera.left = -frustumWidth / 2;
+    this.camera.right = frustumWidth / 2;
+    this.camera.bottom = -frustumHeight / 2;
+    this.camera.top = frustumHeight / 2;
+    this.camera.scale.set(1, 1, 1);
+
+    this.floor.scale.set(frustumWidth, frustumHeight, 1);
+    this.blurPlane.scale.set(frustumWidth, frustumHeight, 1);
+
     this.needsUpdate = true;
   }
 
@@ -280,9 +288,6 @@ export class Shadow extends Object3D {
     // force the depthMaterial to everything
     scene.overrideMaterial = this.depthMaterial;
 
-    // set renderer clear alpha
-    const initialClearAlpha = renderer.getClearAlpha();
-    renderer.setClearAlpha(0);
     this.floor.visible = false;
 
     // disable XR for offscreen rendering
@@ -292,7 +297,22 @@ export class Shadow extends Object3D {
     // render to the render target to get the depths
     const oldRenderTarget = renderer.getRenderTarget();
     renderer.setRenderTarget(this.renderTarget);
+
+    const initialClearAlpha = renderer.getClearAlpha();
+    renderer.setClearAlpha(0);
+    const state = (renderer as any).state;
+    if (state != null) {
+      state.buffers.color.setMask(true);
+      state.buffers.depth.setMask(true);
+    }
+    renderer.clear();
+
+    const initialAutoClear = renderer.autoClear;
+    renderer.autoClear = false;
+
     renderer.render(scene, this.camera);
+
+    renderer.autoClear = initialAutoClear;
 
     // and reset the override material
     scene.overrideMaterial = null;
