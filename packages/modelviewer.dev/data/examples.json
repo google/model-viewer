@@ -286,6 +286,16 @@
     ]
   },
   {
+    "name": "Multiple Models",
+    "htmlName": "multimodel",
+    "examples": [
+      {
+        "htmlId": "multimodel-actions",
+        "name": "Multiple Models Actions"
+      }
+    ]
+  },
+  {
     "name": "Post Process Effects",
     "htmlName": "postprocessing",
     "examples": [

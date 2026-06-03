@@ -70,7 +70,8 @@ const identicalCategories = [
   'annotations',
   'lightingandenv',
   'animation',
-  'scenegraph'
+  'scenegraph',
+  'multimodel'
 ];
 
 export function getSidebarCategoryForNewPage(): string {
