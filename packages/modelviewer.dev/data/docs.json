@@ -42,7 +42,7 @@
       {
         "name": "loading",
         "htmlName": "loading",
-        "description": "An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for <span class='attribute'>reveal=\"auto\"</span>, and when interacted with for <span class='attribute'>reveal=\"interaction\"</span>. Eager loads the model immediately.",
+        "description": "An enumerable attribute describing under what conditions the model should be preloaded. The supported values are \"auto\", \"lazy\" and \"eager\". Auto is equivalent to lazy, which loads the model when it is near the viewport for <span class='attribute'>reveal=\"auto\"</span>, and when <span class='attribute'>dismissPoster()</span> is called for <span class='attribute'>reveal=\"manual\"</span>. Eager loads the model immediately.",
         "links": [
           "<a href=\"../examples/loading/\">Related examples</a>"
         ],
@@ -181,7 +181,7 @@
       {
         "name": "showPoster()",
         "htmlName": "showPoster",
-        "description": "Shows the <span class='attribute'>poster</span>, hiding the model. If this is called after the 3D model has been revealed, then it will behave as though <span class='attribute'>reveal='interaction'</span>, being dismissed either by a user click or a call to dismissPoster()."
+        "description": "Shows the <span class='attribute'>poster</span>, hiding the model. If this is called after the 3D model has been revealed, then it must be dismissed by a call to <span class='attribute'>dismissPoster()</span>."
       },
       {
         "name": "getDimensions()",
