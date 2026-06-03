@@ -1,0 +1,277 @@
+<!--
+/* @license
+ * Copyright 2026 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>&lt;model-viewer&gt; Multiple Models</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; multiple models examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png" />
+
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <script>
+    window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+</head>
+
+<body>
+
+  <div class="examples-page">
+    <div class="sidebar" id="sidenav"></div>
+    <div id="toggle"></div>
+
+    <div class="examples-container">
+      <div class="sample">
+        <div id="multimodel-actions" class="demo"></div>
+        <div class="content">
+          <div class="wrapper">
+            <h4 id="intro">
+              <span class="font-medium">Multiple Models.</span>
+              Load and control multiple 3D models within a single &lt;model-viewer&gt; canvas.
+            </h4>
+            <div class="heading">
+              <h2 class="demo-title">Interact with Multiple Models</h2>
+              <p>
+                By placing declarative <code>&lt;extra-model&gt;</code> elements inside
+                <code>&lt;model-viewer&gt;</code>, you can load multiple separate 3D models into a single scene.
+                Each model has its own position offset, orientation, and scale, and can be manipulated
+                individually.
+              </p>
+              <p>
+                This example displays three models, each showcasing a different type of interaction:
+              </p>
+              <ul>
+                <li><strong>Sphere (Base Model):</strong> Changing material base color factor dynamically.</li>
+                <li><strong>Robot (Extra Model 1):</strong> Targeting animation play/pause to a specific model index.</li>
+                <li><strong>Astronaut (Extra Model 2):</strong> Animating the position offset of a model over time.</li>
+              </ul>
+            </div>
+            <example-snippet stamp-to="multimodel-actions" highlight-as="html">
+              <template>
+                <style>
+                  .controls {
+                    position: absolute;
+                    bottom: 20px;
+                    left: 20px;
+                    right: 20px;
+                    display: flex;
+                    justify-content: space-around;
+                    align-items: center;
+                    padding: 12px;
+                    z-index: 10;
+                  }
+                  .control-group {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                  }
+                  .control-group h4 {
+                    margin: 0 0 8px 0;
+                    font-size: 0.9em;
+                    font-weight: 500;
+                    color: #202124;
+                  }
+                  .control-group button {
+                    font-size: 0.9em;
+                    padding: 8px 16px;
+                    margin: 0 !important;
+                    background-color: #ffffffd0;
+                    border: 1px solid #dadce0;
+                    border-radius: 4px;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                    cursor: pointer;
+                    font-weight: 500;
+                    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+                  }
+                  .control-group button:hover {
+                    background-color: #ffffff;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    transform: translateY(-1px);
+                  }
+                  .control-group button:active {
+                    transform: translateY(0);
+                  }
+                  .control-group button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    transform: none;
+                  }
+                  @media (max-width: 600px) {
+                    .controls {
+                      flex-direction: column;
+                      bottom: 10px;
+                      left: 10px;
+                      right: 10px;
+                      gap: 12px;
+                    }
+                  }
+                </style>
+
+                <model-viewer id="multiModel" camera-controls touch-action="pan-y"
+                  src="../../shared-assets/models/reflective-sphere.gltf"
+                  scale="0.5 0.5 0.5" shadow-intensity="1" alt="Multiple Models Demonstration">
+                  
+                  <extra-model id="robot"
+                    src="../../shared-assets/models/RobotExpressive.glb"
+                    offset="-2.0 0 0" scale="0.2 0.2 0.2" orientation="0 30 0">
+                  </extra-model>
+                  
+                  <extra-model id="astronaut"
+                    src="../../shared-assets/models/Astronaut.glb"
+                    offset="2.0 0 0" scale="0.3 0.3 0.3" orientation="0 -30 0">
+                  </extra-model>
+                  
+                  <div class="controls glass">
+                    <div class="control-group">
+                      <h4>Base Model (Sphere)</h4>
+                      <button id="color-btn">Random Color</button>
+                    </div>
+                    <div class="control-group">
+                      <h4>Model 1 (Robot)</h4>
+                      <button id="animate-btn">Play Animation</button>
+                    </div>
+                    <div class="control-group">
+                      <h4>Model 2 (Astronaut)</h4>
+                      <button id="jump-btn">Jump</button>
+                    </div>
+                  </div>
+                </model-viewer>
+                <script type="module">
+                  const modelViewer = document.querySelector("#multiModel");
+                  const colorBtn = document.querySelector("#color-btn");
+                  const animateBtn = document.querySelector("#animate-btn");
+                  const jumpBtn = document.querySelector("#jump-btn");
+                  const astronautExtra = document.querySelector("#astronaut");
+
+                  // 1. Base Model (Sphere): Change color factor randomly
+                  colorBtn.addEventListener("click", () => {
+                    if (modelViewer.model && modelViewer.model.materials.length > 0) {
+                      const [material] = modelViewer.model.materials;
+                      const hue = Math.floor(Math.random() * 360);
+                      const randomColor = `hsl(${hue}, 90%, 60%)`;
+                      material.pbrMetallicRoughness.setBaseColorFactor(randomColor);
+                    }
+                  });
+
+                  // 2. Robot (Model index 1): Toggle Play/Pause animation
+                  let robotPlaying = false;
+                  animateBtn.addEventListener("click", () => {
+                    if (modelViewer.availableAnimations.length > 0) {
+                      if (robotPlaying) {
+                        modelViewer.pause({modelIndex: 1});
+                        animateBtn.textContent = "Play Animation";
+                        robotPlaying = false;
+                      } else {
+                        modelViewer.animationName = "Dance";
+                        modelViewer.play({modelIndex: 1});
+                        animateBtn.textContent = "Pause Animation";
+                        robotPlaying = true;
+                      }
+                    }
+                  });
+
+                  // 3. Astronaut (Model index 2): Float/Jump animation using offset attribute
+                  let jumping = false;
+                  jumpBtn.addEventListener("click", () => {
+                    if (jumping) return;
+                    jumping = true;
+                    jumpBtn.disabled = true;
+
+                    let startTime = null;
+                    const duration = 1000; // 1 second jump duration
+                    const jumpHeight = 0.8; // jump height in meters
+
+                    const animateJump = (timestamp) => {
+                      if (!startTime) startTime = timestamp;
+                      const elapsed = timestamp - startTime;
+                      const progress = elapsed / duration;
+
+                      if (progress < 1) {
+                        // Sine wave interpolation
+                        const y = Math.sin(progress * Math.PI) * jumpHeight;
+                        astronautExtra.setAttribute("offset", `2.0 ${y} 0`);
+                        requestAnimationFrame(animateJump);
+                      } else {
+                        astronautExtra.setAttribute("offset", "2.0 0 0");
+                        jumpBtn.disabled = false;
+                        jumping = false;
+                      }
+                    };
+                    requestAnimationFrame(animateJump);
+                  });
+
+                  modelViewer.addEventListener("load", () => {
+                    // Pre-configure animation name for the robot
+                    modelViewer.animationName = "Dance";
+                    // Frame all 3 models in the view
+                    modelViewer.updateFraming();
+                  });
+                </script>
+              </template>
+            </example-snippet>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <ul>
+          <li class="attribution">
+            <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a>
+            by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+            licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+          </li>
+          <li class="attribution">
+            <a href="https://poly.google.com/view/dLHpzNdygsg">Astronaut</a> by <a
+              href="https://poly.google.com/user/4aEd8rQgKu2">Poly</a>,
+            licensed under <a href="https://creativecommons.org/licenses/by/2.0/">CC-BY</a>.
+          </li>
+        </ul>
+        <div style="margin-top:24px;" class="copyright">©Copyright 2018-2026 Google Inc. Licensed under the Apache
+          License 2.0.</div>
+        <div id='footer-links'></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../../examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { init('examples-multimodel'); })();
+    (() => { initFooterLinks(); })();
+  </script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module" src="../built/dependencies.js">
+  </script>
+
+  <!-- Loads <model-viewer> on modern browsers: -->
+  <script type="module" src="../../../../node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+</body>
+
+</html>
