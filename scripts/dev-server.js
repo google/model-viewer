@@ -147,8 +147,8 @@ const server = http.createServer((req, res) => {
       let contentType = mimeTypes[extname] || 'application/octet-stream';
       res.writeHead(200, { 'Content-Type': contentType });
 
-      // Dynamically replace placeholders in HTML and JSON files!
-      if (extname === '.html' || extname === '.json') {
+      // Dynamically replace placeholders in HTML, JSON, and space-opera files!
+      if (extname === '.html' || extname === '.json' || filePath.endsWith('space-opera.js') || filePath.endsWith('constants.js')) {
         let text = content.toString('utf8');
         for (const [placeholder, value] of Object.entries(replacements)) {
           text = text.replaceAll(placeholder, value);
