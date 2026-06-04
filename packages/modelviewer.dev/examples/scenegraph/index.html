@@ -201,6 +201,9 @@
                   .controls input[type=number] {
                     -moz-appearance: textfield;
                   }
+                  model-viewer#transform[ar-status="session-started"] .controls {
+                    position: fixed;
+                  }
                 </style>
                 <model-viewer id="transform" orientation="20deg 0 0" shadow-intensity="1" camera-controls
                   touch-action="pan-y" ar src="../../shared-assets/models/Astronaut.glb"
@@ -266,7 +269,7 @@
                         controls.style.transform = 'none';
                         return;
                       }
-                      const layoutHeight = window.innerHeight;
+                      const layoutHeight = document.documentElement.clientHeight;
                       const visualHeight = window.visualViewport.height;
                       const offsetTop = window.visualViewport.offsetTop;
                       const offset = layoutHeight - (visualHeight + offsetTop);
