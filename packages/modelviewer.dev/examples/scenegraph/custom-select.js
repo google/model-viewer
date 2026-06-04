@@ -94,6 +94,11 @@ class CustomSelect extends HTMLElement {
         .panel.open {
           display: block;
         }
+        .panel.upward {
+          top: auto;
+          bottom: calc(100% + 4px);
+          box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+        }
         ul {
           list-style: none;
           padding: 4px 0;
@@ -198,9 +203,21 @@ class CustomSelect extends HTMLElement {
 
   open() {
     this._isOpen = true;
-    this.shadowRoot.getElementById('btn').classList.add('open');
-    this.shadowRoot.getElementById('panel').classList.add('open');
-    
+    const btn = this.shadowRoot.getElementById('btn');
+    const panel = this.shadowRoot.getElementById('panel');
+    btn.classList.add('open');
+    panel.classList.add('open');
+
+    const rect = btn.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const panelHeight = Math.min(panel.scrollHeight, 200);
+
+    if (spaceBelow < panelHeight + 10 && rect.top > panelHeight) {
+      panel.classList.add('upward');
+    } else {
+      panel.classList.remove('upward');
+    }
+
     const selectedItem = this.shadowRoot.querySelector('li.selected');
     if (selectedItem) {
       setTimeout(() => selectedItem.scrollIntoView({ block: 'nearest' }), 50);
@@ -210,7 +227,9 @@ class CustomSelect extends HTMLElement {
   close() {
     this._isOpen = false;
     this.shadowRoot.getElementById('btn').classList.remove('open');
-    this.shadowRoot.getElementById('panel').classList.remove('open');
+    const panel = this.shadowRoot.getElementById('panel');
+    panel.classList.remove('open');
+    panel.classList.remove('upward');
   }
 
   sync() {
