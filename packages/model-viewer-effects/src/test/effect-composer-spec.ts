@@ -14,11 +14,10 @@
  */
 
 import {ModelViewerElement} from '@google/model-viewer';
+import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
 import {expect} from 'chai';
 import {DotScreenEffect, Effect, EffectPass, GridEffect} from 'postprocessing';
 import {Camera} from 'three';
-
-import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
 
 import {$effectComposer, $normalPass, $renderPass, $scene} from '../effect-composer.js';
 import {EffectComposer} from '../model-viewer-effects.js';
