@@ -241,43 +241,43 @@ suite('ARRenderer', () => {
       expect(scale.z).to.be.equal(1);
     });
 
-    test('prevents default WebXR select when beforexrselect is triggered on interactive elements', () => {
-      const button = document.createElement('button');
-      const event = new CustomEvent('beforexrselect', {
-        bubbles: true,
-        cancelable: true
-      });
-      Object.defineProperty(event, 'composedPath', {
-        value: () => [button, (arRenderer as any).overlay]
-      });
+    test(
+        'prevents default WebXR select when beforexrselect is triggered on interactive elements',
+        () => {
+          const button = document.createElement('button');
+          const event = new CustomEvent(
+              'beforexrselect', {bubbles: true, cancelable: true});
+          Object.defineProperty(event, 'composedPath', {
+            value: () => [button, (arRenderer as any).overlay]
+          });
 
-      let defaultPrevented = false;
-      event.preventDefault = () => {
-        defaultPrevented = true;
-      };
+          let defaultPrevented = false;
+          event.preventDefault = () => {
+            defaultPrevented = true;
+          };
 
-      (arRenderer as any).overlay.dispatchEvent(event);
-      expect(defaultPrevented).to.be.equal(true);
-    });
+          (arRenderer as any).overlay.dispatchEvent(event);
+          expect(defaultPrevented).to.be.equal(true);
+        });
 
-    test('does not prevent default WebXR select on non-interactive elements', () => {
-      const div = document.createElement('div');
-      const event = new CustomEvent('beforexrselect', {
-        bubbles: true,
-        cancelable: true
-      });
-      Object.defineProperty(event, 'composedPath', {
-        value: () => [div, (arRenderer as any).overlay]
-      });
+    test(
+        'does not prevent default WebXR select on non-interactive elements',
+        () => {
+          const div = document.createElement('div');
+          const event = new CustomEvent(
+              'beforexrselect', {bubbles: true, cancelable: true});
+          Object.defineProperty(event, 'composedPath', {
+            value: () => [div, (arRenderer as any).overlay]
+          });
 
-      let defaultPrevented = false;
-      event.preventDefault = () => {
-        defaultPrevented = true;
-      };
+          let defaultPrevented = false;
+          event.preventDefault = () => {
+            defaultPrevented = true;
+          };
 
-      (arRenderer as any).overlay.dispatchEvent(event);
-      expect(defaultPrevented).to.be.equal(false);
-    });
+          (arRenderer as any).overlay.dispatchEvent(event);
+          expect(defaultPrevented).to.be.equal(false);
+        });
 
     suite('presentation ends', () => {
       setup(async () => {

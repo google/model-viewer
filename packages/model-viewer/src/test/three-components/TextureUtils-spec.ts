@@ -73,24 +73,27 @@ suite('TextureUtils', () => {
       expect(texture.name).to.be.eq(EQUI_URL);
       expect(texture.mapping).to.be.eq(EquirectangularReflectionMapping);
     });
-    test('decodes a gainmap and disposes intermediate render targets', async () => {
-      const GAINMAP_URL = assetPath('environments/spruit_sunrise_1k_HDR.jpg');
-      const THREE = await import('three');
-      let disposeCount = 0;
-      const originalDispose = THREE.WebGLRenderTarget.prototype.dispose;
-      THREE.WebGLRenderTarget.prototype.dispose = function() {
-        disposeCount++;
-        return originalDispose.call(this);
-      };
+    test(
+        'decodes a gainmap and disposes intermediate render targets',
+        async () => {
+          const GAINMAP_URL =
+              assetPath('environments/spruit_sunrise_1k_HDR.jpg');
+          const THREE = await import('three');
+          let disposeCount = 0;
+          const originalDispose = THREE.WebGLRenderTarget.prototype.dispose;
+          THREE.WebGLRenderTarget.prototype.dispose = function() {
+            disposeCount++;
+            return originalDispose.call(this);
+          };
 
-      try {
-        const texture = await textureUtils.loadEquirect(GAINMAP_URL);
-        texture.dispose();
-        expect(disposeCount).to.be.greaterThan(0);
-      } finally {
-        THREE.WebGLRenderTarget.prototype.dispose = originalDispose;
-      }
-    });
+          try {
+            const texture = await textureUtils.loadEquirect(GAINMAP_URL);
+            texture.dispose();
+            expect(disposeCount).to.be.greaterThan(0);
+          } finally {
+            THREE.WebGLRenderTarget.prototype.dispose = originalDispose;
+          }
+        });
     test('loads a valid KTX2 texture from URL', async () => {
       let texture = await textureUtils.loadImage(KTX2_URL, false);
       texture.dispose();

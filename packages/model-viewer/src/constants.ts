@@ -67,7 +67,8 @@ export const IS_FIREFOX = /firefox/i.test(navigator.userAgent);
 export const IS_OCULUS = /OculusBrowser/.test(navigator.userAgent);
 export const IS_IOS_CHROME = IS_IOS && /CriOS\//.test(navigator.userAgent);
 export const IS_IOS_SAFARI = IS_IOS && IS_SAFARI;
-export const IS_IOS_THIRDPARTY = IS_IOS && /CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(navigator.userAgent);
+export const IS_IOS_THIRDPARTY = IS_IOS &&
+    /CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(navigator.userAgent);
 export const IS_IOS_GSA = IS_IOS && /GSA\//.test(navigator.userAgent);
 
 export const IS_SCENEVIEWER_CANDIDATE = IS_ANDROID && !IS_FIREFOX && !IS_OCULUS;
