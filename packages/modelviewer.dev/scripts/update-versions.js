@@ -24,6 +24,7 @@ const CONFIG = {
         '../dist/data/docs.json',
         '../dist/examples/postprocessing/index.html',
         '../dist/examples/twitter/player.html',
+        '../dist/dist/space-opera.js',
     ].map(file => path.resolve(__dirname, file)),
     placeholders: {
         modelViewer: '{{MODELVIEWER_VERSION}}',
