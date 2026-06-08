@@ -78,6 +78,32 @@ suite('ExtraModel', () => {
       expect(scene._models[1].position.x).to.equal(5);
     });
 
+    test('applies orientation as rotation on the model quaternion', async () => {
+      element.loading = 'eager';
+      element.src = CUBE_GLB_PATH;
+
+      const extra = document.createElement('extra-model');
+      extra.setAttribute('src', CUBE_GLB_PATH);
+      // yaw = 90deg (third term in roll/pitch/yaw) → Euler(0, π/2, 0, 'YXZ')
+      // → quaternion.y ≈ 0.707, quaternion.w ≈ 0.707
+      extra.setAttribute('orientation', '0deg 0deg 90deg');
+      element.appendChild(extra);
+
+      await waitForEvent(element, 'load');
+
+      const scene = (element as any)[$scene];
+      const q = scene._models[1].quaternion;
+      expect(q.y).to.be.closeTo(Math.sin(Math.PI / 4), 0.001);
+      expect(q.w).to.be.closeTo(Math.cos(Math.PI / 4), 0.001);
+
+      // Update dynamically
+      extra.setAttribute('orientation', '0deg 0deg 0deg');
+      await timePasses();
+
+      expect(scene._models[1].quaternion.y).to.be.closeTo(0, 0.001);
+      expect(scene._models[1].quaternion.w).to.be.closeTo(1, 0.001);
+    });
+
     test(
         'does not calculate bounding box synchronously when offset changes',
         async () => {

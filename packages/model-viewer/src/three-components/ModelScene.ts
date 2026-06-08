@@ -323,7 +323,7 @@ export class ModelScene extends Scene {
   }
 
   updateModelTransforms(
-      index: number, offset?: string|null, _orientation?: string|null,
+      index: number, offset?: string|null, orientation?: string|null,
       scale?: string|null) {
     const model = this._models[index];
     if (!model)
@@ -336,6 +336,17 @@ export class ModelScene extends Scene {
                         .map(Number);
       if (parts.length === 3 && !parts.some(isNaN)) {
         model.position.set(parts[0], parts[1], parts[2]);
+      }
+    }
+
+    if (orientation) {
+      const terms = parseExpressions(orientation)[0]
+                        .terms as [NumberNode, NumberNode, NumberNode];
+      if (terms.length >= 3) {
+        const roll = normalizeUnit(terms[0]).number;
+        const pitch = normalizeUnit(terms[1]).number;
+        const yaw = normalizeUnit(terms[2]).number;
+        model.quaternion.setFromEuler(new Euler(pitch, yaw, roll, 'YXZ'));
       }
     }
 
