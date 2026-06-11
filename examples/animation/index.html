@@ -1,0 +1,332 @@
+<!--
+/* @license
+ * Copyright 2020 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>&lt;model-viewer&gt; Animation</title>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; animation examples">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../../styles/examples.css" rel="stylesheet" />
+  <link type="text/css" href="../../styles/docs.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png" />
+
+
+
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <script>
+    window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+  <style>
+    .controls {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      bottom: 1rem;
+      left: 1rem;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      max-height: 14rem;
+      overflow: auto;
+    }
+
+    .model-selection-box {
+      padding: 0.7rem 0.5rem;
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .controls::-webkit-scrollbar {
+      width: 0.3rem;
+    }
+
+    .controls::-webkit-scrollbar-thumb {
+      background-color: #9f9f9f;
+      border-radius: 0.5rem;
+    }
+
+    #texture-name,
+    #image-name {
+      font-size: 0.8em;
+    }
+
+    button {
+      font-size: 1.3em;
+      margin: 0 0.25em;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div class="examples-page">
+    <div class="sidebar" id="sidenav"></div>
+    <div id="toggle"></div>
+
+    <div class="examples-container">
+      <div class="sample">
+        <div id="autoplay" class="demo"></div>
+        <div class="content">
+          <div class="wrapper">
+            <h4 id="intro"><span class="font-medium">Animation. </span>Use &lt;model-viewer&gt; to show off your
+              animated models. This page showcases how you can control models with animations</h4>
+            <div class="heading">
+              <h2 class="demo-title">Automatically play animations with the autoplay attribute</h2>
+              <h4></h4>
+            </div>
+            <example-snippet stamp-to="autoplay" highlight-as="html">
+              <template>
+                <model-viewer camera-controls touch-action="pan-y" autoplay ar ar-modes="webxr scene-viewer"
+                  scale="0.2 0.2 0.2" shadow-intensity="1" src="../../shared-assets/models/RobotExpressive.glb"
+                  alt="An animated 3D model of a robot"></model-viewer>
+              </template>
+            </example-snippet>
+          </div>
+        </div>
+      </div>
+
+      <div class="sample">
+        <div id="selectingAnimations" class="demo"></div>
+        <div class="content">
+          <div class="wrapper">
+            <div class="heading">
+              <h2 class="demo-title">Select a specific animation with animation-name</h2>
+              <h4></h4>
+            </div>
+            <example-snippet stamp-to="selectingAnimations" highlight-as="html">
+              <template>
+                <model-viewer camera-controls touch-action="pan-y" autoplay animation-name="Running" ar
+                  ar-modes="webxr scene-viewer" scale="0.2 0.2 0.2" shadow-intensity="1"
+                  src="../../shared-assets/models/RobotExpressive.glb"
+                  alt="An animate 3D model of a robot"></model-viewer>
+              </template>
+            </example-snippet>
+          </div>
+        </div>
+      </div>
+
+      <div class="sample">
+        <div id="controlSpeed" class="demo"></div>
+        <div class="content">
+          <div class="wrapper">
+            <div class="heading">
+              <h2 class="demo-title">Change animation speed</h2>
+              <h4></h4>
+            </div>
+            <example-snippet stamp-to="controlSpeed" highlight-as="html">
+              <template>
+                <model-viewer id="change-speed-demo" camera-controls touch-action="pan-y" animation-name="Dance" ar
+                  ar-modes="webxr scene-viewer" scale="0.2 0.2 0.2" shadow-intensity="1"
+                  src="../../shared-assets/models/RobotExpressive.glb"
+                  alt="An animate 3D model of a robot"></model-viewer>
+                <script type="module">
+                  const modelViewer = document.querySelector('#change-speed-demo');
+                  const speeds = [1, 2, 0.5, -1];
+
+                  let i = 0;
+                  const play = () => {
+                    modelViewer.timeScale = speeds[i++ % speeds.length];
+                    modelViewer.play({ repetitions: 1 });
+                  };
+                  modelViewer.addEventListener('load', play);
+                  modelViewer.addEventListener('finished', play);
+                </script>
+              </template>
+            </example-snippet>
+          </div>
+        </div>
+      </div>
+
+      <div class="sample">
+        <div id="crossFade" class="demo"></div>
+        <div class="content">
+          <div class="wrapper">
+            <div class="heading">
+              <h2 class="demo-title">Animations crossfade when you change them</h2>
+              <h4></h4>
+            </div>
+            <example-snippet stamp-to="crossFade" highlight-as="html">
+              <template>
+                <model-viewer id="paused-change-demo" camera-controls touch-action="pan-y" autoplay
+                  animation-name="Running" ar ar-modes="webxr scene-viewer" scale="0.2 0.2 0.2" shadow-intensity="1"
+                  src="../../shared-assets/models/RobotExpressive.glb"
+                  alt="An animated 3D model of a robot"></model-viewer>
+                <script>
+                  (() => {
+                    const modelViewer = document.querySelector('#paused-change-demo');
+
+                    self.setInterval(() => {
+                      modelViewer.animationName = modelViewer.animationName === 'Running' ?
+                        'Wave' : 'Running';
+                    }, 1500.0);
+                  })();
+                </script>
+              </template>
+            </example-snippet>
+          </div>
+        </div>
+      </div>
+
+      <div class="sample">
+        <div id="appendAnimation" class="demo"></div>
+        <div class="content">
+          <div class="wrapper">
+            <div class="heading">
+              <h2 class="demo-title">Play and control several different animations of the model simultaneously or create
+                new modes by combining them!</h2>
+              <h4></h4>
+            </div>
+            <example-snippet stamp-to="appendAnimation" highlight-as="html">
+              <template>
+                <model-viewer id="append-demo" camera-controls touch-action="pan-y" ar ar-modes="webxr scene-viewer"
+                  scale="0.2 0.2 0.2" shadow-intensity="1" alt="An animated 3D model of a soldier">
+                  <div class="model-selection-box glass">
+                    <label for="blend-model-selection">Select model:</label>
+                    <select id="blend-model-selection">
+                      <option selected value="RobotExpressive.glb">Robot</option>
+                      <option value="soldier.glb">Soldier</option>
+                    </select>
+                  </div>
+                  <div class="controls glass">
+                  </div>
+                </model-viewer>
+                <script>
+                  (() => {
+                    const modelViewer = document.querySelector('#append-demo');
+                    const controlsPanel = document.querySelector('#append-demo .controls');
+                    const blend_model_selection = document.querySelector('.model-selection-box #blend-model-selection');
+
+                    blend_model_selection.addEventListener("change", event => {
+                      controlsPanel.innerHTML = "";
+                      changeModel(event.target.value);
+                    });
+
+                    modelViewer.addEventListener("load", loadModelAnimations);
+
+                    function loadModelAnimations() {
+                      if (blend_model_selection.value === "soldier.glb") {
+                        modelViewer.setAttribute("camera-orbit", "180deg");
+                      } else {
+                        modelViewer.removeAttribute("camera-orbit");
+                      }
+                      modelViewer.availableAnimations.forEach(animationName => {
+                        if (animationName !== "TPose")
+                          controlsPanel.innerHTML += `
+                          <label for="${animationName}">${animationName}</label>
+                          <input id="${animationName}" type="range" min="0" max="1" step="0.01" value="0">
+                        `;
+                      });
+
+                      controlsPanel.querySelectorAll("input[type='range']").forEach(slider => {
+                        slider.addEventListener("input", updateAnimation);
+                      });
+                    }
+
+                    function updateAnimation(event) {
+                      modelViewer.appendAnimation(event.target.id, {
+                        weight: parseFloat(event.target.value)
+                      });
+                    }
+
+                    function changeModel(modelName) {
+                      modelViewer.setAttribute("src", `../../shared-assets/models/${modelName}`);
+                    }
+
+                    changeModel(blend_model_selection.value);
+
+                  })();
+                </script>
+              </template>
+            </example-snippet>
+          </div>
+        </div>
+      </div>
+
+      <div class="sample">
+        <div id="paused" class="demo"></div>
+        <div class="content">
+          <div class="wrapper">
+            <div class="heading">
+              <h2 class="demo-title">A paused model shows the first frame of the configured animation</h2>
+              <h4></h4>
+            </div>
+            <example-snippet stamp-to="paused" highlight-as="html">
+              <template>
+                <model-viewer id="xfade-demo" camera-controls touch-action="pan-y" animation-name="Running" ar
+                  ar-modes="webxr scene-viewer" scale="0.2 0.2 0.2" shadow-intensity="1"
+                  src="../../shared-assets/models/RobotExpressive.glb"
+                  alt="An animated 3D model of a robot or soldier"></model-viewer>
+                <script>
+                  (() => {
+                    const modelViewer = document.querySelector('#xfade-demo');
+
+                    self.setInterval(() => {
+                      modelViewer.animationName = modelViewer.animationName === 'Running' ?
+                        'Idle' : 'Running';
+                    }, 1500.0);
+                  })();
+                </script>
+              </template>
+            </example-snippet>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="footer">
+        <ul>
+          <li class="attribution">
+            <a
+              href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive">RobotExpressive</a>
+            by <a href="https://www.patreon.com/quaternius">Tomás Laulhé</a>,
+            licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+          </li>
+        </ul>
+        <div style="margin-top:24px;" class="copyright">©Copyright 2018-2025 Google Inc. Licensed under the Apache
+          License 2.0.</div>
+        <div id='footer-links'></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../../examples/built/docs-and-examples.js">
+  </script>
+  <script type="module">
+    (() => { init('examples-animation'); })();
+    (() => { initFooterLinks(); })();
+  </script>
+
+  <!-- Documentation-specific dependencies: -->
+  <script type="module" src="../built/dependencies.js">
+  </script>
+
+  <!-- Loads <model-viewer> on modern browsers: -->
+  <script type="module" src="../../node_modules/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
+</body>
+
+</html>

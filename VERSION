@@ -1,0 +1,20 @@
+commit 33e556235715d84616ba735564ff8a387841954f
+Author: Frank <8014077+Frank3K@users.noreply.github.com>
+Date:   Thu Jun 11 20:30:31 2026 +0200
+
+    fix: apply orientation to extra-model elements (#5177)
+    
+    `updateModelTransforms` accepted an `orientation` parameter but never
+    used it, so `<extra-model orientation="...">` had no effect. Parse the
+    value with `parseExpressions`/`normalizeUnit` (supporting `deg`/`rad`
+    units) and apply it as an Euler rotation on the model's quaternion,
+    using the same `$roll $pitch $yaw` → `Euler(pitch, yaw, roll, 'YXZ')`
+    convention as `applyTransform` and the documented `orientation` attribute.
+    
+    Also fix the multimodel example: bare numbers are treated as radians by
+    the unit parser, and the axis ordering follows roll/pitch/yaw, so update
+    the orientation attributes to `"0deg 0deg 30deg"` / `"0deg 0deg -30deg"`
+    (yaw = third term) to produce the intended 30° Y-axis rotation.
+    
+    Add a test covering both initial application and dynamic updates of the
+    orientation attribute.
