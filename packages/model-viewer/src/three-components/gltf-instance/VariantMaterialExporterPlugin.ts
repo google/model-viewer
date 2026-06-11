@@ -26,11 +26,18 @@
  */
 
 import {Material, Mesh, Object3D} from 'three';
-import {GLTFExporterPlugin} from 'three/examples/jsm/Addons.js';
+import {GLTFExporterPlugin, GLTFWriter} from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 import {VariantData} from '../../features/scene-graph/model.js';
 
 import {UserDataVariantMapping} from './VariantMaterialLoaderPlugin.js';
+
+declare module 'three/examples/jsm/exporters/GLTFExporter.js' {
+  interface GLTFWriter {
+    json: any;
+    processMaterialAsync(material: Material): Promise<number>;
+  }
+}
 
 
 
@@ -57,19 +64,18 @@ const compatibleObject = (object: Object3D) => {
  * @param material {THREE.Material}
  * @return {boolean}
  */
-const compatibleMaterial = (material: Material|null) => {
+const compatibleMaterial = (material: Material|null): material is Material => {
   // @TODO: support multi materials?
-  return material && material.isMaterial && !Array.isArray(material);
+  return !!(material && material.isMaterial && !Array.isArray(material));
 };
 
 export default class GLTFExporterMaterialsVariantsExtension implements
     GLTFExporterPlugin {
-  writer: any;  // @TODO: Replace with GLTFWriter when GLTFExporter plugin TS
-                // declaration is ready
+  writer: GLTFWriter;
   name: string;
   variantNames: string[];
 
-  constructor(writer: any) {
+  constructor(writer: GLTFWriter) {
     this.writer = writer;
     this.name = 'KHR_materials_variants';
     this.variantNames = [];

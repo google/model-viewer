@@ -157,12 +157,15 @@ export default class TextureUtils {
                       texture = dataTexture;
                       result.dispose(true);
                     } else {
-                      console.warn('Decoded DataTexture is completely black, falling back to render target texture.');
+                      console.warn(
+                          'Decoded DataTexture is completely black, falling back to render target texture.');
                       texture = renderTarget.texture;
                       result.dispose(false);
                     }
                   } catch (e) {
-                    console.warn('Failed to convert gainmap to DataTexture, falling back to render target texture:', e);
+                    console.warn(
+                        'Failed to convert gainmap to DataTexture, falling back to render target texture:',
+                        e);
                     texture = renderTarget.texture;
                     result.dispose(false);
                   }

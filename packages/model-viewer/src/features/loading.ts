@@ -205,8 +205,9 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
      *
      * The default value is "auto". The only supported alternative values are
      * "lazy" and "eager". Auto is equivalent to lazy, which loads the model
-     * when it is near the viewport for reveal = "auto", and when dismissPoster()
-     * is called for reveal = "manual". Eager loads the model immediately.
+     * when it is near the viewport for reveal = "auto", and when
+     * dismissPoster() is called for reveal = "manual". Eager loads the model
+     * immediately.
      */
     @property({type: String})
     loading: LoadingAttributeValue = LoadingStrategy.AUTO;
