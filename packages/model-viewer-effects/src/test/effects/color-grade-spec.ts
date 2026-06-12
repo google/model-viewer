@@ -14,9 +14,8 @@
  */
 
 import {ModelViewerElement} from '@google/model-viewer';
-import {expect} from 'chai';
-
 import {Renderer} from '@google/model-viewer/lib/three-components/Renderer.js';
+import {expect} from 'chai';
 
 import {ColorGradeEffect, EffectComposer} from '../../model-viewer-effects.js';
 import {ArraysAreEqual, assetPath, AverageHSL, CompareArrays, createModelViewerElement, rafPasses, screenshot, waitForEvent} from '../utilities.js';

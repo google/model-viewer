@@ -258,8 +258,8 @@ const parseNumber = (() => {
  * Parses a hexadecimal-encoded color in 3, 6 or 8 digit form.
  */
 const parseHex = (() => {
-  // TODO(cdata): right now we don't actually enforce the number of digits
-  const HEX_RE = /^[a-f0-9]*/i;
+  const HEX_RE =
+      /^([a-f0-9]{8}|[a-f0-9]{6}|[a-f0-9]{4}|[a-f0-9]{3})(?![a-f0-9])/i;
 
   return (inputString: string): ParseResult<HexNode> => {
     inputString = inputString.slice(1).trim();
