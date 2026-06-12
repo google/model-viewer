@@ -224,6 +224,29 @@ export interface Scene {
 
 export type AccessorType = 'SCALAR'|'VEC2'|'VEC3'|'VEC4'|'MAT2'|'MAT3'|'MAT4';
 
+export interface AccessorSparseIndices {
+  bufferView: number;
+  byteOffset?: number;
+  componentType: number;
+  extensions?: ExtensionDictionary;
+  extras?: Extras;
+}
+
+export interface AccessorSparseValues {
+  bufferView: number;
+  byteOffset?: number;
+  extensions?: ExtensionDictionary;
+  extras?: Extras;
+}
+
+export interface AccessorSparse {
+  count: number;
+  indices: AccessorSparseIndices;
+  values: AccessorSparseValues;
+  extensions?: ExtensionDictionary;
+  extras?: Extras;
+}
+
 export interface Accessor {
   name?: string;
   bufferView?: number;
@@ -237,9 +260,8 @@ export interface Accessor {
   extensions?: ExtensionDictionary;
   extras?: Extras;
 
-  // TODO: What is this?
   // @see https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#accessorsparse
-  sparse?: any;
+  sparse?: AccessorSparse;
 }
 
 export type ChannelTargetPath = 'rotation'|'scale'|'translation'|'weights';
