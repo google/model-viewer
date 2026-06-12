@@ -81,6 +81,15 @@ suite('Animation', () => {
       expect(element.paused).to.be.true;
     });
 
+    test('dispatches "finished" when a repetition-limited animation completes',
+        async () => {
+          const finished = waitForEvent(element, 'finished');
+          element.play({repetitions: 1, pingpong: false});
+          // Let the LoopOnce action run to completion.
+          await timePasses((element.duration + TOLERANCE_SEC) * 1000);
+          await finished;
+        });
+
     suite('when play is invoked with no options', () => {
       setup(async () => {
         const animationsPlay = waitForEvent(element, 'play');
