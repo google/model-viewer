@@ -25,6 +25,7 @@ const $changeAnimation = Symbol('changeAnimation');
 const $appendAnimation = Symbol('appendAnimation');
 const $detachAnimation = Symbol('detachAnimation');
 const $paused = Symbol('paused');
+const $currentAnimationOptions = Symbol('currentAnimationOptions');
 
 interface PlayAnimationOptions {
   repetitions: number;
@@ -97,6 +98,13 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     animationCrossfadeDuration: number = 300;
 
     protected[$paused]: boolean = true;
+    // Remembers the options from the most recent play() call so re-applying the
+    // current animation (e.g. when animationName changes) preserves them rather
+    // than resetting to an infinite loop. Without this, `animationName = name`
+    // followed by `play({repetitions: 1})` loops forever and never emits
+    // 'finished', because the asynchronous animationName update re-triggers
+    // playback with the default (infinite) options.
+    private[$currentAnimationOptions]: PlayAnimationOptions = DEFAULT_PLAY_OPTIONS;
 
     constructor(...args: any[]) {
       super(args);
@@ -189,7 +197,8 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
         const modelIndex = options?.modelIndex ?? null;
         this[$scene].unpauseAnimation(modelIndex);
 
-        this[$changeAnimation](options);
+        this[$currentAnimationOptions] = {...DEFAULT_PLAY_OPTIONS, ...options};
+        this[$changeAnimation](this[$currentAnimationOptions]);
 
         this.dispatchEvent(new CustomEvent('play'));
       }
@@ -256,9 +265,14 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       }
     }
 
-    [$changeAnimation](options: PlayAnimationOptions = DEFAULT_PLAY_OPTIONS) {
-      const repetitions = options.repetitions ?? Infinity;
-      const mode = options.pingpong ?
+    [$changeAnimation](options?: PlayAnimationOptions) {
+      // When re-triggered without explicit options (e.g. from an animationName
+      // change or onModelLoad), reuse the options from the most recent play()
+      // so an in-flight `play({repetitions: 1})` is not overwritten with the
+      // infinite-loop default.
+      const opts = options ?? this[$currentAnimationOptions];
+      const repetitions = opts.repetitions ?? Infinity;
+      const mode = opts.pingpong ?
           LoopPingPong :
           (repetitions === 1 ? LoopOnce : LoopRepeat);
       this[$scene].playAnimation(
@@ -266,7 +280,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
           this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND,
           mode,
           repetitions,
-          options.modelIndex);
+          opts.modelIndex);
 
       // If we are currently paused, we need to force a render so that
       // the scene updates to the first frame of the new animation

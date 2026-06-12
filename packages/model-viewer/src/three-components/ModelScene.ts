@@ -120,6 +120,12 @@ export class ModelScene extends Scene {
   private boundsAndShadowDirty = false;
   private mixers: AnimationMixer[] = [];
   private mixerPausedStates: boolean[] = [];
+  // Mixer event subscriptions are kept so they can be re-applied to the mixers
+  // that are recreated on every setSource() (one per loaded glTF).
+  private mixerEventSubscriptions: Array<{
+    event: keyof AnimationMixerEventMap,
+    callback: (...args: any[]) => void
+  }> = [];
   private cancelPendingSourceChange: (() => void)|null = null;
   private animationsByName: Map<string, AnimationClip> = new Map();
   private currentAnimationActions: (AnimationAction|null)[] = [];
@@ -281,11 +287,11 @@ export class ModelScene extends Scene {
       if (gltf != null) {
         this._models.push(gltf.scene);
         this.target.add(gltf.scene);
-        this.mixers.push(new AnimationMixer(gltf.scene));
+        this.mixers.push(this.createMixer(gltf.scene));
         this.mixerPausedStates.push(false);
         this.currentAnimationActions.push(null);
       } else {
-        this.mixers.push(new AnimationMixer(this.target));
+        this.mixers.push(this.createMixer(this.target));
         this.mixerPausedStates.push(false);
         this.currentAnimationActions.push(null);
       }
@@ -1282,9 +1288,23 @@ export class ModelScene extends Scene {
 
   subscribeMixerEvent(
       event: keyof AnimationMixerEventMap, callback: (...args: any[]) => void) {
+    // Remember the subscription so it survives the mixers being recreated on
+    // the next setSource(), then apply it to the mixers that already exist.
+    this.mixerEventSubscriptions.push({event, callback});
     for (const mixer of this.mixers) {
       mixer.addEventListener(event, callback);
     }
+  }
+
+  // Creates an AnimationMixer with the currently subscribed events already
+  // attached, so events (e.g. 'finished', 'loop') keep firing after a new
+  // model is loaded.
+  private createMixer(root: Object3D): AnimationMixer {
+    const mixer = new AnimationMixer(root);
+    for (const {event, callback} of this.mixerEventSubscriptions) {
+      mixer.addEventListener(event, callback);
+    }
+    return mixer;
   }
 
   /**
