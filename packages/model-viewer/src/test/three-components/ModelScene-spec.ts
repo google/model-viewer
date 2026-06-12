@@ -16,7 +16,7 @@
 import '../renderer-gate.js';
 
 import {expect} from 'chai';
-import {Matrix4, Mesh, SphereGeometry, Vector3} from 'three';
+import {LoopRepeat, Matrix4, Mesh, SphereGeometry, Vector3} from 'three';
 
 import {$scene} from '../../model-viewer-base.js';
 import {ModelViewerElement} from '../../model-viewer.js';
@@ -80,6 +80,51 @@ suite('ModelScene', () => {
       expect(scene.appendedAnimations).to.include(animationName);
       scene.detachAnimation(animationName, false);
       expect(scene.appendedAnimations).to.not.include(animationName);
+    });
+
+    suite('appendAnimation repetitionCount validation', () => {
+      // Returns the repetitionCount-related warnings emitted while appending the
+      // first animation with the given repetitionCount.
+      const repetitionWarnings = (repetitionCount: any): string[] => {
+        const warnings: string[] = [];
+        const originalWarn = console.warn;
+        console.warn = (...args: any[]) => void warnings.push(args.join(' '));
+        try {
+          scene.appendAnimation(
+              scene.animationNames[0], LoopRepeat, repetitionCount);
+        } finally {
+          console.warn = originalWarn;
+        }
+        return warnings.filter((w) => w.includes('repetitionCount'));
+      };
+
+      test('a valid numeric value does not warn', () => {
+        expect(repetitionWarnings(1)).to.be.empty;
+      });
+
+      test('Infinity (the default) does not warn', () => {
+        expect(repetitionWarnings(Infinity)).to.be.empty;
+      });
+
+      test('a numeric value < 1 warns', () => {
+        expect(repetitionWarnings(0)).to.have.lengthOf(1);
+      });
+
+      test('NaN warns', () => {
+        expect(repetitionWarnings(NaN)).to.have.lengthOf(1);
+      });
+
+      test('a numeric string >= 1 does not warn', () => {
+        expect(repetitionWarnings('3')).to.be.empty;
+      });
+
+      test('a numeric string < 1 warns', () => {
+        expect(repetitionWarnings('0')).to.have.lengthOf(1);
+      });
+
+      test('a non-numeric string warns', () => {
+        expect(repetitionWarnings('abc')).to.have.lengthOf(1);
+      });
     });
   });
 
