@@ -162,6 +162,64 @@
       </div>
 
       <div class="sample">
+        <div id="playOnce" class="demo"></div>
+        <div class="content">
+          <div class="wrapper">
+            <div class="heading">
+              <h2 class="demo-title">Play an animation a single time and react to the finished event</h2>
+              <h4></h4>
+            </div>
+            <example-snippet stamp-to="playOnce" highlight-as="html">
+              <template>
+                <model-viewer id="play-once-demo" camera-controls touch-action="pan-y" ar
+                  ar-modes="webxr scene-viewer" scale="0.2 0.2 0.2" shadow-intensity="1"
+                  animation-crossfade-duration="0" src="../../shared-assets/models/RobotExpressive.glb"
+                  alt="An animated 3D model of a robot">
+                  <button id="play-once-button" style="position: absolute; bottom: 1rem; left: 1rem;">
+                    Play Wave
+                  </button>
+                </model-viewer>
+                <script>
+                  (() => {
+                    const modelViewer = document.querySelector('#play-once-demo');
+                    const button = document.querySelector('#play-once-button');
+                    const animations = ['Wave', 'ThumbsUp'];
+                    let index = 0;
+
+                    const updateLabel = () => {
+                      button.textContent = `Play ${animations[index]}`;
+                    };
+                    updateLabel();
+
+                    button.addEventListener('click', () => {
+                      button.disabled = true;
+
+                      modelViewer.animationName = animations[index];
+                      // Restart from the first frame: a finished animation stays
+                      // clamped on its last frame, so replaying it would otherwise
+                      // show the end pose right away instead of animating.
+                      modelViewer.currentTime = 0;
+                      // play({repetitions: 1}) plays the animation once and emits
+                      // 'finished' when it completes.
+                      modelViewer.play({ repetitions: 1 });
+                    });
+
+                    modelViewer.addEventListener('finished', () => {
+                      // Advance to the next animation and update the label once
+                      // the current one has finished playing.
+                      index = (index + 1) % animations.length;
+                      updateLabel();
+                      button.disabled = false;
+                    });
+                  })();
+                </script>
+              </template>
+            </example-snippet>
+          </div>
+        </div>
+      </div>
+
+      <div class="sample">
         <div id="crossFade" class="demo"></div>
         <div class="content">
           <div class="wrapper">
