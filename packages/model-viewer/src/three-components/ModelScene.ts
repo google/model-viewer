@@ -990,13 +990,17 @@ export class ModelScene extends Scene {
         }
         repetitionCount = Math.max(parseInt(repetitionCount), 1);
       }
-    } else if (typeof repetitionCount === 'number' && repetitionCount < 1) {
-      repetitionCount = 1;
-      console.warn(`Invalid repetitionCount value: ${
-          repetitionCount}. Using  1 value as minimum.`);
+    } else if (typeof repetitionCount === 'number' && !isNaN(repetitionCount)) {
+      // A valid number >= 1 (including Infinity) is left untouched.
+      if (repetitionCount < 1) {
+        console.warn(`Invalid repetitionCount value: ${
+            repetitionCount}. Using 1 as minimum.`);
+        repetitionCount = 1;
+      }
     } else {
       console.warn(`Invalid repetitionCount value: ${
           repetitionCount}. Using default: Infinity`);
+      repetitionCount = Infinity;
     }
 
     if (repetitionCount === 1 && loopMode !== LoopOnce) {
