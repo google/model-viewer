@@ -222,6 +222,10 @@
         "name": "Control Speed"
       },
       {
+        "htmlId": "playOnce",
+        "name": "Play Once"
+      },
+      {
         "htmlId": "crossFade",
         "name": "Crossfade"
       },
