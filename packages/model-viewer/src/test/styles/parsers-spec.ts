@@ -50,10 +50,25 @@ suite('parsers', () => {
     test('parses hex colors', () => {
       expect(parseExpressions('#fff')).to.be.eql([expressionNode(
           [hexNode('fff')])]);
+      expect(parseExpressions('#abcd')).to.be.eql([expressionNode(
+          [hexNode('abcd')])]);
       expect(parseExpressions('#abc123')).to.be.eql([expressionNode(
           [hexNode('abc123')])]);
       expect(parseExpressions('#daf012ee')).to.be.eql([expressionNode(
           [hexNode('daf012ee')])]);
+
+      // Invalid hex digit counts should fail to parse
+      expect(parseExpressions('#')).to.be.eql([]);
+      expect(parseExpressions('#1')).to.be.eql([]);
+      expect(parseExpressions('#12')).to.be.eql([]);
+      expect(parseExpressions('#12345')).to.be.eql([]);
+      expect(parseExpressions('#1234567')).to.be.eql([]);
+      expect(parseExpressions('#123456789')).to.be.eql([]);
+      expect(parseExpressions('#123456fg')).to.be.eql([]);
+
+      // Correctly parses valid hex followed by non-hex characters
+      expect(parseExpressions('#123456g')).to.be.eql([expressionNode(
+          [hexNode('123456'), identNode('g')])]);
     });
 
     test('parses functions', () => {

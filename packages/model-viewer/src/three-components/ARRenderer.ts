@@ -459,7 +459,8 @@ export class ARRenderer extends EventDispatcher<
           this.selectedXRController.userData.line.visible = false;
           if (scene.canScale && this.isWorldSpaceReady()) {
             this.isTwoHandInteraction = true;
-            this.firstRatio = this.controllerSeparation() / scene.scenePivot.scale.x;
+            this.firstRatio =
+                this.controllerSeparation() / scene.scenePivot.scale.x;
             this.scaleLine.visible = true;
           }
         } else {
@@ -478,7 +479,8 @@ export class ARRenderer extends EventDispatcher<
             this.xrController2?.userData.isSelected) {
           if (scene.canScale && this.isWorldSpaceReady()) {
             this.isTwoHandInteraction = true;
-            this.firstRatio = this.controllerSeparation() / scene.scenePivot.scale.x;
+            this.firstRatio =
+                this.controllerSeparation() / scene.scenePivot.scale.x;
             this.scaleLine.visible = true;
           }
         } else {
@@ -516,7 +518,8 @@ export class ARRenderer extends EventDispatcher<
     scene.attach(scene.scenePivot);
     this.selectedXRController = null;
     this.goalYaw = Math.atan2(
-        scene.scenePivot.matrix.elements[8], scene.scenePivot.matrix.elements[10]);
+        scene.scenePivot.matrix.elements[8],
+        scene.scenePivot.matrix.elements[10]);
     this.goalPosition.x = scene.scenePivot.position.x;
     this.goalPosition.z = scene.scenePivot.position.z;
 
@@ -957,8 +960,8 @@ export class ARRenderer extends EventDispatcher<
       if (element instanceof HTMLElement) {
         const tagName = element.tagName.toLowerCase();
         if (tagName === 'input' || tagName === 'button' ||
-            tagName === 'select' || tagName === 'textarea' ||
-            tagName === 'a' || element.hasAttribute('data-pointer-coalesce') ||
+            tagName === 'select' || tagName === 'textarea' || tagName === 'a' ||
+            element.hasAttribute('data-pointer-coalesce') ||
             element.classList.contains('interactive')) {
           event.preventDefault();
           break;
@@ -1093,14 +1096,16 @@ export class ARRenderer extends EventDispatcher<
     }
   }
 
-  private applyXRControllerRotation(controller: XRController, scenePivot: Object3D) {
+  private applyXRControllerRotation(
+      controller: XRController, scenePivot: Object3D) {
     if (!controller.userData.turning) {
       return;
     }
     const angle = (controller.position.x - controller.userData.initialX) *
         ROTATION_SENSIVITY;
     this.deltaRotation.setFromAxisAngle(AXIS_Y, angle);
-    scenePivot.quaternion.multiplyQuaternions(this.deltaRotation, scenePivot.quaternion);
+    scenePivot.quaternion.multiplyQuaternions(
+        this.deltaRotation, scenePivot.quaternion);
   }
 
   private handleScalingInXR(scene: ModelScene, delta: number) {
