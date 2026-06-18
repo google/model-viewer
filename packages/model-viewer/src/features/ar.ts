@@ -278,8 +278,6 @@ configuration or device capabilities');
     }
 
     protected async[$enterARWithWebXR]() {
-      console.log('Attempting to present in AR with WebXR...');
-
       await this[$triggerLoad]();
 
       try {
@@ -395,7 +393,6 @@ configuration or device capabilities');
       self.addEventListener('hashchange', undoHashChange, {once: true});
 
       this[$arAnchor].setAttribute('href', intent);
-      console.log('Attempting to present in AR with Scene Viewer...');
       this[$arAnchor].click();
     }
 
@@ -450,7 +447,6 @@ configuration or device capabilities');
       if (!anchor.isConnected)
         this.shadowRoot!.appendChild(anchor);
 
-      console.log('Attempting to present in AR with Quick Look...');
       anchor.click();
       anchor.removeChild(img);
       if (generateUsdz) {

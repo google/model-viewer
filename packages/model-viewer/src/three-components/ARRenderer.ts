@@ -1068,7 +1068,6 @@ export class ARRenderer extends EventDispatcher<
         // control
         if (this.isWorldSpaceReady()) {
           // Use the hit point directly without floor constraints
-          console.log('[processInput] Setting goalPosition.y to hit.y:', hit.y);
           this.goalPosition.add(hit);
         } else if (this.placeOnWall === false) {
           // Original logic for screen-space or initial world-space placement

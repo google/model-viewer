@@ -223,9 +223,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const extraModels = Array.from(this.querySelectorAll('extra-model'));
     const childIndex = (extraModels as HTMLElement[]).indexOf(targetNode);
 
-    console.log(`[onExtraModelChanged] childIndex: ${childIndex} srcChanged: ${
-        customEv.detail.srcChanged} offset: ${customEv.detail.offset}`);
-
     if (childIndex === -1)
       return;
 
@@ -349,8 +346,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
             const oldVisibility = this.modelIsVisible;
             this[$isElementInViewport] = entry.isIntersecting;
             this[$announceModelVisibility](oldVisibility);
-            console.log(`IntersectionObserver fired! isIntersecting: ${
-                entry.isIntersecting}`);
             if (this[$isElementInViewport] && !this.loaded) {
               this[$updateSource]();
             }
@@ -681,12 +676,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const extraUrlsMatch =
         extraUrlsList.join(',') === (scene.extraUrls || []).join(',');
 
-    console.log(`[$updateSource] called! \nsrc: ${this.src}\nextraUrls: ${
-        extraUrlsList.join(',')}\nloaded: ${this.loaded}`);
-
     if (this.loaded || !this[$shouldAttemptPreload]() ||
         (this.src === scene.url && extraUrlsMatch)) {
-      console.log('[$updateSource] BAILING OUT EARLY!');
       return;
     }
 
