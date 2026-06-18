@@ -336,12 +336,13 @@ export class ModelScene extends Scene {
       return;
 
     if (offset) {
-      const parts = offset.split(' ')
-                        .map(s => s.trim())
-                        .filter(s => s.length > 0)
-                        .map(Number);
-      if (parts.length === 3 && !parts.some(isNaN)) {
-        model.position.set(parts[0], parts[1], parts[2]);
+      const terms = parseExpressions(offset)[0]
+                        .terms as [NumberNode, NumberNode, NumberNode];
+      if (terms.length >= 3) {
+        const x = normalizeUnit(terms[0]).number;
+        const y = normalizeUnit(terms[1]).number;
+        const z = normalizeUnit(terms[2]).number;
+        model.position.set(x, y, z);
       }
     }
 

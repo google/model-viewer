@@ -78,6 +78,30 @@ suite('ExtraModel', () => {
       expect(scene._models[1].position.x).to.equal(5);
     });
 
+    test('normalizes offset lengths with units to meters', async () => {
+      element.loading = 'eager';
+      element.src = CUBE_GLB_PATH;
+
+      const extra = document.createElement('extra-model');
+      extra.setAttribute('src', CUBE_GLB_PATH);
+      // 200cm -> 2m, 1000mm -> 1m, explicit meters stay as-is.
+      extra.setAttribute('offset', '200cm 1000mm -1.5m');
+      element.appendChild(extra);
+
+      await waitForEvent(element, 'load');
+
+      const scene = (element as any)[$scene];
+      expect(scene._models[1].position.x).to.be.closeTo(2, 0.001);
+      expect(scene._models[1].position.y).to.be.closeTo(1, 0.001);
+      expect(scene._models[1].position.z).to.be.closeTo(-1.5, 0.001);
+
+      // Bare numbers are still treated as meters.
+      extra.setAttribute('offset', '3 0 0');
+      await timePasses();
+
+      expect(scene._models[1].position.x).to.be.closeTo(3, 0.001);
+    });
+
     test('applies orientation as rotation on the model quaternion', async () => {
       element.loading = 'eager';
       element.src = CUBE_GLB_PATH;

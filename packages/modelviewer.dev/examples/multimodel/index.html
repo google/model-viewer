@@ -61,6 +61,20 @@
                 individually.
               </p>
               <p>
+                The <code>offset</code> attribute accepts length units (<code>m</code>, <code>cm</code>,
+                <code>mm</code>) per component; unitless numbers are treated as meters. For example,
+                <code>offset="-2.0 0 0"</code> and <code>offset="-200cm 0 0"</code> are equivalent.
+              </p>
+              <p>
+                The <code>orientation</code> attribute uses the same <code>"roll pitch yaw"</code>
+                convention as <code>model-viewer</code>'s <code>orientation</code>: yaw is first
+                applied about the Y-axis, then pitch about the new local X-axis (positive is
+                front-down), then roll about the new local Z-axis. It accepts angle units
+                (<code>deg</code>, <code>rad</code>) per component; unitless numbers are treated as
+                radians. For example, <code>orientation="0deg 0deg 30deg"</code> applies a 30° yaw
+                about the Y axis.
+              </p>
+              <p>
                 This example displays three models, each showcasing a different type of interaction:
               </p>
               <ul>

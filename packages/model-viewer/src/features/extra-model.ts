@@ -33,7 +33,8 @@ export class ExtraModelElement extends ReactiveElement {
 
   /**
    * Position offset relative to global origin.
-   * Format: "x y z" in meters (e.g., "1 0 -0.5")
+   * Format: "x y z". Each component may carry a length unit (m, cm, mm),
+   * unitless numbers are treated as meters.
    */
   @property({type: String}) offset: string|null = null;
 
