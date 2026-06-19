@@ -2,6 +2,10 @@ name: Unit tests
 
 on: pull_request
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   full_test_run:
 
@@ -17,6 +21,15 @@ jobs:
 
     - name: NPM install
       run: npm ci
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-playwright-
 
     - name: Install playwright browsers
       run: npx playwright install --with-deps
