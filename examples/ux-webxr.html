@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>&lt;model-viewer&gt;</title>
+    <meta charset="utf-8">
+    <meta name="description" content="&lt;model-viewer&gt;">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="../styles/ux-test.css" rel="stylesheet" />
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+
+
+    
+    <script type='module' src='https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js'></script>
+</head>
+<body>
+    <h1>AR in the browser</h1>
+    <model-viewer 
+        src='../assets/ShopifyModels/Chair.glb' 
+        poster='../assets/ShopifyModels/Chair.png' 
+        camera-controls
+        shadow-intensity='1' 
+        ar
+        ar-modes='webxr'
+        touch-action='none'>
+
+        <button slot="ar-button" id="ar-button">
+            View in your space
+        </button>
+
+        <div id="ar-prompt">
+            <img src="../assets/hand.png">
+          </div>
+        
+          <button id="ar-failure">
+            AR is not tracking!
+          </button>
+    </model-viewer>
+    <p>The "View in your Space" button activates AR in the browser with the WebXR API, which is supported on Android, but not yet on iOS. 
+        Now the rendering is identical in 3D and AR, since model-viewer handles it all. The browser also participates, allowing arbitrary
+        HTML to render on top of the AR scene.</p>
+</body>
+</html>

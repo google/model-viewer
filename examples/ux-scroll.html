@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>&lt;model-viewer&gt;</title>
+    <meta charset="utf-8">
+    <meta name="description" content="&lt;model-viewer&gt;">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="../styles/ux-test.css" rel="stylesheet" />
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+
+
+    
+    <script type='module' src='https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js'></script>
+</head>
+<body>
+    <h1>Scroll behavior</h1>
+    <model-viewer 
+        src='../assets/ShopifyModels/Chair.glb' 
+        poster='../assets/ShopifyModels/Chair.png' 
+        camera-controls
+        shadow-intensity='1'>
+    </model-viewer>
+    <label for="scroll">Prefer tilt: </label>
+    <input id="scroll" type="checkbox">
+    <p>Assume there's something interesting further down this page: details, prices, related items, etc. 
+        Please tilt the item and scroll down to the bottom and back a few times and note anything that doesn't feel natural.
+        Then check the "Prefer tilt" box and try again. Do you notice a difference? Which feels more natural?</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+    <script type='module'>
+        const modelViewer = document.querySelector('model-viewer');
+        const checkbox = document.querySelector('#scroll');
+        
+        checkbox.addEventListener('change',() => {
+            modelViewer.touchAction = checkbox.checked ? 'none' : 'pan-y';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+commit e33ab46e2c749b1599f9a4fdf76502b11a7e9962
+Author: Diego Teran <dteran@google.com>
+Date:   Tue Jun 30 14:54:28 2026 -0700
+
+    update 3D scene when an <extra-model> is removed (#5187)
+    
+    Fixes #5186.
+    ### Summary & Root Cause
+    When an `<extra-model>` child element was removed from `<model-viewer>` (e.g. via `element.remove()`), the DOM child change triggered a `slotchange` event, which invoked `this[$updateSource]()`. However, because the primary model had already finished loading, `this.loaded` remained `true`. Inside `[$updateSource]()`, an early return check (`if (this.loaded || ...)`) caused the update to bail out before invoking `scene.setSource()`. As a result, the removed `<extra-model>`'s 3D mesh was orphaned and remained rendered inside the Three.js scene graph.
+    ### Changes Made
+    * **`model-viewer-base.ts`**:
+      * Updated `[$onSlotChange]` to reset `this[$loaded] = false;` and `this[$loadedTime] = 0;` whenever the list of `<extra-model>` URLs or element count changes. This allows `[$updateSource]()` to proceed past the load guard and properly synchronize the Three.js scene graph with the DOM.
+      * Added explicit handling for the edge case where all primary and extra models are removed (`this.src == null && extraModels.length === 0`), directly invoking `this[$scene].reset()` and clearing loaded state.
+    * **`ModelScene.ts`**:
+      * Updated `reset()` to ensure `this.extraUrls = [];` is properly cleared during scene resets.
+    * **`extra-model-spec.ts`**:
