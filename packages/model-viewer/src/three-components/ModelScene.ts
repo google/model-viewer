@@ -396,6 +396,7 @@ export class ModelScene extends Scene {
 
   reset() {
     this.url = null;
+    this.extraUrls = [];
     this.renderCount = 0;
     this.queueRender();
     if (this.shadow != null) {
