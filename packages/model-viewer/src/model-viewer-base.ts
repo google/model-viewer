@@ -212,7 +212,15 @@ export default class ModelViewerElementBase extends ReactiveElement {
     // modified its source set
     if (newExtraUrls.join(',') !== currentExtraUrls.join(',') ||
         extraModels.length !== currentExtraUrls.length) {
-      this[$updateSource]();
+      if (this.src == null && extraModels.length === 0) {
+        this[$loaded] = false;
+        this[$loadedTime] = 0;
+        this[$scene].reset();
+      } else {
+        this[$loaded] = false;
+        this[$loadedTime] = 0;
+        this[$updateSource]();
+      }
     }
   };
 
@@ -230,6 +238,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     if (customEv.detail.srcChanged) {
       this[$loaded] = false;
+      this[$loadedTime] = 0;
       this[$updateSource]();
     } else {
       // Apply Transforms
