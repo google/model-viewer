@@ -1,0 +1,17 @@
+commit 297ed2bdbea0c8f921d985ff0c71afd3a819e12e
+Author: Frank <8014077+Frank3K@users.noreply.github.com>
+Date:   Tue Jul 7 23:20:05 2026 +0200
+
+    fix: enable Quick Look AR in third-party iOS browsers without ios-src (#5188)
+    
+    The AR button stopped appearing in Chrome (and Edge/Firefox/DuckDuckGo)
+    on iOS unless an explicit `ios-src` was provided. Those browsers can
+    launch Quick Look with model-viewer's auto-generated USDZ, so the
+    `ios-src` requirement is unnecessary and regressed behavior that worked
+    in 4.2.0.
+    
+    Drop the `(!IS_IOS_THIRDPARTY || this.iosSrc != null)` clause from the
+    quick-look mode selection. Quick Look remains disabled in the Google
+    Search App webview (`!IS_IOS_GSA`), where it is genuinely broken.
+    
+    Fixes #5185

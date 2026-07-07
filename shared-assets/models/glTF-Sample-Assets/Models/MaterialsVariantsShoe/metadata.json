@@ -1,0 +1,26 @@
+{
+    "version": 2,
+    "legal": [
+        {
+            "year": "2021",
+            "owner": "Shopify",
+            "license": "CC-BY International 4.0",
+            "artist": "Shopify",
+            "what": "Everthing",
+            "licenseUrl": "https://creativecommons.org/licenses/by/4.0/legalcode",
+            "text": "CC BY 4.0 International",
+            "spdx": "CC-BY-4.0",
+            "icon": "https://licensebuttons.net/l/by/3.0/88x31.png"
+        }
+    ],
+    "tags": [
+        "extension",
+        "showcase",
+        "written"
+    ],
+    "screenshot": "screenshot/screenshot.jpg",
+    "name": "Materials Variants Shoe",
+    "path": "./Models/MaterialsVariantsShoe",
+    "summary": "A model of a shoe that illustrates use of the KHR_materials_variants extension with three materials included in the asset.",
+    "createReadme": true
+}

@@ -1,0 +1,185 @@
+{
+  "accessors": [
+    {
+      "componentType": 5123,
+      "count": 54972,
+      "type": "SCALAR"
+    },
+    {
+      "componentType": 5126,
+      "count": 11505,
+      "type": "VEC2"
+    },
+    {
+      "componentType": 5126,
+      "count": 11505,
+      "type": "VEC3"
+    },
+    {
+      "componentType": 5126,
+      "count": 11505,
+      "type": "VEC4"
+    },
+    {
+      "componentType": 5126,
+      "count": 11505,
+      "type": "VEC3",
+      "max": [
+        0.019491157955837814,
+        0.05786978673180264,
+        0.019491165455837813
+      ],
+      "min": [
+        -0.019503131931802635,
+        -0.000028256731802638007,
+        -0.019503124431802635
+      ]
+    }
+  ],
+  "asset": {
+    "generator": "glTF Tools for Unity",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 230113
+    }
+  ],
+  "buffers": [
+    {
+      "name": "Corset",
+      "byteLength": 230116,
+      "uri": "Corset.bin"
+    }
+  ],
+  "images": [
+    {
+      "name": "Corset_baseColor",
+      "uri": "Corset_baseColor.png"
+    },
+    {
+      "name": "Corset_occlusionRoughnessMetallic",
+      "uri": "Corset_occlusionRoughnessMetallic.png"
+    },
+    {
+      "name": "Corset_normal",
+      "uri": "Corset_normal.png"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "TEXCOORD_0": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "POSITION": 4
+          },
+          "indices": 0,
+          "material": 0,
+          "mode": 4,
+          "extensions": {
+            "KHR_draco_mesh_compression": {
+              "bufferView": 0,
+              "attributes": {
+                "TEXCOORD_0": 0,
+                "NORMAL": 1,
+                "TANGENT": 2,
+                "POSITION": 3
+              }
+            }
+          }
+        }
+      ],
+      "name": "pCube49"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0,
+          "texCoord": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1,
+          "texCoord": 0
+        },
+        "baseColorFactor": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallicFactor": 1,
+        "roughnessFactor": 1
+      },
+      "normalTexture": {
+        "index": 2,
+        "texCoord": 0
+      },
+      "occlusionTexture": {
+        "index": 1,
+        "texCoord": 0
+      },
+      "name": "Corset_O",
+      "emissiveFactor": [
+        0,
+        0,
+        0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": false
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "rotation": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "name": "Corset",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "source": 0
+    },
+    {
+      "source": 1
+    },
+    {
+      "source": 2
+    }
+  ],
+  "extensionsRequired": [
+    "KHR_draco_mesh_compression"
+  ],
+  "extensionsUsed": [
+    "KHR_draco_mesh_compression"
+  ]
+}

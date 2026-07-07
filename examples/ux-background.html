@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>&lt;model-viewer&gt;</title>
+    <meta charset="utf-8">
+    <meta name="description" content="&lt;model-viewer&gt;">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="../styles/ux-test.css" rel="stylesheet" />
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+
+
+    
+    <script type='module' src='https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js'></script>
+</head>
+<body>
+    <h1>Background scene</h1>
+    <model-viewer 
+        src='../assets/ShopifyModels/Chair.glb' 
+        poster='../assets/ShopifyModels/Chair.png' 
+        camera-controls
+        shadow-intensity='1' 
+        touch-action='none'>
+    </model-viewer>
+    <label for="background">Use background: </label>
+    <input id="background" type="checkbox">
+    <p>Try the "Use background" checkbox - which version do you prefer? Are they useful for different things?</p>
+
+    <script type='module'>
+        const modelViewer = document.querySelector('model-viewer');
+        const checkbox = document.querySelector('#background');
+        
+        checkbox.addEventListener('change',() => {
+            modelViewer.skyboxImage = checkbox.checked ? '../shared-assets/environments/lebombo_1k.hdr' : '';
+            modelViewer.maxCameraOrbit = checkbox.checked ? 'auto 100deg auto' : 'auto auto auto';
+            modelViewer.shadowIntensity = checkbox.checked ? 0 : 1;
+        });
+    </script>
+</body>
+</html>

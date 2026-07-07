@@ -1,0 +1,168 @@
+<!--
+/* @license
+ * Copyright 2021 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; Player</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <meta name="color-scheme" content="dark light">
+  <link rel="shortcut icon" type="image/png" href="../../assets/favicon.png"/>
+  
+  <script type="module" src="generator.js"></script>
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+  <style>
+    #player {
+        width: 480px;
+        height: 480px;
+    }
+
+    body {
+      height: 100%;
+      max-width: 700px;
+      margin: 1em;
+      text-align: left;
+      font-family: 'Rubik', sans-serif;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    input {
+      width: 40%;
+    }
+
+    input.full {
+      width: 100%;
+    }
+
+    .icon-modelviewer-black {
+      background-image: url(../../assets/ic_modelviewer.svg);
+    }
+    .icon-button {
+      margin-left: -4px;
+      margin-right: 8px;
+      width: 34px;
+      height: 34px;
+      background-size: 34px;
+    }
+    .inner-home {
+      display: flex;
+      align-items: center;
+      font-size: 1.1em;
+      text-decoration: none;
+    }
+    .home {
+      padding: 20px;
+      overflow: auto;
+      white-space: nowrap;
+    }
+    .lockup {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+      color: rgba(0,0,0,.87);
+    }
+    @media (prefers-color-scheme: dark) {
+      .lockup {
+        filter: invert(100%);
+      }
+    }
+    .attribute {
+      white-space: pre-wrap !important;
+      font-family: 'Roboto Mono', monospace;
+      color: black;
+    }
+    .attribute:hover {
+      text-decoration: underline;
+      color: #444444;
+    }
+  </style>
+</head>
+<body>
+    <div class="home lockup">
+        <a href="../../" class="sidebar-mv inner-home">
+            <div class="icon-button icon-modelviewer-black inner-home"></div>
+            <div class="inner-home"><span class="attribute">&lt;model-viewer&gt;</span></div>
+        </a>
+    </div>
+
+    <h1>3D Twitter card generator</h1>
+    <p>Use this page to create custom markup for your site and get interactive 3D in any tweet linking to it. 
+        The below is only an example; replace the entries with your own data and see a live preview of what will be embedded in your tweet.
+        See Twitter's validator below to view the complete experience. Note this page supports both light and dark browser themes 
+        to help with testing what different Twitter users will see.</p>
+    
+    <iframe id="player"></iframe><br/>
+
+    <label for="url">Page Link:</label>
+    <input id="url" class="full" value="https://modelviewer.dev/"><br/>
+
+    <label for="glb">GLB/glTF URL:</label>
+    <input id="glb" class="full" value="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"><br/>
+
+    <label for="description">Description:</label>
+    <input id="description" class="full" value="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum"><br/>
+
+    <p>Extra property = value (s):</p>
+    <input id="property" value="environmentImage"> = <input id="value" value="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"><br/>
+    <button id="add">+</button>
+    <p>Note that the properties use the JavaScript names, not the attribute names 
+        (e.g. <code>environmentImage</code> rather than <code>environment-image</code>). 
+        This works not just for the <code>&lt;model-viewer&gt;</code> properties, 
+        but you can also specify <code>style</code> and put all of your desired CSS on the value side.</p>
+
+    <p>By default, this player sets the following attributes: <code>
+      shadow-intensity="1" autoplay ar camera-controls auto-rotate
+      interaction-prompt-threshold="1500"</code>.</p>
+
+    <button id="download">Download Poster & Thumbnail</button>
+
+    <p>Download the poster and card image and serve them from the same path as you serve your GLB/glTF model above. 
+        They can't be the same image because different aspect ratios are required.
+        Ensure your model is served with permissive CORS headers so that it can be loaded by <code>https://modelviewer.dev</code>.</p>
+
+    <p>Then copy the HTML snippet below, remix this <a href="https://glitch.com/edit/#!/model-viewer-twitter">Glitch</a>, 
+        and replace the snippet in the <code>&lt;head&gt;</code>. 
+        This allows you to make your twitter embed without changing the site it points to, so you can also make
+        different embeds that point to the same site (you put the link to your remixed Glitch site in your tweet, 
+        like <a href="https://model-viewer-twitter.glitch.me">https://model-viewer-twitter.glitch.me</a>).</p>
+
+    <p>Alternatively, you can simply copy all but the last line (the redirect) into the <code>&lt;head&gt;</code> 
+        of the page you want to link to, then use its URL directly in your tweet.</p>
+
+    <p>Be sure to test your URL on Twitter's <a href="https://cards-dev.twitter.com/validator">validator</a> to see how it will look in a tweet
+        and to ensure the URLs are working right. 
+        Unfortunately, their validator messes up the encoding of special characters, so if it seems like certain extras are not being respected, 
+        just go ahead and tweet it; we've found it works better in Twitter than the validator.</p>
+
+    <button id="copy">Copy Snippet</button>
+    <pre>
+        <code id="display">
+        </code>
+    </pre>
+  </body>
