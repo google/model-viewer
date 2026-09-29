@@ -753,11 +753,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     [$syncCameraTarget](style: EvaluatedStyle<Vector3Intrinsics>) {
       const [x, y, z] = style;
-      if (!this[$renderer].arRenderer.isPresenting) {
+      if (!this[$renderer].isPresenting) {
         this[$scene].setTarget(x, y, z);
       }
       this[$controls].changeSource = ChangeSource.NONE;
-      this[$renderer].arRenderer.updateTarget();
+      this[$renderer].arRenderer?.updateTarget();
       this[$cancelPrompts]();
     }
 
