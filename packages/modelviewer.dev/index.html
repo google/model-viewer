@@ -44,15 +44,112 @@
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
   <style>
+    /* Scope the background change strictly to the demo component container */
     .demo model-viewer {
-      background-color: #fff;
+      background-color: #ffffff;
+      transition: background-color 0.4s ease;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Target container positioning context for the toggle placement */
+    #demo-container {
+      position: relative;
+    }
+
+    /* Night mode state for the model viewer background */
+    #demo-container.night-mode model-viewer {
+      background-color: #1a1a1a;
+    }
+
+    /* Style for the visual SVG icon toggle switch button */
+    .theme-toggle-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: background-color 0.3s standard, border-color 0.3s ease, transform 0.2s ease;
+      padding: 0;
+    }
+
+    .theme-toggle-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .theme-toggle-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Control internal SVG icon rendering and transitions */
+    .theme-toggle-btn svg {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .theme-toggle-btn .sun-icon {
+      fill: #000000;
+      display: block;
+    }
+
+    .theme-toggle-btn .moon-icon {
+      fill: #ffffff;
+      display: none;
+    }
+
+    /* Dark mode toggle aesthetics */
+    #demo-container.night-mode .theme-toggle-btn {
+      background-color: #000000;
+      border-color: #333333;
+      box-shadow: 0 4px 10px rgba(255,255,255,0.05);
+    }
+
+    #demo-container.night-mode .theme-toggle-btn svg {
+      transform: rotate(360deg);
+    }
+
+    #demo-container.night-mode .theme-toggle-btn .sun-icon {
+      display: none;
+    }
+
+    #demo-container.night-mode .theme-toggle-btn .moon-icon {
+      display: block;
     }
   </style>
 </head>
 <body>
 
   <div class="sample">
-    <div id="demo-container" class="demo"></div>
+    <div id="demo-container" class="demo">
+      <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
+        <svg class="sun-icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" stroke="#000" stroke-width="2" stroke-linecap="round" />
+          <line x1="12" y1="21" x2="12" y2="23" stroke="#000" stroke-width="2" stroke-linecap="round" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#000" stroke-width="2" stroke-linecap="round" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#000" stroke-width="2" stroke-linecap="round" />
+          <line x1="1" y1="12" x2="3" y2="12" stroke="#000" stroke-width="2" stroke-linecap="round" />
+          <line x1="21" y1="12" x2="23" y2="12" stroke="#000" stroke-width="2" stroke-linecap="round" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#000" stroke-width="2" stroke-linecap="round" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#000" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <svg class="moon-icon" viewBox="0 0 24 24">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+    
     <div class="content">
       <div class="wrapper">
         <div class="heading">
@@ -65,10 +162,8 @@
             <div class="quick-start-example">
               <example-snippet inert-script stamp-to="demo-container" highlight-as="html">
                 <template>
-<!-- Import the component -->
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/{{MODELVIEWER_VERSION}}/model-viewer.min.js"></script>
 
-<!-- Use it like any other HTML element -->
 <model-viewer alt="Neil Armstrong's Spacesuit from the Smithsonian Digitization Programs Office and National Air and Space Museum" src="shared-assets/models/NeilArmstrong.glb" ar environment-image="shared-assets/environments/moon_1k.hdr" poster="shared-assets/models/NeilArmstrong.webp" shadow-intensity="1" camera-controls touch-action="pan-y"></model-viewer>
                 </template>
               </example-snippet>
@@ -228,15 +323,27 @@
     (() => { initFooterLinks();})();
   </script>
 
-
-  <!-- Documentation-specific dependencies: -->
   <script type="module"
       src="examples/built/dependencies.js">
   </script>
 
-  <!-- Loads <model-viewer> on modern browsers: -->
   <script type="module"
       src="../../node_modules/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('theme-toggle');
+      const container = document.getElementById('demo-container');
+
+      if (toggleBtn && container) {
+        toggleBtn.addEventListener('click', (e) => {
+          // Explicitly prevent any parent element event triggers
+          e.stopPropagation(); 
+          container.classList.toggle('night-mode');
+        });
+      }
+    });
   </script>
 </body>
 </html>
