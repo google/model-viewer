@@ -143,6 +143,32 @@ suite('TextureUtils', () => {
       expect(environment.mapping).to.be.eq(EquirectangularReflectionMapping);
     });
 
+    test('retries a url whose earlier load failed', async () => {
+      const realLoadEquirect = textureUtils.loadEquirect.bind(textureUtils);
+      let calls = 0;
+      textureUtils.loadEquirect = async (url: string) => {
+        calls++;
+        if (calls === 1) {
+          throw new Error('network error');
+        }
+        return realLoadEquirect(url);
+      };
+
+      let failed = false;
+      try {
+        await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
+      } catch (e) {
+        failed = true;
+      }
+      expect(failed).to.be.eq(true);
+
+      const textures =
+          await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
+
+      expect(textures.environmentMap.name).to.be.eq(EQUI_URL);
+      expect(textures.skybox!.name).to.be.eq(EQUI_URL);
+    });
+
     test(
         'returns an environmentMap and skybox texture from an HDR url',
         async () => {

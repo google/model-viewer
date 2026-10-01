@@ -257,6 +257,13 @@ export default class TextureUtils {
           this.loadEquirect(url, withCredentials, progressCallback);
 
       this.skyboxCache.set(url, skyboxMapLoads);
+
+      // Do not keep a failed load, or the same URL could never be retried.
+      skyboxMapLoads.catch(() => {
+        if (this.skyboxCache.get(url) === skyboxMapLoads) {
+          this.skyboxCache.delete(url);
+        }
+      });
     }
 
     return this.skyboxCache.get(url)!;
