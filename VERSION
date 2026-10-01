@@ -1,0 +1,10 @@
+commit bdd37b87aa0af79ef409918a86a18477e16c7e4c
+Author: Chi-Wei Lee <levi74108520963@gmail.com>
+Date:   Fri Oct 2 05:16:19 2026 +0800
+
+    fix: retry an environment or skybox URL after a failed load (#5197)
+    
+    TextureUtils cached the load promise per URL and kept it when the load
+    rejected, so a skybox-image or environment-image URL that failed once
+    (network error, temporary 404) failed again on every later request until
+    the page was reloaded. Drop the cache entry when the load fails.

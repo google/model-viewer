@@ -1,0 +1,338 @@
+{
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5123,
+            "count" : 18360,
+            "max" : [
+                6509
+            ],
+            "min" : [
+                0
+            ],
+            "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 6510,
+            "max" : [
+                2.6307950019836426,
+                9.506563186645508,
+                2.852458953857422
+            ],
+            "min" : [
+                -3.324300527572632,
+                -0.0014147758483886719,
+                -1.7042126655578613
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 6510,
+            "max" : [
+                1,
+                1,
+                1
+            ],
+            "min" : [
+                -1,
+                -1,
+                -1
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5126,
+            "count" : 6510,
+            "max" : [
+                0.9990595579147339,
+                0.9990596017451026
+            ],
+            "min" : [
+                0.0009403982548974454,
+                0.003113090991973877
+            ],
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 4,
+            "componentType" : 5123,
+            "count" : 41838,
+            "max" : [
+                14667
+            ],
+            "min" : [
+                0
+            ],
+            "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 5,
+            "componentType" : 5126,
+            "count" : 14668,
+            "max" : [
+                1.8916611671447754,
+                12.645012855529785,
+                1.2003434896469116
+            ],
+            "min" : [
+                -1.8916611671447754,
+                9.395228385925293,
+                -1.200343370437622
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 6,
+            "componentType" : 5126,
+            "count" : 14668,
+            "max" : [
+                1,
+                1,
+                1
+            ],
+            "min" : [
+                -1,
+                -1,
+                -1
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 7,
+            "componentType" : 5126,
+            "count" : 14668,
+            "max" : [
+                0.9987892508506775,
+                0.9987891529453918
+            ],
+            "min" : [
+                0.0012108470546081662,
+                0.008463442325592041
+            ],
+            "type" : "VEC2"
+        }
+    ],
+    "asset" : {
+        "generator" : "Khronos Blender glTF 2.0 I/O",
+        "version" : "2.0"
+    },
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 36720,
+            "byteOffset" : 0,
+            "target" : 34963
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 78120,
+            "byteOffset" : 36720,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 78120,
+            "byteOffset" : 114840,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 52080,
+            "byteOffset" : 192960,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 83676,
+            "byteOffset" : 245040,
+            "target" : 34963
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 176016,
+            "byteOffset" : 328716,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 176016,
+            "byteOffset" : 504732,
+            "target" : 34962
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 117344,
+            "byteOffset" : 680748,
+            "target" : 34962
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 798092,
+            "uri" : "AntiqueCamera.bin"
+        }
+    ],
+    "extensions" : {},
+    "images" : [
+        {
+            "name" : "camera_camera_Normal",
+            "uri" : "camera_camera_Normal.png"
+        },
+        {
+            "name" : "camera_camera_BaseColor",
+            "uri" : "camera_camera_BaseColor.png"
+        },
+        {
+            "name" : "camera_tripod_BaseColor",
+            "uri" : "camera_tripod_BaseColor.png"
+        },
+        {
+            "name" : "camera_tripod_Normal",
+            "uri" : "camera_tripod_Normal.png"
+        },
+        {
+            "name" : "camera_camera_Roughness",
+            "uri" : "camera_camera_Roughness.png"
+        },
+        {
+            "name" : "camera_tripod_Roughness",
+            "uri" : "camera_tripod_Roughness.png"
+        }
+    ],
+    "materials" : [
+        {
+            "name" : "camera",
+            "normalTexture" : {
+                "index" : 0
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 1
+                },
+                "metallicRoughnessTexture" : {
+                    "index" : 4
+                }
+            }
+        },
+        {
+            "name" : "tripod",
+            "normalTexture" : {
+                "index" : 3
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 2
+                },
+                "metallicRoughnessTexture" : {
+                    "index" : 5
+                }
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "tripod_uv",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "NORMAL" : 2,
+                        "POSITION" : 1,
+                        "TEXCOORD_0" : 3
+                    },
+                    "indices" : 0,
+                    "material" : 1
+                }
+            ]
+        },
+        {
+            "name" : "camera_uv",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "NORMAL" : 6,
+                        "POSITION" : 5,
+                        "TEXCOORD_0" : 7
+                    },
+                    "indices" : 4,
+                    "material" : 0
+                }
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 1,
+            "name" : "camera",
+            "rotation" : [
+                0,
+                -0.7071068286895752,
+                0,
+                0.7071067690849304
+            ],
+            "scale" : [
+                0.5700311064720154,
+                0.5700311064720154,
+                0.5700311064720154
+            ]
+        },
+        {
+            "mesh" : 0,
+            "name" : "tripod",
+            "rotation" : [
+                0,
+                -0.7071068286895752,
+                0,
+                0.7071067690849304
+            ],
+            "scale" : [
+                0.5700311064720154,
+                0.5700311064720154,
+                0.5700311064720154
+            ]
+        }
+    ],
+    "samplers" : [
+        {}
+    ],
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0,
+                1
+            ]
+        }
+    ],
+    "textures" : [
+        {
+            "sampler" : 0,
+            "source" : 0
+        },
+        {
+            "sampler" : 0,
+            "source" : 1
+        },
+        {
+            "sampler" : 0,
+            "source" : 2
+        },
+        {
+            "sampler" : 0,
+            "source" : 3
+        },
+        {
+            "sampler" : 0,
+            "source" : 4
+        },
+        {
+            "sampler" : 0,
+            "source" : 5
+        }
+    ]
+}

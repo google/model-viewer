@@ -1,0 +1,87 @@
+{
+  "scenes" : [
+    {
+      "nodes" : [ 0 ]
+    }
+  ],
+
+  "nodes" : [
+    {
+      "mesh" : 0
+    }
+  ],
+
+  "meshes" : [
+    {
+      "primitives" : [ {
+        "attributes" : {
+          "POSITION" : 1
+        },
+        "indices" : 0,
+        "material": 0
+      }, {
+        "attributes" : {
+          "POSITION" : 1
+        },
+        "indices" : 0,
+        "material": 1
+      } ]
+    }
+  ],
+  "materials": [
+    {"name": "MaterialA", "pbrMetallicRoughness": {
+      "baseColorFactor": [1, 0.766, 0.336, 1.0],
+      "metallicFactor": 0.0,
+      "roughnessFactor": 1.0
+    }},
+    {"name": "MaterialB", "pbrMetallicRoughness": {
+      "baseColorFactor": [0.766, 1, 0.336, 1.0],
+      "metallicFactor": 1.0,
+      "roughnessFactor": 0.0
+    }}
+  ],
+  "buffers" : [
+    {
+      "uri" : "data:application/octet-stream;base64,AAABAAIAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAACAPwAAAAA=",
+      "byteLength" : 44
+    }
+  ],
+  "bufferViews" : [
+    {
+      "buffer" : 0,
+      "byteOffset" : 0,
+      "byteLength" : 6,
+      "target" : 34963
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 8,
+      "byteLength" : 36,
+      "target" : 34962
+    }
+  ],
+  "accessors" : [
+    {
+      "bufferView" : 0,
+      "byteOffset" : 0,
+      "componentType" : 5123,
+      "count" : 3,
+      "type" : "SCALAR",
+      "max" : [ 2 ],
+      "min" : [ 0 ]
+    },
+    {
+      "bufferView" : 1,
+      "byteOffset" : 0,
+      "componentType" : 5126,
+      "count" : 3,
+      "type" : "VEC3",
+      "max" : [ 1.0, 1.0, 0.0 ],
+      "min" : [ 0.0, 0.0, 0.0 ]
+    }
+  ],
+
+  "asset" : {
+    "version" : "2.0"
+  }
+}
