@@ -34,6 +34,11 @@ suite('conversions', () => {
       expect(degreesToRadians(numberNode(1, null)))
           .to.be.eql(numberNode(1, null));
     });
+
+    test('uses the fallback value for non-finite numbers', () => {
+      expect(degreesToRadians(numberNode(NaN, 'deg'), 1))
+          .to.be.eql(numberNode(1, 'rad'));
+    });
   });
 
   suite('radiansToDegrees', () => {
@@ -50,6 +55,11 @@ suite('conversions', () => {
     test('treats numbers without a unit as radians', () => {
       expect(radiansToDegrees(numberNode(Math.PI, null)))
           .to.be.eql(numberNode(180, 'deg'));
+    });
+
+    test('uses the fallback value for non-finite numbers', () => {
+      expect(radiansToDegrees(numberNode(Infinity, 'rad'), 90))
+          .to.be.eql(numberNode(90, 'deg'));
     });
   });
 

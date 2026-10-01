@@ -26,10 +26,9 @@ import {NumberNode, ZERO} from './parsers.js';
  */
 export const degreesToRadians =
     (numberNode: NumberNode, fallbackRadianValue: number = 0): NumberNode => {
-      let {number, unit} = numberNode;
+      const {number, unit} = numberNode;
       if (!isFinite(number)) {
-        number = fallbackRadianValue;
-        unit = 'rad';
+        return {type: 'number', number: fallbackRadianValue, unit: 'rad'};
       } else if (numberNode.unit === 'rad' || numberNode.unit == null) {
         return numberNode;
       }
@@ -52,11 +51,10 @@ export const degreesToRadians =
  */
 export const radiansToDegrees =
     (numberNode: NumberNode, fallbackDegreeValue: number = 0): NumberNode => {
-      let {number, unit} = numberNode;
+      const {number, unit} = numberNode;
 
       if (!isFinite(number)) {
-        number = fallbackDegreeValue;
-        unit = 'deg';
+        return {type: 'number', number: fallbackDegreeValue, unit: 'deg'};
       } else if (numberNode.unit === 'deg') {
         return numberNode;
       }
