@@ -405,7 +405,13 @@ configuration or device capabilities');
 
       this[$arButtonContainer].classList.remove('enabled');
 
-      const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
+      let objectURL: string;
+      try {
+        objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc!;
+      } catch (error) {
+        this[$arButtonContainer].classList.add('enabled');
+        throw error;
+      }
       const modelUrl = new URL(objectURL, self.location.toString());
 
       if (generateUsdz) {
@@ -487,15 +493,22 @@ configuration or device capabilities');
       }
       exportGroup.updateWorldMatrix(false, true);
 
-      const arraybuffer = await exporter.parseAsync(exportGroup, {
-        maxTextureSize: isNaN(this.arUsdzMaxTextureSize as any) ?
-            Infinity :
-            Math.max(parseInt(this.arUsdzMaxTextureSize), 16),
-      });
-
-      for (const m of models) {
-        exportGroup.remove(m);
-        target.add(m);
+      let arraybuffer: ArrayBuffer;
+      try {
+        arraybuffer = await exporter.parseAsync(exportGroup, {
+          maxTextureSize: isNaN(this.arUsdzMaxTextureSize as any) ?
+              Infinity :
+              Math.max(parseInt(this.arUsdzMaxTextureSize), 16),
+        });
+      } finally {
+        for (const m of models) {
+          exportGroup.remove(m);
+          target.add(m);
+        }
+        if (shadow != null) {
+          shadow.visible = visible;
+        }
+        updateSourceProgress(1);
       }
 
       const blob = new Blob([arraybuffer], {
@@ -503,12 +516,6 @@ configuration or device capabilities');
       });
 
       const url = URL.createObjectURL(blob);
-
-      updateSourceProgress(1);
-
-      if (shadow != null) {
-        shadow.visible = visible;
-      }
 
       return url;
     }
