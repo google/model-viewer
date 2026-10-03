@@ -97,6 +97,49 @@ suite('Annotation', () => {
       expect(sceneContainsHotspot(scene, hotspot)).to.be.true;
     });
 
+    suite('focus visibility', () => {
+      setup(async () => {
+        hotspot.style.transition = 'none';
+        await rafPasses();
+        (scene.target.children[numSlots - 1] as Hotspot).hide();
+      });
+
+      for (const nested of [false, true]) {
+        for (const customOpacity of [false, true]) {
+          test(
+              `restores ${customOpacity ? 'custom' : 'default'} opacity with ` +
+                  `focus ${nested ? 'inside' : 'on'} a hidden hotspot`,
+              () => {
+                const minOpacity = customOpacity ? '0.1' : '0.25';
+                const maxOpacity = customOpacity ? '0.8' : '1';
+                if (customOpacity) {
+                  element.style.setProperty(
+                      '--min-hotspot-opacity', minOpacity);
+                  element.style.setProperty(
+                      '--max-hotspot-opacity', maxOpacity);
+                }
+
+                let focusTarget: HTMLElement = hotspot;
+                if (nested) {
+                  focusTarget = document.createElement('button');
+                  focusTarget.textContent = 'Annotation';
+                  hotspot.appendChild(focusTarget);
+                } else {
+                  hotspot.tabIndex = 0;
+                }
+
+                expect(getComputedStyle(hotspot).opacity).to.equal(minOpacity);
+                focusTarget.focus();
+                expect(document.activeElement).to.equal(focusTarget);
+                expect(getComputedStyle(hotspot).opacity).to.equal(maxOpacity);
+
+                focusTarget.blur();
+                expect(getComputedStyle(hotspot).opacity).to.equal(minOpacity);
+              });
+        }
+      }
+    });
+
     test.skip('querying it returns valid data', () => {
       // to test querying, place hotspot in the center and verify the screen
       // position is half the default width and height (300 x 150) with a depth
