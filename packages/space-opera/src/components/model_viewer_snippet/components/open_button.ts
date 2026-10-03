@@ -36,6 +36,7 @@ import {Dropdown} from '../../shared/dropdown/dropdown.js';
 import {SnippetViewer} from '../../shared/snippet_viewer/snippet_viewer.js';
 import {isObjectUrl} from '../../utils/create_object_url.js';
 import {renderModelViewer} from '../../utils/render_model_viewer.js';
+import {resolveUploadedFile} from '../../utils/resolve_resource.js';
 import {parseHotspotsFromSnippet} from '../parse_hotspot_config.js';
 import {applyRelativeFilePaths, dispatchExtraAttributes, getExtraAttributes} from '../reducer.js';
 
@@ -216,21 +217,24 @@ export class ImportCard extends LitElement {
 
   async onUpload(fileMap: Map<string, File>) {
     const modelViewer = getModelViewer();
-    let rootPath: string;
     for (const [path, file] of fileMap) {
       const filename = file.name.toLowerCase();
       if (filename.match(/\.(gltf|glb)$/)) {
         const blobURLs: Array<string> = [];
-        rootPath = path.replace(file.name, '');
+        const rootPath = path.slice(0, path.lastIndexOf('/') + 1);
+        const fileURL = URL.createObjectURL(file);
+        const resourcePath = fileURL.slice(0, fileURL.lastIndexOf('/') + 1);
 
         ModelViewerElement.mapURLs((url: string) => {
-          const index = url.lastIndexOf('/');
-
-          const normalizedURL =
-              rootPath + url.substr(index + 1).replace(/^(\.?\/)/, '');
-
-          if (fileMap.has(normalizedURL)) {
-            const blob = fileMap.get(normalizedURL)!;
+          // Three.js resolves relative glTF URIs against the model's blob URL.
+          // Resolve those URIs against the uploaded directory instead, leaving
+          // external URLs and embedded resources unchanged.
+          if (url === fileURL || !url.startsWith(resourcePath)) {
+            return url;
+          }
+          const blob = resolveUploadedFile(
+              url.slice(resourcePath.length), rootPath, fileMap);
+          if (blob) {
             const blobURL = URL.createObjectURL(blob);
             blobURLs.push(blobURL);
             return blobURL;
@@ -243,8 +247,6 @@ export class ImportCard extends LitElement {
           blobURLs.forEach(URL.revokeObjectURL);
         });
 
-        const fileURL =
-            typeof file === 'string' ? file : URL.createObjectURL(file);
         const state = reduxStore.getState();
         this.selectedDefaultOption = 0;
         reduxStore.dispatch(dispatchSetModelName(file.name));
