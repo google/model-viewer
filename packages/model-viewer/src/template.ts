@@ -103,7 +103,7 @@ canvas {
   pointer-events: initial;
 }
 
-.annotation-wrapper.hide ::slotted(*) {
+.annotation-wrapper.hide:not(:focus-within) ::slotted(*) {
   opacity: var(--min-hotspot-opacity, 0.25);
 }
 
