@@ -482,6 +482,10 @@ configuration or device capabilities');
 
       updateSourceProgress(0.2);
 
+      const usdzOptions = this.arPlacement === 'wall' ?
+          {includeAnchoringProperties: false} :
+          {};
+
       const exporter = new USDZExporter();
 
       const exportGroup = new Object3D();
@@ -496,6 +500,7 @@ configuration or device capabilities');
       let arraybuffer: ArrayBuffer;
       try {
         arraybuffer = await exporter.parseAsync(exportGroup, {
+          ...usdzOptions,
           maxTextureSize: isNaN(this.arUsdzMaxTextureSize as any) ?
               Infinity :
               Math.max(parseInt(this.arUsdzMaxTextureSize), 16),

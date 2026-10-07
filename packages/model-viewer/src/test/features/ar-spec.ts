@@ -16,6 +16,7 @@
 import '../renderer-gate.js';
 
 import {expect} from 'chai';
+import {strFromU8, unzipSync} from 'three/examples/jsm/libs/fflate.module.js';
 
 import {IS_ANDROID, IS_IOS} from '../../constants.js';
 import {$openIOSARQuickLook, $openSceneViewer} from '../../features/ar.js';
@@ -248,6 +249,64 @@ suite('AR', () => {
           expect(url.hash).to.equal(
               '#custom=path-to-banner.html&allowsContentScaling=0');
         });
+  });
+
+  suite('prepareUSDZ placement', () => {
+    const readUsda = async (url: string) => {
+      try {
+        const response = await fetch(url);
+        const files = unzipSync(new Uint8Array(await response.arrayBuffer()));
+        return strFromU8(files['model.usda']);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+
+    const transforms = (usda: string) => usda.split('\n').filter(
+        line => line.includes('matrix4d xformOp:transform'));
+
+    for (const src
+             of [assetPath('models/cube.gltf'),
+                 assetPath('models/offcenter-cube.gltf'),
+                 '/packages/modelviewer.dev/assets/boom_2_.glb']) {
+      test(`preserves transforms and viewer state for ${src}`, async () => {
+        element.src = src;
+        element.orientation = '15deg 25deg 35deg';
+        await waitForEvent(element, 'load');
+        await element.updateComplete;
+
+        const scene = element[$scene];
+        const model = scene.models[0];
+        const position = model.position.clone();
+        const quaternion = model.quaternion.clone();
+        const scale = model.scale.clone();
+        const targetPosition = scene.target.position.clone();
+
+        const floor = await readUsda(await (element as any).prepareUSDZ());
+        expect(floor).to.include('preliminary:anchoring:type = "plane"');
+        expect(floor).to.include(
+            'preliminary:planeAnchoring:alignment = "horizontal"');
+        expect(transforms(floor)).not.to.be.empty;
+
+        element.arPlacement = 'wall';
+        element.resetTurntableRotation(0.7);
+        const wall = await readUsda(await (element as any).prepareUSDZ());
+        expect(wall).not.to.include('preliminary:anchoring:type');
+        expect(wall).not.to.include('preliminary:planeAnchoring:alignment');
+        expect(transforms(wall)).to.deep.equal(transforms(floor));
+
+        element.resetTurntableRotation(1.3);
+        const rotatedWall =
+            await readUsda(await (element as any).prepareUSDZ());
+        expect(transforms(rotatedWall)).to.deep.equal(transforms(wall));
+        expect(element.turntableRotation).to.equal(1.3);
+        expect(model.parent).to.equal(scene.target);
+        expect(model.position.equals(position)).to.be.true;
+        expect(model.quaternion.equals(quaternion)).to.be.true;
+        expect(model.scale.equals(scale)).to.be.true;
+        expect(scene.target.position.equals(targetPosition)).to.be.true;
+      });
+    }
   });
 
   suite('shows the AR button', () => {
