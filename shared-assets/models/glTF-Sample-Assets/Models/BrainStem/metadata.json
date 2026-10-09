@@ -1,0 +1,25 @@
+{
+    "version": 2,
+    "legal": [
+        {
+            "license": "LicenseRef-Poser-EULA",
+            "licenseUrl": "https://archive.org/stream/poser-pro-2014-reference-manual/Poser_Pro_2014_reference_manual_djvu.txt",
+            "artist": "Keith Hunter",
+            "year": "2017",
+            "owner": "Smith Micro Software, Inc.",
+            "what": "Everything",
+            "text": "Poser EULA",
+            "spdx": "LicenseRef-Poser-EULA",
+            "icon": ""
+        }
+    ],
+    "tags": [
+        "core",
+        "testing"
+    ],
+    "screenshot": "screenshot/screenshot.gif",
+    "name": "BrainStem",
+    "path": "./Models/BrainStem",
+    "summary": "Animations. Skins.",
+    "createReadme": true
+}

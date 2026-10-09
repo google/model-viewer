@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>&lt;model-viewer&gt;</title>
+    <meta charset="utf-8">
+    <meta name="description" content="&lt;model-viewer&gt;">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="../styles/ux-test.css" rel="stylesheet" />
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+
+
+    
+    <script type='module' src='https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js'></script>
+</head>
+<body>
+    <h1>AR through external apps</h1>
+    <model-viewer 
+        src='../assets/ShopifyModels/Chair.glb' 
+        poster='../assets/ShopifyModels/Chair.png' 
+        camera-controls
+        shadow-intensity='1' 
+        ar
+        ar-modes='scene-viewer quick-look'
+        touch-action='none'>
+
+        <button slot="ar-button" id="ar-button">
+            View in your space
+        </button>
+    </model-viewer>
+    <p>The "View in your Space" button activates AR through Scene Viewer on Android or Quick Look on iOS. 
+        These experiences are apps outside of the browser and cannot render custom HTML, nor communicate state with the website.</p>
+</body>
+</html>
