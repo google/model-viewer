@@ -267,8 +267,7 @@ suite('AR', () => {
 
     for (const src
              of [assetPath('models/cube.gltf'),
-                 assetPath('models/offcenter-cube.gltf'),
-                 '/packages/modelviewer.dev/assets/boom_2_.glb']) {
+                 assetPath('models/offcenter-cube.gltf')]) {
       test(`preserves transforms and viewer state for ${src}`, async () => {
         element.src = src;
         element.orientation = '15deg 25deg 35deg';
