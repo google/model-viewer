@@ -106,7 +106,19 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
       if ((changedProperties.has('environmentImage') ||
            changedProperties.has('skyboxImage')) &&
           this[$shouldAttemptPreload]()) {
-        this[$updateEnvironment]();
+        const native = this[$scene].nativeRenderer?.isActive;
+        if (!native || this.loaded) {
+          const updated = this[$updateEnvironment]();
+          if (native) {
+            updated.catch(error => {
+              if ((error as Error)?.name !== 'AbortError') {
+                this.dispatchEvent(new CustomEvent(
+                    'error',
+                    {detail: {type: 'loadfailure', sourceError: error}}));
+              }
+            });
+          }
+        }
       }
 
       if (changedProperties.has('skyboxHeight')) {
@@ -120,6 +132,10 @@ export const EnvironmentMixin = <T extends Constructor<ModelViewerElementBase>>(
     }
 
     async[$updateEnvironment]() {
+      if (this[$scene].nativeRenderer?.isActive) {
+        await this[$scene].nativeRenderer!.updateEnvironment();
+        return;
+      }
       const {skyboxImage, environmentImage} = this;
 
       if (this[$cancelEnvironmentUpdate] != null) {
