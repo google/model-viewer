@@ -65,7 +65,8 @@
     "watch:rollup": "rollup -c -w --environment NODE_ENV:production",
     "watch:rollup:dev": "rollup -c -w --environment NODE_ENV:development",
     "watch:test": "web-test-runner --playwright --browsers chromium --watch",
-    "build:dev:serve": "npm run build:dev && npm run serve"
+    "build:dev:serve": "npm run build:dev && npm run serve",
+    "release:exit-gate": "npx --yes google-artifactregistry-auth --repo-config=.npmrc --credential-config=$HOME/.npmrc && npm publish && VERSION=$(node -p \"require('./package.json').version\") && printf '{\"publish_all\":false,\"publishing_groups\":[{\"packages\":[{\"name\":\"@google/model-viewer\",\"version\":\"%s\"}]}]}\\n' \"$VERSION\" > /tmp/model-viewer-manifest-$VERSION.json && gcloud storage cp /tmp/model-viewer-manifest-$VERSION.json gs://oss-exit-gate-prod-projects-bucket/model-viewer/npm/manifests/manifest-$VERSION-$(date +%s).json"
   },
   "keywords": [
     "ar",
@@ -114,6 +115,7 @@
     "typescript": "5.8.2"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://us-npm.pkg.dev/oss-exit-gate-prod/model-viewer--npm/"
   }
 }
