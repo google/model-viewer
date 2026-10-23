@@ -1,0 +1,177 @@
+<!--
+/* @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>&lt;model-viewer&gt; fuzzer test</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link type="text/css" href="../styles/examples.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
+
+
+
+<style>
+#controls-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+#controls-container > paper-slider {
+  margin: 0 auto;
+}
+</style>
+</head>
+<body>
+    <div id="container">
+        <h1>&lt;model-viewer&gt; - fuzzer test</h1>
+        <div class="desc">
+            <p>This page executes a handful of attribute changes randomly at random intervals to shake our bugs and memory leaks.</p>
+        </div>
+
+        <div id="controls-container">
+            <div>Minimum Change Interval: <span class="interval-display" id="min-interval-display"></span></div>
+            <paper-slider id="min-interval" data-display='#min-interval-display' pin value="50" min="10" max="2000"></paper-slider>
+            <div>Maximum Change Interval: <span class="interval-display" id="max-interval-display"></span></div>
+            <paper-slider id="max-interval" pin data-display='#max-interval-display' value="200" min="100" max="5000"></paper-slider>
+            <paper-button raised id="run">Run</paper-button>
+        </div>
+        <model-viewer id="fuzzee"></model-viewer>
+
+        <a href="https://github.com/google/model-viewer/blob/master/examples/fuzzer.html"
+          class="viewSource">View source<a/>
+
+        
+        <script src="./built/dependencies.js"></script>
+        <script src="../node_modules/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script>
+const model = $('#fuzzee');
+const randomFrom = array => array[Math.floor(Math.random() * array.length)];
+
+const attributes = [{
+    name: 'src',
+    probability: 0.5,
+    values: [
+        'assets/DamagedHelmet/DamagedHelmet.gltf',
+        'assets/BarramundiFish/glTF-Binary/BarramundiFish.glb',
+        'assets/Astronaut.glb',
+        'assets/reflective-sphere.gltf',
+        'i-do-not-exist.gltf',
+    ],
+}, {
+    name: 'background-color',
+    probability: 0.5,
+    values: [
+        '#ff0077',
+        'not-a-color',
+    ],
+}, {
+    name: 'skybox-image',
+    probability: 0.5,
+    values: [
+        'assets/spruit_sunrise_1k_LDR.jpg',
+        'assets/small_hangar_01_1k.jpg',
+        'assets/whipple_creek_regional_park_04_1k.hdr',
+        'i-do-not-exist.jpg',
+    ],
+}, {
+    name: 'controls',
+    probability: 0.2,
+    values: [],
+}, {
+    name: 'auto-rotate',
+    probability: 0.2,
+    values: [],
+}, {
+    name: 'ios-src',
+    probability: 0.5,
+    values: [
+        'assets/Astronaut.usdz',
+        'assets/Astronaut.glb',
+        'i-do-not-exist.usdz',
+    ],
+}, {
+    name: 'preload',
+    probability: 0.2,
+    values: [],
+}, {
+    name: 'poster',
+    probability: 0.2,
+    values: [
+        'assets/poster.png',
+        'assets/poster2.png',
+        'i-do-not-exist.png',
+    ],
+}, {
+    name: 'reveal-when-loaded',
+    probability: 0.2,
+    values: [],
+}, {
+    name: 'unstable-webxr',
+    probability: 0.2,
+    values: [],
+}];
+attributes.forEach(attr => attr.values.push(null, ''));
+
+function updateAttribute (attr, values) {
+    const value = randomFrom(values);
+
+    if (value === null) {
+        model.removeAttribute(attr);
+    } else {
+        model.setAttribute(attr, value);
+    }
+}
+
+let timer = null;
+function tick() {
+    const minInterval = parseInt($('#min-interval').value, 10);
+    const maxInterval = parseInt($('#max-interval').value, 10);
+    for (let attribute of attributes) {
+        if (Math.random() > attribute.probability) {
+            continue;
+        }
+        updateAttribute(attribute.name, attribute.values);
+    }
+
+    const nextInterval = minInterval + (maxInterval - minInterval) * Math.random();
+    timer = setTimeout(tick, nextInterval);
+}
+
+function onIntervalChange (e) {
+    const display = $(e.target.dataset.display);
+    display.innerText = `${e.target.value}ms`;
+}
+
+$('#min-interval').addEventListener('change', onIntervalChange);
+$('#max-interval').addEventListener('change', onIntervalChange);
+
+onIntervalChange({ target: $('#min-interval') });
+onIntervalChange({ target: $('#max-interval') });
+$('#run').addEventListener('click', e => {
+    if (e.target.dataset.running) {
+        delete e.target.dataset.running;
+        e.target.innerText = 'Run';
+        clearTimeout(timer);
+    } else {
+        e.target.dataset.running = true;
+        e.target.innerText = 'Stop';
+        tick();
+    }
+});
+</script>
+</body>
+</html>

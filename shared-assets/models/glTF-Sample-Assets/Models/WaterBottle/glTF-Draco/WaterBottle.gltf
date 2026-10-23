@@ -1,0 +1,196 @@
+{
+  "accessors": [
+    {
+      "componentType": 5123,
+      "count": 13530,
+      "type": "SCALAR"
+    },
+    {
+      "componentType": 5126,
+      "count": 2549,
+      "type": "VEC2"
+    },
+    {
+      "componentType": 5126,
+      "count": 2549,
+      "type": "VEC3"
+    },
+    {
+      "componentType": 5126,
+      "count": 2549,
+      "type": "VEC4"
+    },
+    {
+      "componentType": 5126,
+      "count": 2549,
+      "type": "VEC3",
+      "max": [
+        0.054586463398143624,
+        0.13034756942403516,
+        0.054586449498143626
+      ],
+      "min": [
+        -0.054577240424035174,
+        -0.13034756942403516,
+        -0.05457725432403517
+      ]
+    }
+  ],
+  "asset": {
+    "generator": "glTF Tools for Unity",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 49577
+    }
+  ],
+  "buffers": [
+    {
+      "name": "WaterBottle",
+      "byteLength": 49580,
+      "uri": "WaterBottle.bin"
+    }
+  ],
+  "images": [
+    {
+      "name": "WaterBottle_baseColor",
+      "uri": "WaterBottle_baseColor.png"
+    },
+    {
+      "name": "WaterBottle_occlusionRoughnessMetallic",
+      "uri": "WaterBottle_occlusionRoughnessMetallic.png"
+    },
+    {
+      "name": "WaterBottle_normal",
+      "uri": "WaterBottle_normal.png"
+    },
+    {
+      "name": "WaterBottle_emissive",
+      "uri": "WaterBottle_emissive.png"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "TEXCOORD_0": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "POSITION": 4
+          },
+          "indices": 0,
+          "material": 0,
+          "mode": 4,
+          "extensions": {
+            "KHR_draco_mesh_compression": {
+              "bufferView": 0,
+              "attributes": {
+                "TEXCOORD_0": 0,
+                "NORMAL": 1,
+                "TANGENT": 2,
+                "POSITION": 3
+              }
+            }
+          }
+        }
+      ],
+      "name": "WaterBottle"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0,
+          "texCoord": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1,
+          "texCoord": 0
+        },
+        "baseColorFactor": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallicFactor": 1,
+        "roughnessFactor": 1
+      },
+      "normalTexture": {
+        "index": 2,
+        "texCoord": 0
+      },
+      "occlusionTexture": {
+        "index": 1,
+        "texCoord": 0
+      },
+      "emissiveFactor": [
+        1,
+        1,
+        1
+      ],
+      "emissiveTexture": {
+        "index": 3,
+        "texCoord": 0
+      },
+      "name": "BottleMat",
+      "alphaMode": "OPAQUE",
+      "doubleSided": false
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "rotation": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "name": "WaterBottle",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "source": 0
+    },
+    {
+      "source": 1
+    },
+    {
+      "source": 2
+    },
+    {
+      "source": 3
+    }
+  ],
+  "extensionsRequired": [
+    "KHR_draco_mesh_compression"
+  ],
+  "extensionsUsed": [
+    "KHR_draco_mesh_compression"
+  ]
+}

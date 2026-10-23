@@ -1,0 +1,293 @@
+<!--
+ @license
+ Copyright 2020 Google LLC. All Rights Reserved.
+ Licensed under the Apache License, Version 2.0 (the 'License');
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an 'AS IS' BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="&lt;model-viewer&gt; editor">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <meta property="og:title" content='﹤model-viewer﹥ Editor - Edit your asset files for 3D & AR' />
+  <meta property="og:description"
+    content="A tool to edit glTF and glb files ✏️, and configure them to use the ﹤model-viewer﹥ 3D & AR web component 🌐" />
+  <title>Model Editor</title>
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+  <link rel="shortcut icon" type="image/png" href="../../shared-assets/icons/favicon.png" />
+  <script defer src="https://web3dsurvey.com/collector.js"></script>
+  <!-- Web animations for paper-dropdown -->
+  <script src="../node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
+  <script src="../node_modules/js-beautify/js/lib/beautify-html.js"></script>
+  <script src="../node_modules/js-beautify/js/lib/beautify-css.js"></script>
+  <script>
+    // Necessary hack for Redux. See: https://github.com/reduxjs/redux/pull/2910
+    window.process = {
+      env: {
+        NODE_ENV: 'production'
+      }
+    };
+  </script>
+  <script type="module" src="../dist/space-opera.js">
+
+  </script>
+  <script>
+    window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;
+    ga('create', 'UA-169901325-1', { 'storage': 'none' });
+    ga('set', 'referrer', document.referrer.split('?')[0]);
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+</head>
+<style>
+  :root {
+    --expandable-section-background: #2b2d30;
+    --expandable-section-text: #EEEEEE;
+    --text-on-expandable-background: #F5F5F5;
+    --number-input-background: #212121;
+  }
+
+  html, body {
+    width: 100vw;
+    height: 100lvh;
+    overflow: hidden;
+  }
+
+  .hamburger {
+    position: absolute;
+    z-index: 999;
+    top: 0.72rem;
+    left: 0.72rem;
+    border-radius: 4px;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+    box-shadow: 2.75px 2.75px 4px 0px #00000024;
+    background: #ffffffc4;
+    backdrop-filter: blur(4px) brightness(0.92);
+    display: none;
+  }
+
+  .hamburger input {
+    display: none;
+  }
+
+  .hamburger svg {
+    /* The size of the SVG defines the overall size */
+    height: 3em;
+    /* Define the transition for transforming the SVG */
+    transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .line {
+    fill: none;
+    stroke: #3c4043;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 3;
+    /* Define the transition for transforming the Stroke */
+    transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+      stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .line-top-bottom {
+    stroke-dasharray: 12 63;
+  }
+
+  .hamburger input:checked+svg {
+    transform: rotate(-45deg);
+  }
+
+  .hamburger input:checked+svg .line-top-bottom {
+    stroke-dasharray: 20 300;
+    stroke-dashoffset: -32.42;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .header {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    height: 48px;
+    justify-content: space-between;
+    padding: 0 12px;
+  }
+
+  /* Container for renderer (left) and tabs (right). */
+  .editor-body-root {
+    display: flex;
+    flex: auto;
+    /* Grows to fill space under header */
+    height: 0;
+    overflow: hidden;
+  }
+
+  .mvContainer {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    width: 100%;
+  }
+
+  model-viewer-preview {
+    height: 100%;
+  }
+
+  me-tabs {
+    background-color: #202124;
+    /* GOOGLE_GREY_900 */
+    padding: 0;
+    width: 360px;
+    min-width: 360px;
+    max-width: 360px;
+  }
+
+  me-tabs a {
+    color: #dadcff;
+    /* GOOGLE_GREY_300, but.. bluer */
+  }
+
+  me-tabbed-panel {
+    max-height: calc(100vh - 105px);
+    overflow-y: auto;
+    display: block;
+  }
+
+  me-tabbed-panel::-webkit-scrollbar {
+    width: 8px;
+    background-color: #c1c1c1;
+    border-radius: 0.2rem;
+  }
+
+  me-tabbed-panel::-webkit-scrollbar-thumb {
+    background-color: #202124b0;
+    border-radius: 0.2rem;
+  }
+
+  me-tabbed-panel::-webkit-scrollbar-thumb:hover {
+    background-color: #202124b8;
+  }
+
+  .privacy {
+    color: #BDBDBD;
+    padding: 5px 16px;
+    position: absolute;
+    bottom: 0;
+    font-size: small;
+    z-index: 0;
+    background-color: rgba(32, 33, 36, .75);
+    backdrop-filter: blur(5px) brightness(0.92) saturate(1.27) contrast(1.2);
+  }
+
+  @media only screen and (max-width: 768px) {
+    me-tabs {
+      position: absolute;
+      top: 0;
+      right: 0;
+      transform: translateX(100%);
+      transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 100%;
+    }
+
+    .hamburger {
+      display: block;
+    }
+
+    .hamburger:has(>input:checked)+model-editor me-tabs {
+      transform: translateX(0);
+    }
+
+  }
+
+  @media only screen and (max-width: 450px) {
+    me-tabs {
+      min-width: 100%;
+    }
+  }
+
+  @media only screen and (max-height: 600px) {
+    .privacy {
+      z-index: -1;
+    }
+  }
+
+  .privacy-link {
+    color: #BDBDBD;
+  }
+</style>
+
+<body>
+  <label class="hamburger">
+    <input type="checkbox">
+    <svg viewBox="0 0 32 32">
+      <path class="line line-top-bottom"
+        d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22">
+      </path>
+      <path class="line" d="M7 16 27 16"></path>
+    </svg>
+  </label>
+  <model-editor>
+    <div class="app">
+      <div class="editor-body-root">
+        <div class="mvContainer">
+          <model-viewer-preview id="editing_adapter">
+          </model-viewer-preview>
+        </div>
+        <me-tabs>
+          <me-tabbed-panel icon="import_export">
+            <me-export-panel></me-export-panel>
+            <div style="margin-bottom: 70px;"></div>
+            <div class="privacy">
+              This &lt;model-viewer&gt; editor does not send any imported content to servers except to deploy to your
+              mobile device:
+              <a href="https://policies.google.com/privacy" class="privacy-link" target="_blank">
+                Privacy
+              </a>
+            </div>
+          </me-tabbed-panel>
+          <me-tabbed-panel icon="create">
+            <me-export-panel header></me-export-panel>
+            <me-ibl-selector></me-ibl-selector>
+            <me-animation-controls></me-animation-controls>
+            <me-hotspot-panel></me-hotspot-panel>
+          </me-tabbed-panel>
+          <me-tabbed-panel icon="photo_camera">
+            <me-export-panel header></me-export-panel>
+            <me-camera-settings></me-camera-settings>
+          </me-tabbed-panel>
+          <me-tabbed-panel icon="color_lens">
+            <me-materials-panel></me-materials-panel>
+          </me-tabbed-panel>
+          <me-tabbed-panel icon="search">
+            <me-inspector-panel></me-inspector-panel>
+          </me-tabbed-panel>
+        </me-tabs>
+      </div>
+    </div>
+  </model-editor>
+</body>

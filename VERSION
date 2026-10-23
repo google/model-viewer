@@ -1,0 +1,5 @@
+commit 626f7498f3b8bf1130d0ca0c7b7bb756d6fb89ee
+Author: alonsopf89 <alonsopf@gmail.com>
+Date:   Fri Oct 23 11:00:38 2026 -0700
+
+    ci: migrate @google/model-viewer npm publishing from Wombat to OSS Exit Gate (#5207)

@@ -1,0 +1,390 @@
+{
+  "accessors": [
+    {
+      "componentType": 5123,
+      "count": 2616,
+      "type": "SCALAR"
+    },
+    {
+      "componentType": 5126,
+      "count": 926,
+      "type": "VEC2"
+    },
+    {
+      "componentType": 5126,
+      "count": 926,
+      "type": "VEC3"
+    },
+    {
+      "componentType": 5126,
+      "count": 926,
+      "type": "VEC4"
+    },
+    {
+      "componentType": 5126,
+      "count": 926,
+      "type": "VEC3",
+      "max": [
+        7.763261942994626,
+        12.84464697874939,
+        2.32315730727406
+      ],
+      "min": [
+        -7.758136748749389,
+        -12.844646978749388,
+        -2.3282473087493893
+      ]
+    },
+    {
+      "componentType": 5123,
+      "count": 3744,
+      "type": "SCALAR"
+    },
+    {
+      "componentType": 5126,
+      "count": 756,
+      "type": "VEC2"
+    },
+    {
+      "componentType": 5126,
+      "count": 756,
+      "type": "VEC3"
+    },
+    {
+      "componentType": 5126,
+      "count": 756,
+      "type": "VEC4"
+    },
+    {
+      "componentType": 5126,
+      "count": 756,
+      "type": "VEC3",
+      "max": [
+        0.1295650216751343,
+        0.6529877721543722,
+        0.1295650216751343
+      ],
+      "min": [
+        -0.12984544515437227,
+        -0.6529877721543722,
+        -0.12984544515437227
+      ]
+    },
+    {
+      "componentType": 5123,
+      "count": 9822,
+      "type": "SCALAR"
+    },
+    {
+      "componentType": 5126,
+      "count": 2468,
+      "type": "VEC2"
+    },
+    {
+      "componentType": 5126,
+      "count": 2468,
+      "type": "VEC3"
+    },
+    {
+      "componentType": 5126,
+      "count": 2468,
+      "type": "VEC4"
+    },
+    {
+      "componentType": 5126,
+      "count": 2468,
+      "type": "VEC3",
+      "max": [
+        1.0367896963214462,
+        2.531752207620909,
+        1.0367873063214461
+      ],
+      "min": [
+        -1.0365534976209085,
+        -2.531752207620909,
+        -1.0365558876209087
+      ]
+    }
+  ],
+  "asset": {
+    "generator": "glTF Tools for Unity",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 17392
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 17392,
+      "byteLength": 15281
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 32676,
+      "byteLength": 48291
+    }
+  ],
+  "buffers": [
+    {
+      "name": "Lantern",
+      "byteLength": 80968,
+      "uri": "Lantern.bin"
+    }
+  ],
+  "images": [
+    {
+      "name": "Lantern_baseColor",
+      "uri": "Lantern_baseColor.png"
+    },
+    {
+      "name": "Lantern_roughnessMetallic",
+      "uri": "Lantern_roughnessMetallic.png"
+    },
+    {
+      "name": "Lantern_normal",
+      "uri": "Lantern_normal.png"
+    },
+    {
+      "name": "Lantern_emissive",
+      "uri": "Lantern_emissive.png"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "TEXCOORD_0": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "POSITION": 4
+          },
+          "indices": 0,
+          "material": 0,
+          "mode": 4,
+          "extensions": {
+            "KHR_draco_mesh_compression": {
+              "bufferView": 0,
+              "attributes": {
+                "TEXCOORD_0": 0,
+                "NORMAL": 1,
+                "TANGENT": 2,
+                "POSITION": 3
+              }
+            }
+          }
+        }
+      ],
+      "name": "LanternPole_Body"
+    },
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "TEXCOORD_0": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "POSITION": 9
+          },
+          "indices": 5,
+          "material": 0,
+          "mode": 4,
+          "extensions": {
+            "KHR_draco_mesh_compression": {
+              "bufferView": 1,
+              "attributes": {
+                "TEXCOORD_0": 0,
+                "NORMAL": 1,
+                "TANGENT": 2,
+                "POSITION": 3
+              }
+            }
+          }
+        }
+      ],
+      "name": "LanternPole_Chain"
+    },
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "TEXCOORD_0": 11,
+            "NORMAL": 12,
+            "TANGENT": 13,
+            "POSITION": 14
+          },
+          "indices": 10,
+          "material": 0,
+          "mode": 4,
+          "extensions": {
+            "KHR_draco_mesh_compression": {
+              "bufferView": 2,
+              "attributes": {
+                "TEXCOORD_0": 0,
+                "NORMAL": 1,
+                "TANGENT": 2,
+                "POSITION": 3
+              }
+            }
+          }
+        }
+      ],
+      "name": "LanternPole_Lantern"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0,
+          "texCoord": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1,
+          "texCoord": 0
+        },
+        "baseColorFactor": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallicFactor": 1,
+        "roughnessFactor": 1
+      },
+      "normalTexture": {
+        "index": 2,
+        "texCoord": 0
+      },
+      "emissiveFactor": [
+        1,
+        1,
+        1
+      ],
+      "emissiveTexture": {
+        "index": 3,
+        "texCoord": 0
+      },
+      "name": "LanternPost_Mat",
+      "alphaMode": "OPAQUE",
+      "doubleSided": false
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "translation": [
+        -3.82315421,
+        13.01603,
+        0
+      ],
+      "name": "LanternPole_Body",
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "mesh": 1,
+      "translation": [
+        -9.582001,
+        21.0378723,
+        0
+      ],
+      "name": "LanternPole_Chain",
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "mesh": 2,
+      "translation": [
+        -9.582007,
+        18.0091515,
+        0
+      ],
+      "name": "LanternPole_Lantern",
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "children": [
+        0,
+        1,
+        2
+      ],
+      "rotation": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "name": "Lantern",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        3
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "source": 0
+    },
+    {
+      "source": 1
+    },
+    {
+      "source": 2
+    },
+    {
+      "source": 3
+    }
+  ],
+  "extensionsRequired": [
+    "KHR_draco_mesh_compression"
+  ],
+  "extensionsUsed": [
+    "KHR_draco_mesh_compression"
+  ]
+}

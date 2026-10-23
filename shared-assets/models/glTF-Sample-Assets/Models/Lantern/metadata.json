@@ -1,0 +1,36 @@
+{
+    "version": 2,
+    "legal": [
+        {
+            "license": "CC0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+            "artist": "sbtron",
+            "year": "2017",
+            "owner": "Microsoft",
+            "what": "Initial version",
+            "text": "CC0 1.0 Universal",
+            "spdx": "CC0-1.0",
+            "icon": "https://licensebuttons.net/p/zero/1.0/88x31.png"
+        },
+        {
+            "license": "CC0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+            "artist": "Frank Galligan",
+            "year": "2018",
+            "owner": "Frank Galligan",
+            "what": "Draco compression",
+            "text": "CC0 1.0 Universal",
+            "spdx": "CC0-1.0",
+            "icon": "https://licensebuttons.net/p/zero/1.0/88x31.png"
+        }
+    ],
+    "tags": [
+        "core",
+        "testing"
+    ],
+    "screenshot": "screenshot/screenshot.jpg",
+    "name": "Lantern",
+    "path": "./Models/Lantern",
+    "summary": "Old wooden street light.",
+    "createReadme": true
+}

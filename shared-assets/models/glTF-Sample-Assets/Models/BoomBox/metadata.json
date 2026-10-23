@@ -1,0 +1,25 @@
+{
+    "version": 2,
+    "legal": [
+        {
+            "license": "CC0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+            "artist": "Microsoft",
+            "year": "2017",
+            "owner": "Public",
+            "what": "Everything",
+            "text": "CC0 1.0 Universal",
+            "spdx": "CC0-1.0",
+            "icon": "https://licensebuttons.net/p/zero/1.0/88x31.png"
+        }
+    ],
+    "tags": [
+        "core",
+        "testing"
+    ],
+    "screenshot": "screenshot/screenshot.jpg",
+    "name": "Boom Box",
+    "path": "./Models/BoomBox",
+    "summary": "A common object with glowing front panel created with Core glTF 2.0.",
+    "createReadme": true
+}
