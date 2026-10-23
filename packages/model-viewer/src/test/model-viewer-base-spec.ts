@@ -118,6 +118,13 @@ suite('ModelViewerElementBase', () => {
       expect((event as any).detail.type).to.be.eq('loadfailure');
     });
 
+    test('does not reference an SVG mask from its shadow root', () => {
+      // Chromium keeps the shadow tree of a removed element alive when a
+      // mask is referenced as url(#id) inside of it.
+      expect(element.shadowRoot!.querySelectorAll('mask, [mask]').length)
+          .to.be.equal(0);
+    });
+
     test('when losing the GL context, dispatches an error event', async () => {
       const {threeRenderer, canvas3D} = Renderer.singleton;
 
