@@ -107,6 +107,7 @@ export class Renderer extends
   private multipleScenesVisible = false;
   private lastTick = performance.now();
   private renderedLastFrame = false;
+  private animationFrame: number|null = null;
   private scaleStep = 0;
   private lastStep = DEFAULT_LAST_STEP;
   private avgFrameDuration =
@@ -192,18 +193,36 @@ export class Renderer extends
         this.threeRenderer.setAnimationLoop(
             (time: number, frame?: any) => this.render(time, frame));
       }
+    } else if (this.animationFrame == null) {
+      this.scheduleFrame();
     }
+  }
+
+  // Native models can render even when a WebGL context cannot be created.
+  private scheduleFrame() {
+    this.animationFrame = requestAnimationFrame(time => {
+      this.animationFrame = null;
+      this.render(time);
+      if (this.scenes.size > 0) {
+        this.scheduleFrame();
+      }
+    });
   }
 
   unregisterScene(scene: ModelScene) {
     this.scenes.delete(scene);
 
-    if (this.canvas3D.parentElement === scene.canvas.parentElement) {
-      scene.canvas.parentElement!.removeChild(this.canvas3D);
+    const canvasParent = scene.canvas.parentElement;
+    if (canvasParent != null && this.canvas3D.parentElement === canvasParent) {
+      this.canvas3D.remove();
     }
 
     if (this.canRender && this.scenes.size === 0) {
       this.threeRenderer.setAnimationLoop(null);
+    }
+    if (this.scenes.size === 0 && this.animationFrame != null) {
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = null;
     }
   }
 
@@ -228,7 +247,8 @@ export class Renderer extends
       if (element.modelIsVisible && scene.externalRenderer == null) {
         ++visibleScenes;
       }
-      if (canvas3D.parentElement === scene.canvas.parentElement) {
+      if (canvas3D.parentElement != null &&
+          canvas3D.parentElement === scene.canvas.parentElement) {
         canvas3DScene = scene;
       }
     }
@@ -417,6 +437,10 @@ export class Renderer extends
 
     element[$tick](t, delta);
 
+    if (!this.canRender || scene.nativeRenderer?.isActive) {
+      return;
+    }
+
     const exposureIsNumber =
         typeof exposure === 'number' && !Number.isNaN(exposure);
     const env = element.environmentImage;
@@ -439,7 +463,7 @@ export class Renderer extends
     const delta = t - this.lastTick;
     this.lastTick = t;
 
-    if (!this.canRender || this.isPresenting) {
+    if (this.isPresenting) {
       return;
     }
 
@@ -461,11 +485,11 @@ export class Renderer extends
 
       this.preRender(scene, t, delta);
 
-      if (!this.shouldRender(scene)) {
-        continue;
-      }
-
       if (scene.externalRenderer != null) {
+        const native = scene.nativeRenderer?.isActive;
+        if (native ? !scene.shouldRender() : !this.shouldRender(scene)) {
+          continue;
+        }
         const camera = scene.getCamera();
         camera.updateMatrix();
         const {matrix, projectionMatrix} = camera;
@@ -479,6 +503,14 @@ export class Renderer extends
           viewMatrix: viewMatrix,
           projectionMatrix: projectionMatrix.elements
         });
+        if (native) {
+          scene.hasRendered();
+          ++scene.renderCount;
+        }
+        continue;
+      }
+
+      if (!this.canRender || !this.shouldRender(scene)) {
         continue;
       }
 
@@ -524,6 +556,10 @@ export class Renderer extends
   }
 
   dispose(): Array<ModelViewerElementBase> {
+    if (this.animationFrame != null) {
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = null;
+    }
     if (this.textureUtils != null) {
       this.textureUtils.dispose();
     }
@@ -539,6 +575,7 @@ export class Renderer extends
     for (const scene of this.scenes) {
       elements.push(scene.element);
     }
+    this.scenes.clear();
 
     this.canvas3D.removeEventListener(
         'webglcontextlost', this.onWebGLContextLost);
