@@ -277,6 +277,10 @@ export const AnnotationMixin = <T extends Constructor<ModelViewerElementBase>>(
         this[$scene].addHotspot(hotspot);
       }
       this[$scene].queueRender();
+      if (this[$scene].nativeRenderer?.isActive) {
+        // Adding a hotspot requires geometry that <model> does not expose.
+        this.requestUpdate();
+      }
     }
 
     private[$removeHotspot](node: Node) {

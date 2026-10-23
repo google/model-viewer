@@ -6,7 +6,7 @@
       {
         "name": "src",
         "htmlName": "src",
-        "description": "The URL to the 3D model. Only <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported.",
+        "description": "The URL to the 3D model. <a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0\">glTF</a>/<a href=\"https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification\">GLB</a> models are supported by Three.js. When the browser supports native &lt;model&gt; rendering, its supported resource formats can also be used. Exports and Three.js rendering still require a glTF/GLB resource.",
         "links": [
           "<a href=\"../examples/loading/\">Related examples</a>"
         ],
@@ -69,6 +69,18 @@
         "description": "This attribute makes the browser include credentials (cookies, authorization headers or TLS client certificates) in the request to fetch the 3D model. It's useful if the 3D model file is stored on another server that require authentication. By default the file will be fetch without credentials. Note that this has no effect if you are loading files locally or from the same domain.",
         "links": [
           "<a href=\"https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials\">MDN documentation</a>"
+        ],
+        "default": {
+          "default": "false",
+          "options": "true, false"
+        }
+      },
+      {
+        "name": "disable-native",
+        "htmlName": "disableNative",
+        "description": "Selects Three.js rendering even when the browser supports the native &lt;model&gt; element. Use this for scene graph editing, animation APIs, exact Three.js lighting, or synchronous screenshots. Native rendering is selected automatically for supported resources; unsupported native resources and features fall back to Three.js.",
+        "links": [
+          "<a href=\"../examples/native/\">Native rendering example</a>"
         ],
         "default": {
           "default": "false",
@@ -196,12 +208,12 @@
       {
         "name": "toBlob(options: {mimeType, qualityArgument, idealAspect})",
         "htmlName": "toBlob",
-        "description": "Returns a promise that resolves into a Blob object in the format specified by the <i>mimeType</i> (defaults to image/png). A Blob object represents a file-like object of immutable, raw data. You can also specify a value between 0 and 1 for <i>qualityArgument</i> (Currently only available on Chrome desktop and Firefox) which defaults to 0.92 and 0.8 for image/png and image/webp respectively. By setting <span class='attribute'>idealAspect</span> to true, the blob will be captured at the ideal poster aspect ratio instead of the canvas aspect ratio. This allows for easy poster creation, where a single poster will match the render seamlessly at any canvas aspect ratio."
+        "description": "Returns a promise that resolves into a Blob object in the format specified by the <i>mimeType</i> (defaults to image/png). A Blob object represents a file-like object of immutable, raw data. You can also specify a value between 0 and 1 for <i>qualityArgument</i> (Currently only available on Chrome desktop and Firefox) which defaults to 0.92 and 0.8 for image/png and image/webp respectively. By setting <span class='attribute'>idealAspect</span> to true, the blob will be captured at the ideal poster aspect ratio instead of the canvas aspect ratio. This allows for easy poster creation, where a single poster will match the render seamlessly at any canvas aspect ratio. With native rendering, this method loads the glTF/GLB resource into Three.js before capturing pixels and continues using that renderer."
       },
       {
         "name": "toDataURL(type, encoderOptions)",
         "htmlName": "toDataURL",
-        "description": "Returns a screenshot of the current model render in the format specified by <i>type</i> (defaults to image/png). The screenshot is encoded as a data URL string. In formats that support a sliding scale of quality (such as image/jpeg and image/webp) you can also specify a value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i> defaults to 0.92 otherwise)."
+        "description": "Returns a screenshot of the current model render in the format specified by <i>type</i> (defaults to image/png). The screenshot is encoded as a data URL string. In formats that support a sliding scale of quality (such as image/jpeg and image/webp) you can also specify a value for <i>encoderOptions</i> between 0 and 1 (<i>encoderOptions</i> defaults to 0.92 otherwise). With native rendering, this method throws because the browser does not expose its pixels. Set disable-native before loading, or use the asynchronous toBlob() method."
       },
       {
         "name": "registerEffectComposer(effectComposer)",

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Native model-viewer rendering</title>
+<style>
+  body { margin: 2rem; font: 16px system-ui, sans-serif; }
+  model-viewer { width: 640px; max-width: 100%; height: 480px; background: #eee; }
+  .options { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+  output { display: block; margin: 1rem 0; }
+</style>
+</head>
+<body>
+<h1>Native model-viewer rendering</h1>
+<p>Drag to orbit and scroll to zoom. Use GLB when comparing with Three.js.</p>
+<div class="options">
+  <label>Model:
+    <select id="format">
+      <option value="glb">GLB</option>
+      <option value="usdz">USDZ</option>
+    </select>
+  </label>
+  <label><input id="webgl" type="checkbox"> Force Three.js</label>
+</div>
+<p id="support"></p>
+<output id="status">Loading…</output>
+<model-viewer id="viewer" src="/shared-assets/models/Astronaut.glb"
+    alt="An astronaut wearing a space suit" camera-controls loading="eager">
+</model-viewer>
+<script type="module">
+  import '../../node_modules/@google/model-viewer/dist/model-viewer.js';
+
+  const viewer = document.querySelector('model-viewer');
+  const format = document.querySelector('#format');
+  const status = document.querySelector('#status');
+  const probe = document.createElement('model');
+  document.querySelector('#support').textContent =
+      `Native <model> supported: ${'ready' in probe}`;
+  const updateStatus = () => {
+    const model = viewer.shadowRoot.querySelector('model');
+    status.textContent = model ?
+        `Rendering with <model>; controls: ${model.getAttribute('stagemode') === 'orbit' ? 'browser' : 'model-viewer'}` :
+        'Rendering with Three.js';
+  };
+  viewer.addEventListener('load', updateStatus);
+  viewer.addEventListener('error', event => {
+    status.textContent = `Load failed: ${event.detail.sourceError?.message || event.detail.type}`;
+  });
+  format.addEventListener('change', () => {
+    status.textContent = 'Loading…';
+    viewer.src = `/shared-assets/models/Astronaut.${format.value}`;
+  });
+  document.querySelector('#webgl').addEventListener('change', async event => {
+    status.textContent = 'Loading…';
+    viewer.disableNative = event.target.checked;
+    await viewer.updateComplete;
+    if (viewer.loaded) updateStatus();
+  });
+</script>
+</body>
+</html>
