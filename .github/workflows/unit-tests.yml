@@ -9,7 +9,8 @@ concurrency:
 jobs:
   full_test_run:
 
-    runs-on: ubuntu-latest
+    # The pinned Playwright version does not support Ubuntu 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
 
     steps:
