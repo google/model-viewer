@@ -81,6 +81,27 @@ suite('CachingGLTFLoader', () => {
       expect(scene!.type).to.be.equal('Group');
     });
 
+    test('loads a url again after its earlier load failed', async () => {
+      const realFetch = window.fetch;
+      window.fetch = () => Promise.reject(new TypeError('Failed to fetch'));
+      let firstError: any = null;
+      try {
+        await loader.load(ASTRONAUT_GLB_PATH, element);
+      } catch (error) {
+        firstError = error;
+      } finally {
+        window.fetch = realFetch;
+      }
+      expect(firstError).to.be.instanceOf(TypeError);
+      expect(firstError.message).to.be.equal('Failed to fetch');
+      expect(CachingGLTFLoader.has(ASTRONAUT_GLB_PATH)).to.be.false;
+
+      const {scene} = await loader.load(ASTRONAUT_GLB_PATH, element);
+      expect(scene).to.be.ok;
+      expect(CachingGLTFLoader.hasFinishedLoading(ASTRONAUT_GLB_PATH))
+          .to.be.true;
+    });
+
     suite('with items outside of the eviction threshold', () => {
       let naturalEvictionThreshold: number;
 
