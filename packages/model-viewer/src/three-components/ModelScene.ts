@@ -28,6 +28,7 @@ import {Damper, SETTLING_TIME} from './Damper.js';
 import {ModelViewerGLTFInstance} from './gltf-instance/ModelViewerGLTFInstance.js';
 import {GroundedSkybox} from './GroundedSkybox.js';
 import {Hotspot} from './Hotspot.js';
+import {NativeModelRenderer} from './NativeModelRenderer.js';
 import {Shadow} from './Shadow.js';
 
 export const GROUNDED_SKYBOX_SIZE = 10;
@@ -80,6 +81,7 @@ export class ModelScene extends Scene {
   scaleStep = 0;
   renderCount = 0;
   externalRenderer: RendererInterface|null = null;
+  nativeRenderer: NativeModelRenderer|null = null;
   appendedAnimations: Array<string> = [];
   markedAnimations: Array<MarkedAnimation> = [];
 
@@ -139,6 +141,9 @@ export class ModelScene extends Scene {
 
     this.element = element as ModelViewerElement;
     this.canvas = canvas;
+    if (NativeModelRenderer.isSupported()) {
+      this.nativeRenderer = new NativeModelRenderer(this);
+    }
 
     // These default camera values are never used, as they are reset once the
     // model is loaded and framing is computed.
@@ -222,23 +227,45 @@ export class ModelScene extends Scene {
       progressCallback(1);
       return;
     }
+
+    // Cancel the previous source before selecting a backend. Otherwise a
+    // pending Three.js load can overwrite a newer native model.
+    if (this.cancelPendingSourceChange != null) {
+      this.cancelPendingSourceChange();
+      this.cancelPendingSourceChange = null;
+    }
+
     this.reset();
     this.url = url;
     this.extraUrls = extraUrls;
 
-    if (this.externalRenderer != null) {
-      const framingInfo = await this.externalRenderer.load(progressCallback);
-
-      this.boundingSphere.radius = framingInfo.framedRadius;
-      this.idealAspect = framingInfo.fieldOfViewAspect;
-      return;
+    if (this.nativeRenderer != null &&
+        (this.externalRenderer == null ||
+         this.externalRenderer === this.nativeRenderer)) {
+      this.externalRenderer =
+          this.nativeRenderer.canRender(extraUrls) ? this.nativeRenderer : null;
     }
 
-    // If we have pending work due to a previous source change in progress,
-    // cancel it so that we do not incur a race condition:
-    if (this.cancelPendingSourceChange != null) {
-      this.cancelPendingSourceChange!();
-      this.cancelPendingSourceChange = null;
+    if (this.externalRenderer != null) {
+      try {
+        const framingInfo = await this.externalRenderer.load(progressCallback);
+        this.boundingSphere.radius = framingInfo.framedRadius;
+        this.idealAspect = framingInfo.fieldOfViewAspect;
+        return;
+      } catch (error) {
+        if (this.externalRenderer !== this.nativeRenderer ||
+            NativeModelRenderer.isLoadCancelled(error)) {
+          throw error;
+        }
+        // A native implementation may not support this resource's format or
+        // extensions. Preserve the existing glTF loader as a fallback.
+        console.warn(
+            '<model-viewer>: Native <model> loading failed; falling back to Three.js.',
+            error);
+        this.nativeRenderer!.dispose();
+        this.externalRenderer = null;
+        this.element.requestUpdate();
+      }
     }
 
     let gltfs: ModelViewerGLTFInstance[] = [];
@@ -395,6 +422,7 @@ export class ModelScene extends Scene {
   }
 
   reset() {
+    this.nativeRenderer?.dispose();
     this.url = null;
     this.extraUrls = [];
     this.renderCount = 0;
@@ -553,6 +581,10 @@ export class ModelScene extends Scene {
   }
 
   updateBoundingBox() {
+    if (this.nativeRenderer?.isActive) {
+      this.nativeRenderer.updateBounds();
+      return;
+    }
     const {models} = this;
     if (models.length === 0) {
       return;
@@ -603,6 +635,12 @@ export class ModelScene extends Scene {
    * one side instead of both. Proper choice of center can correct this.
    */
   async updateFraming() {
+    if (this.nativeRenderer?.isActive) {
+      this.nativeRenderer.updateBounds();
+      this.element.requestUpdate('cameraTarget');
+      await this.element.updateComplete;
+      return;
+    }
     const {models} = this;
     if (models.length === 0) {
       return;
