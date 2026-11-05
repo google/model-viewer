@@ -1,0 +1,9 @@
+commit 8146120186993a8e1557fdf31fcdba0f9b2df08b
+Author: Arthur <124417490+Arthur031221@users.noreply.github.com>
+Date:   Fri Nov 6 07:09:17 2026 +0800
+
+    fix: drop the redundant SVG mask so removed elements can be collected (#5208)
+    
+    The interaction prompt icon in every shadow root referenced a mask with url(#B), which makes Chromium keep the shadow tree of a removed element alive.
+    
+    Signed-off-by: Arthur031221 <124417490+Arthur031221@users.noreply.github.com>
