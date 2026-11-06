@@ -81,3 +81,9 @@ Contributed by <a href="https://github.com/donmccurdy">donmccurdy</a>
 ## odd-shape.glb, odd-shape-labeled.glb
 
 Contributed by <a href="https://github.com/cdata">cdata</a>
+
+## UASTC_HDR_4x4.ktx2
+
+2d_uastc_hdr4x4.ktx2 from the <a href="https://github.com/mrdoob/three.js">three.js</a> examples,
+licensed under <a href="https://github.com/mrdoob/three.js/blob/dev/LICENSE">MIT</a>
+(<a href="https://github.com/mrdoob/three.js/blob/r183/examples/textures/ktx2/2d_uastc_hdr4x4.ktx2">source</a>)

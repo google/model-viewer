@@ -29,8 +29,10 @@ export const PROGRESS_BAR_UPDATE_THRESHOLD = 100;
 const DEFAULT_DRACO_DECODER_LOCATION =
     'https://www.gstatic.com/draco/versioned/decoders/1.5.6/';
 
-const DEFAULT_KTX2_TRANSCODER_LOCATION =
-    'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/';
+// Keep in sync with the three version in package.json: its KTX2Loader expects
+// the Basis Universal transcoder bundled in three/examples/jsm/libs/basis.
+export const DEFAULT_KTX2_TRANSCODER_LOCATION =
+    'https://cdn.jsdelivr.net/npm/three@0.183.2/examples/jsm/libs/basis/';
 
 const DEFAULT_LOTTIE_LOADER_LOCATION =
     'https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/loaders/LottieLoader.js';
