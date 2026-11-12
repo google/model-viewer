@@ -1098,6 +1098,20 @@ export class ModelScene extends Scene {
         const action = mixer.existingAction(animationClip) ||
             mixer.clipAction(animationClip, this._models[i] || this);
 
+        // Restart an action that has finished (clamped at either end) or was
+        // faded out, so that its previous run (e.g. its loop count) does not
+        // carry over. This happens before the options are applied, so that
+        // they apply to the new run. Stopping (not just resetting) it makes
+        // sure the loop mode and repetitions are applied below. An action
+        // that was halted mid-clip is kept as is, so that it can be resumed:
+        // either with a time scale of 0, or by a warp to 0, which pauses it.
+        // A finished action is clamped at exactly 0 or the clip's duration.
+        const isFinished = action.paused &&
+            (action.time === 0 || action.time === animationClip.duration);
+        if (isFinished || !action.enabled) {
+          action.stop();
+        }
+
         const currentTimeScale = action.timeScale;
 
         if (typeof time === 'number') {
@@ -1118,9 +1132,6 @@ export class ModelScene extends Scene {
         }
 
         if (!action.isRunning()) {
-          if (action.time == animationClip.duration) {
-            action.stop();
-          }
           action.setLoop(loopMode, repetitionCount);
           action.paused = false;
           action.enabled = true;

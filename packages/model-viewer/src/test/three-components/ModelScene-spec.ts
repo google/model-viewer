@@ -97,6 +97,132 @@ suite('ModelScene', () => {
       expect(scene.markedAnimations).to.be.empty;
     });
 
+    suite('appending an animation again', () => {
+      let animationName: string;
+      let duration: number;
+
+      // The action of the appended animation (on the only model).
+      const getAction = () => {
+        const clip = (scene as any).animationsByName.get(animationName);
+        return (scene as any).mixers[0].existingAction(clip);
+      };
+
+      // Advances the animations by the given number of seconds, in frames.
+      const advance = (seconds: number) => {
+        const step = 1 / 60;
+        for (let t = 0; t < seconds; t += step) {
+          scene.updateAnimation(step);
+        }
+      };
+
+      function append(
+          repetitionCount: number,
+          timeScale: number,
+          time: number|null = null) {
+        scene.appendAnimation(
+            animationName,
+            LoopRepeat,
+            repetitionCount,
+            1,
+            timeScale,
+            false,
+            false,
+            true,
+            time);
+      }
+
+      setup(() => {
+        animationName = scene.animationNames[0];
+        duration = (scene as any).animationsByName.get(animationName).duration;
+        scene.unpauseAnimation();
+      });
+
+      test('restarts a finished reverse animation from scratch', () => {
+        append(2, -1);
+        advance(duration * 3);
+        expect(getAction().paused, 'reverse run has not finished').to.be.true;
+        expect(getAction().time).to.be.equal(0);
+
+        append(2, 1);
+        advance(duration * 1.5);
+
+        expect(getAction().paused, 'second repetition was cut short')
+            .to.be.false;
+        expect(getAction().time).to.be.closeTo(duration * 0.5, 0.1);
+      });
+
+      test('applies the time option to a finished animation', () => {
+        append(1, 1);
+        advance(duration * 1.5);
+        expect(getAction().paused, 'forward run has not finished').to.be.true;
+        expect(getAction().time).to.be.equal(duration);
+
+        append(1, -1, duration);
+        expect(getAction().time).to.be.equal(duration);
+
+        advance(duration * 0.5);
+
+        expect(getAction().paused, 'reverse run has finished').to.be.false;
+        expect(getAction().time).to.be.closeTo(duration * 0.5, 0.1);
+      });
+
+      test('restarts a faded-out animation from scratch', () => {
+        append(2, 1);
+        advance(duration * 1.5);
+        scene.detachAnimation(animationName, 0.1);
+        advance(0.2);
+        expect(getAction().enabled, 'fade-out has not finished').to.be.false;
+
+        append(2, 1);
+        expect(getAction().time).to.be.equal(0);
+
+        advance(duration * 1.5);
+
+        expect(getAction().paused, 'second repetition was cut short')
+            .to.be.false;
+        expect(getAction().time).to.be.closeTo(duration * 0.5, 0.1);
+      });
+
+      test('resumes an animation paused with a time scale of 0', () => {
+        append(Infinity, 1);
+        advance(duration * 0.5);
+        append(Infinity, 0);
+        advance(duration * 0.25);
+        append(Infinity, 1);
+
+        expect(getAction().time).to.be.closeTo(duration * 0.5, 0.1);
+      });
+
+      test('applies the new repetitions to a finished animation', () => {
+        append(1, 1);
+        advance(duration * 1.5);
+        expect(getAction().paused, 'forward run has not finished').to.be.true;
+
+        append(3, 1);
+        advance(duration * 1.5);
+
+        expect(getAction().paused, 'the previous repetitions were used')
+            .to.be.false;
+        expect(getAction().time).to.be.closeTo(duration * 0.5, 0.1);
+      });
+
+      test('resumes an animation halted by a warp to 0', () => {
+        append(Infinity, 1);
+        advance(duration * 0.5);
+        // Warps from the current time scale (1) to 0 in 0.1s.
+        scene.appendAnimation(
+            animationName, LoopRepeat, Infinity, 1, 0, false, 0.1, true, null);
+        advance(0.2);
+        expect(getAction().paused, 'warp has not halted the action').to.be.true;
+        const haltedTime = getAction().time;
+
+        append(Infinity, 1);
+
+        expect(getAction().time).to.be.equal(haltedTime);
+        expect(getAction().paused).to.be.false;
+      });
+    });
+
     suite('appendAnimation repetitionCount validation', () => {
       // Returns the repetitionCount-related warnings emitted while appending the
       // first animation with the given repetitionCount.

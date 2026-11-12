@@ -238,6 +238,60 @@ suite('Animation', () => {
       });
     });
 
+    suite('when a finished appended animation is appended again', () => {
+      // Wave lasts 1.83s; it is sped up to keep the tests short.
+      const name = 'Wave';
+      const speed = 8;
+
+      // Appends the animation and resolves when it has finished.
+      const playToEnd = async (options: {}) => {
+        const finished = waitForEvent(element, 'finished');
+        element.appendAnimation(name, options);
+        await finished;
+      };
+
+      test('plays all repetitions after a reverse run', async () => {
+        await playToEnd({repetitions: 2, timeScale: -speed});
+
+        let loops = 0;
+        const onLoop = () => loops++;
+        element.addEventListener('loop', onLoop);
+        await playToEnd({repetitions: 2, timeScale: speed});
+        element.removeEventListener('loop', onLoop);
+
+        expect(loops, 'the second repetition was skipped').to.be.equal(1);
+      });
+
+      test('uses the new repetitions', async () => {
+        await playToEnd({repetitions: 2, timeScale: speed});
+
+        let loops = 0;
+        const onLoop = () => loops++;
+        element.addEventListener('loop', onLoop);
+        await playToEnd({repetitions: 3, timeScale: speed});
+        element.removeEventListener('loop', onLoop);
+
+        expect(loops, 'the previous repetitions were used').to.be.equal(2);
+      });
+
+      test('starts at the given time', async () => {
+        await playToEnd({repetitions: 1, timeScale: speed});
+        const duration =
+            (element[$scene] as any).animationsByName.get(name).duration;
+
+        let finished = false;
+        const onFinished = () => finished = true;
+        element.addEventListener('finished', onFinished);
+        // A reverse run from the end takes the full duration (1.83s).
+        element.appendAnimation(
+            name, {repetitions: 1, timeScale: -1, time: duration});
+        await timePasses(300);
+        element.removeEventListener('finished', onFinished);
+
+        expect(finished, 'the reverse run started at 0').to.be.false;
+      });
+    });
+
     suite('when configured to autoplay', () => {
       setup(async () => {
         element.autoplay = true;
