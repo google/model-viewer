@@ -69,6 +69,20 @@ const CONFIG = {
 const vector2 = new Vector2();
 
 /**
+ * Padding around the model's footprint, used for both the corner arcs and the
+ * hit meshes. It is proportional for small models so the box stays close to
+ * them, but never less than half the minimum touch area so tiny models remain
+ * selectable and the arcs stay wider than the line.
+ */
+const placementRadius = (x: number, y: number) => {
+  const modelSize = Math.min(x, y);
+  return Math.max(
+      CONFIG.MIN_TOUCH_AREA / 2,
+      Math.min(CONFIG.BASE_RADIUS * 0.7, modelSize * 0.5),
+      modelSize * 0.2);
+};
+
+/**
  * Adds a quarter-annulus of vertices to the array, centered on cornerX,
  * cornerY.
  */
@@ -200,10 +214,8 @@ export class PlacementBox extends Mesh {
     const x = this.goalSize.x / 2;
     const y = (this.side === 'back' ? this.goalSize.y : this.goalSize.z) / 2;
 
-    // Use dynamic radius based on size - slightly bigger for better visibility
     const modelSize = Math.min(x, y);
-    const radius = Math.max(
-        CONFIG.BASE_RADIUS * 0.7, modelSize * 0.2);  // Increased multipliers
+    const radius = placementRadius(x, y);
     const lineWidth = Math.max(
         CONFIG.LINE_WIDTH * 0.7, modelSize * 0.025);  // Increased line width
 
@@ -227,8 +239,7 @@ export class PlacementBox extends Mesh {
   private createHitMeshes(): void {
     const x = this.goalSize.x / 2;
     const y = (this.side === 'back' ? this.goalSize.y : this.goalSize.z) / 2;
-    const modelSize = Math.min(x, y);
-    const radius = Math.max(CONFIG.BASE_RADIUS * 0.7, modelSize * 0.2);
+    const radius = placementRadius(x, y);
 
     this.hitPlane =
         new Mesh(new PlaneGeometry(2 * (x + radius), 2 * (y + radius)));
@@ -266,12 +277,13 @@ export class PlacementBox extends Mesh {
         break;
     }
 
-    // Update hit box position with proper offset
+    // The hit box is only expanded upwards, so its base sits at the model's.
     if (this.hitBox) {
-      const offset = this.side === 'back' ?
-          (this.goalSize.y + CONFIG.BASE_RADIUS) / 2 :
-          (this.goalSize.y + CONFIG.BASE_RADIUS) / 2;
-      this.hitBox.position.y = offset + boundingBox.min.y;
+      const radius = placementRadius(
+          this.goalSize.x / 2,
+          (this.side === 'back' ? this.goalSize.y : this.goalSize.z) / 2);
+      this.hitBox.position.y =
+          (this.goalSize.y + radius) / 2 + boundingBox.min.y;
     }
   }
 
@@ -332,8 +344,7 @@ export class PlacementBox extends Mesh {
     if (this.hitPlane && this.hitBox) {
       const x = this.goalSize.x / 2;
       const y = (this.side === 'back' ? this.goalSize.y : this.goalSize.z) / 2;
-      const modelSize = Math.min(x, y);
-      const radius = Math.max(CONFIG.BASE_RADIUS * 0.7, modelSize * 0.2);
+      const radius = placementRadius(x, y);
 
       // Update hit plane geometry
       const hitPlaneGeometry =
