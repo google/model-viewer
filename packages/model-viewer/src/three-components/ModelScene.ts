@@ -431,6 +431,9 @@ export class ModelScene extends Scene {
     }
     this.mixers = [];
     this.mixerPausedStates = [];
+    // The actions of these animations were discarded with the mixers above
+    this.appendedAnimations = [];
+    this.markedAnimations = [];
   }
 
   dispose() {
