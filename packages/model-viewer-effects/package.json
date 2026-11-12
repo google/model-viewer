@@ -1,7 +1,7 @@
 {
   "name": "@google/model-viewer-effects",
   "type": "module",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Easily add and combine post-processing effects with <model-viewer>!",
   "repository": "https://github.com/google/model-viewer/tree/master/packages/model-viewer-effects",
   "bugs": {
@@ -49,7 +49,8 @@
     "watch:rollup": "rollup -c -w --environment NODE_ENV:production",
     "watch:rollup:dev": "rollup -c -w --environment NODE_ENV:development",
     "watch:test": "web-test-runner --node-resolve --playwright --browsers chromium --watch",
-    "build:dev:serve": "npm run build:dev && npm run serve"
+    "build:dev:serve": "npm run build:dev && npm run serve",
+    "release:exit-gate": "npx --yes google-artifactregistry-auth --repo-config=../model-viewer/.npmrc --credential-config=$HOME/.npmrc && npm publish && VERSION=$(node -p \"require('./package.json').version\") && printf '{\"publish_all\":false,\"publishing_groups\":[{\"namespace\":\"@google\",\"packages\":[{\"name\":\"model-viewer-effects\",\"version\":\"%s\"}]}]}\\n' \"$VERSION\" > /tmp/model-viewer-effects-manifest-$VERSION.json && gcloud storage cp /tmp/model-viewer-effects-manifest-$VERSION.json gs://oss-exit-gate-prod-projects-bucket/model-viewer/npm/manifests/manifest-effects-$VERSION-$(date +%s).json"
   },
   "keywords": [
     "ar",
@@ -105,6 +106,7 @@
     "typescript": "5.8.2"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://us-npm.pkg.dev/oss-exit-gate-prod/model-viewer--npm/"
   }
 }
