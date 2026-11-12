@@ -142,10 +142,11 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
     preloaded.delete(url);
     cache.delete(url);
 
-    const gltf = await gltfLoads;
+    // A load that failed has nothing to dispose of.
+    const gltf = await gltfLoads!.catch(() => null);
     // Dispose of the cached glTF's materials and geometries:
 
-    gltf!.dispose();
+    gltf?.dispose();
   }
 
   /**
@@ -201,7 +202,11 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
                                     })
                                     .catch((reason => {
                                       console.error(reason);
-                                      return new GLTFInstance();
+                                      // Do not keep a failed load, or the
+                                      // same URL could never be retried.
+                                      if (cache.get(url) === gltfInstanceLoads)
+                                        cache.delete(url);
+                                      throw reason;
                                     }));
       cache.set(url, gltfInstanceLoads);
     }
