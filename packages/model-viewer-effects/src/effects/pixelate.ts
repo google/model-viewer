@@ -41,7 +41,7 @@ export class MVPixelateEffect extends MVEffectBase {
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('granularity')) {
       this[$updateProperties]();

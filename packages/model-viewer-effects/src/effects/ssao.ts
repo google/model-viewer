@@ -44,7 +44,7 @@ export class MVSSAOEffect extends MVEffectBase {
     this[$updateProperties]();
   }
 
-  update(changedProperties: Map<string|number|symbol, any>): void {
+  update(changedProperties: Map<string|number|symbol, unknown>): void {
     super.update?.(changedProperties);
     if (changedProperties.has('strength')) {
       this[$updateProperties]();

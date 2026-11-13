@@ -327,13 +327,13 @@ export class ArtifactCreator {
       deviceScaleFactor: DEVICE_PIXEL_RATIO
     });
 
-    page.on('error', (error: any) => {
+    page.on('error', (error) => {
       console.log(`🚨 ${error}`);
     });
 
-    page.on('console', async (message: any) => {
+    page.on('console', async (message) => {
       const args =
-          await Promise.all(message.args().map((arg: any) => arg.jsonValue()));
+          await Promise.all(message.args().map((arg) => arg.jsonValue()));
 
       if (args.length) {
         console.log(`➡️`, ...args);

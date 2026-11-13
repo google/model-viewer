@@ -175,7 +175,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$arAnchor].removeEventListener('message', this[$onARTap]);
     }
 
-    update(changedProperties: Map<string, any>) {
+    update(changedProperties: Map<string|number|symbol, unknown>) {
       super.update(changedProperties);
 
       if (changedProperties.has('arScale')) {

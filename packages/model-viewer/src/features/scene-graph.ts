@@ -179,7 +179,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       return this[$buildTexture](texture);
     }
 
-    async updated(changedProperties: Map<string, any>) {
+    async updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
 
       if (changedProperties.has('variantName')) {

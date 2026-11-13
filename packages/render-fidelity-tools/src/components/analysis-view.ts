@@ -170,7 +170,7 @@ export class AnalysisView extends LitElement {
     return {width: 0, height: 0};
   }
 
-  async updated(changedProperties: Map<string, any>) {
+  async updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     if (changedProperties.has('analysisResult') && this.visuals != null &&

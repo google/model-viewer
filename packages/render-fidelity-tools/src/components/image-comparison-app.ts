@@ -30,7 +30,7 @@ export class ImageComparisonApp extends LitElement {
 
   @query('analysis-view') analysisView!: AnalysisView;
 
-  updated(changedProperties: Map<any, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     if (changedProperties.has('src')) {

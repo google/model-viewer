@@ -158,7 +158,7 @@ export class ExampleSnippet extends ReactiveElement {
     return this;
   }
 
-  updated(changedProperties: Map<string, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     if (!this.stamped && !this.lazy &&

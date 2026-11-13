@@ -58,7 +58,7 @@ export class MVOutlineEffect extends SelectiveMixin
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('color') || changedProperties.has('smoothing') ||
         changedProperties.has('strength')) {

@@ -53,7 +53,7 @@ export const BlendModeMixin =
           this[$setDefaultProperties]();
         }
 
-        updated(changedProperties: Map<string|number|symbol, any>) {
+        updated(changedProperties: Map<string|number|symbol, unknown>) {
           super.updated(changedProperties);
           if (changedProperties.has('blendMode') ||
               changedProperties.has('opacity')) {

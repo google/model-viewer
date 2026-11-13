@@ -62,8 +62,9 @@ export default defineConfig(
 
         '@typescript-eslint/explicit-member-accessibility':
             ['error', {accessibility: 'no-public'}],
-        // Tighten to 'error' once existing usages are typed.
-        '@typescript-eslint/no-explicit-any': 'warn',
+        // Tighten to 'error' once existing usages are typed. Rest args are
+        // allowed because TypeScript mixins require `...args: any[]`.
+        '@typescript-eslint/no-explicit-any': ['warn', {ignoreRestArgs: true}],
         // Mirror tsc's noUnusedLocals/noUnusedParameters, which allow a
         // leading underscore.
         '@typescript-eslint/no-unused-vars': [

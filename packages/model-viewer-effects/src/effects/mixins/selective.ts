@@ -59,7 +59,7 @@ export const SelectiveMixin =
               'updated-selection', this[$setSelection]);
         }
 
-        updated(changedProperties: Map<string|number|symbol, any>) {
+        updated(changedProperties: Map<string|number|symbol, unknown>) {
           super.updated(changedProperties);
           if (changedProperties.has('selection')) {
             this[$setSelection]();

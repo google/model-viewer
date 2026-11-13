@@ -264,7 +264,7 @@ export class MVEffectComposer extends ReactiveElement {
     this[$effectComposer].dispose();
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('msaa')) {
       this[$effectComposer].multisampling = this.msaa;

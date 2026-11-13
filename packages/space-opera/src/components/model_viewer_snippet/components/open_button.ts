@@ -110,10 +110,10 @@ export class OpenModal extends ConnectedLitElement {
           reduxStore.dispatch(dispatchFileMap(new Map<string, File>()));
           reduxStore.dispatch(dispatchGltfUrl(src));
         }
-      } catch (e: any) {
+      } catch (e) {
         console.log(
             `Could not download 'src' attribute - OK, ignoring it. Error: ${
-                e.message}`);
+                (e as Error).message}`);
       }
 
       if (config.environmentImage && isObjectUrl(config.environmentImage)) {

@@ -97,7 +97,7 @@ export class Images4Up extends LitElement {
     this.containerRect = {x, y, width, height};
   }
 
-  async updated(changedProperties: Map<string, any>) {
+  async updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     if (changedProperties.has('dimensions') && this.dimensions != null) {

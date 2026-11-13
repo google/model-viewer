@@ -64,10 +64,11 @@ export const toFullUrl = (partialUrl: string): string => {
  * The throttled version of the function has a "flush" property that resets the
  * threshold for cases when immediate invocation is desired.
  */
-export const throttle = (fn: (...args: Array<any>) => any, ms: number) => {
+export const throttle = <T extends unknown[]>(
+    fn: (...args: T) => unknown, ms: number) => {
   let timer: number|null = null;
 
-  const throttled = (...args: Array<any>) => {
+  const throttled = (...args: T) => {
     if (timer != null) {
       return;
     }
@@ -87,10 +88,11 @@ export const throttle = (fn: (...args: Array<any>) => any, ms: number) => {
   return throttled;
 };
 
-export const debounce = (fn: (...args: Array<any>) => any, ms: number) => {
+export const debounce = <T extends unknown[]>(
+    fn: (...args: T) => unknown, ms: number) => {
   let timer: number|null = null;
 
-  return (...args: Array<any>) => {
+  return (...args: T) => {
     if (timer != null) {
       self.clearTimeout(timer);
     }

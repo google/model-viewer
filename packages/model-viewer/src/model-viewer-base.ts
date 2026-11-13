@@ -453,7 +453,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     // NOTE(cdata): If a property changes from values A -> B -> A in the space

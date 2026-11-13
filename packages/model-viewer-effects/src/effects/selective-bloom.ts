@@ -61,7 +61,7 @@ export class MVSelectiveBloomEffect extends SelectiveMixin
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('strength') ||
         changedProperties.has('threshold') ||

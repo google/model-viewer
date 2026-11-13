@@ -346,7 +346,7 @@ export const LoadingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$progressTracker].removeEventListener('progress', this[$onProgress]);
     }
 
-    async updated(changedProperties: Map<string, any>) {
+    async updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
 
       if (changedProperties.has('poster') && this.poster != null) {

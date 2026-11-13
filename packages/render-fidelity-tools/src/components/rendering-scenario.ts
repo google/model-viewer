@@ -58,7 +58,7 @@ export class RenderingScenario extends LitElement {
     });
   }
 
-  updated(changedProperties: Map<any, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     if (this.analysis == null) {
