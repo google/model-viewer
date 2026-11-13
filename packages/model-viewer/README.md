@@ -84,6 +84,49 @@ desktop and mobile browsers.
 `<model-viewer>` builds upon standard web platform APIs so that the performance,
 capabilities and compatibility of the library get better as the web evolves.
 
+## Native `<model>` rendering
+
+When a browser's `<model>` element exposes its `ready` API, `<model-viewer>` uses
+it to display supported resources. Loading, posters, alt text, credentials,
+autoplay, and environment images remain controlled by `<model-viewer>`.
+
+If an environment image is unsupported by the native renderer, the model keeps
+rendering natively using the browser's lighting. Select `disable-native` when the
+specified lighting must be rendered by Three.js.
+
+When native bounds and writable `entityTransform` are available, the existing
+camera fitting and orbit, pan, and zoom controls drive the native model through
+entity transforms. The browser controls the projection, so perspective can
+differ from Three.js, especially during spatial presentation. If transforms
+are unavailable or rejected, `camera-controls` enables the browser's native
+`stagemode="orbit"` and fitting. Camera and pose settings do not drive the
+native model in that mode.
+
+Three.js remains the fallback for unsupported native resources, extra models,
+nonuniform scale, hotspots, skyboxes, named animations, material variants, and
+postprocessing. Scene export, generated USDZ, WebXR, and `toBlob()` load Three.js
+geometry on demand and continue using that backend. These operations still
+require a resource supported by the glTF loader.
+
+For scene graph editing, animation APIs, or synchronous `toDataURL()` screenshots,
+select Three.js explicitly:
+
+```html
+<model-viewer src="model.glb" camera-controls disable-native></model-viewer>
+```
+
+The corresponding JavaScript property is `disableNative`.
+
+The [native rendering example](https://modelviewer.dev/examples/native/) lets
+you compare the native and Three.js renderers. For local development, run these
+commands from the repository root, then open
+`http://localhost:8080/examples/native/`:
+
+```sh
+npm run build --workspace @google/model-viewer
+npm run serve
+```
+
 ## Development
 
 To get started, follow the instructions in [the main README.md file](../../README.md).
