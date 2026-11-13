@@ -1,0 +1,221 @@
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Making the Most of 3D on the Web with &lt;model-viewer&gt;</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		html,
+		body {
+			width: 100%;
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			padding: 0;
+			color: #666;
+			font-size: 30px;
+			font-family: "Verdana";
+			font-style: italic;
+			background-color: #eee;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			overflow: hidden;
+		}
+
+		td:hover {
+			color: #222;
+		}
+
+		a {
+			color: #48f;
+			text-decoration: none;
+		}
+
+		strong {
+			color: #222;
+		}
+
+		h1 {
+			color: #222;
+			font-size: 40px;
+			margin: 20px;
+		}
+
+		h2 {
+			color: #222;
+			font-size: 40px;
+			margin: 24px;
+		}
+
+		hr {
+			margin: 40px 100px;
+			border: 0px;
+			height: 1px;
+			background-color: #bbb;
+		}
+
+		img,
+		video {
+			max-width: 100%;
+		}
+
+		pre {
+			padding: -20px -40px !important;
+			font-size: 20px;
+			text-align: left;
+		}
+
+		iframe {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			width: 100%;
+			height: 100%;
+			border: 0;
+		}
+
+		section {
+			text-align: center;
+		}
+
+		section.background-image {
+			width: 100%;
+			height: 100%;
+			background-repeat: no-repeat;
+			background-position: 50%;
+			background-size: contain;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		table {
+			margin: auto;
+			position: relative;
+		}
+
+		td {
+			padding: 0px 10px;
+			font-size: 30px;
+			text-align: center;
+		}
+
+		#controls {
+			position: absolute;
+			padding: 5px;
+			left: calc(50% - 100px);
+			bottom: 4px;
+			width: 200px;
+			font-size: 16px;
+			opacity: 0.2;
+			text-align: center;
+			transition: opacity 0.5s;
+			/* background-color: #000;*/
+			/* mix-blend-mode: difference; */
+			z-index: 1;
+		}
+
+		#controls:hover {
+			opacity: 0.8;
+		}
+
+		#controls span {
+			margin: 2px;
+			padding: 2px 10px;
+			color: #222;
+		}
+
+		#html-draw td {
+			width: 150px;
+			height: 100px;
+			border: 1px solid #444;
+			border-spacing: 20px;
+		}
+
+		.url {
+			position: absolute;
+			display: inline-block;
+			color: #ffffff;
+			font-size: 16px;
+			left: 50%;
+			bottom: 40px;
+			border-radius: 20px;
+			background-color: black;
+			padding: 10px 20px;
+			transform: translateX(-50%)
+		}
+	</style>
+</head>
+
+<body ontouchstart="">
+	<section>
+		<h1>Making the Most of 3D on the Web<br /><br /> with &lt;model-viewer&gt;</h1>
+		<hr /> Emmett Lalish, Google<br /><br /> July 27, 2024
+	</section>
+	<section>
+		<iframe src="../.." frameborder="0"></iframe>
+		<div class="url">&lt;model-viewer&gt; v3.5 has a lot to offer!</div>
+	</section>
+	<section>
+		<iframe src="../lightingandenv/#toneMapping" frameborder="0"></iframe>
+		<div class="url">Khronos PBR Neutral Tone Mapping for color accuracy</div>
+	</section>
+	<section>
+		<iframe src="../postprocessing/#colorgrade" frameborder="0"></iframe>
+		<div class="url">Post-processing effects, like bloom</div>
+	</section>
+	<section>
+		<iframe src="../lightingandenv/#groundedSkybox" frameborder="0"></iframe>
+		<div class="url">Easy backgrounds, now with UltraHDR!</div>
+	</section>
+	<section>
+		<iframe src="../scenegraph/#animatedTexturesExample" frameborder="0"></iframe>
+		<div class="url">Animated/Video textures - before glTF!</div>
+	</section>
+	<section>
+		<iframe src="../annotations/index.html#dimensions" frameborder="0"></iframe>
+		<div class="url">Automatic dimensions, with easy a11y & i18n</div>
+	</section>
+	<section>
+		<iframe src="../annotations/index.html#animatedHotspots" frameborder="0"></iframe>
+		<div class="url">Animated hotspots, with DOM & SVG</div>
+	</section>
+	<section>
+		<iframe src="../augmentedreality/#transparentBackground" frameborder="0"></iframe>
+		<div class="url">Transparent rendering lets DOM content show through</div>
+	</section>
+	<section>
+		<h1>Seamless integration with 2D page design</h1><br /> Setting limits on the camera can make your whole page seem
+		3D<br /><br />
+		<a href="https://www.redbullracing.com/int-en/cars">Red Bull Racing</a><br /><br />
+	</section>
+	<section>
+		<h1>Google Store</h1><br /> Variant selection and camera-based walkthrough<br /><br />
+		<a href="https://store.google.com/product/pixel_watch_2">Pixel Watch 2</a><br /><br /> Animation-based
+		walkthrough<br /><br />
+		<a href="https://store.google.com/us/product/pixel_buds_pro">Pixel Buds Pro</a><br /><br />
+	</section>
+	<section>
+		<h1>Search Education</h1><br /> Includes &lt;model-viewer&gt; right on Google Search<br /><br /> With annotations!
+		And a game!<br /><br />
+		<a href="https://www.google.com/search?q=eukaryote">Google Search for Eukaryote</a>
+	</section>
+	<section>
+		<h1>Music Video</h1><br /> Whole new ways to be creative!<br /><br />
+		<a href="https://x.com/shortcircuitsss/status/1808347767581893007">From twitter / X</a><br /><br />
+	</section>
+	<section>
+		<h1>Thanks!</h1><br />
+		<a href="https://modelviewer.dev">https://modelviewer.dev</a><br /><br />
+		<a href="https://github.com/google/model-viewer">https://github.com/google/model-viewer</a><br />
+	</section>
+	<script src="slides.js"></script>
+</body>
+
+</html>

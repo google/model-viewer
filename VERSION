@@ -1,0 +1,14 @@
+commit 9c6fea9ac579e618bf2932456d3308309017df00
+Author: Frank <8014077+Frank3K@users.noreply.github.com>
+Date:   Fri Nov 13 23:40:29 2026 +0100
+
+    fix: clear appended animations when the model changes (#5216)
+    
+    ModelScene.reset() discards the animation mixers and their actions on
+    every model change, but kept appendedAnimations and markedAnimations.
+    Afterwards, appendedAnimations still listed animations of the previous
+    model, although none of them were playing, and markedAnimations could
+    restart an animation of the new model with the same name at its next
+    loop.
+    
+    Clear both lists in reset(), alongside the mixers.
