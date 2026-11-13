@@ -381,7 +381,7 @@ export class ArtifactCreator {
 
     try {
       await fs.mkdir(this.outputDirectory);
-    } catch (e) {
+    } catch {
       // Ignored...
     }
 

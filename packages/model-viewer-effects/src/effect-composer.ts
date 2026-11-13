@@ -224,7 +224,7 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   connectedCallback(): void {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     if (this.parentNode?.nodeName.toLowerCase() === 'model-viewer') {
       this[$modelViewerElement] = this.parentNode as ModelViewerElement;
     }
@@ -258,7 +258,7 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback && super.disconnectedCallback();
+    super.disconnectedCallback?.();
     this.modelViewerElement.unregisterEffectComposer();
     this.modelViewerElement.removeEventListener(
         'before-render', this[$onSceneLoad]);

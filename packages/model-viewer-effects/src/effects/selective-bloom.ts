@@ -57,7 +57,7 @@ export class MVSelectiveBloomEffect extends SelectiveMixin
   }
 
   connectedCallback(): void {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this[$updateProperties]();
   }
 

@@ -39,12 +39,12 @@ export class ImageComparisonApp extends LitElement {
   }
 
   connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     window.addEventListener('hashchange', this.onHashChange);
   }
 
   disconnectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     window.removeEventListener('hashchange', this.onHashChange);
   }
 

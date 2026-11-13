@@ -39,7 +39,7 @@ try {
       break;
     }
   }
-} catch (e) {
+} catch {
   // Fallback to localhost if network discovery fails
 }
 
@@ -72,7 +72,7 @@ const server = http.createServer((req, res) => {
   let safeUrl;
   try {
     safeUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  } catch (err) {
+  } catch {
     res.writeHead(400);
     res.end('Bad Request');
     return;
@@ -82,7 +82,7 @@ const server = http.createServer((req, res) => {
 
   try {
     url = decodeURIComponent(url);
-  } catch (err) {
+  } catch {
     res.writeHead(400);
     res.end('Bad Request');
     return;
@@ -130,7 +130,7 @@ const server = http.createServer((req, res) => {
       }
       filePath = path.join(filePath, 'index.html');
     }
-  } catch (e) {
+  } catch {
     // Ignore stat errors, let readFile handle ENOENT
   }
 

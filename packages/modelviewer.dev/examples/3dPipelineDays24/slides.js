@@ -54,7 +54,7 @@ document.body.appendChild(controls);
 const arrowPrev = document.createElement('span');
 arrowPrev.innerHTML = '⟵';
 arrowPrev.style.cursor = 'pointer';
-arrowPrev.addEventListener('click', function(event) {
+arrowPrev.addEventListener('click', function() {
   prevSlide();
 }, false);
 controls.appendChild(arrowPrev);
@@ -66,7 +66,7 @@ controls.appendChild(position);
 const arrowNext = document.createElement('span');
 arrowNext.innerHTML = '⟶';
 arrowNext.style.cursor = 'pointer';
-arrowNext.addEventListener('click', function(event) {
+arrowNext.addEventListener('click', function() {
   nextSlide();
 }, false);
 controls.appendChild(arrowNext);

@@ -187,7 +187,7 @@ async function main() {
 
     try {
       await fs.mkdir(goldensDirectory);
-    } catch (error) {
+    } catch {
       // Ignored...
     }
 
@@ -219,7 +219,7 @@ async function main() {
 
         try {
           await fs.mkdir(scenarioGoldensDirectory);
-        } catch (error) {
+        } catch {
           // Ignored...
         }
 
@@ -242,7 +242,7 @@ async function main() {
             await fs.access(goldenPath);
             console.log(`⏭  Skipping ${scenarioName} as render exists...`);
             continue;
-          } catch (error) {
+          } catch {
             // ignored
           }
         }

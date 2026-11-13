@@ -53,7 +53,7 @@ export class MVGlitchEffect extends MVEffectBase {
   }
 
   connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this[$updateProperties]();
   }
 

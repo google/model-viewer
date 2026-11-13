@@ -191,7 +191,7 @@ export class OpenMobileView extends ConnectedLitElement {
     try {
       await this.sendSessionContent(
           session, updatedContent, posterBlob, gltfBlob, envBlob);
-    } catch (e) {
+    } catch {
       console.log('error posting...');
     }
   }

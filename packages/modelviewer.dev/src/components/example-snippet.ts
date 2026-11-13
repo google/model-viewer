@@ -154,7 +154,7 @@ export class ExampleSnippet extends ReactiveElement {
   }
 
   connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this.template = this.querySelector('template');
   }
 

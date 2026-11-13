@@ -74,7 +74,7 @@ export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(
     }
 
     connectedCallback(): void {
-      super.connectedCallback && super.connectedCallback();
+      super.connectedCallback?.();
       if (this.parentNode?.nodeName.toLowerCase() === 'effect-composer') {
         this[$effectComposer] = this.parentNode as MVEffectComposer;
       }
@@ -82,7 +82,7 @@ export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(
     }
 
     disconnectedCallback() {
-      super.disconnectedCallback && super.disconnectedCallback();
+      super.disconnectedCallback?.();
       this.effects.forEach((effect) => effect.dispose());
       this.effectComposer.updateEffects();
     }

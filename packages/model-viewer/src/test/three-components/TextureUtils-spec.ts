@@ -111,7 +111,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.loadEquirect('');
         expect(false).to.be.ok;
-      } catch (e) {
+      } catch {
         expect(true).to.be.ok;
       }
     });
@@ -119,7 +119,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.loadEquirect('./nope.png');
         expect(false).to.be.ok;
-      } catch (e) {
+      } catch {
         expect(true).to.be.ok;
       }
     });
@@ -157,7 +157,7 @@ suite('TextureUtils', () => {
       let failed = false;
       try {
         await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
-      } catch (e) {
+      } catch {
         failed = true;
       }
       expect(failed).to.be.eq(true);
@@ -213,7 +213,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.generateEnvironmentMapAndSkybox();
         expect(false).to.be.ok;
-      } catch (e) {
+      } catch {
         expect(true).to.be.ok;
       }
     });

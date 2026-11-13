@@ -49,7 +49,7 @@ export const BlendModeMixin =
         opacity: number = 1;
 
         connectedCallback() {
-          super.connectedCallback && super.connectedCallback();
+          super.connectedCallback?.();
           this[$setDefaultProperties]();
         }
 

@@ -44,7 +44,7 @@ export class RenderingScenario extends LitElement {
   }
 
   async connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
 
     this.shadowRoot!.addEventListener('click', (event) => {
       const originatingElement = event.target as HTMLImageElement;

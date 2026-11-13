@@ -37,7 +37,7 @@ export class MVPixelateEffect extends MVEffectBase {
   }
 
   connectedCallback(): void {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this[$updateProperties]();
   }
 

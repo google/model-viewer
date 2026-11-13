@@ -71,7 +71,7 @@ export class Images4Up extends LitElement {
   }
 
   connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     self.addEventListener('resize', (_event) => this.updateSize());
   }
 

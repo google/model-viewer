@@ -53,7 +53,7 @@ export class MVBloomEffect extends MVEffectBase {
   }
 
   connectedCallback(): void {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this[$updateProperties]();
   }
 

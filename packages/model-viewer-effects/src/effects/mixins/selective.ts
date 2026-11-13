@@ -47,14 +47,14 @@ export const SelectiveMixin =
         @property({type: Array}) selection: Array<string|Object3D> = [];
 
         connectedCallback() {
-          super.connectedCallback && super.connectedCallback();
+          super.connectedCallback?.();
           this[$setSelection]();
           this.effectComposer.addEventListener(
               'updated-selection', this[$setSelection]);
         }
 
         disconnectedCallback(): void {
-          super.disconnectedCallback && super.disconnectedCallback();
+          super.disconnectedCallback?.();
           this.effectComposer.removeEventListener(
               'updated-selection', this[$setSelection]);
         }

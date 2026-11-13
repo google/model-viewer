@@ -91,7 +91,7 @@ export class MobileView extends LitElement {
       if (this.sessionOs === 'Android') {
         post(this.currentBlob!, this.modelViewerUrl);
       }
-    } catch (error) {
+    } catch {
       console.log('Post failed on ar button press...');
     }
   };
@@ -183,7 +183,7 @@ export class MobileView extends LitElement {
     this.currentBlob = await this.modelViewer.exportScene();
     try {
       await post(this.currentBlob, this.modelViewerUrl);
-    } catch (error) {
+    } catch {
       console.log('Post failed on model loaded...');
     }
   }

@@ -383,7 +383,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   }
 
   connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     if (HAS_RESIZE_OBSERVER) {
       this[$resizeObserver]!.observe(this);
     } else {
@@ -420,7 +420,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback && super.disconnectedCallback();
+    super.disconnectedCallback?.();
     if (HAS_RESIZE_OBSERVER) {
       this[$resizeObserver]!.unobserve(this);
     } else {

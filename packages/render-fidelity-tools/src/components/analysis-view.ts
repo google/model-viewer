@@ -71,7 +71,7 @@ export class AnalysisView extends LitElement {
   }
 
   async connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
 
     await this.updateComplete;
 
