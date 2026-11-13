@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import * as core from '@actions/core';
 import HTTPServer from 'http-server';
 import module from 'module';
 import {dirname, join, resolve} from 'path';
@@ -28,8 +29,6 @@ type CommandLineArgs = {
 
 
 const require = module.createRequire(import.meta.url);
-// actions/core can only be imported using commonJS's require here
-const core = require('@actions/core');
 
 import {ArtifactCreator} from '../artifact-creator.js';
 import {FIDELITY_TEST_THRESHOLD, toDecibel} from '../common.js';
