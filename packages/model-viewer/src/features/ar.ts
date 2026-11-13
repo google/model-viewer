@@ -27,6 +27,23 @@ let isWebXRBlocked = false;
 let isSceneViewerBlocked = false;
 const noArViewerSigil = '#model-viewer-no-ar-fallback';
 
+// User-Agent Client Hints are not in TypeScript's DOM lib yet.
+interface NavigatorUAData {
+  getHighEntropyValues?
+      (hints: string[]): Promise<{formFactor?: string | string[]}>;
+}
+
+/** Whether the browser reports an XR headset form factor via UA-CH. */
+const isXRFormFactor = async(): Promise<boolean> => {
+  const {userAgentData} =
+      navigator as Navigator & {userAgentData?: NavigatorUAData};
+  if (userAgentData?.getHighEntropyValues == null) {
+    return false;
+  }
+  const {formFactor} = await userAgentData.getHighEntropyValues(['formFactor']);
+  return formFactor?.includes('XR') ?? false;
+};
+
 export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'none';
 
 const deserializeARModes = enumerationDeserializer<ARMode>(
@@ -234,12 +251,7 @@ configuration or device capabilities');
               break;
             }
             if (value === 'scene-viewer' && !isSceneViewerBlocked &&
-                (IS_SCENEVIEWER_CANDIDATE ||
-                 ((navigator as any).userAgentData &&
-                  (navigator as any).userAgentData.getHighEntropyValues &&
-                  (await (navigator as any).userAgentData.getHighEntropyValues([
-                    'formFactor'
-                  ])).formFactor?.includes('XR')))) {
+                (IS_SCENEVIEWER_CANDIDATE || await isXRFormFactor())) {
               arMode = ARMode.SCENE_VIEWER;
               break;
             }
