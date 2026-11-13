@@ -33,12 +33,12 @@ export class Node {
 
 // Represents a primitive in a glTF mesh.
 export class PrimitiveNode extends Node {
-  public mesh: Mesh;
+  mesh: Mesh;
   // Maps glTF material index number to a material that this primitive supports.
-  public materials = new Map<number, Material>();
+  materials = new Map<number, Material>();
   // Maps variant index to material.
   private variantToMaterialMap = new Map<number, Material>();
-  public initialMaterialIdx = 0;
+  initialMaterialIdx = 0;
   private activeMaterialIdx = 0;
   private modelVariants: Map<string, VariantData>;
   private parser: GLTFParser;

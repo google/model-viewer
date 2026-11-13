@@ -19,9 +19,9 @@ import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
 
 // Silence tsc since prismjs isn't a proper module
-declare var Prism: any;
-declare var __THREEJS_VERSION__: string;
-declare var __POSTPROCESSING_VERSION__: string;
+declare let Prism: any;
+declare let __THREEJS_VERSION__: string;
+declare let __POSTPROCESSING_VERSION__: string;
 
 const EMPTY_ATTRIBUTE_RE = /([\w-]+)=\"\"/g;
 
@@ -75,7 +75,7 @@ export class ExampleSnippet extends ReactiveElement {
 
   readonly stamped: boolean = false;
 
-  public stamp() {
+  stamp() {
     if (this.template == null) {
       return;
     }

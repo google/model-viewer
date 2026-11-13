@@ -15,10 +15,10 @@
 import {directive, Directive, DirectiveParameters, ElementPart, PartInfo, PartType,} from 'lit/directive.js';
 
 const Binding = {
-  ATTRIBUTE: 'ATTRIBUTE' as 'ATTRIBUTE',
-  PROPERTY: 'PROPERTY' as 'PROPERTY',
-  BOOLEAN_ATTRIBUTE: 'BOOLEAN_ATTRIBUTE' as 'BOOLEAN_ATTRIBUTE',
-  EVENT: 'EVENT' as 'EVENT',
+  ATTRIBUTE: 'ATTRIBUTE' as const,
+  PROPERTY: 'PROPERTY' as const,
+  BOOLEAN_ATTRIBUTE: 'BOOLEAN_ATTRIBUTE' as const,
+  EVENT: 'EVENT' as const,
 };
 
 type Binding = keyof typeof Binding;

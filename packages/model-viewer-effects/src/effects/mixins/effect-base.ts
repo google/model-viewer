@@ -65,10 +65,11 @@ export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(
      * The parent {@link MVEffectComposer} element.
      */
     protected get effectComposer() {
-      if (!this[$effectComposer])
+      if (!this[$effectComposer]) {
         throw new Error(`${
             getComponentName(
                 this as any)} must be a child of a <model-viewer> component.`);
+      }
       return this[$effectComposer];
     }
 

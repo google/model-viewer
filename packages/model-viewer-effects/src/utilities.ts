@@ -31,8 +31,9 @@ export function getOwnPropertySymbol(object: any, key: string): symbol|
   while (object) {
     const symbol = Object.getOwnPropertySymbols(object).find(
         (symbol) => symbol.description === key);
-    if (symbol)
+    if (symbol) {
       return symbol;
+    }
     // Search further up in prototype chain
     object = Object.getPrototypeOf(object);
   }
@@ -87,10 +88,12 @@ export function clampNormal(value: number): number {
  */
 export function wrapClamp(
     value: number, lowerLimit: number, upperLimit: number): number {
-  if (value > upperLimit)
+  if (value > upperLimit) {
     return lowerLimit;
-  if (value < lowerLimit)
+  }
+  if (value < lowerLimit) {
     return upperLimit;
+  }
   return value;
 }
 
@@ -106,8 +109,9 @@ export function getBackgroundColor(elem: HTMLElement): ColorRepresentation|
   while (currElem && isTransparent(getComputedStyle(currElem))) {
     currElem = currElem.parentElement;
   }
-  if (!currElem)
+  if (!currElem) {
     return;
+  }
   return getComputedStyle(currElem).backgroundColor as ColorRepresentation;
 }
 
@@ -135,14 +139,15 @@ export function isConvolution(effect: Effect): boolean {
 export function disposeEffectPass(pass: EffectPass): void {
   Pass.prototype.dispose.call(pass);
 
-  if (!(pass as any).listener)
+  if (!(pass as any).listener) {
     return;
+  }
   for (const effect of (pass as any).effects) {
     effect.removeEventListener('change', (pass as any).listener);
   }
 }
 
-export function getValueOfEnum<T extends Object>(Enum: T, key: string): T {
+export function getValueOfEnum<T extends object>(Enum: T, key: string): T {
   const index = Object.keys(Enum).filter((v) => !isNaN(Number(v))).indexOf(key);
   return (Enum as any)[index];
 }
@@ -162,7 +167,8 @@ export function getValueOfEnum<T extends Object>(Enum: T, key: string): T {
  */
 export function validateLiteralType<TOptions extends readonly unknown[]>(
     options: TOptions, value: typeof options[number]): void {
-  if (!options.includes(value))
+  if (!options.includes(value)) {
     throw new TypeError(`Validation Error: ${
         value} is not a valid value. Expected ${options.join(' | ')}`);
+  }
 }

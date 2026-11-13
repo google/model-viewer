@@ -345,14 +345,16 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
       const model = this[$model];
       if (model != null) {
         const material = model[$materialFromPoint](hit);
-        if (material != null)
+        if (material != null) {
           return material;
+        }
       }
 
       for (const extraModel of this[$extraModels]) {
         const extraMaterial = extraModel[$materialFromPoint](hit);
-        if (extraMaterial != null)
+        if (extraMaterial != null) {
           return extraMaterial;
+        }
       }
 
       return null;

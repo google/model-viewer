@@ -57,7 +57,7 @@ export class SnippetViewer extends LitElement {
 
   @property({type: Object}) renderedSnippet: TemplateResult = html``;
   @property({type: String}) renderedStyle = '';
-  @property({type: Boolean}) isReadOnly?: Boolean = true;
+  @property({type: Boolean}) isReadOnly?: boolean = true;
   @query('span#tag') shadowTag!: HTMLElement;
   @query('textarea#snippet') snippet!: HTMLTextAreaElement;
 

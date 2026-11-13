@@ -284,7 +284,7 @@ suite('Controls', () => {
         await rafPasses();
 
         expect(element.getFieldOfView()).to.be.closeTo(fieldOfView, 0.00001);
-        let orbit = element.getCameraOrbit();
+        const orbit = element.getCameraOrbit();
         // round to nearest 0.0001
         orbit.theta = Math.round(orbit.theta * 10000) / 10000;
         expect(`${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`)

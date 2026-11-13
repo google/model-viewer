@@ -199,8 +199,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
   protected[$clearModelTimeout]: number|null = null;
 
   [$onSlotChange] = () => {
-    if (!this[$scene])
+    if (!this[$scene]) {
       return;
+    }
 
     const extraModels = Array.from(this.querySelectorAll('extra-model')) as
         Array<import('./features/extra-model.js').ExtraModelElement>;
@@ -231,8 +232,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const extraModels = Array.from(this.querySelectorAll('extra-model'));
     const childIndex = (extraModels as HTMLElement[]).indexOf(targetNode);
 
-    if (childIndex === -1)
+    if (childIndex === -1) {
       return;
+    }
 
     const modelIndex = this.src ? childIndex + 1 : childIndex;
 
@@ -340,7 +342,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
               return;
             }
 
-            for (let entry of entries) {
+            for (const entry of entries) {
               if (entry.target === this) {
                 this[$updateSize](entry.contentRect);
               }
@@ -350,7 +352,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     if (HAS_INTERSECTION_OBSERVER) {
       this[$intersectionObserver] = new IntersectionObserver(entries => {
-        for (let entry of entries) {
+        for (const entry of entries) {
           if (entry.target === this) {
             const oldVisibility = this.modelIsVisible;
             this[$isElementInViewport] = entry.isIntersecting;

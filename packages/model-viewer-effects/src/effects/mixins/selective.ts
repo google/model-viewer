@@ -69,8 +69,9 @@ export const SelectiveMixin =
 
         [$setSelection] = () => {
           const {effectComposer} = this;
-          if (!effectComposer)
+          if (!effectComposer) {
             return;
+          }
 
           if (this.selection?.length > 0) {
             const selection: Object3D[] = [];

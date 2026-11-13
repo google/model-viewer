@@ -131,18 +131,21 @@ function groupMessages(report) {
   };
 
   report.errors.forEach((message) => {
-    if (!CODES[message.code])
+    if (!CODES[message.code]) {
       return;
+    }
     if (!CODES[message.code].pointerCounts[message.pointer]) {
       CODES[message.code].pointerCounts[message.pointer] = 0;
     }
     CODES[message.code].pointerCounts[message.pointer]++;
   });
   report.errors = report.errors.filter((message) => {
-    if (!CODES[message.code])
+    if (!CODES[message.code]) {
       return true;
-    if (!CODES[message.code].pointerCounts[message.pointer])
+    }
+    if (!CODES[message.code].pointerCounts[message.pointer]) {
       return true;
+    }
     return CODES[message.code].pointerCounts[message.pointer] < 2;
   });
   Object.keys(CODES).forEach((code) => {

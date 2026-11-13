@@ -36,6 +36,7 @@ export default defineConfig(
       ignores: [
         '**/*.d.ts',
         '**/shared-assets/**',
+        '**/third_party/**',
         'packages/modelviewer.dev/examples/built/**',
         'packages/render-fidelity-tools/test/results/**',
       ],

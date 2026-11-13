@@ -35,7 +35,9 @@ try {
         break;
       }
     }
-    if (localIp !== 'localhost') break;
+    if (localIp !== 'localhost') {
+      break;
+    }
   }
 } catch (e) {
   // Fallback to localhost if network discovery fails
@@ -144,7 +146,7 @@ const server = http.createServer((req, res) => {
         res.end(`500 Internal Server Error: ${err.code}`, 'utf-8');
       }
     } else {
-      let contentType = mimeTypes[extname] || 'application/octet-stream';
+      const contentType = mimeTypes[extname] || 'application/octet-stream';
       res.writeHead(200, { 'Content-Type': contentType });
 
       // Dynamically replace placeholders in HTML, JSON, and space-opera files!

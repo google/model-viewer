@@ -330,7 +330,7 @@ configuration or device capabilities');
             'No src or extra-model provided for Scene Viewer fallback.');
         return;
       }
-      let modelUrl = new URL(firstSrc, location);
+      const modelUrl = new URL(firstSrc, location);
 
       // Note: While it would be ideal to export and pass a composited GLB for
       // multi-model scenes, Android's Scene Viewer app cannot securely read
@@ -340,8 +340,9 @@ configuration or device capabilities');
       // scene and gracefully degrade to serving only the base model's remote
       // URI.
 
-      if (modelUrl.hash)
+      if (modelUrl.hash) {
         modelUrl.hash = '';
+      }
       const params = new URLSearchParams(modelUrl.search);
 
       locationUrl.hash = noArViewerSigil;
@@ -450,8 +451,9 @@ configuration or device capabilities');
       // attach anchor to shadow DOM to ensure iOS16 ARQL banner click message
       // event propagation
       anchor.style.display = 'none';
-      if (!anchor.isConnected)
+      if (!anchor.isConnected) {
         this.shadowRoot!.appendChild(anchor);
+      }
 
       anchor.click();
       anchor.removeChild(img);

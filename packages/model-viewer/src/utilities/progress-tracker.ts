@@ -116,8 +116,9 @@ export class ProgressTracker extends EventTarget {
     let progressLeft = 0;
     let completedActivities = 0;
 
-    if (nextProgress == 1.0)
+    if (nextProgress == 1.0) {
       updatedActivity.completed = true;
+    }
 
     for (const activity of this.ongoingActivities) {
       const {progress} = activity;

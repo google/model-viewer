@@ -42,8 +42,9 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
   // gives us a Group, but if the exporter doesn't get a Scene, then it
   // wraps everything in an "AuxScene" node. Feels like a three.js bug.
   // With multi-model we added an extra grouping level globally.
-  if (!hasBeenExportedOnce)
+  if (!hasBeenExportedOnce) {
     return scene.model!;
+  }
 
   // If exported, check for the extra node wrapper (AuxScene or otherwise).
   if (scene.model!.children.length === 1 &&

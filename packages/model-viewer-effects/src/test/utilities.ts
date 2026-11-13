@@ -135,7 +135,7 @@ export const isInDocumentTree = (node: Node): boolean => {
  * original implementation to the object when invoked.
  */
 export const spy =
-    (object: Object, property: string, descriptor: PropertyDescriptor): (
+    (object: object, property: string, descriptor: PropertyDescriptor): (
         () => void) => {
       let sourcePrototype = object;
 
@@ -218,8 +218,9 @@ const COMPONENTS_PER_PIXEL = 4;
 
 export function screenshot(element: ModelViewerElement): Uint8Array {
   const renderer = getOwnPropertySymbolValue<Renderer>(element, 'renderer');
-  if (!renderer)
+  if (!renderer) {
     throw new Error('Invalid element provided');
+  }
 
   const screenshotContext = renderer.threeRenderer.getContext();
   const width = screenshotContext.drawingBufferWidth;
@@ -241,12 +242,14 @@ export function screenshot(element: ModelViewerElement): Uint8Array {
 }
 
 export function ArraysAreEqual(arr1: TypedArray, arr2: TypedArray): boolean {
-  if (arr1.length !== arr2.length)
+  if (arr1.length !== arr2.length) {
     return false;
+  }
 
   for (let i = 0; i < arr1.length; i++) {
-    if (arr1[i] !== arr2[i])
+    if (arr1[i] !== arr2[i]) {
       return false;
+    }
   }
 
   return true;
@@ -261,8 +264,9 @@ export function ArraysAreEqual(arr1: TypedArray, arr2: TypedArray): boolean {
 export function CompareArrays(
     arr1: TypedArray<number>, arr2: TypedArray<number>): number {
   if (arr1.length !== arr2.length ||
-      arr1.BYTES_PER_ELEMENT !== arr2.BYTES_PER_ELEMENT)
+      arr1.BYTES_PER_ELEMENT !== arr2.BYTES_PER_ELEMENT) {
     return 0;
+  }
 
   const similarity: number[] = [];
   const max = maxValue(arr1.BYTES_PER_ELEMENT);
@@ -324,7 +328,7 @@ function rgbToHsl(r: number, g: number, b: number): HSL {
   if (max == min) {
     h = s = 0;  // achromatic
   } else {
-    var d = max - min;
+    const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
 
     switch (max) {
