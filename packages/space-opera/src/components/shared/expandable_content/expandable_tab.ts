@@ -33,7 +33,7 @@ export class ExpandableTab extends LitElement {
   @property({type: Boolean}) open = false;
   @property({type: Boolean}) enabled = true;
   @property({type: Boolean}) sticky? = false;
-  @property({attribute: false}) copyFunction?: Function;
+  @property({attribute: false}) copyFunction?: () => void;
 
   static styles = styles;
 

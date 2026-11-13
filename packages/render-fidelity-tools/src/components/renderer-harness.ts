@@ -34,7 +34,7 @@ export class RendererConfiguration extends LitElement {
   @property({type: Object}) protected scenario: ScenarioConfig|null = null;
 
   connectedCallback() {
-    super.connectedCallback();
+    super.connectedCallback?.();
 
     const {queryParameters} = this;
     this.configUrl = queryParameters.config || '../../config.json';

@@ -121,7 +121,7 @@ export default class GLTFExporterMaterialsVariantsExtension implements
     const variantMaterials =
         userData.variantMaterials as Map<number, UserDataVariantMapping>;
     const variantDataMap = userData.variantData as Map<string, VariantData>;
-    const mappingTable　=
+    const mappingTable =
         new Map<number, {material: number, variants: number[]}>();
 
     // Removes gaps in the variant indices list (caused by deleting variants).

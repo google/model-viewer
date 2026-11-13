@@ -15,7 +15,7 @@
 
 import {colorDelta} from './third_party/pixelmatch/color-delta.js';
 
-export interface OffscreenCanvas extends HTMLCanvasElement {}
+export type OffscreenCanvas = HTMLCanvasElement;
 
 export const COMPONENTS_PER_PIXEL: number = 4;
 

@@ -55,6 +55,10 @@ export default defineConfig(
         eqeqeq: ['error', 'smart'],
         'no-var': 'error',
         'prefer-const': 'error',
+        // clang-format puts call arguments and template literals on the line
+        // after the callee/tag (e.g. `Mixin\n(Base)`, `html\n`...``), which
+        // this rule flags.
+        'no-unexpected-multiline': 'off',
 
         '@typescript-eslint/explicit-member-accessibility':
             ['error', {accessibility: 'no-public'}],

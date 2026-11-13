@@ -280,8 +280,10 @@ async function main() {
               -1,
               args.quiet);
         } catch (error) {
-          throw new Error(`Failed to update ${
-              rendererDescription} screenshot: ${error.message}`);
+          throw new Error(
+              `Failed to update ${rendererDescription} screenshot: ${
+                  error.message}`,
+              {cause: error});
         }
       }
 

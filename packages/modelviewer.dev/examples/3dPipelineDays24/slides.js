@@ -1,4 +1,5 @@
-let slides = [], current;
+const slides = [];
+let current;
 const sections = document.getElementsByTagName('section');
 
 while (sections.length) {
@@ -59,7 +60,7 @@ arrowPrev.addEventListener('click', function() {
 }, false);
 controls.appendChild(arrowPrev);
 
-var position = document.createElement('span');
+const position = document.createElement('span');
 position.style.cursor = 'default';
 controls.appendChild(position);
 

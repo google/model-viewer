@@ -126,9 +126,9 @@ export interface PointerChangeEvent extends ThreeEvent {
  * ensure that the camera's matrixWorld is in sync before using SmoothControls.
  */
 export class SmoothControls extends EventDispatcher<{
-  'user-interaction': {},
-  'pointer-change-start': {},
-  'pointer-change-end': {}
+  'user-interaction': object,
+  'pointer-change-start': object,
+  'pointer-change-end': object
 }> {
   orbitSensitivity = 1;
   zoomSensitivity = 1;
@@ -690,6 +690,7 @@ export class SmoothControls extends EventDispatcher<{
     try {
       element.setPointerCapture(event.pointerId);
     } catch {
+      // Pointer capture is best-effort; the pointer may already be released.
     }
     this.pointers.push(
         {clientX: event.clientX, clientY: event.clientY, id: event.pointerId});

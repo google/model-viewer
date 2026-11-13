@@ -138,7 +138,7 @@ export class Model implements ModelInterface {
     while (nodeStack.length > 0) {
       const object = nodeStack.pop()!;
 
-      let node: Node|null = null;
+      let node: Node|null;
 
       if (object instanceof Mesh) {
         node = new PrimitiveNode(

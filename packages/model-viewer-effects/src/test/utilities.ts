@@ -140,7 +140,7 @@ export const spy =
       let sourcePrototype = object;
 
       while (sourcePrototype != null &&
-             !sourcePrototype.hasOwnProperty(property)) {
+             !Object.prototype.hasOwnProperty.call(sourcePrototype, property)) {
         sourcePrototype = (sourcePrototype as any).__proto__;
       }
 
@@ -323,7 +323,8 @@ function rgbToHsl(r: number, g: number, b: number): HSL {
   (r /= 255), (g /= 255), (b /= 255);
 
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
+  let h, s;
+  const l = (max + min) / 2;
 
   if (max === min) {
     h = s = 0;  // achromatic

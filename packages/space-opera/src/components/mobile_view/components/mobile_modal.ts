@@ -17,7 +17,6 @@
 
 import {html} from 'lit';
 import {customElement, property, query, state} from 'lit/decorators.js';
-// @ts-ignore, the qrious package isn't typed
 import QRious from 'qrious';
 
 import {openModalStyles} from '../../../styles.css.js';

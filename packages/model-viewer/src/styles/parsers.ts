@@ -111,7 +111,6 @@ export const parseExpressions = (() => {
     while (inputString) {
       if (++parseIterations > MAX_PARSE_ITERATIONS) {
         // Avoid a potentially infinite loop due to typos:
-        inputString = '';
         break;
       }
 

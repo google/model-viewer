@@ -69,7 +69,7 @@ export class OpenModal extends ConnectedLitElement {
       return;
     }
     this.errors = [];
-    let inputText: string = '';
+    let inputText: string;
     if (value === undefined) {
       inputText = textArea.value.trim();
     } else {
