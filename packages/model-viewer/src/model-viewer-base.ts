@@ -651,7 +651,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const rootNode = this.getRootNode() as Document | ShadowRoot | null;
     // Only change the aria-label if <model-viewer> is currently focused:
     if (rootNode != null && rootNode.activeElement === this &&
-        this[$statusElement].textContent != status) {
+        this[$statusElement].textContent !== status) {
       this[$statusElement].textContent = status;
     }
   }

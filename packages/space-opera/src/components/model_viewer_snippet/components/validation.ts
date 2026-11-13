@@ -234,7 +234,7 @@ export class Validation extends ConnectedLitElement {
       this.severityTitle = 'Converted';
     }
     if (this.report.info?.extensionsUsed?.find(
-            (e) => e == 'KHR_materials_pbrSpecularGlossiness')) {
+            (e) => e === 'KHR_materials_pbrSpecularGlossiness')) {
       this.severityColor = '#f9a825';
       this.severityTitle = 'Converting';
     }

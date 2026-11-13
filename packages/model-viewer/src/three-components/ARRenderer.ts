@@ -396,7 +396,7 @@ export class ARRenderer extends EventDispatcher<
   private hover(xrController: XRTargetRaySpace): boolean {
     // Do not highlight in mobile-ar
     if (this.xrMode === XRMode.SCREEN_SPACE ||
-        this.selectedXRController == xrController) {
+        this.selectedXRController === xrController) {
       return false;
     }
 
@@ -469,9 +469,9 @@ export class ARRenderer extends EventDispatcher<
         this.selectedXRController = controller;
         scene.setShadowIntensity(0.01);
       } else {
-        if (controller == this.xrController1) {
+        if (controller === this.xrController1) {
           this.xrController1.userData.isSelected = true;
-        } else if (controller == this.xrController2) {
+        } else if (controller === this.xrController2) {
           this.xrController2.userData.isSelected = true;
         }
 
@@ -503,14 +503,14 @@ export class ARRenderer extends EventDispatcher<
     this.isTwoHandInteraction = false;
     this.scaleLine.visible = false;
 
-    if (controller == this.xrController1) {
+    if (controller === this.xrController1) {
       this.xrController1.userData.isSelected = false;
-    } else if (controller == this.xrController2) {
+    } else if (controller === this.xrController2) {
       this.xrController2.userData.isSelected = false;
     }
 
     if (this.selectedXRController != null &&
-        this.selectedXRController != controller) {
+        this.selectedXRController !== controller) {
       return;
     }
     const scene = this.presentedScene!;
@@ -880,7 +880,7 @@ export class ARRenderer extends EventDispatcher<
     }
 
     const hitTestResults = frame.getHitTestResults(hitSource);
-    if (hitTestResults.length == 0) {
+    if (hitTestResults.length === 0) {
       return;
     }
 

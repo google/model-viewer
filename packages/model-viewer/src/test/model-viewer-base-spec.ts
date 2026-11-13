@@ -166,7 +166,7 @@ suite('ModelViewerElementBase', () => {
 
       suite('toDataURL', () => {
         test('produces a URL-compatible string', () => {
-          const dataUrlMatcher = /^data\:image\//;
+          const dataUrlMatcher = /^data:image\//;
           expect(dataUrlMatcher.test(element.toDataURL())).to.be.true;
         });
       });
@@ -180,7 +180,7 @@ suite('ModelViewerElementBase', () => {
         test('can convert blob to object URL', async () => {
           const blob = await element.toBlob();
           const objectUrl = URL.createObjectURL(blob);
-          const objectUrlMatcher = /^blob\:/;
+          const objectUrlMatcher = /^blob:/;
           expect(objectUrlMatcher.test(objectUrl)).to.be.true;
         });
 

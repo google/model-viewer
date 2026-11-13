@@ -328,7 +328,7 @@ export class EnvEvaluator extends Evaluator<NumberNode> {
 }
 
 
-const IS_MULTIPLICATION_RE = /[\*\/]/;
+const IS_MULTIPLICATION_RE = /[*/]/;
 const $evaluator = Symbol('evaluator');
 
 /**
@@ -456,7 +456,7 @@ export class OperatorEvaluator extends Evaluator<NumberNode> {
     const {number: rightValue, unit: rightUnit} = rightNode;
 
     // Disallow operations for mismatched normalized units e.g., m and rad:
-    if (rightUnit != null && leftUnit != null && rightUnit != leftUnit) {
+    if (rightUnit != null && leftUnit != null && rightUnit !== leftUnit) {
       return ZERO;
     }
 

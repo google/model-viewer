@@ -343,15 +343,15 @@ export class MVEffectComposer extends ReactiveElement {
     while (i < effects.length) {
       const separateIndex = effects.slice(i).findIndex(
           (effect) => effect.requireSeparatePass || isConvolution(effect));
-      if (separateIndex != 0) {
+      if (separateIndex !== 0) {
         const effectPass = new EffectPass(
             undefined,
             ...effects.slice(
-                i, separateIndex == -1 ? effects.length : separateIndex));
+                i, separateIndex === -1 ? effects.length : separateIndex));
         this[$effectComposer].addPass(effectPass);
       }
 
-      if (separateIndex != -1) {
+      if (separateIndex !== -1) {
         const convolutionPass =
             new EffectPass(undefined, effects[i + separateIndex]);
         this[$effectComposer].addPass(convolutionPass);

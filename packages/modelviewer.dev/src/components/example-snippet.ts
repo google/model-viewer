@@ -23,7 +23,7 @@ declare let Prism: any;
 declare let __THREEJS_VERSION__: string;
 declare let __POSTPROCESSING_VERSION__: string;
 
-const EMPTY_ATTRIBUTE_RE = /([\w-]+)=\"\"/g;
+const EMPTY_ATTRIBUTE_RE = /([\w-]+)=""/g;
 
 export type RootNode = Document|ShadowRoot;
 

@@ -72,7 +72,7 @@ export class MVGlitchEffect extends MVEffectBase {
     } catch (e) {
       console.error((e as Error).message + +'\nmode defaulting to \'sporadic\'')
     }
-    if (this.strength == 0) {
+    if (this.strength === 0) {
       (this.effects[0] as GlitchEffect).columns = 0;
       (this.effects[0] as GlitchEffect).mode =
           this.mode === 'constant' ? Mode.CONSTANT_MILD : Mode.SPORADIC;

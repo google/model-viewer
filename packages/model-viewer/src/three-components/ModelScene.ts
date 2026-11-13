@@ -957,7 +957,7 @@ export class ModelScene extends Scene {
             action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
           } else if (
               this.animationTimeScale > 0 &&
-              this.animationTime == this.duration) {
+              this.animationTime === this.duration) {
             this.animationTime = 0;
           }
         }
@@ -1122,7 +1122,7 @@ export class ModelScene extends Scene {
         }
 
         if (!action.isRunning()) {
-          if (action.time == animationClip.duration) {
+          if (action.time === animationClip.duration) {
             action.stop();
           }
           action.setLoop(loopMode, repetitionCount);
@@ -1336,7 +1336,7 @@ export class ModelScene extends Scene {
   renderShadow(renderer: WebGLRenderer) {
     this.updateBoundingBoxAndShadowIfDirty();
     const shadow = this.shadow;
-    if (shadow != null && shadow.needsUpdate == true) {
+    if (shadow != null && shadow.needsUpdate === true) {
       shadow.render(renderer, this);
       shadow.needsUpdate = false;
     }

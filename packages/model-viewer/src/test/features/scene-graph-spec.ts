@@ -199,7 +199,7 @@ suite('SceneGraph', () => {
             // Finds the first primitive with material 0 assigned.
             for (const primitive of element.model![$primitivesList]) {
               if (primitive.variantInfo != null &&
-                  primitive.initialMaterialIdx == 0) {
+                  primitive.initialMaterialIdx === 0) {
                 primitiveNode = primitive;
                 return;
               }
@@ -269,7 +269,7 @@ suite('SceneGraph', () => {
                 // Finds the first primitive with material 0 assigned.
                 for (const primitive of element.model![$primitivesList]) {
                   if (primitive.variantInfo != null &&
-                      primitive.initialMaterialIdx == 0) {
+                      primitive.initialMaterialIdx === 0) {
                     primitiveNode = primitive;
                     return;
                   }

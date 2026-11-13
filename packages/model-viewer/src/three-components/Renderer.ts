@@ -322,13 +322,13 @@ export class Renderer extends
     if (!scene.shouldRender()) {
       // The first frame we stop rendering the scene (because it stops moving),
       // trigger one extra render at full scale.
-      if (scene.scaleStep != 0) {
+      if (scene.scaleStep !== 0) {
         scene.scaleStep = 0;
         this.rescaleCanvas(scene);
       } else {
         return false;
       }
-    } else if (scene.scaleStep != this.scaleStep) {
+    } else if (scene.scaleStep !== this.scaleStep) {
       // Update render scale
       scene.scaleStep = this.scaleStep;
       this.rescaleCanvas(scene);

@@ -245,7 +245,7 @@ export class SmoothControls extends EventDispatcher<{
   };
 
   set disableZoom(disable: boolean) {
-    if (this._disableZoom != disable) {
+    if (this._disableZoom !== disable) {
       this._disableZoom = disable;
       if (disable === true) {
         this.element.removeEventListener('wheel', this.onWheel);
@@ -826,7 +826,7 @@ export class SmoothControls extends EventDispatcher<{
     this.changeSource = ChangeSource.USER_INTERACTION;
 
     const deltaZoom = (event as WheelEvent).deltaY *
-        ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY *
+        ((event as WheelEvent).deltaMode === 1 ? 18 : 1) * ZOOM_SENSITIVITY *
         this.zoomSensitivity / 30;
     this.userAdjustOrbit(0, 0, deltaZoom);
 

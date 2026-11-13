@@ -372,7 +372,7 @@ export default class TextureUtils {
       const weight = Math.exp(-x * x / 2);
       weights.push(weight);
 
-      if (i == 0) {
+      if (i === 0) {
         sum += weight;
 
       } else if (i < samples) {

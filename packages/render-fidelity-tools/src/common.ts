@@ -162,7 +162,7 @@ export class ImageComparator {
 
     let maximumDeltaIntensity = 0;
 
-    if (candidateImage.length != goldenImage.length) {
+    if (candidateImage.length !== goldenImage.length) {
       throw new Error(`Image sizes do not match (candidate: ${
           candidateImage.length}, golden: ${goldenImage.length})`);
     }
@@ -226,7 +226,7 @@ export class ImageComparator {
 
     let squareSum = 0;
 
-    if (candidateImage.length != goldenImage.length) {
+    if (candidateImage.length !== goldenImage.length) {
       throw new Error(`Image sizes do not match (candidate: ${
           candidateImage.length}, golden: ${goldenImage.length})`);
     }
@@ -249,10 +249,10 @@ export class ImageComparator {
         let isBlackPixel = true;
         for (let i = 0; i < 3; i++) {
           const colorComponent = candidateImage[position + i] * alpha;
-          if (colorComponent != 255) {
+          if (colorComponent !== 255) {
             isWhitePixel = false;
           }
-          if (colorComponent != 0) {
+          if (colorComponent !== 0) {
             isBlackPixel = false;
           }
         }

@@ -129,7 +129,7 @@ function isTransparent(style: CSSStyleDeclaration): boolean {
  * @param effect The effect to check.
  */
 export function isConvolution(effect: Effect): boolean {
-  return (effect.getAttributes() & EffectAttribute.CONVOLUTION) != 0;
+  return (effect.getAttributes() & EffectAttribute.CONVOLUTION) !== 0;
 }
 
 /**

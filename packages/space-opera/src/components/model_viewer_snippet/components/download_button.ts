@@ -87,7 +87,7 @@ function beautify_snippet(snippetList: string[]): string {
   let snippet = '';
   let i = 0;
   for (const line of snippetList) {
-    if (i == 0) {
+    if (i === 0) {
       snippet = `${line}\n`;
     } else if (i !== 0 && line.includes('model-viewer')) {
       snippet = `${snippet}    ${line}`;

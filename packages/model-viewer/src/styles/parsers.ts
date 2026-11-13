@@ -137,9 +137,9 @@ export const parseExpressions = (() => {
  * next comma, or between the parens of a function invocation.
  */
 const parseExpression = (() => {
-  const IS_IDENT_RE = /^(\-\-|[a-z\u0240-\uffff])/i;
-  const IS_OPERATOR_RE = /^([\*\+\/]|[\-]\s)/i;
-  const IS_EXPRESSION_END_RE = /^[\),]/;
+  const IS_IDENT_RE = /^(--|[a-z\u0240-\uffff])/i;
+  const IS_OPERATOR_RE = /^([*+/]|[-]\s)/i;
+  const IS_EXPRESSION_END_RE = /^[),]/;
   const FUNCTION_ARGUMENTS_FIRST_TOKEN = '(';
   const HEX_FIRST_TOKEN = '#';
 
@@ -224,7 +224,7 @@ const parseIdent = (() => {
  */
 const parseNumber = (() => {
   // @see https://www.w3.org/TR/css-syntax/#number-token-diagram
-  const VALUE_RE = /[\+\-]?(\d+[\.]\d+|\d+|[\.]\d+)([eE][\+\-]?\d+)?/;
+  const VALUE_RE = /[+-]?(\d+[.]\d+|\d+|[.]\d+)([eE][+-]?\d+)?/;
   const UNIT_RE = /^[a-z%]+/i;
   const ALLOWED_UNITS = /^(m|mm|cm|rad|deg|[%])$/;
 

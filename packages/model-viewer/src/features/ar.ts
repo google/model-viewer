@@ -142,7 +142,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     private[$onARTap] = (event: Event) => {
-      if ((event as any).data == '_apple_ar_quicklook_button_tapped') {
+      if ((event as any).data === '_apple_ar_quicklook_button_tapped') {
         this.dispatchEvent(new CustomEvent('quick-look-button-tapped'));
       }
     };

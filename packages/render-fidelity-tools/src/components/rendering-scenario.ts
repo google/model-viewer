@@ -102,7 +102,7 @@ export class RenderingScenario extends LitElement {
                     style="width:${width}px" src="${basePath}/${golden.file}">
                   <div class = "metrics">
                     ${
-                    index == 0 || this.analysis == null ?
+                    index === 0 || this.analysis == null ?
                         html`<span>---</span>` :
                         this.metricTemplate(
                             this.analysis.analysisResults[index - 1],

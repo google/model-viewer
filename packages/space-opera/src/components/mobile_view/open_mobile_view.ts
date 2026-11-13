@@ -138,8 +138,8 @@ export class OpenMobileView extends ConnectedLitElement {
   getStaleContent(): EditorUpdates {
     return {
       gltfChanged: true, stateChanged: true, posterId: getRandomInt(1e+20),
-          envChanged: this.urls.env != undefined &&
-          this.urls.env !== 'neutral' && this.urls.env !== 'legacy',
+          envChanged: this.urls.env != null && this.urls.env !== 'neutral' &&
+          this.urls.env !== 'legacy',
           envIsHdr: this.envIsHdr(), gltfId: getRandomInt(1e+20),
     }
   }

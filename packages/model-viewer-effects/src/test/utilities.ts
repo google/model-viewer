@@ -271,7 +271,7 @@ export function CompareArrays(
   const similarity: number[] = [];
   const max = maxValue(arr1.BYTES_PER_ELEMENT);
   for (let i = 0; i < arr1.length; i += COMPONENTS_PER_PIXEL) {
-    if (arr1[i + 3] != 0 && arr2[i + 3] != 0) {                        // a
+    if (arr1[i + 3] !== 0 && arr2[i + 3] !== 0) {                      // a
       similarity.push(1 - percentage(arr1[i], arr2[i], max));          // r
       similarity.push(1 - percentage(arr1[i + 1], arr2[i + 1], max));  // g
       similarity.push(1 - percentage(arr1[i + 2], arr2[i + 2], max));  // b
@@ -285,7 +285,7 @@ export function AverageHSL(arr: TypedArray<number>): HSL {
   const S: number[] = [];
   const L: number[] = [];
   for (let i = 0; i < arr.length; i += COMPONENTS_PER_PIXEL) {
-    if (arr[i + 3] != 0) {
+    if (arr[i + 3] !== 0) {
       // a
       const hsl = rgbToHsl(arr[i], arr[i + 1], arr[i + 2]);
       H.push(hsl.h);
@@ -325,7 +325,7 @@ function rgbToHsl(r: number, g: number, b: number): HSL {
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
   let h, s, l = (max + min) / 2;
 
-  if (max == min) {
+  if (max === min) {
     h = s = 0;  // achromatic
   } else {
     const d = max - min;
