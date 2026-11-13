@@ -147,7 +147,9 @@ export function disposeEffectPass(pass: EffectPass): void {
   }
 }
 
-export function getValueOfEnum<T extends object>(Enum: T, key: string): T {
+// `Object` (not `object`) is part of the published signature; keep it.
+// eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
+export function getValueOfEnum<T extends Object>(Enum: T, key: string): T {
   const index = Object.keys(Enum).filter((v) => !isNaN(Number(v))).indexOf(key);
   return (Enum as any)[index];
 }
