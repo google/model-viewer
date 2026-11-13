@@ -70,7 +70,7 @@ export class MVGlitchEffect extends MVEffectBase {
     try {
       validateLiteralType(GLITCH_MODES, this.mode);
     } catch (e) {
-      console.error((e as Error).message + +'\nmode defaulting to \'sporadic\'')
+      console.error((e as Error).message + '\nmode defaulting to \'sporadic\'');
     }
     if (this.strength == 0) {
       (this.effects[0] as GlitchEffect).columns = 0;
