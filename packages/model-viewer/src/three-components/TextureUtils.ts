@@ -414,66 +414,66 @@ export default class TextureUtils {
       },
 
       vertexShader: /* glsl */ `
-      
+
       varying vec3 vOutputDirection;
-  
+
       void main() {
-  
+
         vOutputDirection = vec3( position );
         gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-  
+
       }
     `,
 
       fragmentShader: /* glsl */ `
         varying vec3 vOutputDirection;
-  
+
         uniform samplerCube envMap;
         uniform int samples;
         uniform float weights[ n ];
         uniform bool latitudinal;
         uniform float dTheta;
         uniform vec3 poleAxis;
-  
+
         vec3 getSample( float theta, vec3 axis ) {
-  
+
           float cosTheta = cos( theta );
           // Rodrigues' axis-angle rotation
           vec3 sampleDirection = vOutputDirection * cosTheta
             + cross( axis, vOutputDirection ) * sin( theta )
             + axis * dot( axis, vOutputDirection ) * ( 1.0 - cosTheta );
-  
+
           return vec3( textureCube( envMap, sampleDirection ) );
-  
+
         }
-  
+
         void main() {
-  
+
           vec3 axis = latitudinal ? poleAxis : cross( poleAxis, vOutputDirection );
-  
+
           if ( all( equal( axis, vec3( 0.0 ) ) ) ) {
-  
+
             axis = vec3( vOutputDirection.z, 0.0, - vOutputDirection.x );
-  
+
           }
-  
+
           axis = normalize( axis );
-  
+
           gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
           gl_FragColor.rgb += weights[ 0 ] * getSample( 0.0, axis );
-  
+
           for ( int i = 1; i < n; i++ ) {
-  
+
             if ( i >= samples ) {
-  
+
               break;
-  
+
             }
-  
+
             float theta = dTheta * float( i );
             gl_FragColor.rgb += weights[ i ] * getSample( -1.0 * theta, axis );
             gl_FragColor.rgb += weights[ i ] * getSample( theta, axis );
-  
+
           }
         }
       `,

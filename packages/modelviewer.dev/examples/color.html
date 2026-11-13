@@ -151,7 +151,7 @@
       </model-viewer>
       <figcaption>An example interactive 3D product visualization.</figcaption>
     </figure>
-  
+
     <p>Interactive 3D models are the next media type, following images and
     video, and as such <code>&lt;model-viewer&gt;</code> and other renderers are
     being used more often to display these 3D models in commercial settings,
@@ -244,7 +244,7 @@
         src="../../shared-assets/models/silver-gold.gltf"
         skybox-image="../../shared-assets/environments/neutral.hdr"
         ar
-       
+
         camera-controls
         alt="3D model of six example material spheres"
       >
@@ -412,7 +412,7 @@
       <model-viewer
         id="tone-mapping"
         src="../assets/ShopifyModels/Mixer.glb"
-       
+
         camera-controls
         alt="Tone mapping comparisons for different 3D models"
       >
@@ -487,7 +487,7 @@
     mapping) and adjust the environment image if necessary. Since 3D rendering is
     happening completely automatically in real time, there is no way to make
     manual bespoke color adjustments for each frame.</p>
-  
+
     <h3 id="perception">What role does perception play?</h3>
 
     <p>As with photography, the goal is the viewer's perception of the image.
@@ -588,7 +588,7 @@
     then tell your artists to use those for the baseColor. Use a grayscale
     lighting environment (like our default), adjusting if necessary to place
     highlights and change exposure.</p>
-    
+
     <p>If the color is not known, but being matched by eye, then ensure the
     artist's tools also use the Khronos PBR Neutral tone mapper and a lighting environment
     that is as close as possible to the production grayscale lighting
@@ -606,7 +606,7 @@
         id="environments"
         src="../assets/ShopifyModels/Mixer.glb"
         skybox-image="../../shared-assets/environments/neutral.hdr"
-       
+
         camera-controls
         alt="3D model of a blender"
       >
@@ -640,7 +640,7 @@
     const tone2MV = document.querySelector('#tone-mapping');
     const tone = document.querySelector('#tone');
     const model = document.querySelector('#model');
-    
+
     tone.addEventListener('input',() => {
       tone2MV.toneMapping = tone.value;
     });

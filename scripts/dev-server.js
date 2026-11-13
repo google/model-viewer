@@ -173,7 +173,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`- postprocessing: ${versions.postprocessing}\n`);
   console.log(`The server is currently listening for connections.`);
   console.log(`👉 Local:   http://localhost:${PORT}/`);
-  
+
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
     for (const iface of interfaces[name]) {

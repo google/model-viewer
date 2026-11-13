@@ -93,7 +93,7 @@ export class ValidationModal extends LitElement {
         this.report.info!.extensionsUsed?.join(', ')}</li>
         ${
         this.report.info!.converted ? html`
-        <li><b>KHR_materials_pbrSpecularGlossiness extension was encountered, but is no longer supported. 
+        <li><b>KHR_materials_pbrSpecularGlossiness extension was encountered, but is no longer supported.
         This file has been automatically (and losslessly) converted to Metallic-Roughness.
         Please download the GLB to get the updated version.</b></li>` :
                                       html``}

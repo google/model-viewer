@@ -41,5 +41,5 @@ function updateThreeVersion(filePath) {
   }
 }
 
-// Intentionally removed README.md and postprocessing/index.html 
+// Intentionally removed README.md and postprocessing/index.html
 // to prevent dirtying the Git tree, as they rely on {{THREEJS_VERSION}} templates now.

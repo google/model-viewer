@@ -23,7 +23,7 @@
 
   <style>
     body { margin: 0; }
-    model-viewer { 
+    model-viewer {
       --progress-bar-color: transparent;
     }
   </style>
@@ -48,9 +48,9 @@
     harness.addEventListener('scenario-change', () => {
       const {scenario} = harness;
       modelViewer.addEventListener('poster-dismissed', () => {
-        // Sometimes the screenshot is taken when the poster hasn't faded away. 
+        // Sometimes the screenshot is taken when the poster hasn't faded away.
         // This is a temporary workaround so that the screenshot is taken two frames after the poster-dismissed event fires.
-        // TODO(sun765): Remove this when the bug is fixed. 
+        // TODO(sun765): Remove this when the bug is fixed.
         requestAnimationFrame(()=>{
           requestAnimationFrame(()=>{
             requestAnimationFrame(()=>{
@@ -59,7 +59,7 @@
           })
         });
       }, {once: true});
-      
+
       modelViewer.style.width = `${scenario.dimensions.width}px`;
       modelViewer.style.height = `${scenario.dimensions.height}px`;
 
