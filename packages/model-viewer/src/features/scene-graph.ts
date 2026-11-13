@@ -260,53 +260,53 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
     /** @export */
     async exportScene(options?: SceneExportOptions): Promise<Blob> {
       const scene = this[$scene];
-      return new Promise<Blob>(async (resolve, reject) => {
-        // Defaults
-        const opts = {
-          binary: true,
-          onlyVisible: true,
-          maxTextureSize: Infinity,
-          includeCustomExtensions: false,
-          forceIndices: false
-        } as GLTFExporterOptions;
+      // Defaults
+      const opts = {
+        binary: true,
+        onlyVisible: true,
+        maxTextureSize: Infinity,
+        includeCustomExtensions: false,
+        forceIndices: false
+      } as GLTFExporterOptions;
 
-        Object.assign(opts, options);
-        // Not configurable
-        opts.animations = scene.animations;
-        opts.truncateDrawRange = true;
+      Object.assign(opts, options);
+      // Not configurable
+      opts.animations = scene.animations;
+      opts.truncateDrawRange = true;
 
-        const shadow = scene.shadow;
-        let visible = false;
-        // Remove shadow from export
-        if (shadow != null) {
-          visible = shadow.visible;
-          shadow.visible = false;
+      const shadow = scene.shadow;
+      let visible = false;
+      // Remove shadow from export
+      if (shadow != null) {
+        visible = shadow.visible;
+        shadow.visible = false;
+      }
+
+      await this[$model]![$prepareVariantsForExport]();
+
+      const exporter =
+          (new GLTFExporter() as any)
+              .register(
+                  (writer: any) =>
+                      new GLTFExporterMaterialsVariantsExtension(writer));
+
+      exporter.setTextureUtils({
+        decompress: (texture: Texture, maxTextureSize?: number) => {
+          return decompress(texture, maxTextureSize ?? Infinity, undefined);
         }
+      });
 
-        await this[$model]![$prepareVariantsForExport]();
-
-        const exporter =
-            (new GLTFExporter() as any)
-                .register(
-                    (writer: any) =>
-                        new GLTFExporterMaterialsVariantsExtension(writer));
-
-        exporter.setTextureUtils({
-          decompress: (texture: Texture, maxTextureSize?: number) => {
-            return decompress(texture, maxTextureSize ?? Infinity, undefined);
-          }
-        });
-
-        let exportTarget: Object3D;
-        if (scene.models.length > 1) {
-          exportTarget = new Object3D();
-          for (const m of scene.models) {
-            exportTarget.add(m);
-          }
-        } else {
-          exportTarget = scene.models[0];
+      let exportTarget: Object3D;
+      if (scene.models.length > 1) {
+        exportTarget = new Object3D();
+        for (const m of scene.models) {
+          exportTarget.add(m);
         }
+      } else {
+        exportTarget = scene.models[0];
+      }
 
+      const exported = new Promise<Blob>((resolve, reject) => {
         exporter.parse(
             exportTarget,
             (gltf: object) => {
@@ -327,11 +327,13 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
               return reject('glTF export failed');
             },
             opts);
-
-        if (shadow != null) {
-          shadow.visible = visible;
-        }
       });
+
+      if (shadow != null) {
+        shadow.visible = visible;
+      }
+
+      return exported;
     }
 
     materialFromPoint(pixelX: number, pixelY: number): Material|null {

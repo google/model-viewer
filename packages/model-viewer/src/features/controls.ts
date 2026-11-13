@@ -680,8 +680,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       };
 
+      let elapsed = 0;
       const onVisibilityChange = () => {
-        let elapsed = 0;
         if (document.visibilityState === 'hidden') {
           elapsed = performance.now() - startTime;
         } else {

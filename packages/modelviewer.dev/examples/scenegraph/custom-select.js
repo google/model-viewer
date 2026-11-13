@@ -130,6 +130,30 @@ class CustomSelect extends HTMLElement {
     this._value = '';
     this._selectedIndex = 0;
     this._isOpen = false;
+
+    this._onDocumentClick = () => this.close();
+
+    const btn = this.shadowRoot.getElementById('btn');
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggle();
+    });
+
+    this.shadowRoot.getElementById('slot').addEventListener(
+        'slotchange', () => this.sync());
+
+    // CRITICAL FIX: Intercept beforexrselect on this element
+    this.addEventListener('beforexrselect', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    // Prevent event bubbling to WebXR session on the panel list
+    const stop = (e) => e.stopPropagation();
+    const panel = this.shadowRoot.getElementById('panel');
+    panel.addEventListener('pointerdown', stop);
+    panel.addEventListener('mousedown', stop);
+    panel.addEventListener('touchstart', stop);
   }
 
   get value() {
@@ -168,29 +192,12 @@ class CustomSelect extends HTMLElement {
   }
 
   connectedCallback() {
-    const btn = this.shadowRoot.getElementById('btn');
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.toggle();
-    });
-
-    this.shadowRoot.getElementById('slot').addEventListener('slotchange', () => this.sync());
-    document.addEventListener('click', () => this.close());
-
-    // CRITICAL FIX: Intercept beforexrselect on this element
-    this.addEventListener('beforexrselect', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    });
-
-    // Prevent event bubbling to WebXR session on the panel list
-    const stop = (e) => e.stopPropagation();
-    const panel = this.shadowRoot.getElementById('panel');
-    panel.addEventListener('pointerdown', stop);
-    panel.addEventListener('mousedown', stop);
-    panel.addEventListener('touchstart', stop);
-
+    document.addEventListener('click', this._onDocumentClick);
     this.sync();
+  }
+
+  disconnectedCallback() {
+    document.removeEventListener('click', this._onDocumentClick);
   }
 
   toggle() {

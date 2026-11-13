@@ -169,7 +169,7 @@ export class Validation extends ConnectedLitElement {
 
     if (originalGltf != null && gltfUrl != null &&
         this.originalGltf !== originalGltf) {
-      if (this.severityTitle = 'Converted') {
+      if (this.severityTitle === 'Converted') {
         URL.revokeObjectURL(this.gltfUrl!);
       }
 
