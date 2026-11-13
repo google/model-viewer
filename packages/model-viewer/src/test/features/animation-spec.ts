@@ -224,6 +224,18 @@ suite('Animation', () => {
       test('adds the animation to appendedAnimations', () => {
         expect(element.appendedAnimations).to.include('Punch');
       });
+
+      suite('when the model changes', () => {
+        setup(async () => {
+          const load = waitForEvent(element, 'load');
+          element.src = NON_ANIMATED_GLB_PATH;
+          await load;
+        });
+
+        test('clears appendedAnimations', () => {
+          expect(element.appendedAnimations).to.be.empty;
+        });
+      });
     });
 
     suite('when configured to autoplay', () => {
