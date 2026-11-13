@@ -177,8 +177,7 @@ async function main() {
     }
 
     if (fidelityRegressionWarningCount > 0) {
-      console.log(
-          `Warnings on ${fidelityRegressionWarningCount} scenarios❗️`);
+      console.log(`Warnings on ${fidelityRegressionWarningCount} scenarios❗️`);
       console.log('\n🔍 Logging warning scenarios: ');
       for (const warning of fidelityRegressionWarnings) {
         console.log(warning);

@@ -166,8 +166,8 @@ export class PrimitiveNode extends Node {
     return null;
   }
 
-  private async enableVariantHelper(index: number|
-                                    null): Promise<ThreeMaterial|null> {
+  private async enableVariantHelper(index: number|null):
+      Promise<ThreeMaterial|null> {
     if (this.variantToMaterialMap != null && index != null) {
       const material = this.variantToMaterialMap.get(index);
       if (material != null) {

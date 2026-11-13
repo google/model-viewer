@@ -131,12 +131,13 @@ export class RendererConfiguration extends LitElement {
       const scenarioOptions = this.config.scenarios.map(
           scenario => html`<option ?selected="${
               scenario.name === this.scenarioName}">${scenario.name}</option>`);
-      widgets.push(html`
+      widgets.push(
+          html`
 <select @change="${
-          (event: Event) => this.scenarioName =
-              (event.target != null ?
-                   (event.target as HTMLSelectElement).value :
-                   this.scenarioName)}">
+              (event: Event) => this.scenarioName =
+                  (event.target != null ?
+                       (event.target as HTMLSelectElement).value :
+                       this.scenarioName)}">
   ${scenarioOptions}
 </select>`);
     }

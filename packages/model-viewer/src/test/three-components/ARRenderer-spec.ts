@@ -78,8 +78,8 @@ class MockXRFrame implements XRFrame {
     return [];
   }
 
-  getHitTestResultsForTransientInput(_hitTestSource:
-                                         XRTransientInputHitTestSource) {
+  getHitTestResultsForTransientInput(
+      _hitTestSource: XRTransientInputHitTestSource) {
     return [];
   }
 }

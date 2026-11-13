@@ -131,4 +131,4 @@ class Spread extends Directive {
 }
 
 export const spread = directive(Spread);
-export type{Spread};
+export type {Spread};
