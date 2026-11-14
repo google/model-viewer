@@ -19,10 +19,10 @@
   ],
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
+    "@actions/core": "^3.0.1",
     "@google/model-viewer": "^4.4.0",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-radio-group": "^3.0.1",
@@ -34,7 +34,7 @@
     "lit": "^3.2.1",
     "mkdirp": "^3.0.1",
     "pngjs": "^7.0.0",
-    "puppeteer": "^24.4.0",
+    "puppeteer": "^25.17.0",
     "rimraf": "^6.0.1",
     "yargs": "^17.7.2"
   },
@@ -43,7 +43,6 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-replace": "^6.0.2",
     "@types/yargs": "^17.0.33",
-    "polymer-build": "^3.1.4",
     "rollup": "^4.59.0",
     "rollup-plugin-external-globals": "^0.13.0",
     "typescript": "5.8.2"
