@@ -2,17 +2,20 @@ name: Fidelity tests
 
 on: pull_request
 
+permissions:
+  contents: read
+
 jobs:
   compare_renders:
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       with:
         submodules: true
 
-    - uses: actions/setup-node@v6
+    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
 
     - name: NPM install
       run: npm ci
@@ -25,6 +28,6 @@ jobs:
        npm run build --workspace=@google/model-viewer --workspace=@google/model-viewer-render-fidelity-tools
 
     - name: Fidelity tests
-      uses: coactions/setup-xvfb@v1
+      uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
       with:
         run: npm run test --workspace=@google/model-viewer-render-fidelity-tools -- --quiet
