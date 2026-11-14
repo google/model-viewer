@@ -47,19 +47,19 @@ export const SelectiveMixin =
         @property({type: Array}) selection: Array<string|Object3D> = [];
 
         connectedCallback() {
-          super.connectedCallback && super.connectedCallback();
+          super.connectedCallback?.();
           this[$setSelection]();
           this.effectComposer.addEventListener(
               'updated-selection', this[$setSelection]);
         }
 
         disconnectedCallback(): void {
-          super.disconnectedCallback && super.disconnectedCallback();
+          super.disconnectedCallback?.();
           this.effectComposer.removeEventListener(
               'updated-selection', this[$setSelection]);
         }
 
-        updated(changedProperties: Map<string|number|symbol, any>) {
+        updated(changedProperties: Map<string|number|symbol, unknown>) {
           super.updated(changedProperties);
           if (changedProperties.has('selection')) {
             this[$setSelection]();
@@ -69,8 +69,9 @@ export const SelectiveMixin =
 
         [$setSelection] = () => {
           const {effectComposer} = this;
-          if (!effectComposer)
+          if (!effectComposer) {
             return;
+          }
 
           if (this.selection?.length > 0) {
             const selection: Object3D[] = [];

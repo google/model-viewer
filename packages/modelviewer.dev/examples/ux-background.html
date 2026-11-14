@@ -9,16 +9,16 @@
     <link rel="shortcut icon" type="image/png" href="../assets/favicon.png"/>
 
 
-    
+
     <script type='module' src='https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js'></script>
 </head>
 <body>
     <h1>Background scene</h1>
-    <model-viewer 
-        src='../assets/ShopifyModels/Chair.glb' 
-        poster='../assets/ShopifyModels/Chair.png' 
+    <model-viewer
+        src='../assets/ShopifyModels/Chair.glb'
+        poster='../assets/ShopifyModels/Chair.png'
         camera-controls
-        shadow-intensity='1' 
+        shadow-intensity='1'
         touch-action='none'>
     </model-viewer>
     <label for="background">Use background: </label>
@@ -28,7 +28,7 @@
     <script type='module'>
         const modelViewer = document.querySelector('model-viewer');
         const checkbox = document.querySelector('#background');
-        
+
         checkbox.addEventListener('change',() => {
             modelViewer.skyboxImage = checkbox.checked ? '../shared-assets/environments/lebombo_1k.hdr' : '';
             modelViewer.maxCameraOrbit = checkbox.checked ? 'auto 100deg auto' : 'auto auto auto';

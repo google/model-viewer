@@ -51,7 +51,7 @@ const animationWithIndexIsPlaying = (element: any, animationIndex = 0):
 
       if (currentAnimationAction != null && animationIndex >= 0 &&
           animationIndex < _currentGLTF.animations.length &&
-          currentAnimationAction.getClip() ==
+          currentAnimationAction.getClip() ===
               _currentGLTF.animations[animationIndex]) {
         return element.paused === false &&
             currentAnimationAction.enabled === true &&

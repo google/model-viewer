@@ -53,11 +53,11 @@ export class MVGlitchEffect extends MVEffectBase {
   }
 
   connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('mode') || changedProperties.has('strength')) {
       this[$updateProperties]();
@@ -72,7 +72,7 @@ export class MVGlitchEffect extends MVEffectBase {
     } catch (e) {
       console.error((e as Error).message + +'\nmode defaulting to \'sporadic\'')
     }
-    if (this.strength == 0) {
+    if (this.strength === 0) {
       (this.effects[0] as GlitchEffect).columns = 0;
       (this.effects[0] as GlitchEffect).mode =
           this.mode === 'constant' ? Mode.CONSTANT_MILD : Mode.SPORADIC;

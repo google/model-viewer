@@ -73,7 +73,7 @@
     .center-pre-prompt {
       display: flex;
       justify-content: center;
-      align-items: center; 
+      align-items: center;
       height: 100%;
       top: 0;
       left: 0;
@@ -84,15 +84,15 @@
       display: none;
     }
 
-    @keyframes wiggle {	
-      10%, 12% { transform: translateX(-25px); }	 
-      30%, 32% { transform: translateX(25px); }	
+    @keyframes wiggle {
+      10%, 12% { transform: translateX(-25px); }
+      30%, 32% { transform: translateX(25px); }
       0%, 45%, 100% { transform: translateX(0%); }
-    }	
-    
-    @keyframes fade {	
-      5%, 40% {	opacity: 1; }	
-      0%, 45%, 100% {	opacity: 0; }	 
+    }
+
+    @keyframes fade {
+      5%, 40% {	opacity: 1; }
+      0%, 45%, 100% {	opacity: 0; }
     }
 
     .pre-prompt {
@@ -117,12 +117,12 @@
       border: 1px solid rgba(255, 255, 255, 0.9);
       background-color: rgba(0, 0, 0, 0.5);
     }
- 
+
     .progress-bar.hide {
       visibility: hidden;
       transition: visibility 0.3s;
     }
- 
+
     .update-bar {
       background-color: rgba(255, 255, 255, 0.9);
       width: 0%;
@@ -239,7 +239,7 @@
   <!-- First Example -->
 
     <h2>Setting up <code>&lt;model-viewer&gt;</code> for decent Lighthouse scores</h2>
-  
+
     <model-viewer
         id="first"
         src="../assets/ShopifyModels/Chair.glb"
@@ -265,7 +265,7 @@
       <button slot="ar-button" class="ar-button">
         View in your space
       </button>
-    
+
       <div class="ar-prompt">
         <img src="../assets/hand.png">
       </div>
@@ -288,7 +288,7 @@
     <img src="../assets/lighthouse2.png" style="object-fit: contain; width:100%; max-width:700px;" alt="Lighthouse mobile scores">
 
     <p>Note the performance is worse than before, at only 93
-    for mobile (shown above), though still 100 on desktop.</p>  
+    for mobile (shown above), though still 100 on desktop.</p>
 
     <!-- Second Example -->
     <model-viewer

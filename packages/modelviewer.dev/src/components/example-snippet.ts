@@ -19,11 +19,11 @@ import {ReactiveElement} from 'lit';
 import {property} from 'lit/decorators.js';
 
 // Silence tsc since prismjs isn't a proper module
-declare var Prism: any;
-declare var __THREEJS_VERSION__: string;
-declare var __POSTPROCESSING_VERSION__: string;
+declare let Prism: any;
+declare let __THREEJS_VERSION__: string;
+declare let __POSTPROCESSING_VERSION__: string;
 
-const EMPTY_ATTRIBUTE_RE = /([\w-]+)=\"\"/g;
+const EMPTY_ATTRIBUTE_RE = /([\w-]+)=""/g;
 
 export type RootNode = Document|ShadowRoot;
 
@@ -75,7 +75,7 @@ export class ExampleSnippet extends ReactiveElement {
 
   readonly stamped: boolean = false;
 
-  public stamp() {
+  stamp() {
     if (this.template == null) {
       return;
     }
@@ -120,15 +120,11 @@ export class ExampleSnippet extends ReactiveElement {
       // Ensure that any un-replaced version placeholders at runtime get
       // stripped out with predefined injected variables from the Rollup build
       // output.
-      // @ts-ignore
       if (typeof __THREEJS_VERSION__ !== 'undefined') {
-        // @ts-ignore
         snippet =
             snippet.replace(/\{\{THREEJS_VERSION\}\}/g, __THREEJS_VERSION__);
       }
-      // @ts-ignore
       if (typeof __POSTPROCESSING_VERSION__ !== 'undefined') {
-        // @ts-ignore
         snippet = snippet.replace(
             /\{\{POSTPROCESSING_VERSION\}\}/g, __POSTPROCESSING_VERSION__);
       }
@@ -154,7 +150,7 @@ export class ExampleSnippet extends ReactiveElement {
   }
 
   connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this.template = this.querySelector('template');
   }
 
@@ -162,7 +158,7 @@ export class ExampleSnippet extends ReactiveElement {
     return this;
   }
 
-  updated(changedProperties: Map<string, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     if (!this.stamped && !this.lazy &&

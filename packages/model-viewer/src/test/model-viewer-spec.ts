@@ -60,16 +60,16 @@ function testFidelity(screenshotContext: WebGLRenderingContext|
       const index = (height - row - 1) * width + col;
       const position = index * COMPONENTS_PER_PIXEL;
 
-      if (pixels[position + 3] != 255) {
+      if (pixels[position + 3] !== 255) {
         transparentPixels++;
         continue;
       }
       for (let i = 0; i < 3; i++) {
         const colorComponent = pixels[position + i];
-        if (colorComponent != 255) {
+        if (colorComponent !== 255) {
           isWhite = false;
         }
-        if (colorComponent != 0) {
+        if (colorComponent !== 0) {
           isBlack = false;
         }
       }

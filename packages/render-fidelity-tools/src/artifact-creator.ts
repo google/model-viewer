@@ -76,8 +76,10 @@ export class ArtifactCreator {
     try {
       rendererGolden = await fs.readFile(rendererGoldenPath);
     } catch (error) {
-      throw new Error(`❌ Failed to read ${renderer}'s ${
-          scenarioName} golden! Error message: ${error.message}`);
+      throw new Error(
+          `❌ Failed to read ${renderer}'s ${
+              scenarioName} golden! Error message: ${error.message}`,
+          {cause: error});
     }
 
     // save goldens images to result folder which will be used to show in the
@@ -103,8 +105,10 @@ export class ArtifactCreator {
       try {
         candidateGolden = await fs.readFile(candidateGoldenPath);
       } catch (error) {
-        throw new Error(`❌ Failed to read ${golden.name}'s ${
-            scenarioName} golden! Error message: ${error.message}`);
+        throw new Error(
+            `❌ Failed to read ${golden.name}'s ${
+                scenarioName} golden! Error message: ${error.message}`,
+            {cause: error});
       }
 
       // save goldens images to result folder which will be used to show in the
@@ -146,8 +150,10 @@ export class ArtifactCreator {
         await this.browser.close();
         this.browser = null;
       }
-      throw new Error(`❌ Failed to capture ${renderer}'s screenshot of ${
-          scenarioName}. Error message: ${error.message}`);
+      throw new Error(
+          `❌ Failed to capture ${renderer}'s screenshot of ${
+              scenarioName}. Error message: ${error.message}`,
+          {cause: error});
     }
 
     if (screenshot == null) {
@@ -165,8 +171,10 @@ export class ArtifactCreator {
     try {
       rendererGolden = await fs.readFile(rendererGoldenPath);
     } catch (error) {
-      throw new Error(`❌ Failed to read ${renderer}'s ${
-          scenarioName} golden! Error message: ${error.message}`);
+      throw new Error(
+          `❌ Failed to read ${renderer}'s ${
+              scenarioName} golden! Error message: ${error.message}`,
+          {cause: error});
     }
     const rendererGoldenImage =
         new Uint8ClampedArray(pngjs.PNG.sync.read(rendererGolden).data);
@@ -319,13 +327,13 @@ export class ArtifactCreator {
       deviceScaleFactor: DEVICE_PIXEL_RATIO
     });
 
-    page.on('error', (error: any) => {
+    page.on('error', (error) => {
       console.log(`🚨 ${error}`);
     });
 
-    page.on('console', async (message: any) => {
+    page.on('console', async (message) => {
       const args =
-          await Promise.all(message.args().map((arg: any) => arg.jsonValue()));
+          await Promise.all(message.args().map((arg) => arg.jsonValue()));
 
       if (args.length) {
         console.log(`➡️`, ...args);
@@ -381,7 +389,7 @@ export class ArtifactCreator {
 
     try {
       await fs.mkdir(this.outputDirectory);
-    } catch (e) {
+    } catch {
       // Ignored...
     }
 

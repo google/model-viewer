@@ -88,17 +88,16 @@ export class InputDialog extends LitElement {
   }
 
   firstUpdated() {
-    const self = this;
     this.textfield.validityTransform =
         (value: string, nativeValidity: ValidityState) => {
-          const {valid, validationMessage} = self.onValidate(value);
+          const {valid, validationMessage} = this.onValidate(value);
           if (!valid) {
-            self.button.disabled = true;
+            this.button.disabled = true;
             this.textfield.validationMessage = validationMessage;
             return {valid: false};
           }
 
-          self.button.disabled = false;
+          this.button.disabled = false;
           return nativeValidity;
         };
   }

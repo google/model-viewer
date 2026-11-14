@@ -111,7 +111,7 @@ async function main() {
 
   const configPath = resolve(args.config);
   const rootDirectory = resolve(dirname(configPath));
-  const config = require(configPath);
+  const config: ImageComparisonConfig = require(configPath);
 
   const {renderers} = config;
   const goldensDirectory = join(rootDirectory, 'goldens');
@@ -119,7 +119,7 @@ async function main() {
 
   let scenarioWhitelist: Set<string>|null = null;
   let rendererWhitelist: Set<string>|null = null;
-  const rendererList = new Set(config.renderers.map((renderer: any) => {
+  const rendererList = new Set(config.renderers.map((renderer) => {
     return renderer.name;
   }));
 
@@ -140,7 +140,7 @@ async function main() {
     args.scenario.forEach((scenarioName: string) => {
       const scenarioNameLower = scenarioName.toLowerCase();
       let numMatches = 0;
-      config.scenarios.forEach((scenario: any) => {
+      config.scenarios.forEach((scenario) => {
         if (scenario.name.toLowerCase().indexOf(scenarioNameLower) >= 0) {
           if (!scenarioWhitelist!.has(scenario.name)) {
             scenarioWhitelist!.add(scenario.name);
@@ -167,8 +167,8 @@ async function main() {
           stdio: ['ignore', 'inherit', 'inherit']
         });
 
-        childProcess.once('error', (error: any) => {
-          warn(error);
+        childProcess.once('error', (error) => {
+          warn(String(error));
         });
 
         childProcess.once('exit', (code) => {
@@ -187,7 +187,7 @@ async function main() {
 
     try {
       await fs.mkdir(goldensDirectory);
-    } catch (error) {
+    } catch {
       // Ignored...
     }
 
@@ -219,7 +219,7 @@ async function main() {
 
         try {
           await fs.mkdir(scenarioGoldensDirectory);
-        } catch (error) {
+        } catch {
           // Ignored...
         }
 
@@ -242,7 +242,7 @@ async function main() {
             await fs.access(goldenPath);
             console.log(`⏭  Skipping ${scenarioName} as render exists...`);
             continue;
-          } catch (error) {
+          } catch {
             // ignored
           }
         }
@@ -280,8 +280,10 @@ async function main() {
               -1,
               args.quiet);
         } catch (error) {
-          throw new Error(`Failed to update ${
-              rendererDescription} screenshot: ${error.message}`);
+          throw new Error(
+              `Failed to update ${rendererDescription} screenshot: ${
+                  error.message}`,
+              {cause: error});
         }
       }
 

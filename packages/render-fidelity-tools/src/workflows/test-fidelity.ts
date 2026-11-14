@@ -20,6 +20,8 @@ import {rimraf} from 'rimraf';
 import yargs from 'yargs';
 import {hideBin} from 'yargs/helpers';
 
+import {ImageComparisonConfig} from '../common.js';
+
 type CommandLineArgs = {
   config: string; renderer: string; scenario: string[]; port: number;
   dryRun: boolean;
@@ -99,7 +101,7 @@ async function main() {
 
   const configPath = resolve(args.config);
   const rootDirectory = resolve(dirname(configPath));
-  const config = require(configPath);
+  const config: ImageComparisonConfig = require(configPath);
 
   const outputDirectory = join(rootDirectory, 'results');
   const screenshotCreator = new ArtifactCreator(
@@ -125,7 +127,7 @@ async function main() {
     args.scenario.forEach((scenarioName: string) => {
       const scenarioNameLower = scenarioName.toLowerCase();
       let numMatches = 0;
-      config.scenarios.forEach((scenario: any) => {
+      config.scenarios.forEach((scenario) => {
         if (scenario.name.toLowerCase().indexOf(scenarioNameLower) >= 0) {
           if (!scenarioWhitelist!.has(scenario.name)) {
             scenarioWhitelist!.add(scenario.name);
@@ -214,8 +216,8 @@ async function main() {
       throw new Error(
           ' ❌ Fidelity test failed! Please fix the errors listed above before merging this pr!');
     }
-  } catch (error: any) {
-    core.setFailed(error.message);
+  } catch (error) {
+    core.setFailed((error as Error).message);
   } finally {
     server.close();
     screenshotCreator.close();

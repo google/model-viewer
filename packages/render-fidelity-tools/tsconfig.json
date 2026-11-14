@@ -5,6 +5,7 @@
     "moduleResolution": "bundler",
     "lib": [
       "es2017",
+      "es2022.error",
       "dom"
     ],
     "sourceMap": true,

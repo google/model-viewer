@@ -53,9 +53,9 @@ const $updateProperties = Symbol('updateProperties');
  * `camera at a top level, and setting them for every {@link Pass} added.
  */
 export class EffectComposer extends PPEffectComposer {
-  public camera?: Camera;
-  public scene?: ModelScene;
-  public dirtyRender?: boolean;
+  camera?: Camera;
+  scene?: ModelScene;
+  dirtyRender?: boolean;
 
   [$tonemapping]: ToneMapping = NeutralToneMapping;
 
@@ -66,7 +66,6 @@ export class EffectComposer extends PPEffectComposer {
     multisampling?: number;
     frameBufferType?: number;
   }) {
-    // @ts-ignore
     super(renderer ? renderer : DUMMY_RENDERER, options);
   }
 
@@ -172,9 +171,10 @@ export class MVEffectComposer extends ReactiveElement {
   protected[$userEffectCount]: number = 0;
 
   get[$effectComposer]() {
-    if (!this[$composer])
+    if (!this[$composer]) {
       throw new Error(
           'The EffectComposer has not been instantiated yet. Please make sure the component is properly mounted on the Document within a <model-viewer> element.');
+    }
     return this[$composer];
   }
 
@@ -187,9 +187,10 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   get modelViewerElement() {
-    if (!this[$modelViewerElement])
+    if (!this[$modelViewerElement]) {
       throw new Error(
           '<effect-composer> must be a child of a <model-viewer> component.');
+    }
     return this[$modelViewerElement];
   }
 
@@ -222,7 +223,7 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   connectedCallback(): void {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     if (this.parentNode?.nodeName.toLowerCase() === 'model-viewer') {
       this[$modelViewerElement] = this.parentNode as ModelViewerElement;
     }
@@ -256,14 +257,14 @@ export class MVEffectComposer extends ReactiveElement {
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback && super.disconnectedCallback();
+    super.disconnectedCallback?.();
     this.modelViewerElement.unregisterEffectComposer();
     this.modelViewerElement.removeEventListener(
         'before-render', this[$onSceneLoad]);
     this[$effectComposer].dispose();
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('msaa')) {
       this[$effectComposer].multisampling = this.msaa;
@@ -310,11 +311,13 @@ export class MVEffectComposer extends ReactiveElement {
    *     Default is `true`.
    */
   removePass(pass: Pass, dispose: boolean = true): void {
-    if (!this[$effectComposer].passes.includes(pass))
+    if (!this[$effectComposer].passes.includes(pass)) {
       throw new Error(`Pass ${pass.name} not found.`);
+    }
     this[$effectComposer].removePass(pass);
-    if (dispose)
+    if (dispose) {
       pass.dispose();
+    }
     // Enable the normalPass and dirtyRendering if required by any effect.
     this[$updateProperties]();
     this[$userEffectCount]--;
@@ -339,15 +342,15 @@ export class MVEffectComposer extends ReactiveElement {
     while (i < effects.length) {
       const separateIndex = effects.slice(i).findIndex(
           (effect) => effect.requireSeparatePass || isConvolution(effect));
-      if (separateIndex != 0) {
+      if (separateIndex !== 0) {
         const effectPass = new EffectPass(
             undefined,
             ...effects.slice(
-                i, separateIndex == -1 ? effects.length : separateIndex));
+                i, separateIndex === -1 ? effects.length : separateIndex));
         this[$effectComposer].addPass(effectPass);
       }
 
-      if (separateIndex != -1) {
+      if (separateIndex !== -1) {
         const convolutionPass =
             new EffectPass(undefined, effects[i + separateIndex]);
         this[$effectComposer].addPass(convolutionPass);
@@ -383,8 +386,9 @@ export class MVEffectComposer extends ReactiveElement {
     const effects: IMVEffect[] = [];
     for (let i = 0; i < this.children.length; i++) {
       const childEffect = this.children.item(i) as MVEffectBase;
-      if (!childEffect.effects)
+      if (!childEffect.effects) {
         continue;
+      }
       const childEffects = childEffect.effects;
       if (childEffects) {
         effects.push(...childEffects.filter((effect) => !effect.disabled));
@@ -406,7 +410,8 @@ export class MVEffectComposer extends ReactiveElement {
     // Place all Geometries in the selection
     this[$selection].clear();
     this[$scene]?.traverse(
-        (obj) => obj.hasOwnProperty('geometry') && this[$selection].add(obj));
+        (obj) => Object.prototype.hasOwnProperty.call(obj, 'geometry') &&
+            this[$selection].add(obj));
     this.dispatchEvent(new CustomEvent('updated-selection'));
   };
 

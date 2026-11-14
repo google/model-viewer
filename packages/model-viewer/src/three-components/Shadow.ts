@@ -65,7 +65,7 @@ export class Shadow extends Object3D {
   private size = new Vector3;
   private maxDimension = 0;
   private isAnimated = false;
-  public needsUpdate = false;
+  needsUpdate = false;
 
   constructor(scene: ModelScene, softness: number, side: Side) {
     super();
