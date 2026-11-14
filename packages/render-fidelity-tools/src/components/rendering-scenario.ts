@@ -44,7 +44,7 @@ export class RenderingScenario extends LitElement {
   }
 
   async connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
 
     this.shadowRoot!.addEventListener('click', (event) => {
       const originatingElement = event.target as HTMLImageElement;
@@ -58,7 +58,7 @@ export class RenderingScenario extends LitElement {
     });
   }
 
-  updated(changedProperties: Map<any, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     if (this.analysis == null) {
@@ -102,7 +102,7 @@ export class RenderingScenario extends LitElement {
                     style="width:${width}px" src="${basePath}/${golden.file}">
                   <div class = "metrics">
                     ${
-                    index == 0 || this.analysis == null ?
+                    index === 0 || this.analysis == null ?
                         html`<span>---</span>` :
                         this.metricTemplate(
                             this.analysis.analysisResults[index - 1],

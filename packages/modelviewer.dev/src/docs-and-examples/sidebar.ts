@@ -16,7 +16,7 @@
 let globalCurrentView: string[] = [];
 let previouslyActive: string = '';
 let toRemove = '';
-let order = new Map<string, number>();
+const order = new Map<string, number>();
 let isSideBarClick = false;
 
 let isFirstOpen = true;      // is true on the first observation of all entries
@@ -86,8 +86,8 @@ export function getSidebarCategoryForNewPage(): string {
 function getSidebarIdsFromSidebarName(name: string): SidebarIds {
   const sb = 'sidebar';
   const sidebarName = name;
-  let sidebarSub = sidebarName.split('-').slice(0, 2);
-  let sidebarCat = sidebarName.split('-').slice(0, 1);
+  const sidebarSub = sidebarName.split('-').slice(0, 2);
+  const sidebarCat = sidebarName.split('-').slice(0, 1);
   sidebarSub.push(sb);
   const sidebarSubcategory = sidebarSub.join('-');
   sidebarCat.push(sb);
@@ -102,8 +102,8 @@ function getSidebarIdsFromSidebarName(name: string): SidebarIds {
 function getSidebarIdsFromId(id: string): SidebarIds {
   const sb = 'sidebar';
   const sidebarName = id.split('-').slice(1, 10).join('-');
-  let sidebarSub = id.split('-').slice(1, 3);
-  let sidebarCat = id.split('-').slice(1, 2);
+  const sidebarSub = id.split('-').slice(1, 3);
+  const sidebarCat = id.split('-').slice(1, 2);
   sidebarSub.push(sb);
   const sidebarSubcategory = sidebarSub.join('-');
   sidebarCat.push(sb);
@@ -270,7 +270,7 @@ function handlePageJump(entries: IntersectionObserverEntry[]) {
   previouslyActive = sidebarIds.name;
 }
 
-let intersectionRatios = new Map<string, number>();
+const intersectionRatios = new Map<string, number>();
 function handleExamples(entries: IntersectionObserverEntry[], _observer: any) {
   if (isFirstOpen) {
     everyEntry = entries;

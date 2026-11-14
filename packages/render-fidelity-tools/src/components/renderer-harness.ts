@@ -34,7 +34,7 @@ export class RendererConfiguration extends LitElement {
   @property({type: Object}) protected scenario: ScenarioConfig|null = null;
 
   connectedCallback() {
-    super.connectedCallback();
+    super.connectedCallback?.();
 
     const {queryParameters} = this;
     this.configUrl = queryParameters.config || '../../config.json';
@@ -52,7 +52,7 @@ export class RendererConfiguration extends LitElement {
         {} as {[index: string]: string});
   }
 
-  async updated(changedProperties: Map<string, any>) {
+  async updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     if (changedProperties.has('configUrl')) {
@@ -72,7 +72,8 @@ export class RendererConfiguration extends LitElement {
             (new ConfigReader(this.config)).scenarioConfig(this.scenarioName);
       }
 
-      const previousScenarioName = changedProperties.get('scenarioName');
+      const previousScenarioName =
+          changedProperties.get('scenarioName') as string | null | undefined;
 
       if (previousScenarioName !== this.scenarioName) {
         this.dispatchEvent(new CustomEvent(
@@ -130,12 +131,13 @@ export class RendererConfiguration extends LitElement {
       const scenarioOptions = this.config.scenarios.map(
           scenario => html`<option ?selected="${
               scenario.name === this.scenarioName}">${scenario.name}</option>`);
-      widgets.push(html`
+      widgets.push(
+          html`
 <select @change="${
-          (event: Event) => this.scenarioName =
-              (event.target != null ?
-                   (event.target as HTMLSelectElement).value :
-                   this.scenarioName)}">
+              (event: Event) => this.scenarioName =
+                  (event.target != null ?
+                       (event.target as HTMLSelectElement).value :
+                       this.scenarioName)}">
   ${scenarioOptions}
 </select>`);
     }

@@ -18,19 +18,18 @@
 import {WebIO} from '@gltf-transform/core';
 import {KHRONOS_EXTENSIONS} from '@gltf-transform/extensions';
 import {metalRough} from '@gltf-transform/functions';
+import {GLTF} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
 import {html, LitElement} from 'lit';
 import {customElement, property, query, state} from 'lit/decorators.js';
 
+import {reduxStore} from '../../../space_opera_base.js';
 import {validationStyles} from '../../../styles.css.js';
 import {State} from '../../../types.js';
 import {ConnectedLitElement} from '../../connected_lit_element/connected_lit_element';
 import {dispatchGltfUrl, getModel, getModelViewer} from '../../model_viewer_preview/reducer.js';
 
+import type {Message, Report} from './validation_utils';
 import {resolveExternalResource, validateGltf} from './validation_utils.js';
-
-import type {Report, Message} from './validation_utils';
-import {GLTF} from '@google/model-viewer/lib/three-components/gltf-instance/gltf-defaulted';
-import {reduxStore} from '../../../space_opera_base.js';
 
 @customElement('me-validation-modal')
 export class ValidationModal extends LitElement {
@@ -93,7 +92,7 @@ export class ValidationModal extends LitElement {
         this.report.info!.extensionsUsed?.join(', ')}</li>
         ${
         this.report.info!.converted ? html`
-        <li><b>KHR_materials_pbrSpecularGlossiness extension was encountered, but is no longer supported. 
+        <li><b>KHR_materials_pbrSpecularGlossiness extension was encountered, but is no longer supported.
         This file has been automatically (and losslessly) converted to Metallic-Roughness.
         Please download the GLB to get the updated version.</b></li>` :
                                       html``}
@@ -169,7 +168,7 @@ export class Validation extends ConnectedLitElement {
 
     if (originalGltf != null && gltfUrl != null &&
         this.originalGltf !== originalGltf) {
-      if (this.severityTitle = 'Converted') {
+      if (this.severityTitle === 'Converted') {
         URL.revokeObjectURL(this.gltfUrl!);
       }
 
@@ -233,8 +232,8 @@ export class Validation extends ConnectedLitElement {
       this.severityColor = '#8bc34a';
       this.severityTitle = 'Converted';
     }
-    if (!!this.report.info?.extensionsUsed?.find(
-            (e) => e == 'KHR_materials_pbrSpecularGlossiness')) {
+    if (this.report.info?.extensionsUsed?.find(
+            (e) => e === 'KHR_materials_pbrSpecularGlossiness')) {
       this.severityColor = '#f9a825';
       this.severityTitle = 'Converting';
     }

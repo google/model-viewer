@@ -138,8 +138,8 @@ export class OpenMobileView extends ConnectedLitElement {
   getStaleContent(): EditorUpdates {
     return {
       gltfChanged: true, stateChanged: true, posterId: getRandomInt(1e+20),
-          envChanged: this.urls.env != undefined &&
-          this.urls.env !== 'neutral' && this.urls.env !== 'legacy',
+          envChanged: this.urls.env != null && this.urls.env !== 'neutral' &&
+          this.urls.env !== 'legacy',
           envIsHdr: this.envIsHdr(), gltfId: getRandomInt(1e+20),
     }
   }
@@ -191,7 +191,7 @@ export class OpenMobileView extends ConnectedLitElement {
     try {
       await this.sendSessionContent(
           session, updatedContent, posterBlob, gltfBlob, envBlob);
-    } catch (e) {
+    } catch {
       console.log('error posting...');
     }
   }
@@ -216,7 +216,7 @@ export class OpenMobileView extends ConnectedLitElement {
     // If any of the sessions are stale, we want to prepare the relavent blobs
     // to POST before we loop through the sessions
     let haveStale = false;
-    for (let session of this.sessionList) {
+    for (const session of this.sessionList) {
       haveStale = haveStale || session.isStale;
     }
 
@@ -240,7 +240,7 @@ export class OpenMobileView extends ConnectedLitElement {
 
     // Iterate through the list of active mobile sessions, and allow them to
     // post their information asynchronously.
-    for (let session of sessionList) {
+    for (const session of sessionList) {
       this.sendSessionContentHolder(
           session, updatedContent, posterBlob, gltfBlob, envBlob);
     }

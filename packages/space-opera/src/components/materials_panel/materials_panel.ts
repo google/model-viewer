@@ -353,7 +353,7 @@ export class MaterialPanel extends ConnectedLitElement {
 
   deleteCurrentVariant() {
     const deleteVariant = this.selectedVariant;
-    let nextVariant: number = 0;
+    let nextVariant: number;
     let nextVariantName: string|null = null;
     const variantCount = getModelViewer().availableVariants.length;
 
@@ -566,27 +566,25 @@ export class MaterialPanel extends ConnectedLitElement {
       }
     });
 
-    // Captures this reference for use in callbacks.
-    const self = this;
     // Sets up the OnOK callback methods of the InputDialogs these
     // handle dialog results.
     this.createVariantNameDialog.OnOK = (value: string) => {
-      self.onCreateVariant(value);
+      this.onCreateVariant(value);
     };
     this.editVariantNameDialog.OnOK = (value: string) => {
-      self.editVariantName(self.editVariantNameDialog.placeholder, value);
+      this.editVariantName(this.editVariantNameDialog.placeholder, value);
     };
     this.editMaterialNameDialog.OnOK = (value: string) => {
-      self.editMaterialName(self.editMaterialNameDialog.placeholder, value);
+      this.editMaterialName(this.editMaterialNameDialog.placeholder, value);
     };
 
     // Sets up the onValidate callbacks for InputDialogs these let the input
     // dialog know if input is valid or not.
     this.createVariantNameDialog.onValidate = (value: string) => {
-      return self.isValidInput(value);
+      return this.isValidInput(value);
     };
     this.editVariantNameDialog.onValidate = (value: string) => {
-      return self.isValidInput(value);
+      return this.isValidInput(value);
     };
   }
 

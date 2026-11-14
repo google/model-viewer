@@ -30,7 +30,7 @@ const onwarn = (warning, warn) => {
   }
 };
 
-let commonPlugins = [
+const commonPlugins = [
   resolve({dedupe: 'three'}),
   replace({'Reflect.decorate': 'undefined', preventAssignment: true})
 ];

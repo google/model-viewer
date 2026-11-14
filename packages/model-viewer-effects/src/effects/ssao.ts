@@ -39,13 +39,13 @@ export class MVSSAOEffect extends MVEffectBase {
   }
 
   connectedCallback(): void {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this[$setDefaultProperties]();
     this[$updateProperties]();
   }
 
-  update(changedProperties: Map<string|number|symbol, any>): void {
-    super.update && super.update(changedProperties);
+  update(changedProperties: Map<string|number|symbol, unknown>): void {
+    super.update?.(changedProperties);
     if (changedProperties.has('strength')) {
       this[$updateProperties]();
     }

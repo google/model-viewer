@@ -53,11 +53,11 @@ export class MVBloomEffect extends MVEffectBase {
   }
 
   connectedCallback(): void {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('strength') ||
         changedProperties.has('threshold') ||

@@ -540,8 +540,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       if (changedProperties.has('interactionPromptStyle')) {
         this[$promptAnimatedContainer].style.opacity =
-            this.interactionPromptStyle == InteractionPromptStyle.BASIC ? '1' :
-                                                                          '0';
+            this.interactionPromptStyle === InteractionPromptStyle.BASIC ? '1' :
+                                                                           '0';
       }
 
       if (changedProperties.has('touchAction')) {
@@ -680,8 +680,8 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
         }
       };
 
+      let elapsed = 0;
       const onVisibilityChange = () => {
-        let elapsed = 0;
         if (document.visibilityState === 'hidden') {
           elapsed = performance.now() - startTime;
         } else {

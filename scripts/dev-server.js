@@ -35,9 +35,11 @@ try {
         break;
       }
     }
-    if (localIp !== 'localhost') break;
+    if (localIp !== 'localhost') {
+      break;
+    }
   }
-} catch (e) {
+} catch {
   // Fallback to localhost if network discovery fails
 }
 
@@ -70,7 +72,7 @@ const server = http.createServer((req, res) => {
   let safeUrl;
   try {
     safeUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  } catch (err) {
+  } catch {
     res.writeHead(400);
     res.end('Bad Request');
     return;
@@ -80,7 +82,7 @@ const server = http.createServer((req, res) => {
 
   try {
     url = decodeURIComponent(url);
-  } catch (err) {
+  } catch {
     res.writeHead(400);
     res.end('Bad Request');
     return;
@@ -128,7 +130,7 @@ const server = http.createServer((req, res) => {
       }
       filePath = path.join(filePath, 'index.html');
     }
-  } catch (e) {
+  } catch {
     // Ignore stat errors, let readFile handle ENOENT
   }
 
@@ -144,7 +146,7 @@ const server = http.createServer((req, res) => {
         res.end(`500 Internal Server Error: ${err.code}`, 'utf-8');
       }
     } else {
-      let contentType = mimeTypes[extname] || 'application/octet-stream';
+      const contentType = mimeTypes[extname] || 'application/octet-stream';
       res.writeHead(200, { 'Content-Type': contentType });
 
       // Dynamically replace placeholders in HTML, JSON, and space-opera files!
@@ -173,7 +175,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`- postprocessing: ${versions.postprocessing}\n`);
   console.log(`The server is currently listening for connections.`);
   console.log(`👉 Local:   http://localhost:${PORT}/`);
-  
+
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
     for (const iface of interfaces[name]) {

@@ -51,7 +51,7 @@ const animationWithIndexIsPlaying = (element: any, animationIndex = 0):
 
       if (currentAnimationAction != null && animationIndex >= 0 &&
           animationIndex < _currentGLTF.animations.length &&
-          currentAnimationAction.getClip() ==
+          currentAnimationAction.getClip() ===
               _currentGLTF.animations[animationIndex]) {
         return element.paused === false &&
             currentAnimationAction.enabled === true &&
@@ -81,7 +81,8 @@ suite('Animation', () => {
       expect(element.paused).to.be.true;
     });
 
-    test('dispatches "finished" when a repetition-limited animation completes',
+    test(
+        'dispatches "finished" when a repetition-limited animation completes',
         async () => {
           element.play({repetitions: 1, pingpong: false});
           await element.updateComplete;
@@ -99,7 +100,8 @@ suite('Animation', () => {
     // default (infinite-loop) options, clobbering a `play({repetitions: 1})`
     // issued in the same tick, so the animation looped forever and never
     // emitted 'finished'.
-    test('dispatches "finished" when animationName is set then played once',
+    test(
+        'dispatches "finished" when animationName is set then played once',
         async () => {
           const target = element.availableAnimations.find(
                              (name) => name !== element.animationName) ??

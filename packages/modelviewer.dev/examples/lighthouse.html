@@ -79,7 +79,7 @@
     .poster {
       display: flex;
       justify-content: center;
-      align-items: center; 
+      align-items: center;
       height: 100%;
       top: 0;
       left: 0;
@@ -88,15 +88,15 @@
       background-position: center;
     }
 
-    @keyframes wiggle {	
-      10%, 12% { transform: translateX(-25px); }	 
-      30%, 32% { transform: translateX(25px); }	
+    @keyframes wiggle {
+      10%, 12% { transform: translateX(-25px); }
+      30%, 32% { transform: translateX(25px); }
       0%, 45%, 100% { transform: translateX(0%); }
-    }	
-    
-    @keyframes fade {	
-      5%, 40% {	opacity: 1; }	
-      0%, 45%, 100% {	opacity: 0; }	 
+    }
+
+    @keyframes fade {
+      5%, 40% {	opacity: 1; }
+      0%, 45%, 100% {	opacity: 0; }
     }
 
     .pre-prompt {
@@ -121,12 +121,12 @@
       border: 1px solid rgba(255, 255, 255, 0.9);
       background-color: rgba(0, 0, 0, 0.5);
     }
- 
+
     .progress-bar.hide {
       visibility: hidden;
       transition: visibility 0.3s;
     }
- 
+
     .update-bar {
       background-color: rgba(255, 255, 255, 0.9);
       width: 0%;
@@ -242,7 +242,7 @@
   <div align="center">
 
     <h2>Setting up <code>&lt;model-viewer&gt;</code> for good Lighthouse scores</h2>
-  
+
     <model-viewer
         id="first"
         src="../assets/ShopifyModels/Chair.glb"
@@ -251,7 +251,7 @@
         interaction-prompt-threshold="0"
         shadow-intensity="1"
         ar
-       
+
         camera-controls
         alt="3D model of a chair with footrest"
       >
@@ -267,7 +267,7 @@
       <button slot="ar-button" class="ar-button">
         View in your space
       </button>
-    
+
       <div class="ar-prompt">
         <img src="../assets/hand.png">
       </div>
@@ -313,7 +313,7 @@
       interaction-prompt-threshold="0"
       shadow-intensity="1"
       ar
-     
+
       camera-controls
       alt="3D model of a countertop mixer"
     >
@@ -362,9 +362,9 @@
       }
       loaded = true;
 
-      const modelViewer = document.createElement('script'); 
+      const modelViewer = document.createElement('script');
       modelViewer.type = 'module';
-      modelViewer.src = '../node_modules/@google/model-viewer/dist/model-viewer.js'; 
+      modelViewer.src = '../node_modules/@google/model-viewer/dist/model-viewer.js';
       body.appendChild(modelViewer);
     };
 

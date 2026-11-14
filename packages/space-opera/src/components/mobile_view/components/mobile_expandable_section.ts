@@ -28,17 +28,18 @@ import {CheckboxElement} from '../../shared/checkbox/checkbox';
 export class MobileExpanadableSection extends LitElement {
   @property({type: Boolean}) isDeployed?: boolean;
   @property({type: Boolean}) isDeployable?: boolean;
-  @property({attribute: false}) onInitialDeploy?: Function;
+  @property({attribute: false}) onInitialDeploy?: () => void;
 
   @property({type: Boolean}) haveReceivedResponse?: boolean;
   @property({type: Boolean}) isSendingData?: boolean;
   @property({type: Boolean}) contentHasChanged?: boolean;
 
-  @property({attribute: false}) openModal?: Function;
-  @property({attribute: false}) postInfo?: Function;
+  @property({attribute: false}) openModal?: () => void;
+  @property({attribute: false}) postInfo?: () => Promise<void>;
 
   @property({type: Boolean}) defaultToSceneViewer?: boolean;
-  @property({attribute: false}) onSelectArMode?: Function;
+  @property({attribute: false})
+  onSelectArMode?: (isSceneViewer: boolean) => void;
   @property() arConfig?: ArConfigState;
 
   @query('me-checkbox#ar') arCheckbox!: CheckboxElement;

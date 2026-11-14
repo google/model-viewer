@@ -54,11 +54,11 @@ export class MVOutlineEffect extends SelectiveMixin
   }
 
   connectedCallback(): void {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     this[$updateProperties]();
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('color') || changedProperties.has('smoothing') ||
         changedProperties.has('strength')) {

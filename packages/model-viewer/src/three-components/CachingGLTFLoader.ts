@@ -77,7 +77,7 @@ const $GLTFInstance = Symbol('GLTFInstance');
 export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
                                              GLTFInstanceConstructor> extends
     EventDispatcher<
-        {'preload': {element: ModelViewerElementBase, src: String}}> {
+        {'preload': {element: ModelViewerElementBase, src: string}}> {
   static setDRACODecoderLocation(url: string) {
     dracoDecoderLocation = url;
     dracoLoader.setDecoderPath(url);
@@ -192,22 +192,24 @@ export class CachingGLTFLoader<T extends GLTFInstanceConstructor =
           });
 
       const GLTFInstance = this[$GLTFInstance];
-      const gltfInstanceLoads = rawGLTFLoads
-                                    .then((rawGLTF) => {
-                                      return GLTFInstance.prepare(rawGLTF);
-                                    })
-                                    .then((preparedGLTF) => {
-                                      progressCallback(0.9);
-                                      return new GLTFInstance(preparedGLTF);
-                                    })
-                                    .catch((reason => {
-                                      console.error(reason);
-                                      // Do not keep a failed load, or the
-                                      // same URL could never be retried.
-                                      if (cache.get(url) === gltfInstanceLoads)
-                                        cache.delete(url);
-                                      throw reason;
-                                    }));
+      const gltfInstanceLoads =
+          rawGLTFLoads
+              .then((rawGLTF) => {
+                return GLTFInstance.prepare(rawGLTF);
+              })
+              .then((preparedGLTF) => {
+                progressCallback(0.9);
+                return new GLTFInstance(preparedGLTF);
+              })
+              .catch((reason => {
+                console.error(reason);
+                // Do not keep a failed load, or the
+                // same URL could never be retried.
+                if (cache.get(url) === gltfInstanceLoads) {
+                  cache.delete(url);
+                }
+                throw reason;
+              }));
       cache.set(url, gltfInstanceLoads);
     }
 

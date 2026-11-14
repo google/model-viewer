@@ -126,15 +126,15 @@ export interface PointerChangeEvent extends ThreeEvent {
  * ensure that the camera's matrixWorld is in sync before using SmoothControls.
  */
 export class SmoothControls extends EventDispatcher<{
-  'user-interaction': {},
-  'pointer-change-start': {},
-  'pointer-change-end': {}
+  'user-interaction': object,
+  'pointer-change-start': object,
+  'pointer-change-end': object
 }> {
-  public orbitSensitivity = 1;
-  public zoomSensitivity = 1;
-  public panSensitivity = 1;
-  public inputSensitivity = 1;
-  public changeSource = ChangeSource.NONE;
+  orbitSensitivity = 1;
+  zoomSensitivity = 1;
+  panSensitivity = 1;
+  inputSensitivity = 1;
+  changeSource = ChangeSource.NONE;
 
   private _interactionEnabled: boolean = false;
   private _options: SmoothControlsOptions;
@@ -142,8 +142,8 @@ export class SmoothControls extends EventDispatcher<{
   private isUserPointing = false;
 
   // Pan state
-  public enablePan = true;
-  public enableTap = true;
+  enablePan = true;
+  enableTap = true;
   private panProjection = new Matrix3();
   private panPerPixel = 0;
 
@@ -245,7 +245,7 @@ export class SmoothControls extends EventDispatcher<{
   };
 
   set disableZoom(disable: boolean) {
-    if (this._disableZoom != disable) {
+    if (this._disableZoom !== disable) {
       this._disableZoom = disable;
       if (disable === true) {
         this.element.removeEventListener('wheel', this.onWheel);
@@ -690,6 +690,7 @@ export class SmoothControls extends EventDispatcher<{
     try {
       element.setPointerCapture(event.pointerId);
     } catch {
+      // Pointer capture is best-effort; the pointer may already be released.
     }
     this.pointers.push(
         {clientX: event.clientX, clientY: event.clientY, id: event.pointerId});
@@ -826,7 +827,7 @@ export class SmoothControls extends EventDispatcher<{
     this.changeSource = ChangeSource.USER_INTERACTION;
 
     const deltaZoom = (event as WheelEvent).deltaY *
-        ((event as WheelEvent).deltaMode == 1 ? 18 : 1) * ZOOM_SENSITIVITY *
+        ((event as WheelEvent).deltaMode === 1 ? 18 : 1) * ZOOM_SENSITIVITY *
         this.zoomSensitivity / 30;
     this.userAdjustOrbit(0, 0, deltaZoom);
 
