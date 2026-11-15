@@ -18,7 +18,7 @@ import {CanvasTexture, Object3D, RepeatWrapping, SRGBColorSpace, Texture, VideoT
 import {GLTFExporter, GLTFExporterOptions} from 'three/examples/jsm/exporters/GLTFExporter.js';
 import {decompress} from 'three/examples/jsm/utils/WebGLTextureUtils.js';
 
-import ModelViewerElementBase, {$needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ensureWebGL, $needsRender, $onModelLoad, $progressTracker, $renderer, $scene} from '../model-viewer-base.js';
 import {GLTF} from '../three-components/gltf-instance/gltf-defaulted.js';
 import {ModelViewerGLTFInstance} from '../three-components/gltf-instance/ModelViewerGLTFInstance.js';
 import GLTFExporterMaterialsVariantsExtension from '../three-components/gltf-instance/VariantMaterialExporterPlugin.js';
@@ -206,7 +206,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
         scene.applyTransform();
         scene.updateBoundingBox();
         scene.updateShadow();
-        this[$renderer].arRenderer.onUpdateScene();
+        this[$renderer].arRenderer?.onUpdateScene();
         this[$needsRender]();
       }
     }
@@ -216,6 +216,11 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const {currentGLTFs} = this[$scene];
       const currentGLTF = currentGLTFs.length > 0 ? currentGLTFs[0] : null;
+
+      if (currentGLTF == null) {
+        this[$model] = undefined;
+        this[$originalGltfJson] = null;
+      }
 
       if (currentGLTF != null) {
         const {correlatedSceneGraph} = currentGLTF;
@@ -259,6 +264,7 @@ export const SceneGraphMixin = <T extends Constructor<ModelViewerElementBase>>(
 
     /** @export */
     async exportScene(options?: SceneExportOptions): Promise<Blob> {
+      await this[$ensureWebGL]();
       const scene = this[$scene];
       return new Promise<Blob>(async (resolve, reject) => {
         // Defaults

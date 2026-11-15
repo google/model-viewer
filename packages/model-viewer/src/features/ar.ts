@@ -18,7 +18,7 @@ import {Object3D} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_GSA, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
-import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
+import ModelViewerElementBase, {$ensureWebGL, $needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
 import {enumerationDeserializer} from '../styles/deserializers.js';
 import {ARStatus, ARTracking} from '../three-components/ARRenderer.js';
 import {Constructor, waitForEvent} from '../utilities.js';
@@ -229,7 +229,7 @@ configuration or device capabilities');
         if (this.src != null) {
           for (const value of this[$arModes]) {
             if (value === 'webxr' && IS_WEBXR_AR_CANDIDATE && !isWebXRBlocked &&
-                await this[$renderer].arRenderer.supportsPresentation()) {
+                await this[$renderer].arRenderer?.supportsPresentation()) {
               arMode = ARMode.WEBXR;
               break;
             }
@@ -281,6 +281,7 @@ configuration or device capabilities');
       await this[$triggerLoad]();
 
       try {
+        await this[$ensureWebGL]();
         this[$arButtonContainer].removeEventListener(
             'click', this[$onARButtonContainerClick]);
         const {arRenderer} = this[$renderer];
@@ -466,6 +467,7 @@ configuration or device capabilities');
           this[$progressTracker].beginActivity('usdz-conversion');
 
       await this[$triggerLoad]();
+      await this[$ensureWebGL]();
 
       const {models, shadow, target} = this[$scene];
       if (models.length === 0 || models[0] == null) {

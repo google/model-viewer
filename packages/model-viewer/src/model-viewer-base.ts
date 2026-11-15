@@ -46,6 +46,9 @@ const $onFocus = Symbol('onFocus');
 const $onBlur = Symbol('onBlur');
 const $onSlotChange = Symbol('onSlotChange');
 const $onExtraModelChanged = Symbol('onExtraModelChanged');
+const $sourceVersion = Symbol('sourceVersion');
+const $webGLLoad = Symbol('webGLLoad');
+const $forcePreload = Symbol('forcePreload');
 
 export const $updateSize = Symbol('updateSize');
 export const $intersectionObserver = Symbol('intersectionObserver');
@@ -71,6 +74,7 @@ export const $progressTracker = Symbol('progressTracker');
 export const $getLoaded = Symbol('getLoaded');
 export const $getModelIsVisible = Symbol('getModelIsVisible');
 export const $shouldAttemptPreload = Symbol('shouldAttemptPreload');
+export const $ensureWebGL = Symbol('ensureWebGL');
 
 export interface Vector3D {
   x: number
@@ -178,6 +182,10 @@ export default class ModelViewerElementBase extends ReactiveElement {
   @property({type: Boolean, attribute: 'with-credentials'})
   withCredentials: boolean = false;
 
+  /** Use Three.js even when the browser supports the native <model> element. */
+  @property({type: Boolean, attribute: 'disable-native'})
+  disableNative: boolean = false;
+
   /**
    * Generates a 3D model schema https://schema.org/3DModel associated with
    * the loaded src and inserts it into the header of the page for search
@@ -197,6 +205,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
   protected[$status] = '';
   protected[$defaultAriaLabel]: string;
   protected[$clearModelTimeout]: number|null = null;
+  private[$sourceVersion] = 0;
+  private[$webGLLoad]: Promise<void>|null = null;
+  private[$forcePreload] = false;
 
   [$onSlotChange] = () => {
     if (!this[$scene])
@@ -411,8 +422,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
     if (this[$clearModelTimeout] != null) {
       self.clearTimeout(this[$clearModelTimeout]!);
       this[$clearModelTimeout] = null;
-      // Force an update in case the model has been evicted from our GLTF cache
-      // @see https://lit-element.polymer-project.org/guide/lifecycle#requestupdate
+    }
+    // A disposed scene needs to reload, including after its cleanup timeout.
+    if (!this.loaded || this.src !== this[$scene].url) {
       this.requestUpdate('src', null);
     }
   }
@@ -447,6 +459,8 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     this[$clearModelTimeout] = self.setTimeout(() => {
       this[$scene].dispose();
+      this[$loaded] = false;
+      this[$loadedTime] = 0;
       this[$clearModelTimeout] = null;
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
@@ -482,6 +496,30 @@ export default class ModelViewerElementBase extends ReactiveElement {
       this[$userInputElement].setAttribute('aria-label', this[$ariaLabel]);
     }
 
+    const scene = this[$scene];
+    const native = scene.nativeRenderer;
+    if (native != null) {
+      const selectionChanged = [
+        'disableNative',
+        'scale',
+        'skyboxImage',
+        'animationName',
+        'variantName'
+      ].some(property => changedProperties.has(property));
+      const credentialsChanged = changedProperties.has('withCredentials') &&
+          changedProperties.get('withCredentials') !== undefined;
+      if (((selectionChanged || native.isActive) &&
+           (scene.externalRenderer == null || native.isActive) &&
+           native.canRender(scene.extraUrls) !== native.isActive) ||
+          (credentialsChanged && native.isActive)) {
+        this[$loaded] = false;
+        this[$loadedTime] = 0;
+        scene.reset();
+        this[$updateSource]();
+      }
+      native.syncAttributes();
+    }
+
     if (changedProperties.has('generateSchema')) {
       if (this.generateSchema) {
         const extraModels = Array.from(this.querySelectorAll('extra-model')) as
@@ -499,6 +537,10 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   /** @export */
   toDataURL(type?: string, encoderOptions?: number): string {
+    if (this[$scene].nativeRenderer?.isActive) {
+      throw new Error(
+          'Native <model> does not expose pixels. Use toBlob() or disable-native.');
+    }
     return this[$renderer]
         .displayCanvas(this[$scene])
         .toDataURL(type, encoderOptions);
@@ -506,6 +548,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
   /** @export */
   async toBlob(options?: ToBlobOptions): Promise<Blob> {
+    await this[$ensureWebGL]();
     const mimeType = options ? options.mimeType : undefined;
     const qualityArgument = options ? options.qualityArgument : undefined;
     const useIdealAspect = options ? options.idealAspect : undefined;
@@ -530,7 +573,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     blobCanvas.width = outputWidth;
     blobCanvas.height = outputHeight;
     try {
-      return new Promise<Blob>(async (resolve, reject) => {
+      return await new Promise<Blob>((resolve, reject) => {
         blobCanvas.getContext('2d')!.drawImage(
             this[$renderer].displayCanvas(this[$scene]),
             offsetX,
@@ -563,6 +606,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
    * @param effectComposer An EffectComposer from `pmndrs/postprocessing`
    */
   registerEffectComposer(effectComposer: EffectComposerInterface) {
+    if (this[$scene].nativeRenderer?.isActive) {
+      this.disableNative = true;
+    }
     effectComposer.setRenderer(this[$renderer].threeRenderer);
     effectComposer.setMainCamera(this[$scene].getCamera());
     effectComposer.setMainScene(this[$scene]);
@@ -577,6 +623,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   }
 
   registerRenderer(renderer: RendererInterface) {
+    this[$scene].nativeRenderer?.dispose();
     this[$scene].externalRenderer = renderer;
   }
 
@@ -667,10 +714,42 @@ export default class ModelViewerElementBase extends ReactiveElement {
   }
 
   [$onContextLost] = (event: ContextLostEvent) => {
+    if (this[$scene].nativeRenderer?.isActive) {
+      return;
+    }
     this.dispatchEvent(new CustomEvent(
         'error',
         {detail: {type: 'webglcontextlost', sourceError: event.sourceEvent}}));
   };
+
+  /** Load Three.js geometry on demand for export or WebXR presentation. */
+  async[$ensureWebGL]() {
+    if (this[$webGLLoad] != null) {
+      return this[$webGLLoad];
+    }
+    if (!this[$scene].nativeRenderer?.isActive) {
+      return;
+    }
+    this.disableNative = true;
+    this[$scene].externalRenderer = null;
+    this[$scene].reset();
+    this[$loaded] = false;
+    this[$loadedTime] = 0;
+    this[$forcePreload] = true;
+    this[$webGLLoad] =
+        this[$updateSource]()
+            .then(() => {
+              if (!this.loaded) {
+                throw new Error(
+                    'Unable to load model geometry for export or AR.');
+              }
+            })
+            .finally(() => {
+              this[$webGLLoad] = null;
+              this[$forcePreload] = false;
+            });
+    await this[$webGLLoad];
+  }
 
   /**
    * Parses the element for an appropriate source URL and
@@ -685,13 +764,15 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const extraUrlsMatch =
         extraUrlsList.join(',') === (scene.extraUrls || []).join(',');
 
-    if (this.loaded || !this[$shouldAttemptPreload]() ||
+    if (this.loaded ||
+        (!this[$shouldAttemptPreload]() && !this[$forcePreload]) ||
         (this.src === scene.url && extraUrlsMatch)) {
       return;
     }
 
     const source = this.src;
     const heroSrc = source || extraUrlsList[0] || null;
+    const version = ++this[$sourceVersion];
 
     if (this.generateSchema) {
       scene.updateSchema(heroSrc);
@@ -708,9 +789,18 @@ export default class ModelViewerElementBase extends ReactiveElement {
           (progress: number) =>
               updateSourceProgress(clamp(progress, 0, 1) * 0.95));
 
-      const envUpdated = (this as any)[$updateEnvironment]();
+      // Native loading can fall back to Three.js. Select the environment
+      // backend after that decision, so a cancelled native map cannot abort
+      // an otherwise successful fallback load.
+      const envUpdated = scene.nativeRenderer?.isActive ?
+          srcUpdated.then(() => (this as any)[$updateEnvironment]()) :
+          (this as any)[$updateEnvironment]();
 
       await Promise.all([srcUpdated, envUpdated]);
+      if (version !== this[$sourceVersion] || source !== this.src ||
+          scene.url !== source) {
+        return;
+      }
 
       const extraModels = Array.from(this.querySelectorAll('extra-model')) as
           Array<import('./features/extra-model.js').ExtraModelElement>;
@@ -740,10 +830,16 @@ export default class ModelViewerElementBase extends ReactiveElement {
           });
         });
       });
-      this.dispatchEvent(new CustomEvent('load', {detail: {url: heroSrc}}));
+      if (version === this[$sourceVersion] && source === this.src &&
+          scene.url === source) {
+        this.dispatchEvent(new CustomEvent('load', {detail: {url: heroSrc}}));
+      }
     } catch (error) {
-      this.dispatchEvent(new CustomEvent(
-          'error', {detail: {type: 'loadfailure', sourceError: error}}));
+      if (version === this[$sourceVersion] && source === this.src &&
+          scene.url === source) {
+        this.dispatchEvent(new CustomEvent(
+            'error', {detail: {type: 'loadfailure', sourceError: error}}));
+      }
     } finally {
       updateSourceProgress(1.0);
     }

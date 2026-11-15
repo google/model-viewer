@@ -43,6 +43,16 @@ const templateResult = html`
   outline-width: 1px;
 }
 
+/* Safari creates the native model renderer during layout. Keep its container
+ * laid out even while the poster is shown, or model.ready cannot resolve. */
+.userInput.native-rendering {
+  display: block;
+}
+
+.userInput.native-rendering:not(.show) {
+  visibility: hidden;
+}
+
 canvas {
   position: absolute;
   display: none;
@@ -53,6 +63,13 @@ canvas {
    * @see https://github.com/google/model-viewer/pull/755#issuecomment-536597893
    */
   transform: translateZ(0);
+}
+
+.native-model {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
 .show {

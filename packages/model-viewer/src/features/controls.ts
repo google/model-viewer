@@ -462,7 +462,9 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$userHasInteracted] = false;
       this[$waitingToPromptUser] =
           this.interactionPrompt === InteractionPromptStrategy.AUTO &&
-          this.cameraControls;
+          this.cameraControls &&
+          !(this[$scene].nativeRenderer?.isActive &&
+            this[$scene].nativeRenderer?.usesNativeControls);
     }
 
     zoom(keyPresses: number) {
@@ -501,9 +503,16 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
 
       const controls = this[$controls];
       const scene = this[$scene];
+      const native = scene.nativeRenderer;
+      const nativeControls = native?.isActive && native.usesNativeControls;
+      const interactionEnabled = this.cameraControls && !nativeControls;
 
-      if (changedProperties.has('cameraControls')) {
-        if (this.cameraControls) {
+      if (changedProperties.has('cameraControls') ||
+          controls.interactionEnabled !== interactionEnabled) {
+        if (native?.isActive) {
+          native.syncControls();
+        }
+        if (interactionEnabled) {
           controls.enableInteraction();
           if (this.interactionPrompt === InteractionPromptStrategy.AUTO) {
             this[$waitingToPromptUser] = true;
@@ -531,7 +540,7 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
           changedProperties.has('cameraControls') ||
           changedProperties.has('src')) {
         if (this.interactionPrompt === InteractionPromptStrategy.AUTO &&
-            this.cameraControls && !this[$userHasInteracted]) {
+            interactionEnabled && !this[$userHasInteracted]) {
           this[$waitingToPromptUser] = true;
         } else {
           this[$deferInteractionPrompt]();
@@ -765,6 +774,11 @@ export const ControlsMixin = <T extends Constructor<ModelViewerElementBase>>(
       super[$tick](time, delta);
 
       if (this[$renderer].isPresenting || !this[$getModelIsVisible]()) {
+        return;
+      }
+
+      if (this[$scene].nativeRenderer?.isActive &&
+          this[$scene].nativeRenderer?.usesNativeControls) {
         return;
       }
 
