@@ -140,7 +140,24 @@ export class PrimitiveNode extends Node {
         this.mesh.material = backingMaterials.values().next().value!;
       }
 
-      this.parser.assignFinalMaterial(this.mesh);
+      // For a mesh without tangents, assignFinalMaterial() clones the material
+      // and negates normalScale.y (it also sets vertexColors and flatShading
+      // as the geometry requires). Backing materials taken from the scene may
+      // already have been through that for such a mesh; negating them a second
+      // time inverts the normal map, so skip it when the material is already
+      // final for this mesh.
+      // TODO: remove this check in favor of storing the three.js materials
+      // created for each mesh that shares a glTF material (see #4476).
+      const threeMaterial = this.mesh.material as MeshPhysicalMaterial;
+      const {attributes} = this.mesh.geometry;
+      const {normalScale} = threeMaterial;
+      const isAlreadyFinal = normalScale != null &&
+          normalScale.x * normalScale.y < 0 && attributes.tangent == null &&
+          threeMaterial.vertexColors === (attributes.color != null) &&
+          threeMaterial.flatShading === (attributes.normal == null);
+      if (!isAlreadyFinal) {
+        this.parser.assignFinalMaterial(this.mesh);
+      }
       backingMaterials.add(this.mesh.material as MeshPhysicalMaterial);
       this.activeMaterialIdx = material;
     }

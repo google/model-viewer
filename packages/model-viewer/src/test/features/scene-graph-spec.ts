@@ -61,6 +61,59 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
   return scene.model!;
 }
 
+// Two single-triangle primitives without tangents. The second one has vertex
+// colors and uses the 'colored' material, or the first primitive's 'plain'
+// material in the 'Plain' variant.
+function vertexColorVariantsURL(): string {
+  const positions = [0, 0, 0, 1, 0, 0, 0, 1, 0];
+  const normals = [0, 0, 1, 0, 0, 1, 0, 0, 1];
+  const colors = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+  const bytes = new Uint8Array(
+      new Float32Array([...positions, ...normals, ...colors]).buffer);
+  const view = (i: number) => ({buffer: 0, byteOffset: 36 * i, byteLength: 36});
+  const accessor = (i: number) =>
+      ({bufferView: i, componentType: 5126, count: 3, type: 'VEC3'});
+  const gltf = {
+    asset: {version: '2.0'},
+    extensionsUsed: ['KHR_materials_variants'],
+    extensions: {
+      KHR_materials_variants: {variants: [{name: 'Colored'}, {name: 'Plain'}]}
+    },
+    scene: 0,
+    scenes: [{nodes: [0, 1]}],
+    nodes: [{mesh: 0}, {mesh: 1}],
+    meshes: [
+      {primitives: [{attributes: {POSITION: 0, NORMAL: 1}, material: 0}]},
+      {
+        primitives: [{
+          attributes: {POSITION: 0, NORMAL: 1, COLOR_0: 2},
+          material: 1,
+          extensions: {
+            KHR_materials_variants: {
+              mappings:
+                  [{material: 1, variants: [0]}, {material: 0, variants: [1]}]
+            }
+          }
+        }]
+      }
+    ],
+    materials: [{name: 'plain'}, {name: 'colored'}],
+    buffers: [{
+      byteLength: bytes.length,
+      uri: 'data:application/octet-stream;base64,' +
+          btoa(String.fromCharCode(...bytes))
+    }],
+    bufferViews: [view(0), view(1), view(2)],
+    accessors: [
+      {...accessor(0), min: [0, 0, 0], max: [1, 1, 0]},
+      accessor(1),
+      accessor(2)
+    ],
+  };
+  return URL.createObjectURL(
+      new Blob([JSON.stringify(gltf)], {type: 'model/gltf+json'}));
+}
+
 suite('SceneGraph', () => {
   let element: ModelViewerElement;
 
@@ -231,6 +284,54 @@ suite('SceneGraph', () => {
         const gltfRoot = getGLTFRoot(element[$scene], true);
         expect(gltfRoot.children[0].userData.variantMaterials.size).to.be.eq(3);
         expect(gltfRoot.children[1].userData.variantMaterials.size).to.be.eq(3);
+      });
+
+      test('keeps the normal scale when switching variants', async () => {
+        const meshes = getGLTFRoot(element[$scene]).children as Mesh[];
+        const normalScaleY = (mesh: Mesh) =>
+            (mesh.material as MeshStandardMaterial).normalScale.y;
+        // These primitives have no tangents, so three.js flips the normal
+        // scale's y component of the materials it assigns to them.
+        const initial = meshes.map(normalScaleY);
+        expect(initial).to.be.eql([-1, -1]);
+        const initialMaterials = meshes.map((mesh) => mesh.material);
+
+        const variants = [
+          'Yellow Red',
+          'Purple Yellow',
+          'Yellow Yellow',
+          'Yellow Red',
+          null
+        ];
+        for (const variant of variants) {
+          element.variantName = variant;
+          await waitForEvent(element, 'variant-applied');
+          expect(meshes.map(normalScaleY), `variant ${variant}`)
+              .to.be.eql(initial);
+        }
+        expect(meshes.map((mesh) => mesh.material))
+            .to.have.ordered.members(initialMaterials);
+      });
+    });
+
+    suite('with a variant that moves a material to vertex colors', () => {
+      setup(async () => {
+        element.src = vertexColorVariantsURL();
+        await waitForEvent(element, 'load');
+        await rafPasses();
+      });
+
+      test('keeps vertex colors when switching variants', async () => {
+        const colored = getGLTFRoot(element[$scene]).children[1] as Mesh;
+        expect((colored.material as MeshStandardMaterial).vertexColors)
+            .to.be.true;
+
+        element.variantName = 'Plain';
+        await waitForEvent(element, 'variant-applied');
+
+        const material = colored.material as MeshStandardMaterial;
+        expect(material.name).to.be.eq('plain');
+        expect(material.vertexColors).to.be.true;
       });
     });
 
