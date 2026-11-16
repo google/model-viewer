@@ -39,16 +39,16 @@
 </head>
 <body>
 
-<div class="examples-page">  
+<div class="examples-page">
   <div class="sidebar" id="sidenav"></div>
   <div id="toggle"></div>
-  
+
   <div class="examples-container">
     <div class="sample">
       <div id="webXR" class="demo"></div>
       <div class="content">
         <div class="wrapper">
-  
+
           <div class="heading">
             <h2 class="demo-title">WebXR Demo</h2>
             <h4>Customize a WebXR Augmented Reality session with HTML, CSS, and JS in Chrome 83+ on Android.</h4>
@@ -63,25 +63,25 @@
             <p>
               By styling based on the <code>ar-status</code> attribute, you can add DOM that only shows up in certain modes.
               In this case a CSS animation has been added to prompt the user to move their phone around to help ARCore find
-              their floor so that the object can be placed. User studies show a prompt like this is an important part of 
+              their floor so that the object can be placed. User studies show a prompt like this is an important part of
               guiding users to a good AR experience.
             </p>
             <p>
-              Finally, even complex DOM can easily function in both 3D and AR modes, including interactions via script. In 
-              this case a simple carousel of models is demonstrated. Unfortunately none of this DOM content can flow into 
+              Finally, even complex DOM can easily function in both 3D and AR modes, including interactions via script. In
+              this case a simple carousel of models is demonstrated. Unfortunately none of this DOM content can flow into
               SceneViewer or QuickLook, as these are native apps. Only through WebXR, now our default AR mode, can this be
               achieved, as the AR session is still inside of the browser. This also removes the need to redownload the model.
             </p>
             <p>
               Note that by not specifying an <code>ios-src</code>,
               the USDZ will instead be auto-generated when the user clicks the
-              AR button on iOS to launch Quick Look. 
+              AR button on iOS to launch Quick Look.
             </p>
           </div>
           <example-snippet stamp-to="webXR" highlight-as="html">
             <template>
 <model-viewer src="../../assets/ShopifyModels/Chair.glb" poster="../../assets/ShopifyModels/Chair.webp" shadow-intensity="1" ar camera-controls touch-action="pan-y" alt="A 3D model carousel">
-  
+
   <button slot="ar-button" id="ar-button">
     View in your space
   </button>
@@ -104,12 +104,12 @@
 
       <button class="slide" onclick="switchSrc(this, 'GeoPlanter')"
         style="background-image: url('../../assets/ShopifyModels/GeoPlanter.webp');">
-      
+
       <button class="slide" onclick="switchSrc(this, 'ToyTrain')"
         style="background-image: url('../../assets/ShopifyModels/ToyTrain.webp');">
-      
+
       <button class="slide" onclick="switchSrc(this, 'Canoe')"
-        style="background-image: url('../../assets/ShopifyModels/Canoe.webp');">    
+        style="background-image: url('../../assets/ShopifyModels/Canoe.webp');">
     </div>
   </div>
 </model-viewer>
@@ -389,17 +389,17 @@
 </model-viewer>
             </template>
           </example-snippet>
-  
+
           <p>
               Since this slot will only appear on an AR enabled device screenshots are provided below. They compare the &lt;model-viewer&gt; default button in the bottom right and a custom button ("👋 Activate AR") in the top right of the viewport, with a custom style.
           </p>
-  
+
           <img class="eg-image" src="../../assets/eg-default-ar-button.jpg" alt="Image displaying the default model-viewer button of a box with slits cut out in the lower-right, next to the example astronaut model." />
           <img class="eg-image" src="../../assets/eg-custom-ar-button.jpg" alt="Image displaying model-viewer with a custom button reading '👋 Activate AR'." / >
         </div>
       </div>
     </div>
-  
+
     <div class="sample">
       <div id="transparentBackground" class="demo"></div>
         <div class="content">

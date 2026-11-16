@@ -15,10 +15,10 @@
 import {directive, Directive, DirectiveParameters, ElementPart, PartInfo, PartType,} from 'lit/directive.js';
 
 const Binding = {
-  ATTRIBUTE: 'ATTRIBUTE' as 'ATTRIBUTE',
-  PROPERTY: 'PROPERTY' as 'PROPERTY',
-  BOOLEAN_ATTRIBUTE: 'BOOLEAN_ATTRIBUTE' as 'BOOLEAN_ATTRIBUTE',
-  EVENT: 'EVENT' as 'EVENT',
+  ATTRIBUTE: 'ATTRIBUTE' as const,
+  PROPERTY: 'PROPERTY' as const,
+  BOOLEAN_ATTRIBUTE: 'BOOLEAN_ATTRIBUTE' as const,
+  EVENT: 'EVENT' as const,
 };
 
 type Binding = keyof typeof Binding;
@@ -36,11 +36,11 @@ class Spread extends Directive {
 
   update(part: ElementPart, [binds]: DirectiveParameters<this>) {
     const newEntires = Object.entries(binds);
-    this.oldBinds.hasOwnProperty('$spread');
+    Object.prototype.hasOwnProperty.call(this.oldBinds, '$spread');
     for (const [bind, value] of newEntires) {
       const [bindKind, bindName] = this.parseBind(bind);
 
-      if (this.oldBinds.hasOwnProperty(bind)) {
+      if (Object.prototype.hasOwnProperty.call(this.oldBinds, bind)) {
         this.handleExistingBind(part, bind, bindName, value, bindKind);
       } else {
         this.handleNewBind(part, bindName, value, bindKind);
@@ -51,7 +51,7 @@ class Spread extends Directive {
 
     for (const [bind, value] of oldEntries) {
       const [bindKind, bindName] = this.parseBind(bind);
-      if (!binds.hasOwnProperty(bind)) {
+      if (!Object.prototype.hasOwnProperty.call(binds, bind)) {
         this.handleRemovedBind(part, bindName, value, bindKind);
       }
     }
@@ -131,4 +131,4 @@ class Spread extends Directive {
 }
 
 export const spread = directive(Spread);
-export type{Spread};
+export type {Spread};

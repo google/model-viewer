@@ -199,8 +199,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
   protected[$clearModelTimeout]: number|null = null;
 
   [$onSlotChange] = () => {
-    if (!this[$scene])
+    if (!this[$scene]) {
       return;
+    }
 
     const extraModels = Array.from(this.querySelectorAll('extra-model')) as
         Array<import('./features/extra-model.js').ExtraModelElement>;
@@ -231,8 +232,9 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const extraModels = Array.from(this.querySelectorAll('extra-model'));
     const childIndex = (extraModels as HTMLElement[]).indexOf(targetNode);
 
-    if (childIndex === -1)
+    if (childIndex === -1) {
       return;
+    }
 
     const modelIndex = this.src ? childIndex + 1 : childIndex;
 
@@ -340,7 +342,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
               return;
             }
 
-            for (let entry of entries) {
+            for (const entry of entries) {
               if (entry.target === this) {
                 this[$updateSize](entry.contentRect);
               }
@@ -350,7 +352,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
 
     if (HAS_INTERSECTION_OBSERVER) {
       this[$intersectionObserver] = new IntersectionObserver(entries => {
-        for (let entry of entries) {
+        for (const entry of entries) {
           if (entry.target === this) {
             const oldVisibility = this.modelIsVisible;
             this[$isElementInViewport] = entry.isIntersecting;
@@ -381,7 +383,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   }
 
   connectedCallback() {
-    super.connectedCallback && super.connectedCallback();
+    super.connectedCallback?.();
     if (HAS_RESIZE_OBSERVER) {
       this[$resizeObserver]!.observe(this);
     } else {
@@ -418,7 +420,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback && super.disconnectedCallback();
+    super.disconnectedCallback?.();
     if (HAS_RESIZE_OBSERVER) {
       this[$resizeObserver]!.unobserve(this);
     } else {
@@ -451,7 +453,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     }, CLEAR_MODEL_TIMEOUT_MS);
   }
 
-  updated(changedProperties: Map<string|number|symbol, any>) {
+  updated(changedProperties: Map<string|number|symbol, unknown>) {
     super.updated(changedProperties);
 
     // NOTE(cdata): If a property changes from values A -> B -> A in the space
@@ -530,7 +532,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     blobCanvas.width = outputWidth;
     blobCanvas.height = outputHeight;
     try {
-      return new Promise<Blob>(async (resolve, reject) => {
+      return new Promise<Blob>((resolve, reject) => {
         blobCanvas.getContext('2d')!.drawImage(
             this[$renderer].displayCanvas(this[$scene]),
             offsetX,
@@ -649,7 +651,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
     const rootNode = this.getRootNode() as Document | ShadowRoot | null;
     // Only change the aria-label if <model-viewer> is currently focused:
     if (rootNode != null && rootNode.activeElement === this &&
-        this[$statusElement].textContent != status) {
+        this[$statusElement].textContent !== status) {
       this[$statusElement].textContent = status;
     }
   }

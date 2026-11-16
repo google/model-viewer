@@ -55,7 +55,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
   private[$lazyLoadGLTFInfo]?: LazyLoader;
   private[$gltfIndex]: number;
   private[$isActive]: boolean;
-  public[$variantIndices] = new Set<number>();
+  [$variantIndices] = new Set<number>();
   private[$name]?: string;
   readonly[$modelVariants]: Map<string, VariantData>;
   private[$pbrTextures] = new Map<TextureUsage, TextureInfo>();
@@ -268,7 +268,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
     for (const material of this[$correlatedObjects] as
          Set<MeshPhysicalMaterial>) {
       if (this[$getAlphaMode]() === 'MASK') {
-        if (material.alphaTest == undefined) {
+        if (material.alphaTest == null) {
           material.alphaTest = 0.5;
         }
       } else {
@@ -312,7 +312,7 @@ export class Material extends ThreeDOMElement implements MaterialInterface {
 
   getDoubleSided(): boolean {
     this[$ensureMaterialIsLoaded]();
-    return this[$backingThreeMaterial].side == DoubleSide;
+    return this[$backingThreeMaterial].side === DoubleSide;
   }
 
   setAlphaMode(alphaMode: AlphaMode): void {

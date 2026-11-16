@@ -245,10 +245,12 @@ export class ModelScene extends Scene {
 
     try {
       const urlsToLoad: string[] = [];
-      if (url)
+      if (url) {
         urlsToLoad.push(url);
-      if (extraUrls)
+      }
+      if (extraUrls) {
         urlsToLoad.push(...extraUrls);
+      }
 
       if (urlsToLoad.length > 0) {
         gltfs =
@@ -332,8 +334,9 @@ export class ModelScene extends Scene {
       index: number, offset?: string|null, orientation?: string|null,
       scale?: string|null) {
     const model = this._models[index];
-    if (!model)
+    if (!model) {
       return;
+    }
 
     if (offset) {
       const terms = parseExpressions(offset)[0]
@@ -406,15 +409,17 @@ export class ModelScene extends Scene {
 
     const {_models} = this;
     for (const mod of _models) {
-      if (mod != null)
+      if (mod != null) {
         mod.removeFromParent();
+      }
     }
     this._models = [];
 
     const gltfs = this._currentGLTFs;
     for (const gltf of gltfs) {
-      if (gltf != null)
+      if (gltf != null) {
         gltf.dispose();
+      }
     }
     this._currentGLTFs = [];
 
@@ -899,13 +904,15 @@ export class ModelScene extends Scene {
 
     for (let i = startIndex; i < endIndex; i++) {
       const gltf = this._currentGLTFs[i];
-      if (gltf == null)
+      if (gltf == null) {
         continue;
+      }
 
       // Collect animations specific to this model
       const animations = gltf.animations || [];
-      if (animations.length === 0)
+      if (animations.length === 0) {
         continue;
+      }
 
       let animationClip = null;
 
@@ -953,7 +960,7 @@ export class ModelScene extends Scene {
             action.crossFadeFrom(lastAnimationAction, crossfadeTime, false);
           } else if (
               this.animationTimeScale > 0 &&
-              this.animationTime == this.duration) {
+              this.animationTime === this.duration) {
             this.animationTime = 0;
           }
         }
@@ -1118,7 +1125,7 @@ export class ModelScene extends Scene {
         }
 
         if (!action.isRunning()) {
-          if (action.time == animationClip.duration) {
+          if (action.time === animationClip.duration) {
             action.stop();
           }
           action.setLoop(loopMode, repetitionCount);
@@ -1332,7 +1339,7 @@ export class ModelScene extends Scene {
   renderShadow(renderer: WebGLRenderer) {
     this.updateBoundingBoxAndShadowIfDirty();
     const shadow = this.shadow;
-    if (shadow != null && shadow.needsUpdate == true) {
+    if (shadow != null && shadow.needsUpdate === true) {
       shadow.render(renderer, this);
       shadow.needsUpdate = false;
     }
@@ -1407,8 +1414,9 @@ export class ModelScene extends Scene {
     let current: Object3D|null = hit.object;
     while (current != null) {
       const idx = this.models.indexOf(current);
-      if (idx !== -1)
+      if (idx !== -1) {
         return idx;
+      }
       current = current.parent;
     }
     return 0;  // Default to primary model if not found
@@ -1466,8 +1474,9 @@ export class ModelScene extends Scene {
     }
 
     const node = model[$nodeFromPoint](hit);
-    if (node == null)
+    if (node == null) {
       return null;
+    }
     const {meshes, primitives} = node.mesh.userData.associations;
 
     const va = new Vector3();

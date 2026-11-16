@@ -62,8 +62,8 @@ suite('scene-graph/texture', () => {
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .pbrMetallicRoughness.baseColorTexture?.texture
-              ?.source[$threeTexture]!;
+              .pbrMetallicRoughness.baseColorTexture!.texture!
+              .source[$threeTexture]!;
 
       expect(threeTexture.uuid).to.be.equal(newUUID);
     });

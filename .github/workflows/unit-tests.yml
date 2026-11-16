@@ -27,6 +27,12 @@ jobs:
     - name: NPM install
       run: npm ci
 
+    - name: Lint
+      run: npm run lint
+
+    - name: Check formatting
+      run: npm run format:check
+
     - name: Cache Playwright browsers
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       id: playwright-cache
@@ -38,9 +44,6 @@ jobs:
 
     - name: Install playwright browsers
       run: npx playwright install --with-deps
-
-    # - name: Lint TypeScript sources
-    #   run: npm run lint
 
     - name: Build packages
       run: npm run build

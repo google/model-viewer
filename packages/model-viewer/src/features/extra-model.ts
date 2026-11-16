@@ -29,7 +29,7 @@ export class ExtraModelElement extends ReactiveElement {
   /**
    * Reference to the underlying scene graph Model wrapper.
    */
-  public model?: import('./scene-graph/model.js').Model;
+  model?: import('./scene-graph/model.js').Model;
 
   /**
    * Position offset relative to global origin.

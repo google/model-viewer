@@ -146,9 +146,8 @@ player.addEventListener('load', () => {
     };
 
     // Download the poster and thumbnail
-    downloadImage(posterBlob, getPosterUrl().replace(/^.*?([^\\\/]*)$/, '$1'));
-    downloadImage(
-        thumbnailBlob, getImageUrl().replace(/^.*?([^\\\/]*)$/, '$1'));
+    downloadImage(posterBlob, getPosterUrl().replace(/^.*?([^\\/]*)$/, '$1'));
+    downloadImage(thumbnailBlob, getImageUrl().replace(/^.*?([^\\/]*)$/, '$1'));
   };
 
   downloader.addEventListener('click', download);

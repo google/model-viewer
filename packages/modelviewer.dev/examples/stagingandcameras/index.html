@@ -39,10 +39,10 @@
 
 </head>
 <body>
-<div class="examples-page">  
+<div class="examples-page">
   <div class="sidebar" id="sidenav"></div>
   <div id="toggle"></div>
-  
+
   <div class="examples-container">
     <div class="sample">
       <div id="enableInteraction" class="demo"></div>
@@ -237,20 +237,20 @@
 
 <script type="module">
   const modelViewer = document.querySelector("#envlight-demo");
-  
+
   let lastX;
   let panning = false;
   let skyboxAngle = 0;
   let radiansPerPixel;
-      
+
   const startPan = () => {
     const orbit = modelViewer.getCameraOrbit();
     const { radius } = orbit;
     radiansPerPixel = -1 * radius / modelViewer.getBoundingClientRect().height;
     modelViewer.interactionPrompt = 'none';
   };
-  
-  const updatePan = (thisX) => {      
+
+  const updatePan = (thisX) => {
     const delta = (thisX - lastX) * radiansPerPixel;
     lastX = thisX;
     skyboxAngle += delta;
@@ -260,7 +260,7 @@
     modelViewer.resetTurntableRotation(skyboxAngle);
     modelViewer.jumpCameraToGoal();
   }
-  
+
   modelViewer.addEventListener('mousedown', (event) => {
     panning = event.button === 2 || event.ctrlKey || event.metaKey || event.shiftKey;
     if (!panning)
@@ -301,7 +301,7 @@
   self.addEventListener('mouseup', (event) => {
     panning = false;
   }, true);
-  
+
   modelViewer.addEventListener('touchend', (event) => {
     panning = false;
   }, true);
@@ -310,7 +310,7 @@
           </example-snippet>
         </div>
       </div>
-    </div>	
+    </div>
 
     <div class="sample">
       <div id="customPrompt" class="demo"></div>
@@ -342,7 +342,7 @@
 
 <script>
   const modelViewerPrompt = document.querySelector("#prompt-demo");
-  
+
   const PROMT_MS = 3000;
   const REPEAT_MS = 5000;
 
@@ -424,7 +424,7 @@
         </li>
 
         <li class="attribution">
-          <a href="https://3d.si.edu/object/3d/neil-armstrong-spacesuit:d8c63ba6-4ebc-11ea-b77f-2e728ce88125">Neil Armstrong Space Suit</a> 
+          <a href="https://3d.si.edu/object/3d/neil-armstrong-spacesuit:d8c63ba6-4ebc-11ea-b77f-2e728ce88125">Neil Armstrong Space Suit</a>
           provided by the Smithsonian Digitization Programs Office and the National Air and Space Museum; <a href=https://www.si.edu/Termsofuse>Usage Conditions Apply</a>.
         </li>
 
@@ -445,7 +445,7 @@
    (() => { init('examples-stagingandcameras'); })();
    (() => { initFooterLinks();})();
  </script>
-  
+
 
   <!-- Documentation-specific dependencies: -->
   <script type="module"

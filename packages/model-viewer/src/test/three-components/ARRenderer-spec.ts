@@ -78,8 +78,8 @@ class MockXRFrame implements XRFrame {
     return [];
   }
 
-  getHitTestResultsForTransientInput(_hitTestSource:
-                                         XRTransientInputHitTestSource) {
+  getHitTestResultsForTransientInput(
+      _hitTestSource: XRTransientInputHitTestSource) {
     return [];
   }
 }
@@ -98,7 +98,7 @@ suite('ARRenderer', () => {
   const stubWebXrInterface = (arRenderer: ARRenderer) => {
     arRenderer.resolveARSession = async () => {
       class FakeSession extends EventTarget implements XRSession {
-        public renderState: XRRenderState = {
+        renderState: XRRenderState = {
           baseLayer: {
             getViewport: () => {
               return {x: 0, y: 0, width: 320, height: 240} as XRViewport
@@ -106,8 +106,7 @@ suite('ARRenderer', () => {
           } as unknown as XRLayer
         } as XRRenderState;
 
-        public hitTestSources: Set<XRHitTestSource> =
-            new Set<XRHitTestSource>();
+        hitTestSources: Set<XRHitTestSource> = new Set<XRHitTestSource>();
 
         async updateRenderState(_object: any) {
         }

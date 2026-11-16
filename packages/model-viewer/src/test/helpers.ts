@@ -127,13 +127,13 @@ export const isInDocumentTree = (node: Node): boolean => {
  * original implementation to the object when invoked.
  */
 export const spy =
-    (object: Object,
+    (object: object,
      property: string,
      descriptor: PropertyDescriptor): () => void => {
       let sourcePrototype = object;
 
       while (sourcePrototype != null &&
-             !sourcePrototype.hasOwnProperty(property)) {
+             !Object.prototype.hasOwnProperty.call(sourcePrototype, property)) {
         sourcePrototype = (sourcePrototype as any).__proto__;
       }
 

@@ -81,7 +81,7 @@ export const StagingMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$autoRotateStartTime] = performance.now();
     }
 
-    updated(changedProperties: Map<string, any>) {
+    updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
 
       if (changedProperties.has('autoRotate')) {

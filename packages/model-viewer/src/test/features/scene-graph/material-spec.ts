@@ -65,8 +65,8 @@ suite('scene-graph/material', () => {
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .pbrMetallicRoughness.baseColorTexture?.texture
-              ?.source[$threeTexture]!;
+              .pbrMetallicRoughness.baseColorTexture!.texture!
+              .source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.map).to.be.eq(threeTexture);
@@ -84,8 +84,8 @@ suite('scene-graph/material', () => {
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .pbrMetallicRoughness.metallicRoughnessTexture?.texture
-              ?.source[$threeTexture]!;
+              .pbrMetallicRoughness.metallicRoughnessTexture!.texture!
+              .source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.metalnessMap).to.be.eq(threeTexture);
@@ -103,7 +103,7 @@ suite('scene-graph/material', () => {
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .normalTexture?.texture?.source[$threeTexture]!;
+              .normalTexture!.texture!.source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.normalMap).to.be.eq(threeTexture);
@@ -120,7 +120,7 @@ suite('scene-graph/material', () => {
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .occlusionTexture?.texture?.source[$threeTexture]!;
+              .occlusionTexture!.texture!.source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.aoMap).to.be.eq(threeTexture);
@@ -137,7 +137,7 @@ suite('scene-graph/material', () => {
 
       const threeTexture: ThreeTexture =
           element.model!.materials[0]
-              .emissiveTexture?.texture?.source[$threeTexture]!;
+              .emissiveTexture!.texture!.source[$threeTexture]!;
 
       for (const material of threeMaterials as Set<MeshStandardMaterial>) {
         expect(material.emissiveMap).to.be.eq(threeTexture);

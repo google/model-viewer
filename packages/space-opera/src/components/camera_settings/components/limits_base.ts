@@ -130,8 +130,9 @@ export abstract class LimitsBase extends ConnectedLitElement {
   }
 
   renderLimits() {
-    if (!this.limitsProperty?.enabled || !getModelViewer())
+    if (!this.limitsProperty?.enabled || !getModelViewer()) {
       return html``;
+    }
 
     return html`
     <me-section-row label="${this.minimumLabel}">

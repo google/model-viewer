@@ -66,97 +66,94 @@ export interface StyleDecoratorConfig<T extends Intrinsics<Array<Unit>>,
  * environment variable changes (even if the style attribute itself remains
  * static).
  */
-export const style =
-    <T extends Intrinsics<Array<Unit>>, U extends ReactiveElement>(
-        config: StyleDecoratorConfig<T, U>) => {
-      const observeEffects: boolean = config.observeEffects || false;
-      const getIntrinsics = config.intrinsics instanceof Function ?
-          config.intrinsics :
-          (() => config.intrinsics) as IntrinsicsFactory<T, U>;
+export const style = <T extends Intrinsics<Array<Unit>>,
+                                U extends ReactiveElement>(
+    config: StyleDecoratorConfig<T, U>) => {
+  const observeEffects: boolean = config.observeEffects || false;
+  const getIntrinsics = config.intrinsics instanceof Function ?
+      config.intrinsics :
+      (() => config.intrinsics) as IntrinsicsFactory<T, U>;
 
-      return <U extends typeof ReactiveElement['prototype']>(
-                 proto: U, propertyName: string) => {
-        const originalUpdated = (proto as any).updated;
-        const originalConnectedCallback = proto.connectedCallback;
-        const originalDisconnectedCallback = proto.disconnectedCallback;
+  return <U extends typeof ReactiveElement['prototype']>(
+             proto: U, propertyName: string) => {
+    const originalUpdated = (proto as any).updated;
+    const originalConnectedCallback = proto.connectedCallback;
+    const originalDisconnectedCallback = proto.disconnectedCallback;
 
-        const $styleEffector = Symbol(`${propertyName}StyleEffector`);
-        const $styleEvaluator = Symbol(`${propertyName}StyleEvaluator`);
-        const $updateEvaluator = Symbol(`${propertyName}UpdateEvaluator`);
-        const $evaluateAndSync = Symbol(`${propertyName}EvaluateAndSync`);
+    const $styleEffector = Symbol(`${propertyName}StyleEffector`);
+    const $styleEvaluator = Symbol(`${propertyName}StyleEvaluator`);
+    const $updateEvaluator = Symbol(`${propertyName}UpdateEvaluator`);
+    const $evaluateAndSync = Symbol(`${propertyName}EvaluateAndSync`);
 
-        Object.defineProperties(proto, {
-          [$styleEffector]:
-              {value: null as StyleEffector | null, writable: true},
-          [$styleEvaluator]:
-              {value: null as StyleEvaluator<T>| null, writable: true},
+    Object.defineProperties(proto, {
+      [$styleEffector]: {value: null as StyleEffector | null, writable: true},
+      [$styleEvaluator]:
+          {value: null as StyleEvaluator<T>| null, writable: true},
 
-          [$updateEvaluator]: {
-            value: function() {
-              const ast = parseExpressions(
-                  this[propertyName as keyof ReactiveElement] as string);
-              this[$styleEvaluator] =
-                  new StyleEvaluator(ast, getIntrinsics(this));
+      [$updateEvaluator]: {
+        value: function() {
+          const ast = parseExpressions(
+              this[propertyName as keyof ReactiveElement] as string);
+          this[$styleEvaluator] = new StyleEvaluator(ast, getIntrinsics(this));
 
-              if (this[$styleEffector] == null && observeEffects) {
-                this[$styleEffector] =
-                    new StyleEffector(() => this[$evaluateAndSync]());
-              }
-
-              if (this[$styleEffector] != null) {
-                this[$styleEffector].observeEffectsFor(ast);
-              }
-            }
-          },
-
-          [$evaluateAndSync]: {
-            value: function() {
-              if (this[$styleEvaluator] == null) {
-                return;
-              }
-
-              const result = this[$styleEvaluator].evaluate();
-
-              // @see https://github.com/microsoft/TypeScript/pull/30769
-              // @see https://github.com/Microsoft/TypeScript/issues/1863
-              (this as unknown as Record<
-                   string,
-                   (style: EvaluatedStyle<T>) =>
-                       void>)[config.updateHandler as unknown as string](
-                  result);
-            }
-          },
-
-          updated: {
-            value: function(changedProperties: Map<string, any>) {
-              // Always invoke updates to styles first. This gives a class that
-              // uses this decorator the opportunity to override the effect, or
-              // respond to it, in its own implementation of `updated`.
-              if (changedProperties.has(propertyName)) {
-                this[$updateEvaluator]();
-                this[$evaluateAndSync]();
-              }
-
-              originalUpdated.call(this, changedProperties);
-            }
-          },
-
-          connectedCallback: {
-            value: function() {
-              originalConnectedCallback.call(this);
-              this.requestUpdate(propertyName, this[propertyName]);
-            }
-          },
-
-          disconnectedCallback: {
-            value: function() {
-              originalDisconnectedCallback.call(this);
-              if (this[$styleEffector] != null) {
-                this[$styleEffector].dispose();
-                this[$styleEffector] = null;
-              }
-            }
+          if (this[$styleEffector] == null && observeEffects) {
+            this[$styleEffector] =
+                new StyleEffector(() => this[$evaluateAndSync]());
           }
-        });
-      };
-    };
+
+          if (this[$styleEffector] != null) {
+            this[$styleEffector].observeEffectsFor(ast);
+          }
+        }
+      },
+
+      [$evaluateAndSync]: {
+        value: function() {
+          if (this[$styleEvaluator] == null) {
+            return;
+          }
+
+          const result = this[$styleEvaluator].evaluate();
+
+          // @see https://github.com/microsoft/TypeScript/pull/30769
+          // @see https://github.com/Microsoft/TypeScript/issues/1863
+          (this as unknown as Record<
+               string,
+               (style: EvaluatedStyle<T>) =>
+                   void>)[config.updateHandler as unknown as string](result);
+        }
+      },
+
+      updated: {
+        value: function(changedProperties: Map<string|number|symbol, unknown>) {
+          // Always invoke updates to styles first. This gives a class that
+          // uses this decorator the opportunity to override the effect, or
+          // respond to it, in its own implementation of `updated`.
+          if (changedProperties.has(propertyName)) {
+            this[$updateEvaluator]();
+            this[$evaluateAndSync]();
+          }
+
+          originalUpdated.call(this, changedProperties);
+        }
+      },
+
+      connectedCallback: {
+        value: function() {
+          originalConnectedCallback.call(this);
+          this.requestUpdate(propertyName, this[propertyName]);
+        }
+      },
+
+      disconnectedCallback: {
+        value: function() {
+          originalDisconnectedCallback.call(this);
+          if (this[$styleEffector] != null) {
+            this[$styleEffector].dispose();
+            this[$styleEffector] = null;
+          }
+        }
+      }
+    });
+  };
+};

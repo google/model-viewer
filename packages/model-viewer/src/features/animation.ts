@@ -104,7 +104,8 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
     // followed by `play({repetitions: 1})` loops forever and never emits
     // 'finished', because the asynchronous animationName update re-triggers
     // playback with the default (infinite) options.
-    private[$currentAnimationOptions]: PlayAnimationOptions = DEFAULT_PLAY_OPTIONS;
+    private[$currentAnimationOptions]: PlayAnimationOptions =
+        DEFAULT_PLAY_OPTIONS;
 
     constructor(...args: any[]) {
       super(args);
@@ -253,7 +254,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$needsRender]();
     }
 
-    updated(changedProperties: Map<string, any>) {
+    updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
 
       if (changedProperties.has('autoplay') && this.autoplay) {
@@ -272,9 +273,8 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       // infinite-loop default.
       const opts = options ?? this[$currentAnimationOptions];
       const repetitions = opts.repetitions ?? Infinity;
-      const mode = opts.pingpong ?
-          LoopPingPong :
-          (repetitions === 1 ? LoopOnce : LoopRepeat);
+      const mode = opts.pingpong ? LoopPingPong :
+                                   (repetitions === 1 ? LoopOnce : LoopRepeat);
       this[$scene].playAnimation(
           this.animationName,
           this.animationCrossfadeDuration / MILLISECONDS_PER_SECOND,

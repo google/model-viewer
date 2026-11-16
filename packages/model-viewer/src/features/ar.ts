@@ -27,6 +27,23 @@ let isWebXRBlocked = false;
 let isSceneViewerBlocked = false;
 const noArViewerSigil = '#model-viewer-no-ar-fallback';
 
+// User-Agent Client Hints are not in TypeScript's DOM lib yet.
+interface NavigatorUAData {
+  getHighEntropyValues?
+      (hints: string[]): Promise<{formFactor?: string | string[]}>;
+}
+
+/** Whether the browser reports an XR headset form factor via UA-CH. */
+const isXRFormFactor = async(): Promise<boolean> => {
+  const {userAgentData} =
+      navigator as Navigator & {userAgentData?: NavigatorUAData};
+  if (userAgentData?.getHighEntropyValues == null) {
+    return false;
+  }
+  const {formFactor} = await userAgentData.getHighEntropyValues(['formFactor']);
+  return formFactor?.includes('XR') ?? false;
+};
+
 export type ARMode = 'quick-look'|'scene-viewer'|'webxr'|'none';
 
 const deserializeARModes = enumerationDeserializer<ARMode>(
@@ -142,7 +159,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
     };
 
     private[$onARTap] = (event: Event) => {
-      if ((event as any).data == '_apple_ar_quicklook_button_tapped') {
+      if ((event as any).data === '_apple_ar_quicklook_button_tapped') {
         this.dispatchEvent(new CustomEvent('quick-look-button-tapped'));
       }
     };
@@ -175,7 +192,7 @@ export const ARMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$arAnchor].removeEventListener('message', this[$onARTap]);
     }
 
-    update(changedProperties: Map<string, any>) {
+    update(changedProperties: Map<string|number|symbol, unknown>) {
       super.update(changedProperties);
 
       if (changedProperties.has('arScale')) {
@@ -234,12 +251,7 @@ configuration or device capabilities');
               break;
             }
             if (value === 'scene-viewer' && !isSceneViewerBlocked &&
-                (IS_SCENEVIEWER_CANDIDATE ||
-                 ((navigator as any).userAgentData &&
-                  (navigator as any).userAgentData.getHighEntropyValues &&
-                  (await (navigator as any).userAgentData.getHighEntropyValues([
-                    'formFactor'
-                  ])).formFactor?.includes('XR')))) {
+                (IS_SCENEVIEWER_CANDIDATE || await isXRFormFactor())) {
               arMode = ARMode.SCENE_VIEWER;
               break;
             }
@@ -330,7 +342,7 @@ configuration or device capabilities');
             'No src or extra-model provided for Scene Viewer fallback.');
         return;
       }
-      let modelUrl = new URL(firstSrc, location);
+      const modelUrl = new URL(firstSrc, location);
 
       // Note: While it would be ideal to export and pass a composited GLB for
       // multi-model scenes, Android's Scene Viewer app cannot securely read
@@ -340,8 +352,9 @@ configuration or device capabilities');
       // scene and gracefully degrade to serving only the base model's remote
       // URI.
 
-      if (modelUrl.hash)
+      if (modelUrl.hash) {
         modelUrl.hash = '';
+      }
       const params = new URLSearchParams(modelUrl.search);
 
       locationUrl.hash = noArViewerSigil;
@@ -450,8 +463,9 @@ configuration or device capabilities');
       // attach anchor to shadow DOM to ensure iOS16 ARQL banner click message
       // event propagation
       anchor.style.display = 'none';
-      if (!anchor.isConnected)
+      if (!anchor.isConnected) {
         this.shadowRoot!.appendChild(anchor);
+      }
 
       anchor.click();
       anchor.removeChild(img);

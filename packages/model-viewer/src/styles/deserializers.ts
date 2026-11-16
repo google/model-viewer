@@ -48,7 +48,8 @@ export const enumerationDeserializer = <T extends string>(allowedNames: T[]) =>
                           .filter(name => allowedNames.indexOf(name) > -1);
 
         return new Set<T>(names);
-      } catch (_error) {
+      } catch {
+        // Fall through to an empty set for unparseable input.
       }
       return new Set();
     };

@@ -70,7 +70,8 @@ suite('spread directive util test', () => {
     const listener2 = () => {
       numTimesListener2Called++;
     };
-    const getTemplate = (binds: {}) => html` <input ${spread(binds)} /> `;
+    const getTemplate = (binds: {[bind: string]: unknown}) =>
+        html` <input ${spread(binds)} /> `;
 
     let template = getTemplate({
       '?disabled': true,
@@ -116,7 +117,8 @@ suite('spread directive util test', () => {
     const listener1 = () => {
       numTimesListener1Called++;
     };
-    const getTemplate = (binds: {}) => html` <input ${spread(binds)} /> `;
+    const getTemplate = (binds: {[bind: string]: unknown}) =>
+        html` <input ${spread(binds)} /> `;
 
     let template = getTemplate({
       '?disabled': true,
@@ -183,7 +185,8 @@ suite('spread directive util test', () => {
     const listener1 = () => {
       numTimesListener1Called++;
     };
-    const getTemplate = (binds: {}) => html` <input ${spread(binds)} /> `;
+    const getTemplate = (binds: {[bind: string]: unknown}) =>
+        html` <input ${spread(binds)} /> `;
 
     let template = getTemplate({
       '?disabled': true,
