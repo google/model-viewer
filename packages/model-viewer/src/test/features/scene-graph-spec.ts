@@ -191,10 +191,7 @@ suite('SceneGraph', () => {
         expect(material.color).to.include({r: 0.5, g: 0.5, b: 0.5});
       });
 
-      // TODO: This test used to `return` from inside the loop below, so it
-      // never asserted anything. Now that it runs, the 'Yellow Red' variant
-      // yields 'yellow' instead of 'red'; fix the expectation or the bug.
-      test.skip(
+      test(
           `Setting variantName to null results in primitive
            reverting to default/initial material`,
           async () => {
@@ -214,7 +211,7 @@ suite('SceneGraph', () => {
             element.variantName = 'Yellow Red';
             await waitForEvent(element, 'variant-applied');
             expect((primitiveNode!.mesh.material as MeshStandardMaterial).name)
-                .equal('red');
+                .equal('yellow');
 
             // Switches to null variant.
             element.variantName = null;
