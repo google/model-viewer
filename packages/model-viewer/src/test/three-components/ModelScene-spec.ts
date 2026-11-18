@@ -82,6 +82,21 @@ suite('ModelScene', () => {
       expect(scene.appendedAnimations).to.not.include(animationName);
     });
 
+    test('forgets appended animations when the source changes', async () => {
+      const animationName = scene.animationNames[0];
+      scene.appendAnimation(animationName);
+      // Re-appending an appended animation with needsToStop marks it
+      scene.appendAnimation(
+          animationName, LoopRepeat, 2, 1, 1, false, false, true, null, true);
+      expect(scene.appendedAnimations).to.include(animationName);
+      expect(scene.markedAnimations).to.not.be.empty;
+
+      await scene.setSource(assetPath('models/Horse.glb'));
+
+      expect(scene.appendedAnimations).to.be.empty;
+      expect(scene.markedAnimations).to.be.empty;
+    });
+
     suite('appendAnimation repetitionCount validation', () => {
       // Returns the repetitionCount-related warnings emitted while appending the
       // first animation with the given repetitionCount.

@@ -195,8 +195,9 @@ export class ModelViewerPreview extends ConnectedLitElement {
   }
 
   private onDragover(event: DragEvent) {
-    if (!event.dataTransfer)
+    if (!event.dataTransfer) {
       return;
+    }
 
     event.stopPropagation();
     event.preventDefault();
@@ -208,8 +209,9 @@ export class ModelViewerPreview extends ConnectedLitElement {
 
     if (event.dataTransfer && event.dataTransfer.items[0].kind === 'file') {
       const file = event.dataTransfer.items[0].getAsFile();
-      if (!file)
+      if (!file) {
         return;
+      }
       if (file.name.match(/\.(glb|gltf)$/i)) {
         const arrayBuffer = await file.arrayBuffer();
         reduxStore.dispatch(dispatchSetModelName(file.name));

@@ -189,8 +189,8 @@ export class CameraSettings extends ConnectedLitElement {
 
   onCameraOrbitEditorChange() {
     const orbit = getModelViewer().getCameraOrbit();
-    orbit.phi = degToRad(this.cameraOrbitEditor.pitchInput.value),
-    orbit.theta = degToRad(this.cameraOrbitEditor.yawInput.value),
+    orbit.phi = degToRad(this.cameraOrbitEditor.pitchInput.value);
+    orbit.theta = degToRad(this.cameraOrbitEditor.yawInput.value);
     reduxStore.dispatch(dispatchSaveCameraOrbit(orbit));
     getModelViewer().jumpCameraToGoal();
   }

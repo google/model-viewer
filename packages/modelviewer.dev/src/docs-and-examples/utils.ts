@@ -21,7 +21,7 @@ import {getSidebarCategoryForNewPage, sidebarDocsObserver, sidebarExamplesObserv
 // include a previous state to revert to in URI
 export function switchPages(oldLocation: string, newLocation: string) {
   if (oldLocation !== newLocation) {
-    let URI = '';
+    let URI: string;
     if (oldLocation === 'docs') {
       const category = getSidebarCategoryForNewPage();
       URI = '../examples/'.concat(category).concat('/');

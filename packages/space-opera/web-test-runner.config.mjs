@@ -1,5 +1,5 @@
 // import {esbuildPlugin} from '@web/dev-server-esbuild';
-import {devices, playwrightLauncher} from '@web/test-runner-playwright';
+// import {devices, playwrightLauncher} from '@web/test-runner-playwright';
 
 export default {
   concurrency: 10,

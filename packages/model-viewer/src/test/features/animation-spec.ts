@@ -51,7 +51,7 @@ const animationWithIndexIsPlaying = (element: any, animationIndex = 0):
 
       if (currentAnimationAction != null && animationIndex >= 0 &&
           animationIndex < _currentGLTF.animations.length &&
-          currentAnimationAction.getClip() ==
+          currentAnimationAction.getClip() ===
               _currentGLTF.animations[animationIndex]) {
         return element.paused === false &&
             currentAnimationAction.enabled === true &&
@@ -223,6 +223,18 @@ suite('Animation', () => {
 
       test('adds the animation to appendedAnimations', () => {
         expect(element.appendedAnimations).to.include('Punch');
+      });
+
+      suite('when the model changes', () => {
+        setup(async () => {
+          const load = waitForEvent(element, 'load');
+          element.src = NON_ANIMATED_GLB_PATH;
+          await load;
+        });
+
+        test('clears appendedAnimations', () => {
+          expect(element.appendedAnimations).to.be.empty;
+        });
       });
     });
 

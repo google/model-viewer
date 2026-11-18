@@ -128,7 +128,8 @@ export const style =
           },
 
           updated: {
-            value: function(changedProperties: Map<string, any>) {
+            value: function(
+                changedProperties: Map<string|number|symbol, unknown>) {
               // Always invoke updates to styles first. This gives a class that
               // uses this decorator the opportunity to override the effect, or
               // respond to it, in its own implementation of `updated`.

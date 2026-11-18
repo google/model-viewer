@@ -15,7 +15,11 @@
 
 const ALERT_THRESHOLD = 0.1;
 
-import {resolve, join} from 'path';
+import {readFileSync} from 'fs';
+import {join, resolve} from 'path';
+
+const readJson = (path: string) =>
+    JSON.parse(readFileSync(resolve(path), 'utf8'));
 const [candidateResultsDirectory, goldenResultsDirectory] =
     process.argv.slice(2);
 
@@ -29,9 +33,8 @@ console.log(`🛂 Comparing fidelity to previously recorded results at ${
     goldenResultsDirectory}`);
 
 const candidateConfig =
-    require(resolve(join(candidateResultsDirectory, 'config.json')));
-const goldenConfig =
-    require(resolve(join(goldenResultsDirectory, 'config.json')));
+    readJson(join(candidateResultsDirectory, 'config.json'));
+const goldenConfig = readJson(join(goldenResultsDirectory, 'config.json'));
 
 const {scenarios: candidateScenarios, analysisThresholds: candidateThresholds} =
     candidateConfig;
@@ -76,9 +79,9 @@ for (const candidateScenario of candidateScenarios) {
 
   const goldenScenario = goldenScenarioMap.get(name);
   const candidateAnalysis =
-      require(resolve(join(candidateResultsDirectory, name, 'analysis.json')));
+      readJson(join(candidateResultsDirectory, name, 'analysis.json'));
   const goldenAnalysis =
-      require(resolve(join(goldenResultsDirectory, name, 'analysis.json')));
+      readJson(join(goldenResultsDirectory, name, 'analysis.json'));
 
   const goldenGoldenMap = new Map();
 

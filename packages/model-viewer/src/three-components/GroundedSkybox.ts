@@ -39,8 +39,8 @@ export class GroundedSkybox extends Mesh {
   }
 
   updateGeometry(height = this.height, radius = this.radius, resolution = 128) {
-    if (height != this.height || radius != this.radius ||
-        resolution != this.resolution) {
+    if (height !== this.height || radius !== this.radius ||
+        resolution !== this.resolution) {
       this.height = height;
       this.radius = radius;
       this.resolution = resolution;

@@ -18,7 +18,8 @@ import '../renderer-gate.js';
 import {expect} from 'chai';
 import {Cache, CubeReflectionMapping, EquirectangularReflectionMapping, WebGLRenderer} from 'three';
 
-import {CachingGLTFLoader} from '../../three-components/CachingGLTFLoader.js';
+import {DEFAULT_KTX2_TRANSCODER_LOCATION} from '../../features/loading.js';
+import {CachingGLTFLoader, ktx2Loader} from '../../three-components/CachingGLTFLoader.js';
 import {Renderer} from '../../three-components/Renderer.js';
 import TextureUtils from '../../three-components/TextureUtils.js';
 import {assetPath} from '../helpers.js';
@@ -29,6 +30,8 @@ const canvas = document.createElement('canvas');
 const EQUI_URL = assetPath('environments/spruit_sunrise_1k_LDR.jpg');
 const HDR_EQUI_URL = assetPath('environments/spruit_sunrise_1k_HDR.hdr');
 const KTX2_URL = assetPath('models/CesiumLogoFlat.ktx2');
+// three.js example texture (examples/textures/ktx2/2d_uastc_hdr4x4.ktx2, MIT).
+const KTX2_UASTC_HDR_URL = assetPath('models/UASTC_HDR_4x4.ktx2');
 
 suite('TextureUtils', () => {
   let threeRenderer: WebGLRenderer;
@@ -44,7 +47,7 @@ suite('TextureUtils', () => {
     threeRenderer = new WebGLRenderer({canvas});
     threeRenderer.debug.checkShaderErrors = true;
     CachingGLTFLoader.setKTX2TranscoderLocation(
-        'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/');
+        DEFAULT_KTX2_TRANSCODER_LOCATION);
     CachingGLTFLoader.initializeKTX2Loader(threeRenderer);
   });
 
@@ -67,7 +70,7 @@ suite('TextureUtils', () => {
 
   suite('load', () => {
     test('loads a valid texture from URL', async () => {
-      let texture = await textureUtils.loadEquirect(EQUI_URL);
+      const texture = await textureUtils.loadEquirect(EQUI_URL);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(EQUI_URL);
@@ -95,13 +98,27 @@ suite('TextureUtils', () => {
           }
         });
     test('loads a valid KTX2 texture from URL', async () => {
-      let texture = await textureUtils.loadImage(KTX2_URL, false);
+      const texture = await textureUtils.loadImage(KTX2_URL, false);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(KTX2_URL);
     });
+    test('transcodes a UASTC HDR KTX2 texture', async () => {
+      // Force the transcoder path. GPUs with native ASTC HDR upload these
+      // files directly and never exercise the transcoder.
+      const workerConfig = (ktx2Loader as any).workerConfig;
+      const astcHDRSupported = workerConfig.astcHDRSupported;
+      workerConfig.astcHDRSupported = false;
+      try {
+        const texture = await textureUtils.loadImage(KTX2_UASTC_HDR_URL, false);
+        texture.dispose();
+        expect(texture.isTexture).to.be.ok;
+      } finally {
+        workerConfig.astcHDRSupported = astcHDRSupported;
+      }
+    });
     test('loads a valid HDR texture from URL', async () => {
-      let texture = await textureUtils.loadEquirect(HDR_EQUI_URL);
+      const texture = await textureUtils.loadEquirect(HDR_EQUI_URL);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(HDR_EQUI_URL);
@@ -111,7 +128,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.loadEquirect('');
         expect(false).to.be.ok;
-      } catch (e) {
+      } catch {
         expect(true).to.be.ok;
       }
     });
@@ -119,7 +136,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.loadEquirect('./nope.png');
         expect(false).to.be.ok;
-      } catch (e) {
+      } catch {
         expect(true).to.be.ok;
       }
     });
@@ -157,7 +174,7 @@ suite('TextureUtils', () => {
       let failed = false;
       try {
         await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
-      } catch (e) {
+      } catch {
         failed = true;
       }
       expect(failed).to.be.eq(true);
@@ -213,7 +230,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.generateEnvironmentMapAndSkybox();
         expect(false).to.be.ok;
-      } catch (e) {
+      } catch {
         expect(true).to.be.ok;
       }
     });

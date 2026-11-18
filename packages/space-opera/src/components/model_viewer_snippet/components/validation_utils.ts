@@ -20,6 +20,8 @@
 
 import {validateBytes} from 'gltf-validator';
 
+export {resolveExternalResource} from '../../utils/resolve_resource.js';
+
 const SEVERITY_MAP = ['Errors', 'Warnings', 'Infos', 'Hints'];
 
 export type Report = {
@@ -73,28 +75,6 @@ export async function validateGltf(
 }
 
 /**
- * Loads a resource (either locally or from the network) and returns it.
- */
-export async function resolveExternalResource(
-    uri: string, rootPath: string, fileMap: Map<string, File>):
-    Promise<Uint8Array> {
-  const index = uri.lastIndexOf('/');
-
-  const normalizedURL =
-      rootPath + uri.substr(index + 1).replace(/^(\.?\/)/, '');
-
-  if (fileMap.has(normalizedURL)) {
-    const blob = fileMap.get(normalizedURL);
-    const buffer = await blob!.arrayBuffer();
-    return new Uint8Array(buffer);
-  }
-
-  const response = await fetch(rootPath + uri);
-  const buffer = await response.arrayBuffer();
-  return new Uint8Array(buffer);
-}
-
-/**
  * Sets the values of the report.
  * @param {GLTFValidator.Report} report returned object
  */
@@ -131,18 +111,21 @@ function groupMessages(report) {
   };
 
   report.errors.forEach((message) => {
-    if (!CODES[message.code])
+    if (!CODES[message.code]) {
       return;
+    }
     if (!CODES[message.code].pointerCounts[message.pointer]) {
       CODES[message.code].pointerCounts[message.pointer] = 0;
     }
     CODES[message.code].pointerCounts[message.pointer]++;
   });
   report.errors = report.errors.filter((message) => {
-    if (!CODES[message.code])
+    if (!CODES[message.code]) {
       return true;
-    if (!CODES[message.code].pointerCounts[message.pointer])
+    }
+    if (!CODES[message.code].pointerCounts[message.pointer]) {
       return true;
+    }
     return CODES[message.code].pointerCounts[message.pointer] < 2;
   });
   Object.keys(CODES).forEach((code) => {

@@ -68,7 +68,7 @@ export class Dropdown extends LitElement {
     // Filters unselect event fired by paper-dropdown-menu
     if (this.paperDropdownMenu.selectedItem &&
         this.paperListbox.selected != null &&
-        this.paperListbox.selected != this.selectedIndex) {
+        Number(this.paperListbox.selected) !== this.selectedIndex) {
       this.selectedIndex = checkFinite(Number(this.paperListbox.selected));
       this.dispatchEvent(new Event('select'));
     }

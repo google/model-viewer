@@ -1,12 +1,13 @@
-var slides = [], current;
-var sections = document.getElementsByTagName('section');
+const slides = [];
+let current;
+const sections = document.getElementsByTagName('section');
 
 while (sections.length) {
   slides.push(sections[0]);
   document.body.removeChild(sections[0]);
 }
 
-var setSlide =
+const setSlide =
     function(id) {
   if (current !== undefined) {
     document.body.removeChild(slides[current]);
@@ -15,14 +16,14 @@ var setSlide =
   window.location.hash = id;
   position.innerHTML = (id + 1) + ' / ' + slides.length;
 
-  var slide = slides[id];
+  const slide = slides[id];
 
   // handle video.autoplay
 
-  var videos = slide.getElementsByTagName('video');
+  const videos = slide.getElementsByTagName('video');
 
-  for (var i = 0; i < videos.length; i++) {
-    var video = videos[i];
+  for (let i = 0; i < videos.length; i++) {
+    const video = videos[i];
 
     if (video.autoplay === true) {
       video.currentTime = 0;
@@ -35,38 +36,38 @@ var setSlide =
   current = id;
 }
 
-var prevSlide =
+const prevSlide =
     function() {
   setSlide(Math.max(0, current - 1));
 }
 
-var nextSlide =
+const nextSlide =
     function() {
   setSlide(Math.min(slides.length - 1, current + 1));
 }
 
 // controls
 
-var controls = document.createElement('div');
+const controls = document.createElement('div');
 controls.id = 'controls';
 document.body.appendChild(controls);
 
-var arrowPrev = document.createElement('span');
+const arrowPrev = document.createElement('span');
 arrowPrev.innerHTML = '⟵';
 arrowPrev.style.cursor = 'pointer';
-arrowPrev.addEventListener('click', function(event) {
+arrowPrev.addEventListener('click', function() {
   prevSlide();
 }, false);
 controls.appendChild(arrowPrev);
 
-var position = document.createElement('span');
+const position = document.createElement('span');
 position.style.cursor = 'default';
 controls.appendChild(position);
 
-var arrowNext = document.createElement('span');
+const arrowNext = document.createElement('span');
 arrowNext.innerHTML = '⟶';
 arrowNext.style.cursor = 'pointer';
-arrowNext.addEventListener('click', function(event) {
+arrowNext.addEventListener('click', function() {
   nextSlide();
 }, false);
 controls.appendChild(arrowNext);

@@ -138,7 +138,7 @@ export class Model implements ModelInterface {
     while (nodeStack.length > 0) {
       const object = nodeStack.pop()!;
 
-      let node: Node|null = null;
+      let node: Node|null;
 
       if (object instanceof Mesh) {
         node = new PrimitiveNode(
@@ -202,7 +202,7 @@ export class Model implements ModelInterface {
     const found = this[$hierarchy].find((node: Node) => {
       if (node instanceof PrimitiveNode) {
         const {meshes, primitives} = node.mesh.userData.associations;
-        if (meshes == mesh && primitives == primitive) {
+        if (meshes === mesh && primitives === primitive) {
           return true;
         }
       }

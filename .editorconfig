@@ -1,0 +1,17 @@
+# EditorConfig: https://editorconfig.org
+# TypeScript formatting is owned by clang-format (see .clang-format); these
+# settings keep every other file type consistent with it.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Two trailing spaces are a hard line break in Markdown.
+[*.md]
+trim_trailing_whitespace = false

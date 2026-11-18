@@ -65,15 +65,16 @@ export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(
      * The parent {@link MVEffectComposer} element.
      */
     protected get effectComposer() {
-      if (!this[$effectComposer])
+      if (!this[$effectComposer]) {
         throw new Error(`${
             getComponentName(
                 this as any)} must be a child of a <model-viewer> component.`);
+      }
       return this[$effectComposer];
     }
 
     connectedCallback(): void {
-      super.connectedCallback && super.connectedCallback();
+      super.connectedCallback?.();
       if (this.parentNode?.nodeName.toLowerCase() === 'effect-composer') {
         this[$effectComposer] = this.parentNode as MVEffectComposer;
       }
@@ -81,7 +82,7 @@ export const EffectBaseMixin = <T extends Constructor<ReactiveElement>>(
     }
 
     disconnectedCallback() {
-      super.disconnectedCallback && super.disconnectedCallback();
+      super.disconnectedCallback?.();
       this.effects.forEach((effect) => effect.dispose());
       this.effectComposer.updateEffects();
     }
