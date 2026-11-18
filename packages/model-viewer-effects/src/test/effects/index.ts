@@ -14,3 +14,4 @@
  */
 
 import './color-grade-spec.js';
+import './glitch-spec.js';
