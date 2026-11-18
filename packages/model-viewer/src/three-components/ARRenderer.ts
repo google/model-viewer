@@ -126,9 +126,9 @@ export type XRMode = typeof XRMode[keyof typeof XRMode];
 
 export class ARRenderer extends EventDispatcher<
     {status: {status: ARStatus}, tracking: {status: ARTracking}}> {
-  public threeRenderer: WebGLRenderer;
-  public currentSession: XRSession|null = null;
-  public placeOnWall = false;
+  threeRenderer: WebGLRenderer;
+  currentSession: XRSession|null = null;
+  placeOnWall = false;
 
   private placementBox: PlacementBox|null = null;
   private menuPanel: XRMenuPanel|null = null;
@@ -249,7 +249,7 @@ export class ARRenderer extends EventDispatcher<
       console.warn('Cannot present while a model is already presenting');
     }
 
-    let waitForAnimationFrame = new Promise<void>((resolve, _reject) => {
+    const waitForAnimationFrame = new Promise<void>((resolve, _reject) => {
       requestAnimationFrame(() => resolve());
     });
 
@@ -396,7 +396,7 @@ export class ARRenderer extends EventDispatcher<
   private hover(xrController: XRTargetRaySpace): boolean {
     // Do not highlight in mobile-ar
     if (this.xrMode === XRMode.SCREEN_SPACE ||
-        this.selectedXRController == xrController) {
+        this.selectedXRController === xrController) {
       return false;
     }
 
@@ -469,9 +469,9 @@ export class ARRenderer extends EventDispatcher<
         this.selectedXRController = controller;
         scene.setShadowIntensity(0.01);
       } else {
-        if (controller == this.xrController1) {
+        if (controller === this.xrController1) {
           this.xrController1.userData.isSelected = true;
-        } else if (controller == this.xrController2) {
+        } else if (controller === this.xrController2) {
           this.xrController2.userData.isSelected = true;
         }
 
@@ -503,14 +503,14 @@ export class ARRenderer extends EventDispatcher<
     this.isTwoHandInteraction = false;
     this.scaleLine.visible = false;
 
-    if (controller == this.xrController1) {
+    if (controller === this.xrController1) {
       this.xrController1.userData.isSelected = false;
-    } else if (controller == this.xrController2) {
+    } else if (controller === this.xrController2) {
       this.xrController2.userData.isSelected = false;
     }
 
     if (this.selectedXRController != null &&
-        this.selectedXRController != controller) {
+        this.selectedXRController !== controller) {
       return;
     }
     const scene = this.presentedScene!;
@@ -834,12 +834,13 @@ export class ARRenderer extends EventDispatcher<
 
   private getTouchLocation(): Vector3|null {
     const {axes} = this.inputSource!.gamepad!;
-    let location = this.placementBox!.getExpandedHit(
+    const location = this.placementBox!.getExpandedHit(
         this.presentedScene!, axes[0], axes[1]);
     if (location != null) {
       vector3.copy(location).sub(this.presentedScene!.getCamera().position);
-      if (vector3.length() > MAX_DISTANCE)
+      if (vector3.length() > MAX_DISTANCE) {
         return null;
+      }
     }
     return location;
   }
@@ -864,7 +865,7 @@ export class ARRenderer extends EventDispatcher<
         null;
   }
 
-  public moveToFloor(frame: XRFrame) {
+  moveToFloor(frame: XRFrame) {
     // Skip hit testing for world-space mode only during initial placement
     if (this.xrMode === XRMode.WORLD_SPACE &&
         !this.worldSpaceInitialPlacementDone) {
@@ -879,7 +880,7 @@ export class ARRenderer extends EventDispatcher<
     }
 
     const hitTestResults = frame.getHitTestResults(hitSource);
-    if (hitTestResults.length == 0) {
+    if (hitTestResults.length === 0) {
       return;
     }
 
@@ -1245,10 +1246,12 @@ export class ARRenderer extends EventDispatcher<
 
   private applyXRControllerRotations(scenePivot: Object3D) {
     if (!this.isTwoHandInteraction) {
-      if (this.xrController1)
+      if (this.xrController1) {
         this.applyXRControllerRotation(this.xrController1, scenePivot);
-      if (this.xrController2)
+      }
+      if (this.xrController2) {
         this.applyXRControllerRotation(this.xrController2, scenePivot);
+      }
     }
   }
 
@@ -1308,7 +1311,7 @@ export class ARRenderer extends EventDispatcher<
   /**
    * Only public to make it testable.
    */
-  public onWebXRFrame(time: number, frame: XRFrame) {
+  onWebXRFrame(time: number, frame: XRFrame) {
     if (this.xrMode !== XRMode.SCREEN_SPACE) {
       this.updateXRControllerHover();
     }

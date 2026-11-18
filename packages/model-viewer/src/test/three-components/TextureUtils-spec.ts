@@ -70,7 +70,7 @@ suite('TextureUtils', () => {
 
   suite('load', () => {
     test('loads a valid texture from URL', async () => {
-      let texture = await textureUtils.loadEquirect(EQUI_URL);
+      const texture = await textureUtils.loadEquirect(EQUI_URL);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(EQUI_URL);
@@ -98,7 +98,7 @@ suite('TextureUtils', () => {
           }
         });
     test('loads a valid KTX2 texture from URL', async () => {
-      let texture = await textureUtils.loadImage(KTX2_URL, false);
+      const texture = await textureUtils.loadImage(KTX2_URL, false);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(KTX2_URL);
@@ -118,7 +118,7 @@ suite('TextureUtils', () => {
       }
     });
     test('loads a valid HDR texture from URL', async () => {
-      let texture = await textureUtils.loadEquirect(HDR_EQUI_URL);
+      const texture = await textureUtils.loadEquirect(HDR_EQUI_URL);
       texture.dispose();
       expect(texture.isTexture).to.be.ok;
       expect(texture.name).to.be.eq(HDR_EQUI_URL);
@@ -128,7 +128,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.loadEquirect('');
         expect(false).to.be.ok;
-      } catch (e) {
+      } catch {
         expect(true).to.be.ok;
       }
     });
@@ -136,7 +136,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.loadEquirect('./nope.png');
         expect(false).to.be.ok;
-      } catch (e) {
+      } catch {
         expect(true).to.be.ok;
       }
     });
@@ -174,7 +174,7 @@ suite('TextureUtils', () => {
       let failed = false;
       try {
         await textureUtils.generateEnvironmentMapAndSkybox(EQUI_URL);
-      } catch (e) {
+      } catch {
         failed = true;
       }
       expect(failed).to.be.eq(true);
@@ -230,7 +230,7 @@ suite('TextureUtils', () => {
       try {
         await textureUtils.generateEnvironmentMapAndSkybox();
         expect(false).to.be.ok;
-      } catch (e) {
+      } catch {
         expect(true).to.be.ok;
       }
     });

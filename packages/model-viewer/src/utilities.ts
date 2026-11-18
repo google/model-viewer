@@ -64,6 +64,8 @@ export const toFullUrl = (partialUrl: string): string => {
  * The throttled version of the function has a "flush" property that resets the
  * threshold for cases when immediate invocation is desired.
  */
+// The `any` signatures are part of the published types; keep them so
+// callers that deep-import these helpers are not broken.
 export const throttle = (fn: (...args: Array<any>) => any, ms: number) => {
   let timer: number|null = null;
 

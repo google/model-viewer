@@ -79,9 +79,9 @@ suite('scene-graph/texture-info', () => {
           await waitForEvent(element, 'load');
 
           // Transform the textures.
-          const sampler = element.model?.materials[0]
+          const sampler = element.model!.materials[0]
                               .pbrMetallicRoughness['baseColorTexture']
-                              .texture?.sampler!;
+                              .texture!.sampler!;
           sampler.setRotation(0.1);
           sampler.setOffset({u: 0.2, v: 0.3});
           sampler.setScale({u: 0.4, v: 0.5});
@@ -96,9 +96,9 @@ suite('scene-graph/texture-info', () => {
 
           URL.revokeObjectURL(url);
 
-          const exported_sampler = element.model?.materials[0]
+          const exported_sampler = element.model!.materials[0]
                                        .pbrMetallicRoughness['baseColorTexture']
-                                       .texture?.sampler!;
+                                       .texture!.sampler!;
           expect(exported_sampler.rotation).to.be.eq(0.1, 'rotation');
           expect(exported_sampler.offset!.u).to.be.eql(0.2, 'offset_u');
           expect(exported_sampler.offset!.v).to.be.eql(0.3, 'offset_v');

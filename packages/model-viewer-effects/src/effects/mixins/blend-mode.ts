@@ -49,11 +49,11 @@ export const BlendModeMixin =
         opacity: number = 1;
 
         connectedCallback() {
-          super.connectedCallback && super.connectedCallback();
+          super.connectedCallback?.();
           this[$setDefaultProperties]();
         }
 
-        updated(changedProperties: Map<string|number|symbol, any>) {
+        updated(changedProperties: Map<string|number|symbol, unknown>) {
           super.updated(changedProperties);
           if (changedProperties.has('blendMode') ||
               changedProperties.has('opacity')) {
@@ -61,9 +61,10 @@ export const BlendModeMixin =
             this.blendMode = this.blendMode.toUpperCase() as BlendMode;
             this.effects.forEach((effect) => {
               if (this.blendMode === 'DEFAULT') {
-                if (effect.blendMode.defaultBlendFunction === undefined)
+                if (effect.blendMode.defaultBlendFunction === undefined) {
                   throw new Error(
                       `${effect.name} has no default blend function`);
+                }
                 effect.blendMode.blendFunction =
                     effect.blendMode.defaultBlendFunction;
               } else {

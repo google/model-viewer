@@ -253,7 +253,7 @@ export const AnimationMixin = <T extends Constructor<ModelViewerElementBase>>(
       this[$needsRender]();
     }
 
-    updated(changedProperties: Map<string, any>) {
+    updated(changedProperties: Map<string|number|symbol, unknown>) {
       super.updated(changedProperties);
 
       if (changedProperties.has('autoplay') && this.autoplay) {

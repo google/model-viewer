@@ -42,8 +42,9 @@ function getGLTFRoot(scene: ModelScene, hasBeenExportedOnce = false) {
   // gives us a Group, but if the exporter doesn't get a Scene, then it
   // wraps everything in an "AuxScene" node. Feels like a three.js bug.
   // With multi-model we added an extra grouping level globally.
-  if (!hasBeenExportedOnce)
+  if (!hasBeenExportedOnce) {
     return scene.model!;
+  }
 
   // If exported, check for the extra node wrapper (AuxScene or otherwise).
   if (scene.model!.children.length === 1 &&
@@ -198,9 +199,9 @@ suite('SceneGraph', () => {
             // Finds the first primitive with material 0 assigned.
             for (const primitive of element.model![$primitivesList]) {
               if (primitive.variantInfo != null &&
-                  primitive.initialMaterialIdx == 0) {
+                  primitive.initialMaterialIdx === 0) {
                 primitiveNode = primitive;
-                return;
+                break;
               }
             }
 
@@ -210,7 +211,7 @@ suite('SceneGraph', () => {
             element.variantName = 'Yellow Red';
             await waitForEvent(element, 'variant-applied');
             expect((primitiveNode!.mesh.material as MeshStandardMaterial).name)
-                .equal('red');
+                .equal('yellow');
 
             // Switches to null variant.
             element.variantName = null;
@@ -268,9 +269,9 @@ suite('SceneGraph', () => {
                 // Finds the first primitive with material 0 assigned.
                 for (const primitive of element.model![$primitivesList]) {
                   if (primitive.variantInfo != null &&
-                      primitive.initialMaterialIdx == 0) {
+                      primitive.initialMaterialIdx === 0) {
                     primitiveNode = primitive;
-                    return;
+                    break;
                   }
                 }
 

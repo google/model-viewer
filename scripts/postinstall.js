@@ -15,6 +15,8 @@ try {
   console.error('Error reading package.json:', err);
 }
 
+// Currently unused; kept for re-enabling version updates (see #5123).
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function updateThreeVersion(filePath) {
   try {
     let data = fs.readFileSync(filePath, { encoding: 'utf8' });
@@ -41,5 +43,5 @@ function updateThreeVersion(filePath) {
   }
 }
 
-// Intentionally removed README.md and postprocessing/index.html 
+// Intentionally removed README.md and postprocessing/index.html
 // to prevent dirtying the Git tree, as they rely on {{THREEJS_VERSION}} templates now.

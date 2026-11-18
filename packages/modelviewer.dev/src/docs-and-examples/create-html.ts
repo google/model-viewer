@@ -29,21 +29,6 @@ interface Category {
       Slots: Entry[],
 }
 
-const CategoryConstant: Category = {
-  Title: '',
-  htmlName: '',
-  Mixin: [],
-  Attributes: [],
-  CSS: [],
-  Parts: [],
-  Properties: [],
-  'Static Properties': [],
-  Methods: [],
-  'Static Methods': [],
-  Events: [],
-  Slots: [],
-};
-
 function getCurrentDocs() {
   const click = `onclick="switchPages('docs', 'examples')"`;
   return `
@@ -201,8 +186,7 @@ function createSidebar(category: Category) {
     }
 
     const lowerCaseKey = getLowerCaseKey(subcategory);
-    const entries =
-        (<Entry[]>category[subcategory as keyof typeof CategoryConstant]);
+    const entries = (<Entry[]>category[subcategory as keyof Category]);
     for (const entry of entries) {
       const divId =
           lowerCaseTitle.concat('-', lowerCaseKey, '-', entry.htmlName);

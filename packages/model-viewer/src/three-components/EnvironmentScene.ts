@@ -208,7 +208,7 @@ export default class EnvironmentScene extends Scene {
         new MeshStandardMaterial({metalness: 0, side: BackSide});
     const boxMaterial = new MeshStandardMaterial({metalness: 0});
 
-    const data = name == 'legacy' ? legacy : neutral;
+    const data = name === 'legacy' ? legacy : neutral;
 
     const mainLight = new PointLight(0xffffff, data.topLight.intensity, 28, 2);
     mainLight.position.set(...data.topLight.position);
