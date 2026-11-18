@@ -1,0 +1,129 @@
+commit 5cc277a497f6e13fc75ff4821da73164a12570c9
+Author: Frank <8014077+Frank3K@users.noreply.github.com>
+Date:   Wed Nov 18 20:02:40 2026 +0100
+
+    chore: upgrade to ESLint 10 flat config and lint all packages (#5220)
+    
+    * chore: add .editorconfig
+    
+    Keep line endings, final newlines, trailing whitespace and indentation
+    consistent across editors for files clang-format does not cover.
+    
+    * chore: normalize whitespace to match .editorconfig
+    
+    Strip trailing whitespace and convert two CRLF files to LF. Markdown is
+    left untouched since trailing spaces can be significant there.
+    Whitespace-only change: git diff -w shows nothing.
+    
+    * chore: migrate ESLint to v10 flat config and lint all packages
+    
+    Replace the legacy .eslintrc.yaml/.eslintignore, which ESLint 9+ no
+    longer reads and which ignored every package, with eslint.config.mjs.
+    
+    - eslint 10, @eslint/js and typescript-eslint recommended presets,
+      eslint-plugin-wc best-practice, eslint-plugin-mocha recommended for
+      tests
+    - drop the deprecated eslint-config-google; clang-format owns formatting
+    - no-explicit-any is a warning for now
+    - mocha/no-mocha-arrows and no-unused-expressions are off in tests to
+      match the arrow-function style and chai assertions
+    - npm run lint now lints every package, including JS/MJS files
+    
+    * style: apply ESLint autofixes
+    
+    Output of `eslint . --fix` (curly, prefer-const, no-var,
+    explicit-member-accessibility, no-wrapper-object-types, prefer-as-const,
+    no-extra-boolean-cast, ...). Changed lines were reformatted with
+    git-clang-format. Vendored third_party code is now ignored.
+    
+    * fix: resolve no-useless-escape and eqeqeq lint errors
+    
+    - drop unnecessary backslashes in regular expressions and strings
+    - use strict equality; comparisons against undefined become == null to
+      keep matching both null and undefined
+    - dropdown compares Number(selected), since paper-listbox's selected
+      may be a string
+    
+    * fix: resolve no-unused-vars and no-unused-expressions lint errors
+    
+    - super.x && super.x() becomes super.x?.()
+    - use optional catch bindings where the error is unused
+    - replace comma operators with statements in camera_settings
+    - drop type-only $CombinedState imports; declarations still emit
+    - use the Category interface instead of a placeholder constant
+    - comment out imports only used by commented-out test-runner config
+    
+    * fix: resolve lint errors that point at real bugs
+    
+    - controls: keep the elapsed interaction-prompt time across visibility
+      changes; it was reset on every call
+    - validation: compare severityTitle instead of assigning it, so the
+      glTF URL is only revoked after a conversion
+    - exportScene: only wrap exporter.parse in the Promise, so errors from
+      the awaited setup reject instead of leaving it pending; drop async
+      from Promise executors that never await
+    - custom-select example: set up shadow-DOM listeners once in the
+      constructor and remove the document listener on disconnect
+    - compare-results: read JSON with fs, as require() is unavailable in
+      the ESM output
+    - scene-graph-spec: the variant-revert tests returned from inside the
+      search loop and never asserted; use break. The 'Yellow Red' case
+      fails once it runs, so it is skipped with a TODO
+    
+    * fix: resolve remaining ESLint errors
+    
+    - wrap lexical declarations in case blocks
+    - Object.prototype.hasOwnProperty.call instead of obj.hasOwnProperty
+    - replace Function and {} types with specific types
+    - assert non-null instead of mixing ?. with ! in tests
+    - attach caught errors as cause (adds es2022.error lib to
+      render-fidelity-tools)
+    - drop unneeded @ts-ignore comments, this aliases, dead initial
+      assignments and a full-width space
+    - comment empty catch blocks
+    - turn off no-unexpected-multiline, which conflicts with clang-format's
+      layout of calls and tagged templates
+    
+    * ci: run ESLint in the unit-tests workflow
+    
+    Lint runs right after npm ci so it fails fast. Warnings
+    (no-explicit-any) do not fail the build.
+    
+    * refactor: replace easy explicit any types
+    
+    - Lit update/updated overrides take Map<string|number|symbol, unknown>,
+      matching existing usage; one caller now casts the old value
+    - throttle/debounce are generic over the wrapped function's arguments
+    - type render-fidelity configs as ImageComparisonConfig and let
+      puppeteer/child_process handler types be inferred
+    - catch bindings are unknown and cast to Error where .message is read
+    - allow `...args: any[]` (ignoreRestArgs), which TypeScript mixins
+      require
+    
+    no-explicit-any warnings: 269 -> 217.
+    
+    * refactor: type navigator.userAgentData instead of casting to any
+    
+    User-Agent Client Hints are missing from TypeScript's DOM lib, so
+    declare the one method we use and move the XR form-factor check into a
+    helper. Behavior is unchanged.
+    
+    * fix: keep published helper signatures unchanged
+    
+    lib/ is published and its .d.ts files are public. Restore the original
+    throttle/debounce (any) and getValueOfEnum (T extends Object)
+    signatures so callers that deep-import them are not broken by stricter
+    types.
+    
+    * ci: pin GitHub Actions to commit SHAs
+    
+    The zizmor check fails on pull requests that change a workflow file
+    containing actions referenced by tag. Pin every action to the commit
+    its current tag points to, with the version in a comment, and give the
+    read-only workflows an explicit `contents: read` permission.
+    
+    * test: un-skip and fix variant revert expectation in scene-graph-spec
+    
+    ---------
+    
+    Co-authored-by: Diego Teran <dteran@google.com>
