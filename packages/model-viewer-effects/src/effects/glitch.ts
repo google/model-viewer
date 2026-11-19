@@ -66,11 +66,13 @@ export class MVGlitchEffect extends MVEffectBase {
 
   [$updateProperties](): void {
     this.strength = clamp(this.strength, 0, 1);
-    this.mode = this.mode.toLowerCase() as GlitchMode;
+    const mode = (this.mode ?? 'sporadic').toLowerCase() as GlitchMode;
     try {
-      validateLiteralType(GLITCH_MODES, this.mode);
+      validateLiteralType(GLITCH_MODES, mode);
+      this.mode = mode;
     } catch (e) {
-      console.error((e as Error).message + +'\nmode defaulting to \'sporadic\'')
+      console.error((e as Error).message + '\nmode defaulting to \'sporadic\'');
+      this.mode = 'sporadic';
     }
     if (this.strength === 0) {
       (this.effects[0] as GlitchEffect).columns = 0;
