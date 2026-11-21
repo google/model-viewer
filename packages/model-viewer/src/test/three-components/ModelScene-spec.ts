@@ -98,8 +98,8 @@ suite('ModelScene', () => {
     });
 
     suite('appendAnimation repetitionCount validation', () => {
-      // Returns the repetitionCount-related warnings emitted while appending the
-      // first animation with the given repetitionCount.
+      // Returns the repetitionCount-related warnings emitted while appending
+      // the first animation with the given repetitionCount.
       const repetitionWarnings = (repetitionCount: any): string[] => {
         const warnings: string[] = [];
         const originalWarn = console.warn;

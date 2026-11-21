@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://lefthook.dev/schema.json
+#
+# Git hooks, installed by the lefthook package's postinstall script on
+# `npm install`. See https://lefthook.dev/configuration/.
+# Skip them for a single command with `LEFTHOOK=0 git commit ...`.
+
+# Standard glob semantics: `**/` also matches zero directories.
+glob_matcher: doublestar
+
+pre-commit:
+  # Run jobs in order, so clang-format and ESLint never touch a file at the
+  # same time, and stop at the first failing job.
+  piped: true
+  jobs:
+    # Same scope as `npm run format`.
+    - name: clang-format
+      glob: "packages/*/src/**/*.ts"
+      exclude:
+        - "**/*.d.ts"
+      run: npx clang-format -i {staged_files}
+      stage_fixed: true
+
+    # Pass every staged file: eslint.config.mjs decides which ones are linted,
+    # and --no-warn-ignored skips the rest quietly.
+    - name: eslint
+      run: npx eslint --fix --no-warn-ignored {staged_files}
+      stage_fixed: true
