@@ -14,8 +14,9 @@
  */
 
 import {property} from 'lit/decorators.js';
-import {Object3D} from 'three';
+import {Object3D, Texture, WebGLRenderer} from 'three';
 import {USDZExporter} from 'three/examples/jsm/exporters/USDZExporter.js';
+import {decompress} from 'three/examples/jsm/utils/WebGLTextureUtils.js';
 
 import {IS_AR_QUICKLOOK_CANDIDATE, IS_IOS_GSA, IS_SCENEVIEWER_CANDIDATE, IS_WEBXR_AR_CANDIDATE} from '../constants.js';
 import ModelViewerElementBase, {$needsRender, $progressTracker, $renderer, $scene, $shouldAttemptPreload, $updateSource} from '../model-viewer-base.js';
@@ -500,7 +501,23 @@ configuration or device capabilities');
           {includeAnchoringProperties: false} :
           {};
 
+      const maxTextureSize = isNaN(this.arUsdzMaxTextureSize as any) ?
+          Infinity :
+          Math.max(parseInt(this.arUsdzMaxTextureSize), 16);
+
       const exporter = new USDZExporter();
+      // Compressed (e.g. KTX2) textures must be decompressed before they can be
+      // written as PNG. Share one WebGL context for all textures and decompress
+      // at the capped size to limit memory use on mobile devices.
+      let decompressRenderer: WebGLRenderer|undefined;
+      exporter.textureUtils = {
+        decompress: (texture: Texture) => {
+          if (decompressRenderer == null) {
+            decompressRenderer = new WebGLRenderer({antialias: false});
+          }
+          return decompress(texture, maxTextureSize, decompressRenderer);
+        }
+      };
 
       const exportGroup = new Object3D();
       exportGroup.position.copy(target.position);
@@ -515,9 +532,7 @@ configuration or device capabilities');
       try {
         arraybuffer = await exporter.parseAsync(exportGroup, {
           ...usdzOptions,
-          maxTextureSize: isNaN(this.arUsdzMaxTextureSize as any) ?
-              Infinity :
-              Math.max(parseInt(this.arUsdzMaxTextureSize), 16),
+          maxTextureSize,
         });
       } finally {
         for (const m of models) {
@@ -527,6 +542,8 @@ configuration or device capabilities');
         if (shadow != null) {
           shadow.visible = visible;
         }
+        decompressRenderer?.forceContextLoss();
+        decompressRenderer?.dispose();
         updateSourceProgress(1);
       }
 
