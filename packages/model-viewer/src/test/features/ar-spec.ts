@@ -308,6 +308,47 @@ suite('AR', () => {
     }
   });
 
+  suite('prepareUSDZ compressed textures', () => {
+    test(
+        'exports KTX2 textures as PNGs capped at max texture size',
+        async () => {
+          element.src = assetPath('models/BarramundiFish.mixed.glb');
+          element.arUsdzMaxTextureSize = '256';
+          await waitForEvent(element, 'load');
+
+          const url = await (element as any).prepareUSDZ();
+          let files: Record<string, Uint8Array>;
+          try {
+            const response = await fetch(url);
+            files = unzipSync(new Uint8Array(await response.arrayBuffer()));
+          } finally {
+            URL.revokeObjectURL(url);
+          }
+
+          const textures =
+              Object.keys(files).filter(name => name.endsWith('.png'));
+          expect(textures).not.to.be.empty;
+
+          for (const name of textures) {
+            const bitmap = await createImageBitmap(new Blob([files[name]]));
+            // Source textures are 2048x2048.
+            expect(bitmap.width).to.equal(256);
+            expect(bitmap.height).to.equal(256);
+
+            // The decompressed texture must contain actual image data.
+            const canvas = document.createElement('canvas');
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+            const context = canvas.getContext('2d')!;
+            context.drawImage(bitmap, 0, 0);
+            const {data} =
+                context.getImageData(0, 0, bitmap.width, bitmap.height);
+            expect(data.some((value, i) => i % 4 !== 3 && value > 0))
+                .to.be.true;
+          }
+        });
+  });
+
   suite('shows the AR button', () => {
     setup(async () => {
       element.ar = true;
