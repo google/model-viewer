@@ -66,8 +66,12 @@ export const IS_FIREFOX = /firefox/i.test(navigator.userAgent);
 export const IS_OCULUS = /OculusBrowser/.test(navigator.userAgent);
 export const IS_IOS_CHROME = IS_IOS && /CriOS\//.test(navigator.userAgent);
 export const IS_IOS_SAFARI = IS_IOS && IS_SAFARI;
-export const IS_IOS_THIRDPARTY = IS_IOS &&
-    /CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\//.test(navigator.userAgent);
+// DuckDuckGo for iOS sends either the older "DuckDuckGo/" token or, by default
+// in current versions, the "Ddg/" brand token.
+export const IOS_THIRDPARTY_USER_AGENT =
+    /CriOS\/|EdgiOS\/|FxiOS\/|GSA\/|DuckDuckGo\/|Ddg\//;
+export const IS_IOS_THIRDPARTY =
+    IS_IOS && IOS_THIRDPARTY_USER_AGENT.test(navigator.userAgent);
 export const IS_IOS_GSA = IS_IOS && /GSA\//.test(navigator.userAgent);
 
 export const IS_SCENEVIEWER_CANDIDATE = IS_ANDROID && !IS_FIREFOX && !IS_OCULUS;
@@ -87,7 +91,7 @@ export const IS_WKWEBVIEW =
 // instance, check for ARQL feature support. Otherwise, if running in a
 // WKWebView instance, check for known ARQL compatible iOS browsers, including:
 // Chrome (CriOS), Edge (EdgiOS), Firefox (FxiOS), Google App (GSA), DuckDuckGo
-// (DuckDuckGo). All other iOS browsers / apps will fail by default.
+// (DuckDuckGo, Ddg). All other iOS browsers / apps will fail by default.
 export const IS_AR_QUICKLOOK_CANDIDATE = (() => {
   if (IS_IOS) {
     if (IS_IOS_THIRDPARTY) {
